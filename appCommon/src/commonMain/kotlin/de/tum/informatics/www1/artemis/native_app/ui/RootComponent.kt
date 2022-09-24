@@ -57,8 +57,7 @@ class RootComponent(componentContext: ComponentContext) : ComponentContext by co
                 CoursesOverviewComponent(
                     componentContext,
                     onLogout = {
-                        navigation.popWhile { false }
-                        navigation.push(Config.Login)
+                        navigation.replaceCurrent(Config.Login)
                     }
                 )
             )
