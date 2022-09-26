@@ -6,22 +6,35 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import com.arkivanov.decompose.defaultComponentContext
-import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
 import de.tum.informatics.www1.artemis.native_app.android.ui.courses_overview.CoursesOverview
 import de.tum.informatics.www1.artemis.native_app.android.ui.login.LoginScreen
-import de.tum.informatics.www1.artemis.native_app.ui.RootComponent
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import org.koin.android.ext.android.get
+import org.koin.androidx.viewmodel.ext.android.getViewModel
 
 /**
  * Main and only activity used in the android app.
  * Navigation is handled by decompose and jetpack compose.
  */
 class MainActivity : ComponentActivity() {
+
+    private val accountService: AccountService = get()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val rootComponent = RootComponent(defaultComponentContext())
+        //When the user is logged in, immediately display the course overview.
+        val startDestination = runBlocking {
+            when (accountService.authenticationData.first()) {
+                is AccountService.AuthenticationData.LoggedIn -> Navigation.Dest.COURSE_OVERVIEW
+                AccountService.AuthenticationData.NotLoggedIn -> Navigation.Dest.LOGIN
+            }
+        }
 
         setContent {
             MaterialTheme(
@@ -41,17 +54,37 @@ class MainActivity : ComponentActivity() {
 //                    isLight = true
 //                )
             ) {
-                val stackState = rootComponent.childStack.subscribeAsState()
+                val navController = rememberNavController()
 
-                //Display the current screen based on the config state in the root component nav stack
-                when (val instance = stackState.value.active.instance) {
-                    is RootComponent.NavGraphChild.CoursesOverview -> {
-                        CoursesOverview(modifier = Modifier.fillMaxSize(), instance.component)
-                    }
-                    is RootComponent.NavGraphChild.Login -> {
+                //Use jetpack compose navigation for the navigation logic.
+                NavHost(navController = navController, startDestination = startDestination) {
+                    composable(Navigation.Dest.LOGIN) {
                         LoginScreen(
                             modifier = Modifier.fillMaxSize(),
-                            component = instance.component
+                            viewModel = getViewModel(),
+                            onLogin = {
+                                //Navigate to the course overview and remove the login screen from the navigation stack.
+                                navController.navigate(Navigation.Dest.COURSE_OVERVIEW) {
+                                    popUpTo(Navigation.Dest.LOGIN) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                        )
+                    }
+
+                    composable(Navigation.Dest.COURSE_OVERVIEW) {
+                        CoursesOverview(
+                            modifier = Modifier.fillMaxSize(),
+                            viewModel = getViewModel(),
+                            onLogout = {
+                                //Navigate to the login screen and remove the course overview screen from the navigation stack.
+                                navController.navigate(Navigation.Dest.LOGIN) {
+                                    popUpTo(Navigation.Dest.COURSE_OVERVIEW) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
                         )
                     }
                 }

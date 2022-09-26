@@ -13,14 +13,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import de.tum.informatics.www1.artemis.native_app.ui.login.LoginComponent
 
 @Composable
-fun LoginScreen(modifier: Modifier, component: LoginComponent) {
-    val username by component.username.collectAsState(initial = "")
-    val password by component.password.collectAsState(initial = "")
-    val rememberMe by component.rememberMe.collectAsState(initial = false)
-    val isLoginEnabled by component.loginButtonEnabled.collectAsState(initial = false)
+fun LoginScreen(modifier: Modifier, viewModel: LoginViewModel, onLogin: () -> Unit) {
+    val username by viewModel.username.collectAsState(initial = "")
+    val password by viewModel.password.collectAsState(initial = "")
+    val rememberMe by viewModel.rememberMe.collectAsState(initial = false)
+    val isLoginEnabled by viewModel.loginButtonEnabled.collectAsState(initial = false)
 
     Scaffold(modifier = modifier) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -59,14 +58,14 @@ fun LoginScreen(modifier: Modifier, component: LoginComponent) {
                     TextField(
                         modifier = elementModifier,
                         value = username,
-                        onValueChange = component::updateUsername,
+                        onValueChange = viewModel::updateUsername,
                         label = { Text("Login") }
                     )
 
                     TextField(
                         modifier = elementModifier,
                         value = password,
-                        onValueChange = component::updatePassword,
+                        onValueChange = viewModel::updatePassword,
                         label = { Text("Password") },
                         visualTransformation = remember { PasswordVisualTransformation() }
                     )
@@ -75,7 +74,7 @@ fun LoginScreen(modifier: Modifier, component: LoginComponent) {
                         Checkbox(
                             modifier = Modifier,
                             checked = rememberMe,
-                            onCheckedChange = component::updateRememberMe,
+                            onCheckedChange = viewModel::updateRememberMe,
                         )
 
                         Text(
@@ -88,7 +87,12 @@ fun LoginScreen(modifier: Modifier, component: LoginComponent) {
 
                     Button(
                         modifier = elementModifier,
-                        onClick = { component.login { } },
+                        onClick = {
+                            viewModel.login(onSuccess = onLogin, onFailure = {
+                                //TODO: display an error dialog.
+                            }
+                            )
+                        },
                         enabled = isLoginEnabled
                     ) {
                         Text(text = "Login")

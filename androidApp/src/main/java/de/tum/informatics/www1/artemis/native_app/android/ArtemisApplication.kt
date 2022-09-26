@@ -1,8 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.android
 
 import android.app.Application
-import de.tum.informatics.www1.artemis.native_app.service.impl.androidModules
-import de.tum.informatics.www1.artemis.native_app.service.impl.commonModule
+import de.tum.informatics.www1.artemis.native_app.android.service.impl.commonModule
+import de.tum.informatics.www1.artemis.native_app.android.ui.viewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -14,7 +14,7 @@ class ArtemisApplication : Application() {
         startKoin {
             androidContext(this@ArtemisApplication)
 
-            modules(commonModule, androidModules)
+            modules(commonModule, viewModelModule)
         }
     }
 }

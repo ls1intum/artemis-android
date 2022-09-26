@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     kotlin("android")
+    kotlin("plugin.serialization")
 }
 
 android {
@@ -32,10 +33,12 @@ android {
 }
 
 dependencies {
-    implementation(project(":appCommon"))
-
+    implementation("io.insert-koin:koin-core:${koinVersion}")
+    implementation("io.insert-koin:koin-core:${koinVersion}")
     implementation("io.insert-koin:koin-android:$koinVersion")
     implementation("io.insert-koin:koin-androidx-compose:$koinVersion")
+    implementation("io.insert-koin:koin-android-compat:$koinVersion")
+
 
     implementation("com.arkivanov.decompose:extensions-compose-jetpack:$decomposeVersion")
 
@@ -49,4 +52,21 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.6.0")
 
     implementation("io.coil-kt:coil-compose:2.2.1")
+
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+
+    val lifecycle_version = "2.5.1"
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
+    implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    implementation("androidx.navigation:navigation-compose:2.5.2")
 }

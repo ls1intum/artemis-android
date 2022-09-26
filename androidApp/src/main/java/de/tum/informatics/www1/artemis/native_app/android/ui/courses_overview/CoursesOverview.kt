@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,35 +18,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import coil.request.ErrorResult
 import coil.request.ImageRequest
-import coil.transform.Transformation
-import de.tum.informatics.www1.artemis.native_app.content.Course
-import de.tum.informatics.www1.artemis.native_app.ui.courses_overview.CoursesOverviewComponent
-import de.tum.informatics.www1.artemis.native_app.util.DataState
-import de.tum.informatics.www1.artemis.native_app.util.NetworkResponse
-import kotlinx.coroutines.launch
+import de.tum.informatics.www1.artemis.native_app.android.content.Course
+import de.tum.informatics.www1.artemis.native_app.android.util.DataState
+import de.tum.informatics.www1.artemis.native_app.android.util.NetworkResponse
 
 /**
  * Displays the Course Overview screen.
  * Uses Scaffold to display a Material Design TopAppBar.
  */
 @Composable
-fun CoursesOverview(modifier: Modifier, component: CoursesOverviewComponent) {
+fun CoursesOverview(modifier: Modifier, viewModel: CourseOverviewViewModel, onLogout: () -> Unit) {
     val scope = rememberCoroutineScope()
 
-    val courses = component.dashboard.collectAsState(initial = DataState.Loading()).value
+    val courses = viewModel.dashboard.collectAsState(initial = DataState.Loading()).value
 
     //The course composable needs the serverUrl to build the correct url to fetch the course icon from.
-    val serverUrl by component.serverUrl.collectAsState(initial = "")
+    val serverUrl by viewModel.serverUrl.collectAsState(initial = "")
     //The server wants an authorization token to send the course icon.
-    val authorizationBearer by component.authorizationBearerToken.collectAsState(initial = "")
+    val authorizationBearer by viewModel.authorizationBearerToken.collectAsState(initial = "")
 
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(title = { Text(text = "Course Overview") }, actions = {
-                IconButton(onClick = component::logout) {
+                IconButton(onClick = { viewModel.logout(onLogout) }) {
                     Icon(imageVector = Icons.Default.Logout, contentDescription = null)
                 }
             })
@@ -91,7 +86,12 @@ fun CoursesOverview(modifier: Modifier, component: CoursesOverviewComponent) {
  * Displays a lazy list of all the courses supplied.
  */
 @Composable
-private fun CourseList(modifier: Modifier, courses: List<Course>, serverUrl: String, authorizationToken: String) {
+private fun CourseList(
+    modifier: Modifier,
+    courses: List<Course>,
+    serverUrl: String,
+    authorizationToken: String
+) {
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -114,7 +114,12 @@ private fun CourseList(modifier: Modifier, courses: List<Course>, serverUrl: Str
  * Displays course icon, title and description in a Material Design Card.
  */
 @Composable
-private fun CourseItem(modifier: Modifier, course: Course, serverUrl: String, authorizationToken: String) {
+private fun CourseItem(
+    modifier: Modifier,
+    course: Course,
+    serverUrl: String,
+    authorizationToken: String
+) {
     val courseIconUrl = "$serverUrl${course.courseIconPath}"
 
     val context = LocalContext.current
@@ -141,7 +146,11 @@ private fun CourseItem(modifier: Modifier, course: Course, serverUrl: String, au
                 contentDescription = null
             )
 
-            Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 8.dp)
+            ) {
                 Text(
                     text = course.title,
                     modifier = Modifier.fillMaxWidth(),

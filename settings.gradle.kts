@@ -16,7 +16,6 @@ pluginManagement {
 
         kotlin("plugin.serialization") version kotlinVersion
         kotlin("plugin.parcelize") version kotlinVersion
-        kotlin("native.cocoapods") version kotlinVersion apply false
 
         id("com.rickclephas.kmp.nativecoroutines") version nativeCoroutinesVersion apply false
     }
@@ -32,4 +31,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Artemis_Native_Client"
 include(":androidApp")
-include(":appCommon")
