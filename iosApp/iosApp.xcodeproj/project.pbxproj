@@ -9,28 +9,35 @@
 /* Begin PBXBuildFile section */
 		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
+		1C0981821623621F5399DA93 /* ServerCommunicationProviderImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0985C543D77816ADA5933C /* ServerCommunicationProviderImpl.swift */; };
+		1C0981A88640D5D3E52A941A /* AccountServiceImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0988D01EAA04C4775B8923 /* AccountServiceImpl.swift */; };
+		1C0981D273DD7A6DF3D40CAE /* ServerCommunicationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098F1706F0DCA286CF5754 /* ServerCommunicationProvider.swift */; };
 		1C098230E8C6C7CD41AF6B29 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098402211D502EAE42393D /* LoginView.swift */; };
-		1C0988DF1346F1B2A6D7DB01 /* ObservedNativeFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098E4F326F8898DBB8F4E5 /* ObservedNativeFlow.swift */; };
+		1C0985B8D54C605754C110DC /* HTTPClientProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098D536B58DD18AC0AEE63 /* HTTPClientProvider.swift */; };
+		1C098D2A4D7898F37E732681 /* JsonProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0982F1FCAF373DD7648987 /* JsonProvider.swift */; };
+		1C098E05516193D855C4FA51 /* AccountService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098AFF95AB352EF5A47A4C /* AccountService.swift */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		220409A728D4EF1A00204B1C /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220409A628D4EF1A00204B1C /* RootView.swift */; };
-		220409A928D4F1AD00204B1C /* ObservableValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220409A828D4F1AD00204B1C /* ObservableValue.swift */; };
 		220409AC28D4F34700204B1C /* CoursesOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220409AB28D4F34700204B1C /* CoursesOverviewView.swift */; };
-		22F8034B28D8EE6D00B55A09 /* KMPNativeCoroutinesCombine in Frameworks */ = {isa = PBXBuildFile; productRef = 22F8034A28D8EE6D00B55A09 /* KMPNativeCoroutinesCombine */; };
+		227BD53928E24BF600D11F92 /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = 227BD53828E24BF600D11F92 /* Swinject */; };
+		227BD53E28E2570B00D11F92 /* AsyncHTTPClient in Frameworks */ = {isa = PBXBuildFile; productRef = 227BD53D28E2570B00D11F92 /* AsyncHTTPClient */; };
 		22F8034E28D8EE7F00B55A09 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 22F8034D28D8EE7F00B55A09 /* SDWebImageSwiftUI */; };
-		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		058557BA273AAA24004C7B11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		1C0982F1FCAF373DD7648987 /* JsonProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JsonProvider.swift; sourceTree = "<group>"; };
 		1C098402211D502EAE42393D /* LoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
-		1C098E4F326F8898DBB8F4E5 /* ObservedNativeFlow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservedNativeFlow.swift; sourceTree = "<group>"; };
+		1C0985C543D77816ADA5933C /* ServerCommunicationProviderImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerCommunicationProviderImpl.swift; sourceTree = "<group>"; };
+		1C0988D01EAA04C4775B8923 /* AccountServiceImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountServiceImpl.swift; sourceTree = "<group>"; };
+		1C098AFF95AB352EF5A47A4C /* AccountService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountService.swift; sourceTree = "<group>"; };
+		1C098D536B58DD18AC0AEE63 /* HTTPClientProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPClientProvider.swift; sourceTree = "<group>"; };
+		1C098F1706F0DCA286CF5754 /* ServerCommunicationProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerCommunicationProvider.swift; sourceTree = "<group>"; };
 		2152FB032600AC8F00CF470E /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
 		220409A628D4EF1A00204B1C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
-		220409A828D4F1AD00204B1C /* ObservableValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableValue.swift; sourceTree = "<group>"; };
 		220409AB28D4F34700204B1C /* CoursesOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursesOverviewView.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -40,7 +47,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				22F8034E28D8EE7F00B55A09 /* SDWebImageSwiftUI in Frameworks */,
-				22F8034B28D8EE6D00B55A09 /* KMPNativeCoroutinesCombine in Frameworks */,
+				227BD53E28E2570B00D11F92 /* AsyncHTTPClient in Frameworks */,
+				227BD53928E24BF600D11F92 /* Swinject in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -58,17 +66,11 @@
 		1C09820212901F7CC570CB99 /* ui */ = {
 			isa = PBXGroup;
 			children = (
-				1C098402211D502EAE42393D /* LoginView.swift */,
+				220409A628D4EF1A00204B1C /* RootView.swift */,
+				227BD53628E24A6400D11F92 /* login */,
+				227BD53528E24A4C00D11F92 /* courses */,
 			);
 			path = ui;
-			sourceTree = "<group>";
-		};
-		1C0985CCF0E29610A09BBEB4 /* util */ = {
-			isa = PBXGroup;
-			children = (
-				1C098E4F326F8898DBB8F4E5 /* ObservedNativeFlow.swift */,
-			);
-			path = util;
 			sourceTree = "<group>";
 		};
 		21622B9BF08CD3C1E1587F2B /* Pods */ = {
@@ -78,12 +80,41 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
-		220409AA28D4F33000204B1C /* courses */ = {
+		227BD53528E24A4C00D11F92 /* courses */ = {
 			isa = PBXGroup;
 			children = (
 				220409AB28D4F34700204B1C /* CoursesOverviewView.swift */,
 			);
 			path = courses;
+			sourceTree = "<group>";
+		};
+		227BD53628E24A6400D11F92 /* login */ = {
+			isa = PBXGroup;
+			children = (
+				1C098402211D502EAE42393D /* LoginView.swift */,
+			);
+			path = login;
+			sourceTree = "<group>";
+		};
+		227BD53A28E24C3900D11F92 /* service */ = {
+			isa = PBXGroup;
+			children = (
+				227BD53B28E24C6200D11F92 /* impl */,
+				1C098AFF95AB352EF5A47A4C /* AccountService.swift */,
+				1C098F1706F0DCA286CF5754 /* ServerCommunicationProvider.swift */,
+			);
+			path = service;
+			sourceTree = "<group>";
+		};
+		227BD53B28E24C6200D11F92 /* impl */ = {
+			isa = PBXGroup;
+			children = (
+				1C0988D01EAA04C4775B8923 /* AccountServiceImpl.swift */,
+				1C0985C543D77816ADA5933C /* ServerCommunicationProviderImpl.swift */,
+				1C098D536B58DD18AC0AEE63 /* HTTPClientProvider.swift */,
+				1C0982F1FCAF373DD7648987 /* JsonProvider.swift */,
+			);
+			path = impl;
 			sourceTree = "<group>";
 		};
 		7555FF72242A565900829871 = {
@@ -106,15 +137,11 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
-				220409AA28D4F33000204B1C /* courses */,
+				227BD53A28E24C3900D11F92 /* service */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
-				7555FF82242A565900829871 /* ContentView.swift */,
 				7555FF8C242A565B00829871 /* Info.plist */,
 				2152FB032600AC8F00CF470E /* iOSApp.swift */,
 				058557D7273AAEEB004C7B11 /* Preview Content */,
-				220409A628D4EF1A00204B1C /* RootView.swift */,
-				220409A828D4F1AD00204B1C /* ObservableValue.swift */,
-				1C0985CCF0E29610A09BBEB4 /* util */,
 				1C09820212901F7CC570CB99 /* ui */,
 			);
 			path = iosApp;
@@ -127,7 +154,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7555FFA5242A565B00829871 /* Build configuration list for PBXNativeTarget "iosApp" */;
 			buildPhases = (
-				2212C46328D9C39300420FBE /* ShellScript */,
 				7555FF77242A565900829871 /* Sources */,
 				7555FF79242A565900829871 /* Resources */,
 				48598CA0DF0DC47107BCF1DF /* Frameworks */,
@@ -138,8 +164,9 @@
 			);
 			name = iosApp;
 			packageProductDependencies = (
-				22F8034A28D8EE6D00B55A09 /* KMPNativeCoroutinesCombine */,
 				22F8034D28D8EE7F00B55A09 /* SDWebImageSwiftUI */,
+				227BD53828E24BF600D11F92 /* Swinject */,
+				227BD53D28E2570B00D11F92 /* AsyncHTTPClient */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* iosApp.app */;
@@ -170,8 +197,9 @@
 			);
 			mainGroup = 7555FF72242A565900829871;
 			packageReferences = (
-				22F8034928D8EE6D00B55A09 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */,
 				22F8034C28D8EE7F00B55A09 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				227BD53728E24BF600D11F92 /* XCRemoteSwiftPackageReference "Swinject" */,
+				227BD53C28E2570B00D11F92 /* XCRemoteSwiftPackageReference "async-http-client" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -194,26 +222,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		2212C46328D9C39300420FBE /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "cd \"$SRCROOT/..\"\n./gradlew :appCommon:embedAndSignAppleFrameworkForXcode\n";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		7555FF77242A565900829871 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -221,11 +229,14 @@
 			files = (
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				220409AC28D4F34700204B1C /* CoursesOverviewView.swift in Sources */,
-				7555FF83242A565900829871 /* ContentView.swift in Sources */,
-				220409A928D4F1AD00204B1C /* ObservableValue.swift in Sources */,
 				220409A728D4EF1A00204B1C /* RootView.swift in Sources */,
-				1C0988DF1346F1B2A6D7DB01 /* ObservedNativeFlow.swift in Sources */,
 				1C098230E8C6C7CD41AF6B29 /* LoginView.swift in Sources */,
+				1C098E05516193D855C4FA51 /* AccountService.swift in Sources */,
+				1C0981A88640D5D3E52A941A /* AccountServiceImpl.swift in Sources */,
+				1C0981D273DD7A6DF3D40CAE /* ServerCommunicationProvider.swift in Sources */,
+				1C0981821623621F5399DA93 /* ServerCommunicationProviderImpl.swift in Sources */,
+				1C0985B8D54C605754C110DC /* HTTPClientProvider.swift in Sources */,
+				1C098D2A4D7898F37E732681 /* JsonProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -357,17 +368,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../appCommon/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
+				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = iosApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-framework",
-					appCommon,
-				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = orgIdentifier.iosApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -382,17 +389,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../appCommon/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
+				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = iosApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-framework",
-					appCommon,
-				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = orgIdentifier.iosApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -424,12 +427,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		22F8034928D8EE6D00B55A09 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */ = {
+		227BD53728E24BF600D11F92 /* XCRemoteSwiftPackageReference "Swinject" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/rickclephas/KMP-NativeCoroutines.git";
+			repositoryURL = "https://github.com/Swinject/Swinject.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.12.6;
+				version = 2.8.2;
+			};
+		};
+		227BD53C28E2570B00D11F92 /* XCRemoteSwiftPackageReference "async-http-client" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/swift-server/async-http-client.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.11.5;
 			};
 		};
 		22F8034C28D8EE7F00B55A09 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
@@ -443,10 +454,15 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		22F8034A28D8EE6D00B55A09 /* KMPNativeCoroutinesCombine */ = {
+		227BD53828E24BF600D11F92 /* Swinject */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 22F8034928D8EE6D00B55A09 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */;
-			productName = KMPNativeCoroutinesCombine;
+			package = 227BD53728E24BF600D11F92 /* XCRemoteSwiftPackageReference "Swinject" */;
+			productName = Swinject;
+		};
+		227BD53D28E2570B00D11F92 /* AsyncHTTPClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 227BD53C28E2570B00D11F92 /* XCRemoteSwiftPackageReference "async-http-client" */;
+			productName = AsyncHTTPClient;
 		};
 		22F8034D28D8EE7F00B55A09 /* SDWebImageSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
