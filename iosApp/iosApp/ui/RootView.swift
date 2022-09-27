@@ -7,28 +7,35 @@
 //
 
 import SwiftUI
+import Factory
+import Combine
 
 struct RootView: View {
 
+    @State private var isLoggedIn: Bool = false
+
+    @Injected(Container.accountService) var accountService: AccountService
+
     init() {
+        isLoggedIn = accountService.isLoggedIn()
     }
-    
+
     var body: some View {
         VStack {
-//            ChildView(child: activeChild)
-//                .frame(maxHeight: .infinity)
+            if (isLoggedIn) {
+                CoursesOverviewView()
+            } else {
+                LoginView()
+            }
+
         }
+                .onReceive(accountService.authenticationData.eraseToAnyPublisher()) { authData in
+                    switch authData {
+                    case AuthenticationData.NotLoggedIn: isLoggedIn = false
+                    case AuthenticationData.LoggedIn: isLoggedIn = true
+                    }
+                }
+
+
     }
 }
-
-//private struct ChildView: View {
-//    let child: RootComponent.NavGraphChild
-//
-//    var body: some View {
-//        switch child {
-//        case let child as RootComponent.NavGraphChildCoursesOverview: CoursesOverviewView(component: child.component)
-//        case let child as RootComponent.NavGraphChildLogin: LoginView(component: child.component)
-//        default: EmptyView()
-//        }
-//    }
-//}

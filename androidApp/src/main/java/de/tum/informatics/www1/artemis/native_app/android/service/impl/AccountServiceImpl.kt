@@ -10,9 +10,7 @@ import de.tum.informatics.www1.artemis.native_app.android.util.performNetworkCal
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -28,21 +26,32 @@ class AccountServiceImpl(
 
     private val Context.accountSettingsStore by preferencesDataStore("account_settings")
 
-    override val authenticationData: Flow<AccountService.AuthenticationData> =
-        context
-            .accountSettingsStore
-            .data
-            .map { data ->
-                val key = data[JWT_KEY]
-                //TODO: Verify if the key has expired, etc
-                if (key != null) {
-                    AccountService.AuthenticationData.LoggedIn(key)
-                } else {
-                    AccountService.AuthenticationData.NotLoggedIn
-                }
-            }
+    /**
+     * Only set if the user logged in without remember me.
+     */
+    private val inMemoryJWT = MutableStateFlow<String?>(null)
 
-    override suspend fun login(username: String, password: String, rememberMe: Boolean): AccountService.LoginResponse {
+    override val authenticationData: Flow<AccountService.AuthenticationData> =
+        combine(
+            context.accountSettingsStore.data.map { it[JWT_KEY] },
+            inMemoryJWT
+        ) { storedJWT: String?, inMemoryJWT ->
+            //The inMemoryJWT is always preferred
+            inMemoryJWT ?: storedJWT
+        }.map { key: String? ->
+            //TODO: Verify if the key has expired, etc
+            if (key != null) {
+                AccountService.AuthenticationData.LoggedIn(key)
+            } else {
+                AccountService.AuthenticationData.NotLoggedIn
+            }
+        }
+
+    override suspend fun login(
+        username: String,
+        password: String,
+        rememberMe: Boolean
+    ): AccountService.LoginResponse {
         val tokenResponse = performNetworkCall {
             val body: LoginResponseBody =
                 ktorProvider.ktorClient.post(serverCommunicationProvider.serverUrl.first()) {
@@ -59,8 +68,13 @@ class AccountServiceImpl(
 
         return when (tokenResponse) {
             is NetworkResponse.Response -> {
-                context.accountSettingsStore.edit { data ->
-                    data[JWT_KEY] = tokenResponse.data.idToken
+                //either store the token permanently, or just cache it in memory.
+                if (rememberMe) {
+                    context.accountSettingsStore.edit { data ->
+                        data[JWT_KEY] = tokenResponse.data.idToken
+                    }
+                } else {
+                    inMemoryJWT.value = tokenResponse.data.idToken
                 }
 
                 AccountService.LoginResponse(isSuccessful = true)
@@ -82,6 +96,8 @@ class AccountServiceImpl(
     )
 
     override suspend fun logout() {
+        inMemoryJWT.value = null
+
         context.accountSettingsStore.edit { data ->
             data.remove(JWT_KEY)
         }

@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.android.util
 
 /**
- * Wrapper around network responses. Use to propagate failures correctly.
+ * Wrapper around network responses. Used to propagate failures correctly.
  */
 sealed class NetworkResponse<T> {
 
