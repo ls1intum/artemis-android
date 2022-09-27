@@ -17,7 +17,7 @@ extension Container {
         JsonProvider()
     }
 
-    static let accountService = Factory<AccountService> {
+    static let accountService = Factory<AccountService>(scope: .singleton) {
         AccountServiceImpl(serverCommunicationProvider: serverCommunicationProvider(), jsonProvider: JsonProvider())
     }
 

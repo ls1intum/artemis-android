@@ -15,13 +15,15 @@ class AccountServiceImpl: AccountService {
     /**
      * Only set if the user logged in without remember me.
      */
-    private let inMemoryJWT = CurrentValueSubject<String?, Never>(nil)
+    private let inMemoryJWT: CurrentValueSubject<String?, Never>
 
     let authenticationData: any Publisher<AuthenticationData, Never>
 
     init(serverCommunicationProvider: ServerCommunicationProvider, jsonProvider: JsonProvider) {
         self.serverCommunicationProvider = serverCommunicationProvider
         self.jsonProvider = jsonProvider
+
+        inMemoryJWT = CurrentValueSubject(nil)
 
         authenticationData =
 //                Publishers.Zip(
@@ -33,9 +35,9 @@ class AccountServiceImpl: AccountService {
 //                        .map { storedJWT, inMemoryJWT in
 //                            inMemoryJWT ?? storedJWT
 //                        }
-        UserDefaults
-                .standard
-                .publisher(for: \.loginJwt)
+                UserDefaults
+                        .standard
+                        .publisher(for: \.loginJwt)
                         .map { key in
                             if let setKey = key {
                                 return AuthenticationData.LoggedIn(authToken: setKey)
@@ -68,7 +70,7 @@ class AccountServiceImpl: AccountService {
                 if (rememberMe) {
                     UserDefaults.standard.loginJwt = loginResponse.id_token
                 } else {
-                    inMemoryJWT.value = loginResponse.id_token
+                    inMemoryJWT.send(loginResponse.id_token)
                 }
 
                 try client.syncShutdown()
