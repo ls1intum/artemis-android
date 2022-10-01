@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
 
 class AccountServiceImpl(
     private val ktorProvider: KtorProvider,
-    private val serverCommunicationProvider: ServerCommunicationProvider,
+    private val serverCommunicationProvider: ServerCommunicationProviderImpl,
     private val context: Context
 ) : AccountService {
 

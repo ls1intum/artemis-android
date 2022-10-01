@@ -13,6 +13,6 @@ val commonModule = module {
     single<DashboardService> { DashboardServiceImpl(get()) }
 
     single { KtorProvider() }
-    singleOf(::ServerCommunicationProvider)
+    singleOf(::ServerCommunicationProviderImpl)
     single<AccountService> { AccountServiceImpl(get(), get(), get()) }
 }

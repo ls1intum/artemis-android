@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.android.content.Dashboard
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
 import de.tum.informatics.www1.artemis.native_app.android.service.DashboardService
-import de.tum.informatics.www1.artemis.native_app.android.service.impl.ServerCommunicationProvider
+import de.tum.informatics.www1.artemis.native_app.android.service.impl.ServerCommunicationProviderImpl
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import de.tum.informatics.www1.artemis.native_app.android.util.NetworkResponse
 import kotlinx.coroutines.flow.*
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
  */
 class CourseOverviewViewModel(
     private val dashboardService: DashboardService,
-    private val serverCommunicationProvider: ServerCommunicationProvider,
+    private val serverCommunicationProvider: ServerCommunicationProviderImpl,
     private val accountService: AccountService
     ) : ViewModel() {
 

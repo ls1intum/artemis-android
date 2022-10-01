@@ -6,18 +6,13 @@ pluginManagement {
     }
 
     val kotlinVersion = "1.7.10"
-    val nativeCoroutinesVersion = "0.12.6"
+    val agpVersion = "7.3.0"
 
     plugins {
-        id("com.android.application") version "7.2.2" apply false
-        id("com.android.library") version "7.2.2" apply false
+        id("com.android.application") version agpVersion apply false
         kotlin("android") version kotlinVersion apply false
-        kotlin("multiplatform") version kotlinVersion apply false
 
         kotlin("plugin.serialization") version kotlinVersion
-        kotlin("plugin.parcelize") version kotlinVersion
-
-        id("com.rickclephas.kmp.nativecoroutines") version nativeCoroutinesVersion apply false
     }
 }
 

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="artemis_instance_tum_production">TUM Artemis</string>
+    <string name="artemis_instance_tum_test_server_1">TUM test-server 1</string>
+    <string name="artemis_instance_tum_test_server_2">TUM test-server 2</string>
+
+    <!--  Registration ui  -->
+    <string name="register_label_first_name">First name</string>
+    <string name="register_label_last_name">Last name</string>
+    <string name="register_label_username">Login name</string>
+    <string name="register_label_email">Email</string>
+    <string name="register_label_password">Password</string>
+    <string name="register_label_confirm_password">Confirm password</string>
+
+    <string name="register_email_pattern">Please use an email with the following pattern: %1$s</string>
+
+    <string name="register_error_text_first_name_not_present">Your first name is required.</string>
+    <string name="register_error_text_first_name_short">At least 2 characters are required.</string>
+    <string name="register_error_text_last_name_not_present">Your last name is required.</string>
+    <string name="register_error_text_last_name_short">At least 2 characters are required.</string>
+
+    <string name="register_error_text_username_not_present">Your username is required.</string>
+    <string name="register_error_text_username_short">Your username is required to be at least %d characters.</string>
+    <string name="register_error_text_username_long">Your username cannot be longer than %d characters.</string>
+    <string name="register_error_text_username_invalid_pattern">Your username can only contain letters and digits.</string>
+
+    <string name="register_error_text_email_not_present">Your email is required.</string>
+    <string name="register_error_text_email_short">Your email is required to be at least %d characters.</string>
+    <string name="register_error_text_email_long">Your email cannot be longer than %d characters.</string>
+    <string name="register_error_text_email_invalid_pattern">Your email does not follow the required pattern.</string>
+
+    <string name="register_error_text_password_not_present">Your password is required.</string>
+    <string name="register_error_text_password_short">Your password is required to be at least %d characters.</string>
+    <string name="register_error_text_password_long">Your password cannot be longer than %d characters.</string>
+
+    <string name="register_error_text_confirmation_password_not_present">Your confirmation password is required.</string>
+    <string name="register_error_text_confirmation_password_short">Your confirmation password is required to be at least %d characters.</string>
+    <string name="register_error_text_confirmation_password_long">Your confirmation password cannot be longer than %d characters.</string>
+
+</resources>
