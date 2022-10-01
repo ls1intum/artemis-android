@@ -5,6 +5,8 @@
 import Foundation
 import SwiftUI
 import Factory
+import Combine
+import CombineExt
 
 extension CoursesOverviewView {
     @MainActor class CoursesOverviewViewModel: ObservableObject {
@@ -15,6 +17,10 @@ extension CoursesOverviewView {
 
         @Published var dashboard: DataState<Dashboard> = DataState.loading
         @Published var bearer: String = ""
+
+        @Published var serverUrl: String = ""
+
+        private let requestReloadDashboard = ReplaySubject<Void, Never>(bufferSize: 1)
 
         init() {
             accountService
@@ -31,21 +37,34 @@ extension CoursesOverviewView {
                         }
                     }
                     .assign(to: &$bearer)
+
+            serverCommunicationProvider
+                    .serverUrl
+                    .assign(to: &$serverUrl)
+
+            let dashboardPublisher: AnyPublisher<DataState<Dashboard>, Never> =
+                    accountService
+                            .authenticationData
+                            .combineLatest(serverCommunicationProvider.serverUrl, requestReloadDashboard.prepend(()))
+                            .transformLatest { [self] (continuation, data) in
+                                let (authData, serverUrl, _) = data
+                                switch authData {
+                                case .NotLoggedIn: continuation.send(DataState<Dashboard>.done(response: NetworkResponse<Dashboard>.failure(error: NSError())))
+                                case .LoggedIn(authToken: let authToken):
+                                    continuation.send(DataState<Dashboard>.loading)
+
+                                    let loadedDashboard = await dashboardService.loadDashboard(authorizationToken: authToken, serverUrl: serverUrl)
+                                    continuation.send(DataState.done(response: loadedDashboard))
+                                }
+                            }
+
+
+            dashboardPublisher
+                    .assign(to: &$dashboard)
         }
 
-        /**
-         * TODO: automatically reload dashboard when login status changes, the server url changes etc.
-         */
         func reloadDashboard() async {
-            let authData = await accountService.authenticationData.eraseToAnyPublisher().values.first(where: { _ in true })!
-
-            switch authData {
-            case .NotLoggedIn: return
-            case .LoggedIn(authToken: let authToken):
-                dashboard = DataState.loading
-                let loadedDashboard = await dashboardService.loadDashboard(authorizationToken: authToken, serverUrl: serverCommunicationProvider.serverUrl)
-                dashboard = DataState.done(response: loadedDashboard)
-            }
+            requestReloadDashboard.send(())
         }
 
         func logout() {

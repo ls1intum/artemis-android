@@ -4,6 +4,7 @@
 
 import Foundation
 import Combine
+import CombineExt
 
 /**
  * Provides data about which instance of artemis is communicated with.
@@ -12,7 +13,6 @@ class ServerCommunicationProviderImpl: ServerCommunicationProvider {
 
     /**
      * The currently selected server.
-     * TODO: Convert to publisher.
      */
-    var serverUrl = "https://artemis.ase.in.tum.de/"
+    var serverUrl: AnyPublisher<String, Never> = Just("https://artemis.ase.in.tum.de/").eraseToAnyPublisher()
 }

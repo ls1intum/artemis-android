@@ -6,5 +6,5 @@ import Foundation
 import Combine
 
 protocol ServerCommunicationProvider {
-    var serverUrl: String { get }
+    var serverUrl: AnyPublisher<String, Never> { get }
 }

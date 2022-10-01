@@ -17,7 +17,7 @@ class AccountServiceImpl: AccountService {
      */
     private let inMemoryJWT: CurrentValueSubject<String?, Never>
 
-    let authenticationData: any Publisher<AuthenticationData, Never>
+    let authenticationData: AnyPublisher<AuthenticationData, Never>
 
     init(serverCommunicationProvider: ServerCommunicationProvider, jsonProvider: JsonProvider) {
         self.serverCommunicationProvider = serverCommunicationProvider
@@ -26,18 +26,13 @@ class AccountServiceImpl: AccountService {
         inMemoryJWT = CurrentValueSubject(nil)
 
         authenticationData =
-//                Publishers.Zip(
-//                                UserDefaults
-//                                        .standard
-//                                        .publisher(for: \.loginJwt),
-//                                inMemoryJWT
-//                        )
-//                        .map { storedJWT, inMemoryJWT in
-//                            inMemoryJWT ?? storedJWT
-//                        }
                 UserDefaults
                         .standard
                         .publisher(for: \.loginJwt)
+                        .combineLatest(inMemoryJWT)
+                        .map { storedJWT, inMemoryJWT in
+                            inMemoryJWT ?? storedJWT
+                        }
                         .map { key in
                             if let setKey = key {
                                 return AuthenticationData.LoggedIn(authToken: setKey)
@@ -45,15 +40,17 @@ class AccountServiceImpl: AccountService {
                                 return AuthenticationData.NotLoggedIn
                             }
                         }
+                        .eraseToAnyPublisher()
     }
 
     func login(username: String, password: String, rememberMe: Bool) async -> LoginResponse {
         let client = HTTPClient(eventLoopGroupProvider: .createNew)
+        let serverUrl = await serverCommunicationProvider.serverUrl.first().values.first(where: { _ in true })!
 
         do {
             let requestBodyData = try jsonProvider.encoder.encode(LoginBody(username: username, password: password, rememberMe: rememberMe))
 
-            var request = HTTPClientRequest(url: serverCommunicationProvider.serverUrl + "api/authenticate")
+            var request = HTTPClientRequest(url: serverUrl + "api/authenticate")
             request.method = .POST
             request.headers.add(name: "content-type", value: "application/json")
             request.headers.add(name: "accept", value: "application/json")

@@ -23,7 +23,7 @@ struct CoursesOverviewView: View {
                 switch (viewModel.dashboard) {
                 case .loading: ProgressView()
                         .progressViewStyle(CircularProgressViewStyle())
-                case .done(let response): DashboardLoadedView(response: response, serverUrl: viewModel.serverCommunicationProvider.serverUrl, bearer: viewModel.bearer)
+                case .done(let response): DashboardLoadedView(response: response, serverUrl: viewModel.serverUrl, bearer: viewModel.bearer)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }

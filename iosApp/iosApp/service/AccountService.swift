@@ -13,7 +13,7 @@ protocol AccountService {
     /**
      * The latest authentication data. Publisher emits a new element whenever the login status of the user changes.
      */
-    var authenticationData: any Publisher<AuthenticationData, Never> { get }
+    var authenticationData: AnyPublisher<AuthenticationData, Never> { get }
 
     func login(username: String, password: String, rememberMe: Bool) async -> LoginResponse
 
