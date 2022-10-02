@@ -27,7 +27,7 @@ sealed class DataState<T> {
  * Perform a network call, returning a wrapper with the response.
  * If it fails, a failure object is returned instead.
  */
-inline fun <T> performNetworkCall(
+inline fun <T> fetchData(
     crossinline produceFailureState: (Exception) -> DataState<T>,
     crossinline perform: suspend () -> T
 ): Flow<DataState<T>> {
@@ -58,7 +58,7 @@ inline fun <T> retryOnInternet(
         .filter { it == NetworkStatusProvider.NetworkStatus.Internet }
         .transformLatest {
             emitAll(
-                performNetworkCall(::Suspended, perform)
+                fetchData(::Suspended, perform)
             )
         }
         .transformWhile { dataState ->

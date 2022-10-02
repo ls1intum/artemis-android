@@ -25,3 +25,14 @@ sealed class NetworkResponse<T> {
 
     data class Failure<T>(val exception: Exception) : NetworkResponse<T>()
 }
+
+suspend inline fun <T> performNetworkCall(
+    crossinline perform: suspend () -> T
+): NetworkResponse<T> {
+    return try {
+        NetworkResponse.Response(perform())
+    } catch (e: Exception) {
+        e.printStackTrace()
+        NetworkResponse.Failure(e)
+    }
+}

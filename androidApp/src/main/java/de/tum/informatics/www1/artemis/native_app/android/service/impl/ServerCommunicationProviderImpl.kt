@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.android.service.impl
 
 import android.content.Context
-import android.provider.ContactsContract.Profile
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import de.tum.informatics.www1.artemis.native_app.android.content.ProfileInfo
@@ -9,8 +8,6 @@ import de.tum.informatics.www1.artemis.native_app.android.defaults.ArtemisInstan
 import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
-import de.tum.informatics.www1.artemis.native_app.android.util.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.android.util.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.android.util.retryOnInternet
 import io.ktor.client.call.*
 import io.ktor.client.request.*

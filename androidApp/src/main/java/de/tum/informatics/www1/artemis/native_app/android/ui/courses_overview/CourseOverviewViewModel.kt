@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.android.content.Dashboard
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
 import de.tum.informatics.www1.artemis.native_app.android.service.DashboardService
+import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.android.service.impl.ServerCommunicationProviderImpl
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import de.tum.informatics.www1.artemis.native_app.android.util.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.android.util.retryOnInternet
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -17,8 +19,9 @@ import kotlinx.coroutines.launch
 class CourseOverviewViewModel(
     private val dashboardService: DashboardService,
     private val serverCommunicationProvider: ServerCommunicationProviderImpl,
-    private val accountService: AccountService
-    ) : ViewModel() {
+    private val accountService: AccountService,
+    private val networkStatusProvider: NetworkStatusProvider
+) : ViewModel() {
 
     /**
      * Emit a unit to this flow, to reload the dashboard.
@@ -38,19 +41,18 @@ class CourseOverviewViewModel(
             emit(authenticationData to serverUrl)
         }
             .transformLatest { (authenticationData, serverUrl) ->
-                emit(DataState.Loading())
                 //Called every time the authentication data changes, the server url changes or a reload is requested.
-                val loadedDashboard = when (authenticationData) {
+                when (authenticationData) {
                     is AccountService.AuthenticationData.LoggedIn -> {
-                        dashboardService.loadDashboard(authenticationData, serverUrl)
+                        emitAll(retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                            dashboardService.loadDashboard(authenticationData, serverUrl)
+                        })
                     }
                     AccountService.AuthenticationData.NotLoggedIn -> {
                         //User is not logged in, nothing to fetch.
-                        NetworkResponse.Response(Dashboard(emptyList()))
+                        emit(DataState.Suspended())
                     }
                 }
-
-                emit(DataState.Success(loadedDashboard))
             }
             //Store the loaded dashboard, so it is not loaded again when somebody collects this flow.
             .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())

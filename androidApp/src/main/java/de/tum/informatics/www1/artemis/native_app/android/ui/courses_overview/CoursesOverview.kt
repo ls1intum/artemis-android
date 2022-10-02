@@ -61,21 +61,11 @@ fun CoursesOverview(modifier: Modifier, viewModel: CourseOverviewViewModel, onLo
                 )
                 is DataState.Success -> {
                     when (val response = courses.data) {
-                        is NetworkResponse.Response -> {
-                            CourseList(
-                                modifier = Modifier.fillMaxSize(),
-                                courses = response.data.courses,
-                                serverUrl = serverUrl,
-                                authorizationToken = authorizationBearer
-                            )
-                        }
-                        is NetworkResponse.Failure -> {
-                            Text(
-                                text = "Could not load dashboard. ${response.exception}",
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
+
                     }
+                }
+                else -> {
+
                 }
             }
         }

@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
 import de.tum.informatics.www1.artemis.native_app.android.util.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.android.util.fetchData
 import de.tum.informatics.www1.artemis.native_app.android.util.performNetworkCall
 import io.ktor.client.call.*
 import io.ktor.client.request.*
