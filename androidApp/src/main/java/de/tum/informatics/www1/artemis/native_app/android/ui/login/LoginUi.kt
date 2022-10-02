@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.android.ui.login
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,6 +24,8 @@ fun LoginScreen(modifier: Modifier, viewModel: LoginViewModel, onLogin: () -> Un
 
     Scaffold(modifier = modifier) {
         Box(modifier = Modifier.fillMaxSize()) {
+            //TODO: Artemis instance selection dropbox
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

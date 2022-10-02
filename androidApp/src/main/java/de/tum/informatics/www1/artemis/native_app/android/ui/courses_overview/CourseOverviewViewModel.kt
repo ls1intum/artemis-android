@@ -50,7 +50,7 @@ class CourseOverviewViewModel(
                     }
                 }
 
-                emit(DataState.Done(loadedDashboard))
+                emit(DataState.Success(loadedDashboard))
             }
             //Store the loaded dashboard, so it is not loaded again when somebody collects this flow.
             .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())

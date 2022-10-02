@@ -1,5 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.android.util
 
+import android.net.Network
+import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
+import kotlinx.coroutines.flow.*
+
 /**
  * Wrapper around network responses. Used to propagate failures correctly.
  */
@@ -20,17 +24,4 @@ sealed class NetworkResponse<T> {
     data class Response<T>(val data: T) : NetworkResponse<T>()
 
     data class Failure<T>(val exception: Exception) : NetworkResponse<T>()
-}
-
-/**
- * Perform a network call, returning a wrapper with the response.
- * If it fails, a failure object is returned instead.
- */
-suspend inline fun <T> performNetworkCall(crossinline perform: suspend () -> T): NetworkResponse<T> {
-    return try {
-        NetworkResponse.Response(perform())
-    } catch (e: Exception) {
-        e.printStackTrace()
-        NetworkResponse.Failure(e)
-    }
 }
