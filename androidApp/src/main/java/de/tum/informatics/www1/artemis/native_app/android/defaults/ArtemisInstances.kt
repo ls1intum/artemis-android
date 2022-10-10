@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.android.defaults
 
 import androidx.annotation.StringRes
+import de.tum.informatics.www1.artemis.native_app.android.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.android.R
 
 object ArtemisInstances {
@@ -23,15 +24,16 @@ object ArtemisInstances {
         type = ArtemisInstance.Type.TEST
     )
 
+    val instances: List<ArtemisInstance> =
+        (if (BuildConfig.DEBUG) {
+            listOf(TUM_TEST_SERVER_1, TUM_TEST_SERVER_2)
+        } else emptyList()) + listOf(TUM_ARTEMIS)
+
     data class ArtemisInstance(val serverUrl: String, @StringRes val name: Int, val type: Type) {
         enum class Type {
             PRODUCTION,
-            TEST
-        }
-
-        enum class LoginType {
-            TUM_ONLINE,
-            USER_DATABASE
+            TEST,
+            CUSTOM
         }
     }
 }

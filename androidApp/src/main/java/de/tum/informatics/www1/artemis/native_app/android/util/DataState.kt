@@ -1,8 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.android.util
 
 import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.android.util.DataState.Failure
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState.Suspended
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import org.koin.core.time.TimeInMillis
 
 /**
  * The data state of the request.
@@ -24,42 +27,48 @@ sealed class DataState<T> {
 }
 
 /**
- * Perform a network call, returning a wrapper with the response.
- * If it fails, a failure object is returned instead.
- */
-inline fun <T> fetchData(
-    crossinline produceFailureState: (Exception) -> DataState<T>,
-    crossinline perform: suspend () -> T
-): Flow<DataState<T>> {
-    return flow {
-        emit(DataState.Loading())
-
-        try {
-            emit(DataState.Success(perform()))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emit(produceFailureState(e))
-        }
-    }
-}
-
-/**
  * Performs the given network response once an internet connection is available.
- * If the request fails, it is retried once a connection to the internet is available again.
+ * If the request fails, it is retried using an exponential backoff approach, however, only if internet is available.
+ * The exponential backoff timer is reset if connection is lost.
  * Once the first request succeeded, nothing is emitted anymore.
  *
  * The first element emitted is always [DataState.Suspended]
  */
 inline fun <T> retryOnInternet(
     connectivity: Flow<NetworkStatusProvider.NetworkStatus>,
+    baseBackoffMillis: Long = 2000,
     crossinline perform: suspend () -> T
 ): Flow<DataState<T>> {
     return connectivity
-        .filter { it == NetworkStatusProvider.NetworkStatus.Internet }
-        .transformLatest {
-            emitAll(
-                fetchData(::Suspended, perform)
-            )
+        .transformLatest { networkStatus ->
+            when (networkStatus) {
+                NetworkStatusProvider.NetworkStatus.Internet -> {
+                    //Fetch data with exponential backoff
+
+                    var currentBackoff = baseBackoffMillis
+
+                    while (true) {
+                        emit(DataState.Loading())
+                        when (val response = performNetworkCall(perform)) {
+                            is NetworkResponse.Response -> {
+                                emit(DataState.Success(response.data))
+                                return@transformLatest
+                            }
+                            is NetworkResponse.Failure -> {
+                                emit(Suspended())
+                            }
+                        }
+
+                        //Perform exponential backoff
+                        delay(currentBackoff)
+                        currentBackoff *= 2
+                    }
+                }
+                NetworkStatusProvider.NetworkStatus.Unavailable -> {
+                    //Just emit that this is suspended for now.
+                    emit(Suspended())
+                }
+            }
         }
         .transformWhile { dataState ->
             emit(dataState)

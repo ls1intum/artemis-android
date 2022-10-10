@@ -1,5 +1,6 @@
-package de.tum.informatics.www1.artemis.native_app.android.ui.login
+package de.tum.informatics.www1.artemis.native_app.android.ui.account.login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material3.*
@@ -9,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -24,8 +26,6 @@ fun LoginScreen(modifier: Modifier, viewModel: LoginViewModel, onLogin: () -> Un
 
     Scaffold(modifier = modifier) {
         Box(modifier = Modifier.fillMaxSize()) {
-            //TODO: Artemis instance selection dropbox
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -105,5 +105,4 @@ fun LoginScreen(modifier: Modifier, viewModel: LoginViewModel, onLogin: () -> Un
             }
         }
     }
-
 }

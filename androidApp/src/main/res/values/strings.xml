@@ -3,6 +3,7 @@
     <string name="artemis_instance_tum_production">TUM Artemis</string>
     <string name="artemis_instance_tum_test_server_1">TUM test-server 1</string>
     <string name="artemis_instance_tum_test_server_2">TUM test-server 2</string>
+    <string name="artemis_instance_custom">Other</string>
 
     <!--  Registration ui  -->
     <string name="register_label_first_name">First name</string>
@@ -36,5 +37,6 @@
     <string name="register_error_text_confirmation_password_not_present">Your confirmation password is required.</string>
     <string name="register_error_text_confirmation_password_short">Your confirmation password is required to be at least %d characters.</string>
     <string name="register_error_text_confirmation_password_long">Your confirmation password cannot be longer than %d characters.</string>
+
 
 </resources>

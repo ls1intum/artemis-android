@@ -16,4 +16,6 @@ interface ServerCommunicationProvider {
      * The profile info associated with the server url.
      */
     val serverProfileInfo: Flow<DataState<ProfileInfo>>
+
+    suspend fun updateServerUrl(serverUrl: String)
 }

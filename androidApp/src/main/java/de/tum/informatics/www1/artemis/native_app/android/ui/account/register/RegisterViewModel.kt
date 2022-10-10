@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.android.ui.login
+package de.tum.informatics.www1.artemis.native_app.android.ui.account.register
 
 import android.util.Patterns
 import androidx.annotation.StringRes
@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.map
 
 /**
  * Handle the registration ui.
- * Implementes the
  */
 class RegisterViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
 

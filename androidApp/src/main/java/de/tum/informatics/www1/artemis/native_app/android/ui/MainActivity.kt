@@ -12,7 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
 import de.tum.informatics.www1.artemis.native_app.android.ui.courses_overview.CoursesOverview
-import de.tum.informatics.www1.artemis.native_app.android.ui.login.LoginScreen
+import de.tum.informatics.www1.artemis.native_app.android.ui.account.login.LoginScreen
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get

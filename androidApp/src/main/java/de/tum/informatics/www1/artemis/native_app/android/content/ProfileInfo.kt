@@ -17,5 +17,7 @@ data class ProfileInfo(
     val allowedEmailPatternReadable: String?,
     val allowedLdapUsernamePattern: String?,
     val allowedCourseRegistrationUsernamePattern: String?,
-    val accountName: String?
+    val accountName: String?,
+    val externalCredentialProvider: String,
+    val externalPasswordResetLinkMap: Map<String, String>
 )
