@@ -44,7 +44,7 @@ class CourseOverviewViewModel(
                 //Called every time the authentication data changes, the server url changes or a reload is requested.
                 when (authenticationData) {
                     is AccountService.AuthenticationData.LoggedIn -> {
-                        emitAll(retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                        emitAll(retryOnInternet(networkStatusProvider.currentNetworkStatus, retry = reloadDashboard) {
                             dashboardService.loadDashboard(authenticationData, serverUrl)
                         })
                     }

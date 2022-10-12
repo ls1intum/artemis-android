@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.defaults.ArtemisInstances
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
+import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -32,6 +33,12 @@ class AccountViewModel(
     fun updateServerUrl(serverUrl: String) {
         viewModelScope.launch {
             serverCommunicationProvider.updateServerUrl(serverUrl)
+        }
+    }
+
+    fun retryLoadServerProfileInfo() {
+        viewModelScope.launch {
+            serverCommunicationProvider.retryLoadServerProfileInfo()
         }
     }
 }

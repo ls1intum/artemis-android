@@ -1,8 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.android.service
 
-import de.tum.informatics.www1.artemis.native_app.android.content.ProfileInfo
+import de.tum.informatics.www1.artemis.native_app.android.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
-import de.tum.informatics.www1.artemis.native_app.android.util.NetworkResponse
 import kotlinx.coroutines.flow.Flow
 
 interface ServerCommunicationProvider {
@@ -18,4 +17,6 @@ interface ServerCommunicationProvider {
     val serverProfileInfo: Flow<DataState<ProfileInfo>>
 
     suspend fun updateServerUrl(serverUrl: String)
+
+    suspend fun retryLoadServerProfileInfo()
 }

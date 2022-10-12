@@ -37,9 +37,11 @@ sealed class DataState<T> {
 inline fun <T> retryOnInternet(
     connectivity: Flow<NetworkStatusProvider.NetworkStatus>,
     baseBackoffMillis: Long = 2000,
+    retry: Flow<Unit>,
     crossinline perform: suspend () -> T
 ): Flow<DataState<T>> {
     return connectivity
+        .combine(retry.onStart { emit(Unit) }) { a, _ -> a }
         .transformLatest { networkStatus ->
             when (networkStatus) {
                 NetworkStatusProvider.NetworkStatus.Internet -> {
@@ -55,7 +57,7 @@ inline fun <T> retryOnInternet(
                                 return@transformLatest
                             }
                             is NetworkResponse.Failure -> {
-                                emit(Suspended())
+                                emit(Failure(response.exception))
                             }
                         }
 

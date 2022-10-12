@@ -1,9 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.android.service.impl
 
 import android.content.Context
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import de.tum.informatics.www1.artemis.native_app.android.content.ProfileInfo
+import de.tum.informatics.www1.artemis.native_app.android.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.android.defaults.ArtemisInstances
 import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
@@ -18,7 +19,7 @@ import kotlinx.coroutines.flow.*
  * Provides data about which instance of artemis is communicated with.
  */
 class ServerCommunicationProviderImpl(
-    context: Context,
+    private val context: Context,
     private val ktorProvider: KtorProvider,
     private val networkStatusProvider: NetworkStatusProvider
 ) :
@@ -30,19 +31,22 @@ class ServerCommunicationProviderImpl(
         private val SERVER_URL_KEY = stringPreferencesKey("server_url")
     }
 
-    override val serverUrl: Flow<String> =
+    private val retryLoadServerProfileInfo = MutableSharedFlow<Unit>()
+
+    final override val serverUrl: Flow<String> =
         context
             .serverCommunicationPreferences
             .data
             .map { data -> data[SERVER_URL_KEY] ?: ArtemisInstances.TUM_ARTEMIS.serverUrl }
 
     override val serverProfileInfo: Flow<DataState<ProfileInfo>> =
-        serverUrl.transformLatest { serverUrl ->
-            emitAll(
-                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                    fetchProfileInfo(serverUrl)
-                }
-            )
+        serverUrl.flatMapLatest { serverUrl ->
+            retryOnInternet(
+                networkStatusProvider.currentNetworkStatus,
+                retry = retryLoadServerProfileInfo
+            ) {
+                fetchProfileInfo(serverUrl)
+            }
         }
 
     private suspend fun fetchProfileInfo(serverUrl: String): ProfileInfo {
@@ -51,5 +55,15 @@ class ServerCommunicationProviderImpl(
 
             accept(ContentType.Application.Json)
         }.body()
+    }
+
+    override suspend fun updateServerUrl(serverUrl: String) {
+        context.serverCommunicationPreferences.edit { data ->
+            data[SERVER_URL_KEY] = serverUrl
+        }
+    }
+
+    override suspend fun retryLoadServerProfileInfo() {
+        retryLoadServerProfileInfo.emit(Unit)
     }
 }

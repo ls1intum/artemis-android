@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.android.R
-import de.tum.informatics.www1.artemis.native_app.android.content.ProfileInfo
+import de.tum.informatics.www1.artemis.native_app.android.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import org.koin.androidx.compose.get

@@ -4,13 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
+import de.tum.informatics.www1.artemis.native_app.android.ui.account.AccountScreen
 import de.tum.informatics.www1.artemis.native_app.android.ui.courses_overview.CoursesOverview
 import de.tum.informatics.www1.artemis.native_app.android.ui.account.login.LoginScreen
 import kotlinx.coroutines.flow.first
@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
         val startDestination = runBlocking {
             when (accountService.authenticationData.first()) {
                 is AccountService.AuthenticationData.LoggedIn -> Navigation.Dest.COURSE_OVERVIEW
-                AccountService.AuthenticationData.NotLoggedIn -> Navigation.Dest.LOGIN
+                AccountService.AuthenticationData.NotLoggedIn -> Navigation.Dest.HOME
             }
         }
 
@@ -57,20 +57,37 @@ class MainActivity : ComponentActivity() {
             ) {
                 val navController = rememberNavController()
 
+                val onLoggedIn = {
+                    //Navigate to the course overview and remove the login screen from the navigation stack.
+                    navController.navigate(Navigation.Dest.COURSE_OVERVIEW) {
+                        popUpTo(Navigation.Dest.HOME) {
+                            inclusive = true
+                        }
+                    }
+                }
+
                 //Use jetpack compose navigation for the navigation logic.
                 NavHost(navController = navController, startDestination = startDestination) {
-                    composable(Navigation.Dest.LOGIN) {
+                    composable(Navigation.Dest.HOME) {
+                        AccountScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            onNavigateToLoginScreen = {
+                                navController.navigate(Navigation.Dest.HOME_LOGIN)
+                            },
+                            onNavigateToRegisterScreen = {
+                                navController.navigate(Navigation.Dest.HOME_REGISTER)
+
+                            },
+                            onLoggedIn = onLoggedIn
+                        )
+
+                    }
+
+                    composable(Navigation.Dest.HOME_LOGIN) {
                         LoginScreen(
                             modifier = Modifier.fillMaxSize(),
                             viewModel = getViewModel(),
-                            onLogin = {
-                                //Navigate to the course overview and remove the login screen from the navigation stack.
-                                navController.navigate(Navigation.Dest.COURSE_OVERVIEW) {
-                                    popUpTo(Navigation.Dest.LOGIN) {
-                                        inclusive = true
-                                    }
-                                }
-                            }
+                            onLoggedIn = onLoggedIn
                         )
                     }
 
@@ -80,7 +97,7 @@ class MainActivity : ComponentActivity() {
                             viewModel = getViewModel(),
                             onLogout = {
                                 //Navigate to the login screen and remove the course overview screen from the navigation stack.
-                                navController.navigate(Navigation.Dest.LOGIN) {
+                                navController.navigate(Navigation.Dest.HOME) {
                                     popUpTo(Navigation.Dest.COURSE_OVERVIEW) {
                                         inclusive = true
                                     }
