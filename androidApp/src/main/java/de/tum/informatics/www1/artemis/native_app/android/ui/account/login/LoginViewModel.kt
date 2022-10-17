@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -66,8 +67,8 @@ class LoginViewModel(
         savedStateHandle[USER_ACCEPTED_TERMS_KEY] = newUserAcceptedTerms
     }
 
-    fun login(onSuccess: () -> Unit, onFailure: () -> Unit) {
-        viewModelScope.launch {
+    fun login(onSuccess: () -> Unit, onFailure: () -> Unit): Job {
+        return viewModelScope.launch {
             val response: AccountService.LoginResponse =
                 accountService.login(username.first(), password.first(), rememberMe.first())
 

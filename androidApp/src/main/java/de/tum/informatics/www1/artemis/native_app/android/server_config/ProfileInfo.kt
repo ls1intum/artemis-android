@@ -28,5 +28,5 @@ data class ProfileInfo(
     /**
      * If a login using a username-password combination is not possible.
      */
-    val isPasswordLoginDisabled: Boolean = saml2 != null && saml2.passwordLoginDisabled
+    val isPasswordLoginDisabled: Boolean = saml2 != null && (saml2.passwordLoginDisabled || !saml2.enablePassword)
 }

@@ -2,6 +2,8 @@
 <resources>
     <!--  Artemis instance names  -->
     <string name="artemis_instance_tum_production">Technical University of Munich</string>
+    <string name="artemis_instance_codeability_production">codeAbility</string>
+    <string name="artemis_instance_hm_production">Hochschule München</string>
     <string name="artemis_instance_tum_test_server_1">TUM test-server 1</string>
     <string name="artemis_instance_tum_test_server_2">TUM test-server 2</string>
     <string name="artemis_instance_custom">Other</string>
@@ -22,7 +24,7 @@
 
 
     <!--  Artemis instance selection ui  -->
-    <string name="account_select_artemis_instance_select_text">Please select your artemis server:</string>
+    <string name="account_select_artemis_instance_select_text">Your artemis server:</string>
     <!--  Login/Register selection ui  -->
     <string name="account_login_button">Login</string>
     <string name="account_register_button">Register</string>
@@ -61,6 +63,8 @@
     <string name="register_error_text_confirmation_password_long">Your confirmation password cannot be longer than %d characters.</string>
 
     <!-- Login ui -->
+    <string name="login_dialog_perform_login_title">Please wait…</string>
+
     <string name="login_dialog_login_failed_title">Login failed.</string>
     <string name="login_dialog_login_failed_message">Something went wrong while logging you in. Please try again.</string>
     <string name="login_dialog_login_failed_confirm">@android:string/ok</string>

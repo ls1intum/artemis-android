@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
+import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
 import de.tum.informatics.www1.artemis.native_app.android.util.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.android.util.performNetworkCall
 import io.ktor.client.call.*
@@ -16,7 +17,7 @@ import kotlinx.serialization.Serializable
 
 class AccountServiceImpl(
     private val ktorProvider: KtorProvider,
-    private val serverCommunicationProvider: ServerCommunicationProviderImpl,
+    private val serverCommunicationProvider: ServerCommunicationProvider,
     private val context: Context
 ) : AccountService {
 

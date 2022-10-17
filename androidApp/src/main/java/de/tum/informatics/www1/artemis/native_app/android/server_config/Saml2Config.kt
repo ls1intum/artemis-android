@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.android.server_config
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -8,6 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Saml2Config(
     val identityProviderName: String? = null,
+    @SerialName("button-label")
     val buttonLabel: String? = null,
     val passwordLoginDisabled: Boolean = false,
     val enablePassword: Boolean = false

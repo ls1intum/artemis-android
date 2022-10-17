@@ -33,7 +33,7 @@ class ServerCommunicationProviderImpl(
 
     private val retryLoadServerProfileInfo = MutableSharedFlow<Unit>()
 
-    final override val serverUrl: Flow<String> =
+    override val serverUrl: Flow<String> =
         context
             .serverCommunicationPreferences
             .data

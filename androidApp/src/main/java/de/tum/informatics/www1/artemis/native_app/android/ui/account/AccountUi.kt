@@ -1,15 +1,21 @@
 package de.tum.informatics.www1.artemis.native_app.android.ui.account
 
-import androidx.compose.foundation.Image
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.VectorPainter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -17,13 +23,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.android.defaults.ArtemisInstances
 import de.tum.informatics.www1.artemis.native_app.android.ui.account.login.LoginUi
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
-import org.koin.androidx.compose.getViewModel
-import org.koin.core.parameter.parametersOf
+import org.koin.androidx.compose.getStateViewModel
 import java.io.IOException
 
 /**
@@ -32,7 +40,7 @@ import java.io.IOException
 @Composable
 fun AccountScreen(
     modifier: Modifier,
-    viewModel: AccountViewModel = getViewModel(),
+    viewModel: AccountViewModel = getStateViewModel(),
     onNavigateToLoginScreen: () -> Unit,
     onNavigateToRegisterScreen: () -> Unit,
     onLoggedIn: () -> Unit
@@ -72,10 +80,19 @@ private fun AccountUi(
                 .padding(padding)
         ) {
 
+            ArtemisInstanceSelection(
+                modifier = Modifier
+                    .fillMaxWidth(1f)
+                    .height(80.dp)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                artemisInstance = artemisInstance,
+                changeUrl = updateServerUrl
+            )
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.15f)
+                    .fillMaxHeight(0.05f)
             )
 
             Text(
@@ -102,15 +119,6 @@ private fun AccountUi(
                     .fillMaxHeight(0.05f)
             )
 
-            ArtemisInstanceSelection(
-                modifier = Modifier
-                    .fillMaxWidth(1.0f)
-                    .padding(horizontal = 16.dp)
-                    .align(Alignment.CenterHorizontally),
-                artemisInstance = artemisInstance,
-                changeUrl = updateServerUrl
-            )
-
             RegisterLoginAccount(
                 modifier = Modifier
                     .weight(1f)
@@ -135,9 +143,9 @@ fun ArtemisInstanceSelection(
         mutableStateOf(false)
     }
 
-    Column(modifier = modifier) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.weight(2f),
             text = stringResource(id = R.string.account_select_artemis_instance_select_text),
             textAlign = TextAlign.Center,
             fontSize = 20.sp,
@@ -146,47 +154,54 @@ fun ArtemisInstanceSelection(
 
         Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min)
+                .weight(1f),
+            onClick = { dropdownMenuDisplayed = true },
+            border = BorderStroke(2.dp, color = MaterialTheme.colorScheme.outline)
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min)
+                    .fillMaxSize()
             ) {
-                ArtemisInstance(
+                Box(
                     modifier = Modifier
+                        .weight(4f)
+                        .align(Alignment.CenterVertically)
+                        .padding(start = 4.dp)
+                ) {
+                    ArtemisInstanceLogo(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(vertical = 4.dp),
+                        serverUrl = artemisInstance.serverUrl
+                    )
+                }
+
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxHeight()
                         .weight(1f)
-                        .align(Alignment.CenterVertically),
-                    name = stringResource(id = artemisInstance.name),
-                    icon = null
+                        .padding(horizontal = 4.dp)
                 )
 
-                Box {
-                    IconButton(
-                        modifier = Modifier,
-                        onClick = { dropdownMenuDisplayed = true }
-                    ) {
-                        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
-                    }
-
-                    DropdownMenu(
-                        modifier = Modifier.fillMaxWidth(0.8f),
-                        expanded = dropdownMenuDisplayed,
-                        onDismissRequest = { dropdownMenuDisplayed = false }) {
-                        ArtemisInstances.instances.forEach { instance ->
-                            DropdownMenuItem(
-                                text = {
-                                    ArtemisInstance(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        name = stringResource(id = instance.name),
-                                        icon = null
-                                    )
-                                }, onClick = {
-                                    changeUrl(instance.serverUrl)
-                                }
-                            )
-                        }
+                DropdownMenu(
+                    modifier = Modifier.fillMaxWidth(0.8f),
+                    expanded = dropdownMenuDisplayed,
+                    onDismissRequest = { dropdownMenuDisplayed = false }) {
+                    ArtemisInstances.instances.forEach { instance ->
+                        DropdownMenuItem(
+                            text = {
+                                ArtemisInstance(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    name = stringResource(id = instance.name),
+                                    serverUrl = instance.serverUrl
+                                )
+                            }, onClick = {
+                                changeUrl(instance.serverUrl)
+                                dropdownMenuDisplayed = false
+                            }
+                        )
                     }
                 }
             }
@@ -195,23 +210,38 @@ fun ArtemisInstanceSelection(
 }
 
 @Composable
-private fun ArtemisInstance(modifier: Modifier, name: String, icon: Painter?) {
-    Row(modifier = modifier.then(Modifier.height(IntrinsicSize.Min))) {
-        val iconModifier = Modifier
-            .weight(1f)
-            .aspectRatio(1f)
-        if (icon != null) {
-            Image(modifier = iconModifier, painter = icon, contentDescription = null)
-        } else {
-            Box(modifier = iconModifier)
-        }
+private fun ArtemisInstance(modifier: Modifier, name: String, serverUrl: String) {
+    Row(
+        modifier = modifier.then(Modifier.height(IntrinsicSize.Min)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ArtemisInstanceLogo(modifier = Modifier.weight(1f), serverUrl = serverUrl)
 
         Text(
-            modifier = Modifier.weight(9f),
+            modifier = Modifier.weight(2f),
             text = name,
-            fontSize = 20.sp
+            fontSize = 16.sp
         )
     }
+}
+
+/**
+ * Displays the public/images/logo.png of the given artemis instance
+ */
+@Composable
+private fun ArtemisInstanceLogo(modifier: Modifier, serverUrl: String) {
+    val model = ImageRequest
+        .Builder(LocalContext.current)
+        .data("${serverUrl}public/images/logo.png")
+        .build()
+
+    AsyncImage(
+        modifier = modifier,
+        model = model,
+        contentScale = ContentScale.Fit,
+        contentDescription = null,
+        placeholder = rememberVectorPainter(image = Icons.Default.Downloading)
+    )
 }
 
 /**
@@ -229,97 +259,104 @@ private fun RegisterLoginAccount(
     onNavigateToRegisterScreen: () -> Unit,
     onLoggedIn: () -> Unit
 ) {
-    Box(
-        modifier = modifier
-    ) {
-        val columnModifier = Modifier
-            .align(Alignment.Center)
-            .fillMaxWidth(0.8f)
+    Crossfade(
+        modifier = modifier,
+        targetState = serverProfileInfo,
+        animationSpec = tween(50)
+    ) { currentServerProfileInfo ->
+        Box(modifier = Modifier.fillMaxWidth()) {
+            val columnModifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth(0.8f)
 
-        when (serverProfileInfo) {
-            is DataState.Failure, is DataState.Suspended -> {
-                Column(
-                    modifier = columnModifier
-                ) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(
-                            when (serverProfileInfo) {
-                                is DataState.Failure -> R.string.account_load_server_profile_failure
-                                is DataState.Suspended -> R.string.account_load_server_profile_suspended
-                                else -> 0 //Not reachable
-                            }
-                        ),
-                        textAlign = TextAlign.Center,
-                        fontSize = 18.sp
-                    )
+            when (currentServerProfileInfo) {
+                is DataState.Failure, is DataState.Suspended -> {
+                    Column(
+                        modifier = columnModifier
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(
+                                when (currentServerProfileInfo) {
+                                    is DataState.Failure -> R.string.account_load_server_profile_failure
+                                    is DataState.Suspended -> R.string.account_load_server_profile_suspended
+                                    else -> 0 //Not reachable
+                                }
+                            ),
+                            textAlign = TextAlign.Center,
+                            fontSize = 18.sp
+                        )
 
-                    TextButton(
-                        onClick = retryLoadServerProfileInfo,
-                        content = { Text(text = stringResource(id = R.string.account_load_server_profile_button_try_again)) },
-                        modifier = Modifier
-                            .padding(top = 0.dp)
-                            .align(Alignment.CenterHorizontally)
-                    )
+                        TextButton(
+                            onClick = retryLoadServerProfileInfo,
+                            content = { Text(text = stringResource(id = R.string.account_load_server_profile_button_try_again)) },
+                            modifier = Modifier
+                                .padding(top = 0.dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+                    }
                 }
-            }
-            is DataState.Loading -> {
-                Column(modifier = columnModifier) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(id = R.string.account_load_server_profile_loading),
-                        textAlign = TextAlign.Center,
-                        fontSize = 20.sp,
-                    )
+                is DataState.Loading -> {
+                    Column(modifier = columnModifier) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(id = R.string.account_load_server_profile_loading),
+                            textAlign = TextAlign.Center,
+                            fontSize = 20.sp,
+                        )
 
-                    LinearProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                            .align(Alignment.CenterHorizontally)
-                            .padding(top = 4.dp)
-                    )
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth(0.5f)
+                                .align(Alignment.CenterHorizontally)
+                                .padding(top = 4.dp)
+                        )
+                    }
                 }
-            }
-            is DataState.Success -> {
-                if (serverProfileInfo.data.registrationEnabled == true) {
-                    LoginOrRegister(
-                        modifier = Modifier.fillMaxSize(),
-                        onClickLogin = onNavigateToLoginScreen,
-                        onClickRegister = onNavigateToRegisterScreen
-                    )
-                } else {
-                    val loginUiModifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .align(Alignment.Center)
-
-                    if (LocalInspectionMode.current) {
-                        //Just for the preview.
-                        LoginUi(
-                            modifier = loginUiModifier,
-                            username = "",
-                            password = "",
-                            userAcceptedTerms = false,
-                            rememberMe = false,
-                            updateUsername = {},
-                            updatePassword = {},
-                            updateRememberMe = {},
-                            updateUserAcceptedTerms = {},
-                            onClickLogin = {},
-                            isLoginButtonEnabled = false,
-                            accountName = "TUM",
-                            needsToAcceptTerms = false
+                is DataState.Success -> {
+                    if (currentServerProfileInfo.data.registrationEnabled == true) {
+                        LoginOrRegister(
+                            modifier = Modifier.fillMaxSize(),
+                            onClickLogin = onNavigateToLoginScreen,
+                            onClickRegister = onNavigateToRegisterScreen
                         )
                     } else {
-                        LoginUi(
-                            modifier = loginUiModifier,
-                            viewModel = getViewModel(parameters = { parametersOf(serverProfileInfo.data) }),
-                            onLoggedIn = onLoggedIn
-                        )
+                        val loginUiModifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .align(Alignment.Center)
+
+                        if (LocalInspectionMode.current) {
+                            //Just for the preview.
+                            LoginUi(
+                                modifier = loginUiModifier,
+                                username = "",
+                                password = "",
+                                hasUserAcceptedTerms = false,
+                                rememberMe = false,
+                                updateUsername = {},
+                                updatePassword = {},
+                                updateRememberMe = {},
+                                updateUserAcceptedTerms = {},
+                                onClickLogin = {},
+                                isLoginButtonEnabled = false,
+                                accountName = "TUM",
+                                needsToAcceptTerms = false,
+                                isPasswordLoginDisabled = false,
+                                saml2Config = null
+                            )
+                        } else {
+                            LoginUi(
+                                modifier = loginUiModifier,
+                                viewModel = getStateViewModel(),
+                                onLoggedIn = onLoggedIn
+                            )
+                        }
                     }
                 }
             }
         }
+
     }
 }
 

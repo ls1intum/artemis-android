@@ -5,10 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.defaults.ArtemisInstances
+import de.tum.informatics.www1.artemis.native_app.android.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class AccountViewModel(
@@ -28,7 +29,15 @@ class AccountViewModel(
             )
         }
 
-    val serverProfileInfo = serverCommunicationProvider.serverProfileInfo
+    val serverProfileInfo: Flow<DataState<ProfileInfo>> =
+        serverCommunicationProvider.serverProfileInfo
+            .transform { dataState ->
+                emit(dataState)
+                if (dataState is DataState.Loading) {
+                    delay(200L)
+                }
+            }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
     fun updateServerUrl(serverUrl: String) {
         viewModelScope.launch {

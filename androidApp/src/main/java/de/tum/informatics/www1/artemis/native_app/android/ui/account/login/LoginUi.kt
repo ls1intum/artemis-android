@@ -13,10 +13,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import de.tum.informatics.www1.artemis.native_app.android.R
+import de.tum.informatics.www1.artemis.native_app.android.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.android.server_config.Saml2Config
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
+import kotlinx.coroutines.Job
 import org.koin.androidx.compose.get
 
 @Composable
@@ -34,6 +37,17 @@ fun LoginScreen(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () ->
     }
 }
 
+private fun <T> fromProfileInfo(
+    dataState: DataState<ProfileInfo>,
+    default: T,
+    onSuccess: (ProfileInfo) -> T
+): T {
+    return when (dataState) {
+        is DataState.Success -> onSuccess(dataState.data)
+        else -> default
+    }
+}
+
 @Composable
 fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Unit) {
     val username by viewModel.username.collectAsState(initial = "")
@@ -43,6 +57,7 @@ fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Uni
     val isLoginButtonEnabled by viewModel.loginButtonEnabled.collectAsState(initial = false)
 
     var displayLoginFailedDialog by rememberSaveable { mutableStateOf(false) }
+    var displayPerformLoginDialog by rememberSaveable { mutableStateOf(false) }
 
     val serverCommunicationProvider: ServerCommunicationProvider = get()
 
@@ -50,17 +65,15 @@ fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Uni
     val profileInfo =
         serverCommunicationProvider.serverProfileInfo.collectAsState(initial = DataState.Loading()).value
 
-    val accountName = when (profileInfo) {
-        is DataState.Success -> profileInfo.data.accountName ?: ""
-        else -> "" //Should not happen
-    }
+    val accountName = fromProfileInfo(profileInfo, "") { it.accountName ?: "" }
 
-    val needsToAcceptTerms = when (profileInfo) {
-        is DataState.Success -> profileInfo.data.needsToAcceptTerms
-        else -> false //Should not happen
-    }
+    val needsToAcceptTerms = fromProfileInfo(profileInfo, false) { it.needsToAcceptTerms }
 
-    
+    val isPasswordLoginDisabled = fromProfileInfo(profileInfo, false) { it.isPasswordLoginDisabled }
+
+    val saml2Config: Saml2Config? = fromProfileInfo(profileInfo, null) { it.saml2 }
+
+    var loginJob: Job? by remember { mutableStateOf(null) }
 
     LoginUi(
         modifier = modifier,
@@ -73,9 +86,15 @@ fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Uni
         updateRememberMe = viewModel::updateRememberMe,
         updateUserAcceptedTerms = viewModel::updateUserAcceptedTerms,
         onClickLogin = {
-            viewModel.login(
-                onSuccess = onLoggedIn,
+            displayPerformLoginDialog = true
+
+            loginJob = viewModel.login(
+                onSuccess = {
+                    displayPerformLoginDialog = false
+                    onLoggedIn()
+                },
                 onFailure = {
+                    displayPerformLoginDialog = false
                     displayLoginFailedDialog = true
                 }
             )
@@ -83,8 +102,26 @@ fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Uni
         isLoginButtonEnabled = isLoginButtonEnabled,
         accountName = accountName,
         needsToAcceptTerms = needsToAcceptTerms,
-        isPasswordLoginDisabled = false
+        isPasswordLoginDisabled = isPasswordLoginDisabled,
+        saml2Config = saml2Config
     )
+
+    if (displayPerformLoginDialog) {
+        AlertDialog(
+            title = {
+                Text(text = stringResource(id = R.string.login_dialog_perform_login_title))
+            },
+            onDismissRequest = {
+                try {
+                    loginJob?.cancel()
+                    loginJob = null
+                    displayPerformLoginDialog = false
+                } catch (_: Exception) {
+                }
+            },
+            confirmButton = {}
+        )
+    }
 
     if (displayLoginFailedDialog) {
         AlertDialog(
@@ -138,10 +175,6 @@ fun LoginUi(
             textAlign = TextAlign.Center
         )
 
-        val elementModifier = Modifier
-            .widthIn(max = 600.dp)
-            .fillMaxWidth(0.8f)
-
         val loginModifier = Modifier
             .padding(16.dp)
             .fillMaxWidth(0.8f)
@@ -154,7 +187,11 @@ fun LoginUi(
                 username = username,
                 updateUsername = updateUsername,
                 password = password,
-                updatePassword = updatePassword
+                updatePassword = updatePassword,
+                rememberMe = rememberMe,
+                updateRememberMe = updateRememberMe,
+                isLoginButtonEnabled = isLoginButtonEnabled,
+                onClickLogin = onClickLogin
             )
         }
 
@@ -162,10 +199,12 @@ fun LoginUi(
             //Both are visible, therefore we place a visual divider
             DividerWithText(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                text = {
+                text = { modifier ->
                     Text(
+                        modifier = modifier,
                         text = stringResource(id = R.string.login_password_or_saml_divider_text),
-                        fontSize = 16.sp
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center
                     )
                 }
             )
@@ -175,35 +214,24 @@ fun LoginUi(
             Saml2BasedLogin(
                 modifier = loginModifier,
                 saml2Config = saml2Config,
+                passwordLoginDisabled = isPasswordLoginDisabled,
                 needsToAcceptTerms = needsToAcceptTerms,
-                hasUserAcceptedTerms = hasUserAcceptedTerms
-            ) {
+                hasUserAcceptedTerms = hasUserAcceptedTerms,
+                rememberMe = rememberMe,
+                updateRememberMe = updateRememberMe,
+                onLoginButtonClicked = {
 
-            }
+                }
+            )
         }
-
-        CheckboxWithText(
-            modifier = elementModifier,
-            isChecked = rememberMe,
-            text = stringResource(id = R.string.login_remember_me_label),
-            onCheckedChanged = updateRememberMe
-        )
 
         if (needsToAcceptTerms) {
             CheckboxWithText(
-                modifier = elementModifier,
+                modifier = loginModifier,
                 isChecked = hasUserAcceptedTerms,
                 text = stringResource(id = R.string.login_remember_me_label),
                 onCheckedChanged = updateUserAcceptedTerms
             )
-        }
-
-        Button(
-            modifier = elementModifier,
-            onClick = onClickLogin,
-            enabled = isLoginButtonEnabled
-        ) {
-            Text(text = stringResource(id = R.string.login_perform_login_button_text))
         }
     }
 }
@@ -212,9 +240,13 @@ fun LoginUi(
 private fun PasswordBasedLogin(
     modifier: Modifier,
     username: String,
-    updateUsername: (String) -> Unit,
     password: String,
-    updatePassword: (String) -> Unit
+    rememberMe: Boolean,
+    updateUsername: (String) -> Unit,
+    updatePassword: (String) -> Unit,
+    updateRememberMe: (Boolean) -> Unit,
+    isLoginButtonEnabled: Boolean,
+    onClickLogin: () -> Unit
 ) {
     Column(
         modifier = modifier,
@@ -234,6 +266,20 @@ private fun PasswordBasedLogin(
             label = { Text(text = stringResource(id = R.string.login_password_label)) },
             visualTransformation = remember { PasswordVisualTransformation() }
         )
+
+        RememberLoginCheckBox(
+            modifier = Modifier.fillMaxWidth(),
+            rememberMe = rememberMe,
+            updateRememberMe = updateRememberMe
+        )
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onClickLogin,
+            enabled = isLoginButtonEnabled
+        ) {
+            Text(text = stringResource(id = R.string.login_perform_login_button_text))
+        }
     }
 }
 
@@ -241,8 +287,11 @@ private fun PasswordBasedLogin(
 private fun Saml2BasedLogin(
     modifier: Modifier,
     saml2Config: Saml2Config,
+    passwordLoginDisabled: Boolean,
     needsToAcceptTerms: Boolean,
     hasUserAcceptedTerms: Boolean,
+    rememberMe: Boolean,
+    updateRememberMe: (Boolean) -> Unit,
     onLoginButtonClicked: () -> Unit
 ) {
     val elementModifier = Modifier.fillMaxWidth()
@@ -255,11 +304,19 @@ private fun Saml2BasedLogin(
             )
         } else stringResource(id = R.string.login_saml_please_sign_in)
 
-        Text(
+        if (!passwordLoginDisabled) {
+            Text(
+                modifier = elementModifier,
+                text = pleaseSignInText,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        RememberLoginCheckBox(
             modifier = elementModifier,
-            text = pleaseSignInText,
-            fontSize = 20.sp,
-            textAlign = TextAlign.Center
+            rememberMe = rememberMe,
+            updateRememberMe = updateRememberMe
         )
 
         Button(
@@ -287,6 +344,20 @@ private fun Saml2BasedLogin(
 }
 
 @Composable
+private fun RememberLoginCheckBox(
+    modifier: Modifier,
+    rememberMe: Boolean,
+    updateRememberMe: (Boolean) -> Unit
+) {
+    CheckboxWithText(
+        modifier = modifier,
+        isChecked = rememberMe,
+        text = stringResource(id = R.string.login_remember_me_label),
+        onCheckedChanged = updateRememberMe
+    )
+}
+
+@Composable
 private fun CheckboxWithText(
     modifier: Modifier,
     isChecked: Boolean,
@@ -310,15 +381,15 @@ private fun CheckboxWithText(
 }
 
 @Composable
-private fun DividerWithText(modifier: Modifier, text: @Composable () -> Unit) {
-    Row(modifier = Modifier) {
+private fun DividerWithText(modifier: Modifier, text: @Composable (Modifier) -> Unit) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Divider(
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 8.dp)
         )
 
-        text()
+        text(Modifier)
 
         Divider(
             modifier = Modifier
