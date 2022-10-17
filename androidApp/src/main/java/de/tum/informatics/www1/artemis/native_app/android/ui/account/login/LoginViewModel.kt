@@ -3,13 +3,10 @@ package de.tum.informatics.www1.artemis.native_app.android.ui.account.login
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.android.defaults.ArtemisInstances
-import de.tum.informatics.www1.artemis.native_app.android.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -36,14 +33,14 @@ class LoginViewModel(
 
     val rememberMe: Flow<Boolean> = savedStateHandle.getStateFlow(REMEMBER_ME_KEY, false)
 
-    val userAcceptedTerms: Flow<Boolean> =
+    val hasUserAcceptedTerms: Flow<Boolean> =
         savedStateHandle.getStateFlow(USER_ACCEPTED_TERMS_KEY, false)
 
     val loginButtonEnabled: Flow<Boolean> =
         combine(
             username,
             password,
-            userAcceptedTerms,
+            hasUserAcceptedTerms,
             serverCommunicationProvider.serverProfileInfo
         ) { username, password, userAcceptedTerms, serverProfileInfo ->
             val needsToAcceptTerms = when (serverProfileInfo) {

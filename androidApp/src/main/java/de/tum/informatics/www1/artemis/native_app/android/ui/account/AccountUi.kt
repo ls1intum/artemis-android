@@ -21,9 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.android.defaults.ArtemisInstances
 import de.tum.informatics.www1.artemis.native_app.android.ui.account.login.LoginUi
-import de.tum.informatics.www1.artemis.native_app.android.ui.account.login.LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
-import io.ktor.http.*
 import org.koin.androidx.compose.getViewModel
 import org.koin.core.parameter.parametersOf
 import java.io.IOException
@@ -308,7 +306,7 @@ private fun RegisterLoginAccount(
                             updateRememberMe = {},
                             updateUserAcceptedTerms = {},
                             onClickLogin = {},
-                            isLoginEnabled = false,
+                            isLoginButtonEnabled = false,
                             accountName = "TUM",
                             needsToAcceptTerms = false
                         )

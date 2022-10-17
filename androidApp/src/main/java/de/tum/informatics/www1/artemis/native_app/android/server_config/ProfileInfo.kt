@@ -20,7 +20,13 @@ data class ProfileInfo(
     val accountName: String? = null,
     val externalCredentialProvider: String = "",
     val externalPasswordResetLinkMap: Map<String, String> = emptyMap(),
+    /**
+     * Set if the server allows a saml2 based login. If not set, it is also not supported.
+     */
     val saml2: Saml2Config? = null
 ) {
+    /**
+     * If a login using a username-password combination is not possible.
+     */
     val isPasswordLoginDisabled: Boolean = saml2 != null && saml2.passwordLoginDisabled
 }
