@@ -113,7 +113,10 @@ class MainActivity : ComponentActivity() {
                     composable(Navigation.Dest.COURSE_REGISTRATION) {
                         RegisterForCourseScreen(
                             modifier = Modifier.fillMaxSize(),
-                            onNavigateUp = navController::navigateUp
+                            onNavigateUp = navController::navigateUp,
+                            onRegisteredInCourse = {
+                                navController.navigateUp()
+                            }
                         )
                     }
                 }

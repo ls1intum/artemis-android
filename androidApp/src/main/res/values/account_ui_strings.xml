@@ -4,6 +4,7 @@
     <string name="artemis_instance_tum_production">Technical University of Munich</string>
     <string name="artemis_instance_codeability_production">codeAbility</string>
     <string name="artemis_instance_hm_production">Hochschule München</string>
+    <string name="artemis_instance_tum_test_server_0">TUM test-server 0 </string>
     <string name="artemis_instance_tum_test_server_1">TUM test-server 1</string>
     <string name="artemis_instance_tum_test_server_2">TUM test-server 2</string>
     <string name="artemis_instance_custom">Other</string>

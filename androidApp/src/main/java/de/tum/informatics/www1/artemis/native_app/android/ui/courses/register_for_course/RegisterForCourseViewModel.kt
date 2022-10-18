@@ -58,5 +58,20 @@ class RegisterForCourseViewModel(
         }
     }
 
+    fun registerInCourse(course: Course, onSuccess: () -> Unit, onFailure: () -> Unit) {
+        viewModelScope.launch {
+            val authToken = when(val authData = accountService.authenticationData.first()) {
+                is AccountService.AuthenticationData.LoggedIn -> authData.authToken
+                AccountService.AuthenticationData.NotLoggedIn -> {
+                    onFailure()
+                    return@launch
+                }
+            }
+
+            courseRegistrationService.registerInCourse(serverCommunicationProvider.serverUrl.first(), authToken, course.id)
+            onSuccess()
+        }
+    }
+
     data class SemesterCourses(val semester: String, val courses: List<Course>)
 }

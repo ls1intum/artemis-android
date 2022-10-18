@@ -7,5 +7,10 @@
     <string name="course_registration_loading_courses_try_again">Try again</string>
 
     <string name="course_registration_sign_up">Sign up</string>
+    <string name="course_registration_sign_up_dialog_message">Are you sure you want to register?</string>
     <string name="course_registration_sign_up_dialog_positive_button">Sign up now</string>
+
+    <string name="course_registration_sign_up_failed_dialog_title">Registration failed</string>
+    <string name="course_registration_sign_up_failed_dialog_message">Something went wrong while registering you to the server. Please try again later.</string>
+    <string name="course_registration_sign_up_failed_dialog_positive">@android:string/ok</string>
 </resources>

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -32,7 +33,8 @@ import kotlin.math.sign
 fun RegisterForCourseScreen(
     modifier: Modifier,
     viewModel: RegisterForCourseViewModel = getViewModel(),
-    onNavigateUp: () -> Unit
+    onNavigateUp: () -> Unit,
+    onRegisteredInCourse: (courseId: Int) -> Unit
 ) {
     val courses by viewModel.registrableCourses.collectAsState(initial = DataState.Loading())
 
@@ -40,6 +42,7 @@ fun RegisterForCourseScreen(
     val serverCommunicationProvider: ServerCommunicationProvider = get()
 
     var signUpCandidate: Course? by remember { mutableStateOf(null) }
+    var displayRegistrationFailedDialog: Boolean by rememberSaveable { mutableStateOf(false) }
 
     val authData = accountService.authenticationData.collectAsState(initial = null).value
     val serverUrl = serverCommunicationProvider.serverUrl.collectAsState(initial = null).value
@@ -92,12 +95,46 @@ fun RegisterForCourseScreen(
             AlertDialog(
                 onDismissRequest = { signUpCandidate = null },
                 confirmButton = {
-                    Button(onClick = { /*TODO*/ }) {
+                    Button(onClick = {
+                        viewModel.registerInCourse(
+                            candidate,
+                            onSuccess = {
+                                signUpCandidate = null
+                                onRegisteredInCourse(candidate.id)
+                            },
+                            onFailure = {
+                                signUpCandidate = null
+                                displayRegistrationFailedDialog = true
+                            }
+                        )
+                    }) {
                         Text(text = stringResource(id = R.string.course_registration_sign_up_dialog_positive_button))
                     }
                 },
                 text = {
-                    MarkdownText(markdown = candidate.registrationConfirmationMessage)
+                    if (candidate.registrationConfirmationMessage.isNotBlank()) {
+                        MarkdownText(markdown = candidate.registrationConfirmationMessage)
+                    } else {
+                        Text(text = stringResource(id = R.string.course_registration_sign_up_dialog_message))
+                    }
+                },
+                title = if (candidate.registrationConfirmationMessage.isBlank()) {
+                    { Text(text = candidate.title) }
+                } else null
+            )
+        }
+
+        if (displayRegistrationFailedDialog) {
+            AlertDialog(
+                onDismissRequest = { displayRegistrationFailedDialog = false },
+                title = { Text(text = stringResource(id = R.string.course_registration_sign_up_failed_dialog_title)) },
+                text = { Text(text = stringResource(id = R.string.course_registration_sign_up_failed_dialog_message)) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        displayRegistrationFailedDialog = false
+                    }) {
+                        Text(text = stringResource(id = R.string.course_registration_sign_up_failed_dialog_positive))
+                    }
                 }
             )
         }
