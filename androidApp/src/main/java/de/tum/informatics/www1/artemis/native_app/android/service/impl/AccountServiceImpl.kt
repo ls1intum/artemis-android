@@ -4,10 +4,13 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import de.tum.informatics.www1.artemis.native_app.android.content.account.Account
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
+import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
 import de.tum.informatics.www1.artemis.native_app.android.util.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.android.util.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.android.util.retryOnInternet
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -18,6 +21,7 @@ import kotlinx.serialization.Serializable
 class AccountServiceImpl(
     private val ktorProvider: KtorProvider,
     private val serverCommunicationProvider: ServerCommunicationProvider,
+    private val networkStatusProvider: NetworkStatusProvider,
     private val context: Context
 ) : AccountService {
 
@@ -39,12 +43,20 @@ class AccountServiceImpl(
         ) { storedJWT: String?, inMemoryJWT ->
             //The inMemoryJWT is always preferred
             inMemoryJWT ?: storedJWT
-        }.map { key: String? ->
+        }.transformLatest { key: String? ->
             //TODO: Verify if the key has expired, etc
             if (key != null) {
-                AccountService.AuthenticationData.LoggedIn(key)
+                emitAll(
+                    retryOnInternet(
+                        networkStatusProvider.currentNetworkStatus,
+                        retry = emptyFlow()
+                    ) {
+                        getAccountData(key)
+                    }
+                        .map { AccountService.AuthenticationData.LoggedIn(key, it) }
+                )
             } else {
-                AccountService.AuthenticationData.NotLoggedIn
+                emit(AccountService.AuthenticationData.NotLoggedIn)
             }
         }
 
@@ -95,6 +107,22 @@ class AccountServiceImpl(
     private data class LoginResponseBody(
         @SerialName("id_token") val idToken: String
     )
+
+    /**
+     * Fetches from api/account
+     */
+    private suspend fun getAccountData(authToken: String): Account {
+        return ktorProvider
+            .ktorClient
+            .get(serverCommunicationProvider.serverUrl.first()) {
+                url {
+                    appendPathSegments("api", "account")
+                }
+
+                contentType(ContentType.Application.Json)
+                bearerAuth(authToken)
+            }.body()
+    }
 
     override suspend fun logout() {
         inMemoryJWT.value = null

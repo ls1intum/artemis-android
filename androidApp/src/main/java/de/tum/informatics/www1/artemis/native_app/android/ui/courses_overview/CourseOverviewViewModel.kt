@@ -7,9 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
 import de.tum.informatics.www1.artemis.native_app.android.service.DashboardService
 import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
-import de.tum.informatics.www1.artemis.native_app.android.service.impl.ServerCommunicationProviderImpl
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
-import de.tum.informatics.www1.artemis.native_app.android.util.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.android.util.retryOnInternet
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -45,9 +43,16 @@ class CourseOverviewViewModel(
                 //Called every time the authentication data changes, the server url changes or a reload is requested.
                 when (authenticationData) {
                     is AccountService.AuthenticationData.LoggedIn -> {
-                        emitAll(retryOnInternet(networkStatusProvider.currentNetworkStatus, retry = reloadDashboard) {
-                            dashboardService.loadDashboard(authenticationData, serverUrl)
-                        })
+                        emitAll(
+                            retryOnInternet(
+                                networkStatusProvider.currentNetworkStatus,
+                                retry = reloadDashboard
+                            ) {
+                                dashboardService.loadDashboard(
+                                    authenticationData.authToken,
+                                    serverUrl
+                                )
+                            })
                     }
                     AccountService.AuthenticationData.NotLoggedIn -> {
                         //User is not logged in, nothing to fetch.

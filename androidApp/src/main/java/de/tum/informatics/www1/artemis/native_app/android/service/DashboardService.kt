@@ -10,5 +10,5 @@ interface DashboardService {
     /**
      * Load the dashboard from the specified server using the specified authentication data.
      */
-    suspend fun loadDashboard(authenticationData: AccountService.AuthenticationData.LoggedIn, serverUrl: String): Dashboard
+    suspend fun loadDashboard(authToken: String, serverUrl: String): Dashboard
 }

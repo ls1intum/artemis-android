@@ -102,6 +102,9 @@ class MainActivity : ComponentActivity() {
                                         inclusive = true
                                     }
                                 }
+                            },
+                            onClickRegisterForCourse = {
+
                             }
                         )
                     }

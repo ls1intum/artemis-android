@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("plugin.serialization")
+    kotlin("plugin.parcelize")
 }
 
 android {
@@ -38,7 +39,7 @@ android {
 
 dependencies {
     implementation("com.google.android.material:material:1.6.1")
-    implementation("androidx.compose.material3:material3:1.0.0-beta03")
+    implementation("androidx.compose.material3:material3:1.0.0-rc01")
 
     implementation("io.insert-koin:koin-core:${koinVersion}")
     implementation("io.insert-koin:koin-core:${koinVersion}")
@@ -46,14 +47,16 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose:$koinVersion")
     implementation("io.insert-koin:koin-android-compat:$koinVersion")
 
-
-    implementation("com.arkivanov.decompose:extensions-compose-jetpack:$decomposeVersion")
-
     implementation("androidx.compose.ui:ui:1.2.1")
     implementation("androidx.compose.ui:ui-tooling:1.2.1")
     implementation("androidx.compose.ui:ui-tooling-preview:1.2.1")
     implementation("androidx.compose.foundation:foundation:1.2.1")
     implementation("androidx.compose.material:material-icons-extended:1.2.1")
+
+    val accompanistVersion = "0.25.1"
+
+    implementation("com.google.accompanist:accompanist-placeholder:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-navigation-animation:$accompanistVersion")
 
     implementation("androidx.activity:activity-compose:1.6.0")
 
@@ -75,4 +78,8 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     implementation("androidx.navigation:navigation-compose:2.5.2")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.4.0")
+
+    implementation("com.auth0:java-jwt:4.1.0")
 }

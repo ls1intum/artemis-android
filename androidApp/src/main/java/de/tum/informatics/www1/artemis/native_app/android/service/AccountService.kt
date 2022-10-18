@@ -1,5 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.android.service
 
+import de.tum.informatics.www1.artemis.native_app.android.content.account.Account
+import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -18,7 +20,10 @@ interface AccountService {
     sealed class AuthenticationData {
         object NotLoggedIn : AuthenticationData()
 
-        data class LoggedIn(val authToken: String) : AuthenticationData() {
+        /**
+         * @property account the account information about the user that is logged in.
+         */
+        data class LoggedIn(val authToken: String, val account: DataState<Account>) : AuthenticationData() {
             val asBearer = "Bearer $authToken"
         }
     }

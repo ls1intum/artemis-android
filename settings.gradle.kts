@@ -13,6 +13,7 @@ pluginManagement {
         kotlin("android") version kotlinVersion apply false
 
         kotlin("plugin.serialization") version kotlinVersion
+        kotlin("plugin.parcelize") version kotlinVersion
     }
 }
 
