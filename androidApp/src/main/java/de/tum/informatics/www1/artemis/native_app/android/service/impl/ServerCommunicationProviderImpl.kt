@@ -42,8 +42,7 @@ class ServerCommunicationProviderImpl(
     override val serverProfileInfo: Flow<DataState<ProfileInfo>> =
         serverUrl.flatMapLatest { serverUrl ->
             retryOnInternet(
-                networkStatusProvider.currentNetworkStatus,
-                retry = retryLoadServerProfileInfo
+                networkStatusProvider.currentNetworkStatus
             ) {
                 fetchProfileInfo(serverUrl)
             }

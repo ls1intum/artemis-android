@@ -11,8 +11,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
 import de.tum.informatics.www1.artemis.native_app.android.ui.account.AccountScreen
-import de.tum.informatics.www1.artemis.native_app.android.ui.courses_overview.CoursesOverview
+import de.tum.informatics.www1.artemis.native_app.android.ui.courses.courses_overview.CoursesOverview
 import de.tum.informatics.www1.artemis.native_app.android.ui.account.login.LoginScreen
+import de.tum.informatics.www1.artemis.native_app.android.ui.courses.register_for_course.RegisterForCourseScreen
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
@@ -104,8 +105,15 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             onClickRegisterForCourse = {
-
+                                navController.navigate(Navigation.Dest.COURSE_REGISTRATION)
                             }
+                        )
+                    }
+
+                    composable(Navigation.Dest.COURSE_REGISTRATION) {
+                        RegisterForCourseScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            onNavigateUp = navController::navigateUp
                         )
                     }
                 }

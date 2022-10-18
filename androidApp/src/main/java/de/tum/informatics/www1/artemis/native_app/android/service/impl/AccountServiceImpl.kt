@@ -48,8 +48,7 @@ class AccountServiceImpl(
             if (key != null) {
                 emitAll(
                     retryOnInternet(
-                        networkStatusProvider.currentNetworkStatus,
-                        retry = emptyFlow()
+                        networkStatusProvider.currentNetworkStatus
                     ) {
                         getAccountData(key)
                     }

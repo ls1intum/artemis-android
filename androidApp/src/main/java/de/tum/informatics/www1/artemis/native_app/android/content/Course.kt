@@ -14,11 +14,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Course(
     val id: Int,
-    val title: String,
-    val description: String,
-    @SerialName("courseIcon") val courseIconPath: String,
+    val title: String = "",
+    val description: String = "",
+    @SerialName("courseIcon") val courseIconPath: String? = null,
     val exercises: List<Exercise> = emptyList(),
-    val lectures: List<Lecture> = emptyList()
+    val lectures: List<Lecture> = emptyList(),
+    val semester: String = "",
+    val registrationConfirmationMessage: String = ""
 ) : Parcelable {
     private val maxPointsPossibleHalves get() = exercises.sumOf { it.maxPointsHalves }
     private val currentScoreHalves get() = exercises.sumOf { it.currentScoreHalves }

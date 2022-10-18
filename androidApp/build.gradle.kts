@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -16,7 +18,9 @@ android {
         versionName = "1.0"
 
         kotlinOptions {
-            freeCompilerArgs = freeCompilerArgs + "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api"
+            freeCompilerArgs = freeCompilerArgs +
+                    "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api" +
+                    "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi"
         }
     }
     buildFeatures {
@@ -35,6 +39,10 @@ android {
             isMinifyEnabled = false
         }
     }
+}
+
+repositories {
+    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -57,6 +65,8 @@ dependencies {
 
     implementation("com.google.accompanist:accompanist-placeholder:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-navigation-animation:$accompanistVersion")
+
+    implementation("com.github.jeziellago:compose-markdown:0.3.1")
 
     implementation("androidx.activity:activity-compose:1.6.0")
 
@@ -82,4 +92,16 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.4.0")
 
     implementation("com.auth0:java-jwt:4.1.0")
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
+    kotlinOptions {
+        freeCompilerArgs += listOf(
+            "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+            "-Xopt-in=com.google.accompanist.pager.ExperimentalPagerApi",
+            "-Xopt-in=androidx.compose.ui.ExperimentalComposeUiApi",
+            "-Xopt-in=androidx.compose.animation.ExperimentalAnimationApi"
+        )
+    }
 }

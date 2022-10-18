@@ -6,5 +6,6 @@ object Navigation {
         const val HOME_LOGIN = "home/login"
         const val HOME_REGISTER = "home/register"
         const val COURSE_OVERVIEW = "course_overview"
+        const val COURSE_REGISTRATION  = "course_overview/registration"
     }
 }

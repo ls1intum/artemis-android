@@ -5,7 +5,6 @@ import de.tum.informatics.www1.artemis.native_app.android.util.DataState.Failure
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState.Suspended
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import org.koin.core.time.TimeInMillis
 
 /**
  * The data state of the request.
@@ -24,6 +23,15 @@ sealed class DataState<T> {
     class Failure<T>(val exception: Exception) : DataState<T>()
 
     data class Success<T>(val data: T) : DataState<T>()
+
+    fun <K> bind(op: (T) -> K): DataState<K> {
+        return when(this) {
+            is Success -> Success(op(data))
+            is Failure -> Failure(exception)
+            is Loading -> Loading()
+            is Suspended -> Suspended(exception)
+        }
+    }
 }
 
 /**
@@ -37,11 +45,9 @@ sealed class DataState<T> {
 inline fun <T> retryOnInternet(
     connectivity: Flow<NetworkStatusProvider.NetworkStatus>,
     baseBackoffMillis: Long = 2000,
-    retry: Flow<Unit>,
     crossinline perform: suspend () -> T
 ): Flow<DataState<T>> {
     return connectivity
-        .combine(retry.onStart { emit(Unit) }) { a, _ -> a }
         .transformLatest { networkStatus ->
             when (networkStatus) {
                 NetworkStatusProvider.NetworkStatus.Internet -> {
@@ -77,5 +83,5 @@ inline fun <T> retryOnInternet(
             //Continue while the network response is still a failure.
             dataState !is DataState.Success
         }
-        .onStart { emit(Suspended(null)) }
+        .onStart { emit(DataState.Loading()) }
 }

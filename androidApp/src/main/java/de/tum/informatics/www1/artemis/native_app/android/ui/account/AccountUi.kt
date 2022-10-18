@@ -30,6 +30,7 @@ import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.android.defaults.ArtemisInstances
 import de.tum.informatics.www1.artemis.native_app.android.ui.account.login.LoginUi
+import de.tum.informatics.www1.artemis.native_app.android.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import org.koin.androidx.compose.getStateViewModel
 import java.io.IOException
@@ -269,94 +270,56 @@ private fun RegisterLoginAccount(
                 .align(Alignment.Center)
                 .fillMaxWidth(0.8f)
 
-            when (currentServerProfileInfo) {
-                is DataState.Failure, is DataState.Suspended -> {
-                    Column(
-                        modifier = columnModifier
-                    ) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(
-                                when (currentServerProfileInfo) {
-                                    is DataState.Failure -> R.string.account_load_server_profile_failure
-                                    is DataState.Suspended -> R.string.account_load_server_profile_suspended
-                                    else -> 0 //Not reachable
-                                }
-                            ),
-                            textAlign = TextAlign.Center,
-                            fontSize = 18.sp
-                        )
+            BasicDataStateUi(
+                modifier = Modifier.fillMaxWidth(),
+                dataState = currentServerProfileInfo,
+                loadingText = stringResource(id = R.string.account_load_server_profile_loading),
+                failureText = stringResource(id = R.string.account_load_server_profile_failure),
+                suspendedText = stringResource(id = R.string.account_load_server_profile_suspended),
+                retryButtonText = stringResource(id = R.string.account_load_server_profile_button_try_again),
+                onClickRetry = retryLoadServerProfileInfo) { data ->
 
-                        TextButton(
-                            onClick = retryLoadServerProfileInfo,
-                            content = { Text(text = stringResource(id = R.string.account_load_server_profile_button_try_again)) },
-                            modifier = Modifier
-                                .padding(top = 0.dp)
-                                .align(Alignment.CenterHorizontally)
-                        )
-                    }
-                }
-                is DataState.Loading -> {
-                    Column(modifier = columnModifier) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(id = R.string.account_load_server_profile_loading),
-                            textAlign = TextAlign.Center,
-                            fontSize = 20.sp,
-                        )
+                if (data.registrationEnabled == true) {
+                    LoginOrRegister(
+                        modifier = Modifier.fillMaxSize(),
+                        onClickLogin = onNavigateToLoginScreen,
+                        onClickRegister = onNavigateToRegisterScreen
+                    )
+                } else {
+                    val loginUiModifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .align(Alignment.Center)
 
-                        LinearProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxWidth(0.5f)
-                                .align(Alignment.CenterHorizontally)
-                                .padding(top = 4.dp)
-                        )
-                    }
-                }
-                is DataState.Success -> {
-                    if (currentServerProfileInfo.data.registrationEnabled == true) {
-                        LoginOrRegister(
-                            modifier = Modifier.fillMaxSize(),
-                            onClickLogin = onNavigateToLoginScreen,
-                            onClickRegister = onNavigateToRegisterScreen
+                    if (LocalInspectionMode.current) {
+                        //Just for the preview.
+                        LoginUi(
+                            modifier = loginUiModifier,
+                            username = "",
+                            password = "",
+                            hasUserAcceptedTerms = false,
+                            rememberMe = false,
+                            updateUsername = {},
+                            updatePassword = {},
+                            updateRememberMe = {},
+                            updateUserAcceptedTerms = {},
+                            onClickLogin = {},
+                            isLoginButtonEnabled = false,
+                            accountName = "TUM",
+                            needsToAcceptTerms = false,
+                            isPasswordLoginDisabled = false,
+                            saml2Config = null
                         )
                     } else {
-                        val loginUiModifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .align(Alignment.Center)
-
-                        if (LocalInspectionMode.current) {
-                            //Just for the preview.
-                            LoginUi(
-                                modifier = loginUiModifier,
-                                username = "",
-                                password = "",
-                                hasUserAcceptedTerms = false,
-                                rememberMe = false,
-                                updateUsername = {},
-                                updatePassword = {},
-                                updateRememberMe = {},
-                                updateUserAcceptedTerms = {},
-                                onClickLogin = {},
-                                isLoginButtonEnabled = false,
-                                accountName = "TUM",
-                                needsToAcceptTerms = false,
-                                isPasswordLoginDisabled = false,
-                                saml2Config = null
-                            )
-                        } else {
-                            LoginUi(
-                                modifier = loginUiModifier,
-                                viewModel = getStateViewModel(),
-                                onLoggedIn = onLoggedIn
-                            )
-                        }
+                        LoginUi(
+                            modifier = loginUiModifier,
+                            viewModel = getStateViewModel(),
+                            onLoggedIn = onLoggedIn
+                        )
                     }
                 }
             }
         }
-
     }
 }
 

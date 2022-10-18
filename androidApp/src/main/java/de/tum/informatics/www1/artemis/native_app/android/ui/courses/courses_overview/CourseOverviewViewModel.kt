@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.android.ui.courses_overview
+package de.tum.informatics.www1.artemis.native_app.android.ui.courses.courses_overview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusP
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import de.tum.informatics.www1.artemis.native_app.android.util.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.android.util.withoutLastChar
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -45,8 +46,7 @@ class CourseOverviewViewModel(
                     is AccountService.AuthenticationData.LoggedIn -> {
                         emitAll(
                             retryOnInternet(
-                                networkStatusProvider.currentNetworkStatus,
-                                retry = reloadDashboard
+                                networkStatusProvider.currentNetworkStatus
                             ) {
                                 dashboardService.loadDashboard(
                                     authenticationData.authToken,
@@ -68,7 +68,7 @@ class CourseOverviewViewModel(
      * The serverUrl comes without a trailing /
      */
     val serverUrl = serverCommunicationProvider.serverUrl
-        .map { it.substring(0, it.length - 1) } //Remove the /
+        .map { it.withoutLastChar() } //Remove the /
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     /**

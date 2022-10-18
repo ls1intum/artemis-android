@@ -8,13 +8,13 @@ data class Account(
     val activated: Boolean = false,
     val authorities: List<String> = emptyList(),
     @SerialName("login")
-    val username: String?,
-    val email: String?,
+    val username: String? = null,
+    val email: String? = null,
     val name: String? = "",
     val internal: Boolean = true,
     val firstName: String = "",
     val lastName: String = "",
     val langKey: String = "en",
-    val imageUrl: String?,
-    val id: Int?
+    val imageUrl: String? = null,
+    val id: Int? = null
 )

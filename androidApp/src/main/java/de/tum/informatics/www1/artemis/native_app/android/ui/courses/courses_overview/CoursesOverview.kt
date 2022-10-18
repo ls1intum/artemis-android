@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.android.ui.courses_overview
+package de.tum.informatics.www1.artemis.native_app.android.ui.courses.courses_overview
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,6 +24,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.content.Course
+import de.tum.informatics.www1.artemis.native_app.android.ui.courses.CourseItemHeader
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import de.tum.informatics.www1.artemis.native_app.android.util.compose.isScrollingUp
 import java.text.DecimalFormat
@@ -49,14 +51,24 @@ fun CoursesOverview(
 
     val coursesListState = rememberLazyListState()
 
+    val topAppBarState = rememberTopAppBarState()
+
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        topAppBarState
+    )
+
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
         topBar = {
-            TopAppBar(title = { Text(text = "Course Overview") }, actions = {
-                IconButton(onClick = { viewModel.logout(onLogout) }) {
-                    Icon(imageVector = Icons.Default.Logout, contentDescription = null)
-                }
-            })
+            TopAppBar(
+                title = { Text(text = "Course Overview") },
+                actions = {
+                    IconButton(onClick = { viewModel.logout(onLogout) }) {
+                        Icon(imageVector = Icons.Default.Logout, contentDescription = null)
+                    }
+                },
+                scrollBehavior = scrollBehavior
+            )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -123,7 +135,7 @@ private fun CourseList(
                     .padding(horizontal = 8.dp),
                 course = course,
                 serverUrl = serverUrl,
-                authorizationToken = authorizationToken
+                authorizationToken = authorizationToken,
             )
         }
     }
@@ -133,106 +145,55 @@ private fun CourseList(
  * Displays course icon, title and description in a Material Design Card.
  */
 @Composable
-private fun CourseItem(
+fun CourseItem(
     modifier: Modifier,
     course: Course,
     serverUrl: String,
-    authorizationToken: String
+    authorizationToken: String,
 ) {
-    val courseIconUrl = "$serverUrl${course.courseIconPath}"
+    CourseItemHeader(
+        modifier = modifier,
+        course = course,
+        serverUrl = serverUrl,
+        authorizationToken = authorizationToken
+    ) {
+        Divider()
 
-    val context = LocalContext.current
-
-    //Authorization needed
-    val courseIconRequest = ImageRequest.Builder(context)
-        .addHeader("Authorization", authorizationToken)
-        .data(courseIconUrl)
-        .build()
-
-    Card(modifier = modifier) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(0.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min)
-            ) {
-                Image(
-                    modifier = Modifier
-                        .size(80.dp),
-                    painter = rememberAsyncImagePainter(model = courseIconRequest),
-                    contentDescription = null
-                )
-
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .padding(horizontal = 8.dp)
-                ) {
-                    Text(
-                        text = course.title,
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1
-                    )
-
-                    Text(
-                        text = course.description,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        color = MaterialTheme.colorScheme.secondary,
-                        fontSize = 12.sp,
-                        overflow = TextOverflow.Ellipsis,
-                        lineHeight = 14.sp,
-                    )
-                }
-            }
-
-            Divider()
-
-            val scoreNumberFormat = remember {
-                DecimalFormat("0").apply {
-                    maximumFractionDigits = 1
-                }
-            }
-
-            val percentNumberFormat = remember {
-                NumberFormat.getPercentInstance().apply {
-                    maximumFractionDigits = 0
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                LinearProgressIndicator(
-                    modifier = Modifier.weight(1f),
-                    progress = course.progress,
-                    trackColor = MaterialTheme.colorScheme.onPrimary
-                )
-
-                Text(
-                    text = stringResource(
-                        id = R.string.course_overview_course_progress,
-                        scoreNumberFormat.format(course.currentScore),
-                        scoreNumberFormat.format(course.maxPointsPossible),
-                        percentNumberFormat.format(course.progress)
-                    ),
-                    fontSize = 14.sp
-                )
+        val scoreNumberFormat = remember {
+            DecimalFormat("0").apply {
+                maximumFractionDigits = 1
             }
         }
 
+        val percentNumberFormat = remember {
+            NumberFormat.getPercentInstance().apply {
+                maximumFractionDigits = 0
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            LinearProgressIndicator(
+                modifier = Modifier.weight(1f),
+                progress = course.progress,
+                trackColor = MaterialTheme.colorScheme.onPrimary
+            )
+
+            Text(
+                text = stringResource(
+                    id = R.string.course_overview_course_progress,
+                    scoreNumberFormat.format(course.currentScore),
+                    scoreNumberFormat.format(course.maxPointsPossible),
+                    percentNumberFormat.format(course.progress)
+                ),
+                fontSize = 14.sp
+            )
+        }
     }
+
 }
