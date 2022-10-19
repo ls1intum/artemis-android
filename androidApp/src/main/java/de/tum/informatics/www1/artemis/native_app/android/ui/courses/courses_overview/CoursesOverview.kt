@@ -128,7 +128,7 @@ private fun CourseList(
         contentPadding = PaddingValues(bottom = 90.dp),
         state = listState
     ) {
-        items(courses + courses + courses + courses + courses) { course ->
+        items(courses) { course ->
             CourseItem(
                 modifier = Modifier
                     .fillMaxWidth()
