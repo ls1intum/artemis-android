@@ -49,3 +49,15 @@ extension Publisher {
                 .eraseToAnyPublisher()
     }
 }
+
+extension Publishers.Create.Subscriber {
+
+    /**
+     * Sends all elements received by the publisher to the original caller.
+     */
+    func sendAll(publisher: AnyPublisher<Output, Failure>) async throws {
+        for try await v in publisher.values {
+            send(v)
+        }
+    }
+}

@@ -24,4 +24,8 @@ extension Container {
     static let dashboardService = Factory<DashboardService> {
         DashboardServiceImpl(jsonProvider: jsonProvider())
     }
+
+    static let networkStatusProvider = Factory<NetworkStatusProvider>(scope: .singleton) {
+        NetworkStatusProviderImpl()
+    }
 }

@@ -10,6 +10,24 @@
       }
     },
     {
+      "identity" : "combineext",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/CombineCommunity/CombineExt.git",
+      "state" : {
+        "revision" : "aaf1a0981c05360000af972473034cb952be4ca0",
+        "version" : "1.8.0"
+      }
+    },
+    {
+      "identity" : "factory",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/hmlongco/Factory",
+      "state" : {
+        "revision" : "8557426f3286e20b631ecdac8115242f888656e0",
+        "version" : "1.2.8"
+      }
+    },
+    {
       "identity" : "sdwebimage",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SDWebImage/SDWebImage.git",
@@ -88,15 +106,6 @@
       "state" : {
         "revision" : "4e02d9cf35cabfb538c96613272fb027dd0c8692",
         "version" : "1.13.1"
-      }
-    },
-    {
-      "identity" : "swinject",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Swinject/Swinject.git",
-      "state" : {
-        "revision" : "11e65d83ba100459a41837119a8af32f182339f1",
-        "version" : "2.8.2"
       }
     }
   ],

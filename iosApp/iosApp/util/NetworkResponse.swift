@@ -11,3 +11,11 @@ enum NetworkResponse<T> {
     case response(data: T)
     case failure(error: Error)
 }
+
+func performNetworkCall<T>(perform: () async throws -> T) async -> NetworkResponse<T> {
+    do {
+       return NetworkResponse<T>.response(data: try await perform())
+    } catch {
+        return NetworkResponse<T>.failure(error: error)
+    }
+}

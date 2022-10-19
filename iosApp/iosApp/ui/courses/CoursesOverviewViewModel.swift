@@ -14,6 +14,7 @@ extension CoursesOverviewView {
         @Injected(Container.dashboardService) var dashboardService: DashboardService
         @Injected(Container.accountService) var accountService: AccountService
         @Injected(Container.serverCommunicationProvider) var serverCommunicationProvider: ServerCommunicationProvider
+        let networkStatusProvider: NetworkStatusProvider = Container.networkStatusProvider()
 
         @Published var dashboard: DataState<Dashboard> = DataState.loading
         @Published var bearer: String = ""
@@ -49,12 +50,13 @@ extension CoursesOverviewView {
                             .transformLatest { [self] (continuation, data) in
                                 let (authData, serverUrl, _) = data
                                 switch authData {
-                                case .NotLoggedIn: continuation.send(DataState<Dashboard>.done(response: NetworkResponse<Dashboard>.failure(error: NSError())))
                                 case .LoggedIn(authToken: let authToken):
-                                    continuation.send(DataState<Dashboard>.loading)
-
-                                    let loadedDashboard = await dashboardService.loadDashboard(authorizationToken: authToken, serverUrl: serverUrl)
-                                    continuation.send(DataState.done(response: loadedDashboard))
+                                    try? await continuation.sendAll(publisher:
+                                        retryOnInternet(connectivity: networkStatusProvider.currentNetworkStatus) { [self] in
+                                            await dashboardService.loadDashboard(authorizationToken: authToken, serverUrl: serverUrl)
+                                        }
+                                    )
+                                case .NotLoggedIn: continuation.send(DataState<Dashboard>.suspended(error: nil))
                                 }
                             }
 
