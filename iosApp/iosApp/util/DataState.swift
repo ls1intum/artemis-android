@@ -43,7 +43,7 @@ func retryOnInternet<T>(
                 switch networkStatus {
                 case .internet:
                     //Fetch data with exponential backoff
-                    var currentBackoff = baseBackoffMillis * 1_000_000
+                    var currentBackoff = baseBackoffMillis
 
                     while true {
                         subscription.send(DataState<T>.loading)
@@ -58,7 +58,11 @@ func retryOnInternet<T>(
                         }
 
                         //Perform exponential backoff
-                        try? await Task.sleep(nanoseconds: currentBackoff)
+                        do {
+                            try await Task.sleep(nanoseconds: currentBackoff * NSEC_PER_MSEC)
+                        } catch {
+                             return
+                        }
                         currentBackoff *= 2
                     }
                 case .unavailable:

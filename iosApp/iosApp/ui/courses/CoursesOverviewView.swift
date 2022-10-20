@@ -27,7 +27,12 @@ struct CoursesOverviewView: View {
                         suspendedText: "course_overview_loading_courses_suspended",
                         retryButtonText: "course_overview_loading_courses_button_try_again"
                 ) { data in
-
+                    CourseListView(
+                            courses: data.courses,
+                            serverUrl: viewModel.serverUrl,
+                            bearer: viewModel.bearer
+                    )
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 }
 
 //                switch (viewModel.dashboard) {
@@ -58,9 +63,12 @@ private struct CourseListView: View {
     let bearer: String
 
     var body: some View {
-        LazyVStack(spacing: 8) {
-            ForEach(courses, id: \.self.id) { course in
-                CourseView(course: course, serverUrl: serverUrl, bearer: bearer)
+        ScrollView {
+            LazyVStack(spacing: 8) {
+                ForEach(courses, id: \.self.id) { course in
+                    CourseView(course: course, serverUrl: serverUrl, bearer: bearer)
+                            .padding(.horizontal, 8)
+                }
             }
         }
     }

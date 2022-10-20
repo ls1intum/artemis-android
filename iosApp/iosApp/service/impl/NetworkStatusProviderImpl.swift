@@ -12,11 +12,11 @@ class NetworkStatusProviderImpl: NetworkStatusProvider {
         do {
             let reachability: Reachability = try Reachability()
 
-            reachability.whenReachable! = { r in
+            reachability.whenReachable = { r in
                 subscriber.send(NetworkStatus.internet)
             }
 
-            reachability.whenUnreachable! = { r in
+            reachability.whenUnreachable = { r in
                 subscriber.send(NetworkStatus.unavailable)
             }
 
