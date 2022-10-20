@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.android.ui.courses
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +38,7 @@ fun CourseItemHeader(
         .addHeader("Authorization", authorizationToken)
         .data(courseIconUrl)
         .build()
-
+    
     Card(modifier = modifier) {
         Column(
             modifier = Modifier

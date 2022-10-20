@@ -26,17 +26,21 @@
 		1C0986D542BBDED04A22C64E /* AccountViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0983700CAF9E8371CBF572 /* AccountViewController.swift */; };
 		1C0988187041042BBA80FC32 /* Saml2Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C09877094E9C0A4803D691D /* Saml2Config.swift */; };
 		1C0989A1EFB6D3CE33CECD27 /* AsyncSequenceToCombine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098A9DA1D0970B84C2BECD /* AsyncSequenceToCombine.swift */; };
+		1C098A905080872B673330FC /* theming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0986D9D9E11B706FF4C7F8 /* theming.swift */; };
 		1C098C823B0ED6C8DDA449C2 /* Dashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098ADFDCCE7E60744694F8 /* Dashboard.swift */; };
 		1C098D2A4D7898F37E732681 /* JsonProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0982F1FCAF373DD7648987 /* JsonProvider.swift */; };
 		1C098D65337401C654D0F56D /* DataState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0986A12977F0E8A60950B5 /* DataState.swift */; };
 		1C098E05516193D855C4FA51 /* AccountService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098AFF95AB352EF5A47A4C /* AccountService.swift */; };
+		1C098E7E07E84FE6DD38AA3A /* courses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098319B96A24B40D10CC21 /* courses.swift */; };
 		1C098FC4C4C91E9448B2998E /* CoursesOverviewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0988B69F8C404929945942 /* CoursesOverviewViewModel.swift */; };
+		1C098FF7C17896FCEA2FC228 /* datastateui.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098DC2127E649084ED7A33 /* datastateui.swift */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		220409A728D4EF1A00204B1C /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220409A628D4EF1A00204B1C /* RootView.swift */; };
 		220409AC28D4F34700204B1C /* CoursesOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220409AB28D4F34700204B1C /* CoursesOverviewView.swift */; };
 		226B088C28E30FBC00382C92 /* Factory in Frameworks */ = {isa = PBXBuildFile; productRef = 226B088B28E30FBC00382C92 /* Factory */; };
 		227BD53E28E2570B00D11F92 /* AsyncHTTPClient in Frameworks */ = {isa = PBXBuildFile; productRef = 227BD53D28E2570B00D11F92 /* AsyncHTTPClient */; };
 		22B12970290038D600C4910E /* Reachability in Frameworks */ = {isa = PBXBuildFile; productRef = 22B1296F290038D600C4910E /* Reachability */; };
+		22B12972290048A800C4910E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 22B12971290048A800C4910E /* Localizable.strings */; };
 		22ECB44E28E79354000F5342 /* CombineExt in Frameworks */ = {isa = PBXBuildFile; productRef = 22ECB44D28E79354000F5342 /* CombineExt */; };
 		22F8034E28D8EE7F00B55A09 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 22F8034D28D8EE7F00B55A09 /* SDWebImageSwiftUI */; };
 /* End PBXBuildFile section */
@@ -45,11 +49,13 @@
 		058557BA273AAA24004C7B11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		1C0982F1FCAF373DD7648987 /* JsonProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JsonProvider.swift; sourceTree = "<group>"; };
+		1C098319B96A24B40D10CC21 /* courses.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = courses.swift; sourceTree = "<group>"; };
 		1C0983700CAF9E8371CBF572 /* AccountViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountViewController.swift; sourceTree = "<group>"; };
 		1C098402211D502EAE42393D /* LoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		1C098542CFAA494BB3EF413A /* Course.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Course.swift; sourceTree = "<group>"; };
 		1C0985C543D77816ADA5933C /* ServerCommunicationProviderImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerCommunicationProviderImpl.swift; sourceTree = "<group>"; };
 		1C0986A12977F0E8A60950B5 /* DataState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataState.swift; sourceTree = "<group>"; };
+		1C0986D9D9E11B706FF4C7F8 /* theming.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = theming.swift; sourceTree = "<group>"; };
 		1C0987164AF272D3D5618C26 /* NetworkStatusProviderImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkStatusProviderImpl.swift; sourceTree = "<group>"; };
 		1C09873399CAC9793A6DC8EE /* ProfileInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileInfo.swift; sourceTree = "<group>"; };
 		1C09877094E9C0A4803D691D /* Saml2Config.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Saml2Config.swift; sourceTree = "<group>"; };
@@ -64,11 +70,13 @@
 		1C098B3EC06CCDD7482E6214 /* NetworkStatusProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkStatusProvider.swift; sourceTree = "<group>"; };
 		1C098BE36C1A5738E35FD12A /* DashboardServiceImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashboardServiceImpl.swift; sourceTree = "<group>"; };
 		1C098C077ADB678F568185B9 /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
+		1C098DC2127E649084ED7A33 /* datastateui.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = datastateui.swift; sourceTree = "<group>"; };
 		1C098F1706F0DCA286CF5754 /* ServerCommunicationProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerCommunicationProvider.swift; sourceTree = "<group>"; };
 		1C098FF0D296294BE7E6EA71 /* AppContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
 		2152FB032600AC8F00CF470E /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
 		220409A628D4EF1A00204B1C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		220409AB28D4F34700204B1C /* CoursesOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursesOverviewView.swift; sourceTree = "<group>"; };
+		22B12971290048A800C4910E /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -103,6 +111,8 @@
 				220409A628D4EF1A00204B1C /* RootView.swift */,
 				227BD53528E24A4C00D11F92 /* courses */,
 				1C098896B18CE8A96B8DB9C3 /* account */,
+				1C098C539135CD4F664B9BF5 /* common */,
+				1C0986D9D9E11B706FF4C7F8 /* theming.swift */,
 			);
 			path = ui;
 			sourceTree = "<group>";
@@ -136,6 +146,14 @@
 			path = server_config;
 			sourceTree = "<group>";
 		};
+		1C098C539135CD4F664B9BF5 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				1C098DC2127E649084ED7A33 /* datastateui.swift */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
 		1C098D02D12D2633391B61F8 /* content */ = {
 			isa = PBXGroup;
 			children = (
@@ -157,6 +175,7 @@
 			children = (
 				220409AB28D4F34700204B1C /* CoursesOverviewView.swift */,
 				1C0988B69F8C404929945942 /* CoursesOverviewViewModel.swift */,
+				1C098319B96A24B40D10CC21 /* courses.swift */,
 			);
 			path = courses;
 			sourceTree = "<group>";
@@ -224,6 +243,7 @@
 				1C0986B0A9DB2190C647D7F2 /* util */,
 				1C098D02D12D2633391B61F8 /* content */,
 				1C098A5237A2CE7D6C8AF8C3 /* server_config */,
+				22B12971290048A800C4910E /* Localizable.strings */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -284,7 +304,7 @@
 				227BD53C28E2570B00D11F92 /* XCRemoteSwiftPackageReference "async-http-client" */,
 				226B088A28E30FBC00382C92 /* XCRemoteSwiftPackageReference "Factory" */,
 				22ECB44C28E79354000F5342 /* XCRemoteSwiftPackageReference "CombineExt" */,
-				22B1296E290038D600C4910E /* XCRemoteSwiftPackageReference "Reachability" */,
+				22B1296E290038D600C4910E /* XCRemoteSwiftPackageReference "Reachability.swift" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -301,6 +321,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */,
+				22B12972290048A800C4910E /* Localizable.strings in Resources */,
 				058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -337,6 +358,9 @@
 				1C09857C424EF06EB07AAA65 /* ProfileInfo.swift in Sources */,
 				1C0988187041042BBA80FC32 /* Saml2Config.swift in Sources */,
 				1C098367EECE1F42EADECAE5 /* NetworkStatusProviderImpl.swift in Sources */,
+				1C098FF7C17896FCEA2FC228 /* datastateui.swift in Sources */,
+				1C098E7E07E84FE6DD38AA3A /* courses.swift in Sources */,
+				1C098A905080872B673330FC /* theming.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -543,7 +567,7 @@
 				version = 1.11.5;
 			};
 		};
-		22B1296E290038D600C4910E /* XCRemoteSwiftPackageReference "Reachability" */ = {
+		22B1296E290038D600C4910E /* XCRemoteSwiftPackageReference "Reachability.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ashleymills/Reachability.swift";
 			requirement = {
@@ -582,7 +606,7 @@
 		};
 		22B1296F290038D600C4910E /* Reachability */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 22B1296E290038D600C4910E /* XCRemoteSwiftPackageReference "Reachability" */;
+			package = 22B1296E290038D600C4910E /* XCRemoteSwiftPackageReference "Reachability.swift" */;
 			productName = Reachability;
 		};
 		22ECB44D28E79354000F5342 /* CombineExt */ = {

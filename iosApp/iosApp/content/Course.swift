@@ -12,4 +12,11 @@ struct Course: Codable {
     let title: String
     let description: String
     let courseIcon: String
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case description
+        case courseIcon
+    }
 }

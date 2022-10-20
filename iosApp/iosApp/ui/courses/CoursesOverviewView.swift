@@ -20,12 +20,22 @@ struct CoursesOverviewView: View {
         NavigationView {
             VStack(alignment: .center) {
 
-                switch (viewModel.dashboard) {
-                case .loading: ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-                case .done(let response): DashboardLoadedView(response: response, serverUrl: viewModel.serverUrl, bearer: viewModel.bearer)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                BasicDataStateView(
+                        data: viewModel.dashboard,
+                        loadingText: "course_overview_loading_courses_loading",
+                        failureText: "course_overview_loading_courses_failed",
+                        suspendedText: "course_overview_loading_courses_suspended",
+                        retryButtonText: "course_overview_loading_courses_button_try_again"
+                ) { data in
+
                 }
+
+//                switch (viewModel.dashboard) {
+//                case .loading: ProgressView()
+//                        .progressViewStyle(CircularProgressViewStyle())
+//                case .done(let response): DashboardLoadedView(response: response, serverUrl: viewModel.serverUrl, bearer: viewModel.bearer)
+//                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                }
             }
                     .navigationTitle(Text("Course Overview"))
                     .navigationBarItems(trailing: Button("Logout") {
@@ -38,51 +48,21 @@ struct CoursesOverviewView: View {
     }
 }
 
-private struct DashboardLoadedView: View {
+/**
+ * Displays a lazy list of all the courses supplied.
+ */
+private struct CourseListView: View {
 
-    let response: NetworkResponse<Dashboard>
-    let serverUrl: String
-    let bearer: String
-
-    var body: some View {
-        VStack {
-            switch (response) {
-            case .response(let data): VStack {
-                let courses: [Course] = data.courses
-
-                CoursesList(courses: courses, serverUrl: serverUrl, bearer: bearer)
-            }
-            case .failure( _): VStack {
-                Text("Failed loading dashboard.")
-            }
-            default: EmptyView()
-            }
-        }
-    }
-}
-
-private struct CoursesList: View {
     let courses: [Course]
     let serverUrl: String
     let bearer: String
 
     var body: some View {
-        ScrollView {
-            VStack {
-                ForEach(courses, id: \.self.id) { course in
-                    CourseView(course: course, serverUrl: serverUrl, bearer: bearer)
-
-                    if course.id != courses.last?.id {
-                        Divider()
-                                .frame(maxWidth: .infinity)
-                    }
-                }
-
-                Spacer()
+        LazyVStack(spacing: 8) {
+            ForEach(courses, id: \.self.id) { course in
+                CourseView(course: course, serverUrl: serverUrl, bearer: bearer)
             }
         }
-                .padding(.leading, 25)
-                .padding(.trailing, 25)
     }
 }
 
@@ -92,31 +72,24 @@ private struct CourseView: View {
     let bearer: String
 
     var body: some View {
-        let url: String = serverUrl.dropLast() + course.courseIcon
+        CoursesHeaderView(
+                course: course,
+                serverUrl: serverUrl,
+                bearer: bearer
+        ) {
+            VStack(spacing: 0) {
+                Divider()
 
-        HStack {
-            WebImage(
-                    url: URL(string: url),
-                    context: [.downloadRequestModifier: SDWebImageDownloaderRequestModifier(headers: ["Authorization": bearer])]
-            )
-                    .placeholder(Image(systemName: "photo"))
-                    .resizable()
-                    .aspectRatio(1, contentMode: .fill)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .scaledToFit()
-                    .clipShape(Circle())
+                HStack(spacing: 8) {
+                    ProgressView(value: 0.4)
+                            .frame(maxWidth: .infinity)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(course.title)
-                        .font(.system(size: 30, weight: .bold))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                Text(course.description)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("30P/40P (12%)")
+                }
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 16)
             }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-                .frame(maxHeight: 80)
     }
 }
 
@@ -124,9 +97,9 @@ private struct CourseView: View {
 class CoursesOverviewView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-//            let serverUrl = "https://via.placeholder.com"
+            let serverUrl = "https://via.placeholder.com"
 
-//            let sampleCourse = Course(id: 12, title: "Sample Course", description: "Sample Course Description", courseIconPath: "/150/0000FF")
+            let sampleCourse = Course(id: 12, title: "Sample Course", description: "Sample Course Description", courseIcon: "/150/0000FF")
 //
 //            let courses = [sampleCourse,
 //                           Course(id: 13,
@@ -137,7 +110,7 @@ class CoursesOverviewView_Previews: PreviewProvider {
 //
 //            CoursesList(courses: courses, serverUrl: "", bearer: "")
 //
-//            CourseView(course: sampleCourse, serverUrl: serverUrl, bearer: "")
+            CourseView(course: sampleCourse, serverUrl: serverUrl, bearer: "")
         }
     }
 }

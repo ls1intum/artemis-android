@@ -1,0 +1,4 @@
+"course_overview_loading_courses_failed" = "Something went wrong while loading your courses.";
+"course_overview_loading_courses_suspended" = "You may have an unstable internet connection.";
+"course_overview_loading_courses_loading" = "Fetching your courses from the server…";
+"course_overview_loading_courses_button_try_again" = "Try again";
