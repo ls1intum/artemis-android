@@ -18,7 +18,7 @@ extension Container {
     }
 
     static let accountService = Factory<AccountService>(scope: .singleton) {
-        AccountServiceImpl(serverCommunicationProvider: serverCommunicationProvider(), jsonProvider: JsonProvider())
+        AccountServiceImpl(serverCommunicationProvider: serverCommunicationProvider(), jsonProvider: JsonProvider(), networkStatusProvider: networkStatusProvider())
     }
 
     static let dashboardService = Factory<DashboardService> {
@@ -27,5 +27,9 @@ extension Container {
 
     static let networkStatusProvider = Factory<NetworkStatusProvider>(scope: .singleton) {
         NetworkStatusProviderImpl()
+    }
+
+    static let courseRegistrationService = Factory<CourseRegistrationService>(scope: .singleton) {
+        CourseRegistrationServiceImpl(jsonProvider: jsonProvider())
     }
 }

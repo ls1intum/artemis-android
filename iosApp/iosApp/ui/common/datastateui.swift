@@ -14,6 +14,7 @@ struct BasicDataStateView<T, ChildContent: View>: View {
     let failureText: LocalizedStringKey
     let suspendedText: LocalizedStringKey
     let retryButtonText: LocalizedStringKey
+    let clickRetryButtonAction: () -> Void
 
     init(
             data: DataState<T>,
@@ -21,6 +22,7 @@ struct BasicDataStateView<T, ChildContent: View>: View {
             failureText: LocalizedStringKey,
             suspendedText: LocalizedStringKey,
             retryButtonText: LocalizedStringKey,
+            clickRetryButtonAction: @escaping () -> Void,
             @ViewBuilder successUi: (T) -> ChildContent
     ) {
         self.data = data
@@ -28,6 +30,7 @@ struct BasicDataStateView<T, ChildContent: View>: View {
         self.failureText = failureText
         self.suspendedText = suspendedText
         self.retryButtonText = retryButtonText
+        self.clickRetryButtonAction = clickRetryButtonAction
 
         switch data {
         case .done(
@@ -53,7 +56,7 @@ struct BasicDataStateView<T, ChildContent: View>: View {
 
                     Text(text)
 
-                    Button(action: {}) {
+                    Button(action: clickRetryButtonAction) {
                         Text(retryButtonText)
                     }
                 }
@@ -80,7 +83,8 @@ class DataStateViewPreviews: PreviewProvider {
                     loadingText: "Loading data",
                     failureText: "Failed loading data",
                     suspendedText: "Unstable internet connection",
-                    retryButtonText: "Try again"
+                    retryButtonText: "Try again",
+                    clickRetryButtonAction: {}
             ) {
             }
 
@@ -89,7 +93,8 @@ class DataStateViewPreviews: PreviewProvider {
                     loadingText: "Loading data",
                     failureText: "Failed loading data",
                     suspendedText: "Unstable internet connection",
-                    retryButtonText: "Try again"
+                    retryButtonText: "Try again",
+                    clickRetryButtonAction: {}
             ) {
             }
         }

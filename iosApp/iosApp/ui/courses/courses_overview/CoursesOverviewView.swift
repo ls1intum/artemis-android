@@ -1,32 +1,31 @@
-//
-//  CoursesOverviewView.swift
-//  iosApp
-//
-//  Created by Tim Ortel on 16.09.22.
-//
-//  Display the course overview with the course list.
-//
-
 import SwiftUI
 import Combine
 import SDWebImageSwiftUI
 import SDWebImage
 
+/**
+ * Display the course overview with the course list.
+ */
 struct CoursesOverviewView: View {
 
     @StateObject var viewModel: CoursesOverviewViewModel = CoursesOverviewViewModel()
+    let onClickRegisterForCourse: () -> Void
 
     var body: some View {
-        NavigationView {
-            VStack(alignment: .center) {
-
-                BasicDataStateView(
-                        data: viewModel.dashboard,
-                        loadingText: "course_overview_loading_courses_loading",
-                        failureText: "course_overview_loading_courses_failed",
-                        suspendedText: "course_overview_loading_courses_suspended",
-                        retryButtonText: "course_overview_loading_courses_button_try_again"
-                ) { data in
+        VStack(alignment: .center) {
+            BasicDataStateView(
+                    data: viewModel.dashboard,
+                    loadingText: "course_overview_loading_courses_loading",
+                    failureText: "course_overview_loading_courses_failed",
+                    suspendedText: "course_overview_loading_courses_suspended",
+                    retryButtonText: "course_overview_loading_courses_button_try_again",
+                    clickRetryButtonAction: {
+                        Task {
+                            await viewModel.reloadDashboard()
+                        }
+                    }
+            ) { data in
+                ZStack {
                     CourseListView(
                             courses: data.courses,
                             serverUrl: viewModel.serverUrl,
@@ -34,22 +33,25 @@ struct CoursesOverviewView: View {
                     )
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 }
-
-//                switch (viewModel.dashboard) {
-//                case .loading: ProgressView()
-//                        .progressViewStyle(CircularProgressViewStyle())
-//                case .done(let response): DashboardLoadedView(response: response, serverUrl: viewModel.serverUrl, bearer: viewModel.bearer)
-//                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-                    .navigationTitle(Text("Course Overview"))
-                    .navigationBarItems(trailing: Button("Logout") {
-                        viewModel.logout()
-                    })
-                    .task {
-                        await viewModel.reloadDashboard()
-                    }
         }
+                .navigationTitle(Text("course_overview_title"))
+                .toolbar {
+                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                        Button(action: onClickRegisterForCourse, label: {
+                            Label("course_overview_register_button_text", systemImage: "pencil")
+                        })
+
+                        Button("Logout") {
+                            viewModel.logout()
+                        }
+                    }
+                }
+                .navigationBarBackButtonHidden()
+                .task {
+                    await viewModel.reloadDashboard()
+                }
     }
 }
 

@@ -11,47 +11,48 @@ import Factory
 import Combine
 
 struct RootView: View {
-
-    @ObservedObject private var isLoggedIn: IsLoggedIn
-
-    init() {
-        isLoggedIn = IsLoggedIn(accountService: Container.accountService())
-    }
+    @StateObject private var viewController: RootViewViewController = RootViewViewController()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        VStack {
-            if (isLoggedIn.isLoggedIn) {
-                CoursesOverviewView()
-            } else {
-                LoginView()
-            }
-
+        NavigationStack(path: $viewController.path) {
+            EmptyView()
+                    .navigationDestination(for: AccountDest.self) { _ in
+                        AccountView()
+                    }
+                    .navigationDestination(for: CourseOverviewDest.self) { _ in
+                        CoursesOverviewView(onClickRegisterForCourse: {
+                            viewController.path.append(CourseRegistration())
+                        })
+                    }
+                    .navigationDestination(for: CourseRegistration.self) { _ in
+                        CourseRegistrationView()
+                    }
         }
-//                .onReceive(accountService.authenticationData.eraseToAnyPublisher()) { authData in
-//                    switch authData {
-//                    case AuthenticationData.NotLoggedIn: isLoggedIn = false
-//                    case AuthenticationData.LoggedIn: isLoggedIn = true
-//                    }
-//                }
-
-
-    }
-}
-
-class IsLoggedIn: ObservableObject {
-    @Published var isLoggedIn: Bool = false
-
-    init(accountService: AccountService) {
-        accountService
-                .authenticationData
-                .eraseToAnyPublisher()
-                .map { authData in
-                    switch authData {
-                    case AuthenticationData.NotLoggedIn: return false
-                    case AuthenticationData.LoggedIn: return true
+                .onChange(of: scenePhase) { phase in
+                    if phase == .background {
+                        //viewController.save()
                     }
                 }
-                .receive(on: DispatchQueue.main)
-                .assign(to: &$isLoggedIn)
     }
 }
+
+class RootViewViewController: ObservableObject {
+    private let accountService: AccountService = Container.accountService()
+
+    @Published var path: NavigationPath
+
+    init() {
+        if accountService.isLoggedIn() {
+            path = NavigationPath([CourseOverviewDest()])
+        } else {
+            path = NavigationPath([AccountDest()])
+        }
+    }
+}
+
+struct AccountDest: Hashable {}
+
+struct CourseOverviewDest: Hashable {}
+
+struct CourseRegistration: Hashable {}

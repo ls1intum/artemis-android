@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.android.ui.courses.register_for_course
+package de.tum.informatics.www1.artemis.native_app.android.ui.courses.course_registation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

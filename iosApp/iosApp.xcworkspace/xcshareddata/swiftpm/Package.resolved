@@ -10,6 +10,24 @@
       }
     },
     {
+      "identity" : "attributedtext",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/gonzalezreal/AttributedText",
+      "state" : {
+        "revision" : "2dc2d7864e0fee4b524a5850d7d7cf9a7eeda0fc",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "combine-schedulers",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/combine-schedulers",
+      "state" : {
+        "revision" : "aa3e575929f2bcc5bad012bd2575eae716cbcdf7",
+        "version" : "0.8.0"
+      }
+    },
+    {
       "identity" : "combineext",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/CombineCommunity/CombineExt.git",
@@ -25,6 +43,24 @@
       "state" : {
         "revision" : "8557426f3286e20b631ecdac8115242f888656e0",
         "version" : "1.2.8"
+      }
+    },
+    {
+      "identity" : "markdownui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/gonzalezreal/MarkdownUI",
+      "state" : {
+        "revision" : "6a33c60ad430772d69ac5278e35474d6b3e5d30a",
+        "version" : "1.1.1"
+      }
+    },
+    {
+      "identity" : "networkimage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/gonzalezreal/NetworkImage",
+      "state" : {
+        "revision" : "c97f83e771c95186af80ef6118f158852a9e54be",
+        "version" : "4.0.1"
       }
     },
     {
@@ -115,6 +151,24 @@
       "state" : {
         "revision" : "4e02d9cf35cabfb538c96613272fb027dd0c8692",
         "version" : "1.13.1"
+      }
+    },
+    {
+      "identity" : "swiftcommonmark",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/gonzalezreal/SwiftCommonMark",
+      "state" : {
+        "revision" : "ed252beaddecce28ea6363f800c773d6169011b8",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "xctest-dynamic-overlay",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
+      "state" : {
+        "revision" : "16e6409ee82e1b81390bdffbf217b9c08ab32784",
+        "version" : "0.5.0"
       }
     }
   ],

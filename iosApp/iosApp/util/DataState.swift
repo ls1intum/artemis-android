@@ -9,6 +9,7 @@ import Combine
  * The data state of the request.
  */
 enum DataState<T> {
+
     /**
      * Waiting until a valid internet connection is available again.
      */
@@ -31,6 +32,8 @@ enum DataState<T> {
         case .done(response: let response): return DataState<K>.done(response: op(response))
         }
     }
+
+
 }
 
 func retryOnInternet<T>(

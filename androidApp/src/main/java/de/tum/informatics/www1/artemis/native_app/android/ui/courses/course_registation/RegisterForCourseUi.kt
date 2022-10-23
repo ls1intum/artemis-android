@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.android.ui.courses.register_for_course
+package de.tum.informatics.www1.artemis.native_app.android.ui.courses.course_registation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,11 +11,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.content.Course
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
@@ -27,7 +25,6 @@ import de.tum.informatics.www1.artemis.native_app.android.util.withoutLastChar
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-import kotlin.math.sign
 
 @Composable
 fun RegisterForCourseScreen(

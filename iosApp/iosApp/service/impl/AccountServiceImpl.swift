@@ -10,6 +10,7 @@ import NIO
 class AccountServiceImpl: AccountService {
 
     let serverCommunicationProvider: ServerCommunicationProvider
+    let networkStatusProvider: NetworkStatusProvider
     let jsonProvider: JsonProvider
 
     /**
@@ -19,9 +20,10 @@ class AccountServiceImpl: AccountService {
 
     let authenticationData: AnyPublisher<AuthenticationData, Never>
 
-    init(serverCommunicationProvider: ServerCommunicationProvider, jsonProvider: JsonProvider) {
+    init(serverCommunicationProvider: ServerCommunicationProvider, jsonProvider: JsonProvider, networkStatusProvider: NetworkStatusProvider) {
         self.serverCommunicationProvider = serverCommunicationProvider
         self.jsonProvider = jsonProvider
+        self.networkStatusProvider = networkStatusProvider
 
         inMemoryJWT = CurrentValueSubject(nil)
 
@@ -33,13 +35,29 @@ class AccountServiceImpl: AccountService {
                         .map { storedJWT, inMemoryJWT in
                             inMemoryJWT ?? storedJWT
                         }
-                        .map { key in
+                        .transformLatest { sub, key in
+                            //TODO: Verify if the key has expired, etc
                             if let setKey = key {
-                                return AuthenticationData.LoggedIn(authToken: setKey)
+                                try! await sub.sendAll(
+                                        publisher: serverCommunicationProvider
+                                                .serverUrl
+                                                .transformLatest { sub2, serverUrl in
+                                                    try! await sub2.sendAll(
+                                                            publisher: retryOnInternet(connectivity: networkStatusProvider.currentNetworkStatus) {
+                                                                await AccountServiceImpl.getAccountData(bearer: "Bearer " + setKey, serverUrl: serverUrl, jsonProvider: jsonProvider)
+                                                            }
+                                                    )
+                                                }
+                                                .map { account in
+                                                    AuthenticationData.LoggedIn(authToken: setKey, account: account)
+                                                }
+                                                .eraseToAnyPublisher()
+                                )
                             } else {
-                                return AuthenticationData.NotLoggedIn
+                                sub.send(AuthenticationData.NotLoggedIn)
                             }
                         }
+                        .share(replay: 1)
                         .eraseToAnyPublisher()
     }
 
@@ -94,6 +112,19 @@ class AccountServiceImpl: AccountService {
     func logout() {
         inMemoryJWT.value = nil
         UserDefaults.standard.loginJwt = nil
+    }
+
+    private static func getAccountData(bearer: String, serverUrl: String, jsonProvider: JsonProvider) async -> NetworkResponse<Account> {
+        await HTTPClient(eventLoopGroupProvider: .createNew).use { httpClient in
+            await performNetworkCall(httpClient: httpClient, createRequest: {
+                var request = HTTPClientRequest(url: serverUrl + "api/account")
+                request.headers.add(name: HttpHeaders.Accept, value: ContentTypes.Application.Json)
+                request.headers.add(name: HttpHeaders.UserAgent, value: DefaultHttpHeaderValues.ArtemisUserAgent)
+                request.headers.add(name: HttpHeaders.Authorization, value: bearer)
+
+                return request
+            }, decode: { body in try jsonProvider.decoder.decode(Account.self, from: body) })
+        }
     }
 }
 

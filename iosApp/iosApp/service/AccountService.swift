@@ -33,7 +33,7 @@ protocol AccountService {
  */
 enum AuthenticationData {
     case NotLoggedIn
-    case LoggedIn(authToken: String)
+    case LoggedIn(authToken: String, account: DataState<Account>)
 }
 
 struct LoginResponse {

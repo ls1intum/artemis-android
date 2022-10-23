@@ -4,7 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.android.ui.courses.courses_ove
 import de.tum.informatics.www1.artemis.native_app.android.ui.account.login.LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.android.ui.account.register.RegisterViewModel
 import de.tum.informatics.www1.artemis.native_app.android.ui.account.AccountViewModel
-import de.tum.informatics.www1.artemis.native_app.android.ui.courses.register_for_course.RegisterForCourseViewModel
+import de.tum.informatics.www1.artemis.native_app.android.ui.courses.course_registation.RegisterForCourseViewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.dsl.module
 

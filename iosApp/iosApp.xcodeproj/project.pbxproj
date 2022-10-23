@@ -14,29 +14,40 @@
 		1C0981ABE77580FF17B8C4C1 /* NetworkResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0989F63763E9A7692C4DBE /* NetworkResponse.swift */; };
 		1C0981D273DD7A6DF3D40CAE /* ServerCommunicationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098F1706F0DCA286CF5754 /* ServerCommunicationProvider.swift */; };
 		1C098230E8C6C7CD41AF6B29 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098402211D502EAE42393D /* LoginView.swift */; };
+		1C098308D3760950BADD01BA /* HttpHeaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0987B7B724003FC08E6665 /* HttpHeaders.swift */; };
+		1C098360370AFEAE91EC3495 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098783D4E50EAB201EA1E0 /* Account.swift */; };
 		1C098367EECE1F42EADECAE5 /* NetworkStatusProviderImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0987164AF272D3D5618C26 /* NetworkStatusProviderImpl.swift */; };
 		1C0983C4F287A691E93D01F1 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098C077ADB678F568185B9 /* LoginViewController.swift */; };
+		1C0983D49B52AC043FF36C3F /* datasizeutil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098B01894061710A23FB0F /* datasizeutil.swift */; };
 		1C09842337C756759BA07179 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098A490B00EB0A8E14EB25 /* AccountView.swift */; };
 		1C09848B8BCF245F9A76F4EA /* DashboardServiceImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098BE36C1A5738E35FD12A /* DashboardServiceImpl.swift */; };
 		1C0984CE27FA7D3AAEF901C2 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098FF0D296294BE7E6EA71 /* AppContainer.swift */; };
 		1C09851A8238C343EF07793B /* DashboardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0989DDFF1DA9772A3862E4 /* DashboardService.swift */; };
 		1C09853AB260471BB4AC8594 /* Course.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098542CFAA494BB3EF413A /* Course.swift */; };
+		1C098557C72F2C209DE7CDC9 /* CourseRegistrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098586B51822E675303B0E /* CourseRegistrationService.swift */; };
 		1C09857C424EF06EB07AAA65 /* ProfileInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C09873399CAC9793A6DC8EE /* ProfileInfo.swift */; };
 		1C0985B3CE7A5E66E0798691 /* NetworkStatusProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098B3EC06CCDD7482E6214 /* NetworkStatusProvider.swift */; };
 		1C0986D542BBDED04A22C64E /* AccountViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0983700CAF9E8371CBF572 /* AccountViewController.swift */; };
+		1C0987C868DF1D1E9C6D0CAC /* CourseRegistrationUi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098A0E14DFDA97AE02334E /* CourseRegistrationUi.swift */; };
+		1C0987DEE262D2932163EE09 /* ObservedValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098420AF2C5E3E3715BC06 /* ObservedValue.swift */; };
 		1C0988187041042BBA80FC32 /* Saml2Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C09877094E9C0A4803D691D /* Saml2Config.swift */; };
+		1C098828DDCBBCECF757872D /* fab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0980813BE156858016F214 /* fab.swift */; };
+		1C0989531F87BBEBC27C669C /* CoursesOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098ADF152F67124A5F190C /* CoursesOverviewView.swift */; };
 		1C0989A1EFB6D3CE33CECD27 /* AsyncSequenceToCombine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098A9DA1D0970B84C2BECD /* AsyncSequenceToCombine.swift */; };
+		1C098A4CB53F1A557E21C9AD /* CourseRegistrationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C09841E56980818F78990CA /* CourseRegistrationViewController.swift */; };
 		1C098A905080872B673330FC /* theming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0986D9D9E11B706FF4C7F8 /* theming.swift */; };
 		1C098C823B0ED6C8DDA449C2 /* Dashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098ADFDCCE7E60744694F8 /* Dashboard.swift */; };
+		1C098D003D4BA926E1B2BD32 /* CoursesOverviewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098A1D279F2DE664C4C4FB /* CoursesOverviewViewModel.swift */; };
 		1C098D2A4D7898F37E732681 /* JsonProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0982F1FCAF373DD7648987 /* JsonProvider.swift */; };
 		1C098D65337401C654D0F56D /* DataState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0986A12977F0E8A60950B5 /* DataState.swift */; };
+		1C098DBB8193E6D9943263D4 /* httpclientutil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0980017AE0C68D19D4D969 /* httpclientutil.swift */; };
 		1C098E05516193D855C4FA51 /* AccountService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098AFF95AB352EF5A47A4C /* AccountService.swift */; };
+		1C098E2C838D72B7FE13C1F0 /* CourseRegistrationServiceImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0985F681D1B8D8ADB5CB62 /* CourseRegistrationServiceImpl.swift */; };
 		1C098E7E07E84FE6DD38AA3A /* courses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098319B96A24B40D10CC21 /* courses.swift */; };
-		1C098FC4C4C91E9448B2998E /* CoursesOverviewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0988B69F8C404929945942 /* CoursesOverviewViewModel.swift */; };
 		1C098FF7C17896FCEA2FC228 /* datastateui.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098DC2127E649084ED7A33 /* datastateui.swift */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		220409A728D4EF1A00204B1C /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220409A628D4EF1A00204B1C /* RootView.swift */; };
-		220409AC28D4F34700204B1C /* CoursesOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220409AB28D4F34700204B1C /* CoursesOverviewView.swift */; };
+		225EDFFE2905AC2800C7FCA8 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 225EDFFD2905AC2800C7FCA8 /* MarkdownUI */; };
 		226B088C28E30FBC00382C92 /* Factory in Frameworks */ = {isa = PBXBuildFile; productRef = 226B088B28E30FBC00382C92 /* Factory */; };
 		227BD53E28E2570B00D11F92 /* AsyncHTTPClient in Frameworks */ = {isa = PBXBuildFile; productRef = 227BD53D28E2570B00D11F92 /* AsyncHTTPClient */; };
 		22B12970290038D600C4910E /* Reachability in Frameworks */ = {isa = PBXBuildFile; productRef = 22B1296F290038D600C4910E /* Reachability */; };
@@ -48,25 +59,36 @@
 /* Begin PBXFileReference section */
 		058557BA273AAA24004C7B11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		1C0980017AE0C68D19D4D969 /* httpclientutil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = httpclientutil.swift; sourceTree = "<group>"; };
+		1C0980813BE156858016F214 /* fab.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = fab.swift; sourceTree = "<group>"; };
 		1C0982F1FCAF373DD7648987 /* JsonProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JsonProvider.swift; sourceTree = "<group>"; };
 		1C098319B96A24B40D10CC21 /* courses.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = courses.swift; sourceTree = "<group>"; };
 		1C0983700CAF9E8371CBF572 /* AccountViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountViewController.swift; sourceTree = "<group>"; };
 		1C098402211D502EAE42393D /* LoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		1C09841E56980818F78990CA /* CourseRegistrationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CourseRegistrationViewController.swift; sourceTree = "<group>"; };
+		1C098420AF2C5E3E3715BC06 /* ObservedValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservedValue.swift; sourceTree = "<group>"; };
 		1C098542CFAA494BB3EF413A /* Course.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Course.swift; sourceTree = "<group>"; };
+		1C098586B51822E675303B0E /* CourseRegistrationService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CourseRegistrationService.swift; sourceTree = "<group>"; };
 		1C0985C543D77816ADA5933C /* ServerCommunicationProviderImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerCommunicationProviderImpl.swift; sourceTree = "<group>"; };
+		1C0985F681D1B8D8ADB5CB62 /* CourseRegistrationServiceImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CourseRegistrationServiceImpl.swift; sourceTree = "<group>"; };
 		1C0986A12977F0E8A60950B5 /* DataState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataState.swift; sourceTree = "<group>"; };
 		1C0986D9D9E11B706FF4C7F8 /* theming.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = theming.swift; sourceTree = "<group>"; };
 		1C0987164AF272D3D5618C26 /* NetworkStatusProviderImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkStatusProviderImpl.swift; sourceTree = "<group>"; };
 		1C09873399CAC9793A6DC8EE /* ProfileInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileInfo.swift; sourceTree = "<group>"; };
 		1C09877094E9C0A4803D691D /* Saml2Config.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Saml2Config.swift; sourceTree = "<group>"; };
-		1C0988B69F8C404929945942 /* CoursesOverviewViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoursesOverviewViewModel.swift; sourceTree = "<group>"; };
+		1C098783D4E50EAB201EA1E0 /* Account.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
+		1C0987B7B724003FC08E6665 /* HttpHeaders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HttpHeaders.swift; sourceTree = "<group>"; };
 		1C0988D01EAA04C4775B8923 /* AccountServiceImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountServiceImpl.swift; sourceTree = "<group>"; };
 		1C0989DDFF1DA9772A3862E4 /* DashboardService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashboardService.swift; sourceTree = "<group>"; };
 		1C0989F63763E9A7692C4DBE /* NetworkResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkResponse.swift; sourceTree = "<group>"; };
+		1C098A0E14DFDA97AE02334E /* CourseRegistrationUi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CourseRegistrationUi.swift; sourceTree = "<group>"; };
+		1C098A1D279F2DE664C4C4FB /* CoursesOverviewViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoursesOverviewViewModel.swift; sourceTree = "<group>"; };
 		1C098A490B00EB0A8E14EB25 /* AccountView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		1C098A9DA1D0970B84C2BECD /* AsyncSequenceToCombine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncSequenceToCombine.swift; sourceTree = "<group>"; };
+		1C098ADF152F67124A5F190C /* CoursesOverviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoursesOverviewView.swift; sourceTree = "<group>"; };
 		1C098ADFDCCE7E60744694F8 /* Dashboard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dashboard.swift; sourceTree = "<group>"; };
 		1C098AFF95AB352EF5A47A4C /* AccountService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountService.swift; sourceTree = "<group>"; };
+		1C098B01894061710A23FB0F /* datasizeutil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = datasizeutil.swift; sourceTree = "<group>"; };
 		1C098B3EC06CCDD7482E6214 /* NetworkStatusProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkStatusProvider.swift; sourceTree = "<group>"; };
 		1C098BE36C1A5738E35FD12A /* DashboardServiceImpl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashboardServiceImpl.swift; sourceTree = "<group>"; };
 		1C098C077ADB678F568185B9 /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
@@ -75,7 +97,6 @@
 		1C098FF0D296294BE7E6EA71 /* AppContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
 		2152FB032600AC8F00CF470E /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
 		220409A628D4EF1A00204B1C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
-		220409AB28D4F34700204B1C /* CoursesOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursesOverviewView.swift; sourceTree = "<group>"; };
 		22B12971290048A800C4910E /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -89,6 +110,7 @@
 				22ECB44E28E79354000F5342 /* CombineExt in Frameworks */,
 				226B088C28E30FBC00382C92 /* Factory in Frameworks */,
 				22B12970290038D600C4910E /* Reachability in Frameworks */,
+				225EDFFE2905AC2800C7FCA8 /* MarkdownUI in Frameworks */,
 				22F8034E28D8EE7F00B55A09 /* SDWebImageSwiftUI in Frameworks */,
 				227BD53E28E2570B00D11F92 /* AsyncHTTPClient in Frameworks */,
 			);
@@ -113,8 +135,18 @@
 				1C098896B18CE8A96B8DB9C3 /* account */,
 				1C098C539135CD4F664B9BF5 /* common */,
 				1C0986D9D9E11B706FF4C7F8 /* theming.swift */,
+				1C098420AF2C5E3E3715BC06 /* ObservedValue.swift */,
 			);
 			path = ui;
+			sourceTree = "<group>";
+		};
+		1C098280852E9E63A2B85CC6 /* http */ = {
+			isa = PBXGroup;
+			children = (
+				1C0987B7B724003FC08E6665 /* HttpHeaders.swift */,
+				1C0980017AE0C68D19D4D969 /* httpclientutil.swift */,
+			);
+			path = http;
 			sourceTree = "<group>";
 		};
 		1C0986B0A9DB2190C647D7F2 /* util */ = {
@@ -123,8 +155,19 @@
 				1C0989F63763E9A7692C4DBE /* NetworkResponse.swift */,
 				1C0986A12977F0E8A60950B5 /* DataState.swift */,
 				1C098A9DA1D0970B84C2BECD /* AsyncSequenceToCombine.swift */,
+				1C098B01894061710A23FB0F /* datasizeutil.swift */,
+				1C098280852E9E63A2B85CC6 /* http */,
 			);
 			path = util;
+			sourceTree = "<group>";
+		};
+		1C0986ED830477ABEFB2C73F /* courses_overview */ = {
+			isa = PBXGroup;
+			children = (
+				1C098ADF152F67124A5F190C /* CoursesOverviewView.swift */,
+				1C098A1D279F2DE664C4C4FB /* CoursesOverviewViewModel.swift */,
+			);
+			path = courses_overview;
 			sourceTree = "<group>";
 		};
 		1C098896B18CE8A96B8DB9C3 /* account */ = {
@@ -150,8 +193,17 @@
 			isa = PBXGroup;
 			children = (
 				1C098DC2127E649084ED7A33 /* datastateui.swift */,
+				1C0980813BE156858016F214 /* fab.swift */,
 			);
 			path = common;
+			sourceTree = "<group>";
+		};
+		1C098C5E64D121C0D2207FB9 /* account */ = {
+			isa = PBXGroup;
+			children = (
+				1C098783D4E50EAB201EA1E0 /* Account.swift */,
+			);
+			path = account;
 			sourceTree = "<group>";
 		};
 		1C098D02D12D2633391B61F8 /* content */ = {
@@ -159,8 +211,18 @@
 			children = (
 				1C098542CFAA494BB3EF413A /* Course.swift */,
 				1C098ADFDCCE7E60744694F8 /* Dashboard.swift */,
+				1C098C5E64D121C0D2207FB9 /* account */,
 			);
 			path = content;
+			sourceTree = "<group>";
+		};
+		1C098DE88B81C4F7AC515609 /* course_registration */ = {
+			isa = PBXGroup;
+			children = (
+				1C098A0E14DFDA97AE02334E /* CourseRegistrationUi.swift */,
+				1C09841E56980818F78990CA /* CourseRegistrationViewController.swift */,
+			);
+			path = course_registration;
 			sourceTree = "<group>";
 		};
 		21622B9BF08CD3C1E1587F2B /* Pods */ = {
@@ -173,9 +235,9 @@
 		227BD53528E24A4C00D11F92 /* courses */ = {
 			isa = PBXGroup;
 			children = (
-				220409AB28D4F34700204B1C /* CoursesOverviewView.swift */,
-				1C0988B69F8C404929945942 /* CoursesOverviewViewModel.swift */,
 				1C098319B96A24B40D10CC21 /* courses.swift */,
+				1C098DE88B81C4F7AC515609 /* course_registration */,
+				1C0986ED830477ABEFB2C73F /* courses_overview */,
 			);
 			path = courses;
 			sourceTree = "<group>";
@@ -197,6 +259,7 @@
 				1C098F1706F0DCA286CF5754 /* ServerCommunicationProvider.swift */,
 				1C0989DDFF1DA9772A3862E4 /* DashboardService.swift */,
 				1C098B3EC06CCDD7482E6214 /* NetworkStatusProvider.swift */,
+				1C098586B51822E675303B0E /* CourseRegistrationService.swift */,
 			);
 			path = service;
 			sourceTree = "<group>";
@@ -210,6 +273,7 @@
 				1C098FF0D296294BE7E6EA71 /* AppContainer.swift */,
 				1C098BE36C1A5738E35FD12A /* DashboardServiceImpl.swift */,
 				1C0987164AF272D3D5618C26 /* NetworkStatusProviderImpl.swift */,
+				1C0985F681D1B8D8ADB5CB62 /* CourseRegistrationServiceImpl.swift */,
 			);
 			path = impl;
 			sourceTree = "<group>";
@@ -270,6 +334,7 @@
 				226B088B28E30FBC00382C92 /* Factory */,
 				22ECB44D28E79354000F5342 /* CombineExt */,
 				22B1296F290038D600C4910E /* Reachability */,
+				225EDFFD2905AC2800C7FCA8 /* MarkdownUI */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* iosApp.app */;
@@ -304,7 +369,8 @@
 				227BD53C28E2570B00D11F92 /* XCRemoteSwiftPackageReference "async-http-client" */,
 				226B088A28E30FBC00382C92 /* XCRemoteSwiftPackageReference "Factory" */,
 				22ECB44C28E79354000F5342 /* XCRemoteSwiftPackageReference "CombineExt" */,
-				22B1296E290038D600C4910E /* XCRemoteSwiftPackageReference "Reachability.swift" */,
+				22B1296E290038D600C4910E /* XCRemoteSwiftPackageReference "Reachability" */,
+				225EDFFC2905AC2700C7FCA8 /* XCRemoteSwiftPackageReference "MarkdownUI" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -334,7 +400,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
-				220409AC28D4F34700204B1C /* CoursesOverviewView.swift in Sources */,
 				220409A728D4EF1A00204B1C /* RootView.swift in Sources */,
 				1C098230E8C6C7CD41AF6B29 /* LoginView.swift in Sources */,
 				1C098E05516193D855C4FA51 /* AccountService.swift in Sources */,
@@ -349,7 +414,6 @@
 				1C09853AB260471BB4AC8594 /* Course.swift in Sources */,
 				1C098C823B0ED6C8DDA449C2 /* Dashboard.swift in Sources */,
 				1C09848B8BCF245F9A76F4EA /* DashboardServiceImpl.swift in Sources */,
-				1C098FC4C4C91E9448B2998E /* CoursesOverviewViewModel.swift in Sources */,
 				1C098D65337401C654D0F56D /* DataState.swift in Sources */,
 				1C0989A1EFB6D3CE33CECD27 /* AsyncSequenceToCombine.swift in Sources */,
 				1C0986D542BBDED04A22C64E /* AccountViewController.swift in Sources */,
@@ -361,6 +425,18 @@
 				1C098FF7C17896FCEA2FC228 /* datastateui.swift in Sources */,
 				1C098E7E07E84FE6DD38AA3A /* courses.swift in Sources */,
 				1C098A905080872B673330FC /* theming.swift in Sources */,
+				1C098828DDCBBCECF757872D /* fab.swift in Sources */,
+				1C0987C868DF1D1E9C6D0CAC /* CourseRegistrationUi.swift in Sources */,
+				1C098A4CB53F1A557E21C9AD /* CourseRegistrationViewController.swift in Sources */,
+				1C098360370AFEAE91EC3495 /* Account.swift in Sources */,
+				1C098557C72F2C209DE7CDC9 /* CourseRegistrationService.swift in Sources */,
+				1C098E2C838D72B7FE13C1F0 /* CourseRegistrationServiceImpl.swift in Sources */,
+				1C0983D49B52AC043FF36C3F /* datasizeutil.swift in Sources */,
+				1C098308D3760950BADD01BA /* HttpHeaders.swift in Sources */,
+				1C098DBB8193E6D9943263D4 /* httpclientutil.swift in Sources */,
+				1C0989531F87BBEBC27C669C /* CoursesOverviewView.swift in Sources */,
+				1C098D003D4BA926E1B2BD32 /* CoursesOverviewViewModel.swift in Sources */,
+				1C0987DEE262D2932163EE09 /* ObservedValue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -494,6 +570,7 @@
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = iosApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -515,6 +592,7 @@
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = iosApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -551,6 +629,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		225EDFFC2905AC2700C7FCA8 /* XCRemoteSwiftPackageReference "MarkdownUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/MarkdownUI";
+			requirement = {
+				kind = exactVersion;
+				version = 1.1.1;
+			};
+		};
 		226B088A28E30FBC00382C92 /* XCRemoteSwiftPackageReference "Factory" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/hmlongco/Factory";
@@ -567,7 +653,7 @@
 				version = 1.11.5;
 			};
 		};
-		22B1296E290038D600C4910E /* XCRemoteSwiftPackageReference "Reachability.swift" */ = {
+		22B1296E290038D600C4910E /* XCRemoteSwiftPackageReference "Reachability" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ashleymills/Reachability.swift";
 			requirement = {
@@ -594,6 +680,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		225EDFFD2905AC2800C7FCA8 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 225EDFFC2905AC2700C7FCA8 /* XCRemoteSwiftPackageReference "MarkdownUI" */;
+			productName = MarkdownUI;
+		};
 		226B088B28E30FBC00382C92 /* Factory */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 226B088A28E30FBC00382C92 /* XCRemoteSwiftPackageReference "Factory" */;
@@ -606,7 +697,7 @@
 		};
 		22B1296F290038D600C4910E /* Reachability */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 22B1296E290038D600C4910E /* XCRemoteSwiftPackageReference "Reachability.swift" */;
+			package = 22B1296E290038D600C4910E /* XCRemoteSwiftPackageReference "Reachability" */;
 			productName = Reachability;
 		};
 		22ECB44D28E79354000F5342 /* CombineExt */ = {

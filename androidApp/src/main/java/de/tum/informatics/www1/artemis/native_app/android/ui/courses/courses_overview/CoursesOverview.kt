@@ -61,7 +61,7 @@ fun CoursesOverview(
         modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
         topBar = {
             TopAppBar(
-                title = { Text(text = "Course Overview") },
+                title = { Text(text = stringResource(id = R.string.course_overview_title)) },
                 actions = {
                     IconButton(onClick = { viewModel.logout(onLogout) }) {
                         Icon(imageVector = Icons.Default.Logout, contentDescription = null)

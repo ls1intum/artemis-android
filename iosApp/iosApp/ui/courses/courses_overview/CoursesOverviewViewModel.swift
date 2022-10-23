@@ -33,7 +33,7 @@ extension CoursesOverviewView {
                         switch authData {
                         case .NotLoggedIn:
                             return ""
-                        case .LoggedIn(authToken: let authToken):
+                        case .LoggedIn(authToken: let authToken, _):
                             return "Bearer " + authToken
                         }
                     }
@@ -41,6 +41,7 @@ extension CoursesOverviewView {
 
             serverCommunicationProvider
                     .serverUrl
+                    .receive(on: DispatchQueue.main)
                     .assign(to: &$serverUrl)
 
             let dashboardPublisher: AnyPublisher<DataState<Dashboard>, Never> =
@@ -50,7 +51,7 @@ extension CoursesOverviewView {
                             .transformLatest { [self] (continuation, data) in
                                 let (authData, serverUrl, _) = data
                                 switch authData {
-                                case .LoggedIn(authToken: let authToken):
+                                case .LoggedIn(authToken: let authToken, _):
                                     try? await continuation.sendAll(publisher:
                                         retryOnInternet(connectivity: networkStatusProvider.currentNetworkStatus) { [self] in
                                             await dashboardService.loadDashboard(authorizationToken: authToken, serverUrl: serverUrl)
@@ -62,6 +63,7 @@ extension CoursesOverviewView {
 
 
             dashboardPublisher
+                    .receive(on: DispatchQueue.main)
                     .assign(to: &$dashboard)
         }
 

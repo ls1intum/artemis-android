@@ -13,7 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
 import de.tum.informatics.www1.artemis.native_app.android.ui.account.AccountScreen
 import de.tum.informatics.www1.artemis.native_app.android.ui.courses.courses_overview.CoursesOverview
 import de.tum.informatics.www1.artemis.native_app.android.ui.account.login.LoginScreen
-import de.tum.informatics.www1.artemis.native_app.android.ui.courses.register_for_course.RegisterForCourseScreen
+import de.tum.informatics.www1.artemis.native_app.android.ui.courses.course_registation.RegisterForCourseScreen
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get

@@ -7,16 +7,11 @@ import Foundation
 /**
  * Representation of a single course.
  */
-struct Course: Codable {
+struct Course: Codable, Identifiable {
     let id: Int
-    let title: String
-    let description: String
-    let courseIcon: String
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case title
-        case description
-        case courseIcon
-    }
+    var title: String? = ""
+    var description: String? = ""
+    var courseIcon: String? = nil
+    var semester: String? = ""
+    var registrationConfirmationMessage: String? = ""
 }

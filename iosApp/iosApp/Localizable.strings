@@ -1,4 +1,21 @@
+"course_overview_title" = "Dashboard";
 "course_overview_loading_courses_failed" = "Something went wrong while loading your courses.";
 "course_overview_loading_courses_suspended" = "You may have an unstable internet connection.";
 "course_overview_loading_courses_loading" = "Fetching your courses from the server…";
 "course_overview_loading_courses_button_try_again" = "Try again";
+
+"course_overview_register_button_text" = "Register for course";
+
+"course_registration_title" = "Register for course";
+"course_registration_loading_courses_failed" = "Something went wrong while loading courses.";
+"course_registration_loading_courses_suspended" = "Your Internet connection may be unstable.";
+"course_registration_loading_courses_loading" = "Fetching courses from server…";
+"course_registration_loading_courses_try_again" = "Try again";
+
+"course_registration_sign_up" = "Sign up";
+"course_registration_sign_up_dialog_message" = "Are you sure you want to register?";
+"course_registration_sign_up_dialog_positive_button" = "Sign up now";
+
+"course_registration_sign_up_failed_dialog_title" = "Registration failed";
+"course_registration_sign_up_failed_dialog_message" = "Something went wrong while registering you to the server. Please try again later.";
+"course_registration_sign_up_failed_dialog_positive" = "Ok";
