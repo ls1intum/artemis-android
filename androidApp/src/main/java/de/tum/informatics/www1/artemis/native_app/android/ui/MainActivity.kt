@@ -11,13 +11,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
 import de.tum.informatics.www1.artemis.native_app.android.ui.account.AccountScreen
-import de.tum.informatics.www1.artemis.native_app.android.ui.courses.courses_overview.CoursesOverview
+import de.tum.informatics.www1.artemis.native_app.android.ui.courses.dashboard.CoursesOverview
 import de.tum.informatics.www1.artemis.native_app.android.ui.account.login.LoginScreen
+import de.tum.informatics.www1.artemis.native_app.android.ui.courses.course.CourseUi
 import de.tum.informatics.www1.artemis.native_app.android.ui.courses.course_registation.RegisterForCourseScreen
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
+import org.koin.androidx.compose.koinViewModel
+import org.koin.androidx.viewmodel.ext.android.getStateViewModel
 import org.koin.androidx.viewmodel.ext.android.getViewModel
+import org.koin.core.parameter.parametersOf
 
 /**
  * Main and only activity used in the android app.
@@ -81,7 +85,6 @@ class MainActivity : ComponentActivity() {
                             },
                             onLoggedIn = onLoggedIn
                         )
-
                     }
 
                     composable(Navigation.Dest.HOME_LOGIN) {
@@ -106,6 +109,13 @@ class MainActivity : ComponentActivity() {
                             },
                             onClickRegisterForCourse = {
                                 navController.navigate(Navigation.Dest.COURSE_REGISTRATION)
+                            },
+                            onViewCourse = { courseId ->
+                                navController.navigate(
+                                    Navigation.Dest.courseViewDestination(
+                                        courseId
+                                    )
+                                )
                             }
                         )
                     }
@@ -117,6 +127,21 @@ class MainActivity : ComponentActivity() {
                             onRegisteredInCourse = {
                                 navController.navigateUp()
                             }
+                        )
+                    }
+
+                    composable(
+                        Navigation.Dest.COURSE_VIEW,
+                        arguments = listOf(Navigation.ArgDef.COURSE_ID)
+                    ) { backStackEntry ->
+                        val courseId =
+                            backStackEntry.arguments?.getInt(Navigation.Argument.COURSE_ID)
+                        checkNotNull(courseId)
+
+                        CourseUi(
+                            modifier = Modifier.fillMaxSize(),
+                            viewModel = koinViewModel { parametersOf(courseId) },
+                            onNavigateBack = navController::navigateUp
                         )
                     }
                 }

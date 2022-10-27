@@ -14,20 +14,29 @@ class CourseRegistrationServiceImpl(
     private val ktorProvider: KtorProvider
 ) : CourseRegistrationService {
 
-    override suspend fun fetchRegistrableCourses(serverUrl: String, authToken: String): List<Course> {
-        return ktorProvider.ktorClient
-            .get(serverUrl) {
-                url {
-                    appendPathSegments("api", "courses", "for-registration")
-                }
+    override suspend fun fetchRegistrableCourses(
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<List<Course>> {
+        return performNetworkCall {
+            ktorProvider.ktorClient
+                .get(serverUrl) {
+                    url {
+                        appendPathSegments("api", "courses", "for-registration")
+                    }
 
-                bearerAuth(authToken)
-                contentType(ContentType.Application.Json)
-            }
-            .body()
+                    bearerAuth(authToken)
+                    contentType(ContentType.Application.Json)
+                }
+                .body()
+        }
     }
 
-    override suspend fun registerInCourse(serverUrl: String, authToken: String, courseId: Int): NetworkResponse<Unit> {
+    override suspend fun registerInCourse(
+        serverUrl: String,
+        authToken: String,
+        courseId: Int
+    ): NetworkResponse<Unit> {
         return performNetworkCall {
             val user: Account = ktorProvider.ktorClient
                 .post(serverUrl) {

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.android.ui.courses.courses_overview
+package de.tum.informatics.www1.artemis.native_app.android.ui.courses.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

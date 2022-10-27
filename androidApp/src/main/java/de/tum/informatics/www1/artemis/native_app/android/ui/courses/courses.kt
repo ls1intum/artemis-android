@@ -27,6 +27,7 @@ fun CourseItemHeader(
     course: Course,
     serverUrl: String,
     authorizationToken: String,
+    onClick: () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit
 ) {
     val courseIconUrl = "$serverUrl${course.courseIconPath}"
@@ -39,7 +40,7 @@ fun CourseItemHeader(
         .data(courseIconUrl)
         .build()
     
-    Card(modifier = modifier) {
+    Card(modifier = modifier, onClick = onClick) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

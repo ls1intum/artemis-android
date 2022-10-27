@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="course_ui_tab_exercises">Exercises</string>
+    <string name="course_ui_tab_statistics">Statistics</string>
+    <string name="course_ui_tab_communication">Communication</string>
+    <string name="course_ui_tab_messages">Messages</string>
+    <string name="course_ui_tab_learning_goals">Learning goals</string>
+</resources>

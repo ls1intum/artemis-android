@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.android.util
 
+import android.provider.ContactsContract.Data
 import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState.Failure
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState.Suspended
@@ -25,14 +26,27 @@ sealed class DataState<T> {
     data class Success<T>(val data: T) : DataState<T>()
 
     fun <K> bind(op: (T) -> K): DataState<K> {
-        return when(this) {
+        return when (this) {
             is Success -> Success(op(data))
             is Failure -> Failure(exception)
             is Loading -> Loading()
             is Suspended -> Suspended(exception)
         }
     }
+
+    fun orElse(other: T): T {
+        return when (this) {
+            is Success -> data
+            else -> other
+        }
+    }
 }
+
+val <T> DataState<T>.isSuccess: Boolean
+    get() = when (this) {
+        is DataState.Success<T> -> true
+        else -> false
+    }
 
 /**
  * Performs the given network response once an internet connection is available.
@@ -45,7 +59,8 @@ sealed class DataState<T> {
 inline fun <T> retryOnInternet(
     connectivity: Flow<NetworkStatusProvider.NetworkStatus>,
     baseBackoffMillis: Long = 2000,
-    crossinline perform: suspend () -> T
+    minimumLoadingMillis: Long = 0,
+    crossinline perform: suspend () -> NetworkResponse<T>
 ): Flow<DataState<T>> {
     return connectivity
         .transformLatest { networkStatus ->
@@ -57,8 +72,14 @@ inline fun <T> retryOnInternet(
 
                     while (true) {
                         emit(DataState.Loading())
-                        when (val response = performNetworkCall(perform)) {
+
+                        val start = System.currentTimeMillis()
+                        when (val response = perform()) {
                             is NetworkResponse.Response -> {
+                                val end = System.currentTimeMillis()
+                                val remainingWaitTime = minimumLoadingMillis - (end - start)
+                                if (remainingWaitTime > 0) delay(remainingWaitTime)
+
                                 emit(DataState.Success(response.data))
                                 return@transformLatest
                             }

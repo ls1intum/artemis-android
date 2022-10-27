@@ -110,17 +110,19 @@ class AccountServiceImpl(
     /**
      * Fetches from api/account
      */
-    private suspend fun getAccountData(authToken: String): Account {
-        return ktorProvider
-            .ktorClient
-            .get(serverCommunicationProvider.serverUrl.first()) {
-                url {
-                    appendPathSegments("api", "account")
-                }
+    private suspend fun getAccountData(authToken: String): NetworkResponse<Account> {
+        return performNetworkCall {
+            ktorProvider
+                .ktorClient
+                .get(serverCommunicationProvider.serverUrl.first()) {
+                    url {
+                        appendPathSegments("api", "account")
+                    }
 
-                contentType(ContentType.Application.Json)
-                bearerAuth(authToken)
-            }.body()
+                    contentType(ContentType.Application.Json)
+                    bearerAuth(authToken)
+                }.body()
+        }
     }
 
     override suspend fun logout() {

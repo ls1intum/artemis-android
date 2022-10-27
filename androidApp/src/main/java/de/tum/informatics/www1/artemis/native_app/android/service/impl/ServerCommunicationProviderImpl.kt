@@ -9,6 +9,8 @@ import de.tum.informatics.www1.artemis.native_app.android.defaults.ArtemisInstan
 import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
+import de.tum.informatics.www1.artemis.native_app.android.util.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.android.util.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.android.util.retryOnInternet
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -48,12 +50,14 @@ class ServerCommunicationProviderImpl(
             }
         }
 
-    private suspend fun fetchProfileInfo(serverUrl: String): ProfileInfo {
-        return ktorProvider.ktorClient.get(serverUrl) {
-            url { appendPathSegments("management", "info") }
+    private suspend fun fetchProfileInfo(serverUrl: String): NetworkResponse<ProfileInfo> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.get(serverUrl) {
+                url { appendPathSegments("management", "info") }
 
-            accept(ContentType.Application.Json)
-        }.body()
+                accept(ContentType.Application.Json)
+            }.body()
+        }
     }
 
     override suspend fun updateServerUrl(serverUrl: String) {

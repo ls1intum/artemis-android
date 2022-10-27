@@ -1,6 +1,5 @@
-package de.tum.informatics.www1.artemis.native_app.android.ui.courses.courses_overview
+package de.tum.informatics.www1.artemis.native_app.android.ui.courses.dashboard
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -14,14 +13,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.content.Course
 import de.tum.informatics.www1.artemis.native_app.android.ui.courses.CourseItemHeader
@@ -29,7 +23,6 @@ import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import de.tum.informatics.www1.artemis.native_app.android.util.compose.isScrollingUp
 import java.text.DecimalFormat
 import java.text.NumberFormat
-import kotlin.math.roundToInt
 
 /**
  * Displays the Course Overview screen.
@@ -40,7 +33,8 @@ fun CoursesOverview(
     modifier: Modifier,
     viewModel: CourseOverviewViewModel,
     onLogout: () -> Unit,
-    onClickRegisterForCourse: () -> Unit
+    onClickRegisterForCourse: () -> Unit,
+    onViewCourse: (courseId: Int) -> Unit
 ) {
     val courses = viewModel.dashboard.collectAsState(initial = DataState.Loading()).value
 
@@ -100,7 +94,8 @@ fun CoursesOverview(
                         courses = courses.data.courses,
                         serverUrl = serverUrl,
                         authorizationToken = authorizationBearer,
-                        listState = coursesListState
+                        listState = coursesListState,
+                        onClickOnCourse = { course -> onViewCourse(course.id) }
                     )
                 }
                 else -> {
@@ -120,7 +115,8 @@ private fun CourseList(
     courses: List<Course>,
     serverUrl: String,
     authorizationToken: String,
-    listState: LazyListState
+    listState: LazyListState,
+    onClickOnCourse: (Course) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
@@ -136,6 +132,7 @@ private fun CourseList(
                 course = course,
                 serverUrl = serverUrl,
                 authorizationToken = authorizationToken,
+                onClick = { onClickOnCourse(course) }
             )
         }
     }
@@ -150,12 +147,14 @@ fun CourseItem(
     course: Course,
     serverUrl: String,
     authorizationToken: String,
+    onClick: () -> Unit
 ) {
     CourseItemHeader(
         modifier = modifier,
         course = course,
         serverUrl = serverUrl,
-        authorizationToken = authorizationToken
+        authorizationToken = authorizationToken,
+        onClick = onClick
     ) {
         Divider()
 

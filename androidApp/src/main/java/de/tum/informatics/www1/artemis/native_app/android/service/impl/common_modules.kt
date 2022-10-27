@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.android.service.impl
 
 import de.tum.informatics.www1.artemis.native_app.android.service.*
 import de.tum.informatics.www1.artemis.native_app.android.service.impl.courses.CourseRegistrationServiceImpl
+import de.tum.informatics.www1.artemis.native_app.android.service.impl.courses.CourseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.android.service.impl.courses.DashboardServiceImpl
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
@@ -14,6 +15,7 @@ val userManagementModule = module {
 
 val userContentModule = module {
     single<DashboardService> { DashboardServiceImpl(get()) }
+    single<CourseService> { CourseServiceImpl(get()) }
 }
 
 val environmentModule = module {

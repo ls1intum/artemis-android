@@ -27,7 +27,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.0"
+        kotlinCompilerExtensionVersion = composeVersion
     }
     packagingOptions {
         resources {
@@ -46,8 +46,8 @@ repositories {
 }
 
 dependencies {
-    implementation("com.google.android.material:material:1.6.1")
-    implementation("androidx.compose.material3:material3:1.0.0-rc01")
+    implementation("com.google.android.material:material:1.7.0")
+    implementation("androidx.compose.material3:material3:1.0.0")
 
     implementation("io.insert-koin:koin-core:${koinVersion}")
     implementation("io.insert-koin:koin-core:${koinVersion}")
@@ -55,20 +55,20 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose:$koinVersion")
     implementation("io.insert-koin:koin-android-compat:$koinVersion")
 
-    implementation("androidx.compose.ui:ui:1.2.1")
-    implementation("androidx.compose.ui:ui-tooling:1.2.1")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.2.1")
-    implementation("androidx.compose.foundation:foundation:1.2.1")
-    implementation("androidx.compose.material:material-icons-extended:1.2.1")
+    implementation("androidx.compose.ui:ui:$composeVersion")
+    implementation("androidx.compose.ui:ui-tooling:$composeVersion")
+    implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
+    implementation("androidx.compose.foundation:foundation:$composeVersion")
+    implementation("androidx.compose.material:material-icons-extended:$composeVersion")
 
-    val accompanistVersion = "0.25.1"
+    val accompanistVersion = "0.27.0"
 
-    implementation("com.google.accompanist:accompanist-placeholder:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-placeholder-material:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-navigation-animation:$accompanistVersion")
 
     implementation("com.github.jeziellago:compose-markdown:0.3.1")
 
-    implementation("androidx.activity:activity-compose:1.6.0")
+    implementation("androidx.activity:activity-compose:1.6.1")
 
     implementation("io.coil-kt:coil-compose:2.2.1")
 
@@ -87,7 +87,7 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
-    implementation("androidx.navigation:navigation-compose:2.5.2")
+    implementation("androidx.navigation:navigation-compose:2.5.3")
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.4.0")
 
