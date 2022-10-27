@@ -6,8 +6,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("modeling")
-class ModelingExercise(
+@SerialName("file-upload")
+data class FileUploadExercise(
     override val id: Int? = null,
     override val title: String? = null,
     override val shortName: String? = null,
@@ -28,21 +28,6 @@ class ModelingExercise(
     override val includedInOverallScore: IncludedInOverallScore = IncludedInOverallScore.INCLUDED_COMPLETELY,
     override val exampleSolutionPublicationDate: Instant? = null,
     override val attachments: List<Attachment> = emptyList(),
-    val diagramType: UMLDiagramType? = null,
-    val exampleSolutionModel: String? = null,
-    val exampleSolutionExplanation: String? = null
-) : Exercise() {
-    enum class UMLDiagramType {
-        ClassDiagram,
-        ObjectDiagram,
-        ActivityDiagram,
-        UseCaseDiagram,
-        CommunicationDiagram,
-        ComponentDiagram,
-        DeploymentDiagram,
-        PetriNet,
-        SyntaxTree,
-        Flowchart
-    }
-
-}
+    val filePattern: String? = null,
+    val exampleSolution: String? = null
+) : Exercise()

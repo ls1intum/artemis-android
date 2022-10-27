@@ -77,3 +77,17 @@ fun <T> BasicDataStateUi(
         }
     }
 }
+
+/**
+ * Simply displays nothing when the data state is not loaded.
+ */
+@Composable
+fun <T> EmptyDataStateUi(
+    dataState: DataState<T>,
+    content: @Composable (T) -> Unit
+) {
+    when (dataState) {
+        is DataState.Success -> content(dataState.data)
+        else -> {}
+    }
+}

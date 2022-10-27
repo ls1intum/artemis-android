@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="course_ui_tab_exercises">Exercises</string>
+    <string name="course_ui_tab_lectures">Lectures</string>
     <string name="course_ui_tab_statistics">Statistics</string>
     <string name="course_ui_tab_communication">Communication</string>
     <string name="course_ui_tab_messages">Messages</string>
     <string name="course_ui_tab_learning_goals">Learning goals</string>
+
+    <!--  Exercise list  -->
+    <!--  Supplied with the from date and to date.   -->
+    <string name="course_ui_exercise_list_week_header">%1$s - %2$s</string>
+    <string name="course_ui_exercise_list_unbound_week_header">No time specified</string>
 </resources>
