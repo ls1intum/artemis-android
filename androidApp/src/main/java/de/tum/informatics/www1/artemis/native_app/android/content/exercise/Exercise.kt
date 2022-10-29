@@ -9,12 +9,15 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Serializer
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonClassDiscriminator
+import org.json.JSONObject
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -92,29 +95,35 @@ sealed class Exercise {
         MANUAL
     }
 
-    @Serializable
+    @Serializable(with = Category.CategorySerializer::class)
     data class Category(
         val category: String,
-        @Serializable(with = CategoryColorSerializer::class) val color: Color?
+        val color: Color?
     ) {
-        object CategoryColorSerializer : KSerializer<Color?> {
+        //Categories are Json Objects wrapped in a string
+        object CategorySerializer : KSerializer<Category> {
             override val descriptor: SerialDescriptor =
-                PrimitiveSerialDescriptor("color", PrimitiveKind.STRING)
+                PrimitiveSerialDescriptor("category", PrimitiveKind.STRING)
 
-            override fun serialize(encoder: Encoder, value: Color?) {
-                if (value != null) {
-                    val asString = value.toArgb().toString(16).padStart(8, '0')
-                    encoder.encodeString("#$asString")
-                } else encoder.encodeString("null")
+            override fun serialize(encoder: Encoder, value: Category) {
+                throw NotImplementedError()
             }
 
-            override fun deserialize(decoder: Decoder): Color? {
-                val s = decoder.decodeString()
+            override fun deserialize(decoder: Decoder): Category {
+                val categoryString = decoder.decodeString()
 
-                if (s == "null") return null
-                if (!s.startsWith("#")) return null
+                val obj = JSONObject(categoryString)
+                val category = obj.getString("category")
+                val colorString = obj.getString("color")
 
-                val code = s.substring(1).toLongOrNull(16) ?: return null
+                return Category(category, parseColor(colorString))
+            }
+
+            private fun parseColor(colorString: String): Color? {
+                if (colorString == "null") return null
+                if (!colorString.startsWith("#")) return null
+
+                val code = colorString.substring(1).toLongOrNull(16) ?: return null
                 return Color(code)
             }
         }

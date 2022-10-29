@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.android.util
 
-import android.provider.ContactsContract.Data
 import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState.Failure
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState.Suspended
@@ -21,14 +20,14 @@ sealed class DataState<T> {
      */
     class Loading<T> : DataState<T>()
 
-    class Failure<T>(val exception: Exception) : DataState<T>()
+    class Failure<T>(val throwable: Throwable) : DataState<T>()
 
     data class Success<T>(val data: T) : DataState<T>()
 
     fun <K> bind(op: (T) -> K): DataState<K> {
         return when (this) {
             is Success -> Success(op(data))
-            is Failure -> Failure(exception)
+            is Failure -> Failure(throwable)
             is Loading -> Loading()
             is Suspended -> Suspended(exception)
         }
@@ -99,6 +98,7 @@ inline fun <T> retryOnInternet(
                 }
             }
         }
+        .catch { error -> emit(Failure(error)) }
         .transformWhile { dataState ->
             emit(dataState)
             //Continue while the network response is still a failure.

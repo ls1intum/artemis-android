@@ -29,5 +29,5 @@ class TextExercise(
     override val includedInOverallScore: IncludedInOverallScore = IncludedInOverallScore.INCLUDED_COMPLETELY,
     override val exampleSolutionPublicationDate: Instant? = null,
     override val attachments: List<Attachment> = emptyList(),
-    val exampleSolution: String?
+    val exampleSolution: String? = null
 ) : Exercise()

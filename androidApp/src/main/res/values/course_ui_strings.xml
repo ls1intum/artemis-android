@@ -8,7 +8,15 @@
     <string name="course_ui_tab_learning_goals">Learning goals</string>
 
     <!--  Exercise list  -->
+    <string name="course_ui_loading_course_failed">Something went wrong while loading your course.</string>
+    <string name="course_ui_loading_course_suspended">Your Internet connection may be unstable.</string>
+    <string name="course_ui_loading_course_loading">Fetching your course from server…</string>
+    <string name="course_ui_loading_course_try_again">Try again</string>
+
     <!--  Supplied with the from date and to date.   -->
     <string name="course_ui_exercise_list_week_header">%1$s - %2$s</string>
     <string name="course_ui_exercise_list_unbound_week_header">No time specified</string>
+    <!--  Screen reader information about the expand button to show weekly exercises  -->
+    <string name="course_ui_exercise_list_expand_button_more_content_info">Expand exercise list</string>
+    <string name="course_ui_exercise_list_expand_button_less_content_info">Collapse exercise list</string>
 </resources>

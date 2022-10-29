@@ -6,26 +6,34 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.*
 import de.tum.informatics.www1.artemis.native_app.android.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.*
+import kotlinx.datetime.TimeZone
 import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Display a list of all exercises with section headers.
@@ -38,14 +46,56 @@ fun ExerciseListUi(
     onClickExercise: (exerciseId: Int) -> Unit
 ) {
     EmptyDataStateUi(dataState = exercisesDataState) { weeklyExercises ->
+        val weeklyExercisesExpanded: MutableMap<WeeklyExercises, Boolean> = remember(
+            weeklyExercises
+        ) {
+            val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+            SnapshotStateMap<WeeklyExercises, Boolean>().apply {
+                putAll(
+                    weeklyExercises
+                        .map {
+                            it to when (it) {
+                                is WeeklyExercises.Unbound -> true
+                                is WeeklyExercises.BoundToWeek -> {
+                                    it.firstDayOfWeek.daysUntil(today) < 14
+                                }
+                            }
+                        }
+                )
+            }
+        }
+
         LazyColumn(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
             weeklyExercises.forEach { weeklyExercise ->
                 item {
                     ExerciseWeekSectionHeader(
-                        modifier = Modifier.fillMaxWidth(),
-                        weeklyExercise
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        weeklyExercises = weeklyExercise,
+                        expanded = weeklyExercisesExpanded[weeklyExercise] == true,
+                        onToggleExpanded = {
+                            weeklyExercisesExpanded[weeklyExercise] =
+                                weeklyExercisesExpanded[weeklyExercise] != true
+                        }
                     )
                 }
+
+                if (weeklyExercisesExpanded[weeklyExercise] == true) {
+                    items(weeklyExercise.exercises, key = { it.id ?: it.hashCode() }) { exercise ->
+                        Exercise(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .animateItemPlacement(),
+                            exercise = exercise,
+                            onClickExercise = { onClickExercise(exercise.id ?: return@Exercise) }
+                        )
+                    }
+                }
+
+                item { Divider() }
             }
         }
     }
@@ -53,9 +103,16 @@ fun ExerciseListUi(
 
 /**
  * Display a title with the time range of the week or a text indicating that no time is bound.
+ * Displays an icon button that lets the user expand and collapse the weekly exercises
+ * @param expanded if the exercise group this is showing is expanded
  */
 @Composable
-fun ExerciseWeekSectionHeader(modifier: Modifier, weeklyExercises: WeeklyExercises) {
+fun ExerciseWeekSectionHeader(
+    modifier: Modifier,
+    weeklyExercises: WeeklyExercises,
+    expanded: Boolean,
+    onToggleExpanded: () -> Unit
+) {
     val text = when (weeklyExercises) {
         is WeeklyExercises.BoundToWeek -> {
             val (fromText, toText) = remember(
@@ -64,7 +121,14 @@ fun ExerciseWeekSectionHeader(modifier: Modifier, weeklyExercises: WeeklyExercis
             ) {
                 val format = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM)
 
-                format.format(weeklyExercises.firstDayOfWeek) to format.format(weeklyExercises.lastDayOfWeek)
+                val dateToInstant = { date: LocalDate ->
+                    Date.from(date.atStartOfDayIn(TimeZone.currentSystemDefault()).toJavaInstant())
+                }
+
+                val fromDate = dateToInstant(weeklyExercises.firstDayOfWeek)
+                val toData = dateToInstant(weeklyExercises.lastDayOfWeek)
+
+                format.format(fromDate) to format.format(toData)
             }
 
             stringResource(id = R.string.course_ui_exercise_list_week_header, fromText, toText)
@@ -73,11 +137,23 @@ fun ExerciseWeekSectionHeader(modifier: Modifier, weeklyExercises: WeeklyExercis
     }
 
 
-    Box(modifier = modifier) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Text(
+            modifier = Modifier.weight(1f),
             text = text,
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.titleMedium
         )
+
+        IconButton(onClick = onToggleExpanded) {
+            val icon = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore
+            val contentDescription =
+                stringResource(
+                    id = if (expanded) R.string.course_ui_exercise_list_expand_button_less_content_info
+                    else R.string.course_ui_exercise_list_expand_button_more_content_info
+                )
+
+            Icon(icon, contentDescription)
+        }
     }
 }
 
@@ -87,7 +163,8 @@ fun ExerciseWeekSectionHeader(modifier: Modifier, weeklyExercises: WeeklyExercis
  */
 @Composable
 private fun Exercise(modifier: Modifier, exercise: Exercise, onClickExercise: () -> Unit) {
-    val chips = remember(exercise) { collectExerciseCategoryChips(exercise) }
+    val context = LocalContext.current
+    val chips = remember(exercise) { collectExerciseCategoryChips(context, exercise) }
 
     Card(modifier = modifier, onClick = onClickExercise) {
         Column(
@@ -112,9 +189,12 @@ private fun Exercise(modifier: Modifier, exercise: Exercise, onClickExercise: ()
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-
+                chips.forEach { chipData ->
+                    ExerciseCategoryChip(modifier = Modifier, data = chipData)
+                }
             }
         }
     }
@@ -130,7 +210,7 @@ private fun ExerciseTypeIcon(modifier: Modifier, exercise: Exercise) {
         is ModelingExercise -> Icons.Default.AccountTree
         is FileUploadExercise -> Icons.Default.FileUpload
         is ProgrammingExercise -> Icons.Default.Code
-        is UnknownExercise -> Icons.Default.QuestionMark
+        else -> Icons.Default.QuestionMark
     }
 
     Box(
@@ -161,7 +241,9 @@ private fun ExerciseCategoryChip(modifier: Modifier, data: ExerciseCategoryChipD
         Text(
             modifier = Modifier.padding(2.dp),
             text = data.text,
-            style = MaterialTheme.typography.labelLarge
+            style = MaterialTheme.typography.labelLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
