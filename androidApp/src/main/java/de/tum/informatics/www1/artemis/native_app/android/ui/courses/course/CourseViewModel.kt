@@ -3,10 +3,12 @@ package de.tum.informatics.www1.artemis.native_app.android.ui.courses.course
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.android.content.Course
+import de.tum.informatics.www1.artemis.native_app.android.content.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
 import de.tum.informatics.www1.artemis.native_app.android.service.CourseService
 import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
+import de.tum.informatics.www1.artemis.native_app.android.service.exercises.ExerciseService
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import de.tum.informatics.www1.artemis.native_app.android.util.retryOnInternet
 import kotlinx.coroutines.flow.*
@@ -18,10 +20,11 @@ import java.util.Locale
 
 class CourseViewModel(
     private val courseId: Int,
-    serverCommunicationProvider: ServerCommunicationProvider,
-    accountService: AccountService,
+    private val serverCommunicationProvider: ServerCommunicationProvider,
+    private val accountService: AccountService,
     private val networkStatusProvider: NetworkStatusProvider,
-    private val courseService: CourseService
+    private val courseService: CourseService,
+    private val exerciseService: ExerciseService
 ) : ViewModel() {
 
     private val requestReloadCourse = MutableSharedFlow<Unit>()
@@ -60,7 +63,7 @@ class CourseViewModel(
                     .exercises
                     // Group the exercise based on their start of the week day (most likely monday)
                     .groupBy { exercise ->
-                        val releaseDate = exercise.releaseDate ?: return@groupBy null
+                        val releaseDate = exercise.dueDate ?: return@groupBy null
 
                         releaseDate
                             .toLocalDateTime(TimeZone.currentSystemDefault())
@@ -71,7 +74,7 @@ class CourseViewModel(
                     }
                     .map { (firstDayOfWeek, exercises) ->
                         if (firstDayOfWeek != null) {
-                            val lastDayOfWeek = firstDayOfWeek.plus(7, DateTimeUnit.DAY)
+                            val lastDayOfWeek = firstDayOfWeek.plus(6, DateTimeUnit.DAY)
                             WeeklyExercises.BoundToWeek(firstDayOfWeek, lastDayOfWeek, exercises)
                         } else WeeklyExercises.Unbound(exercises)
                     }
@@ -93,6 +96,32 @@ class CourseViewModel(
 //                + (if (course.lectures.isNotEmpty()) listOf(CourseTab.Lectures(course.lectures)) else emptyList())
 //                + listOf(CourseTab.Statistics, CourseTab.Communication)
 //    )
+
+    /**
+     * @return a flow that fetches the details for the exercise with the provided it.
+     * Automatically retries and refreshes on changes.
+     */
+    fun getLoadExerciseDetailsFlow(exerciseId: Int): Flow<DataState<Exercise>> {
+        return combine(
+            serverCommunicationProvider.serverUrl,
+            accountService.authenticationData,
+            requestReloadCourse.onStart { emit(Unit) }) { a, b, _ -> a to b }
+            .transformLatest { (serverUrl, authData) ->
+                when (authData) {
+                    is AccountService.AuthenticationData.LoggedIn -> {
+                        emitAll(
+                            retryOnInternet(
+                                connectivity = networkStatusProvider.currentNetworkStatus
+                            ) {
+                                exerciseService
+                                    .getExerciseDetails(exerciseId, serverUrl, authData.authToken)
+                            }
+                        )
+                    }
+                    AccountService.AuthenticationData.NotLoggedIn -> emit(DataState.Suspended())
+                }
+            }
+    }
 
     fun reloadCourse() {
         viewModelScope.launch {

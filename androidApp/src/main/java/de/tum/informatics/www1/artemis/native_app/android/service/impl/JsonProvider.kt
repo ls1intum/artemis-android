@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.android.service.impl
 
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.exerciseSerializerModule
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.participation.participationSerializerModule
+import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.submissionSerializerModule
 import de.tum.informatics.www1.artemis.native_app.android.content.lecture.lectureSerializerModule
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
@@ -21,6 +22,7 @@ class JsonProvider {
             include(exerciseSerializerModule)
             include(lectureSerializerModule)
             include(participationSerializerModule)
+            include(submissionSerializerModule)
         }
     }
 }

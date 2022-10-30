@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.android.content.exercise
 
+import de.tum.informatics.www1.artemis.native_app.android.content.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.android.content.lecture.attachment.Attachment
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
@@ -28,6 +29,7 @@ class ModelingExercise(
     override val includedInOverallScore: IncludedInOverallScore = IncludedInOverallScore.INCLUDED_COMPLETELY,
     override val exampleSolutionPublicationDate: Instant? = null,
     override val attachments: List<Attachment> = emptyList(),
+    override val studentParticipations: List<Participation>? = null,
     val diagramType: UMLDiagramType? = null,
     val exampleSolutionModel: String? = null,
     val exampleSolutionExplanation: String? = null

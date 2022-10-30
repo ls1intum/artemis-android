@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
@@ -23,11 +25,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.*
+import de.tum.informatics.www1.artemis.native_app.android.service.exercises.ExerciseService
 import de.tum.informatics.www1.artemis.native_app.android.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
+import de.tum.informatics.www1.artemis.native_app.android.util.retryOnInternet
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone
 import okhttp3.internal.format
+import org.koin.androidx.compose.get
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -39,6 +47,7 @@ import java.util.*
 fun ExerciseListUi(
     modifier: Modifier,
     exercisesDataState: DataState<List<WeeklyExercises>>,
+    loadExerciseDetails: (exerciseId: Int) -> Flow<DataState<Exercise>>,
     onClickExercise: (exerciseId: Int) -> Unit
 ) {
     EmptyDataStateUi(dataState = exercisesDataState) { weeklyExercises ->
@@ -83,9 +92,9 @@ fun ExerciseListUi(
                         Exercise(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .animateItemPlacement(),
+                                .padding(horizontal = 16.dp),
                             exercise = exercise,
+                            loadExerciseDetails = loadExerciseDetails,
                             onClickExercise = { onClickExercise(exercise.id ?: return@Exercise) }
                         )
                     }
@@ -156,11 +165,30 @@ fun ExerciseWeekSectionHeader(
 /**
  * Display a single exercise.
  * The exercise is displayed in a card with an icon specific to the exercise type.
+ *
+ * Additionally, loads the exercise details from the server. Once loaded, replaces the supplied exercise with the loaded one.
+ *
+ * @param loadExerciseDetails supply a flow that returns the exercise details.
  */
 @Composable
-private fun Exercise(modifier: Modifier, exercise: Exercise, onClickExercise: () -> Unit) {
+private fun Exercise(
+    modifier: Modifier,
+    exercise: Exercise,
+    loadExerciseDetails: (exerciseId: Int) -> Flow<DataState<Exercise>>,
+    onClickExercise: () -> Unit
+) {
+//    val loadedExercise by flow {
+//        val id = exercise.id
+//        if (id != null) {
+//            emitAll(loadExerciseDetails(id))
+//        }
+//
+//    }.collectAsState(initial = DataState.Loading())
+
+    val actExercise = exercise
+
     val context = LocalContext.current
-    val chips = remember(exercise) { collectExerciseCategoryChips(context, exercise) }
+    val chips = remember(actExercise) { collectExerciseCategoryChips(context, actExercise) }
 
     Card(modifier = modifier, onClick = onClickExercise) {
         Column(
@@ -170,13 +198,13 @@ private fun Exercise(modifier: Modifier, exercise: Exercise, onClickExercise: ()
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
-                ExerciseTypeIcon(modifier = Modifier.size(80.dp), exercise = exercise)
+                ExerciseTypeIcon(modifier = Modifier.size(80.dp), exercise = actExercise)
 
                 ExerciseDataText(
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 16.dp),
-                    exercise = exercise
+                    exercise = actExercise
                 )
             }
 
@@ -225,7 +253,7 @@ private fun ExerciseTypeIcon(modifier: Modifier, exercise: Exercise) {
 }
 
 /**
- * Displays the exercise title, the
+ * Displays the exercise title, the due data and the participation info. The participation info is automatically updates.
  */
 @Composable
 private fun ExerciseDataText(modifier: Modifier, exercise: Exercise) {
@@ -258,24 +286,21 @@ private fun ExerciseDataText(modifier: Modifier, exercise: Exercise) {
             style = MaterialTheme.typography.bodyMedium
         )
 
-        val participationStatus = exercise.participationStatus
-        if (participationStatus != null) {
-            when (participationStatus) {
-                Exercise.ParticipationStatus.QUIZ_FINISHED,
-                Exercise.ParticipationStatus.INACTIVE,
-                Exercise.ParticipationStatus.INITIALIZED,
-                Exercise.ParticipationStatus.EXERCISE_SUBMITTED -> {
-                    //Display dynamic updates component
-                }
-                else -> {
-                    //Simply display text
-                    Text(
-                        text = getSubmissionResultStatusText(participationStatus = participationStatus),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
+        when (val participationStatus = exercise.computeParticipationStatus(testRun = null)) {
+            Exercise.ParticipationStatus.QUIZ_FINISHED,
+            Exercise.ParticipationStatus.INACTIVE,
+            Exercise.ParticipationStatus.INITIALIZED,
+            Exercise.ParticipationStatus.EXERCISE_SUBMITTED -> {
+                //Display dynamic updates component
+                Exercise
             }
-
+            else -> {
+                //Simply display text
+                Text(
+                    text = getSubmissionResultStatusText(participationStatus = participationStatus),
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
         }
     }
 }

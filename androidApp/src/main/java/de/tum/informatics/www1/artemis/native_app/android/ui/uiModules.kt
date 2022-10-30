@@ -17,6 +17,6 @@ val viewModelModule = module {
     viewModelOf(::AccountViewModel)
     viewModelOf(::RegisterForCourseViewModel)
     viewModel { parametersHolder ->
-        CourseViewModel(parametersHolder.get(), get(), get(), get(), get())
+        CourseViewModel(parametersHolder.get(), get(), get(), get(), get(), get())
     }
 }

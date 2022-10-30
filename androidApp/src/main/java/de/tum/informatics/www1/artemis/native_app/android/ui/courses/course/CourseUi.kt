@@ -14,9 +14,17 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.android.R
+import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
+import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
 import de.tum.informatics.www1.artemis.native_app.android.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import de.tum.informatics.www1.artemis.native_app.android.util.isSuccess
+import de.tum.informatics.www1.artemis.native_app.android.util.retryOnInternet
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.transformLatest
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @Composable
@@ -87,7 +95,8 @@ fun CourseUi(
                 exercisesDataState = weeklyExercises,
                 onClickExercise = { exerciseId ->
 
-                }
+                },
+                loadExerciseDetails = viewModel::getLoadExerciseDetailsFlow
             )
         }
     }

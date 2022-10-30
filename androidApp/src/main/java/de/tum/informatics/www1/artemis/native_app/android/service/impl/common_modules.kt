@@ -1,10 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.android.service.impl
 
 import de.tum.informatics.www1.artemis.native_app.android.service.*
+import de.tum.informatics.www1.artemis.native_app.android.service.exercises.ExerciseService
 import de.tum.informatics.www1.artemis.native_app.android.service.exercises.ParticipationService
 import de.tum.informatics.www1.artemis.native_app.android.service.impl.courses.CourseRegistrationServiceImpl
 import de.tum.informatics.www1.artemis.native_app.android.service.impl.courses.CourseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.android.service.impl.courses.DashboardServiceImpl
+import de.tum.informatics.www1.artemis.native_app.android.service.impl.exercises.ExerciseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.android.service.impl.exercises.ParticipationServiceImpl
 import de.tum.informatics.www1.artemis.native_app.android.service.student.CourseRegistrationService
 import org.koin.android.ext.koin.androidContext
@@ -20,6 +22,7 @@ val userContentModule = module {
     single<DashboardService> { DashboardServiceImpl(get()) }
     single<CourseService> { CourseServiceImpl(get()) }
     single<ParticipationService> { ParticipationServiceImpl(get()) }
+    single<ExerciseService> { ExerciseServiceImpl(get()) }
 }
 
 val environmentModule = module {
