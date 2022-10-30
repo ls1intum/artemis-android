@@ -124,7 +124,7 @@ sealed class Exercise {
                 if (!colorString.startsWith("#")) return null
 
                 val code = colorString.substring(1).toLongOrNull(16) ?: return null
-                return Color(code)
+                return Color(0xff000000 + code)
             }
         }
     }
