@@ -16,5 +16,4 @@ class UnknownParticipation(
     override val individualDueDate: Instant? = null,
     override val results: List<Result>? = null,
     override val exercise: Exercise? = null,
-    override val type: ParticipationType? = null,
 ) : Participation()

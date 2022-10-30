@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission
 
+import de.tum.informatics.www1.artemis.native_app.android.content.exercise.participation.Participation
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

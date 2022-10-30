@@ -16,7 +16,6 @@ sealed class Participation {
     abstract val individualDueDate: Instant?
     abstract val results: List<Result>?
     abstract val exercise: Exercise?
-    abstract val type: ParticipationType?
 
     enum class InitializationState {
         UNINITIALIZED,
@@ -34,17 +33,5 @@ sealed class Participation {
          */
         FINISHED,
         INACTIVE
-    }
-
-    // IMPORTANT NOTICE: The following strings have to be consistent with the ones defined in Participation.java
-    enum class ParticipationType {
-        @SerialName("student")
-        STUDENT,
-        @SerialName("programming")
-        PROGRAMMING,
-        @SerialName("template")
-        TEMPLATE,
-        @SerialName("solution")
-        SOLUTION
     }
 }

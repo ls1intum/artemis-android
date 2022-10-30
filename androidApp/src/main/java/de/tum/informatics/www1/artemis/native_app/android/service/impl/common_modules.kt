@@ -1,9 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.android.service.impl
 
 import de.tum.informatics.www1.artemis.native_app.android.service.*
+import de.tum.informatics.www1.artemis.native_app.android.service.exercises.ParticipationService
 import de.tum.informatics.www1.artemis.native_app.android.service.impl.courses.CourseRegistrationServiceImpl
 import de.tum.informatics.www1.artemis.native_app.android.service.impl.courses.CourseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.android.service.impl.courses.DashboardServiceImpl
+import de.tum.informatics.www1.artemis.native_app.android.service.impl.exercises.ParticipationServiceImpl
+import de.tum.informatics.www1.artemis.native_app.android.service.student.CourseRegistrationService
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -16,6 +19,7 @@ val userManagementModule = module {
 val userContentModule = module {
     single<DashboardService> { DashboardServiceImpl(get()) }
     single<CourseService> { CourseServiceImpl(get()) }
+    single<ParticipationService> { ParticipationServiceImpl(get()) }
 }
 
 val environmentModule = module {
@@ -23,7 +27,9 @@ val environmentModule = module {
 }
 
 val communicationModule = module {
-    single { KtorProvider() }
+    singleOf(::JsonProvider)
+    singleOf(::KtorProvider)
+    singleOf(::WebsocketProvider)
 
     single<ServerCommunicationProvider> {
         ServerCommunicationProviderImpl(androidContext(), get(), get())

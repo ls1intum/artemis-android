@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.android.content.Course
 import de.tum.informatics.www1.artemis.native_app.android.service.AccountService
-import de.tum.informatics.www1.artemis.native_app.android.service.CourseRegistrationService
+import de.tum.informatics.www1.artemis.native_app.android.service.student.CourseRegistrationService
 import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState

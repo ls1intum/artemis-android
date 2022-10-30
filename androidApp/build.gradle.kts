@@ -76,8 +76,14 @@ dependencies {
     implementation("io.ktor:ktor-client-serialization:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    implementation("io.ktor:ktor-client-websockets:$ktorVersion")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+    //For the websockets
+    implementation("org.hildan.krossbow:krossbow-stomp-core:4.4.0")
+    implementation("org.hildan.krossbow:krossbow-websocket-ktor:4.4.0")
+    implementation("org.hildan.krossbow:krossbow-stomp-kxserialization-json:4.4.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
 
     val lifecycle_version = "2.5.1"
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")

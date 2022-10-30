@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Strings associated with an exercise -->
+<?xml version="1.0" encoding="utf-8"?><!-- Strings associated with an exercise -->
 <resources>
     <!--  Difficulty  -->
     <string name="exercise_difficulty_easy">Easy</string>
@@ -7,4 +6,15 @@
     <string name="exercise_difficulty_hard">Hard</string>
 
     <string name="exercise_is_bonus">Bonus</string>
+    <string name="exercise_live_quit">Live</string>
+
+    <string name="exercise_user_not_started_exercise">Not yet started.</string>
+    <string name="exercise_user_not_assigned_to_team">No team yet.</string>
+    <string name="exercise_exercise_not_submitted">No Submission</string>
+    <string name="exercise_exercise_missed_deadline">Deadline missed.</string>
+    <string name="exercise_quiz_not_started">Not yet started.</string>
+    <string name="exercise_user_not_started_quiz">Not yet started.</string>
+    <string name="exercise_user_not_participated">Not participated.</string>
+    <string name="exercise_user_participating">Currently participating.</string>
+    <string name="exercise_user_submitted">Already submitted.</string>
 </resources>

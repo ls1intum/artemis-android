@@ -19,4 +19,7 @@
     <!--  Screen reader information about the expand button to show weekly exercises  -->
     <string name="course_ui_exercise_list_expand_button_more_content_info">Expand exercise list</string>
     <string name="course_ui_exercise_list_expand_button_less_content_info">Collapse exercise list</string>
+
+    <string name="course_ui_exercise_item_due_date_set">Due date: %1$s</string>
+    <string name="course_ui_exercise_item_due_date_not_set">No due date</string>
 </resources>

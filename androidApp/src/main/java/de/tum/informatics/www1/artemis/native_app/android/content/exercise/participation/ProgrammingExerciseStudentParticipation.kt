@@ -17,7 +17,6 @@ class ProgrammingExerciseStudentParticipation(
     override val individualDueDate: Instant? = null,
     override val results: List<Result>? = null,
     override val exercise: Exercise? = null,
-    override val type: ParticipationType? = null,
     override val student: User? = null,
     override val team: Team? = null,
     override val participantIdentifier: String? = null,
