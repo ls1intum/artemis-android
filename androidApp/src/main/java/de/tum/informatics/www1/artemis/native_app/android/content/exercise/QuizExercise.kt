@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("quiz")
-class QuizExercise(
+data class QuizExercise(
     override val id: Int? = null,
     override val title: String? = null,
     override val shortName: String? = null,
@@ -41,6 +41,8 @@ class QuizExercise(
     val quizMode: QuizMode = QuizMode.INDIVIDUAL,
     val quizBatches: List<QuizBatch>? = null
 ) : Exercise() {
+
+    override fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise = copy(studentParticipations = newParticipations)
 
     enum class QuizStatus {
         CLOSED,

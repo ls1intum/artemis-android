@@ -12,8 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
@@ -25,17 +23,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.*
-import de.tum.informatics.www1.artemis.native_app.android.service.exercises.ExerciseService
 import de.tum.informatics.www1.artemis.native_app.android.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
-import de.tum.informatics.www1.artemis.native_app.android.util.retryOnInternet
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone
-import okhttp3.internal.format
-import org.koin.androidx.compose.get
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -47,7 +38,6 @@ import java.util.*
 fun ExerciseListUi(
     modifier: Modifier,
     exercisesDataState: DataState<List<WeeklyExercises>>,
-    loadExerciseDetails: (exerciseId: Int) -> Flow<DataState<Exercise>>,
     onClickExercise: (exerciseId: Int) -> Unit
 ) {
     EmptyDataStateUi(dataState = exercisesDataState) { weeklyExercises ->
@@ -88,15 +78,13 @@ fun ExerciseListUi(
                 }
 
                 if (weeklyExercisesExpanded[weeklyExercise] == true) {
-                    items(weeklyExercise.exercises, key = { it.id ?: it.hashCode() }) { exercise ->
-                        Exercise(
+                    items(weeklyExercise.exercises, key = { it.exercise.id ?: it.hashCode() }) { exerciseWithParticipationStatus ->
+                        ExerciseItem(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
-                            exercise = exercise,
-                            loadExerciseDetails = loadExerciseDetails,
-                            onClickExercise = { onClickExercise(exercise.id ?: return@Exercise) }
-                        )
+                            exerciseWithParticipationStatus = exerciseWithParticipationStatus
+                        ) { onClickExercise(exerciseWithParticipationStatus.exercise.id ?: return@ExerciseItem) }
                     }
                 }
 
@@ -168,27 +156,18 @@ fun ExerciseWeekSectionHeader(
  *
  * Additionally, loads the exercise details from the server. Once loaded, replaces the supplied exercise with the loaded one.
  *
- * @param loadExerciseDetails supply a flow that returns the exercise details.
+ * @param loadLatestExerciseVersion supply a flow that returns the exercise details.
  */
 @Composable
-private fun Exercise(
+private fun ExerciseItem(
     modifier: Modifier,
-    exercise: Exercise,
-    loadExerciseDetails: (exerciseId: Int) -> Flow<DataState<Exercise>>,
+    exerciseWithParticipationStatus: ExerciseWithParticipationStatus,
     onClickExercise: () -> Unit
 ) {
-//    val loadedExercise by flow {
-//        val id = exercise.id
-//        if (id != null) {
-//            emitAll(loadExerciseDetails(id))
-//        }
-//
-//    }.collectAsState(initial = DataState.Loading())
-
-    val actExercise = exercise
+    val exercise = exerciseWithParticipationStatus.exercise
 
     val context = LocalContext.current
-    val chips = remember(actExercise) { collectExerciseCategoryChips(context, actExercise) }
+    val chips = remember(exercise) { collectExerciseCategoryChips(context, exercise) }
 
     Card(modifier = modifier, onClick = onClickExercise) {
         Column(
@@ -198,13 +177,13 @@ private fun Exercise(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
-                ExerciseTypeIcon(modifier = Modifier.size(80.dp), exercise = actExercise)
+                ExerciseTypeIcon(modifier = Modifier.size(80.dp), exercise = exercise)
 
                 ExerciseDataText(
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 16.dp),
-                    exercise = actExercise
+                    exercise = exercise
                 )
             }
 

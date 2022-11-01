@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.android.service.CourseService
 import de.tum.informatics.www1.artemis.native_app.android.service.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.android.service.ServerCommunicationProvider
 import de.tum.informatics.www1.artemis.native_app.android.service.exercises.ExerciseService
+import de.tum.informatics.www1.artemis.native_app.android.service.exercises.ParticipationService
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import de.tum.informatics.www1.artemis.native_app.android.util.retryOnInternet
 import kotlinx.coroutines.flow.*
@@ -24,7 +25,8 @@ class CourseViewModel(
     private val accountService: AccountService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val courseService: CourseService,
-    private val exerciseService: ExerciseService
+    private val exerciseService: ExerciseService,
+    private val participationService: ParticipationService
 ) : ViewModel() {
 
     private val requestReloadCourse = MutableSharedFlow<Unit>()
@@ -56,13 +58,81 @@ class CourseViewModel(
             }
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
+    /**
+     * Holds a flow of the latest participation status for each exercise (associated by the exercise id)
+     */
+    private val exerciseWithParticipationStatusFlow: Flow<DataState<List<ExerciseWithParticipationStatus>>> =
+        course
+            .map { courseDataState -> courseDataState.bind { it.exercises } }
+            .transformLatest { exercisesDataState ->
+                when (exercisesDataState) {
+                    is DataState.Success -> {
+                        val exercises = exercisesDataState.data
+                        val exercisesById = exercises.associateBy { it.id }.toMutableMap()
+
+                        val participationStatusMap =
+                            exercises
+                                .associate {
+                                    (it.id ?: 0) to ExerciseWithParticipationStatus(
+                                        it,
+                                        it.computeParticipationStatus(null)
+                                    )
+                                }
+                                .toMutableMap()
+
+                        emit(DataState.Success(participationStatusMap.values.toList()))
+
+                        participationService
+                            .personalSubmissionUpdater
+                            .collect { latestSubmission ->
+                                //Find the associated exercise, so that the submissions can be updated.
+                                val participation = latestSubmission.participation
+
+                                val associatedExerciseId =
+                                    participation?.exercise?.id ?: return@collect
+                                val associatedExercise =
+                                    exercisesById[associatedExerciseId] ?: return@collect
+
+                                val currentAssociatedExerciseParticipations =
+                                    associatedExercise.studentParticipations
+
+                                val updatedParticipations =
+                                    //Replace the updated participation
+                                    currentAssociatedExerciseParticipations?.map { oldParticipation ->
+                                        if (oldParticipation.id == participation.id) {
+                                            participation
+                                        } else {
+                                            oldParticipation
+                                        }
+                                    }
+                                        ?: //The new participations are just the one we just received
+                                        listOf(participation)
+
+                                //Replace the exercise
+                                val newExercise = associatedExercise.copyWithUpdatedParticipations(
+                                    updatedParticipations
+                                )
+                                exercisesById[associatedExerciseId] = newExercise
+
+                                participationStatusMap[associatedExerciseId] =
+                                    ExerciseWithParticipationStatus(
+                                        newExercise,
+                                        newExercise.computeParticipationStatus(null)
+                                    )
+                                emit(DataState.Success(participationStatusMap.values.toList()))
+                            }
+                    }
+                    else -> emit(exercisesDataState.bind { emptyList() })
+                }
+            }
+
     val exercisesGroupedByWeek: Flow<DataState<List<WeeklyExercises>>> =
-        course.map { courseDataState ->
-            courseDataState.bind { course ->
-                course
-                    .exercises
+        exerciseWithParticipationStatusFlow.map { exercisesDataState ->
+            exercisesDataState.bind { exercisesWithParticipationState ->
+                exercisesWithParticipationState
                     // Group the exercise based on their start of the week day (most likely monday)
-                    .groupBy { exercise ->
+                    .groupBy { exerciseWithParticipationState ->
+                        val exercise = exerciseWithParticipationState.exercise
                         val releaseDate = exercise.dueDate ?: return@groupBy null
 
                         releaseDate
@@ -97,35 +167,10 @@ class CourseViewModel(
 //                + listOf(CourseTab.Statistics, CourseTab.Communication)
 //    )
 
-    /**
-     * @return a flow that fetches the details for the exercise with the provided it.
-     * Automatically retries and refreshes on changes.
-     */
-    fun getLoadExerciseDetailsFlow(exerciseId: Int): Flow<DataState<Exercise>> {
-        return combine(
-            serverCommunicationProvider.serverUrl,
-            accountService.authenticationData,
-            requestReloadCourse.onStart { emit(Unit) }) { a, b, _ -> a to b }
-            .transformLatest { (serverUrl, authData) ->
-                when (authData) {
-                    is AccountService.AuthenticationData.LoggedIn -> {
-                        emitAll(
-                            retryOnInternet(
-                                connectivity = networkStatusProvider.currentNetworkStatus
-                            ) {
-                                exerciseService
-                                    .getExerciseDetails(exerciseId, serverUrl, authData.authToken)
-                            }
-                        )
-                    }
-                    AccountService.AuthenticationData.NotLoggedIn -> emit(DataState.Suspended())
-                }
-            }
-    }
-
     fun reloadCourse() {
         viewModelScope.launch {
             requestReloadCourse.emit(Unit)
         }
     }
+
 }

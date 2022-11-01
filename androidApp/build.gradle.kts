@@ -81,6 +81,7 @@ dependencies {
     //For the websockets
     implementation("org.hildan.krossbow:krossbow-stomp-core:4.4.0")
     implementation("org.hildan.krossbow:krossbow-websocket-ktor:4.4.0")
+    implementation("org.hildan.krossbow:krossbow-websocket-okhttp:4.4.0")
     implementation("org.hildan.krossbow:krossbow-stomp-kxserialization-json:4.4.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")

@@ -33,6 +33,15 @@ sealed class DataState<T> {
         }
     }
 
+    fun <K> transform(op: (T) -> DataState<K>): DataState<K> {
+        return when (this) {
+            is Success -> op(data)
+            is Failure -> Failure(throwable)
+            is Loading -> Loading()
+            is Suspended -> Suspended(exception)
+        }
+    }
+
     fun orElse(other: T): T {
         return when (this) {
             is Success -> data

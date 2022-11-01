@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("text")
-class TextExercise(
+data class TextExercise(
     override val id: Int? = null,
     override val title: String? = null,
     override val shortName: String? = null,
@@ -31,4 +31,6 @@ class TextExercise(
     override val attachments: List<Attachment> = emptyList(),
     override val studentParticipations: List<Participation>? = null,
     val exampleSolution: String? = null
-) : Exercise()
+) : Exercise() {
+    override fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise = copy(studentParticipations = newParticipations)
+}

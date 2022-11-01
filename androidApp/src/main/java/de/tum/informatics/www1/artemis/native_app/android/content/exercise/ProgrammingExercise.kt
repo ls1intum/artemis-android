@@ -33,6 +33,8 @@ data class ProgrammingExercise(
     val programmingLanguage: ProgrammingLanguage? = null
 ) : Exercise() {
 
+    override fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise = copy(studentParticipations = newParticipations)
+
     enum class ProgrammingLanguage {
         JAVA,
         PYTHON,

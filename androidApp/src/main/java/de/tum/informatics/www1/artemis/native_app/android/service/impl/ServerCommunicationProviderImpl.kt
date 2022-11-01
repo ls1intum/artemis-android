@@ -41,6 +41,10 @@ class ServerCommunicationProviderImpl(
             .data
             .map { data -> data[SERVER_URL_KEY] ?: ArtemisInstances.TUM_ARTEMIS.serverUrl }
 
+    override val host: Flow<String> =
+        serverUrl
+            .map { Url(it).host }
+
     override val serverProfileInfo: Flow<DataState<ProfileInfo>> =
         serverUrl.flatMapLatest { serverUrl ->
             retryOnInternet(

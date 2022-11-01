@@ -32,4 +32,7 @@ data class FileUploadExercise(
     override val studentParticipations: List<Participation>? = null,
     val filePattern: String? = null,
     val exampleSolution: String? = null
-) : Exercise()
+) : Exercise() {
+
+    override fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise = copy(studentParticipations = newParticipations)
+}

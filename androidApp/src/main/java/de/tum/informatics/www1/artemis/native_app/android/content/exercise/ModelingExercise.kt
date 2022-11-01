@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("modeling")
-class ModelingExercise(
+data class ModelingExercise(
     override val id: Int? = null,
     override val title: String? = null,
     override val shortName: String? = null,
@@ -47,4 +47,5 @@ class ModelingExercise(
         Flowchart
     }
 
+    override fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise = copy(studentParticipations = newParticipations)
 }

@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
  * Default deserialized exercise if an exercise is found this app does not know.
  */
 @Serializable
-class UnknownExercise(
+data class UnknownExercise(
     override val id: Int? = null,
     override val title: String? = null,
     override val shortName: String? = null,
@@ -31,4 +31,7 @@ class UnknownExercise(
     override val exampleSolutionPublicationDate: Instant? = null,
     override val attachments: List<Attachment> = emptyList(),
     override val studentParticipations: List<Participation>? = null,
-    ) : Exercise()
+) : Exercise() {
+    override fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise =
+        copy(studentParticipations = newParticipations)
+}

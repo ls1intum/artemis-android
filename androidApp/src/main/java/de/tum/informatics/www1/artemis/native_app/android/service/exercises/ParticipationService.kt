@@ -7,6 +7,11 @@ import kotlinx.coroutines.flow.Flow
 interface ParticipationService {
 
     /**
+     * Subscribed to the users personal participations
+     */
+    val personalSubmissionUpdater: Flow<Submission>
+
+    /**
      * @param isPersonalParticipation whether the participation belongs to the user (by being a student) or not (by being an instructor)
      */
     fun getLatestPendingSubmissionByParticipationIdFlow(participationId: Int, exerciseId: Int, isPersonalParticipation: Boolean): Flow<Submission>

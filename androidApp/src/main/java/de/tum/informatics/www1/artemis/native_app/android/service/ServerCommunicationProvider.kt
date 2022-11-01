@@ -12,6 +12,11 @@ interface ServerCommunicationProvider {
     val serverUrl: Flow<String>
 
     /**
+     * Just returns the domain of the serverUrl.
+     */
+    val host: Flow<String>
+
+    /**
      * The profile info associated with the server url.
      */
     val serverProfileInfo: Flow<DataState<ProfileInfo>>

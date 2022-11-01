@@ -126,6 +126,11 @@ sealed class Exercise {
         }
     }
 
+    /**
+     * Create a copy of this exercise with the participations field replaced.
+     */
+    abstract fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise
+
     //-------------------------------------------------------------
     // Copy of https://github.com/ls1intum/Artemis/blob/5c13e2e1b5b6d81594b9123946f040cbf6f0cfc6/src/main/webapp/app/exercises/shared/exercise/exercise.utils.ts
     // TODO: Remove me once this is calculated on the server.
