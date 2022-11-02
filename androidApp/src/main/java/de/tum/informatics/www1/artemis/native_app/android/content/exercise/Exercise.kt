@@ -28,6 +28,7 @@ sealed class Exercise {
     abstract val bonusPoints: Float?
     abstract val releaseDate: Instant?
     abstract val dueDate: Instant?
+    abstract val assessmentDueDate: Instant?
     abstract val difficulty: Difficulty?
     abstract val mode: Mode
     abstract val categories: List<Category>
@@ -218,7 +219,7 @@ sealed class Exercise {
         }
     }
 
-    private fun getDueDate(participation: Participation): Instant? =
+    fun getDueDate(participation: Participation): Instant? =
         if (dueDate == null) null else {
             participation.initializationDate ?: dueDate
         }

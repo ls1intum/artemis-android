@@ -4,6 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.android.content.Team
 import de.tum.informatics.www1.artemis.native_app.android.content.account.User
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.Submission
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -21,6 +22,7 @@ class ProgrammingExerciseStudentParticipation(
     override val team: Team? = null,
     override val participantIdentifier: String? = null,
     override val testRun: Boolean? = null,
+    override val submissions: List<Submission>? = null,
     val repositoryUrl: String? = null,
     val buildPlanId: String? = null
 ) : StudentParticipation()

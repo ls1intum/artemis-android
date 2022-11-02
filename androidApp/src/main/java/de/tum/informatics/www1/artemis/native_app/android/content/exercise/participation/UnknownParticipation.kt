@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.android.content.exercise.part
 
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.Submission
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
@@ -16,4 +17,5 @@ class UnknownParticipation(
     override val individualDueDate: Instant? = null,
     override val results: List<Result>? = null,
     override val exercise: Exercise? = null,
-) : Participation()
+    override val submissions: List<Submission>? = null,
+    ) : Participation()

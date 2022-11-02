@@ -15,6 +15,7 @@ data class ModelingExercise(
     override val maxPoints: Float? = null,
     override val bonusPoints: Float? = null,
     override val releaseDate: Instant? = null,
+    override val assessmentDueDate: Instant? = null,
     override val dueDate: Instant? = null,
     override val difficulty: Difficulty? = null,
     override val mode: Mode = Mode.INDIVIDUAL,
