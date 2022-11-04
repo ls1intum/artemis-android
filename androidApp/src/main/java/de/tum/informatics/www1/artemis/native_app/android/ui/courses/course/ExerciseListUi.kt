@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.*
 import de.tum.informatics.www1.artemis.native_app.android.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.android.ui.exercise.ExerciseResult
 import de.tum.informatics.www1.artemis.native_app.android.util.DataState
 import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone
@@ -266,12 +267,15 @@ private fun ExerciseDataText(modifier: Modifier, exercise: Exercise) {
         )
 
         when (val participationStatus = exercise.computeParticipationStatus(testRun = null)) {
-            Exercise.ParticipationStatus.QUIZ_FINISHED,
-            Exercise.ParticipationStatus.INACTIVE,
-            Exercise.ParticipationStatus.INITIALIZED,
-            Exercise.ParticipationStatus.EXERCISE_SUBMITTED -> {
+            is Exercise.ParticipationStatus.ParticipationStatusWithParticipation -> {
                 //Display dynamic updates component
-                Exercise
+                ExerciseResult(
+                    modifier = Modifier.fillMaxWidth(),
+                    exercise = exercise,
+                    participation = participationStatus.participation,
+                    result = null,
+                    isBuilding = false
+                )
             }
             else -> {
                 //Simply display text
@@ -288,19 +292,16 @@ private fun ExerciseDataText(modifier: Modifier, exercise: Exercise) {
 @Composable
 private fun getSubmissionResultStatusText(participationStatus: Exercise.ParticipationStatus): String {
     val id = when (participationStatus) {
-        Exercise.ParticipationStatus.QUIZ_UNINITIALIZED -> R.string.exercise_quiz_not_started
-        Exercise.ParticipationStatus.QUIZ_ACTIVE -> R.string.exercise_user_participating
-        Exercise.ParticipationStatus.QUIZ_SUBMITTED -> R.string.exercise_user_submitted
-        Exercise.ParticipationStatus.QUIZ_NOT_STARTED -> R.string.exercise_quiz_not_started
-        Exercise.ParticipationStatus.QUIZ_NOT_PARTICIPATED -> R.string.exercise_user_not_participated
-        Exercise.ParticipationStatus.NO_TEAM_ASSIGNED -> R.string.exercise_user_not_assigned_to_team
-        Exercise.ParticipationStatus.UNINITIALIZED -> R.string.exercise_user_not_started_exercise
-        Exercise.ParticipationStatus.EXERCISE_ACTIVE -> R.string.exercise_exercise_not_submitted
-        Exercise.ParticipationStatus.EXERCISE_MISSED -> R.string.exercise_exercise_missed_deadline
-        Exercise.ParticipationStatus.QUIZ_FINISHED,
-        Exercise.ParticipationStatus.INACTIVE,
-        Exercise.ParticipationStatus.INITIALIZED,
-        Exercise.ParticipationStatus.EXERCISE_SUBMITTED -> 0
+        Exercise.ParticipationStatus.QuizNotInitialized -> R.string.exercise_quiz_not_started
+        Exercise.ParticipationStatus.QuizActive -> R.string.exercise_user_participating
+        Exercise.ParticipationStatus.QuizSubmitted -> R.string.exercise_user_submitted
+        Exercise.ParticipationStatus.QuizNotStarted -> R.string.exercise_quiz_not_started
+        Exercise.ParticipationStatus.QuizNotParticipated -> R.string.exercise_user_not_participated
+        Exercise.ParticipationStatus.NoTeamAssigned -> R.string.exercise_user_not_assigned_to_team
+        Exercise.ParticipationStatus.Uninitialized -> R.string.exercise_user_not_started_exercise
+        Exercise.ParticipationStatus.ExerciseActive -> R.string.exercise_exercise_not_submitted
+        Exercise.ParticipationStatus.ExerciseMissed -> R.string.exercise_exercise_missed_deadline
+        else -> 0
     }
 
     return stringResource(id = id)

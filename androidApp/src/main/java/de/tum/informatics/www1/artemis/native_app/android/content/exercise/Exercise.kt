@@ -34,7 +34,6 @@ sealed class Exercise {
     abstract val categories: List<Category>
     abstract val visibleToStudents: Boolean?
     abstract val teamMode: Boolean?
-    abstract val participationStatus: ParticipationStatus?
     abstract val problemStatement: String?
     abstract val assessmentType: AssessmentType?
     abstract val allowComplaintsForAutomaticAssessments: Boolean?
@@ -71,20 +70,31 @@ sealed class Exercise {
         NOT_INCLUDED
     }
 
-    enum class ParticipationStatus {
-        QUIZ_UNINITIALIZED,
-        QUIZ_ACTIVE,
-        QUIZ_SUBMITTED,
-        QUIZ_NOT_STARTED,
-        QUIZ_NOT_PARTICIPATED,
-        QUIZ_FINISHED,
-        NO_TEAM_ASSIGNED,
-        UNINITIALIZED,
-        INITIALIZED,
-        INACTIVE,
-        EXERCISE_ACTIVE,
-        EXERCISE_SUBMITTED,
-        EXERCISE_MISSED
+    sealed class ParticipationStatus {
+        abstract class ParticipationStatusWithParticipation(val participation: Participation) :
+            ParticipationStatus()
+
+        object QuizNotInitialized : ParticipationStatus()
+        object QuizActive : ParticipationStatus()
+        object QuizSubmitted : ParticipationStatus()
+        object QuizNotStarted : ParticipationStatus()
+        object QuizNotParticipated : ParticipationStatus()
+        class QuizFinished(participation: Participation) :
+            ParticipationStatusWithParticipation(participation)
+
+        object NoTeamAssigned : ParticipationStatus()
+        object Uninitialized : ParticipationStatus()
+        class Initialized(participation: Participation) :
+            ParticipationStatusWithParticipation(participation)
+
+        class Inactive(participation: Participation) :
+            ParticipationStatusWithParticipation(participation)
+
+        object ExerciseActive : ParticipationStatus()
+        class ExerciseSubmitted(participation: Participation) :
+            ParticipationStatusWithParticipation(participation)
+
+        object ExerciseMissed : ParticipationStatus()
     }
 
     enum class AssessmentType {
@@ -174,14 +184,14 @@ sealed class Exercise {
             initState == InitializationState.BUILD_PLAN_CONFIGURED
         ) {
             if (this is ProgrammingExercise && !isStartExerciseAvailable(this) && testRun == null || testRun == false) {
-                return ParticipationStatus.EXERCISE_MISSED
+                return ParticipationStatus.ExerciseMissed
             } else {
-                return ParticipationStatus.UNINITIALIZED
+                return ParticipationStatus.Uninitialized
             }
         } else if (studentParticipation.initializationState === InitializationState.INITIALIZED) {
-            return ParticipationStatus.INITIALIZED
+            return ParticipationStatus.Initialized(studentParticipation)
         }
-        return ParticipationStatus.INACTIVE
+        return ParticipationStatus.Inactive(studentParticipation)
     }
 
     private fun isStartExerciseAvailable(exercise: ProgrammingExercise) =
@@ -190,27 +200,29 @@ sealed class Exercise {
     private fun participationStatusForQuizExercise(exercise: QuizExercise): ParticipationStatus {
         if (exercise.status == QuizExercise.QuizStatus.CLOSED) {
             if (exercise.studentParticipations?.isNotEmpty() == true && exercise.studentParticipations.first().results?.isNotEmpty() == true) {
-                return ParticipationStatus.QUIZ_FINISHED
+                return ParticipationStatus.QuizFinished(exercise.studentParticipations.first())
             }
-            return ParticipationStatus.QUIZ_NOT_PARTICIPATED
+            return ParticipationStatus.QuizNotParticipated
         } else if (exercise.studentParticipations?.isNotEmpty() == true) {
             val initState = exercise.studentParticipations.first().initializationState
             if (initState == InitializationState.INITIALIZED) {
-                return ParticipationStatus.QUIZ_ACTIVE
+                return ParticipationStatus.QuizActive
             } else if (initState == InitializationState.FINISHED) {
-                return ParticipationStatus.QUIZ_SUBMITTED
+                return ParticipationStatus.QuizSubmitted
             }
         } else if (exercise.quizBatches?.any { it.started == true } == true) {
-            return ParticipationStatus.QUIZ_UNINITIALIZED
+            return ParticipationStatus.QuizNotInitialized
         }
-        return ParticipationStatus.QUIZ_NOT_STARTED
+        return ParticipationStatus.QuizNotStarted
     }
 
     private fun participationStatusForModelingTextFileUploadExercise(participation: Participation): ParticipationStatus {
         return if (participation.initializationState == InitializationState.INITIALIZED) {
-            if (hasDueDataPassed(participation)) ParticipationStatus.EXERCISE_MISSED else ParticipationStatus.EXERCISE_ACTIVE
-        } else if (participation.initializationState == InitializationState.FINISHED) ParticipationStatus.EXERCISE_SUBMITTED
-        else ParticipationStatus.UNINITIALIZED
+            if (hasDueDataPassed(participation)) ParticipationStatus.ExerciseMissed else ParticipationStatus.ExerciseActive
+        } else if (participation.initializationState == InitializationState.FINISHED) ParticipationStatus.ExerciseSubmitted(
+            participation
+        )
+        else ParticipationStatus.Uninitialized
     }
 
     private fun hasDueDataPassed(participation: Participation): Boolean {

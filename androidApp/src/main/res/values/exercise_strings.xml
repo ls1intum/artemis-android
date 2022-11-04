@@ -17,4 +17,11 @@
     <string name="exercise_user_not_participated">Not participated.</string>
     <string name="exercise_user_participating">Currently participating.</string>
     <string name="exercise_user_submitted">Already submitted.</string>
+
+    <string name="exercise_result_is_building">Building…</string>
+    <string name="exercise_result_no_result">You have no results yet.</string>
+    <string name="exercise_result_no_graded_result">You have no graded result.</string>
+    <string name="exercise_result_submitted">Submitted, you can still submit updates.</string>
+    <string name="exercise_result_submitted_waiting_for_grading">Submitted, waiting for grading.</string>
+    <string name="exercise_result_late_submission">Late submission, waiting for feedback.</string>
 </resources>

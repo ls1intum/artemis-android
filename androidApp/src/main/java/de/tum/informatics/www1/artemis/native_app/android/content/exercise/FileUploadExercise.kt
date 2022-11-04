@@ -22,7 +22,6 @@ data class FileUploadExercise(
     override val categories: List<Category> = emptyList(),
     override val visibleToStudents: Boolean? = null,
     override val teamMode: Boolean? = null,
-    override val participationStatus: ParticipationStatus? = null,
     override val problemStatement: String? = null,
     override val assessmentType: AssessmentType? = null,
     override val allowComplaintsForAutomaticAssessments: Boolean? = null,

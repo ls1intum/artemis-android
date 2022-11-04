@@ -1,63 +1,85 @@
 package de.tum.informatics.www1.artemis.native_app.android.ui.exercise
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.*
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.Result
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
+private const val MIN_SCORE_GREEN = 80
+private const val MIN_SCORE_ORANGE = 40
+
+private val ColorScheme.resultSuccess: Color
+    get() = Color.Green
+private val ColorScheme.resultMedium: Color
+    get() = Color.Yellow
+private val ColorScheme.resultBad: Color
+    get() = Color.Red
+
 /**
  * Enumeration object representing the possible options that
  * the status of the result's template can be in.
  */
-private enum class ResultTemplateStatus {
+sealed class ResultTemplateStatus {
     /**
      * An automatic result is currently being generated and should be available soon.
      * This is currently only relevant for programming exercises.
      */
-    IS_BUILDING,
+    object IsBuilding : ResultTemplateStatus()
 
     /**
      * A regular, finished result is available.
      * Can be rated (counts toward the score) or not rated (after the deadline for practice).
      */
-    HAS_RESULT,
+    class HasResult(val result: Result) : ResultTemplateStatus()
 
     /**
      * There is no result or submission status that could be shown, e.g. because the student just started with the exercise.
      */
-    NO_RESULT,
+    object NoResult : ResultTemplateStatus()
 
     /**
      * Submitted and the student can still continue to submit.
      */
-    SUBMITTED,
+    object Submitted : ResultTemplateStatus()
 
     /**
      * Submitted and the student can no longer submit, but a result is not yet available.
      */
-    SUBMITTED_WAITING_FOR_GRADING,
+    object SubmittedWaitingForGrading : ResultTemplateStatus()
 
     /**
      * The student started the exercise but submitted too late.
      * Feedback is not yet available, and a future result will not count toward the score.
      */
-    LATE_NO_FEEDBACK,
+    object LateNoFeedback : ResultTemplateStatus()
 
     /**
      * The student started the exercise and submitted too late, but feedback is available.
      */
-    LATE,
+    class Late(val result: Result) : ResultTemplateStatus()
 
     /**
      * No latest result available, e.g. because building took too long and the webapp did not receive it in time.
      * This is a distinct state because we want the student to know about this problematic state
      * and not confuse them by showing a previous result that does not match the latest submission.
      */
-    MISSING
+    object Missing : ResultTemplateStatus()
 }
 
 @Composable
@@ -74,14 +96,164 @@ fun ExerciseResult(
                 .maxByOrNull { it.completionDate ?: Instant.fromEpochSeconds(0L) }
     }
 
-    val submission = result?.submission
-
     val templateStatus =
         remember(participation, exercise, chosenResult, isBuilding) {
             evaluateTemplateStatus(participation, exercise, chosenResult, isBuilding)
         }
 
+    when (templateStatus) {
+        ResultTemplateStatus.IsBuilding -> {
+            StatusIsBuilding(modifier = modifier.height(IntrinsicSize.Min))
+        }
+        is ResultTemplateStatus.HasResult -> {
+            StatusHasResult(
+                modifier = modifier.height(IntrinsicSize.Min),
+                showIcon = true,
+                result = templateStatus.result,
+                isLate = false
+            )
+        }
+        ResultTemplateStatus.NoResult -> {
+            StatusNoResult(modifier = modifier, showUngradedResults = false)
+        }
+        ResultTemplateStatus.Submitted -> {
+            TextStatus(
+                modifier = modifier,
+                text = stringResource(id = R.string.exercise_result_submitted)
+            )
+        }
+        ResultTemplateStatus.SubmittedWaitingForGrading -> {
+            TextStatus(
+                modifier = modifier,
+                text = stringResource(id = R.string.exercise_result_submitted_waiting_for_grading)
+            )
+        }
+        ResultTemplateStatus.LateNoFeedback -> {
+            TextStatus(
+                modifier = modifier,
+                text = stringResource(id = R.string.exercise_result_late_submission)
+            )
+        }
+        is ResultTemplateStatus.Late -> {
+            StatusHasResult(
+                modifier = modifier,
+                showIcon = true,
+                result = templateStatus.result,
+                isLate = true
+            )
+        }
+        ResultTemplateStatus.Missing -> TODO()
+    }
+}
 
+private val statusTextStyle: TextStyle
+    @Composable get() = MaterialTheme.typography.labelMedium
+
+
+@Composable
+private fun StatusIsBuilding(modifier: Modifier) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1f, matchHeightConstraintsFirst = true)
+        )
+
+        Text(
+            text = stringResource(id = R.string.exercise_result_is_building),
+            style = statusTextStyle,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+    }
+}
+
+@Composable
+private fun StatusHasResult(
+    modifier: Modifier,
+    showIcon: Boolean,
+    result: Result,
+    isLate: Boolean
+) {
+    val resultScore = result.score ?: 0f
+
+    val icon = if (resultScore < MIN_SCORE_GREEN) {
+        Icons.Default.Cancel
+    } else {
+        Icons.Default.CheckCircle
+    }
+
+    val textAndIconColor = when {
+        resultScore >= MIN_SCORE_GREEN -> MaterialTheme.colorScheme.resultSuccess
+        resultScore >= MIN_SCORE_ORANGE -> MaterialTheme.colorScheme.resultMedium
+        else -> MaterialTheme.colorScheme.resultBad
+    }
+
+    val text = if (isLate) "TODO: LATE" else "TODO: Result"
+
+    IconTextStatus(
+        modifier = modifier,
+        icon = icon,
+        text = text,
+        iconColor = textAndIconColor,
+        textColor = textAndIconColor
+    )
+}
+
+@Composable
+private fun StatusNoResult(modifier: Modifier, showUngradedResults: Boolean) {
+    TextStatus(
+        modifier = modifier,
+        text = stringResource(id = if (showUngradedResults) R.string.exercise_result_no_result else R.string.exercise_result_no_graded_result)
+    )
+}
+
+/**
+ * Template if the status only requires a text field
+ */
+@Composable
+private fun TextStatus(
+    modifier: Modifier,
+    text: String,
+    textColor: Color = Color.Unspecified,
+    textStyle: TextStyle = statusTextStyle
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        color = textColor,
+        style = textStyle
+    )
+}
+
+/**
+ * Template for a status that has an icon and a text in a row
+ */
+@Composable
+private fun IconTextStatus(
+    modifier: Modifier,
+    icon: ImageVector,
+    text: String,
+    iconColor: Color = Color.Unspecified,
+    textColor: Color = Color.Unspecified,
+    textStyle: TextStyle = statusTextStyle
+) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = text,
+            color = textColor,
+            style = textStyle,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+
+        Icon(
+            imageVector = icon,
+            tint = iconColor,
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1f, matchHeightConstraintsFirst = true),
+            contentDescription = null
+        )
+    }
 }
 
 private fun evaluateTemplateStatus(
@@ -101,41 +273,41 @@ private fun evaluateTemplateStatus(
         if (inDueTime && result?.score != null) {
             // Submission is in due time of exercise and has a result with score
             return if (assessmentDueDate == null || assessmentDueDate < now) {
-                ResultTemplateStatus.HAS_RESULT
+                ResultTemplateStatus.HasResult(result)
             } else {
                 // the assessment period is still active
-                ResultTemplateStatus.SUBMITTED_WAITING_FOR_GRADING
+                ResultTemplateStatus.SubmittedWaitingForGrading
             }
         } else if (inDueTime) {
             // Submission is in due time of exercise and doesn't have a result with score.
-            return if (dueDate == null || dueDate >= now) ResultTemplateStatus.SUBMITTED
+            return if (dueDate == null || dueDate >= now) ResultTemplateStatus.Submitted
             else if (assessmentDueDate == null || assessmentDueDate >= now)
             // the due date is in the future (or there is none) => the exercise is still ongoing
-                ResultTemplateStatus.SUBMITTED_WAITING_FOR_GRADING
+                ResultTemplateStatus.SubmittedWaitingForGrading
             else
             // the due date is over, further submissions are no longer possible, no result after assessment due date
             // TODO why is this distinct from the case above? The submission can still be graded and often is.
-                ResultTemplateStatus.NO_RESULT
+                ResultTemplateStatus.NoResult
         } else if (result?.score != null && (assessmentDueDate == null || assessmentDueDate < now)) {
             // Submission is not in due time of exercise, has a result with score and there is no assessmentDueDate for the exercise or it lies in the past.
             // TODO handle external submissions with new status "External"
-            return ResultTemplateStatus.LATE;
+            return ResultTemplateStatus.Late(result)
         } else {
             // Submission is not in due time of exercise and there is actually no feedback for the submission or the feedback should not be displayed yet.
-            return ResultTemplateStatus.LATE_NO_FEEDBACK;
+            return ResultTemplateStatus.LateNoFeedback
         }
     }
 
     // Evaluate status for programming and quiz exercises
     if (exercise is ProgrammingExercise || exercise is QuizExercise) {
         return if (isBuilding) {
-            ResultTemplateStatus.IS_BUILDING;
+            ResultTemplateStatus.IsBuilding
         } else if (result?.score != null) {
-            ResultTemplateStatus.HAS_RESULT;
+            ResultTemplateStatus.HasResult(result)
         } else {
-            ResultTemplateStatus.NO_RESULT;
+            ResultTemplateStatus.NoResult
         }
     }
 
-    return ResultTemplateStatus.NO_RESULT;
+    return ResultTemplateStatus.NoResult
 }
