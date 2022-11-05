@@ -274,7 +274,7 @@ private fun ExerciseDataText(modifier: Modifier, exercise: Exercise) {
                     exercise = exercise,
                     participation = participationStatus.participation,
                     result = null,
-                    isBuilding = false
+                    personal = true
                 )
             }
             else -> {

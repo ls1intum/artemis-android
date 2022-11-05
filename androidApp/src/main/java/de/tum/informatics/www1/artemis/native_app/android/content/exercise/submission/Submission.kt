@@ -13,18 +13,8 @@ sealed class Submission {
     abstract val id: Int?
     abstract val submitted: Boolean?
     abstract val submissionDate: Instant?
-    abstract val type: SubmissionType?
     abstract val exampleSubmission: Boolean?
     abstract val durationInMinutes: Float?
     abstract val results: List<Result>?
     abstract val participation: Participation?
-
-    enum class SubmissionType {
-        MANUAL,
-        TIMEOUT,
-        INSTRUCTOR,
-        EXTERNAL,
-        TEST,
-        ILLEGAL
-    }
 }

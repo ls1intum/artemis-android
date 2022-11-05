@@ -6,6 +6,8 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,9 +19,16 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.*
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.participation.Participation
+import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.InstructorSubmission
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.Submission
+import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.TestSubmission
+import de.tum.informatics.www1.artemis.native_app.android.service.exercises.ParticipationService
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import org.koin.androidx.compose.get
 
 private const val MIN_SCORE_GREEN = 80
 private const val MIN_SCORE_ORANGE = 40
@@ -88,8 +97,42 @@ fun ExerciseResult(
     exercise: Exercise,
     participation: Participation,
     result: Result?,
-    isBuilding: Boolean
+    showUngradedResults: Boolean = true,
+    personal: Boolean
 ) {
+    val service: ParticipationService = get()
+
+    val participationId = participation.id ?: 0
+    val exerciseId = exercise.id ?: 0
+
+    val isBuilding: Boolean by service
+        .getLatestPendingSubmissionByParticipationIdFlow(participationId, exerciseId, true, personal)
+        .filter { submissionData ->
+            val shouldUpdateBasedOnData: Boolean = when (submissionData) {
+                is ParticipationService.ProgrammingSubmissionStateData.IsBuildingPendingSubmission -> {
+                    val submission = submissionData.submission
+
+                    val submissionDate = submission.submissionDate ?: Instant.fromEpochSeconds(0L)
+                    val dueDate = exercise.getDueDate(participation) ?: Instant.fromEpochSeconds(0L)
+
+                    submission is InstructorSubmission
+                            || submission is TestSubmission
+                            || submissionDate < dueDate
+                }
+                is ParticipationService.ProgrammingSubmissionStateData.FailedSubmission,
+                is ParticipationService.ProgrammingSubmissionStateData.NoPendingSubmission,
+                null -> true
+            }
+
+            showUngradedResults
+                    || exercise.dueDate == null
+                    || shouldUpdateBasedOnData
+        }
+        .map { submissionData ->
+            submissionData is ParticipationService.ProgrammingSubmissionStateData.IsBuildingPendingSubmission
+        }
+        .collectAsState(initial = false)
+
     val chosenResult: Result? = remember(participation, result) {
         result
             ?: participation.results.orEmpty()
@@ -153,16 +196,14 @@ private val statusTextStyle: TextStyle
 @Composable
 private fun StatusIsBuilding(modifier: Modifier) {
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        CircularProgressIndicator(
-            modifier = Modifier
-                .fillMaxHeight()
-                .aspectRatio(1f, matchHeightConstraintsFirst = true)
+        LinearProgressIndicator(
+            modifier = Modifier.weight(2f)
         )
 
         Text(
             text = stringResource(id = R.string.exercise_result_is_building),
             style = statusTextStyle,
-            modifier = Modifier.align(Alignment.CenterVertically)
+            modifier = Modifier.align(Alignment.CenterVertically).weight(8f)
         )
     }
 }

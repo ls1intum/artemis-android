@@ -21,7 +21,7 @@ val userManagementModule = module {
 val userContentModule = module {
     single<DashboardService> { DashboardServiceImpl(get()) }
     single<CourseService> { CourseServiceImpl(get()) }
-    single<ParticipationService> { ParticipationServiceImpl(get()) }
+    single<ParticipationService> { ParticipationServiceImpl(get(), get(), get(), get(), get(), get()) }
     single<ExerciseService> { ExerciseServiceImpl(get()) }
 }
 

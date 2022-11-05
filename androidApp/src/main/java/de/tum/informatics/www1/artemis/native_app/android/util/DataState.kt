@@ -48,6 +48,13 @@ sealed class DataState<T> {
             else -> other
         }
     }
+
+    fun orThrow(): T {
+        return when (this) {
+            is Success -> data
+            else -> throw IllegalStateException("Data state is $this but Success was expected")
+        }
+    }
 }
 
 val <T> DataState<T>.isSuccess: Boolean

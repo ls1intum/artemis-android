@@ -2,11 +2,12 @@ package de.tum.informatics.www1.artemis.native_app.android.content.exercise.subm
 
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.participation.Participation
 import kotlinx.datetime.Instant
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonClassDiscriminator
 
 @Serializable
-class UnknownSubmission(
+@SerialName("TEST")
+class TestSubmission(
     override val id: Int? = null,
     override val submitted: Boolean? = null,
     override val submissionDate: Instant? = null,

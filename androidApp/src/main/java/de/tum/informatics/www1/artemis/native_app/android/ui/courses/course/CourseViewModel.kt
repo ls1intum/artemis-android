@@ -125,7 +125,7 @@ class CourseViewModel(
                     else -> emit(exercisesDataState.bind { emptyList() })
                 }
             }
-
+    
     val exercisesGroupedByWeek: Flow<DataState<List<WeeklyExercises>>> =
         exerciseWithParticipationStatusFlow.map { exercisesDataState ->
             exercisesDataState.bind { exercisesWithParticipationState ->
