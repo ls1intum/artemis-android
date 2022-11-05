@@ -198,6 +198,7 @@ private fun StatusIsBuilding(modifier: Modifier) {
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         LinearProgressIndicator(
             modifier = Modifier.weight(2f)
+                .align(Alignment.CenterVertically)
         )
 
         Text(

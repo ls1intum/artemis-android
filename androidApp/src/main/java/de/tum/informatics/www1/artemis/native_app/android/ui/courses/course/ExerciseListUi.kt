@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.AccountTree
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -210,9 +211,10 @@ private fun ExerciseItem(
 private fun ExerciseTypeIcon(modifier: Modifier, exercise: Exercise) {
     val icon = when (exercise) {
         is TextExercise -> Icons.Default.EditNote
-        is ModelingExercise -> Icons.Default.AccountTree
+        is ModelingExercise -> Icons.Outlined.AccountTree
         is FileUploadExercise -> Icons.Default.FileUpload
         is ProgrammingExercise -> Icons.Default.Code
+        is QuizExercise -> Icons.Default.Quiz
         else -> Icons.Default.QuestionMark
     }
 

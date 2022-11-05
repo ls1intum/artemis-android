@@ -179,7 +179,7 @@ fun CourseItem(
         ) {
             LinearProgressIndicator(
                 modifier = Modifier.weight(1f),
-                progress = course.progress,
+                progress = course.progress.coerceAtMost(1f),
                 trackColor = MaterialTheme.colorScheme.onPrimary
             )
 
