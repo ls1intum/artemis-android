@@ -155,10 +155,6 @@ fun ExerciseWeekSectionHeader(
 /**
  * Display a single exercise.
  * The exercise is displayed in a card with an icon specific to the exercise type.
- *
- * Additionally, loads the exercise details from the server. Once loaded, replaces the supplied exercise with the loaded one.
- *
- * @param loadLatestExerciseVersion supply a flow that returns the exercise details.
  */
 @Composable
 private fun ExerciseItem(
@@ -185,7 +181,8 @@ private fun ExerciseItem(
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 16.dp),
-                    exercise = exercise
+                    exercise = exercise,
+                    participationStatus = exerciseWithParticipationStatus.participationStatus
                 )
             }
 
@@ -235,10 +232,10 @@ private fun ExerciseTypeIcon(modifier: Modifier, exercise: Exercise) {
 }
 
 /**
- * Displays the exercise title, the due data and the participation info. The participation info is automatically updates.
+ * Displays the exercise title, the due data and the participation info. The participation info is automatically updated.
  */
 @Composable
-private fun ExerciseDataText(modifier: Modifier, exercise: Exercise) {
+private fun ExerciseDataText(modifier: Modifier, exercise: Exercise, participationStatus: Exercise.ParticipationStatus) {
     //Format a relative time if the distant is
     val formattedDueDate = remember(exercise) {
         val dueDate = exercise.dueDate
@@ -268,7 +265,7 @@ private fun ExerciseDataText(modifier: Modifier, exercise: Exercise) {
             style = MaterialTheme.typography.bodyMedium
         )
 
-        when (val participationStatus = exercise.computeParticipationStatus(testRun = null)) {
+        when (participationStatus) {
             is Exercise.ParticipationStatus.ParticipationStatusWithParticipation -> {
                 //Display dynamic updates component
                 ExerciseResult(
@@ -347,7 +344,7 @@ private fun collectExerciseCategoryChips(
         if (exercise is QuizExercise && exercise.status == QuizExercise.QuizStatus.ACTIVE)
             listOf(
                 ExerciseCategoryChipData(
-                    context.getString(R.string.exercise_live_quit),
+                    context.getString(R.string.exercise_live_quiz),
                     Color(0xff28a745)
                 )
             ) else emptyList()

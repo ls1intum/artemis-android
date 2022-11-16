@@ -7,17 +7,34 @@ import kotlinx.coroutines.flow.Flow
 interface ParticipationService {
 
     /**
+     * TODO: THERE IS ACTUALLY A RESULT RETURNED.
+     *
      * Subscribed to the users personal participations
      */
     val personalSubmissionUpdater: Flow<Submission>
 
     /**
-     * @param isPersonalParticipation whether the participation belongs to the user (by being a student) or not (by being an instructor)
+     * Subscribe for the latest pending submission for the given participation.
+     * A latest pending submission is characterized by the following properties:
+     * - Submission is the newest one (by submissionDate)
+     * - Submission does not have a result (yet)
+     * - Submission is not older than DEFAULT_EXPECTED_RESULT_ETA (in this case it could be that never a result will come due to an error)
+     *
+     * Will emit:
+     * - A submission if a last pending submission exists.
+     * - An null value when there is not a pending submission.
+     * - An null value when no result arrived in time for the submission.
+     *
+     * This method will execute a REST call to the server so that the subscriber will always receive the latest information from the server.
+     *
+     * @param participationId id of the ProgrammingExerciseStudentParticipation
+     * @param exerciseId id of ProgrammingExercise
+     * @param isPersonalParticipation whether the current user is a participant in the participation.
+     * @param fetchPending whether the latest pending submission should be fetched from the server
      */
     fun getLatestPendingSubmissionByParticipationIdFlow(
         participationId: Int,
         exerciseId: Int,
-        isPersonalParticipation: Boolean,
         personal: Boolean,
         fetchPending: Boolean = true
     ): Flow<ProgrammingSubmissionStateData?>

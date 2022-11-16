@@ -21,7 +21,6 @@ import de.tum.informatics.www1.artemis.native_app.android.content.exercise.*
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.InstructorSubmission
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.Result
-import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.android.content.exercise.submission.TestSubmission
 import de.tum.informatics.www1.artemis.native_app.android.service.exercises.ParticipationService
 import kotlinx.coroutines.flow.filter
@@ -106,7 +105,7 @@ fun ExerciseResult(
     val exerciseId = exercise.id ?: 0
 
     val isBuilding: Boolean by service
-        .getLatestPendingSubmissionByParticipationIdFlow(participationId, exerciseId, true, personal)
+        .getLatestPendingSubmissionByParticipationIdFlow(participationId, exerciseId, personal)
         .filter { submissionData ->
             val shouldUpdateBasedOnData: Boolean = when (submissionData) {
                 is ParticipationService.ProgrammingSubmissionStateData.IsBuildingPendingSubmission -> {
@@ -157,7 +156,7 @@ fun ExerciseResult(
             )
         }
         ResultTemplateStatus.NoResult -> {
-            StatusNoResult(modifier = modifier, showUngradedResults = false)
+            StatusNoResult(modifier = modifier, showUngradedResults = showUngradedResults)
         }
         ResultTemplateStatus.Submitted -> {
             TextStatus(

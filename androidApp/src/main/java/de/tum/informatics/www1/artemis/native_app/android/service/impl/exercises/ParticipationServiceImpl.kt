@@ -71,34 +71,15 @@ class ParticipationServiceImpl(
                 replay = 1
             )
 
-    /**
-     * Subscribe for the latest pending submission for the given participation.
-     * A latest pending submission is characterized by the following properties:
-     * - Submission is the newest one (by submissionDate)
-     * - Submission does not have a result (yet)
-     * - Submission is not older than DEFAULT_EXPECTED_RESULT_ETA (in this case it could be that never a result will come due to an error)
-     *
-     * Will emit:
-     * - A submission if a last pending submission exists.
-     * - An null value when there is not a pending submission.
-     * - An null value when no result arrived in time for the submission.
-     *
-     * This method will execute a REST call to the server so that the subscriber will always receive the latest information from the server.
-     *
-     * @param participationId id of the ProgrammingExerciseStudentParticipation
-     * @param exerciseId id of ProgrammingExercise
-     * @param personal whether the current user is a participant in the participation.
-     * @param fetchPending whether the latest pending submission should be fetched from the server
-     */
     override fun getLatestPendingSubmissionByParticipationIdFlow(
         participationId: Int,
         exerciseId: Int,
-        isPersonalParticipation: Boolean,
         personal: Boolean,
         fetchPending: Boolean
     ): Flow<ProgrammingSubmissionStateData?> {
         /*
         This implementation works differently than the one provided on the web-app. However, the final result is the same.
+        It makes use of reactive programming.
          */
 
         //Flow that emits when the websocket sends new data

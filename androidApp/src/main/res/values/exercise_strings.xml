@@ -6,7 +6,7 @@
     <string name="exercise_difficulty_hard">Hard</string>
 
     <string name="exercise_is_bonus">Bonus</string>
-    <string name="exercise_live_quit">Live</string>
+    <string name="exercise_live_quiz">Live</string>
 
     <string name="exercise_user_not_started_exercise">Not yet started.</string>
     <string name="exercise_user_not_assigned_to_team">No team yet.</string>
