@@ -1,29 +1,31 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google()
-        gradlePluginPortal()
         mavenCentral()
-    }
-
-    val kotlinVersion = "1.7.10"
-    val agpVersion = "7.3.1"
-
-    plugins {
-        id("com.android.application") version agpVersion apply false
-        kotlin("android") version kotlinVersion apply false
-
-        kotlin("plugin.serialization") version kotlinVersion
-        kotlin("plugin.parcelize") version kotlinVersion
+        gradlePluginPortal()
     }
 }
 
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
-        gradlePluginPortal()
+        maven("https://jitpack.io")
     }
 }
 
-rootProject.name = "Artemis_Native_Client"
-include(":androidApp")
+rootProject.name = "artemis_android"
+include(":app")
+include(":core:common")
+include(":core:data")
+include(":core:datastore")
+include(":core:model")
+include(":core:ui")
+include(":core:websocket")
+include(":core:device")
+include(":feature:course_registration")
+include(":feature:dashboard")
+include(":feature:course_view")
+include(":feature:login")
