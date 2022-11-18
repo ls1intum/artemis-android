@@ -3,7 +3,7 @@
 ## Project structure
 The project structure is heavily inspired by [nowinandroid](https://github.com/android/nowinandroid). 
 The modularization is heavily borrowed from the [one described in nowinandroid](https://github.com/android/nowinandroid/blob/main/docs/ModularizationLearningJourney.md).
-The modularization helps keeping the up maintainable, fastens up build times and allows it to easily scale with new features.
+The modularization helps keeping the app maintainable, fastens up build times and allows it to easily scale with new features.
 
 The modularization is split up into two parent modules:
 - **core**: Shares common code between features and code not directly related to features.
