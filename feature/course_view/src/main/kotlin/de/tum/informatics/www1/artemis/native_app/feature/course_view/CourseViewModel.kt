@@ -82,25 +82,8 @@ internal class CourseViewModel(
                                 val associatedExercise =
                                     exercisesById[associatedExerciseId] ?: return@collect
 
-                                val currentAssociatedExerciseParticipations =
-                                    associatedExercise.studentParticipations
-
-                                val updatedParticipations =
-                                    //Replace the updated participation
-                                    currentAssociatedExerciseParticipations?.map { oldParticipation ->
-                                        if (oldParticipation.id == participation.id) {
-                                            participation
-                                        } else {
-                                            oldParticipation
-                                        }
-                                    }
-                                        ?: //The new participations are just the one we just received
-                                        listOf(participation)
-
                                 //Replace the exercise
-                                val newExercise = associatedExercise.copyWithUpdatedParticipations(
-                                    updatedParticipations
-                                )
+                                val newExercise = associatedExercise.withUpdatedParticipation(participation)
                                 exercisesById[associatedExerciseId] = newExercise
 
                                 participationStatusMap[associatedExerciseId] =

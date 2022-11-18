@@ -24,7 +24,10 @@ fun NavController.navigateToCourse(courseId: Int, builder: NavOptionsBuilder.() 
     navigate("course/$courseId", builder)
 }
 
-fun NavGraphBuilder.course(onNavigateBack: () -> Unit) {
+fun NavGraphBuilder.course(
+    onNavigateToExercise: (exerciseId: Int) -> Unit,
+    onNavigateBack: () -> Unit
+) {
     composable("course/{courseId}", arguments = listOf(
         navArgument("courseId") { type = NavType.IntType; nullable = false }
     )) { backStackEntry ->
@@ -35,7 +38,8 @@ fun NavGraphBuilder.course(onNavigateBack: () -> Unit) {
         CourseUi(
             modifier = Modifier.fillMaxSize(),
             viewModel = koinViewModel { parametersOf(courseId) },
-            onNavigateBack = onNavigateBack
+            onNavigateBack = onNavigateBack,
+            onNavigateToExercise = onNavigateToExercise
         )
     }
 }
@@ -44,6 +48,7 @@ fun NavGraphBuilder.course(onNavigateBack: () -> Unit) {
 internal fun CourseUi(
     modifier: Modifier,
     viewModel: CourseViewModel,
+    onNavigateToExercise: (exerciseId: Int) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val courseDataState by viewModel.course.collectAsState(initial = DataState.Loading())
@@ -127,13 +132,12 @@ internal fun CourseUi(
             suspendedText = stringResource(id = R.string.course_ui_loading_course_suspended),
             retryButtonText = stringResource(id = R.string.course_ui_loading_course_try_again),
             onClickRetry = { viewModel.reloadCourse() }
-        ) { _ ->
+        ) {
             ExerciseListUi(
                 modifier = Modifier.fillMaxSize(),
-                exercisesDataState = weeklyExercises
-            ) { exerciseId ->
-
-            }
+                exercisesDataState = weeklyExercises,
+                onClickExercise = onNavigateToExercise
+            )
         }
     }
 }

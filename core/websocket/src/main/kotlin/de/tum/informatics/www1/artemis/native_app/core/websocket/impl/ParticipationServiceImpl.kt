@@ -48,8 +48,8 @@ internal class ParticipationServiceImpl(
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    override val personalSubmissionUpdater: Flow<Submission> =
-        websocketProvider.subscribe(PERSONAL_PARTICIPATION_TOPIC, Submission.serializer())
+    override val personalSubmissionUpdater: Flow<Result> =
+        websocketProvider.subscribe(PERSONAL_PARTICIPATION_TOPIC, Result.serializer())
             .shareIn(
                 scope = GlobalScope,
                 started = SharingStarted.WhileSubscribed(replayExpiration = Duration.ZERO),

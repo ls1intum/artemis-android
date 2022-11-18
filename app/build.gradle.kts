@@ -41,6 +41,7 @@ dependencies {
     implementation(project(":feature:course_view"))
     implementation(project(":feature:dashboard"))
     implementation(project(":feature:login"))
+    implementation(project(":feature:exercise_view"))
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.coil.compose)

@@ -1,17 +1,17 @@
 package de.tum.informatics.www1.artemis.native_app.core.websocket
 
 import de.tum.informatics.www1.artemis.native_app.android.model.exercise.participation.StudentParticipation
+import de.tum.informatics.www1.artemis.native_app.android.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.android.model.exercise.submission.Submission
 import kotlinx.coroutines.flow.Flow
 
 interface ParticipationService {
 
     /**
-     * TODO: THERE IS ACTUALLY A RESULT RETURNED.
      *
      * Subscribed to the users personal participations
      */
-    val personalSubmissionUpdater: Flow<Submission>
+    val personalSubmissionUpdater: Flow<Result>
 
     /**
      * Subscribe for the latest pending submission for the given participation.

@@ -15,6 +15,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.course_view.navigateTo
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.DASHBOARD_DESTINATION
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboard
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.navigateToDashboard
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exercise
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.navigateToExercise
 import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATION
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
@@ -95,12 +97,20 @@ class MainActivity : ComponentActivity() {
 
                     courseRegistration(
                         onNavigateUp = navController::navigateUp,
-                        onRegisteredInCourse = {
+                        onRegisteredInCourse = { courseId ->
                             navController.navigateUp()
+                            navController.navigateToCourse(courseId) { }
                         }
                     )
 
                     course(
+                        onNavigateToExercise = { exerciseId ->
+                            navController.navigateToExercise(exerciseId) { }
+                        },
+                        onNavigateBack = navController::navigateUp
+                    )
+
+                    exercise(
                         onNavigateBack = navController::navigateUp
                     )
                 }

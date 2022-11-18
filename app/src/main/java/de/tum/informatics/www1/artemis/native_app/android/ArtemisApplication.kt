@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.websocketM
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistrationModule
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.courseViewModule
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboardModule
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exerciseViewModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -28,7 +29,8 @@ class ArtemisApplication : Application() {
                 courseRegistrationModule,
                 courseViewModule,
                 dashboardModule,
-                loginModule
+                loginModule,
+                exerciseViewModule
             )
         }
     }

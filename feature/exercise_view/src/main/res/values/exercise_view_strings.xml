@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exercise_view_loading">Loading exercise…</string>
+    <string name="exercise_view_suspended">Your internet may be unstable. Could not load exercise.</string>
+    <string name="exercise_view_failure">Something went wrong while loading the exercise.</string>
+    <string name="exercise_view_try_again">Try again</string>
+
+    <string name="exercise_view_tab_overview">Overview</string>
+    <string name="exercise_view_tab_qna">Question and Answer</string>
+
+    <string name="exercise_info_title">Exercise info</string>
+    <string name="exercise_info_exercise_type">Type</string>
+    <string name="exercise_info_points">Points</string>
+    <string name="exercise_info_reached_points">Your points / Max points</string>
+    <string name="exercise_info_reached_points_value">%1$f / %2$f</string>
+    <string name="exercise_info_assessment">Assessment</string>
+    <string name="exercise_info_due_date">Due date</string>
+
+    <string name="exercise_type_file_upload">File upload</string>
+    <string name="exercise_type_modeling">Modeling</string>
+    <string name="exercise_type_programming">Programming</string>
+    <string name="exercise_type_quiz">Quiz</string>
+    <string name="exercise_type_text">Text</string>
+    <string name="exercise_type_unknown">Unknown</string>
+
+    <string name="assessment_type_automatic">Immediate computer generated feedback.</string>
+    <string name="assessment_type_semi_automatic">Manual feedback with computer assistance.</string>
+    <string name="assessment_type_manual">Manual feedback.</string>
+</resources>

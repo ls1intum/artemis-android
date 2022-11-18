@@ -135,6 +135,21 @@ sealed class Exercise {
         }
     }
 
+    fun withUpdatedParticipation(participation: Participation): Exercise {
+        //Replace the updated participation
+        val updatedParticipations = studentParticipations?.map { oldParticipation ->
+            if (oldParticipation.id == participation.id) {
+                participation
+            } else {
+                oldParticipation
+            }
+        }
+            ?: //The new participations are just the one we just received
+            listOf(participation)
+
+        return copyWithUpdatedParticipations(updatedParticipations)
+    }
+
     /**
      * Create a copy of this exercise with the participations field replaced.
      */

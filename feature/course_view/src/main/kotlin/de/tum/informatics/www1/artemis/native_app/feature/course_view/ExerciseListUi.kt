@@ -1,13 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.feature.course_view
 
-import android.content.Context
 import android.text.format.DateUtils
-import androidx.compose.foundation.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.AccountTree
@@ -17,19 +18,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.android.model.exercise.*
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseResult
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCategoryChipRow
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseResult
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIcon
 import kotlinx.datetime.*
+import kotlinx.datetime.TimeZone
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlinx.datetime.TimeZone
 
 /**
  * Display a list of all exercises with section headers.
@@ -163,9 +164,6 @@ private fun ExerciseItem(
 ) {
     val exercise = exerciseWithParticipationStatus.exercise
 
-    val context = LocalContext.current
-    val chips = remember(exercise) { collectExerciseCategoryChips(context, exercise) }
-
     Card(modifier = modifier, onClick = onClickExercise) {
         Column(
             modifier = Modifier
@@ -186,16 +184,12 @@ private fun ExerciseItem(
             }
 
             //Display a row of chips
-            Row(
+            ExerciseCategoryChipRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                chips.forEach { chipData ->
-                    ExerciseCategoryChip(modifier = Modifier, data = chipData)
-                }
-            }
+                exercise = exercise
+            )
         }
     }
 }
@@ -205,15 +199,6 @@ private fun ExerciseItem(
  */
 @Composable
 private fun ExerciseTypeIcon(modifier: Modifier, exercise: Exercise) {
-    val icon = when (exercise) {
-        is TextExercise -> Icons.Default.EditNote
-        is ModelingExercise -> Icons.Outlined.AccountTree
-        is FileUploadExercise -> Icons.Default.FileUpload
-        is ProgrammingExercise -> Icons.Default.Code
-        is QuizExercise -> Icons.Default.Quiz
-        else -> Icons.Default.QuestionMark
-    }
-
     Box(
         modifier = modifier.then(
             Modifier
@@ -224,7 +209,7 @@ private fun ExerciseTypeIcon(modifier: Modifier, exercise: Exercise) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(8.dp),
-            imageVector = icon,
+            imageVector = getExerciseTypeIcon(exercise),
             contentDescription = null
         )
     }
@@ -303,89 +288,4 @@ private fun getSubmissionResultStatusText(participationStatus: Exercise.Particip
     }
 
     return stringResource(id = id)
-}
-
-private data class ExerciseCategoryChipData(val text: String, val color: Color)
-
-/**
- * Displays a colored rounded rectangle with the given text in it.
- * These are not material chips, as material chips indicate an action that can be performed.
- */
-@Composable
-private fun ExerciseCategoryChip(modifier: Modifier, data: ExerciseCategoryChipData) {
-    Box(
-        modifier = modifier.then(
-            Modifier.background(
-                color = data.color,
-                shape = RoundedCornerShape(25)
-            )
-        )
-    ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            text = data.text,
-            style = MaterialTheme.typography.labelLarge,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            color = Color.White
-        )
-    }
-}
-
-/**
- * Generates a list of the chips that are displayed in the ui from the data available in the exercise.
- */
-private fun collectExerciseCategoryChips(
-    context: Context,
-    exercise: Exercise
-): List<ExerciseCategoryChipData> {
-    val liveQuizChips =
-        if (exercise is QuizExercise && exercise.status == QuizExercise.QuizStatus.ACTIVE)
-            listOf(
-                ExerciseCategoryChipData(
-                    context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_live_quiz),
-                    Color(0xff28a745)
-                )
-            ) else emptyList()
-
-    val difficulty = exercise.difficulty
-    val difficultyChips = if (difficulty != null) {
-        val data = when (difficulty) {
-            Exercise.Difficulty.EASY ->
-                ExerciseCategoryChipData(
-                    context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_difficulty_easy),
-                    Color(0xff28a745)
-                )
-            Exercise.Difficulty.MEDIUM ->
-                ExerciseCategoryChipData(
-                    context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_difficulty_medium),
-                    Color(0xffffc107)
-                )
-            Exercise.Difficulty.HARD ->
-                ExerciseCategoryChipData(
-                    context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_difficulty_hard),
-                    Color(0xffdc3545)
-                )
-        }
-        listOf(data)
-    } else emptyList()
-
-    val bonusChips =
-        if (exercise.includedInOverallScore == Exercise.IncludedInOverallScore.INCLUDED_AS_BONUS) {
-            listOf(
-                ExerciseCategoryChipData(
-                    context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_is_bonus),
-                    Color.Cyan
-                )
-            )
-        } else emptyList()
-
-    val categoryChips = exercise.categories.map { category ->
-        ExerciseCategoryChipData(
-            category.category,
-            Color(category.colorValue ?: 0xFFFFFFFF)
-        )
-    }
-
-    return liveQuizChips + categoryChips + difficultyChips + bonusChips
 }
