@@ -1,6 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.impl.exercises
 
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
@@ -23,7 +23,7 @@ internal class ExerciseServiceImpl(
         authToken: String
     ): Flow<DataState<Exercise>> {
         return retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            performNetworkCall {
+            val x: NetworkResponse<Exercise> = performNetworkCall {
                 ktorProvider.ktorClient.get(serverUrl) {
                     url {
                         appendPathSegments("api", "exercises", exerciseId.toString(), "details")
@@ -33,6 +33,7 @@ internal class ExerciseServiceImpl(
                     bearerAuth(authToken)
                 }.body()
             }
+            x
         }
     }
 }

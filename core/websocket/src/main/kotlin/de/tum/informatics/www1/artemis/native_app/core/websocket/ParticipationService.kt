@@ -1,8 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.core.websocket
 
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.participation.StudentParticipation
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.submission.Result
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.submission.Submission
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import kotlinx.coroutines.flow.Flow
 
 interface ParticipationService {

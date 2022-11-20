@@ -52,8 +52,10 @@ internal class WebsocketProvider(
             accountService.authenticationData
         ) { a, b -> a to b }
             .transformLatest { (host, authenticationData) ->
+                println("host: $host; authData=$authenticationData")
                 emitAll(
                     channelFlow {
+                        println("START WEBSOCKET")
                         val url =
                             "wss://$host/websocket/tracker/websocket" + when (authenticationData) {
                                 is AccountService.AuthenticationData.LoggedIn -> {
@@ -68,6 +70,8 @@ internal class WebsocketProvider(
                         send(session)
 
                         awaitClose {
+                            println("STOP WEBSOCKET")
+
                             //Graceful disconnect is disabled, runBlocking should not block
                             runBlocking {
                                 session.disconnect()
@@ -110,6 +114,10 @@ internal class WebsocketProvider(
                     StompSubscribeHeaders(destination = channel),
                     deserializer
                 )
+                    .retryWhen { _, attempt ->
+                        delay(2.seconds * attempt.toInt())
+                        true
+                    }
                 emitAll(flow)
             }
     }

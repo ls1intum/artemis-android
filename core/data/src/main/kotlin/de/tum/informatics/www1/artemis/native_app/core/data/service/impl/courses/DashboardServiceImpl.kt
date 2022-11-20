@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.impl.courses
 
-import de.tum.informatics.www1.artemis.native_app.android.model.Course
-import de.tum.informatics.www1.artemis.native_app.android.model.Dashboard
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall

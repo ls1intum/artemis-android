@@ -15,8 +15,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.QuizExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 
 /**
  * Display a row of the categories this exercise is associated with

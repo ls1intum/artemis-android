@@ -5,24 +5,28 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.HelpCenter
-import androidx.compose.material.icons.filled.ViewHeadline
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.navigation.*
 import androidx.navigation.compose.composable
 import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCategoryChipRow
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIcon
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.tabs.details.ExerciseDetailsTab
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.tabs.overview.ExerciseOverviewTab
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -70,9 +74,36 @@ internal fun ExerciseScreen(
         topBar = {
             MediumTopAppBar(
                 title = {
+                    val fontSize = LocalTextStyle.current.fontSize
+
+                    val (titleText, inlineContent) = remember(exerciseDataState) {
+                        val text = buildAnnotatedString {
+                            appendInlineContent("icon")
+                            append(" ")
+                            append(
+                                exerciseDataState.bind { it.title }.orElse(null)
+                                    ?: "Exercise name placeholder"
+                            )
+                        }
+
+                        val inlineContent = mapOf(
+                            "icon" to InlineTextContent(
+                                Placeholder(fontSize, fontSize, PlaceholderVerticalAlign.TextCenter)
+                            ) {
+                                Icon(
+                                    imageVector = exerciseDataState.bind { getExerciseTypeIcon(it) }
+                                        .orElse(Icons.Default.Downloading),
+                                    contentDescription = null
+                                )
+                            }
+                        )
+
+                        text to inlineContent
+                    }
+
                     Text(
-                        text = exerciseDataState.bind { it.title }.orElse(null)
-                            ?: "Exercise name placeholder",
+                        text = titleText,
+                        inlineContent = inlineContent,
                         modifier = Modifier.placeholder(exerciseDataState !is DataState.Success)
                     )
                 },
@@ -105,9 +136,11 @@ internal fun ExerciseScreen(
                     modifier = Modifier.fillMaxWidth(),
                     selectedTabIndex = selectedTabIndex
                 ) {
+                    @Suppress("LocalVariableName")
                     val DefaultTab = @Composable { index: Int, icon: ImageVector, textRes: Int ->
                         Tab(
-                            selected = selectedTabIndex == index, onClick = { selectedTabIndex = index },
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
                             icon = {
                                 Icon(
                                     imageVector = icon,
@@ -121,21 +154,25 @@ internal fun ExerciseScreen(
                     }
 
                     DefaultTab(0, Icons.Default.ViewHeadline, R.string.exercise_view_tab_overview)
-                    DefaultTab(1, Icons.Default.HelpCenter, R.string.exercise_view_tab_qna)
+                    DefaultTab(1, Icons.Default.Info, R.string.exercise_view_tab_info)
+                    DefaultTab(2, Icons.Default.HelpCenter, R.string.exercise_view_tab_qna)
                 }
+
+                val tabModifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(
+                        rememberScrollState()
+                    )
 
                 when (selectedTabIndex) {
                     0 -> {
-                        ExerciseDetailsUi(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(top = 8.dp)
-                                .verticalScroll(
-                                    rememberScrollState()
-                                ),
+                        ExerciseOverviewTab(modifier = tabModifier, exercise = exercise)
+                    }
+                    1 -> {
+                        ExerciseDetailsTab(
+                            modifier = tabModifier,
                             exercise = exercise,
-                            latestResult = null,
-                            hasMultipleResults = false
+                            latestResult = null
                         )
                     }
                 }

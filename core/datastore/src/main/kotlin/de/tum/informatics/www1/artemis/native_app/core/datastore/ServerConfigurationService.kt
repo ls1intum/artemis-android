@@ -1,6 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.datastore
 
-import de.tum.informatics.www1.artemis.native_app.android.model.server_config.ProfileInfo
+import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import kotlinx.coroutines.flow.Flow
 

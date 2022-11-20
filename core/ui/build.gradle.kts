@@ -25,4 +25,5 @@ dependencies {
     api(libs.coil.compose)
 
     implementation(libs.kotlinx.datetime)
+    implementation(libs.kotlinx.coroutines.android)
 }

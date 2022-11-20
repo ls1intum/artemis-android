@@ -1,9 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.impl
 
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.exerciseSerializerModule
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.participation.participationSerializerModule
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.submission.submissionSerializerModule
-import de.tum.informatics.www1.artemis.native_app.android.model.lecture.lectureSerializerModule
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.exerciseSerializerModule
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.participationSerializerModule
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.submissionSerializerModule
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lectureSerializerModule
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 

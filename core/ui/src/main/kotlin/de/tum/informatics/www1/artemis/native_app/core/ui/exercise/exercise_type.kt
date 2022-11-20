@@ -4,7 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.AccountTree
 import androidx.compose.ui.graphics.vector.ImageVector
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.*
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.*
 
 fun getExerciseTypeIcon(exercise: Exercise): ImageVector {
     return when (exercise) {

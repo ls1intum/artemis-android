@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.exercise_view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
@@ -55,6 +55,8 @@ internal class ExerciseViewModel(
                 when (exercise) {
                     is DataState.Success -> {
                         var currentExercise = exercise.data
+
+                        emit(exercise)
 
                         emitAll(
                             participationService

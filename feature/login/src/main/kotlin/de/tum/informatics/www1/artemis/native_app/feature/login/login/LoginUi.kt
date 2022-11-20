@@ -13,8 +13,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import de.tum.informatics.www1.artemis.native_app.android.model.server_config.ProfileInfo
-import de.tum.informatics.www1.artemis.native_app.android.model.server_config.Saml2Config
+import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
+import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Saml2Config
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
@@ -149,11 +149,11 @@ fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Uni
  * Displays the username and password text field and the remember me checkbox.
  * The user can trigger .
  *
- * @param accountName the account name from [de.tum.informatics.www1.artemis.native_app.android.server_config.ProfileInfo.accountName]
+ * @param accountName the account name from [de.tum.informatics.www1.artemis.native_app.core.server_config.ProfileInfo.accountName]
  * @param onClickLogin called when the user clicks the login button.
  * @param isLoginButtonEnabled if the button that sends the login request is enabled.
- * @param isPasswordLoginDisabled see [de.tum.informatics.www1.artemis.native_app.android.server_config.ProfileInfo.isPasswordLoginDisabled]
- * @param saml2Config see [de.tum.informatics.www1.artemis.native_app.android.server_config.ProfileInfo.saml2]
+ * @param isPasswordLoginDisabled see [de.tum.informatics.www1.artemis.native_app.core.server_config.ProfileInfo.isPasswordLoginDisabled]
+ * @param saml2Config see [de.tum.informatics.www1.artemis.native_app.core.server_config.ProfileInfo.saml2]
  */
 @Composable
 fun LoginUi(

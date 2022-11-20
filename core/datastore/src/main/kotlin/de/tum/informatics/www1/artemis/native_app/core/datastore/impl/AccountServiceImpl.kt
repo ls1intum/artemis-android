@@ -4,12 +4,14 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import de.tum.informatics.www1.artemis.native_app.android.model.account.Account
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.LoginService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
 
 internal class AccountServiceImpl(
@@ -50,6 +52,11 @@ internal class AccountServiceImpl(
                 emit(AccountService.AuthenticationData.NotLoggedIn)
             }
         }
+            .shareIn(
+                GlobalScope,
+                started = SharingStarted.Lazily,
+                replay = 1
+            )
 
     override suspend fun login(
         username: String,

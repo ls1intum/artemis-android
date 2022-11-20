@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
 
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.participation.StudentParticipation
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.submission.Submission
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationService.ProgrammingSubmissionStateData
@@ -26,6 +26,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.datetime.Clock
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 
 /**
  * From: https://github.com/ls1intum/Artemis/blob/5c13e2e1b5b6d81594b9123946f040cbf6f0cfc6/src/main/webapp/app/overview/participation-websocket.service.ts
@@ -109,12 +110,12 @@ internal class ParticipationServiceImpl(
                             val submissionUpdater = if (personal) personalSubmissionUpdater else {
                                 websocketProvider.subscribe(
                                     exerciseParticipationTopic(exerciseId),
-                                    Submission.serializer()
+                                    Result.serializer()
                                 )
                             }
 
                             submissionUpdater
-                                .filter { it.participation?.id == participationId }
+                                .filter { it.id == participationId }
                                 .map { } // Map to Unit, we are not interested in the value
                                 .first()
                         }
@@ -205,9 +206,6 @@ internal class ParticipationServiceImpl(
     }
 
     override fun subscribeForParticipationChanges(): Flow<StudentParticipation> = emptyFlow()
-
-    @Serializable
-    private data class ProgrammingSubmissionError(val error: String, val participationId: Int)
 
     @Serializable(with = WebsocketProgrammingSubmissionMessage.Deserializer::class)
     private sealed class WebsocketProgrammingSubmissionMessage {

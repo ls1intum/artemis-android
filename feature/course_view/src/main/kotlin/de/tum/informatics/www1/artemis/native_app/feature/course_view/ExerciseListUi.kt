@@ -18,14 +18,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.android.model.exercise.*
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.*
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCategoryChipRow
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseResult
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ParticipationStatusUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIcon
 import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone
@@ -249,43 +248,6 @@ private fun ExerciseDataText(modifier: Modifier, exercise: Exercise, participati
             style = MaterialTheme.typography.bodyMedium
         )
 
-        when (participationStatus) {
-            is Exercise.ParticipationStatus.ParticipationStatusWithParticipation -> {
-                //Display dynamic updates component
-                ExerciseResult(
-                    modifier = Modifier.fillMaxWidth(),
-                    exercise = exercise,
-                    participation = participationStatus.participation,
-                    result = null,
-                    personal = true
-                )
-            }
-            else -> {
-                //Simply display text
-                Text(
-                    text = getSubmissionResultStatusText(participationStatus = participationStatus),
-                    style = MaterialTheme.typography.labelLarge
-                )
-            }
-        }
+        ParticipationStatusUi(exercise = exercise, participationStatus = participationStatus)
     }
-}
-
-//From: https://github.com/ls1intum/Artemis/blob/5c13e2e1b5b6d81594b9123946f040cbf6f0cfc6/src/main/webapp/app/overview/submission-result-status.component.html
-@Composable
-private fun getSubmissionResultStatusText(participationStatus: Exercise.ParticipationStatus): String {
-    val id = when (participationStatus) {
-        Exercise.ParticipationStatus.QuizNotInitialized -> de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_quiz_not_started
-        Exercise.ParticipationStatus.QuizActive -> de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_user_participating
-        Exercise.ParticipationStatus.QuizSubmitted -> de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_user_submitted
-        Exercise.ParticipationStatus.QuizNotStarted -> de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_quiz_not_started
-        Exercise.ParticipationStatus.QuizNotParticipated -> de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_user_not_participated
-        Exercise.ParticipationStatus.NoTeamAssigned -> de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_user_not_assigned_to_team
-        Exercise.ParticipationStatus.Uninitialized -> de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_user_not_started_exercise
-        Exercise.ParticipationStatus.ExerciseActive -> de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_exercise_not_submitted
-        Exercise.ParticipationStatus.ExerciseMissed -> de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_exercise_missed_deadline
-        else -> 0
-    }
-
-    return stringResource(id = id)
 }
