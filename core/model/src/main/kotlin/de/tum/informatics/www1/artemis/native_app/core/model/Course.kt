@@ -17,7 +17,8 @@ data class Course(
     val exercises: List<Exercise> = emptyList(),
     val lectures: List<Lecture> = emptyList(),
     val semester: String = "",
-    val registrationConfirmationMessage: String = ""
+    val registrationConfirmationMessage: String = "",
+    val accuracyOfScores: Float = 1f
 ) {
     private val maxPointsPossibleHalves get() = exercises.sumOf { it.maxPointsHalves }
     private val currentScoreHalves get() = exercises.sumOf { it.currentScoreHalves }

@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.exercise
 
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation.InitializationState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
@@ -39,6 +40,7 @@ sealed class Exercise {
     abstract val includedInOverallScore: IncludedInOverallScore
     abstract val exampleSolutionPublicationDate: Instant?
     abstract val studentParticipations: List<Participation>?
+    abstract val course: Course?
 
     // -------
     abstract val attachments: List<Attachment>

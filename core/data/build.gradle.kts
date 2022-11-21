@@ -28,4 +28,5 @@ dependencies {
     implementation(libs.krossbow.stomp.kxserialization.json)
 
     implementation(libs.koin.core)
+    implementation(libs.kotlinx.datetime)
 }

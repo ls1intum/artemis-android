@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.tabs.overview
+package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.tabs.overview
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 
 @Composable
-internal fun ExerciseOverviewTab(modifier: Modifier, exercise: Exercise) {
+internal fun ExerciseOverviewTab(modifier: Modifier, exercise: Exercise, onViewResult: () -> Unit) {
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -16,7 +16,7 @@ internal fun ExerciseOverviewTab(modifier: Modifier, exercise: Exercise) {
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp),
             exercise = exercise,
-            viewResultInformation = {}
+            viewResultInformation = onViewResult
         )
     }
 }

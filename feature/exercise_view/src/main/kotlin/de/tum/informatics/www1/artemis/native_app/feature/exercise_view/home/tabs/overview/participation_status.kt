@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.tabs.overview
+package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.tabs.overview
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.ProgrammingExerciseStudentParticipation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.ProgrammingSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ParticipationStatusUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ResultTemplateStatus
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.computeTemplateStatus
@@ -24,12 +27,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 /**
  * Display the default participation status ui in combination with enhancing options.
  * These additional options are, e.g, a button to inspect the result.
+ * @param viewResultInformation called when the user wants to view their latest result.
  */
 @Composable
 internal fun ParticipationStatusUi(
     modifier: Modifier,
     exercise: Exercise,
-    viewResultInformation: (result: Result) -> Unit
+    viewResultInformation: () -> Unit
 ) {
     val participationStatus = remember(exercise) {
         exercise.computeParticipationStatus(null)
@@ -69,14 +73,26 @@ internal fun ParticipationStatusUi(
             )
 
             if (templateStatus != null) {
-                if (templateStatus is ResultTemplateStatus.WithResult) {
+                if (templateStatus is ResultTemplateStatus.WithResult && canShowResultDetails(
+                        null,
+                        templateStatus.result
+                    )
+                ) {
                     Button(
                         modifier = Modifier.align(Alignment.End),
-                        onClick = { viewResultInformation(templateStatus.result) }) {
+                        onClick = viewResultInformation
+                    ) {
                         Text(text = stringResource(id = R.string.exercise_participation_status_view_result_button))
                     }
                 }
             }
         }
     }
+}
+
+private fun canShowResultDetails(@Suppress("SameParameterValue") submission: Submission?, result: Result): Boolean {
+    if (result.isPreliminary) return true
+
+    if (result.submission != null && submission is ProgrammingSubmission && submission.buildFailed == true) return true
+    return result.hasFeedback == true
 }

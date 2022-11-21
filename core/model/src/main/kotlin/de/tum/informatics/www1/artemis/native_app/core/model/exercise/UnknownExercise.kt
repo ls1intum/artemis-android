@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.exercise
 
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.attachment.Attachment
 import kotlinx.datetime.Instant
@@ -31,7 +32,8 @@ data class UnknownExercise(
     override val exampleSolutionPublicationDate: Instant? = null,
     override val attachments: List<Attachment> = emptyList(),
     override val studentParticipations: List<Participation>? = null,
-) : Exercise() {
+    override val course: Course? = null,
+    ) : Exercise() {
     override fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise =
         copy(studentParticipations = newParticipations)
 }

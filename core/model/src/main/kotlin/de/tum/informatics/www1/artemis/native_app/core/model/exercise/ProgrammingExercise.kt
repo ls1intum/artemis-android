@@ -1,7 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.exercise
 
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.ProgrammingExerciseStudentParticipation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.attachment.Attachment
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -30,10 +34,16 @@ data class ProgrammingExercise(
     override val exampleSolutionPublicationDate: Instant? = null,
     override val attachments: List<Attachment> = emptyList(),
     override val studentParticipations: List<Participation>? = null,
-    val programmingLanguage: ProgrammingLanguage? = null
+    override val course: Course? = null,
+    val programmingLanguage: ProgrammingLanguage? = null,
+    val buildAndTestStudentSubmissionsAfterDueDate: Instant? = null,
+    val showTestNamesToStudents: Boolean? = false,
+    val staticCodeAnalysisEnabled: Boolean = false,
+    val maxStaticCodeAnalysisPenalty: Float? = null
 ) : Exercise() {
 
-    override fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise = copy(studentParticipations = newParticipations)
+    override fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise =
+        copy(studentParticipations = newParticipations)
 
     enum class ProgrammingLanguage {
         JAVA,
@@ -46,5 +56,39 @@ data class ProgrammingExercise(
         SWIFT,
         OCAML,
         EMPTY
+    }
+
+    /**
+     * A result is preliminary if:
+     * - The programming exercise buildAndTestAfterDueDate is set
+     * - The submission date of the result / result completionDate is before the buildAndTestAfterDueDate
+     *
+     * @param latestResult Result with attached Submission - if submission is null, method will use the result completionDate as a reference.
+     * @see [https://github.com/ls1intum/Artemis/blob/fe3a00a2118be74ecc7b2f7e85e223f175e509d2/src/main/webapp/app/exercises/programming/shared/utils/programming-exercise.utils.ts#L68]
+     */
+    fun isResultPreliminary(latestResult: Result): Boolean {
+        if (latestResult.participation is ProgrammingExerciseStudentParticipation && latestResult.participation.testRun == true) {
+            return false
+        }
+
+        if (latestResult.completionDate == null) {
+            // in the unlikely case the completion date is not set yet (this should not happen), it is preliminary
+            return true
+        }
+
+        // If an exercise's assessment type is not automatic the last result is supposed to be manually assessed
+        if (assessmentType != AssessmentType.AUTOMATIC) {
+            // either the semi-automatic result is not yet available as last result (then it is preliminary), or it is already available (then it still can be changed)
+            if (assessmentDueDate != null) {
+                return Clock.System.now() < assessmentDueDate
+            }
+            // in case the assessment due date is not set, the assessment type of the latest result is checked. If it is automatic the result is still preliminary.
+            return latestResult.assessmentType == AssessmentType.AUTOMATIC
+        }
+        // When the due date for the automatic building and testing is available but not reached, the result is preliminary
+        if (buildAndTestStudentSubmissionsAfterDueDate != null) {
+            return latestResult.completionDate < buildAndTestStudentSubmissionsAfterDueDate
+        }
+        return false
     }
 }

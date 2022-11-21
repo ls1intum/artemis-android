@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.exercise
 
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.attachment.Attachment
@@ -31,6 +32,7 @@ data class QuizExercise(
     override val exampleSolutionPublicationDate: Instant? = null,
     override val attachments: List<Attachment> = emptyList(),
     override val studentParticipations: List<Participation>? = null,
+    override val course: Course? = null,
     val allowedNumberOfAttempts: Int? = null,
     val remainingNumberOfAttempts: Int? = null,
     val randomizeQuestionOrder: Boolean? = null,

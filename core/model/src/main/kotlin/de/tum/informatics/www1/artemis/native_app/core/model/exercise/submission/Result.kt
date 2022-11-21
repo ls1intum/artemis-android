@@ -2,12 +2,16 @@ package de.tum.informatics.www1.artemis.native_app.core.model.exercise.submissio
 
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.feedback.Feedback
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.ProgrammingExerciseStudentParticipation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
-class Result(
+data class Result(
     val id: Int? = null,
     val completionDate: Instant? = null,
     val successful: Boolean? = null,
@@ -26,6 +30,16 @@ class Result(
     val codeIssueCount: Int? = null,
     val submission: Submission? = null,
     val assessor: User? = null,
-    //val feedbacks: List<Feedback>? = null,
+    val feedbacks: List<Feedback>? = null,
     val participation: Participation? = null
-)
+) {
+
+    /**
+     * @see [ProgrammingExercise.isResultPreliminary]
+     */
+    val isPreliminary: Boolean
+        get() {
+            return participation != null && participation is ProgrammingExerciseStudentParticipation &&
+                    (participation.exercise as? ProgrammingExercise)?.isResultPreliminary(this) ?: false
+        }
+}

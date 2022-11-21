@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.tabs.details
+package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.tabs.details
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.InlineTextContent
