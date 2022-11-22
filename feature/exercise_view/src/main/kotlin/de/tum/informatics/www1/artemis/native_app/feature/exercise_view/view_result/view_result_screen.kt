@@ -54,6 +54,8 @@ internal fun ViewResultScreen(
         val feedbackItems =
             viewModel.feedbackItems.collectAsState(initial = DataState.Loading()).value
 
+        val buildLogs = viewModel.buildLogs.collectAsState(initial = DataState.Loading()).value
+
         ExerciseDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
@@ -64,11 +66,14 @@ internal fun ViewResultScreen(
             if (exercise !is DataState.Success) return@ExerciseDataStateUi
 
             ResultDetailUi(
-                modifier = Modifier.fillMaxSize().padding(8.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
                 exercise = exercise.data,
                 latestResult = latestResult ?: return@ExerciseDataStateUi,
                 feedbackItems = feedbackItems.orElse(emptyList()),
-                latestIndividualDueDate = latestIndividualDueDate.orElse(null)
+                latestIndividualDueDate = latestIndividualDueDate.orElse(null),
+                buildLogs = buildLogs.orElse(emptyList())
             )
         }
     }

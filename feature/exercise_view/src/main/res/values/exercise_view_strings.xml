@@ -9,7 +9,7 @@
     <string name="exercise_view_tab_info">Information</string>
     <string name="exercise_view_tab_qna">Question and Answer</string>
 
-    <string name="exercise_participation_status_title">Your exercise status</string>
+    <string name="exercise_participation_status_title">Your exercise status:</string>
     <string name="exercise_participation_status_view_result_button">View result</string>
 
     <string name="exercise_info_title">Exercise info</string>
@@ -36,12 +36,18 @@
     <string name="result_view_preliminary_result_semi_automatic">Your result is not final yet, because more tests will be executed after the due date or a manual assessment will be done.</string>
     <string name="result_view_preliminary_result_automatic">Your result is not final yet, because more tests will be executed after the due date.</string>
 
+    <string name="result_view_score_section_title">Score</string>
+    <string name="result_view_score_result">Your have achieved %1$s/%2$s points resulting in %3$s.</string>
+
+    <string name="result_view_feedback_section_title">Feedback</string>
+
     <string name="result_view_feedback_category_regular">Feedback</string>
     <string name="result_view_feedback_category_submission_policy">Submission policy</string>
     <string name="result_view_feedback_category_submission_code_issue">Code issue</string>
     <string name="result_view_feedback_category_submission_test">Unit test result</string>
     <string name="result_view_feedback_category_submission_tutor">Tutor feedback</string>
 
+    <string name="result_view_programming_exercise_chart_section_title">Score chart</string>
     <string name="result_view_feedback_test_title_no_info">%1$s: No test info available</string>
     <string name="result_view_feedback_test_title_passed">%1$s: Test passed</string>
     <string name="result_view_feedback_test_title_failed">%1$s: Test failed</string>
@@ -49,4 +55,7 @@
     <string name="result_view_feedback_overview_category_correct">Correct</string>
     <string name="result_view_feedback_overview_category_warning">Warning</string>
     <string name="result_view_feedback_overview_category_wrong">Wrong</string>
+
+    <string name="result_view_build_log_section_title">Build logs</string>
+    <string name="result_view_build_log_show_entire_log">Show whole log</string>
 </resources>

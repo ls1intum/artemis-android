@@ -37,7 +37,8 @@ fun ParticipationStatusUi(
             ExerciseResult(
                 modifier = Modifier.fillMaxWidth(),
                 showUngradedResults = true,
-                templateStatus = templateStatus
+                templateStatus = templateStatus,
+                exercise = exercise
             )
         }
         else -> {

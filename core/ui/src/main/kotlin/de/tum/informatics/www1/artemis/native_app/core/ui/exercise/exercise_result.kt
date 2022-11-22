@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
+import androidx.compose.animation.core.DecayAnimation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
@@ -11,15 +12,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.*
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.InstructorSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TestSubmission
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
@@ -28,15 +32,16 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.koin.androidx.compose.get
+import java.text.DecimalFormat
 
 private const val MIN_SCORE_GREEN = 80
 private const val MIN_SCORE_ORANGE = 40
 
-private val ColorScheme.resultSuccess: Color
+val ColorScheme.resultSuccess: Color
     get() = Color.Green
-private val ColorScheme.resultMedium: Color
+val ColorScheme.resultMedium: Color
     get() = Color.Yellow
-private val ColorScheme.resultBad: Color
+val ColorScheme.resultBad: Color
     get() = Color.Red
 
 /**
@@ -158,6 +163,7 @@ fun ExerciseResult(
     modifier: Modifier,
     showUngradedResults: Boolean = true,
     templateStatus: ResultTemplateStatus,
+    exercise: Exercise
 ) {
     when (templateStatus) {
         ResultTemplateStatus.IsBuilding -> {
@@ -168,7 +174,8 @@ fun ExerciseResult(
                 modifier = modifier.height(IntrinsicSize.Min),
                 showIcon = true,
                 result = templateStatus.result,
-                isLate = false
+                isLate = false,
+                maxPoints = exercise.maxPoints
             )
         }
         ResultTemplateStatus.NoResult -> {
@@ -197,7 +204,8 @@ fun ExerciseResult(
                 modifier = modifier,
                 showIcon = true,
                 result = templateStatus.result,
-                isLate = true
+                isLate = true,
+                maxPoints = exercise.maxPoints
             )
         }
         ResultTemplateStatus.Missing -> TODO()
@@ -232,7 +240,8 @@ private fun StatusHasResult(
     modifier: Modifier,
     showIcon: Boolean,
     result: Result,
-    isLate: Boolean
+    isLate: Boolean,
+    maxPoints: Float?
 ) {
     val resultScore = result.score ?: 0f
 
@@ -248,7 +257,27 @@ private fun StatusHasResult(
         else -> MaterialTheme.colorScheme.resultBad
     }
 
-    val text = if (isLate) "TODO: LATE" else "TODO: Result"
+    val context = LocalContext.current
+
+    val completionDate = result.completionDate
+
+    //The relative time to this result being finished.
+    val relativeTime = if (completionDate == null) null else getRelativeTime(to = completionDate)
+
+    val text = remember(resultScore, maxPoints, relativeTime) {
+        if (maxPoints == null || relativeTime == null)
+            return@remember context.getString(R.string.exercise_result_has_result_score_unknown)
+
+        val percentage = resultScore / maxPoints
+        val formattedPercentage = DecimalFormat.getPercentInstance().format(percentage)
+
+        context.getString(
+            if (isLate) R.string.exercise_result_has_result_score_late
+            else R.string.exercise_result_has_result_score,
+            formattedPercentage,
+            relativeTime
+        )
+    }
 
     IconTextStatus(
         modifier = modifier,

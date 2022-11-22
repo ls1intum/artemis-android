@@ -213,15 +213,28 @@ internal class ExerciseViewModel(
                     .transformLatest { latestResult ->
                         val resultId = latestResult.bind { it?.id }.orElse(null)
 
-                        combine(
-                            serverConfigurationService.serverUrl,
-                            accountService.authenticationData
-                        )
+                        //This is rexecuted when exercise is reloaded anyway. And exercise is reloaded
+                        //When server url or auth data changes.
+                        val serverUrl = serverConfigurationService.serverUrl.first()
+                        val accountData = accountService.authenticationData.first()
 
-                        emitAll(
-                            buildLogService
-                                .loadBuildLogs(participationId, resultId, ser)
-                        )
+                        when (accountData) {
+                            is AccountService.AuthenticationData.LoggedIn -> {
+                                emitAll(
+                                    buildLogService
+                                        .loadBuildLogs(
+                                            participationId,
+                                            resultId,
+                                            serverUrl,
+                                            accountData.authToken
+                                        )
+                                )
+                            }
+                            AccountService.AuthenticationData.NotLoggedIn -> {
+                                emit(DataState.Suspended())
+                            }
+                        }
+
                     }
             }
 
@@ -338,7 +351,7 @@ internal class ExerciseViewModel(
             category = if (showTestDetails) R.string.result_view_feedback_category_submission_test
             else R.string.result_view_feedback_category_regular,
             title = title,
-            text = feedback.text,
+            text = feedback.detailText,
             positive = feedback.positive,
             credits = feedback.credits,
             actualCredits = null

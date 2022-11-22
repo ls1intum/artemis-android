@@ -60,7 +60,7 @@ internal fun ParticipationStatusUi(
         ) {
             Text(
                 text = stringResource(id = R.string.exercise_participation_status_title),
-                style = MaterialTheme.typography.titleSmall
+                style = MaterialTheme.typography.titleMedium
             )
 
             ParticipationStatusUi(
