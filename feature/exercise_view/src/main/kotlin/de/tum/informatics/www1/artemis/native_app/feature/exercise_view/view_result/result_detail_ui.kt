@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.view_result
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,11 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -25,8 +22,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.BuildLogEntry
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultBad
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultMedium
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 import kotlinx.datetime.Clock
@@ -44,11 +39,8 @@ internal fun ResultDetailUi(
     latestResult: Result,
     feedbackItems: List<ExerciseViewModel.FeedbackItem>,
     latestIndividualDueDate: Instant?,
-    buildLogs: List<BuildLogEntry>,
-    forceShowTestDetails: Boolean = false
+    buildLogs: List<BuildLogEntry>
 ) {
-    val showTestDetails =
-        (exercise is ProgrammingExercise && exercise.showTestNamesToStudents == true) || forceShowTestDetails
     val showMissingAutomaticFeedbackInformation = remember(latestIndividualDueDate) {
         if (latestIndividualDueDate == null) {
             false
@@ -339,7 +331,13 @@ private val pointDecimalFormat = DecimalFormat("00.00")
 private val percentageFormat = DecimalFormat.getPercentInstance()
 
 @Composable
-private fun ScoreResult(modifier: Modifier, title: String, points: Double, percentage: Double, colors: CardColors) {
+private fun ScoreResult(
+    modifier: Modifier,
+    title: String,
+    points: Double,
+    percentage: Double,
+    colors: CardColors
+) {
     val pointText = remember(points) {
         pointDecimalFormat.format(points)
     }
