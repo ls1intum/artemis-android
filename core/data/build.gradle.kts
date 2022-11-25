@@ -15,17 +15,12 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
 
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.serialization)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
+    api(libs.ktor.client.core)
+    api(libs.ktor.client.serialization)
+    api(libs.ktor.client.content.negotiation)
+    api(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.client.websockets)
     implementation(libs.ktor.client.okhttp)
-
-    //For the websockets
-    implementation(libs.krossbow.stomp.core)
-    implementation(libs.krossbow.websocket.ktor)
-    implementation(libs.krossbow.stomp.kxserialization.json)
 
     implementation(libs.koin.core)
     implementation(libs.kotlinx.datetime)

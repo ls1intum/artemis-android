@@ -10,6 +10,8 @@ androidxLifecycle = "2.5.1"
 androidxNavigation = "2.5.3"
 androidGradlePlugin = "7.3.1"
 androidxDataStore = "1.0.0"
+androidxPaging = "3.1.1"
+androidxPagingCompose = "1.0.0-alpha17"
 androidxWork = "2.7.1"
 coil = "2.2.2"
 kotlin = "1.7.20"
@@ -19,6 +21,7 @@ kotlinxSerializationJson = "1.4.1"
 koin = "3.2.0"
 ktor = "2.1.1"
 krossbow = "4.4.0"
+room = "2.4.3"
 
 [libraries]
 accompanist-placeholder-material = { group = "com.google.accompanist", name = "accompanist-placeholder-material", version.ref = "accompanist" }
@@ -40,6 +43,11 @@ androidx-dataStore-preferences = { group = "androidx.datastore", name = "datasto
 androidx-lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidxLifecycle" }
 androidx-lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidxLifecycle" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidxNavigation" }
+androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "androidxPaging" }
+androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "androidxPagingCompose" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }

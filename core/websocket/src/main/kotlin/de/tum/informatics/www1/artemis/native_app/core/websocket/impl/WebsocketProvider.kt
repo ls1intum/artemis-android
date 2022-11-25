@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
 
 import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -20,11 +19,9 @@ import org.hildan.krossbow.stomp.conversions.kxserialization.*
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.stomp.headers.StompSubscribeHeaders
 import org.hildan.krossbow.websocket.ktor.KtorWebSocketClient
-import java.net.URLEncoder
 import kotlin.time.Duration.Companion.minutes
 
-internal class WebsocketProvider(
-    ktorProvider: KtorProvider,
+class WebsocketProvider(
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val jsonProvider: JsonProvider
