@@ -24,15 +24,15 @@ class StandalonePosting(
     @ColumnInfo(name = "course_id")
     val courseId: Int,
     @ColumnInfo(name = "exercise_id")
-    val exerciseId: Int?,
+    val exerciseId: Int,
     @ColumnInfo(name = "lecture_id")
-    val lectureId: Int?,
+    val lectureId: Int,
     @ColumnInfo(name = "title")
     val title: String?,
     @ColumnInfo(name = "context")
-    val context: PostingEntity.CourseWideContext,
+    val context: PostingEntity.CourseWideContext?,
     @ColumnInfo(name = "display_priority")
-    val displayPriority: PostingEntity.DisplayPriority,
+    val displayPriority: PostingEntity.DisplayPriority?,
     @ColumnInfo(name = "resolved")
     val resolved: Boolean
 )

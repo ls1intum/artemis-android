@@ -2,11 +2,12 @@ package de.tum.informatics.www1.artemis.native_app.core.communication.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.communication.*
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import io.ktor.client.call.*
@@ -20,70 +21,68 @@ class MetisServiceImpl(
     private val websocketProvider: WebsocketProvider
 ) : MetisService {
 
-    override fun getPosts(
+    override suspend fun getPosts(
         standalonePostsContext: MetisService.StandalonePostsContext,
         pageNum: Int,
         authToken: String,
         serverUrl: String
-    ): Flow<DataState<List<StandalonePost>>> {
-        return retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            performNetworkCall {
-                ktorProvider.ktorClient.get(serverUrl) {
-                    val metisContext = standalonePostsContext.metisContext
-                    url {
-                        appendPathSegments("api", "courses")
-                        appendPathSegments(metisContext.courseId.toString())
-                        appendPathSegments(metisContext.resourceEndpoint)
+    ): NetworkResponse<List<StandalonePost>> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.get(serverUrl) {
+                val metisContext = standalonePostsContext.metisContext
+                url {
+                    appendPathSegments("api", "courses")
+                    appendPathSegments(metisContext.courseId.toString())
+                    appendPathSegments(metisContext.resourceEndpoint)
+                }
+
+                parameter("postSortCriterion", "CREATION_DATE")
+                parameter(
+                    "sortingOrder",
+                    standalonePostsContext.sortingStrategy.httpParamValue
+                )
+
+                when (metisContext) {
+                    is MetisContext.Exercise -> {
+                        parameter("exerciseId", metisContext.exerciseId)
                     }
-
-                    parameter("postSortCriterion", "CREATION_DATE")
-                    parameter(
-                        "sortingOrder",
-                        standalonePostsContext.sortingStrategy.httpParamValue
-                    )
-
-                    when (metisContext) {
-                        is MetisContext.Exercise -> {
-                            parameter("exerciseId", metisContext.exerciseId)
-                        }
-                        is MetisContext.Lecture -> {
-                            parameter("lectureId", metisContext.lectureId)
-                        }
-                        is MetisContext.Conversation -> {
-                            parameter("conversationId", metisContext.conversationId)
-                        }
-                        is MetisContext.Course -> {
-
-                        }
+                    is MetisContext.Lecture -> {
+                        parameter("lectureId", metisContext.lectureId)
                     }
-
-                    parameter(
-                        "courseWideContext",
-                        standalonePostsContext.courseWideContext.httpValue
-                    )
-
-                    if (standalonePostsContext.query != null) {
-                        parameter("searchText", standalonePostsContext.query)
+                    is MetisContext.Conversation -> {
+                        parameter("conversationId", metisContext.conversationId)
                     }
+                    is MetisContext.Course -> {
 
-                    parameter(
-                        "filterToUnresolved",
-                        MetisFilter.RESOLVED !in standalonePostsContext.filter
-                    )
-                    parameter(
-                        "filterToOwn",
-                        MetisFilter.CREATED_BY_CLIENT in standalonePostsContext.filter
-                    )
-                    parameter(
-                        "filterToAnsweredOrReacted",
-                        MetisFilter.WITH_REACTION in standalonePostsContext.filter
-                    )
+                    }
+                }
 
-                    parameter("pagingEnabled", true)
-                    parameter("page", pageNum)
-                    parameter("pageSize", 20)
-                }.body()
-            }
+                parameter(
+                    "courseWideContext",
+                    standalonePostsContext.courseWideContext.httpValue
+                )
+
+                if (standalonePostsContext.query != null) {
+                    parameter("searchText", standalonePostsContext.query)
+                }
+
+                parameter(
+                    "filterToUnresolved",
+                    MetisFilter.RESOLVED !in standalonePostsContext.filter
+                )
+                parameter(
+                    "filterToOwn",
+                    MetisFilter.CREATED_BY_CLIENT in standalonePostsContext.filter
+                )
+                parameter(
+                    "filterToAnsweredOrReacted",
+                    MetisFilter.WITH_REACTION in standalonePostsContext.filter
+                )
+
+                parameter("pagingEnabled", true)
+                parameter("page", pageNum)
+                parameter("pageSize", 20)
+            }.body()
         }
     }
 

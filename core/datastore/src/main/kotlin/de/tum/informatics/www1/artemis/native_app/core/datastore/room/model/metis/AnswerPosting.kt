@@ -32,9 +32,9 @@ data class AnswerPosting(
     @ColumnInfo(name = "course_id")
     val courseId: Int,
     @ColumnInfo(name = "exercise_id")
-    val exerciseId: Int?,
+    val exerciseId: Int,
     @ColumnInfo(name = "lecture_id")
-    val lectureId: Int?,
+    val lectureId: Int,
     @ColumnInfo(name = "parent_post_id")
     val parentPostId: Int,
     @ColumnInfo(name = "resolves_post")

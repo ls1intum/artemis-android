@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class StandalonePost(
-    override val id: String? = null,
+    override val id: Int? = null,
     override val author: User? = null,
     override val authorRole: UserRole? = null,
     override val creationDate: Instant? = null,

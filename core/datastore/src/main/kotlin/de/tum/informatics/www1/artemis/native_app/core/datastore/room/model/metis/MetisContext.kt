@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.communication
+package de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis
 
 /**
  * The context in which metis is used, e.g. in a course, an exercise or personal communication.

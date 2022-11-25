@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class BasePost {
-    abstract val id: String?
+    abstract val id: Int?
     abstract val author: User?
     abstract val authorRole: UserRole?
     abstract val creationDate: Instant?
