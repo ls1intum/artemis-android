@@ -4,6 +4,9 @@ import androidx.paging.PagingSource
 import androidx.room.withTransaction
 import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.dao.MetisDao
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.*
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.*
@@ -247,7 +250,10 @@ class MetisStorageServiceImpl(
     /**
      * Insert new reactions and remove reactions no longer present
      */
-    private suspend fun MetisDao.updateReactions(postId: String, reactions: List<PostReactionEntity>) {
+    private suspend fun MetisDao.updateReactions(
+        postId: String,
+        reactions: List<PostReactionEntity>
+    ) {
         insertReactions(reactions)
         removeSuperfluousReactions(
             postId,
@@ -263,16 +269,30 @@ class MetisStorageServiceImpl(
         TODO("Not yet implemented")
     }
 
+    override suspend fun clearMetisContext(host: String, metisContext: MetisContext) {
+        databaseProvider.database.metisDao().clearAll(
+            serverId = host,
+            courseId = metisContext.courseId,
+            lectureId = metisContext.lectureId,
+            exerciseId = metisContext.exerciseId
+        )
+    }
+
     override fun getStoredPosts(
-        host: String,
+        serverId: String,
+        filter: MetisFilter,
+        sortingStrategy: MetisSortingStrategy,
+        query: String?,
         metisContext: MetisContext
     ): PagingSource<Int, Post> {
-        return databaseProvider.database.metisDao().queryPosts(
-            host,
-            metisContext.courseId,
-            metisContext.exerciseId,
-            metisContext.lectureId,
-            ""
+        return databaseProvider.database.metisDao().queryCoursePosts(
+            serverId = serverId,
+            courseId = metisContext.courseId,
+            exerciseId = metisContext.exerciseId,
+            lectureId = metisContext.lectureId,
+            metisFilter = filter,
+            metisSortingStrategy = sortingStrategy,
+            query = query
         )
     }
 }

@@ -65,7 +65,9 @@ data class BasePostingEntity(
     }
 
     enum class PostingType {
+        @ColumnInfo(name = "standalone")
         STANDALONE,
+        @ColumnInfo(name = "answer")
         ANSWER
     }
 

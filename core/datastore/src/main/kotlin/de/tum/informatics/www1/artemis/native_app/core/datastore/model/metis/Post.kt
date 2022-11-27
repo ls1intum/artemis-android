@@ -20,6 +20,8 @@ class Post(
     val authorName: String,
     @ColumnInfo(name = "author_role")
     val authorRole: BasePostingEntity.UserRole,
+    @ColumnInfo(name = "resolved")
+    val resolved: Boolean,
     @Relation(
         entity = StandalonePostTagEntity::class,
         parentColumn = "post_id",

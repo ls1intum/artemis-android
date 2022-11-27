@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.communication
+package de.tum.informatics.www1.artemis.native_app.core.communication.impl
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState

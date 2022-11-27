@@ -2,7 +2,9 @@ package de.tum.informatics.www1.artemis.native_app.core.datastore
 
 import androidx.paging.PagingSource
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
-import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.MetisContext
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 
 /**
@@ -22,5 +24,16 @@ interface MetisStorageService {
      */
     suspend fun deletePosts(host: String, metisContext: MetisContext, postIds: List<Int>)
 
-    fun getStoredPosts(host: String, metisContext: MetisContext): PagingSource<Int, Post>
+    /**
+     * Deletes all posts and data associated with the given metis context.
+     */
+    suspend fun clearMetisContext(host: String, metisContext: MetisContext)
+
+    fun getStoredPosts(
+        serverId: String,
+        filter: MetisFilter,
+        sortingStrategy: MetisSortingStrategy,
+        query: String?,
+        metisContext: MetisContext
+    ): PagingSource<Int, Post>
 }
