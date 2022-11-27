@@ -7,8 +7,14 @@ import kotlinx.datetime.Instant
 
 @Entity(
     tableName = "postings",
-    primaryKeys = ["id", "server_id", "course_id", "lecture_id", "exercise_id"],
+    primaryKeys = ["id"],
     foreignKeys = [
+        ForeignKey(
+            entity = PostMetisContext::class,
+            parentColumns = ["client_post_id"],
+            childColumns = ["id"],
+            onDelete = ForeignKey.CASCADE
+        ),
         ForeignKey(
             entity = MetisUserEntity::class,
             parentColumns = ["server_id", "id"],
@@ -17,17 +23,11 @@ import kotlinx.datetime.Instant
         )
     ]
 )
-data class PostingEntity(
+data class BasePostingEntity(
     @ColumnInfo(name = "id")
-    val id: Int,
+    val postId: String,
     @ColumnInfo(name = "server_id")
     val serverId: String,
-    @ColumnInfo(name = "course_id")
-    val courseId: Int,
-    @ColumnInfo(name = "exercise_id")
-    val exerciseId: Int,
-    @ColumnInfo(name = "lecture_id")
-    val lectureId: Int,
     @ColumnInfo(name = "type")
     val postingType: PostingType,
     @ColumnInfo(name = "author_id")

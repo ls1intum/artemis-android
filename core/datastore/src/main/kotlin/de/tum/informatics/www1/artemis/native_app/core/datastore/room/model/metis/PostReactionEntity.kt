@@ -6,12 +6,12 @@ import androidx.room.ForeignKey
 
 @Entity(
     tableName = "reactions",
-    primaryKeys = ["server_id", "post_id", "course_id", "lecture_id", "exercise_id"],
+    primaryKeys = ["post_id", "emoji", "author_id"],
     foreignKeys = [
         ForeignKey(
-            entity = PostingEntity::class,
-            parentColumns = ["id", "course_id", "lecture_id", "exercise_id", "server_id"],
-            childColumns = ["post_id", "course_id", "lecture_id", "exercise_id", "server_id"],
+            entity = BasePostingEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["post_id"],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
@@ -21,17 +21,11 @@ import androidx.room.ForeignKey
         )
     ]
 )
-data class PostReaction(
+data class PostReactionEntity(
     @ColumnInfo(name = "server_id")
     val serverId: String,
     @ColumnInfo(name = "post_id")
-    val postId: Int,
-    @ColumnInfo(name = "course_id")
-    val courseId: Int,
-    @ColumnInfo(name = "exercise_id")
-    val exerciseId: Int,
-    @ColumnInfo(name = "lecture_id")
-    val lectureId: Int,
+    val postId: String,
     @ColumnInfo(name = "emoji")
     val emojiId: String,
     @ColumnInfo(name = "author_id")

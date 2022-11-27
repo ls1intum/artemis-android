@@ -1,59 +1,125 @@
 package de.tum.informatics.www1.artemis.native_app.core.datastore.impl
 
 import androidx.paging.PagingSource
+import androidx.room.withTransaction
 import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.dao.MetisDao
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.*
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.*
+import java.util.UUID
 
 class MetisStorageServiceImpl(
     private val databaseProvider: DatabaseProvider
 ) : MetisStorageService {
 
     companion object {
-        private val UserRole.asStorage: PostingEntity.UserRole
+        private val UserRole.asDb: BasePostingEntity.UserRole
             get() = when (this) {
-                UserRole.INSTRUCTOR -> PostingEntity.UserRole.INSTRUCTOR
-                UserRole.TUTOR -> PostingEntity.UserRole.TUTOR
-                UserRole.USER -> PostingEntity.UserRole.USER
+                UserRole.INSTRUCTOR -> BasePostingEntity.UserRole.INSTRUCTOR
+                UserRole.TUTOR -> BasePostingEntity.UserRole.TUTOR
+                UserRole.USER -> BasePostingEntity.UserRole.USER
             }
 
-        private val CourseWideContext.asStorage: PostingEntity.CourseWideContext
+        private val CourseWideContext.asDb: BasePostingEntity.CourseWideContext
             get() = when (this) {
-                CourseWideContext.TECH_SUPPORT -> PostingEntity.CourseWideContext.TECH_SUPPORT
-                CourseWideContext.ORGANIZATION -> PostingEntity.CourseWideContext.ORGANIZATION
-                CourseWideContext.RANDOM -> PostingEntity.CourseWideContext.RANDOM
-                CourseWideContext.ANNOUNCEMENT -> PostingEntity.CourseWideContext.ANNOUNCEMENT
+                CourseWideContext.TECH_SUPPORT -> BasePostingEntity.CourseWideContext.TECH_SUPPORT
+                CourseWideContext.ORGANIZATION -> BasePostingEntity.CourseWideContext.ORGANIZATION
+                CourseWideContext.RANDOM -> BasePostingEntity.CourseWideContext.RANDOM
+                CourseWideContext.ANNOUNCEMENT -> BasePostingEntity.CourseWideContext.ANNOUNCEMENT
             }
 
-        private val DisplayPriority.asStorage: PostingEntity.DisplayPriority
+        private val DisplayPriority.asDb: BasePostingEntity.DisplayPriority
             get() = when (this) {
-                DisplayPriority.PINNED -> PostingEntity.DisplayPriority.PINNED
-                DisplayPriority.ARCHIVED -> PostingEntity.DisplayPriority.ARCHIVED
-                DisplayPriority.NONE -> PostingEntity.DisplayPriority.NONE
+                DisplayPriority.PINNED -> BasePostingEntity.DisplayPriority.PINNED
+                DisplayPriority.ARCHIVED -> BasePostingEntity.DisplayPriority.ARCHIVED
+                DisplayPriority.NONE -> BasePostingEntity.DisplayPriority.NONE
             }
 
-        private fun Reaction.asStorage(
-            host: String,
-            postId: Int,
-            courseId: Int,
-            exerciseId: Int,
-            lectureId: Int
-        ): Pair<PostReaction, MetisUserEntity>? {
-            return PostReaction(
-                serverId = host,
-                postId = postId,
+        private fun StandalonePost.asDb(
+            serverId: String,
+            clientSidePostId: String
+        ): Pair<BasePostingEntity, StandalonePostingEntity>? {
+            val basePosting = BasePostingEntity(
+                serverId = serverId,
+                postId = clientSidePostId,
+                postingType = BasePostingEntity.PostingType.STANDALONE,
+                authorId = author?.id ?: return null,
+                creationDate = creationDate ?: return null,
+                content = content,
+                authorRole = authorRole?.asDb ?: return null
+            )
+
+            val standalone = StandalonePostingEntity(
+                postId = clientSidePostId,
+                title = title,
+                context = courseWideContext?.asDb,
+                displayPriority = displayPriority?.asDb,
+                resolved = resolved ?: false
+            )
+
+            return basePosting to standalone
+        }
+
+        private fun AnswerPost.asDb(
+            serverId: String,
+            clientSidePostId: String,
+            parentClientSidePostId: String
+        ): Triple<BasePostingEntity, AnswerPostingEntity, MetisUserEntity>? {
+            val basePost = BasePostingEntity(
+                postId = clientSidePostId,
+                serverId = serverId,
+                postingType = BasePostingEntity.PostingType.ANSWER,
+                authorId = author?.id ?: return null,
+                creationDate = creationDate ?: return null,
+                content = content,
+                authorRole = authorRole?.asDb ?: return null
+            )
+
+            val answer = AnswerPostingEntity(
+                postId = clientSidePostId,
+                parentPostId = parentClientSidePostId,
+                resolvesPost = resolvedPost
+            )
+
+            val user = MetisUserEntity(
+                serverId = serverId,
+                id = author?.id ?: return null,
+                displayName = author?.name ?: return null
+            )
+
+            return Triple(basePost, answer, user)
+        }
+
+        private fun Reaction.asDb(
+            serverId: String,
+            clientSidePostId: String
+        ): Pair<PostReactionEntity, MetisUserEntity>? {
+            return PostReactionEntity(
+                serverId = serverId,
+                postId = clientSidePostId,
                 emojiId = emojiId ?: return null,
-                authorId = user?.id ?: return null,
-                courseId = courseId,
-                exerciseId = exerciseId,
-                lectureId = lectureId
+                authorId = user?.id ?: return null
             ) to MetisUserEntity(
-                serverId = host,
+                serverId = serverId,
                 id = user?.id ?: return null,
                 displayName = user?.name ?: return null
             )
         }
+
+        private fun MetisContext.toPostMetisContext(
+            serverId: String,
+            clientSidePostId: String,
+            serverSidePostId: Int
+        ) =
+            PostMetisContext(
+                serverId,
+                courseId,
+                exerciseId,
+                lectureId,
+                serverSidePostId,
+                clientSidePostId
+            )
 
         private val MetisContext.lectureId: Int get() = if (this is MetisContext.Lecture) lectureId else -1
         private val MetisContext.exerciseId: Int get() = if (this is MetisContext.Exercise) exerciseId else -1
@@ -64,129 +130,133 @@ class MetisStorageServiceImpl(
         metisContext: MetisContext,
         posts: List<StandalonePost>
     ) {
-        data class DbModel(
-            val posting: StandalonePosting,
-            val basePostings: List<PostingEntity>,
-            val answers: List<AnswerPosting>,
-            val reactions: List<PostReaction>,
-            val tags: List<StandalonePostTag>,
-            val users: List<MetisUserEntity>
-        )
+        val metisDao = databaseProvider.database.metisDao()
 
-        //Extract the db entities from the network entities. With the schema invalid entities are discarded.
-        val modelPosts = posts.map { sp ->
-            val postId = sp.id ?: return@map null
-            val exerciseId = metisContext.exerciseId
-            val lectureId = metisContext.lectureId
+        databaseProvider.database.withTransaction {
+            //Extract the db entities from the network entities. With the schema invalid entities are discarded.
+            for (sp in posts) {
+                val postingAuthor = MetisUserEntity(
+                    serverId = host,
+                    id = sp.author?.id ?: continue,
+                    displayName = sp.author?.name ?: continue
+                )
 
-            val postingAuthor = MetisUserEntity(
-                serverId = host,
-                id = sp.author?.id ?: return@map null,
-                displayName = sp.author?.name ?: return@map null
-            )
-
-            val standaloneBasePosting = PostingEntity(
-                serverId = host,
-                id = postId,
-                courseId = metisContext.courseId,
-                exerciseId = exerciseId,
-                lectureId = lectureId,
-                postingType = PostingEntity.PostingType.STANDALONE,
-                authorId = postingAuthor.id,
-                creationDate = sp.creationDate ?: return@map null,
-                content = sp.content,
-                authorRole = sp.authorRole?.asStorage ?: return@map null
-            )
-
-            val standalonePosting = StandalonePosting(
-                serverId = host,
-                postId = postId,
-                courseId = metisContext.courseId,
-                exerciseId = exerciseId,
-                lectureId = lectureId,
-                title = sp.title,
-                context = sp.courseWideContext?.asStorage,
-                displayPriority = sp.displayPriority?.asStorage,
-                resolved = sp.resolved ?: false
-            )
-
-            val answers = sp.answers.orEmpty().map answerMap@{ ap ->
-                val answerPostId = ap.id ?: return@answerMap null
-                val authorId = ap.author?.id ?: return@answerMap null
-
-                val basePost = PostingEntity(
-                    id = answerPostId,
+                val queryClientPostId = metisDao.queryClientPostId(
                     serverId = host,
                     courseId = metisContext.courseId,
-                    exerciseId = exerciseId,
-                    lectureId = lectureId,
-                    postingType = PostingEntity.PostingType.ANSWER,
-                    authorId = authorId,
-                    creationDate = ap.creationDate ?: return@answerMap null,
-                    content = ap.content,
-                    authorRole = ap.authorRole?.asStorage ?: return@answerMap null
+                    exerciseId = metisContext.exerciseId,
+                    lectureId = metisContext.lectureId,
+                    postId = sp.id ?: continue
                 )
+                val clientSidePostId: String = queryClientPostId ?: UUID.randomUUID().toString()
 
-                val answer = AnswerPosting(
+                val (standaloneBasePosting, standalonePosting) = sp.asDb(
                     serverId = host,
-                    postId = answerPostId,
-                    courseId = metisContext.courseId,
-                    exerciseId = exerciseId,
-                    lectureId = lectureId,
-                    parentPostId = standalonePosting.postId,
-                    resolvesPost = ap.resolvedPost
-                )
-                val user = MetisUserEntity(
-                    serverId = host,
-                    id = authorId,
-                    displayName = ap.author?.name ?: return@answerMap null
-                )
+                    clientSidePostId = clientSidePostId
+                ) ?: continue
 
-                Triple(basePost, answer, user)
-            }.filterNotNull()
+                val standalonePostReactionsWithUsers =
+                    sp.reactions.orEmpty().mapNotNull { r -> r.asDb(host, clientSidePostId) }
+                val standalonePostReactions = standalonePostReactionsWithUsers.map { it.first }
+                val standalonePostReactionsUsers =
+                    standalonePostReactionsWithUsers.map { it.second }
 
-            val reactions: List<Pair<PostReaction, MetisUserEntity>> =
-                sp.reactions.orEmpty().map { reaction ->
-                    reaction.asStorage(host, postId, metisContext.courseId, exerciseId, lectureId)
-                }.filterNotNull() + sp.answers.orEmpty().flatMap { answer ->
-                    val answerPostId = answer.id ?: return@flatMap emptyList()
-                    answer.reactions.orEmpty().map reactionMap@{ reaction ->
-                        reaction.asStorage(host, answerPostId, metisContext.courseId, exerciseId, lectureId)
+                val tags = sp.tags.orEmpty().map { tag ->
+                    StandalonePostTagEntity(
+                        postId = clientSidePostId,
+                        tag = tag
+                    )
+                }
+
+                //First insert the users as they have no dependencies
+                metisDao.updateUsers(standalonePostReactionsUsers)
+                metisDao.insertUsers(standalonePostReactionsUsers)
+
+                metisDao.insertOrUpdateUser(postingAuthor)
+                if (queryClientPostId != null) {
+                    metisDao.updateBasePost(standaloneBasePosting)
+                    metisDao.updatePost(standalonePosting)
+
+                    metisDao.updateReactions(clientSidePostId, standalonePostReactions)
+
+                    metisDao.insertTags(tags)
+                    metisDao.removeSuperfluousTags(clientSidePostId, tags.map { it.tag })
+                } else {
+                    metisDao.insertPostMetisContext(
+                        metisContext.toPostMetisContext(host, clientSidePostId, sp.id ?: continue)
+                    )
+                    metisDao.insertBasePost(standaloneBasePosting)
+                    metisDao.insertPost(standalonePosting)
+                    metisDao.insertReactions(standalonePostReactions)
+                    metisDao.insertTags(tags)
+                }
+
+                for (ap in sp.answers.orEmpty()) {
+                    val queryClientPostIdAnswer = metisDao.queryClientPostId(
+                        serverId = host,
+                        courseId = metisContext.courseId,
+                        exerciseId = metisContext.exerciseId,
+                        lectureId = metisContext.lectureId,
+                        postId = ap.id ?: continue
+                    )
+                    val answerClientSidePostId =
+                        queryClientPostIdAnswer ?: UUID.randomUUID().toString()
+
+                    val (basePostingEntity, answerPostingEntity, metisUserEntity) = ap.asDb(
+                        serverId = host,
+                        clientSidePostId = answerClientSidePostId,
+                        parentClientSidePostId = clientSidePostId
+                    ) ?: continue
+
+                    val answerPostReactionsWithUsers =
+                        ap.reactions.orEmpty().mapNotNull { it.asDb(host, answerClientSidePostId) }
+                    val answerPostReactions = answerPostReactionsWithUsers.map { it.first }
+                    val answerPostReactionUsers = answerPostReactionsWithUsers.map { it.second }
+
+                    metisDao.insertOrUpdateUser(metisUserEntity)
+                    metisDao.updateUsers(answerPostReactionUsers)
+                    metisDao.insertUsers(answerPostReactionUsers)
+
+                    if (queryClientPostIdAnswer != null) {
+                        metisDao.updateBasePost(basePostingEntity)
+                        metisDao.updateAnswerPosting(answerPostingEntity)
+
+                        metisDao.updateReactions(answerClientSidePostId, answerPostReactions)
+                    } else {
+                        metisDao.insertPostMetisContext(
+                            metisContext.toPostMetisContext(
+                                host,
+                                answerClientSidePostId,
+                                ap.id ?: continue
+                            )
+                        )
+                        metisDao.insertBasePost(basePostingEntity)
+                        metisDao.insertAnswerPosting(answerPostingEntity)
+                        metisDao.insertReactions(answerPostReactions)
                     }
-                }.filterNotNull()
-
-            val tags = sp.tags.orEmpty().map tagMap@{ tag ->
-                StandalonePostTag(
-                    serverId = host,
-                    postId = standalonePosting.postId,
-                    tag = tag,
-                    courseId = metisContext.courseId,
-                    exerciseId = exerciseId,
-                    lectureId = lectureId
-                )
+                }
             }
+        }
+    }
 
-            val users = answers.map { it.third } + reactions.map { it.second } + postingAuthor
-            val basePostings = answers.map { it.first } + standaloneBasePosting
+    private suspend fun MetisDao.insertOrUpdateUser(user: MetisUserEntity) {
+        updateUser(user)
+        insertUser(user)
+    }
 
-            DbModel(
-                posting = standalonePosting,
-                basePostings = basePostings,
-                answers = answers.map { it.second },
-                reactions = reactions.map { it.first },
-                tags = tags,
-                users = users
-            )
-        }.filterNotNull()
-
-        databaseProvider.database.metisDao().insertOrUpdatePosts(
-            basePostings = modelPosts.flatMap { it.basePostings },
-            standalonePosts = modelPosts.map { it.posting },
-            answerPosts = modelPosts.flatMap { it.answers },
-            reactions = modelPosts.flatMap { it.reactions },
-            tags = modelPosts.flatMap { it.tags },
-            users = modelPosts.flatMap { it.users }
-        )
+    /**
+     * Insert new reactions and remove reactions no longer present
+     */
+    private suspend fun MetisDao.updateReactions(postId: String, reactions: List<PostReactionEntity>) {
+        insertReactions(reactions)
+        removeSuperfluousReactions(
+            postId,
+            reactions.map {
+                MetisDao.ReactionOnly(
+                    it.authorId,
+                    it.emojiId
+                )
+            })
     }
 
     override suspend fun deletePosts(host: String, metisContext: MetisContext, postIds: List<Int>) {

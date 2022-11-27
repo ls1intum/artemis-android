@@ -1,49 +1,90 @@
 package de.tum.informatics.www1.artemis.native_app.core.datastore.dao
 
-import androidx.paging.DataSource
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
 import androidx.room.Update
-import androidx.room.paging.LimitOffsetPagingSource
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.*
 
 @Dao
 interface MetisDao {
 
+    /**
+     * Query the client side post if for the given metis context. Returns null if the given post is not yet stored.
+     */
+    @Query(
+        """
+        select 
+            client_post_id 
+        from metis_post_context 
+        where 
+            server_id = :serverId and 
+            course_id = :courseId and
+            exercise_id = :exerciseId and
+            lecture_id = :lectureId and
+            server_post_id = :postId
+    """
+    )
+    suspend fun queryClientPostId(
+        serverId: String,
+        courseId: Int,
+        exerciseId: Int,
+        lectureId: Int,
+        postId: Int
+    ): String?
+
+    @Insert
+    suspend fun insertPostMetisContext(postMetisContext: PostMetisContext)
+
     @Update
-    suspend fun updateBasePosts(posts: List<PostingEntity>)
+    suspend fun updateBasePost(post: BasePostingEntity)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertBasePosts(posts: List<PostingEntity>)
+    suspend fun insertBasePost(post: BasePostingEntity)
 
     @Update
-    suspend fun updatePosts(posts: List<StandalonePosting>)
+    suspend fun updatePost(post: StandalonePostingEntity)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertPosts(posts: List<StandalonePosting>)
+    suspend fun insertPost(post: StandalonePostingEntity)
 
     @Update
-    suspend fun updateAnswerPostings(answerPosts: List<AnswerPosting>)
+    suspend fun updateAnswerPosting(answerPost: AnswerPostingEntity)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertAnswerPostings(answerPosts: List<AnswerPosting>)
+    suspend fun insertAnswerPosting(answerPost: AnswerPostingEntity)
+
+    @Query("""
+        delete from reactions where
+            post_id = :postId and
+            (select author_id, emoji) not in (:remainingReactions)
+    """)
+    suspend fun removeSuperfluousReactions(postId: String, remainingReactions: List<ReactionOnly>)
+
+    data class ReactionOnly(val authorId: Int, val emojiId: String)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertReactions(reactions: List<PostReactionEntity>)
 
     @Update
-    suspend fun updateReactions(reactions: List<PostReaction>)
+    suspend fun updateTags(tags: List<StandalonePostTagEntity>)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertReactions(reactions: List<PostReaction>)
+    suspend fun insertTags(tags: List<StandalonePostTagEntity>)
+
+    @Query("""
+        delete from post_tags where post_id = :postId and tag not in (:remainingTags)
+    """)
+    suspend fun removeSuperfluousTags(postId: String, remainingTags: List<String>)
 
     @Update
-    suspend fun updateTags(tags: List<StandalonePostTag>)
+    suspend fun updateUser(user: MetisUserEntity)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertTags(tags: List<StandalonePostTag>)
+    suspend fun insertUser(user: MetisUserEntity)
 
     @Update
     suspend fun updateUsers(users: List<MetisUserEntity>)
@@ -51,53 +92,16 @@ interface MetisDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertUsers(users: List<MetisUserEntity>)
 
-    /**
-     * Inserts all entities unknown yet and updates the one known already.
-     * All database updates are executed within a transaction.
-     */
-    @Transaction
-    suspend fun insertOrUpdatePosts(
-        basePostings: List<PostingEntity>,
-        standalonePosts: List<StandalonePosting>,
-        answerPosts: List<AnswerPosting>,
-        reactions: List<PostReaction>,
-        tags: List<StandalonePostTag>,
-        users: List<MetisUserEntity>
-    ) {
-        //First perform the update, it ignores the rows that do not exist yet
-        //Then perform the insert, which ignores the rows which already exist
-
-        updateBasePosts(basePostings)
-        insertBasePosts(basePostings)
-
-        updatePosts(standalonePosts)
-        insertPosts(standalonePosts)
-
-        updateAnswerPostings(answerPosts)
-        insertAnswerPostings(answerPosts)
-
-        updateReactions(reactions)
-        insertReactions(reactions)
-
-        updateTags(tags)
-        insertTags(tags)
-
-        updateUsers(users)
-        insertUsers(users)
-    }
-
-    @Query("select 'abc' from postings")
-    fun fooQuery(): PagingSource<Int, String>
-
+    @Query(
+        """
+            
+        """
+    )
     fun queryPosts(
         serverId: String,
         courseId: Int,
         exerciseId: Int?,
         lectureId: Int?,
         query: String
-    ): PagingSource<Int, Post> {
-        return object : LimitOffsetPagingSource() {
-
-        }
-    }
+    ): PagingSource<Int, Post>
 }
