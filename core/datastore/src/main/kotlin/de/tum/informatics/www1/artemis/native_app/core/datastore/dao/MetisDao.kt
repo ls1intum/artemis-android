@@ -9,7 +9,6 @@ import androidx.room.RawQuery
 import androidx.room.Update
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
@@ -71,14 +70,8 @@ interface MetisDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAnswerPosting(answerPost: AnswerPostingEntity)
 
-    @Query(
-        """
-        delete from reactions where
-            post_id = :postId and
-            (select author_id, emoji) not in (:remainingReactions)
-    """
-    )
-    suspend fun removeSuperfluousReactions(postId: String, remainingReactions: List<ReactionOnly>)
+    @Query("delete from reactions where post_id = :postId")
+    suspend fun removeReactions(postId: String)
 
     data class ReactionOnly(val authorId: Int, val emojiId: String)
 
@@ -115,31 +108,33 @@ interface MetisDao {
         courseId: Int,
         exerciseId: Int,
         lectureId: Int,
-        metisFilter: MetisFilter,
+        metisFilter: List<MetisFilter>,
         metisSortingStrategy: MetisSortingStrategy,
         query: String?
     ): PagingSource<Int, Post> {
         val baseQuery = """
-            select 
+            select
                 mpc.client_post_id,
                 mpc.server_post_id,
                 p.content,
+                p.creation_date,
+                sp.context,
                 sp.title,
                 sp.resolved,
                 u.name as author_name,
                 p.author_role
-            from 
+            from
                 metis_post_context mpc,
                 postings p,
                 standalone_postings sp,
                 users u
-            where 
+            where
                 mpc.server_id = ? and
                 mpc.course_id = ? and
                 mpc.exercise_id = ? and
                 mpc.lecture_id = ? and
                 p.id = mpc.client_post_id and
-                p.type = 'standalone' and
+                p.type = 'STANDALONE' and
                 sp.post_id = p.id and
                 u.server_id = mpc.server_id and
                 u.id = p.author_id
@@ -171,33 +166,33 @@ interface MetisDao {
     )
     fun queryCoursePosts(query: SupportSQLiteQuery): PagingSource<Int, Post>
 
-    @Query(
-        """
-                select 
-                    mpc.client_post_id,
-                    mpc.server_post_id,
-                    p.content,
-                    sp.title,
-                    sp.resolved,
-                    u.name as author_name,
-                    p.author_role
-                from 
-                    metis_post_context mpc,
-                    postings p,
-                    standalone_postings sp,
-                    users u
-                where 
-                    mpc.server_id = :serverId and
-                    mpc.course_id = :courseId and
-                    mpc.exercise_id = :exerciseId and
-                    mpc.lecture_id = :lectureId and
-                    p.id = mpc.client_post_id and
-                    p.type = 'standalone' and
-                    sp.post_id = p.id and
-                    u.server_id = mpc.server_id and
-                    u.id = p.author_id
-                order by p.creation_date desc
-    """
-    )
-    fun foo(serverId: String, courseId: Int, exerciseId: Int, lectureId: Int)
+//    @Query(
+//        """
+//                select
+//                    mpc.client_post_id,
+//                    mpc.server_post_id,
+//                    p.content,
+//                    sp.title,
+//                    sp.resolved,
+//                    u.name as author_name,
+//                    p.author_role
+//                from
+//                    metis_post_context mpc,
+//                    postings p,
+//                    standalone_postings sp,
+//                    users u
+//                where
+//                    mpc.server_id = :serverId and
+//                    mpc.course_id = :courseId and
+//                    mpc.exercise_id = :exerciseId and
+//                    mpc.lecture_id = :lectureId and
+//                    p.id = mpc.client_post_id and
+//                    p.type = 'standalone' and
+//                    sp.post_id = p.id and
+//                    u.server_id = mpc.server_id and
+//                    u.id = p.author_id
+//                order by p.creation_date desc
+//    """
+//    )
+//    fun foo(serverId: String, courseId: Int, exerciseId: Int, lectureId: Int)
 }

@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.course_view
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,11 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.compose.composable
 import com.google.accompanist.placeholder.material.placeholder
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -39,7 +44,8 @@ fun NavGraphBuilder.course(
             modifier = Modifier.fillMaxSize(),
             viewModel = koinViewModel { parametersOf(courseId) },
             onNavigateBack = onNavigateBack,
-            onNavigateToExercise = onNavigateToExercise
+            onNavigateToExercise = onNavigateToExercise,
+            courseId = courseId
         )
     }
 }
@@ -48,6 +54,7 @@ fun NavGraphBuilder.course(
 internal fun CourseUi(
     modifier: Modifier,
     viewModel: CourseViewModel,
+    courseId: Int,
     onNavigateToExercise: (exerciseId: Int) -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -59,6 +66,8 @@ internal fun CourseUi(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         topAppBarState
     )
+
+    var selectedTabIndex by remember { mutableStateOf(0) }
 
     Scaffold(
         modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
@@ -79,8 +88,6 @@ internal fun CourseUi(
                     },
                     scrollBehavior = scrollBehavior
                 )
-                var selectedTabIndex by remember { mutableStateOf(0) }
-
                 ScrollableTabRow(
                     modifier = Modifier.fillMaxWidth(),
                     selectedTabIndex = selectedTabIndex
@@ -133,11 +140,40 @@ internal fun CourseUi(
             retryButtonText = stringResource(id = R.string.course_ui_loading_course_try_again),
             onClickRetry = { viewModel.reloadCourse() }
         ) {
-            ExerciseListUi(
-                modifier = Modifier.fillMaxSize(),
-                exercisesDataState = weeklyExercises,
-                onClickExercise = onNavigateToExercise
-            )
+            AnimatedContent(
+                targetState = selectedTabIndex,
+                transitionSpec = {
+                    if (targetState > initialState) {
+                        slideInHorizontally { width -> width } with
+                                slideOutHorizontally { width -> -width }
+                    } else {
+                        slideInHorizontally { width -> -width } with
+                                slideOutHorizontally { width -> width }
+                    }.using(
+                        SizeTransform(clip = false)
+                    )
+                }
+            ) { tabIndex ->
+                when (tabIndex) {
+                    0 -> {
+                        ExerciseListUi(
+                            modifier = Modifier.fillMaxSize(),
+                            exercisesDataState = weeklyExercises,
+                            onClickExercise = onNavigateToExercise
+                        )
+                    }
+                    2 -> {
+                        val metisContext = remember {
+                            MetisContext.Course(courseId = courseId)
+                        }
+
+                        MetisUi(
+                            modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+                            metisContext = metisContext
+                        )
+                    }
+                }
+            }
         }
     }
 }

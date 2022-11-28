@@ -36,6 +36,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:device"))
     implementation(project(":core:websocket"))
+    implementation(project(":core:communication"))
 
     implementation(project(":feature:course_registration"))
     implementation(project(":feature:course_view"))

@@ -9,12 +9,12 @@ data class AnswerPost(
     val parentPostId: String,
     @ColumnInfo(name = "post_id")
     val postId: String,
-    @ColumnInfo(name = "resolved_post")
+    @ColumnInfo(name = "resolves_post")
     val resolvesPost: Boolean,
     @Relation(
         entity = BasePostingEntity::class,
-        parentColumn = "id",
-        entityColumn = "post_id"
+        entityColumn = "id",
+        parentColumn = "post_id"
     )
     val basePosting: BasePostingEntity
 )

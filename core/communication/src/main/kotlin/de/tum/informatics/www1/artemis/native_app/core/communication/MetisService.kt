@@ -15,6 +15,7 @@ interface MetisService {
      */
     suspend fun getPosts(
         standalonePostsContext: StandalonePostsContext,
+        pageSize: Int,
         pageNum: Int,
         authToken: String,
         serverUrl: String
@@ -33,6 +34,6 @@ interface MetisService {
         val filter: List<MetisFilter>,
         val query: String?,
         val sortingStrategy: MetisSortingStrategy,
-        val courseWideContext: CourseWideContext
+        val courseWideContext: CourseWideContext?
     )
 }

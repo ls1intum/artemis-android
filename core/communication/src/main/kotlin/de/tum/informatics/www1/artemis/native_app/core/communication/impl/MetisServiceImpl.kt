@@ -11,6 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePos
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.flow.Flow
 
@@ -22,6 +23,7 @@ class MetisServiceImpl(
 
     override suspend fun getPosts(
         standalonePostsContext: MetisService.StandalonePostsContext,
+        pageSize: Int,
         pageNum: Int,
         authToken: String,
         serverUrl: String
@@ -56,10 +58,12 @@ class MetisServiceImpl(
                     }
                 }
 
-                parameter(
-                    "courseWideContext",
-                    standalonePostsContext.courseWideContext.httpValue
-                )
+                if (standalonePostsContext.courseWideContext != null) {
+                    parameter(
+                        "courseWideContext",
+                        standalonePostsContext.courseWideContext.httpValue
+                    )
+                }
 
                 if (standalonePostsContext.query != null) {
                     parameter("searchText", standalonePostsContext.query)
@@ -80,7 +84,9 @@ class MetisServiceImpl(
 
                 parameter("pagingEnabled", true)
                 parameter("page", pageNum)
-                parameter("pageSize", 20)
+                parameter("pageSize", pageSize)
+
+                bearerAuth(authToken)
             }.body()
         }
     }

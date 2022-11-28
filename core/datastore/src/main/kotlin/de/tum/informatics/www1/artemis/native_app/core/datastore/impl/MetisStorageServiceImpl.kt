@@ -254,15 +254,8 @@ class MetisStorageServiceImpl(
         postId: String,
         reactions: List<PostReactionEntity>
     ) {
+        removeReactions(postId)
         insertReactions(reactions)
-        removeSuperfluousReactions(
-            postId,
-            reactions.map {
-                MetisDao.ReactionOnly(
-                    it.authorId,
-                    it.emojiId
-                )
-            })
     }
 
     override suspend fun deletePosts(host: String, metisContext: MetisContext, postIds: List<Int>) {
@@ -280,7 +273,7 @@ class MetisStorageServiceImpl(
 
     override fun getStoredPosts(
         serverId: String,
-        filter: MetisFilter,
+        filter: List<MetisFilter>,
         sortingStrategy: MetisSortingStrategy,
         query: String?,
         metisContext: MetisContext

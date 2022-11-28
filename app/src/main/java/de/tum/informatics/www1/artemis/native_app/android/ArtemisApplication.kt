@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.android
 
 import android.app.Application
+import de.tum.informatics.www1.artemis.native_app.core.communication.communicationModule
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.impl.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.impl.deviceModule
@@ -30,7 +31,8 @@ class ArtemisApplication : Application() {
                 courseViewModule,
                 dashboardModule,
                 loginModule,
-                exerciseViewModule
+                exerciseViewModule,
+                communicationModule
             )
         }
     }

@@ -13,5 +13,5 @@ class AnswerPost(
     override val content: String? = null,
     override val reactions: List<Reaction>? = null,
     val resolvedPost: Boolean = false,
-    val post: BasePost? = null
+    val post: StandalonePost? = null
 ) : BasePost()
