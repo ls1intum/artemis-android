@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <plurals name="communication_standalone_post_view_replies_button">
+        <item quantity="one">Show 1 reply</item>
+        <item quantity="other">Show %1$d replies</item>
+    </plurals>
 </resources>

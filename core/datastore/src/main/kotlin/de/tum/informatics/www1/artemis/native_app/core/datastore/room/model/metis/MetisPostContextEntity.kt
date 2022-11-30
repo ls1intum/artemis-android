@@ -12,10 +12,10 @@ import androidx.room.Index
  */
 @Entity(
     tableName = "metis_post_context",
-    primaryKeys = ["server_id", "course_id", "exercise_id", "lecture_id", "server_post_id"],
+    primaryKeys = ["server_id", "server_post_id"],
     indices = [Index("client_post_id", unique = true)]
 )
-class PostMetisContext(
+class MetisPostContextEntity(
     @ColumnInfo(name = "server_id")
     val serverId: String,
     @ColumnInfo(name = "course_id")

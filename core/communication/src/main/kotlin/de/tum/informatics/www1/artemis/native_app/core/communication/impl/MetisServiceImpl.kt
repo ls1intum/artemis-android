@@ -11,7 +11,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePos
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.flow.Flow
 
@@ -91,13 +90,13 @@ class MetisServiceImpl(
         }
     }
 
-    override fun subscribeToPostUpdates(standalonePostsContext: MetisService.StandalonePostsContext): Flow<MetisPostDTO> {
+    override fun subscribeToPostUpdates(metisContext: MetisContext): Flow<MetisPostDTO> {
         val baseChannel = "/topic/metis"
-        val channel = when (val mC = standalonePostsContext.metisContext) {
-            is MetisContext.Conversation -> "/user$baseChannel/courses/${mC.courseId}/conversations/${mC.conversationId}"
-            is MetisContext.Course -> "$baseChannel/courses/${mC.courseId}"
-            is MetisContext.Exercise -> "$baseChannel/exercises/${mC.exerciseId}"
-            is MetisContext.Lecture -> "$baseChannel/lectures/${mC.lectureId}"
+        val channel = when (metisContext) {
+            is MetisContext.Conversation -> "/user$baseChannel/courses/${metisContext.courseId}/conversations/${metisContext.conversationId}"
+            is MetisContext.Course -> "$baseChannel/courses/${metisContext.courseId}"
+            is MetisContext.Exercise -> "$baseChannel/exercises/${metisContext.exerciseId}"
+            is MetisContext.Lecture -> "$baseChannel/lectures/${metisContext.lectureId}"
         }
 
         return websocketProvider.subscribe(channel, MetisPostDTO.serializer())

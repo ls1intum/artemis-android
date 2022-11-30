@@ -26,4 +26,10 @@ dependencies {
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.coroutines.android)
+
+    implementation(libs.noties.markwon.core)
+    implementation(libs.noties.markwon.ext.strikethrough)
+    implementation(libs.noties.markwon.ext.tables)
+    implementation(libs.noties.markwon.html)
+    implementation(libs.noties.markwon.linkify)
 }

@@ -14,7 +14,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.meti
         StandalonePostingEntity::class,
         StandalonePostTagEntity::class,
         PostReactionEntity::class,
-        PostMetisContext::class
+        MetisPostContextEntity::class
     ],
     exportSchema = true,
     version = 1

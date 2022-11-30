@@ -22,7 +22,7 @@ interface MetisService {
     ): NetworkResponse<List<StandalonePost>>
 
     fun subscribeToPostUpdates(
-        standalonePostsContext: StandalonePostsContext
+        metisContext: MetisContext
     ): Flow<MetisPostDTO>
 
     /**

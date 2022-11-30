@@ -17,11 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.compose.composable
 import com.google.accompanist.placeholder.material.placeholder
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisUi
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SmartphoneMetisUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
-import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -30,6 +29,7 @@ fun NavController.navigateToCourse(courseId: Int, builder: NavOptionsBuilder.() 
 }
 
 fun NavGraphBuilder.course(
+    navController: NavController,
     onNavigateToExercise: (exerciseId: Int) -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -45,7 +45,8 @@ fun NavGraphBuilder.course(
             viewModel = koinViewModel { parametersOf(courseId) },
             onNavigateBack = onNavigateBack,
             onNavigateToExercise = onNavigateToExercise,
-            courseId = courseId
+            courseId = courseId,
+            navController = navController
         )
     }
 }
@@ -55,6 +56,7 @@ internal fun CourseUi(
     modifier: Modifier,
     viewModel: CourseViewModel,
     courseId: Int,
+    navController: NavController,
     onNavigateToExercise: (exerciseId: Int) -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -167,9 +169,10 @@ internal fun CourseUi(
                             MetisContext.Course(courseId = courseId)
                         }
 
-                        MetisUi(
+                        SmartphoneMetisUi(
                             modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
-                            metisContext = metisContext
+                            metisContext = metisContext,
+                            navController = navController
                         )
                     }
                 }

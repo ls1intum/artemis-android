@@ -19,15 +19,19 @@ class MetisRemoteMediator(
     private val host: String
 ) : RemoteMediator<Int, Post>() {
 
+    override suspend fun initialize(): InitializeAction = InitializeAction.LAUNCH_INITIAL_REFRESH
+
     override suspend fun load(loadType: LoadType, state: PagingState<Int, Post>): MediatorResult {
         val pageSize = state.config.pageSize
 
         val nextPageIndex = when (loadType) {
-            LoadType.REFRESH -> 0
+            LoadType.REFRESH -> {
+                0
+            }
             LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
             LoadType.APPEND -> {
                 if (state.isEmpty()) return MediatorResult.Success(endOfPaginationReached = true)
-                val loadedItemsCount = state.pages.sumOf { it.data.size }
+                val loadedItemsCount = metisStorageService.getCachedPostCount(host, context.metisContext)
                 (loadedItemsCount - (loadedItemsCount % pageSize)) / pageSize
             }
         }
@@ -46,7 +50,8 @@ class MetisRemoteMediator(
         metisStorageService.insertOrUpdatePosts(
             host = host,
             metisContext = context.metisContext,
-            posts = loadedPosts
+            posts = loadedPosts,
+            clearPreviousPosts = loadType == LoadType.REFRESH
         )
 
         return MediatorResult.Success(

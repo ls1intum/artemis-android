@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.standalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.navigateToCourseRegistration
@@ -107,11 +108,16 @@ class MainActivity : ComponentActivity() {
                         onNavigateToExercise = { exerciseId ->
                             navController.navigateToExercise(exerciseId) { }
                         },
-                        onNavigateBack = navController::navigateUp
+                        onNavigateBack = navController::navigateUp,
+                        navController = navController
                     )
 
                     exercise(
                         onNavigateBack = navController::navigateUp
+                    )
+
+                    standalonePostScreen(
+                        onNavigateUp = navController::navigateUp
                     )
                 }
             }

@@ -22,6 +22,7 @@ kotlinxSerializationJson = "1.4.1"
 koin = "3.2.0"
 ktor = "2.1.1"
 krossbow = "4.4.0"
+markwon = "4.6.2"
 room = "2.4.3"
 
 [libraries]
@@ -72,7 +73,12 @@ ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.r
 krossbow-stomp-core = { group = "org.hildan.krossbow", name = "krossbow-stomp-core", version.ref = "krossbow" }
 krossbow-websocket-ktor = { group = "org.hildan.krossbow", name = "krossbow-websocket-ktor", version.ref = "krossbow" }
 krossbow-stomp-kxserialization-json = { group = "org.hildan.krossbow", name = "krossbow-stomp-kxserialization-json", version.ref = "krossbow" }
-
+noties-markwon-core = { group = "io.noties.markwon", name="core", version.ref = "markwon" }
+noties-markwon-ext-strikethrough = { group = "io.noties.markwon", name="ext-strikethrough", version.ref = "markwon" }
+noties-markwon-ext-tables = { group = "io.noties.markwon", name="ext-tables", version.ref = "markwon" }
+noties-markwon-html = { group = "io.noties.markwon", name="html", version.ref = "markwon" }
+noties-markwon-linkify = { group = "io.noties.markwon", name="linkify", version.ref = "markwon" }
+noties-markwon-simple-ext = { group = "io.noties.markwon", name="simple-ext", version.ref = "markwon" }
 
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }

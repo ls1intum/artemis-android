@@ -1,13 +1,13 @@
-package de.tum.informatics.www1.artemis.native_app.core.communication.ui
+package de.tum.informatics.www1.artemis.native_app.core.communication.ui.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
-import de.tum.informatics.www1.artemis.native_app.core.common.combine6
 import de.tum.informatics.www1.artemis.native_app.core.common.combine7
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisService
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisRemoteMediator
+import de.tum.informatics.www1.artemis.native_app.core.communication.impl.updatePosts
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -16,8 +16,9 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
-internal class MetisViewModel(
+internal class MetisListViewModel(
     private val metisContext: MetisContext,
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,
@@ -29,6 +30,21 @@ internal class MetisViewModel(
     private val _query = MutableStateFlow<String?>(null)
     private val _sortingStrategy = MutableStateFlow(MetisSortingStrategy.DATE_DESCENDING)
     private val _courseWideContext = MutableStateFlow<CourseWideContext?>(null)
+
+    private val standalonePostContext: Flow<MetisService.StandalonePostsContext> = combine(
+        _filter,
+        _query,
+        _sortingStrategy,
+        _courseWideContext
+    ) { filter, query, sortingStrategy, courseWideContext ->
+        MetisService.StandalonePostsContext(
+            metisContext = metisContext,
+            filter = filter,
+            query = query,
+            sortingStrategy = sortingStrategy,
+            courseWideContext = courseWideContext
+        )
+    }
 
     @OptIn(ExperimentalPagingApi::class)
     val postPagingData: Flow<PagingData<Post>> = combine7(
@@ -76,4 +92,21 @@ internal class MetisViewModel(
     }
         .filterNotNull()
         .flatMapLatest { it.flow.cachedIn(viewModelScope) }
+
+    init {
+        viewModelScope.launch {
+            combine(
+                serverConfigurationService.host,
+                standalonePostContext
+            ) { a, b -> Pair(a, b) }
+                .collectLatest { (host, postContext) ->
+                    updatePosts(
+                        host,
+                        metisService,
+                        metisStorageService,
+                        postContext.metisContext
+                    )
+                }
+        }
+    }
 }
