@@ -11,6 +11,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItem
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItemViewType
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.getEmojiForEmojiId
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 
 @Composable
@@ -44,7 +45,12 @@ internal fun MetisStandalonePostList(
                                 onClickViewReplies(post.clientPostId)
                             }
                         }
-                    )
+                    ),
+                    getUnicodeForEmojiId = {
+                        val emoji = getEmojiForEmojiId(emojiId = it)
+                        println(emoji)
+                        emoji
+                    }
                 )
             }
         }

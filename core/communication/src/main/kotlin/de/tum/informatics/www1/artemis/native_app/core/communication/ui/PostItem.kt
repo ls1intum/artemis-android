@@ -11,13 +11,16 @@ import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.AnswerPost
@@ -48,7 +51,8 @@ sealed class PostItemViewType {
 internal fun PostItem(
     modifier: Modifier,
     post: Post?,
-    postItemViewType: PostItemViewType
+    postItemViewType: PostItemViewType,
+    getUnicodeForEmojiId: @Composable (String) -> String
 ) {
     PostItemBase(
         modifier = modifier,
@@ -59,12 +63,17 @@ internal fun PostItem(
         title = post?.title,
         content = post?.content,
         reactions = post?.reactions.orEmpty(),
-        postItemViewType = postItemViewType
+        postItemViewType = postItemViewType,
+        getUnicodeForEmojiId = getUnicodeForEmojiId
     )
 }
 
 @Composable
-internal fun AnswerPostItem(modifier: Modifier, answerPost: AnswerPost) {
+internal fun AnswerPostItem(
+    modifier: Modifier,
+    answerPost: AnswerPost,
+    getUnicodeForEmojiId: @Composable (String) -> String
+) {
     PostItemBase(
         modifier = modifier,
         isPlaceholder = false,
@@ -74,7 +83,8 @@ internal fun AnswerPostItem(modifier: Modifier, answerPost: AnswerPost) {
         title = null,
         content = answerPost.content,
         reactions = answerPost.reactions,
-        postItemViewType = PostItemViewType.AnswerItem
+        postItemViewType = PostItemViewType.AnswerItem,
+        getUnicodeForEmojiId = getUnicodeForEmojiId
     )
 }
 
@@ -88,7 +98,8 @@ private fun PostItemBase(
     title: String?,
     content: String?,
     reactions: List<Post.Reaction>,
-    postItemViewType: PostItemViewType
+    postItemViewType: PostItemViewType,
+    getUnicodeForEmojiId: @Composable (String) -> String
 ) {
     Card(modifier = modifier) {
         Column(
@@ -130,7 +141,8 @@ private fun PostItemBase(
                 modifier = Modifier.fillMaxWidth(),
                 isPlaceholder = isPlaceholder,
                 reactions = reactions,
-                postItemViewType = postItemViewType
+                postItemViewType = postItemViewType,
+                getUnicodeForEmojiId = getUnicodeForEmojiId
             )
         }
     }
@@ -188,7 +200,8 @@ private fun StandalonePostFooter(
     modifier: Modifier,
     isPlaceholder: Boolean,
     reactions: List<Post.Reaction>,
-    postItemViewType: PostItemViewType
+    postItemViewType: PostItemViewType,
+    getUnicodeForEmojiId: @Composable (String) -> String
 ) {
     val reactionCount: Map<String, Int> = remember(reactions) {
         reactions.groupBy { it.emojiId }.mapValues { it.value.size }
@@ -202,8 +215,15 @@ private fun StandalonePostFooter(
         ) {
             reactionCount.forEach { (emoji, count) ->
                 AssistChip(
+                    leadingIcon = {
+                        Text(
+                            text = getEmojiForEmojiId(emojiId = emoji),
+                            fontSize = 18.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    },
                     label = {
-                        Text(text = "$emoji $count")
+                        Text(text = "$count")
                     },
                     onClick = {
 
@@ -276,6 +296,8 @@ private fun PostPreview(
         postItemViewType = PostItemViewType.StandaloneListItem(
             post?.answerPostings.orEmpty(),
             {},
-            {})
+            {}
+        ),
+        getUnicodeForEmojiId = { "\uD83D\uDE80" }
     )
 }

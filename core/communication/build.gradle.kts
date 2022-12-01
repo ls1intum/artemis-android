@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("artemis.android.library")
     id("artemis.android.library.compose")
@@ -6,6 +8,12 @@ plugins {
 
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.core.communication"
+
+    sourceSets {
+        named("main") {
+            res.srcDir(buildDir.resolve("generated/res/emoji"))
+        }
+    }
 }
 
 dependencies {
@@ -27,4 +35,15 @@ dependencies {
     implementation(libs.androidx.appcompat)
 
     implementation(libs.github.compose.markdown)
+}
+
+tasks.register("fetchAndPrepareEmojis", emoji.FetchAndPrepareEmojisTask::class) {
+    commit.set("d5676f0bb66c9c46b646db9b8a3d993b589bbe5c")
+    set.set("14")
+}
+
+tasks.withType(KotlinCompile::class).forEach { kotlinCompile ->
+    project.afterEvaluate {
+        kotlinCompile.dependsOn(tasks.getByName("fetchAndPrepareEmojis"))
+    }
 }

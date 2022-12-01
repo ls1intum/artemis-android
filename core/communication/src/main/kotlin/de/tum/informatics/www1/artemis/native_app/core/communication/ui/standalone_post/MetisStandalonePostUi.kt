@@ -14,10 +14,15 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.R
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.AnswerPostItem
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItem
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItemViewType
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.getEmojiForEmojiId
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 
 @Composable
-internal fun MetisStandalonePostUi(modifier: Modifier, viewModel: MetisStandalonePostViewModel, viewType: ViewType) {
+internal fun MetisStandalonePostUi(
+    modifier: Modifier,
+    viewModel: MetisStandalonePostViewModel,
+    viewType: ViewType
+) {
     val post: Post? = viewModel.post.collectAsState(initial = null).value
 
     Box(modifier = modifier) {
@@ -30,7 +35,8 @@ internal fun MetisStandalonePostUi(modifier: Modifier, viewModel: MetisStandalon
                 PostItem(
                     modifier = Modifier.padding(top = 8.dp),
                     post = post,
-                    postItemViewType = PostItemViewType.StandaloneView
+                    postItemViewType = PostItemViewType.StandaloneView,
+                    getUnicodeForEmojiId = { getEmojiForEmojiId(emojiId = it) }
                 )
             }
 
@@ -43,7 +49,11 @@ internal fun MetisStandalonePostUi(modifier: Modifier, viewModel: MetisStandalon
             }
 
             items(post?.answerPostings.orEmpty()) { answerPost ->
-                AnswerPostItem(modifier = Modifier.fillMaxWidth(), answerPost = answerPost)
+                AnswerPostItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    answerPost = answerPost,
+                    getUnicodeForEmojiId = { getEmojiForEmojiId(emojiId = it) }
+                )
             }
         }
     }
