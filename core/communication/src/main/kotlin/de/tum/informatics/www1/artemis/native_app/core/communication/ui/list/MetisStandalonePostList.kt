@@ -29,7 +29,7 @@ internal fun MetisStandalonePostList(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(top = 8.dp)
         ) {
-            items(posts) { post ->
+            items(posts, key = { it.clientPostId }) { post ->
                 PostItem(
                     modifier = Modifier.fillMaxWidth(),
                     post = post,

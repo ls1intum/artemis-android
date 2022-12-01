@@ -55,7 +55,6 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-github-compose-markdown = { group = "com.github.jeziellago", name = "compose-markdown", version = "0.3.1" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
@@ -81,6 +80,7 @@ noties-markwon-ext-tables = { group = "io.noties.markwon", name="ext-tables", ve
 noties-markwon-html = { group = "io.noties.markwon", name="html", version.ref = "markwon" }
 noties-markwon-linkify = { group = "io.noties.markwon", name="linkify", version.ref = "markwon" }
 noties-markwon-simple-ext = { group = "io.noties.markwon", name="simple-ext", version.ref = "markwon" }
+noties-markwon-image-coil = { group = "io.noties.markwon", name="image-coil", version.ref = "markwon" }
 
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }

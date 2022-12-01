@@ -118,7 +118,26 @@ interface MetisDao {
         serverPostIds: List<Int>
     )
 
-    @Query("""
+    @Query(
+        """
+        delete from metis_post_context where
+        server_id = :host and
+        server_post_id not in (:answerServerIds) and
+        exists (
+            select * from answer_postings ap where 
+            ap.post_id = client_post_id and
+            ap.parent_post_id = :standalonePostClientId
+        ) 
+    """
+    )
+    suspend fun removeSuperfluousAnswerPosts(
+        host: String,
+        standalonePostClientId: String,
+        answerServerIds: List<Int>
+    )
+
+    @Query(
+        """
         select
             mpc.client_post_id,
             mpc.server_post_id,
@@ -138,7 +157,8 @@ interface MetisDao {
             mpc.client_post_id = :clientPostId and
             u.server_id = mpc.server_id and
             u.id = p.author_id
-    """)
+    """
+    )
     fun queryStandalonePost(clientPostId: String): Flow<Post?>
 
     @Query("select * from metis_post_context where client_post_id = :clientPostId")
@@ -208,7 +228,8 @@ interface MetisDao {
     fun queryCoursePosts(query: SupportSQLiteQuery): PagingSource<Int, Post>
 
     @Transaction
-    @Query("""
+    @Query(
+        """
         select 
             count(*) 
         from 
@@ -222,8 +243,17 @@ interface MetisDao {
             p.type = 'STANDALONE' and
             sp.post_id = p.id and
             sp.live_created = 0
-    """)
-    suspend fun queryContextPostCountNoLiveCreated(serverId: String, courseId: Int, exerciseId: Int, lectureId: Int): Int
+    """
+    )
+    suspend fun queryContextPostCountNoLiveCreated(
+        serverId: String,
+        courseId: Int,
+        exerciseId: Int,
+        lectureId: Int
+    ): Int
+
+    @Query("select author_role from postings where id = :clientPostId")
+    suspend fun queryPostAuthorRole(clientPostId: String): BasePostingEntity.UserRole
 
 //    @Query(
 //        """

@@ -5,7 +5,7 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
-class AnswerPost(
+data class AnswerPost(
     override val id: Int? = null,
     override val author: User? = null,
     override val authorRole: UserRole? = null,

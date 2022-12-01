@@ -33,8 +33,6 @@ dependencies {
     implementation(libs.androidx.emoji2.views.helper)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.appcompat)
-
-    implementation(libs.github.compose.markdown)
 }
 
 tasks.register("fetchAndPrepareEmojis", emoji.FetchAndPrepareEmojisTask::class) {

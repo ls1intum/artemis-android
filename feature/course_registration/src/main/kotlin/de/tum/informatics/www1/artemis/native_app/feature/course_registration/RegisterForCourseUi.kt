@@ -24,7 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseItemHeader
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import dev.jeziellago.compose.markdowntext.MarkdownText
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 

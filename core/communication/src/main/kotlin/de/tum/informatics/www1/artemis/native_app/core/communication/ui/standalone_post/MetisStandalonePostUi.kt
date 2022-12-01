@@ -48,7 +48,7 @@ internal fun MetisStandalonePostUi(
                 )
             }
 
-            items(post?.answerPostings.orEmpty()) { answerPost ->
+            items(post?.orderedAnswerPostings.orEmpty(), key = { it.postId }) { answerPost ->
                 AnswerPostItem(
                     modifier = Modifier.fillMaxWidth(),
                     answerPost = answerPost,

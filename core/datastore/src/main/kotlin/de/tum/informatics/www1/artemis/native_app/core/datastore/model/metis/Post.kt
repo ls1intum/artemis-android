@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis
 
 import androidx.room.ColumnInfo
+import androidx.room.Ignore
 import androidx.room.Relation
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.*
 import kotlinx.datetime.Instant
@@ -45,6 +46,10 @@ data class Post(
     )
     val reactions: List<Reaction>
 ) {
+
+    @Ignore
+    val orderedAnswerPostings = answerPostings.sortedBy { it.creationDate }
+
     data class Reaction(
         @ColumnInfo(name = "emoji")
         val emojiId: String,

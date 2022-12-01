@@ -22,6 +22,13 @@ class MetisStorageServiceImpl(
 ) : MetisStorageService {
 
     companion object {
+        private val BasePostingEntity.UserRole.asNetwork: UserRole
+            get() = when (this) {
+                BasePostingEntity.UserRole.INSTRUCTOR -> UserRole.INSTRUCTOR
+                BasePostingEntity.UserRole.TUTOR -> UserRole.TUTOR
+                BasePostingEntity.UserRole.USER -> UserRole.USER
+            }
+
         private val UserRole.asDb: BasePostingEntity.UserRole
             get() = when (this) {
                 UserRole.INSTRUCTOR -> BasePostingEntity.UserRole.INSTRUCTOR
@@ -188,12 +195,22 @@ class MetisStorageServiceImpl(
                 post.id ?: return@withTransaction
             ) ?: return@withTransaction
 
+            //The author role seems to be omitted when sending an update. Therefore, we just load the one still cached.
+            val actPost = if (post.authorRole == null) {
+                val storedRole = when (metisDao.queryPostAuthorRole(clientSidePostId)) {
+                    BasePostingEntity.UserRole.INSTRUCTOR -> UserRole.INSTRUCTOR
+                    BasePostingEntity.UserRole.TUTOR -> UserRole.TUTOR
+                    BasePostingEntity.UserRole.USER -> UserRole.USER
+                }
+                post.copy(authorRole = storedRole)
+            } else post
+
             insertOrUpdatePost(
                 metisDao,
                 host,
                 metisContext,
                 clientSidePostId,
-                post,
+                actPost,
                 isLiveCreated = false
             )
         }
@@ -258,6 +275,11 @@ class MetisStorageServiceImpl(
 
             metisDao.insertTags(tags)
             metisDao.removeSuperfluousTags(clientSidePostId, tags.map { it.tag })
+            metisDao.removeSuperfluousAnswerPosts(
+                host,
+                clientSidePostId,
+                sp.answers.orEmpty().mapNotNull { it.id }
+            )
         } else {
             metisDao.insertPostMetisContext(
                 metisContext.toPostMetisContext(host, clientSidePostId, sp.id ?: return)
@@ -279,11 +301,17 @@ class MetisStorageServiceImpl(
             val answerClientSidePostId =
                 queryClientPostIdAnswer ?: UUID.randomUUID().toString()
 
-            val (basePostingEntity, answerPostingEntity, metisUserEntity) = ap.asDb(
-                serverId = host,
-                clientSidePostId = answerClientSidePostId,
-                parentClientSidePostId = clientSidePostId
-            ) ?: return
+            val authorRole = (if (queryClientPostIdAnswer != null && ap.authorRole == null) {
+                metisDao.queryPostAuthorRole(answerClientSidePostId)
+            } else ap.authorRole?.asDb)?.asNetwork
+
+            val (basePostingEntity, answerPostingEntity, metisUserEntity) = ap
+                .copy(authorRole = authorRole)
+                .asDb(
+                    serverId = host,
+                    clientSidePostId = answerClientSidePostId,
+                    parentClientSidePostId = clientSidePostId
+                ) ?: return
 
             val answerPostReactionsWithUsers =
                 ap.reactions.orEmpty().mapNotNull { it.asDb(host, answerClientSidePostId) }

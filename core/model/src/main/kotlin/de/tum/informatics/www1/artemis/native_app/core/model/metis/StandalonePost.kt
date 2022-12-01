@@ -8,7 +8,7 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
-class StandalonePost(
+data class StandalonePost(
     override val id: Int? = null,
     override val author: User? = null,
     override val authorRole: UserRole? = null,

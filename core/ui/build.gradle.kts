@@ -32,4 +32,5 @@ dependencies {
     implementation(libs.noties.markwon.ext.tables)
     implementation(libs.noties.markwon.html)
     implementation(libs.noties.markwon.linkify)
+    implementation(libs.noties.markwon.image.coil)
 }

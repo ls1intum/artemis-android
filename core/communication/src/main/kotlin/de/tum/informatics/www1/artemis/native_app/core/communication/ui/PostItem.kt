@@ -27,7 +27,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Ans
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
-import dev.jeziellago.compose.markdowntext.MarkdownText
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.minutes
@@ -211,14 +211,15 @@ private fun StandalonePostFooter(
         Row(
             modifier = Modifier
                 .weight(1f)
-                .horizontalScroll(rememberScrollState())
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             reactionCount.forEach { (emoji, count) ->
                 AssistChip(
                     leadingIcon = {
                         Text(
-                            text = getEmojiForEmojiId(emojiId = emoji),
-                            fontSize = 18.sp,
+                            text = getUnicodeForEmojiId(emoji),
+                            fontSize = 16.sp,
                             textAlign = TextAlign.Center
                         )
                     },

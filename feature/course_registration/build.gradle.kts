@@ -8,7 +8,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.github.compose.markdown)
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
     implementation(project(":core:device"))
