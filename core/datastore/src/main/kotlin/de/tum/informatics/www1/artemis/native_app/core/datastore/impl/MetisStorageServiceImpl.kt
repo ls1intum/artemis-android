@@ -11,6 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Pos
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.*
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.Instant
 import java.util.UUID
 
 /**
@@ -53,9 +54,9 @@ class MetisStorageServiceImpl(
                 postId = clientSidePostId,
                 postingType = BasePostingEntity.PostingType.STANDALONE,
                 authorId = author?.id ?: return null,
-                creationDate = creationDate ?: return null,
+                creationDate = creationDate ?: Instant.fromEpochSeconds(0),
                 content = content,
-                authorRole = authorRole?.asDb ?: return null
+                authorRole = authorRole?.asDb ?: BasePostingEntity.UserRole.USER
             )
 
             val standalone = StandalonePostingEntity(
@@ -64,7 +65,7 @@ class MetisStorageServiceImpl(
                 context = courseWideContext?.asDb,
                 displayPriority = displayPriority?.asDb,
                 resolved = resolved ?: false,
-                isLiveCreated = isLiveCreated
+                liveCreated = isLiveCreated
             )
 
             return basePosting to standalone
@@ -80,9 +81,9 @@ class MetisStorageServiceImpl(
                 serverId = serverId,
                 postingType = BasePostingEntity.PostingType.ANSWER,
                 authorId = author?.id ?: return null,
-                creationDate = creationDate ?: return null,
+                creationDate = creationDate ?: Instant.fromEpochSeconds(0),
                 content = content,
-                authorRole = authorRole?.asDb ?: return null
+                authorRole = authorRole?.asDb ?: BasePostingEntity.UserRole.USER
             )
 
             val answer = AnswerPostingEntity(
@@ -94,7 +95,7 @@ class MetisStorageServiceImpl(
             val user = MetisUserEntity(
                 serverId = serverId,
                 id = author?.id ?: return null,
-                displayName = author?.name ?: return null
+                displayName = author?.name ?: "NULL"
             )
 
             return Triple(basePost, answer, user)

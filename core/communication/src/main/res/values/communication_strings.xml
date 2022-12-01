@@ -4,4 +4,7 @@
         <item quantity="one">Show 1 reply</item>
         <item quantity="other">Show %1$d replies</item>
     </plurals>
+
+    <string name="standalone_screen_title">View post</string>
+    <string name="standalone_screen_replies_title">Replies</string>
 </resources>

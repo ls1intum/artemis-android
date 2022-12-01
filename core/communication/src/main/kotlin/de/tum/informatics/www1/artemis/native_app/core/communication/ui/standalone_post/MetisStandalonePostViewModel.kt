@@ -25,7 +25,8 @@ class MetisStandalonePostViewModel(
         .shareIn(viewModelScope, SharingStarted.Eagerly)
 
     val post: Flow<Post?> =
-        metisStorageService.getStandalonePost(clientSidePostId)
+        metisStorageService
+            .getStandalonePost(clientSidePostId)
             .shareIn(viewModelScope, SharingStarted.Eagerly)
 
     init {

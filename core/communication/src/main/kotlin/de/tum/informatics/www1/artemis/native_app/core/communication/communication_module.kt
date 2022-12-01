@@ -21,8 +21,8 @@ val communicationModule = module {
 
     viewModel { params ->
         MetisStandalonePostViewModel(
-            params.get(),
-            get(),
+            params[0],
+            params[1],
             get(),
             get(),
             get()

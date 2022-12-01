@@ -27,6 +27,6 @@ class StandalonePostingEntity(
     val displayPriority: BasePostingEntity.DisplayPriority?,
     @ColumnInfo(name = "resolved")
     val resolved: Boolean,
-    @ColumnInfo(name = "is_live_created")
-    val isLiveCreated: Boolean
+    @ColumnInfo(name = "live_created")
+    val liveCreated: Boolean
 )

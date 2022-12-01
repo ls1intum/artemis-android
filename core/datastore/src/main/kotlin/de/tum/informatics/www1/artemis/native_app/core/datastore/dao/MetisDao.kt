@@ -77,7 +77,6 @@ interface MetisDao {
     @Query("delete from reactions where post_id = :postId")
     suspend fun removeReactions(postId: String)
 
-    data class ReactionOnly(val authorId: Int, val emojiId: String)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertReactions(reactions: List<PostReactionEntity>)
@@ -222,7 +221,7 @@ interface MetisDao {
             p.id = mpc.client_post_id and
             p.type = 'STANDALONE' and
             sp.post_id = p.id and
-            sp.is_live_created = 0
+            sp.live_created = 0
     """)
     suspend fun queryContextPostCountNoLiveCreated(serverId: String, courseId: Int, exerciseId: Int, lectureId: Int): Int
 

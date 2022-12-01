@@ -32,7 +32,10 @@ class MetisRemoteMediator(
             LoadType.APPEND -> {
                 if (state.isEmpty()) return MediatorResult.Success(endOfPaginationReached = true)
                 val loadedItemsCount = metisStorageService.getCachedPostCount(host, context.metisContext)
-                (loadedItemsCount - (loadedItemsCount % pageSize)) / pageSize
+                val foo = (loadedItemsCount - (loadedItemsCount % pageSize)) / pageSize
+
+                println("loadedItemCount=$loadedItemsCount; nextPage=$foo")
+                foo
             }
         }
 
@@ -55,7 +58,7 @@ class MetisRemoteMediator(
         )
 
         return MediatorResult.Success(
-            endOfPaginationReached = loadedPosts.isEmpty()
+            endOfPaginationReached = loadedPosts.size < pageSize
         )
     }
 }
