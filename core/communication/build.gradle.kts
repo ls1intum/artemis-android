@@ -1,3 +1,4 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -38,10 +39,13 @@ dependencies {
 tasks.register("fetchAndPrepareEmojis", emoji.FetchAndPrepareEmojisTask::class) {
     commit.set("d5676f0bb66c9c46b646db9b8a3d993b589bbe5c")
     set.set("14")
+    outputDir.set(buildDir.resolve("generated/res/emoji/raw"))
 }
 
-tasks.withType(KotlinCompile::class).forEach { kotlinCompile ->
-    project.afterEvaluate {
+//tasks.named("build").get().dependsOn(tasks.getByName("fetchAndPrepareEmojis"))
+
+project.afterEvaluate {
+    tasks.withType(KotlinCompile::class).toList().forEach { kotlinCompile ->
         kotlinCompile.dependsOn(tasks.getByName("fetchAndPrepareEmojis"))
     }
 }

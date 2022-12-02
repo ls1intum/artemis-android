@@ -12,6 +12,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import java.io.File
 
 abstract class FetchAndPrepareEmojisTask : DefaultTask() {
 
@@ -21,10 +22,13 @@ abstract class FetchAndPrepareEmojisTask : DefaultTask() {
     @get:Input
     abstract val set: Property<String>
 
+    @get:Input
+    abstract val outputDir: Property<File>
+
     @TaskAction
     fun performAction() {
-        val outputFolder = project.buildDir.resolve("generated/res/emoji/raw")
-        outputFolder.mkdir()
+        val outputFolder = outputDir.get()
+        outputFolder.mkdirs()
         val outputFile = outputFolder.resolve("emojis.json")
 
         if (outputFile.exists()) {
