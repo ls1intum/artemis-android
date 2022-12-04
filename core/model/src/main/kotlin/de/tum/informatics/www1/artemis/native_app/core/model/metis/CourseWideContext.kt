@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class CourseWideContext(val httpValue: String) {
+    ANNOUNCEMENT("ANNOUNCEMENT"),
     TECH_SUPPORT("TECH_SUPPORT"),
     ORGANIZATION("ORGANIZATION"),
-    RANDOM("RANDOM"),
-    ANNOUNCEMENT("ANNOUNCEMENT")
+    RANDOM("RANDOM")
 }

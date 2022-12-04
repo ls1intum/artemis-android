@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import io.ktor.client.call.*
@@ -41,9 +42,11 @@ class MetisServiceImpl(
                     MetisSortingStrategy.DATE_ASCENDING, MetisSortingStrategy.DATE_DESCENDING -> {
                         parameter("postSortCriterion", "CREATION_DATE")
                     }
+
                     MetisSortingStrategy.REPLIES_ASCENDING, MetisSortingStrategy.REPLIES_DESCENDING -> {
                         parameter("postSortCriterion", "ANSWER_COUNT")
                     }
+
                     MetisSortingStrategy.VOTES_ASCENDING, MetisSortingStrategy.VOTES_DESCENDING -> {
                         parameter("postSortCriterion", "ANSWER_COUNT")
                     }
@@ -83,18 +86,20 @@ class MetisServiceImpl(
                     parameter("searchText", standalonePostsContext.query)
                 }
 
-                parameter(
-                    "filterToUnresolved",
-                    MetisFilter.RESOLVED !in standalonePostsContext.filter
-                )
-                parameter(
-                    "filterToOwn",
-                    MetisFilter.CREATED_BY_CLIENT in standalonePostsContext.filter
-                )
-                parameter(
-                    "filterToAnsweredOrReacted",
-                    MetisFilter.WITH_REACTION in standalonePostsContext.filter
-                )
+                if (standalonePostsContext.courseWideContext != CourseWideContext.ANNOUNCEMENT) {
+                    parameter(
+                        "filterToUnresolved",
+                        MetisFilter.RESOLVED !in standalonePostsContext.filter
+                    )
+                    parameter(
+                        "filterToOwn",
+                        MetisFilter.CREATED_BY_CLIENT in standalonePostsContext.filter
+                    )
+                    parameter(
+                        "filterToAnsweredOrReacted",
+                        MetisFilter.WITH_REACTION in standalonePostsContext.filter
+                    )
+                }
 
                 parameter("pagingEnabled", true)
                 parameter("page", pageNum)

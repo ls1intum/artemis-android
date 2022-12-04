@@ -15,8 +15,10 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class MetisListViewModel(
     private val metisContext: MetisContext,
@@ -32,6 +34,17 @@ internal class MetisListViewModel(
     private val _query = MutableStateFlow<String?>(null)
     val query: Flow<String> = _query.map(String?::orEmpty)
 
+    private val delayedQuery = _query.transformLatest { query ->
+        /*
+         * Do not search every time the user enters a new character.
+         * Wait for 300 ms of the user not entering a char to search
+         */
+        if (query != null) {
+            delay(300.milliseconds)
+        }
+        emit(query)
+    }
+
     private val _sortingStrategy = MutableStateFlow(MetisSortingStrategy.DATE_DESCENDING)
     val sortingStrategy: Flow<MetisSortingStrategy> = _sortingStrategy
 
@@ -40,7 +53,7 @@ internal class MetisListViewModel(
 
     private val standalonePostContext: Flow<MetisService.StandalonePostsContext> = combine(
         _filter,
-        _query,
+        delayedQuery,
         _sortingStrategy,
         _courseWideContext
     ) { filter, query, sortingStrategy, courseWideContext ->
@@ -59,7 +72,7 @@ internal class MetisListViewModel(
         serverConfigurationService.serverUrl,
         serverConfigurationService.host,
         _filter,
-        _query,
+        delayedQuery,
         _sortingStrategy,
         _courseWideContext
     ) { authData, serverUrl, host, filter, query, sortingStrategy, courseWideContext ->
