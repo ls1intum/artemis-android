@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
@@ -21,6 +19,7 @@ import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Recommend
 import androidx.compose.material.icons.filled.Reply
@@ -315,14 +314,14 @@ private fun MetisFilterChip(
     val icon = when (metisFilter) {
         MetisFilter.CREATED_BY_CLIENT -> Icons.Default.Smartphone
         MetisFilter.WITH_REACTION -> Icons.Default.Reply
-        MetisFilter.RESOLVED -> Icons.Default.Done
+        MetisFilter.UNRESOLVED -> Icons.Default.Pending
     }
 
     val text = stringResource(
         id = when (metisFilter) {
             MetisFilter.CREATED_BY_CLIENT -> R.string.metis_filter_client_created
             MetisFilter.WITH_REACTION -> R.string.metis_filter_with_reaction
-            MetisFilter.RESOLVED -> R.string.metis_filter_resolved
+            MetisFilter.UNRESOLVED -> R.string.metis_filter_unresolved
         }
     )
 

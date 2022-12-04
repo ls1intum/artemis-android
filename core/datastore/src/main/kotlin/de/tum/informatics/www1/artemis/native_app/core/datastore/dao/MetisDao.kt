@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.*
 import kotlinx.coroutines.flow.Flow
+import java.util.Locale
 
 @Dao
 interface MetisDao {
@@ -169,10 +170,55 @@ interface MetisDao {
         courseId: Int,
         exerciseId: Int,
         lectureId: Int,
+        clientId: Int,
         metisFilter: List<MetisFilter>,
         metisSortingStrategy: MetisSortingStrategy,
         query: String?
     ): PagingSource<Int, Post> {
+        val queryReplyCount =
+            "(select count(*) from answer_postings ap where ap.parent_post_id = sp.post_id)"
+        val queryEmojiCount = "(select count(*) from reactions r where r.post_id = p.id)"
+
+        val orderBy = when (metisSortingStrategy) {
+            MetisSortingStrategy.DATE_ASCENDING -> "order by p.creation_date asc"
+            MetisSortingStrategy.DATE_DESCENDING -> "order by p.creation_date desc"
+            MetisSortingStrategy.REPLIES_ASCENDING -> "order by $queryReplyCount asc"
+            MetisSortingStrategy.REPLIES_DESCENDING -> "order by $queryReplyCount desc"
+            MetisSortingStrategy.VOTES_ASCENDING -> "order by $queryEmojiCount asc"
+            MetisSortingStrategy.VOTES_DESCENDING -> "order by $queryEmojiCount desc"
+        }
+
+        val metisFilterSql = buildString {
+            if (MetisFilter.UNRESOLVED in metisFilter) {
+                append("and sp.resolved = 0 \n")
+            }
+            if (MetisFilter.CREATED_BY_CLIENT in metisFilter) {
+                append("and p.author_id = ? \n")
+            }
+            if (MetisFilter.WITH_REACTION in metisFilter) {
+                append("and ($queryReplyCount > 0 or \n")
+                append("(select count(*) from reactions r where r.post_id = p.id) > 0)  \n")
+            }
+        }
+
+        val bindServerPostId =
+            query != null && query.startsWith("#") && query.substring(1).isNotBlank()
+        val queryServerPostId =
+            if (query != null && bindServerPostId) query.substring(1).toIntOrNull() ?: "" else ""
+
+        val likeQueryLiteral = "%${query?.lowercase(Locale.getDefault())}%"
+
+        val querySql = buildString {
+            if (query != null) {
+                if (bindServerPostId) {
+                    append("and mpc.server_post_id = ?  \n")
+                } else {
+                    append("and (sp.title like ? or p.content like ? or \n")
+                    append("exists (select * from post_tags pt where pt.tag like ?))")
+                }
+            }
+        }
+
         val baseQuery = """
             select
                 mpc.client_post_id,
@@ -199,7 +245,9 @@ interface MetisDao {
                 sp.post_id = p.id and
                 u.server_id = mpc.server_id and
                 u.id = p.author_id
-            order by p.creation_date desc
+                $metisFilterSql
+                $querySql
+            $orderBy
         """.trimIndent()
 
         val constructedQuery = SimpleSQLiteQuery(
@@ -210,6 +258,9 @@ interface MetisDao {
                 exerciseId,
                 lectureId
             )
+                    + (if (MetisFilter.CREATED_BY_CLIENT in metisFilter) arrayOf(clientId) else emptyArray())
+                    + (if (bindServerPostId) arrayOf(queryServerPostId) else emptyArray())
+                    + if (!bindServerPostId && query != null) arrayOf(likeQueryLiteral, likeQueryLiteral, likeQueryLiteral) else emptyArray()
         )
 
         return queryCoursePosts(constructedQuery)
@@ -279,8 +330,10 @@ interface MetisDao {
 //                    p.type = 'standalone' and
 //                    sp.post_id = p.id and
 //                    u.server_id = mpc.server_id and
-//                    u.id = p.author_id
-//                order by p.creation_date desc
+//                    u.id = p.author_id and
+//                    sp.resolved = 1 and
+//                    exists (select count(*) from reactions r where r.post_id = p.id )
+//                order by (select count(*) from reactions r where r.post_id = p.id) desc
 //    """
 //    )
 //    fun foo(serverId: String, courseId: Int, exerciseId: Int, lectureId: Int)

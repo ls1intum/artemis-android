@@ -76,8 +76,11 @@ internal class MetisListViewModel(
         _sortingStrategy,
         _courseWideContext
     ) { authData, serverUrl, host, filter, query, sortingStrategy, courseWideContext ->
-        val authToken = when (authData) {
-            is AccountService.AuthenticationData.LoggedIn -> authData.authToken
+        val (authToken, clientId) = when (authData) {
+            is AccountService.AuthenticationData.LoggedIn -> {
+                authData.authToken to (authData.account.bind { it.id }.orElse(null) ?: return@combine7 null)
+            }
+
             AccountService.AuthenticationData.NotLoggedIn -> return@combine7 null
         }
 
@@ -102,6 +105,7 @@ internal class MetisListViewModel(
             pagingSourceFactory = {
                 metisStorageService.getStoredPosts(
                     serverId = host,
+                    clientId = clientId,
                     filter = filter,
                     sortingStrategy = sortingStrategy,
                     query = query,

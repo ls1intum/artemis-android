@@ -46,7 +46,8 @@ internal fun MetisStandalonePostList(
             posts.loadState.refresh is LoadState.Loading -> {
                 Column(
                     modifier = informationModifier,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = stringResource(id = R.string.metis_post_list_loading),
@@ -119,7 +120,8 @@ private fun PageStateError(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = stringResource(id = R.string.metis_post_list_error),

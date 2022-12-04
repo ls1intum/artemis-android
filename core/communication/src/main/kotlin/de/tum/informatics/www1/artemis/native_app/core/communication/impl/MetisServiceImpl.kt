@@ -89,7 +89,7 @@ class MetisServiceImpl(
                 if (standalonePostsContext.courseWideContext != CourseWideContext.ANNOUNCEMENT) {
                     parameter(
                         "filterToUnresolved",
-                        MetisFilter.RESOLVED !in standalonePostsContext.filter
+                        MetisFilter.UNRESOLVED in standalonePostsContext.filter
                     )
                     parameter(
                         "filterToOwn",

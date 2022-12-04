@@ -10,7 +10,7 @@ enum class MetisFilter {
      */
     WITH_REACTION,
     /**
-     * Filter for courses which already have been resolved
+     * Filter for posts which have not been resolved yet
      */
-    RESOLVED
+    UNRESOLVED
 }

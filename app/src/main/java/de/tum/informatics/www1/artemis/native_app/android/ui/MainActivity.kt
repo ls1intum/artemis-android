@@ -47,23 +47,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            MaterialTheme(
-//                colors = Colors(
-//                    primary = Color(0xff1e88e5),
-//                    secondary = Color(0xff424242),
-//                    primaryVariant = Color(0xff6ab7ff),
-//                    secondaryVariant = Color(0xff6d6d6d),
-//                    background = Color.White,
-//                    surface = Color(0xffe4e5e6),
-//                    error = Color(0xffffc107),
-//                    onPrimary = Color(0xff000000),
-//                    onSecondary = Color(0xffffffff),
-//                    onBackground = Color(0xff000000),
-//                    onSurface = Color.Black,
-//                    onError = Color.Black,
-//                    isLight = true
-//                )
-            ) {
+            AppTheme {
                 val navController = rememberNavController()
 
                 val onLoggedIn = {

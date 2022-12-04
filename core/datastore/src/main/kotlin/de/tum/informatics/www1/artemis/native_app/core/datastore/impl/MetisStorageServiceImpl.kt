@@ -367,6 +367,7 @@ class MetisStorageServiceImpl(
 
     override fun getStoredPosts(
         serverId: String,
+        clientId: Int,
         filter: List<MetisFilter>,
         sortingStrategy: MetisSortingStrategy,
         query: String?,
@@ -374,6 +375,7 @@ class MetisStorageServiceImpl(
     ): PagingSource<Int, Post> {
         return databaseProvider.database.metisDao().queryCoursePosts(
             serverId = serverId,
+            clientId = clientId,
             courseId = metisContext.courseId,
             exerciseId = metisContext.exerciseId,
             lectureId = metisContext.lectureId,
