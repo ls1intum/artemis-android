@@ -27,4 +27,9 @@
     <string name="metis_sorting_strategy_order_title">Order by:</string>
     <string name="metis_sorting_strategy_order_ascending">Ascending</string>
     <string name="metis_sorting_strategy_order_descending">Descending</string>
+
+    <string name="metis_post_list_empty">No posts were found matching your selection.</string>
+    <string name="metis_post_list_loading">Loading posts…</string>
+    <string name="metis_post_list_error">Something went wrong while loading your posts.</string>
+    <string name="metis_post_list_error_try_again">Try again</string>
 </resources>
