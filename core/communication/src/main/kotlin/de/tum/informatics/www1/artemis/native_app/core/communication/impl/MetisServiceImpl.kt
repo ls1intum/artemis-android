@@ -6,6 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
@@ -36,7 +37,18 @@ class MetisServiceImpl(
                     appendPathSegments(metisContext.resourceEndpoint)
                 }
 
-                parameter("postSortCriterion", "CREATION_DATE")
+                when (standalonePostsContext.sortingStrategy) {
+                    MetisSortingStrategy.DATE_ASCENDING, MetisSortingStrategy.DATE_DESCENDING -> {
+                        parameter("postSortCriterion", "CREATION_DATE")
+                    }
+                    MetisSortingStrategy.REPLIES_ASCENDING, MetisSortingStrategy.REPLIES_DESCENDING -> {
+                        parameter("postSortCriterion", "ANSWER_COUNT")
+                    }
+                    MetisSortingStrategy.VOTES_ASCENDING, MetisSortingStrategy.VOTES_DESCENDING -> {
+                        parameter("postSortCriterion", "ANSWER_COUNT")
+                    }
+                }
+
                 parameter(
                     "sortingOrder",
                     standalonePostsContext.sortingStrategy.httpParamValue
@@ -46,12 +58,15 @@ class MetisServiceImpl(
                     is MetisContext.Exercise -> {
                         parameter("exerciseId", metisContext.exerciseId)
                     }
+
                     is MetisContext.Lecture -> {
                         parameter("lectureId", metisContext.lectureId)
                     }
+
                     is MetisContext.Conversation -> {
                         parameter("conversationId", metisContext.conversationId)
                     }
+
                     is MetisContext.Course -> {
 
                     }

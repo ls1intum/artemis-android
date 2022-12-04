@@ -27,9 +27,16 @@ internal class MetisListViewModel(
 ) : ViewModel() {
 
     private val _filter = MutableStateFlow<List<MetisFilter>>(emptyList())
+    val filter: Flow<List<MetisFilter>> = _filter
+
     private val _query = MutableStateFlow<String?>(null)
+    val query: Flow<String> = _query.map(String?::orEmpty)
+
     private val _sortingStrategy = MutableStateFlow(MetisSortingStrategy.DATE_DESCENDING)
+    val sortingStrategy: Flow<MetisSortingStrategy> = _sortingStrategy
+
     private val _courseWideContext = MutableStateFlow<CourseWideContext?>(null)
+    val courseWideContext: Flow<CourseWideContext?> = _courseWideContext
 
     private val standalonePostContext: Flow<MetisService.StandalonePostsContext> = combine(
         _filter,
@@ -108,5 +115,25 @@ internal class MetisListViewModel(
                     )
                 }
         }
+    }
+
+    fun addMetisFilter(metisFilter: MetisFilter) {
+        _filter.value = _filter.value + metisFilter
+    }
+
+    fun removeMetisFilter(metisFilter: MetisFilter) {
+        _filter.value = _filter.value.filterNot { it == metisFilter }
+    }
+
+    fun updateCourseWideContext(new: CourseWideContext?) {
+        _courseWideContext.value = new
+    }
+
+    fun updateQuery(new: String) {
+        _query.value = new.ifEmpty { null }
+    }
+
+    fun updateSortingStrategy(new: MetisSortingStrategy) {
+        _sortingStrategy.value = new
     }
 }
