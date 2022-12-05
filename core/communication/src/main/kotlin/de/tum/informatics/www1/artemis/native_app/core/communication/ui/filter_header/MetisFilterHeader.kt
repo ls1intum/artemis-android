@@ -446,9 +446,7 @@ private fun SortingStrategyField(
             Text(
                 text = text,
                 onTextLayout = {
-                    if (it.hasVisualOverflow) {
-                        displayText = false
-                    }
+                    displayText = !it.hasVisualOverflow
                 },
                 maxLines = 1
             )
@@ -459,7 +457,7 @@ private fun SortingStrategyField(
         Icon(imageVector = Icons.Default.ExpandMore, contentDescription = null)
 
         DropdownMenu(expanded = displayDialog, onDismissRequest = { displayDialog = false }) {
-            dialogContent { displayText = false }
+            dialogContent { displayDialog = false }
         }
     }
 }
