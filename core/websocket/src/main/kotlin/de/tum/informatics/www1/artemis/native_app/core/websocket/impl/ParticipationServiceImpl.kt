@@ -50,7 +50,7 @@ internal class ParticipationServiceImpl(
 
     @OptIn(DelicateCoroutinesApi::class)
     override val personalSubmissionUpdater: Flow<Result> =
-        websocketProvider.subscribe(PERSONAL_PARTICIPATION_TOPIC, Result.serializer())
+        websocketProvider.subscribeMessage(PERSONAL_PARTICIPATION_TOPIC, Result.serializer())
             .shareIn(
                 scope = GlobalScope,
                 started = SharingStarted.WhileSubscribed(replayExpiration = Duration.ZERO),
@@ -59,7 +59,7 @@ internal class ParticipationServiceImpl(
 
     @OptIn(DelicateCoroutinesApi::class)
     private val personalNewSubmissionsUpdater: Flow<WebsocketProgrammingSubmissionMessage> =
-        websocketProvider.subscribe(
+        websocketProvider.subscribeMessage(
             PERSONAL_NEW_SUBMISSIONS_TOPIC,
             WebsocketProgrammingSubmissionMessage.serializer()
         )
@@ -83,7 +83,7 @@ internal class ParticipationServiceImpl(
         //Flow that emits when the websocket sends new data
         val updatingFlow: Flow<ProgrammingSubmissionStateData?> =
             if (personal) personalNewSubmissionsUpdater else {
-                websocketProvider.subscribe(
+                websocketProvider.subscribeMessage(
                     "/topic/exercise/$exerciseId/newSubmissions",
                     WebsocketProgrammingSubmissionMessage.serializer()
                 )
@@ -94,6 +94,7 @@ internal class ParticipationServiceImpl(
                             message.participationId ?: 0
                         )
                     )
+
                     is WebsocketProgrammingSubmissionMessage.ReceivedSubmission -> {
                         val submission = message.submission
                         emit(
@@ -108,7 +109,7 @@ internal class ParticipationServiceImpl(
                         val result: Unit? = withTimeoutOrNull(remainingTime) {
                             //Wait for the submission updater to emit a result for the participation we are interested in
                             val submissionUpdater = if (personal) personalSubmissionUpdater else {
-                                websocketProvider.subscribe(
+                                websocketProvider.subscribeMessage(
                                     exerciseParticipationTopic(exerciseId),
                                     Result.serializer()
                                 )

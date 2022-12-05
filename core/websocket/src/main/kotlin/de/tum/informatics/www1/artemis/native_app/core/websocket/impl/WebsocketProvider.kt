@@ -4,6 +4,7 @@ import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider.WebsocketData.Message
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.awaitClose
@@ -18,6 +19,7 @@ import kotlin.time.Duration.Companion.seconds
 import org.hildan.krossbow.stomp.conversions.kxserialization.*
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.stomp.headers.StompSubscribeHeaders
+import org.hildan.krossbow.stomp.subscribe
 import org.hildan.krossbow.websocket.ktor.KtorWebSocketClient
 import kotlin.time.Duration.Companion.minutes
 
@@ -58,6 +60,7 @@ class WebsocketProvider(
                                 is AccountService.AuthenticationData.LoggedIn -> {
                                     "?access_token=${authenticationData.authToken}"
                                 }
+
                                 AccountService.AuthenticationData.NotLoggedIn -> ""
                             }
 
@@ -104,19 +107,45 @@ class WebsocketProvider(
      * Returns a flow that automatically unsubscribes once the collector is inactive.
      * The given flow can only be subscribed to once.
      */
-    fun <T : Any> subscribe(channel: String, deserializer: DeserializationStrategy<T>): Flow<T> {
+    fun <T : Any> subscribe(
+        channel: String,
+        deserializer: DeserializationStrategy<T>
+    ): Flow<WebsocketData<T>> {
         return session
             .transformLatest { currentSession ->
-                val flow: Flow<T> = currentSession.subscribe(
+                val flow: Flow<WebsocketData<T>> = currentSession.subscribe(
                     StompSubscribeHeaders(destination = channel),
                     deserializer
                 )
                     .retryWhen { _, attempt ->
+                        emit(WebsocketData.Disconnect())
                         delay(2.seconds * attempt.toInt())
                         true
                     }
+                    .map { Message(it) }
+                    .onStart { emit(WebsocketData.Subscribe()) }
                 emitAll(flow)
             }
+    }
+
+    fun <T : Any> subscribeMessage(
+        channel: String,
+        deserializer: DeserializationStrategy<T>
+    ): Flow<T> {
+        return subscribe(channel, deserializer).mapNotNull {
+            when (it) {
+                is Message -> it.message
+                else -> null
+            }
+        }
+    }
+
+    sealed interface WebsocketData<T> {
+        class Subscribe<T> : WebsocketData<T>
+
+        class Disconnect<T> : WebsocketData<T>
+
+        class Message<T>(val message: T) : WebsocketData<T>
     }
 }
 

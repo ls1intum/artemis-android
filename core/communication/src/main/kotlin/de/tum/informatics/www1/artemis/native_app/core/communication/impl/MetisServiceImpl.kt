@@ -110,7 +110,7 @@ class MetisServiceImpl(
         }
     }
 
-    override fun subscribeToPostUpdates(metisContext: MetisContext): Flow<MetisPostDTO> {
+    override fun subscribeToPostUpdates(metisContext: MetisContext): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>> {
         val baseChannel = "/topic/metis"
         val channel = when (metisContext) {
             is MetisContext.Conversation -> "/user$baseChannel/courses/${metisContext.courseId}/conversations/${metisContext.conversationId}"

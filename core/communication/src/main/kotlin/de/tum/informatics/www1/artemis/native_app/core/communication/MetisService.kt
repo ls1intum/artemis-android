@@ -6,6 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import kotlinx.coroutines.flow.Flow
 
 interface MetisService {
@@ -23,7 +24,7 @@ interface MetisService {
 
     fun subscribeToPostUpdates(
         metisContext: MetisContext
-    ): Flow<MetisPostDTO>
+    ): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>>
 
     /**
      * The metis context needed to query standalone posts.

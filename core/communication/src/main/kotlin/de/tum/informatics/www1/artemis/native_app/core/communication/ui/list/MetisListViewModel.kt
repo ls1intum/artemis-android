@@ -3,9 +3,11 @@ package de.tum.informatics.www1.artemis.native_app.core.communication.ui.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
-import de.tum.informatics.www1.artemis.native_app.core.common.combine7
+import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisService
+import de.tum.informatics.www1.artemis.native_app.core.communication.impl.CurrentDataAction
+import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisContextManager
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisRemoteMediator
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.updatePosts
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
@@ -15,9 +17,11 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class MetisListViewModel(
@@ -25,8 +29,9 @@ internal class MetisListViewModel(
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,
     private val accountService: AccountService,
-    private val serverConfigurationService: ServerConfigurationService
-) : ViewModel() {
+    private val serverConfigurationService: ServerConfigurationService,
+    private val metisContextManager: MetisContextManager
+) : ViewModel(), KoinComponent {
 
     private val _filter = MutableStateFlow<List<MetisFilter>>(emptyList())
     val filter: Flow<List<MetisFilter>> = _filter
@@ -51,7 +56,7 @@ internal class MetisListViewModel(
     private val _courseWideContext = MutableStateFlow<CourseWideContext?>(null)
     val courseWideContext: Flow<CourseWideContext?> = _courseWideContext
 
-    private val standalonePostContext: Flow<MetisService.StandalonePostsContext> = combine(
+    private val standaloneMetisContext: Flow<MetisService.StandalonePostsContext> = combine(
         _filter,
         delayedQuery,
         _sortingStrategy,
@@ -66,73 +71,77 @@ internal class MetisListViewModel(
         )
     }
 
-    @OptIn(ExperimentalPagingApi::class)
-    val postPagingData: Flow<PagingData<Post>> = combine7(
+    private val pagingDataInput: Flow<PagingDataInput> = combine(
         accountService.authenticationData,
         serverConfigurationService.serverUrl,
         serverConfigurationService.host,
-        _filter,
-        delayedQuery,
-        _sortingStrategy,
-        _courseWideContext
-    ) { authData, serverUrl, host, filter, query, sortingStrategy, courseWideContext ->
-        val (authToken, clientId) = when (authData) {
-            is AccountService.AuthenticationData.LoggedIn -> {
-                authData.authToken to (authData.account.bind { it.id }.orElse(null) ?: return@combine7 null)
-            }
+        standaloneMetisContext,
+        ::PagingDataInput
+    )
 
-            AccountService.AuthenticationData.NotLoggedIn -> return@combine7 null
-        }
+    private data class PagingDataInput(
+        val authenticationData: AccountService.AuthenticationData,
+        val serverUrl: String,
+        val host: String,
+        val standalonePostsContext: MetisService.StandalonePostsContext
+    )
 
-        Pager(
-            config = PagingConfig(
-                pageSize = 20
-            ),
-            remoteMediator = MetisRemoteMediator(
-                context = MetisService.StandalonePostsContext(
-                    metisContext = metisContext,
-                    filter = filter,
-                    query = query,
-                    sortingStrategy = sortingStrategy,
-                    courseWideContext = courseWideContext
-                ),
-                metisService = metisService,
-                metisStorageService = metisStorageService,
-                authToken = authToken,
-                serverUrl = serverUrl,
-                host = host
-            ),
-            pagingSourceFactory = {
-                metisStorageService.getStoredPosts(
-                    serverId = host,
-                    clientId = clientId,
-                    filter = filter,
-                    sortingStrategy = sortingStrategy,
-                    query = query,
-                    metisContext = metisContext
-                )
-            }
-        )
-    }
-        .filterNotNull()
-        .flatMapLatest { it.flow.cachedIn(viewModelScope) }
-
-    init {
-        viewModelScope.launch {
-            combine(
-                serverConfigurationService.host,
-                standalonePostContext
-            ) { a, b -> Pair(a, b) }
-                .collectLatest { (host, postContext) ->
-                    updatePosts(
-                        host,
-                        metisService,
-                        metisStorageService,
-                        postContext.metisContext
-                    )
+    @OptIn(ExperimentalPagingApi::class)
+    val postPagingData: Flow<PagingData<Post>> =
+        pagingDataInput.withPrevious().transformLatest { (previousPagingDataInput, pagingDataInput) ->
+            val (authToken, clientId) = when (val authData = pagingDataInput.authenticationData) {
+                is AccountService.AuthenticationData.LoggedIn -> {
+                    authData.authToken to (authData.account.bind { it.id }.orElse(null)
+                        ?: return@transformLatest)
                 }
+
+                AccountService.AuthenticationData.NotLoggedIn -> return@transformLatest
+            }
+
+            var doneRefresh = false
+            metisContextManager.collectMetisUpdates(metisContext).collect { currentDataAction ->
+                val performInitialRefresh = when (currentDataAction) {
+                    // If we already did a refresh we can ignore keep
+                    CurrentDataAction.Keep -> if (doneRefresh) {
+                        return@collect
+                    } else false
+                    CurrentDataAction.Outdated -> return@collect // there is nothing we can do here
+                    CurrentDataAction.Refresh -> {
+                        doneRefresh = true
+                        true
+                    }
+                } || (previousPagingDataInput != pagingDataInput)
+
+                val newPager = Pager(
+                    config = PagingConfig(
+                        pageSize = 20
+                    ),
+                    remoteMediator = MetisRemoteMediator(
+                        context = pagingDataInput.standalonePostsContext,
+                        metisService = metisService,
+                        metisStorageService = metisStorageService,
+                        authToken = authToken,
+                        serverUrl = pagingDataInput.serverUrl,
+                        host = pagingDataInput.host,
+                        performInitialRefresh = performInitialRefresh
+                    ),
+                    pagingSourceFactory = {
+                        metisStorageService.getStoredPosts(
+                            serverId = pagingDataInput.host,
+                            clientId = clientId,
+                            filter = pagingDataInput.standalonePostsContext.filter,
+                            sortingStrategy = pagingDataInput.standalonePostsContext.sortingStrategy,
+                            query = pagingDataInput.standalonePostsContext.query,
+                            metisContext = metisContext
+                        )
+                    }
+                )
+
+                emit(newPager)
+            }
         }
-    }
+            .flatMapLatest { it.flow.cachedIn(viewModelScope) }
+            .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
 
     fun addMetisFilter(metisFilter: MetisFilter) {
         _filter.value = _filter.value + metisFilter

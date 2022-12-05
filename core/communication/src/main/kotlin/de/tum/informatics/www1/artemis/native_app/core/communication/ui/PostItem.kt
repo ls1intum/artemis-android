@@ -101,7 +101,7 @@ private fun PostItemBase(
     postItemViewType: PostItemViewType,
     getUnicodeForEmojiId: @Composable (String) -> String
 ) {
-    Card(modifier = modifier) {
+    OutlinedCard(modifier = modifier) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
