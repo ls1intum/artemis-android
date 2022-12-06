@@ -32,9 +32,7 @@ internal fun MetisStandalonePostList(
     val isDataOutdated = viewModel.isDataOutdated.collectAsState(initial = false).value
 
     Column(modifier = modifier) {
-        if (isDataOutdated) {
-            MetisOutdatedBanner(modifier = Modifier.fillMaxWidth())
-        }
+        MetisOutdatedBanner(modifier = Modifier.fillMaxWidth(), isOutdated = isDataOutdated)
 
         Box(
             modifier = Modifier

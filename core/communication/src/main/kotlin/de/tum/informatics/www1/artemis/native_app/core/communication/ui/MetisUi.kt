@@ -1,8 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.core.communication.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -81,23 +83,25 @@ fun SmartphoneMetisUi(
 }
 
 @Composable
-internal fun MetisOutdatedBanner(modifier: Modifier) {
-    Box(
-        modifier = modifier.then(
-            Modifier.background(
-                MaterialTheme.colorScheme.errorContainer,
-                shape = RoundedCornerShape(15)
+internal fun ColumnScope.MetisOutdatedBanner(modifier: Modifier, isOutdated: Boolean) {
+    AnimatedVisibility(visible = isOutdated) {
+        Box(
+            modifier = modifier.then(
+                Modifier.background(
+                    MaterialTheme.colorScheme.errorContainer,
+                    shape = RoundedCornerShape(15)
+                )
             )
-        )
-    ) {
-        Text(
-            text = stringResource(id = R.string.metis_outdated_data_banner_text),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onErrorContainer
-        )
+        ) {
+            Text(
+                text = stringResource(id = R.string.metis_outdated_data_banner_text),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onErrorContainer
+            )
+        }
     }
 }

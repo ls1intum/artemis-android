@@ -22,6 +22,16 @@ interface MetisService {
         serverUrl: String
     ): NetworkResponse<List<StandalonePost>>
 
+    /**
+     * Request a single post from the server.
+     */
+    suspend fun getPost(
+        metisContext: MetisContext,
+        serverSidePostId: Int,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<StandalonePost>
+
     fun subscribeToPostUpdates(
         metisContext: MetisContext
     ): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>>

@@ -12,6 +12,10 @@ import org.hildan.krossbow.websocket.WebSocketConnection
 import org.hildan.krossbow.websocket.WebSocketFrame
 import java.lang.Exception
 
+/**
+ * Websocket client wrapper that calls onClose when anything goes wrong with the connection.
+ * E.g. when the WLAN disconnects or when a heartbeat is missed.
+ */
 class CloseCallbackWebsocketClient(
     private val baseClient: WebSocketClient,
     private val onClose: () -> Unit

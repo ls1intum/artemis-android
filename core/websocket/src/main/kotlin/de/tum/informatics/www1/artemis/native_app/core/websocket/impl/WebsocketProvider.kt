@@ -43,9 +43,9 @@ class WebsocketProvider(
     private val webSocketClient =
         CloseCallbackWebsocketClient(KtorWebSocketClient(ktorProvider.ktorClient)) {
             GlobalScope.launch {
-                Log.d(TAG, "RIP WEB SOCKET HERE START")
+                Log.d(TAG, "Websocket closed. Emitting to try reconnect")
                 tryReconnect.emit(Unit)
-                Log.d(TAG, "RIP WEB SOCKET HERE END")
+                Log.d(TAG, "Websocket closed. Emitted try reconnect.")
             }
         }
 
@@ -72,11 +72,11 @@ class WebsocketProvider(
                     .currentNetworkStatus
                     .filter { it == NetworkStatusProvider.NetworkStatus.Internet }
                     .first()
-                Log.d(TAG, "Has internet to try connection")
+                Log.d(TAG, "Waiting for internet done.")
 
                 emitAll(
                     channelFlow {
-                        Log.d(TAG, "START WEBSOCKET")
+                        Log.d(TAG, "Websocket: Init")
                         val url =
                             "wss://$host/websocket/tracker/websocket" + when (authenticationData) {
                                 is AccountService.AuthenticationData.LoggedIn -> {
@@ -93,10 +93,10 @@ class WebsocketProvider(
                         send(session)
 
                         onReconnected.emit(Unit)
-                        Log.d(TAG, "WEBSOCKET CONNECTED!!!!")
+                        Log.d(TAG, "Websocket: Connected")
 
                         awaitClose {
-                            Log.d(TAG, "STOP WEBSOCKET")
+                            Log.d(TAG, "Websocket: Stopped")
 
                             //Graceful disconnect is disabled, runBlocking should not block
                             runBlocking {

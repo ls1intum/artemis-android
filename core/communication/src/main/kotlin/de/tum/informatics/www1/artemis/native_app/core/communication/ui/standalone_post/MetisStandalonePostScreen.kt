@@ -1,6 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -13,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.*
 import androidx.navigation.compose.composable
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisOutdatedBanner
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.MetisStandalonePostUi
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import org.koin.androidx.compose.koinViewModel
@@ -66,6 +69,8 @@ internal fun MetisStandalonePostScreen(
     val viewModel: MetisStandalonePostViewModel =
         koinViewModel(parameters = { parametersOf(clientPostId, true) })
 
+    val isDataOutdated by viewModel.isDataOutdated.collectAsState(initial = false)
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -81,13 +86,21 @@ internal fun MetisStandalonePostScreen(
             )
         }
     ) { padding ->
-        MetisStandalonePostUi(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            viewModel = viewModel,
-            viewType = viewType
-        )
+                .padding(padding)
+        ) {
+            MetisOutdatedBanner(modifier = Modifier.fillMaxWidth(), isOutdated = isDataOutdated)
+
+            MetisStandalonePostUi(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                viewModel = viewModel,
+                viewType = viewType
+            )
+        }
     }
 }
 

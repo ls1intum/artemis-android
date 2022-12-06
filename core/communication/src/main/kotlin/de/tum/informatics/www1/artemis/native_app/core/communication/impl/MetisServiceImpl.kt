@@ -110,6 +110,42 @@ class MetisServiceImpl(
         }
     }
 
+    /**
+     * Uses the fact that you can query a single post using the query parameter.
+     * Therefore, no extra API is required.
+     */
+    override suspend fun getPost(
+        metisContext: MetisContext,
+        serverSidePostId: Int,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<StandalonePost> {
+        val posts = getPosts(
+            standalonePostsContext = MetisService.StandalonePostsContext(
+                metisContext = metisContext,
+                filter = emptyList(),
+                query = "#$serverSidePostId",
+                sortingStrategy = MetisSortingStrategy.DATE_DESCENDING,
+                courseWideContext = null
+            ),
+            pageSize = 20,
+            pageNum = 0,
+            authToken = authToken,
+            serverUrl = serverUrl
+        )
+
+        when (posts) {
+            is NetworkResponse.Failure -> return NetworkResponse.Failure(posts.exception)
+            is NetworkResponse.Response -> {
+                if (posts.data.size != 1) {
+                    return NetworkResponse.Failure(RuntimeException("Expected exactly one post"))
+                }
+
+                return NetworkResponse.Response(posts.data.first())
+            }
+        }
+    }
+
     override fun subscribeToPostUpdates(metisContext: MetisContext): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>> {
         val baseChannel = "/topic/metis"
         val channel = when (metisContext) {
