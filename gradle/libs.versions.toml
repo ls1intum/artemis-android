@@ -21,7 +21,7 @@ kotlinxDatetime = "0.4.0"
 kotlinxSerializationJson = "1.4.1"
 koin = "3.2.0"
 ktor = "2.1.1"
-krossbow = "4.4.0"
+krossbow = "4.5.0"
 markwon = "4.6.2"
 room = "2.4.3"
 

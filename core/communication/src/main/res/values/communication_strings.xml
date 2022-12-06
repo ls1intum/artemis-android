@@ -32,4 +32,6 @@
     <string name="metis_post_list_loading">Loading posts…</string>
     <string name="metis_post_list_error">Something went wrong while loading your posts.</string>
     <string name="metis_post_list_error_try_again">Try again</string>
+
+    <string name="metis_outdated_data_banner_text">The displayed data may be outdated.</string>
 </resources>

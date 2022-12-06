@@ -2,14 +2,17 @@ package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
 
 import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider.WebsocketData.Message
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.DeserializationStrategy
 import org.hildan.krossbow.stomp.StompClient
@@ -19,22 +22,35 @@ import kotlin.time.Duration.Companion.seconds
 import org.hildan.krossbow.stomp.conversions.kxserialization.*
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.stomp.headers.StompSubscribeHeaders
-import org.hildan.krossbow.stomp.subscribe
 import org.hildan.krossbow.websocket.ktor.KtorWebSocketClient
 import kotlin.time.Duration.Companion.minutes
 
 class WebsocketProvider(
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
-    private val jsonProvider: JsonProvider
+    private val jsonProvider: JsonProvider,
+    private val networkStatusProvider: NetworkStatusProvider,
+    private val ktorProvider: KtorProvider
 ) {
 
     companion object {
         private const val TAG = "WebsocketProvider"
     }
 
+    private val tryReconnect = MutableSharedFlow<Unit>()
+    private val onReconnected = MutableSharedFlow<Unit>()
+
+    private val webSocketClient =
+        CloseCallbackWebsocketClient(KtorWebSocketClient(ktorProvider.ktorClient)) {
+            GlobalScope.launch {
+                Log.d(TAG, "RIP WEB SOCKET HERE START")
+                tryReconnect.emit(Unit)
+                Log.d(TAG, "RIP WEB SOCKET HERE END")
+            }
+        }
+
     private val client =
-        StompClient(KtorWebSocketClient()) {
+        StompClient(webSocketClient) {
             heartBeat = HeartBeat(10.seconds, 10.seconds)
             gracefulDisconnect = false
             connectionTimeout = 20.minutes
@@ -48,13 +64,19 @@ class WebsocketProvider(
     private val session: Flow<StompSessionWithKxSerialization> =
         combine(
             serverConfigurationService.host,
-            accountService.authenticationData
-        ) { a, b -> a to b }
+            accountService.authenticationData,
+            tryReconnect.onStart { emit(Unit) }
+        ) { a, b, _ -> a to b }
             .transformLatest { (host, authenticationData) ->
-                println("host: $host; authData=$authenticationData")
+                networkStatusProvider
+                    .currentNetworkStatus
+                    .filter { it == NetworkStatusProvider.NetworkStatus.Internet }
+                    .first()
+                Log.d(TAG, "Has internet to try connection")
+
                 emitAll(
                     channelFlow {
-                        println("START WEBSOCKET")
+                        Log.d(TAG, "START WEBSOCKET")
                         val url =
                             "wss://$host/websocket/tracker/websocket" + when (authenticationData) {
                                 is AccountService.AuthenticationData.LoggedIn -> {
@@ -64,13 +86,17 @@ class WebsocketProvider(
                                 AccountService.AuthenticationData.NotLoggedIn -> ""
                             }
 
-                        val session =
-                            client.connect(url)
-                                .withJsonConversions(jsonProvider.networkJsonConfiguration)
+                        val session = client
+                            .connect(url)
+                            .withJsonConversions(jsonProvider.networkJsonConfiguration)
+
                         send(session)
 
+                        onReconnected.emit(Unit)
+                        Log.d(TAG, "WEBSOCKET CONNECTED!!!!")
+
                         awaitClose {
-                            println("STOP WEBSOCKET")
+                            Log.d(TAG, "STOP WEBSOCKET")
 
                             //Graceful disconnect is disabled, runBlocking should not block
                             runBlocking {
@@ -80,17 +106,7 @@ class WebsocketProvider(
                     }
                         .retryWhen { e, attempt ->
                             Log.d(TAG, "Websocket connection failure (attempt $attempt): $e.")
-                            val delayTime = when {
-                                attempt > 20 -> 600
-                                attempt > 16 -> 300
-                                attempt > 12 -> 120
-                                attempt > 8 -> 60
-                                attempt > 4 -> 20
-                                attempt > 2 -> 10
-                                else -> 5
-                            }.seconds
-
-                            delay(delayTime)
+                            delay(1.seconds * attempt.toInt())
                             true
                         }
                 )
@@ -113,17 +129,23 @@ class WebsocketProvider(
     ): Flow<WebsocketData<T>> {
         return session
             .transformLatest { currentSession ->
-                val flow: Flow<WebsocketData<T>> = currentSession.subscribe(
-                    StompSubscribeHeaders(destination = channel),
-                    deserializer
-                )
-                    .retryWhen { _, attempt ->
+                val flow: Flow<WebsocketData<T>> = flow {
+                    emitAll(
+                        currentSession.subscribe(
+                            StompSubscribeHeaders(destination = channel),
+                            deserializer
+                        )
+                    )
+                }
+                    .onStart {
+                        Log.d(TAG, "subscribe! $channel")
+                        emit(WebsocketData.Subscribe())
+                    }
+                    .catch { e ->
+                        Log.d(TAG, "ERROR!, ${e.localizedMessage}")
                         emit(WebsocketData.Disconnect())
-                        delay(2.seconds * attempt.toInt())
-                        true
                     }
                     .map { Message(it) }
-                    .onStart { emit(WebsocketData.Subscribe()) }
                 emitAll(flow)
             }
     }

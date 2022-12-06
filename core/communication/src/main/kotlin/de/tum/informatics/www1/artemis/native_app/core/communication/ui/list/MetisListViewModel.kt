@@ -88,60 +88,71 @@ internal class MetisListViewModel(
 
     @OptIn(ExperimentalPagingApi::class)
     val postPagingData: Flow<PagingData<Post>> =
-        pagingDataInput.withPrevious().transformLatest { (previousPagingDataInput, pagingDataInput) ->
-            val (authToken, clientId) = when (val authData = pagingDataInput.authenticationData) {
-                is AccountService.AuthenticationData.LoggedIn -> {
-                    authData.authToken to (authData.account.bind { it.id }.orElse(null)
-                        ?: return@transformLatest)
+        pagingDataInput.withPrevious()
+            .transformLatest { (previousPagingDataInput, pagingDataInput) ->
+                val (authToken, clientId) = when (val authData =
+                    pagingDataInput.authenticationData) {
+                    is AccountService.AuthenticationData.LoggedIn -> {
+                        authData.authToken to (authData.account.bind { it.id }.orElse(null)
+                            ?: return@transformLatest)
+                    }
+
+                    AccountService.AuthenticationData.NotLoggedIn -> return@transformLatest
                 }
 
-                AccountService.AuthenticationData.NotLoggedIn -> return@transformLatest
+                var doneRefresh = false
+                metisContextManager.collectMetisUpdates(metisContext).collect { currentDataAction ->
+                    val performInitialRefresh = when (currentDataAction) {
+                        // If we already did a refresh we can ignore keep
+                        CurrentDataAction.Keep -> if (doneRefresh) {
+                            return@collect
+                        } else false
+
+                        CurrentDataAction.Outdated -> return@collect // there is nothing we can do here
+                        CurrentDataAction.Refresh -> {
+                            doneRefresh = true
+                            true
+                        }
+                    } || (previousPagingDataInput != pagingDataInput)
+
+                    val newPager = Pager(
+                        config = PagingConfig(
+                            pageSize = 20
+                        ),
+                        remoteMediator = MetisRemoteMediator(
+                            context = pagingDataInput.standalonePostsContext,
+                            metisService = metisService,
+                            metisStorageService = metisStorageService,
+                            authToken = authToken,
+                            serverUrl = pagingDataInput.serverUrl,
+                            host = pagingDataInput.host,
+                            performInitialRefresh = performInitialRefresh
+                        ),
+                        pagingSourceFactory = {
+                            metisStorageService.getStoredPosts(
+                                serverId = pagingDataInput.host,
+                                clientId = clientId,
+                                filter = pagingDataInput.standalonePostsContext.filter,
+                                sortingStrategy = pagingDataInput.standalonePostsContext.sortingStrategy,
+                                query = pagingDataInput.standalonePostsContext.query,
+                                metisContext = metisContext
+                            )
+                        }
+                    )
+
+                    emit(newPager)
+                }
             }
-
-            var doneRefresh = false
-            metisContextManager.collectMetisUpdates(metisContext).collect { currentDataAction ->
-                val performInitialRefresh = when (currentDataAction) {
-                    // If we already did a refresh we can ignore keep
-                    CurrentDataAction.Keep -> if (doneRefresh) {
-                        return@collect
-                    } else false
-                    CurrentDataAction.Outdated -> return@collect // there is nothing we can do here
-                    CurrentDataAction.Refresh -> {
-                        doneRefresh = true
-                        true
-                    }
-                } || (previousPagingDataInput != pagingDataInput)
-
-                val newPager = Pager(
-                    config = PagingConfig(
-                        pageSize = 20
-                    ),
-                    remoteMediator = MetisRemoteMediator(
-                        context = pagingDataInput.standalonePostsContext,
-                        metisService = metisService,
-                        metisStorageService = metisStorageService,
-                        authToken = authToken,
-                        serverUrl = pagingDataInput.serverUrl,
-                        host = pagingDataInput.host,
-                        performInitialRefresh = performInitialRefresh
-                    ),
-                    pagingSourceFactory = {
-                        metisStorageService.getStoredPosts(
-                            serverId = pagingDataInput.host,
-                            clientId = clientId,
-                            filter = pagingDataInput.standalonePostsContext.filter,
-                            sortingStrategy = pagingDataInput.standalonePostsContext.sortingStrategy,
-                            query = pagingDataInput.standalonePostsContext.query,
-                            metisContext = metisContext
-                        )
-                    }
-                )
-
-                emit(newPager)
-            }
-        }
             .flatMapLatest { it.flow.cachedIn(viewModelScope) }
             .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
+
+    val isDataOutdated: Flow<Boolean> = metisContextManager.collectMetisUpdates(metisContext).map {
+        when (it) {
+            CurrentDataAction.Keep -> false
+            CurrentDataAction.Outdated -> true
+            CurrentDataAction.Refresh -> false
+        }
+    }
 
     fun addMetisFilter(metisFilter: MetisFilter) {
         _filter.value = _filter.value + metisFilter
