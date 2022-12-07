@@ -116,7 +116,8 @@ class MetisStorageServiceImpl(
                 serverId = serverId,
                 postId = clientSidePostId,
                 emojiId = emojiId ?: return null,
-                authorId = user?.id ?: return null
+                authorId = user?.id ?: return null,
+                id = id ?: return null
             ) to MetisUserEntity(
                 serverId = serverId,
                 id = user?.id ?: return null,
@@ -407,5 +408,9 @@ class MetisStorageServiceImpl(
             metisContext.exerciseId,
             metisContext.lectureId
         )
+    }
+
+    override suspend fun getServerSidePostId(host: String, clientSidePostId: String): Int {
+        return databaseProvider.database.metisDao().queryServerSidePostId(host, clientSidePostId)
     }
 }

@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.communication
 
+import de.tum.informatics.www1.artemis.native_app.core.communication.emoji.EmojiService
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.EmojiServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisContextManager
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisServiceImpl
@@ -11,7 +12,7 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val communicationModule = module {
-    single<MetisService> { MetisServiceImpl(get(), get(), get()) }
+    single<MetisService> { MetisServiceImpl(get(), get()) }
     single<EmojiService> { EmojiServiceImpl(androidContext()) }
 
     viewModel { params ->

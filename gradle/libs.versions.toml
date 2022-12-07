@@ -27,6 +27,7 @@ room = "2.4.3"
 
 [libraries]
 accompanist-placeholder-material = { group = "com.google.accompanist", name = "accompanist-placeholder-material", version.ref = "accompanist" }
+accompanist-flowlayout = { group = "com.google.accompanist", name = "accompanist-flowlayout", version.ref = "accompanist" }
 
 android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJdkLibs" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
@@ -36,6 +37,7 @@ androidx-compose-foundation = { group = "androidx.compose.foundation", name = "f
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout" }
 androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-material = { group = "androidx.compose.material", name = "material" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
@@ -74,13 +76,13 @@ ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.r
 krossbow-stomp-core = { group = "org.hildan.krossbow", name = "krossbow-stomp-core", version.ref = "krossbow" }
 krossbow-websocket-ktor = { group = "org.hildan.krossbow", name = "krossbow-websocket-ktor", version.ref = "krossbow" }
 krossbow-stomp-kxserialization-json = { group = "org.hildan.krossbow", name = "krossbow-stomp-kxserialization-json", version.ref = "krossbow" }
-noties-markwon-core = { group = "io.noties.markwon", name="core", version.ref = "markwon" }
-noties-markwon-ext-strikethrough = { group = "io.noties.markwon", name="ext-strikethrough", version.ref = "markwon" }
-noties-markwon-ext-tables = { group = "io.noties.markwon", name="ext-tables", version.ref = "markwon" }
-noties-markwon-html = { group = "io.noties.markwon", name="html", version.ref = "markwon" }
-noties-markwon-linkify = { group = "io.noties.markwon", name="linkify", version.ref = "markwon" }
-noties-markwon-simple-ext = { group = "io.noties.markwon", name="simple-ext", version.ref = "markwon" }
-noties-markwon-image-coil = { group = "io.noties.markwon", name="image-coil", version.ref = "markwon" }
+noties-markwon-core = { group = "io.noties.markwon", name = "core", version.ref = "markwon" }
+noties-markwon-ext-strikethrough = { group = "io.noties.markwon", name = "ext-strikethrough", version.ref = "markwon" }
+noties-markwon-ext-tables = { group = "io.noties.markwon", name = "ext-tables", version.ref = "markwon" }
+noties-markwon-html = { group = "io.noties.markwon", name = "html", version.ref = "markwon" }
+noties-markwon-linkify = { group = "io.noties.markwon", name = "linkify", version.ref = "markwon" }
+noties-markwon-simple-ext = { group = "io.noties.markwon", name = "simple-ext", version.ref = "markwon" }
+noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", version.ref = "markwon" }
 
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }

@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Ignore
 import androidx.room.Relation
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.BasePostingEntity
+import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.MetisPostContextEntity
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.MetisUserEntity
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.PostReactionEntity
 import kotlinx.datetime.Instant
@@ -26,7 +27,7 @@ data class AnswerPost constructor(
         entity = PostReactionEntity::class,
         entityColumn = "post_id",
         parentColumn = "post_id",
-        projection = ["author_id", "emoji"]
+        projection = ["author_id", "emoji", "id"]
     )
     val reactions: List<Post.Reaction>
 ) {

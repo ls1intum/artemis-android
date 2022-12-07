@@ -7,8 +7,9 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorPro
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
-import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import io.ktor.client.call.*
@@ -17,7 +18,6 @@ import io.ktor.http.*
 import kotlinx.coroutines.flow.Flow
 
 class MetisServiceImpl(
-    private val networkStatusProvider: NetworkStatusProvider,
     private val ktorProvider: KtorProvider,
     private val websocketProvider: WebsocketProvider
 ) : MetisService {
@@ -156,5 +156,74 @@ class MetisServiceImpl(
         }
 
         return websocketProvider.subscribe(channel, MetisPostDTO.serializer())
+    }
+
+    override suspend fun createReaction(
+        context: MetisContext,
+        post: MetisService.AffectedPost,
+        emojiId: String,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<Reaction> {
+        val reaction = when (post) {
+            is MetisService.AffectedPost.Answer -> {
+                Reaction(
+                    emojiId = emojiId,
+                    answerPost = AnswerPost(id = post.postId)
+                )
+            }
+
+            is MetisService.AffectedPost.Standalone -> {
+                Reaction(
+                    emojiId = emojiId,
+                    standalonePost = StandalonePost(id = post.postId)
+                )
+            }
+        }
+        
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments(
+                        "api",
+                        "courses",
+                        context.courseId.toString(),
+                        "postings",
+                        "reactions"
+                    )
+                }
+
+                setBody(reaction)
+                bearerAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }.body()
+        }
+    }
+
+    override suspend fun deleteReaction(
+        context: MetisContext,
+        reactionId: Int,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<Unit> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.delete(serverUrl) {
+                url {
+                    appendPathSegments(
+                        "api",
+                        "courses",
+                        context.courseId.toString(),
+                        "postings",
+                        "reactions",
+                        reactionId.toString()
+                    )
+                }
+
+                bearerAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }
+
+            Unit
+        }
     }
 }

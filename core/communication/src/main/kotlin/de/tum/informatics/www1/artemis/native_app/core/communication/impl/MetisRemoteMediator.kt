@@ -8,6 +8,9 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.MetisServic
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
+import kotlinx.coroutines.withTimeoutOrNull
+import java.util.concurrent.TimeoutException
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalPagingApi::class)
 class MetisRemoteMediator(
@@ -43,13 +46,18 @@ class MetisRemoteMediator(
             }
         }
 
-        val loadedPosts = when (val networkResponse = metisService.getPosts(
-            standalonePostsContext = context,
-            pageSize = pageSize,
-            pageNum = nextPageIndex,
-            authToken = authToken,
-            serverUrl = serverUrl
-        )) {
+        val loadedPosts = when (val networkResponse =
+            withTimeoutOrNull(10.seconds) {
+                metisService.getPosts(
+                    standalonePostsContext = context,
+                    pageSize = pageSize,
+                    pageNum = nextPageIndex,
+                    authToken = authToken,
+                    serverUrl = serverUrl
+                )
+            }
+        ) {
+            null -> return MediatorResult.Error(TimeoutException())
             is NetworkResponse.Failure -> return MediatorResult.Error(networkResponse.exception)
             is NetworkResponse.Response -> networkResponse.data
         }

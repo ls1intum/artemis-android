@@ -35,5 +35,7 @@ class ArtemisApplication : Application() {
                 communicationModule
             )
         }
+
+
     }
 }

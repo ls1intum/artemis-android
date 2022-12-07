@@ -25,10 +25,12 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(project(":core:device"))
 
+    implementation(libs.androidx.compose.material)
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
     implementation(libs.kotlinx.datetime)
     implementation(libs.accompanist.placeholder.material)
+    implementation(libs.accompanist.flowlayout)
     implementation(libs.androidx.emoji2)
     implementation(libs.androidx.emoji2.views)
     implementation(libs.androidx.emoji2.views.helper)

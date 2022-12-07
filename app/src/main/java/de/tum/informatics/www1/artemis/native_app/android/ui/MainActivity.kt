@@ -3,9 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.android.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.standalonePostScreen
@@ -25,14 +23,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 /**
  * Main and only activity used in the android app.
  * Navigation is handled by decompose and jetpack compose.
  */
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private val accountService: AccountService = get()
 

@@ -2,8 +2,10 @@ package de.tum.informatics.www1.artemis.native_app.core.communication.ui.standal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.communication.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisService
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisContextManager
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisViewModel
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
@@ -18,15 +20,15 @@ import kotlinx.coroutines.launch
 class MetisStandalonePostViewModel(
     private val clientSidePostId: String,
     subscribeToLiveUpdateService: Boolean,
-    metisStorageService: MetisStorageService,
+    private val metisStorageService: MetisStorageService,
     metisContextManager: MetisContextManager,
     private val metisService: MetisService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService
-) : ViewModel() {
+) : MetisViewModel(metisService, serverConfigurationService, accountService) {
 
-    private val metisContext: Flow<MetisContext> = flow {
+    val metisContext: Flow<MetisContext> = flow {
         emit(metisStorageService.getStandalonePostMetisContext(clientSidePostId))
     }
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
@@ -68,9 +70,6 @@ class MetisStandalonePostViewModel(
             viewModelScope.launch {
                 metisContext.collectLatest { currentMetisContext ->
                     collectMetisUpdates
-                        .onEach {
-                            println(it)
-                        }
                         .filter { it == MetisContextManager.CurrentDataAction.Refresh }
                         .collect {
                             val serverSidePostId = post.filterNotNull().first().serverPostId
@@ -105,4 +104,49 @@ class MetisStandalonePostViewModel(
             }
         }
     }
+
+    /**
+     * Convenience method that wraps the superclass create reaction.
+     */
+    fun createReactionForAnswer(
+        emojiId: String,
+        clientSidePostId: String,
+        onResponse: (MetisModificationFailure?) -> Unit
+    ) {
+        viewModelScope.launch {
+            val serverSidePostId = metisStorageService.getServerSidePostId(
+                serverConfigurationService.host.first(),
+                clientSidePostId
+            )
+
+            createReactionImpl(
+                emojiId = emojiId,
+                post = MetisService.AffectedPost.Answer(postId = serverSidePostId),
+                response = onResponse
+            )
+        }
+    }
+
+    fun onClickReactionOfAnswer(
+        emojiId: String,
+        clientSidePostId: String,
+        presentReactions: List<Post.Reaction>,
+        onResponse: (MetisModificationFailure?) -> Unit
+    ) {
+        viewModelScope.launch {
+            val serverSidePostId = metisStorageService.getServerSidePostId(
+                serverConfigurationService.host.first(),
+                clientSidePostId
+            )
+
+            onClickReactionImpl(
+                emojiId = emojiId,
+                post = MetisService.AffectedPost.Answer(postId = serverSidePostId),
+                presentReactions = presentReactions,
+                response = onResponse
+            )
+        }
+    }
+
+    override suspend fun getMetisContext(): MetisContext = metisContext.first()
 }

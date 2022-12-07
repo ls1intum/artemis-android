@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisService
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisContextManager
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisRemoteMediator
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisViewModel
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -22,13 +23,13 @@ import org.koin.core.component.KoinComponent
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class MetisListViewModel(
-    private val metisContext: MetisContext,
+    val metisContext: MetisContext,
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,
     private val accountService: AccountService,
     private val serverConfigurationService: ServerConfigurationService,
     private val metisContextManager: MetisContextManager
-) : ViewModel(), KoinComponent {
+) : MetisViewModel(metisService, serverConfigurationService, accountService), KoinComponent {
 
     private val _filter = MutableStateFlow<List<MetisFilter>>(emptyList())
     val filter: Flow<List<MetisFilter>> = _filter
@@ -180,4 +181,6 @@ internal class MetisListViewModel(
     fun updateSortingStrategy(new: MetisSortingStrategy) {
         _sortingStrategy.value = new
     }
+
+    override suspend fun getMetisContext(): MetisContext = metisContext
 }

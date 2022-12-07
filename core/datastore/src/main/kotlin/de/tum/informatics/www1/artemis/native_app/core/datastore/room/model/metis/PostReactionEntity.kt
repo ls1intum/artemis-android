@@ -29,5 +29,7 @@ data class PostReactionEntity(
     @ColumnInfo(name = "emoji")
     val emojiId: String,
     @ColumnInfo(name = "author_id")
-    val authorId: Int
+    val authorId: Int,
+    @ColumnInfo(name = "id")
+    val id: Int
 )

@@ -67,4 +67,6 @@ interface MetisStorageService {
      * WARNING: This does ignore live created posts.
      */
     suspend fun getCachedPostCount(host: String, metisContext: MetisContext): Int
+
+    suspend fun getServerSidePostId(host: String, clientSidePostId: String): Int
 }

@@ -5,6 +5,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -14,12 +19,17 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
+import de.tum.informatics.www1.artemis.native_app.core.communication.MetisService
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisModificationFailureDialog
+import de.tum.informatics.www1.artemis.native_app.core.communication.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisOutdatedBanner
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItem
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.getEmojiForEmojiId
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.get
 
 @Composable
 internal fun MetisStandalonePostList(
@@ -30,6 +40,11 @@ internal fun MetisStandalonePostList(
 ) {
     val posts: LazyPagingItems<Post> = viewModel.postPagingData.collectAsLazyPagingItems()
     val isDataOutdated = viewModel.isDataOutdated.collectAsState(initial = false).value
+
+    val scope = rememberCoroutineScope()
+    val metisService: MetisService = get()
+
+    var metisFailure: MetisModificationFailure? by remember { mutableStateOf(null) }
 
     Column(modifier = modifier) {
         MetisOutdatedBanner(modifier = Modifier.fillMaxWidth(), isOutdated = isDataOutdated)
@@ -82,6 +97,9 @@ internal fun MetisStandalonePostList(
                         contentPadding = PaddingValues(top = 8.dp)
                     ) {
                         items(posts, key = { it.clientPostId }) { post ->
+                            val asAffectedPost = post?.let {
+                                MetisService.AffectedPost.Standalone(it.serverPostId)
+                            }
                             PostItem(
                                 modifier = Modifier.fillMaxWidth(),
                                 post = post,
@@ -101,6 +119,19 @@ internal fun MetisStandalonePostList(
                                 getUnicodeForEmojiId = {
                                     val emoji = getEmojiForEmojiId(emojiId = it)
                                     emoji
+                                },
+                                onReactWithEmoji = { emojiId ->
+                                    viewModel.createReaction(
+                                        emojiId = emojiId,
+                                        post = asAffectedPost ?: return@PostItem
+                                    ) { metisFailure = it }
+                                },
+                                onClickOnPresentReaction = { emojiId ->
+                                    viewModel.onClickReaction(
+                                        emojiId = emojiId,
+                                        post = asAffectedPost ?: return@PostItem,
+                                        presentReactions = post.reactions,
+                                    ) { metisFailure = it }
                                 }
                             )
                         }
@@ -123,6 +154,10 @@ internal fun MetisStandalonePostList(
                 }
             }
         }
+    }
+
+    MetisModificationFailureDialog(metisModificationFailure = metisFailure) {
+        metisFailure = null
     }
 }
 

@@ -5,6 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import kotlinx.coroutines.flow.Flow
@@ -35,6 +36,32 @@ interface MetisService {
     fun subscribeToPostUpdates(
         metisContext: MetisContext
     ): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>>
+
+    /**
+     * Returns null if no error occurred.
+     */
+    suspend fun createReaction(
+        context: MetisContext,
+        post: AffectedPost,
+        emojiId: String,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<Reaction>
+
+    /**
+     * Returns null if no error occurred.
+     */
+    suspend fun deleteReaction(
+        context: MetisContext,
+        reactionId: Int,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<Unit>
+
+    sealed class AffectedPost {
+        data class Standalone(val postId: Int) : AffectedPost()
+        data class Answer(val postId: Int) : AffectedPost()
+    }
 
     /**
      * The metis context needed to query standalone posts.

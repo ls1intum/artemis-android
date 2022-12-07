@@ -1,8 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.core.communication.impl
 
 import android.content.Context
-import de.tum.informatics.www1.artemis.native_app.core.communication.EmojiService
+import de.tum.informatics.www1.artemis.native_app.core.communication.emoji.EmojiService
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
+import de.tum.informatics.www1.artemis.native_app.core.communication.emoji.EmojiCategory
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -20,21 +21,31 @@ import kotlinx.serialization.json.decodeFromStream
 class EmojiServiceImpl(context: Context) : EmojiService {
 
     @OptIn(ExperimentalSerializationApi::class, DelicateCoroutinesApi::class)
-    private val entries: Flow<Map<String, String>> = flow {
+    private val input: Flow<Input> = flow<Input> {
         emit(
             withContext(Dispatchers.IO) {
                 context.resources.openRawResource(R.raw.emojis).use { stream ->
-                    val result: List<EmojiEntry> = Json.decodeFromStream(stream)
-                    result.associate { it.id to it.unicode }
+                    Json.decodeFromStream(stream)
                 }
             }
         )
     }
         .shareIn(GlobalScope, started = SharingStarted.Lazily, replay = 1)
 
+    @OptIn(DelicateCoroutinesApi::class)
+    private val entries: Flow<Map<String, String>> = input.map { input ->
+        input.entries.associate { it.id to it.unicode }
+    }
+        .shareIn(GlobalScope, started = SharingStarted.Lazily, replay = 1)
+
+
     override suspend fun emojiIdToUnicode(emojiId: String): String {
         val map = entries.first()
         return map[emojiId] ?: "\uD83D\uDDBE"
+    }
+
+    override suspend fun getEmojiCategories(): List<EmojiCategory> {
+        return input.first().categories
     }
 
     @Serializable
@@ -43,5 +54,11 @@ class EmojiServiceImpl(context: Context) : EmojiService {
         val id: String,
         @SerialName("b")
         val unicode: String
+    )
+
+    @Serializable
+    data class Input(
+        val categories: List<EmojiCategory>,
+        val entries: List<EmojiEntry>
     )
 }

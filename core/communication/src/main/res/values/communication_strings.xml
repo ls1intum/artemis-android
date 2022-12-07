@@ -34,4 +34,12 @@
     <string name="metis_post_list_error_try_again">Try again</string>
 
     <string name="metis_outdated_data_banner_text">The displayed data may be outdated.</string>
+
+    <!-- Strings related to failures when interacting and modifying metis -->
+    <string name="metis_modification_failure_dialog_title">Failure</string>
+    <string name="metis_modification_failure_dialog_confirm_button">@android:string/ok</string>
+    <string name="metis_modification_failure_dialog_message_create_reaction">Could not create reaction.</string>
+    <string name="metis_modification_failure_dialog_message_delete_reaction">Could not delete reaction.</string>
+    <string name="metis_modification_failure_dialog_message_create_post">Could not create post.</string>
+    <string name="metis_modification_failure_dialog_message_delete_post">Could not delete post.</string>
 </resources>

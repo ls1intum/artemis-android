@@ -337,4 +337,7 @@ interface MetisDao {
 //    """
 //    )
 //    fun foo(serverId: String, courseId: Int, exerciseId: Int, lectureId: Int)
+
+    @Query("select server_post_id from metis_post_context where server_id = :serverId and client_post_id = :clientPostId")
+    suspend fun queryServerSidePostId(serverId: String, clientPostId: String): Int
 }

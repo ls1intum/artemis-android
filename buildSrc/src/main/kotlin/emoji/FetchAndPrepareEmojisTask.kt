@@ -69,6 +69,11 @@ abstract class FetchAndPrepareEmojisTask : DefaultTask() {
                 OutputEmojiEntry(id, unicode)
             }
 
-        outputFile.writeText(json.encodeToString(entries))
+        val output = OutputEmojiJson(
+            categories = data.categories,
+            entries = entries
+        )
+
+        outputFile.writeText(json.encodeToString(output))
     }
 }

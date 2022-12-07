@@ -42,7 +42,7 @@ data class Post(
         entity = PostReactionEntity::class,
         entityColumn = "post_id",
         parentColumn = "client_post_id",
-        projection = ["author_id", "emoji"]
+        projection = ["author_id", "emoji", "id"]
     )
     val reactions: List<Reaction>
 ) {
@@ -61,6 +61,8 @@ data class Post(
             entityColumn = "id",
             projection = ["name"]
         )
-        val username: String
+        val username: String,
+        @ColumnInfo(name = "id")
+        val id: Int
     )
 }
