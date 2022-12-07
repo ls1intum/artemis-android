@@ -1,5 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.core.communication.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -263,7 +270,7 @@ private fun StandalonePostFooter(
                         )
                     },
                     label = {
-                        Text(text = "$count")
+                        AnimatedCounter(count)
                     },
                     onClick = {
                         onClickReaction(emoji)
@@ -335,6 +342,26 @@ private fun EmojiDialog(
                 onSelectEmoji = onSelectEmoji
             )
         }
+    }
+}
+
+@Composable
+private fun AnimatedCounter(currentCount: Int) {
+    AnimatedContent(
+        targetState = currentCount,
+        transitionSpec = {
+            if (targetState > initialState) {
+                slideInVertically { height -> height } + fadeIn() with
+                        slideOutVertically { height -> -height } + fadeOut()
+            } else {
+                slideInVertically { height -> -height } + fadeIn() with
+                        slideOutVertically { height -> height } + fadeOut()
+            }.using(
+                SizeTransform(clip = false)
+            )
+        }
+    ) { targetCount ->
+        Text(text = "$targetCount")
     }
 }
 
