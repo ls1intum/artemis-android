@@ -116,7 +116,7 @@ private fun createTextView(
     }
 }
 
-private fun createMarkdownRender(context: Context, imageLoader: ImageLoader?): Markwon {
+fun createMarkdownRender(context: Context, imageLoader: ImageLoader?): Markwon {
     return Markwon.builder(context)
         .usePlugin(HtmlPlugin.create())
         .usePlugin(StrikethroughPlugin.create())

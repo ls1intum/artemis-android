@@ -5,10 +5,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -18,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.navigateToCreateStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.list.MetisStandalonePostList
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.ViewType
@@ -43,42 +51,60 @@ fun SmartphoneMetisUi(
 
     val query: String = viewModel.query.collectAsState(initial = "").value
 
-    Column(modifier = modifier) {
-        MetisFilterHeader(
-            modifier = Modifier.fillMaxWidth(),
-            context = metisContext,
-            courseWideContext = courseWideContext,
-            metisFilter = metisFilter,
-            metisSortingStrategy = sortingStrategy,
-            query = query,
-            selectCourseWideContext = viewModel::updateCourseWideContext,
-            onSelectFilter = { selectedFilter, isSelected ->
-                if (isSelected) {
-                    viewModel.addMetisFilter(selectedFilter)
-                } else {
-                    viewModel.removeMetisFilter(selectedFilter)
-                }
-            },
-            onChangeMetisSortingStrategy = viewModel::updateSortingStrategy,
-            onUpdateQuery = viewModel::updateQuery
-        )
-
-        MetisStandalonePostList(
-            modifier = modifier,
-            viewModel = viewModel,
-            onClickReply = { clientPostId ->
-                navController.navigateToStandalonePostScreen(
-                    clientPostId = clientPostId,
-                    viewType = ViewType.WRITE_COMMENT
-                ) {}
-            },
-            onClickViewReplies = { clientPostId ->
-                navController.navigateToStandalonePostScreen(
-                    clientPostId = clientPostId,
-                    viewType = ViewType.REPLIES
-                ) {}
+    Scaffold(
+        modifier = modifier,
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                navController.navigateToCreateStandalonePostScreen {}
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Create,
+                    contentDescription = null
+                )
             }
-        )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            MetisFilterHeader(
+                modifier = Modifier.fillMaxWidth(),
+                context = metisContext,
+                courseWideContext = courseWideContext,
+                metisFilter = metisFilter,
+                metisSortingStrategy = sortingStrategy,
+                query = query,
+                selectCourseWideContext = viewModel::updateCourseWideContext,
+                onSelectFilter = { selectedFilter, isSelected ->
+                    if (isSelected) {
+                        viewModel.addMetisFilter(selectedFilter)
+                    } else {
+                        viewModel.removeMetisFilter(selectedFilter)
+                    }
+                },
+                onChangeMetisSortingStrategy = viewModel::updateSortingStrategy,
+                onUpdateQuery = viewModel::updateQuery
+            )
+
+            MetisStandalonePostList(
+                modifier = modifier,
+                viewModel = viewModel,
+                onClickReply = { clientPostId ->
+                    navController.navigateToStandalonePostScreen(
+                        clientPostId = clientPostId,
+                        viewType = ViewType.WRITE_COMMENT
+                    ) {}
+                },
+                onClickViewReplies = { clientPostId ->
+                    navController.navigateToStandalonePostScreen(
+                        clientPostId = clientPostId,
+                        viewType = ViewType.REPLIES
+                    ) {}
+                }
+            )
+        }
     }
 }
 

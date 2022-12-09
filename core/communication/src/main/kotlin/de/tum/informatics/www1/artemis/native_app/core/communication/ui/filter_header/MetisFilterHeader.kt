@@ -57,6 +57,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.DropdownButton
 
 @Composable
 internal fun MetisFilterHeader(
@@ -270,21 +271,8 @@ private fun CourseWideContextFilterChip(
     selectedCourseWideContext: CourseWideContext?,
     onSelect: (CourseWideContext?) -> Unit
 ) {
-    val icon = when (courseWideContext) {
-        CourseWideContext.TECH_SUPPORT -> Icons.Default.Support
-        CourseWideContext.ORGANIZATION -> Icons.Default.CalendarMonth
-        CourseWideContext.RANDOM -> Icons.Default.QuestionMark
-        CourseWideContext.ANNOUNCEMENT -> Icons.Default.Campaign
-    }
-
-    val text = stringResource(
-        id = when (courseWideContext) {
-            CourseWideContext.TECH_SUPPORT -> R.string.course_wide_context_tech_support
-            CourseWideContext.ORGANIZATION -> R.string.course_wide_context_organization
-            CourseWideContext.RANDOM -> R.string.course_wide_context_random
-            CourseWideContext.ANNOUNCEMENT -> R.string.course_wide_context_announcement
-        }
-    )
+    val icon = getIconForCourseWideContext(courseWideContext = courseWideContext)
+    val text = getHumanReadableTextForCourseWideContext(courseWideContext = courseWideContext)
 
     val isSelected = courseWideContext == selectedCourseWideContext
     FilterChip(
@@ -370,7 +358,7 @@ private fun SelectMetisSortingStrategy(
     ) {
         Text(text = stringResource(id = R.string.metis_sorting_strategy_criteria_title))
 
-        SortingStrategyField(
+        DropdownButton(
             modifier = Modifier,
             text = stringResource(id = selectedCriteria.textRes),
             icon = selectedCriteria.icon
@@ -400,7 +388,7 @@ private fun SelectMetisSortingStrategy(
 
         Text(text = stringResource(id = R.string.metis_sorting_strategy_order_title))
 
-        SortingStrategyField(
+        DropdownButton(
             modifier = Modifier,
             text = stringResource(id = sortingOrder.textRes),
             icon = sortingOrder.icon
@@ -421,43 +409,6 @@ private fun SelectMetisSortingStrategy(
                     }
                 )
             }
-        }
-    }
-}
-
-/**
- * Display a clickable text with button that shows a dialog on click.
- */
-@Composable
-private fun SortingStrategyField(
-    modifier: Modifier,
-    text: String,
-    icon: ImageVector,
-    dialogContent: @Composable ColumnScope.(hide: () -> Unit) -> Unit
-) {
-    var displayDialog by remember {
-        mutableStateOf(false)
-    }
-
-    OutlinedButton(modifier = modifier, onClick = { displayDialog = true }) {
-        var displayText by remember { mutableStateOf(true) }
-
-        if (displayText) {
-            Text(
-                text = text,
-                onTextLayout = {
-                    displayText = !it.hasVisualOverflow
-                },
-                maxLines = 1
-            )
-        } else {
-            Icon(imageVector = icon, contentDescription = null)
-        }
-
-        Icon(imageVector = Icons.Default.ExpandMore, contentDescription = null)
-
-        DropdownMenu(expanded = displayDialog, onDismissRequest = { displayDialog = false }) {
-            dialogContent { displayDialog = false }
         }
     }
 }

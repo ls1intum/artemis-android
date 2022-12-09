@@ -6,22 +6,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.*
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavOptionsBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisOutdatedBanner
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.MetisStandalonePostUi
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-internal fun NavController.navigateToStandalonePostScreen(
+fun NavController.navigateToStandalonePostScreen(
     clientPostId: String,
     viewType: ViewType,
     builder: NavOptionsBuilder.() -> Unit
@@ -61,7 +67,7 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
 }
 
 @Composable
-internal fun MetisStandalonePostScreen(
+private fun MetisStandalonePostScreen(
     clientPostId: String,
     viewType: ViewType,
     onNavigateUp: () -> Unit
@@ -104,7 +110,8 @@ internal fun MetisStandalonePostScreen(
     }
 }
 
-internal enum class ViewType {
+enum class ViewType {
     REPLIES,
-    WRITE_COMMENT
+    WRITE_COMMENT,
+    POST
 }

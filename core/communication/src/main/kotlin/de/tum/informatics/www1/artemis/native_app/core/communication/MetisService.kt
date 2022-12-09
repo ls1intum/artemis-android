@@ -4,6 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
@@ -36,6 +37,34 @@ interface MetisService {
     fun subscribeToPostUpdates(
         metisContext: MetisContext
     ): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>>
+
+    suspend fun createPost(
+        context: MetisContext,
+        post: StandalonePost,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<StandalonePost>
+
+    suspend fun updatePost(
+        context: MetisContext,
+        post: StandalonePost,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<StandalonePost>
+
+    suspend fun createAnswerPost(
+        context: MetisContext,
+        post: AnswerPost,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<AnswerPost>
+
+    suspend fun updateAnswerPost(
+        context: MetisContext,
+        post: AnswerPost,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<AnswerPost>
 
     /**
      * Returns null if no error occurred.

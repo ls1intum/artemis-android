@@ -8,6 +8,9 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -108,6 +111,46 @@ abstract class MetisViewModel(
                 }
             }
         )
+    }
+
+    protected fun createStandalonePost(
+        post: StandalonePost,
+        response: (MetisModificationFailure?) -> Unit
+    ): Job {
+        return viewModelScope.launch {
+            metisService.createPost(
+                context = getMetisContext(),
+                post = post,
+                serverUrl = serverConfigurationService.serverUrl.first(),
+                authToken = when (val authData = accountService.authenticationData.first()) {
+                    is AccountService.AuthenticationData.LoggedIn -> authData.authToken
+                    AccountService.AuthenticationData.NotLoggedIn -> {
+                        response(MetisModificationFailure.CREATE_REACTION)
+                        return@launch
+                    }
+                }
+            )
+        }
+    }
+
+    protected fun createAnswerPost(
+        post: AnswerPost,
+        response: (MetisModificationFailure?) -> Unit
+    ): Job {
+        return viewModelScope.launch {
+            metisService.createAnswerPost(
+                context = getMetisContext(),
+                post = post,
+                serverUrl = serverConfigurationService.serverUrl.first(),
+                authToken = when (val authData = accountService.authenticationData.first()) {
+                    is AccountService.AuthenticationData.LoggedIn -> authData.authToken
+                    AccountService.AuthenticationData.NotLoggedIn -> {
+                        response(MetisModificationFailure.CREATE_REACTION)
+                        return@launch
+                    }
+                }
+            )
+        }
     }
 
     protected abstract suspend fun getMetisContext(): MetisContext

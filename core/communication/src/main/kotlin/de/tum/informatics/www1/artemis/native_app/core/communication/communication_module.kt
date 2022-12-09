@@ -4,6 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.emoji.Emoji
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.EmojiServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisContextManager
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.CreateStandalonePostViewModel
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.MetisStandalonePostViewModel
 import org.koin.android.ext.koin.androidContext
@@ -38,6 +39,8 @@ val communicationModule = module {
             get()
         )
     }
+
+    viewModel { CreateStandalonePostViewModel(get()) }
 
     singleOf(::MetisContextManager)
 }

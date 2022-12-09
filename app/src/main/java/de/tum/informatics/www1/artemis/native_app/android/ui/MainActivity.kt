@@ -6,6 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.createStandalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.ViewType
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.navigateToStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.standalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistration
@@ -99,6 +102,17 @@ class MainActivity : AppCompatActivity() {
 
                     standalonePostScreen(
                         onNavigateUp = navController::navigateUp
+                    )
+
+                    createStandalonePostScreen(
+                        onNavigateUp = navController::navigateUp,
+                        onCreatedPost = { clientSidePostId ->
+                            navController.navigateUp()
+                            navController.navigateToStandalonePostScreen(
+                                clientSidePostId,
+                                ViewType.POST
+                            ) {}
+                        }
                     )
                 }
             }

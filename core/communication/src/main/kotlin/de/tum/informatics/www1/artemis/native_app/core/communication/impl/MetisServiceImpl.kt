@@ -22,6 +22,10 @@ class MetisServiceImpl(
     private val websocketProvider: WebsocketProvider
 ) : MetisService {
 
+    companion object {
+        private val RESOURCE_PATH_SEGMENTS = listOf("api", "courses")
+    }
+
     override suspend fun getPosts(
         standalonePostsContext: MetisService.StandalonePostsContext,
         pageSize: Int,
@@ -33,9 +37,9 @@ class MetisServiceImpl(
             ktorProvider.ktorClient.get(serverUrl) {
                 val metisContext = standalonePostsContext.metisContext
                 url {
-                    appendPathSegments("api", "courses")
+                    appendPathSegments(RESOURCE_PATH_SEGMENTS)
                     appendPathSegments(metisContext.courseId.toString())
-                    appendPathSegments(metisContext.resourceEndpoint)
+                    appendPathSegments(metisContext.standalonePostResourceEndpoint)
                 }
 
                 when (standalonePostsContext.sortingStrategy) {
@@ -158,6 +162,84 @@ class MetisServiceImpl(
         return websocketProvider.subscribe(channel, MetisPostDTO.serializer())
     }
 
+    override suspend fun createPost(
+        context: MetisContext,
+        post: StandalonePost,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<StandalonePost> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments(RESOURCE_PATH_SEGMENTS)
+                    appendPathSegments(context.courseId.toString(), context.standalonePostResourceEndpoint)
+                }
+
+                setBody(post)
+                bearerAuth(authToken)
+            }.body()
+        }
+    }
+
+    override suspend fun createAnswerPost(
+        context: MetisContext,
+        post: AnswerPost,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<AnswerPost> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments(RESOURCE_PATH_SEGMENTS)
+                    appendPathSegments(context.courseId.toString(), context.answerPostResourceEndpoint)
+                }
+
+                setBody(post)
+                bearerAuth(authToken)
+            }.body()
+        }
+    }
+
+    override suspend fun updatePost(
+        context: MetisContext,
+        post: StandalonePost,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<StandalonePost> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.put(serverUrl) {
+                url {
+                    appendPathSegments(RESOURCE_PATH_SEGMENTS)
+                    appendPathSegments(context.courseId.toString(), context.standalonePostResourceEndpoint)
+                    appendPathSegments(post.id.toString())
+                }
+
+                setBody(post)
+                bearerAuth(authToken)
+            }.body()
+        }
+    }
+
+    override suspend fun updateAnswerPost(
+        context: MetisContext,
+        post: AnswerPost,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<AnswerPost> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.put(serverUrl) {
+                url {
+                    appendPathSegments(RESOURCE_PATH_SEGMENTS)
+                    appendPathSegments(context.courseId.toString(), context.answerPostResourceEndpoint)
+                    appendPathSegments(post.id.toString())
+                }
+
+                setBody(post)
+                bearerAuth(authToken)
+            }.body()
+        }
+    }
+
     override suspend fun createReaction(
         context: MetisContext,
         post: MetisService.AffectedPost,
@@ -180,13 +262,12 @@ class MetisServiceImpl(
                 )
             }
         }
-        
+
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
+                    appendPathSegments(RESOURCE_PATH_SEGMENTS)
                     appendPathSegments(
-                        "api",
-                        "courses",
                         context.courseId.toString(),
                         "postings",
                         "reactions"
@@ -209,9 +290,8 @@ class MetisServiceImpl(
         return performNetworkCall {
             ktorProvider.ktorClient.delete(serverUrl) {
                 url {
+                    appendPathSegments(RESOURCE_PATH_SEGMENTS)
                     appendPathSegments(
-                        "api",
-                        "courses",
                         context.courseId.toString(),
                         "postings",
                         "reactions",

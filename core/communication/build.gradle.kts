@@ -44,8 +44,6 @@ tasks.register("fetchAndPrepareEmojis", emoji.FetchAndPrepareEmojisTask::class) 
     outputDir.set(buildDir.resolve("generated/res/emoji/raw"))
 }
 
-//tasks.named("build").get().dependsOn(tasks.getByName("fetchAndPrepareEmojis"))
-
 project.afterEvaluate {
     tasks.withType(KotlinCompile::class).toList().forEach { kotlinCompile ->
         kotlinCompile.dependsOn(tasks.getByName("fetchAndPrepareEmojis"))
