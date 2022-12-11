@@ -1,12 +1,12 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     id("artemis.android.application")
     id("artemis.android.application.compose")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.appdistribution")
 }
 
- val kotlinVersion = "1.7.0"
- val coroutinesVersion = "1.6.4"
+val kotlinVersion = "1.7.0"
+val coroutinesVersion = "1.6.4"
 
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
@@ -14,7 +14,7 @@ android {
     defaultConfig {
         applicationId = "de.tum.informatics.www1.artemis.native_app.android"
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.1.0"
     }
     packagingOptions {
         resources {

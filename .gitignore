@@ -7,3 +7,7 @@ captures
 .externalNativeBuild
 .cxx
 local.properties
+google-services.json
+artemis-native-keystore.jks
+passwords
+private_key.pepk
