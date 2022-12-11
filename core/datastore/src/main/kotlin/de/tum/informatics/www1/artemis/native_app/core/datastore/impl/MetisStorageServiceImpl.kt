@@ -221,13 +221,24 @@ class MetisStorageServiceImpl(
         host: String,
         metisContext: MetisContext,
         post: StandalonePost
-    ) {
+    ): String? {
         val metisDao = databaseProvider.database.metisDao()
-        databaseProvider.database.withTransaction {
-            insertOrUpdatePost(metisDao, host, metisContext, null, post, true)
+        return databaseProvider.database.withTransaction {
+            // First check, if by any chance there is a client side post id for this already.
+            // If the post already exists, do nothing
+            metisDao.queryClientPostId(
+                host,
+                metisContext.courseId,
+                metisContext.exerciseId,
+                metisContext.lectureId,
+                post.id ?: return@withTransaction null
+            ) ?: insertOrUpdatePost(metisDao, host, metisContext, null, post, true)
         }
     }
 
+    /**
+     * @return the client side post id or null if failed
+     */
     private suspend fun insertOrUpdatePost(
         metisDao: MetisDao,
         host: String,
@@ -235,11 +246,11 @@ class MetisStorageServiceImpl(
         queryClientPostId: String?,
         sp: StandalonePost,
         isLiveCreated: Boolean
-    ) {
+    ): String? {
         val postingAuthor = MetisUserEntity(
             serverId = host,
-            id = sp.author?.id ?: return,
-            displayName = sp.author?.name ?: return
+            id = sp.author?.id ?: return null,
+            displayName = sp.author?.name ?: return null
         )
 
         val clientSidePostId: String = queryClientPostId ?: UUID.randomUUID().toString()
@@ -248,7 +259,7 @@ class MetisStorageServiceImpl(
             serverId = host,
             clientSidePostId = clientSidePostId,
             isLiveCreated = isLiveCreated
-        ) ?: return
+        ) ?: return null
 
         val standalonePostReactionsWithUsers =
             sp.reactions.orEmpty().mapNotNull { r -> r.asDb(host, clientSidePostId) }
@@ -283,7 +294,7 @@ class MetisStorageServiceImpl(
             )
         } else {
             metisDao.insertPostMetisContext(
-                metisContext.toPostMetisContext(host, clientSidePostId, sp.id ?: return)
+                metisContext.toPostMetisContext(host, clientSidePostId, sp.id ?: return null)
             )
             metisDao.insertBasePost(standaloneBasePosting)
             metisDao.insertPost(standalonePosting)
@@ -297,7 +308,7 @@ class MetisStorageServiceImpl(
                 courseId = metisContext.courseId,
                 exerciseId = metisContext.exerciseId,
                 lectureId = metisContext.lectureId,
-                postId = ap.id ?: return
+                postId = ap.id ?: return null
             )
             val answerClientSidePostId =
                 queryClientPostIdAnswer ?: UUID.randomUUID().toString()
@@ -312,7 +323,7 @@ class MetisStorageServiceImpl(
                     serverId = host,
                     clientSidePostId = answerClientSidePostId,
                     parentClientSidePostId = clientSidePostId
-                ) ?: return
+                ) ?: return null
 
             val answerPostReactionsWithUsers =
                 ap.reactions.orEmpty().mapNotNull { it.asDb(host, answerClientSidePostId) }
@@ -333,7 +344,7 @@ class MetisStorageServiceImpl(
                     metisContext.toPostMetisContext(
                         host,
                         answerClientSidePostId,
-                        ap.id ?: return
+                        ap.id ?: return null
                     )
                 )
                 metisDao.insertBasePost(basePostingEntity)
@@ -341,6 +352,8 @@ class MetisStorageServiceImpl(
                 metisDao.insertReactions(answerPostReactions)
             }
         }
+
+        return clientSidePostId
     }
 
     private suspend fun MetisDao.insertOrUpdateUser(user: MetisUserEntity) {

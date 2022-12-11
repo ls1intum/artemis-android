@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -14,22 +13,36 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import de.tum.informatics.www1.artemis.native_app.core.communication.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.core.communication.MetisModificationResponse
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisModificationFailureDialog
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.getStateViewModel
-import org.koin.androidx.compose.getViewModel
-import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 internal fun NavController.navigateToCreateStandalonePostScreen(
+    metisContext: MetisContext,
     builder: NavOptionsBuilder.() -> Unit
 ) {
-    navigate("metisCreateStandalonePost", builder)
+    val metisContextAsString = Json.encodeToString(metisContext)
+    navigate("metisCreateStandalonePost/$metisContextAsString", builder)
 }
 
 fun NavGraphBuilder.createStandalonePostScreen(
@@ -37,9 +50,23 @@ fun NavGraphBuilder.createStandalonePostScreen(
     onCreatedPost: (clientSidePostId: String) -> Unit
 ) {
     composable(
-        "metisCreateStandalonePost"
+        "metisCreateStandalonePost/{metisContext}",
+        arguments = listOf(
+            navArgument(
+                "metisContext"
+            ) {
+                type = NavType.StringType
+                nullable = false
+            }
+        )
     ) {
+        val metisContextAsString = it.arguments?.getString("metisContext")
+        checkNotNull(metisContextAsString)
+
+        val metisContext: MetisContext = Json.decodeFromString(metisContextAsString)
+
         CreateStandalonePostScreen(
+            metisContext = metisContext,
             onNavigateUp = onNavigateUp,
             onCreatedPost = onCreatedPost
         )
@@ -48,12 +75,15 @@ fun NavGraphBuilder.createStandalonePostScreen(
 
 @Composable
 private fun CreateStandalonePostScreen(
+    metisContext: MetisContext,
     onNavigateUp: () -> Unit,
     onCreatedPost: (clientSidePostId: String) -> Unit
 ) {
     @Suppress("DEPRECATION")
-    val viewModel: CreateStandalonePostViewModel = getStateViewModel()
+    val viewModel: CreateStandalonePostViewModel = getStateViewModel { parametersOf(metisContext) }
     val canSave = viewModel.canCreatePost.collectAsState(initial = false).value
+
+    var modificationFailure: MetisModificationFailure? by remember { mutableStateOf(null) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -77,10 +107,19 @@ private fun CreateStandalonePostScreen(
         floatingActionButton = {
             if (canSave) {
                 ExtendedFloatingActionButton(
-                    onClick = { viewModel.createPost() },
+                    onClick = {
+                        viewModel.createPost { response ->
+                            when(response) {
+                                is MetisModificationResponse.Failure -> modificationFailure = response.failure
+                                is MetisModificationResponse.Response -> {
+                                    onCreatedPost(response.data)
+                                }
+                            }
+                        }
+                    },
                     icon = { Icon(imageVector = Icons.Default.Create, contentDescription = null) },
                     text = { Text(text = stringResource(id = R.string.create_standalone_post_fab_create)) },
-                    expanded = canSave
+                    expanded = true
                 )
             }
         }
@@ -92,5 +131,9 @@ private fun CreateStandalonePostScreen(
                 .padding(horizontal = 16.dp),
             viewModel = viewModel
         )
+
+        MetisModificationFailureDialog(metisModificationFailure = modificationFailure) {
+            modificationFailure = null
+        }
     }
 }

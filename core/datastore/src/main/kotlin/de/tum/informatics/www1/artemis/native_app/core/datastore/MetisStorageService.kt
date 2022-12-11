@@ -34,8 +34,9 @@ interface MetisStorageService {
 
     /**
      * Insert a post that has been created live and are thus not sent by a regular rest request.
+     * @return the client side post id of the created post or null, if the creation of the post failed
      */
-    suspend fun insertLiveCreatedPost(host: String, metisContext: MetisContext, post: StandalonePost)
+    suspend fun insertLiveCreatedPost(host: String, metisContext: MetisContext, post: StandalonePost): String?
 
     /**
      * Deletes the posts with the given post ids. Can delete both answer and standalone posts.

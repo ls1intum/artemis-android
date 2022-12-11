@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post
+package de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +14,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -28,7 +27,6 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItem
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.getEmojiForEmojiId
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
-import org.koin.androidx.compose.get
 
 @Composable
 internal fun MetisStandalonePostUi(

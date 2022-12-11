@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -28,8 +27,8 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.R
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.navigateToCreateStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.list.MetisStandalonePostList
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.ViewType
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.navigateToStandalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.ViewType
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.navigateToStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import org.koin.androidx.compose.koinViewModel
@@ -55,7 +54,7 @@ fun SmartphoneMetisUi(
         modifier = modifier,
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                navController.navigateToCreateStandalonePostScreen {}
+                navController.navigateToCreateStandalonePostScreen(metisContext) {}
             }) {
                 Icon(
                     imageVector = Icons.Default.Create,

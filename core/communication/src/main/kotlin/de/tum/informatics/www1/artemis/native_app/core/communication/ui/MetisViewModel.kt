@@ -3,8 +3,11 @@ package de.tum.informatics.www1.artemis.native_app.core.communication.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.core.communication.MetisModificationResponse
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisService
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
@@ -19,6 +22,7 @@ import kotlinx.coroutines.launch
  */
 abstract class MetisViewModel(
     private val metisService: MetisService,
+    private val metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService
 ) : ViewModel() {
@@ -113,23 +117,52 @@ abstract class MetisViewModel(
         )
     }
 
+    /**
+     * @param onResponse contains the client side post id on success
+     */
     protected fun createStandalonePost(
         post: StandalonePost,
-        response: (MetisModificationFailure?) -> Unit
+        onResponse: (MetisModificationResponse<String>) -> Unit
     ): Job {
+        val onFailure = {
+            onResponse(
+                MetisModificationResponse.Failure(MetisModificationFailure.CREATE_POST)
+            )
+        }
+
         return viewModelScope.launch {
-            metisService.createPost(
-                context = getMetisContext(),
+            val metisContext = getMetisContext()
+            val response = metisService.createPost(
+                context = metisContext,
                 post = post,
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = when (val authData = accountService.authenticationData.first()) {
                     is AccountService.AuthenticationData.LoggedIn -> authData.authToken
                     AccountService.AuthenticationData.NotLoggedIn -> {
-                        response(MetisModificationFailure.CREATE_REACTION)
+                        onFailure()
                         return@launch
                     }
                 }
             )
+
+            when (response) {
+                is NetworkResponse.Failure -> onFailure()
+                is NetworkResponse.Response -> {
+                    val clientSidePostId = metisStorageService.insertLiveCreatedPost(
+                        serverConfigurationService.host.first(),
+                        metisContext,
+                        response.data
+                    )
+
+                    if (clientSidePostId == null) {
+                        onFailure()
+                    } else {
+                        onResponse(
+                            MetisModificationResponse.Response(clientSidePostId)
+                        )
+                    }
+                }
+            }
         }
     }
 

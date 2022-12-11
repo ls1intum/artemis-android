@@ -1,15 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.android.ui
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.createStandalonePostScreen
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.ViewType
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.navigateToStandalonePostScreen
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.standalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.ViewType
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.navigateToStandalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.standalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.navigateToCourseRegistration

@@ -6,3 +6,9 @@ enum class MetisModificationFailure(val messageRes: Int) {
     CREATE_POST(R.string.metis_modification_failure_dialog_message_create_post),
     DELETE_POST(R.string.metis_modification_failure_dialog_message_delete_post)
 }
+
+sealed class MetisModificationResponse<T> {
+    data class Failure<T>(val failure: MetisModificationFailure) : MetisModificationResponse<T>()
+
+    data class Response<T>(val data: T) : MetisModificationResponse<T>()
+}

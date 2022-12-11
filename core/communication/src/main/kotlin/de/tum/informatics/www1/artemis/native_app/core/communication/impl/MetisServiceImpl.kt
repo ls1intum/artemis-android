@@ -175,6 +175,8 @@ class MetisServiceImpl(
                     appendPathSegments(context.courseId.toString(), context.standalonePostResourceEndpoint)
                 }
 
+                contentType(ContentType.Application.Json)
+
                 setBody(post)
                 bearerAuth(authToken)
             }.body()

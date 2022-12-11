@@ -29,7 +29,7 @@ internal class MetisListViewModel(
     private val accountService: AccountService,
     private val serverConfigurationService: ServerConfigurationService,
     private val metisContextManager: MetisContextManager
-) : MetisViewModel(metisService, serverConfigurationService, accountService), KoinComponent {
+) : MetisViewModel(metisService, metisStorageService, serverConfigurationService, accountService), KoinComponent {
 
     private val _filter = MutableStateFlow<List<MetisFilter>>(emptyList())
     val filter: Flow<List<MetisFilter>> = _filter

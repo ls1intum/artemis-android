@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post
+package de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

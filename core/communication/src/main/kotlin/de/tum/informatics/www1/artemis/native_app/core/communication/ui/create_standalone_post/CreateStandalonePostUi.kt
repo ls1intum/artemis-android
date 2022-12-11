@@ -21,7 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -76,7 +75,7 @@ private fun CreateStandalonePostUiImpl(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        SelectContent(
+        SelectContext(
             modifier = inputModifier,
             currentContext = context,
             updateContext = updateContext
@@ -97,46 +96,49 @@ private fun CreateStandalonePostUiImpl(
 }
 
 @Composable
-private fun SelectContent(
+private fun SelectContext(
     modifier: Modifier,
     currentContext: CourseWideContext,
     updateContext: (CourseWideContext) -> Unit
 ) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(
-            text = stringResource(id = R.string.create_standalone_post_label_select_context),
-            style = MaterialTheme.typography.titleLarge
-        )
 
-        DropdownButton(
-            modifier = Modifier,
-            text = getHumanReadableTextForCourseWideContext(
-                courseWideContext = currentContext
-            ),
-            icon = getIconForCourseWideContext(currentContext)
-        ) { hide ->
-            CourseWideContext.values().forEach { cwc ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = getHumanReadableTextForCourseWideContext(courseWideContext = cwc)
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = getIconForCourseWideContext(cwc),
-                            contentDescription = null
-                        )
-                    },
-                    onClick = {
-                        hide()
-                        updateContext(cwc)
-                    }
-                )
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.create_standalone_post_label_select_context),
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            DropdownButton(
+                modifier = Modifier,
+                text = getHumanReadableTextForCourseWideContext(
+                    courseWideContext = currentContext
+                ),
+                icon = getIconForCourseWideContext(currentContext)
+            ) { hide ->
+                CourseWideContext.values().forEach { cwc ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = getHumanReadableTextForCourseWideContext(courseWideContext = cwc)
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = getIconForCourseWideContext(cwc),
+                                contentDescription = null
+                            )
+                        },
+                        onClick = {
+                            hide()
+                            updateContext(cwc)
+                        }
+                    )
+                }
             }
         }
 

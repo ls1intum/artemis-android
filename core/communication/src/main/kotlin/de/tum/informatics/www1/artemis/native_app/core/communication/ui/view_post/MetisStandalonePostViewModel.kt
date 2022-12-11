@@ -1,6 +1,5 @@
-package de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post
+package de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisService
@@ -26,7 +25,7 @@ class MetisStandalonePostViewModel(
     private val networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService
-) : MetisViewModel(metisService, serverConfigurationService, accountService) {
+) : MetisViewModel(metisService, metisStorageService, serverConfigurationService, accountService) {
 
     val metisContext: Flow<MetisContext> = flow {
         emit(metisStorageService.getStandalonePostMetisContext(clientSidePostId))

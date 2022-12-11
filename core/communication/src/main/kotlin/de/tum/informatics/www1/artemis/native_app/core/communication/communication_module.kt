@@ -6,7 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisC
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.CreateStandalonePostViewModel
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.list.MetisListViewModel
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.standalone_post.MetisStandalonePostViewModel
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.MetisStandalonePostViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.dsl.singleOf
@@ -40,7 +40,7 @@ val communicationModule = module {
         )
     }
 
-    viewModel { CreateStandalonePostViewModel(get()) }
+    viewModel { params -> CreateStandalonePostViewModel(params.get(), get(), get(), get(), get(), get()) }
 
     singleOf(::MetisContextManager)
 }
