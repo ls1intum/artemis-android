@@ -5,6 +5,9 @@
         <item quantity="other">Show %1$d replies</item>
     </plurals>
 
+    <string name="post_view_edit_post">Edit</string>
+    <string name="post_view_delete_post">Delete</string>
+
     <string name="standalone_screen_title">View post</string>
     <string name="standalone_screen_replies_title">Replies</string>
 

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_answer_click_to_write">Click to write reply</string>
+    <string name="create_answer_sending_reply">Sending reply…</string>
+</resources>

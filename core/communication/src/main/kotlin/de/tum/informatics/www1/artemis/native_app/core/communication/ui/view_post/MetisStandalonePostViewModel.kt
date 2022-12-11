@@ -13,10 +13,14 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 
-class MetisStandalonePostViewModel(
+internal class MetisStandalonePostViewModel(
     private val clientSidePostId: String,
     subscribeToLiveUpdateService: Boolean,
     private val metisStorageService: MetisStorageService,
@@ -144,6 +148,26 @@ class MetisStandalonePostViewModel(
                 presentReactions = presentReactions,
                 response = onResponse
             )
+        }
+    }
+
+    fun createReply(
+        replyText: String,
+        onResponse: (MetisModificationFailure?) -> Unit
+    ): Job {
+        return viewModelScope.launch {
+            val replyPost = AnswerPost(
+                creationDate = Clock.System.now(),
+                content = replyText,
+                post = StandalonePost(
+                    id = metisStorageService.getServerSidePostId(
+                        serverConfigurationService.host.first(),
+                        clientSidePostId
+                    )
+                )
+            )
+
+            createAnswerPostImpl(replyPost, onResponse)
         }
     }
 

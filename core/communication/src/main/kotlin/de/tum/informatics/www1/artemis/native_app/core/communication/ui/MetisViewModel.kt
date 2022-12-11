@@ -166,23 +166,31 @@ abstract class MetisViewModel(
         }
     }
 
-    protected fun createAnswerPost(
+    protected suspend fun createAnswerPostImpl(
         post: AnswerPost,
-        response: (MetisModificationFailure?) -> Unit
-    ): Job {
-        return viewModelScope.launch {
-            metisService.createAnswerPost(
-                context = getMetisContext(),
-                post = post,
-                serverUrl = serverConfigurationService.serverUrl.first(),
-                authToken = when (val authData = accountService.authenticationData.first()) {
-                    is AccountService.AuthenticationData.LoggedIn -> authData.authToken
-                    AccountService.AuthenticationData.NotLoggedIn -> {
-                        response(MetisModificationFailure.CREATE_REACTION)
-                        return@launch
-                    }
+        onResponse: (MetisModificationFailure?) -> Unit
+    ) {
+        val response = metisService.createAnswerPost(
+            context = getMetisContext(),
+            post = post,
+            serverUrl = serverConfigurationService.serverUrl.first(),
+            authToken = when (val authData = accountService.authenticationData.first()) {
+                is AccountService.AuthenticationData.LoggedIn -> authData.authToken
+                AccountService.AuthenticationData.NotLoggedIn -> {
+                    onResponse(MetisModificationFailure.CREATE_POST)
+                    return
                 }
-            )
+            }
+        )
+
+        when (response) {
+            is NetworkResponse.Failure -> {
+                onResponse(MetisModificationFailure.CREATE_POST)
+            }
+
+            is NetworkResponse.Response -> {
+                onResponse(null)
+            }
         }
     }
 

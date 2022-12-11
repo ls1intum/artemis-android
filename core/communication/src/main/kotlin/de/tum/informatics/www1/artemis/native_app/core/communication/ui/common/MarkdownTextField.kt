@@ -15,6 +15,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
@@ -24,9 +27,13 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 internal fun MarkdownTextField(
     modifier: Modifier,
     text: String,
+    focusRequester: FocusRequester = remember { FocusRequester() },
+    onFocusLost: () -> Unit = {},
     onTextChanged: (String) -> Unit
 ) {
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
+    var hadFocus by remember { mutableStateOf(false) }
+
     Column(modifier = modifier) {
         TabRow(selectedTabIndex = selectedType.ordinal) {
             Tab(
@@ -51,7 +58,19 @@ internal fun MarkdownTextField(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { focusState ->
+                            if (focusState.hasFocus) {
+                                hadFocus = true
+                            }
+
+                            if (!focusState.hasFocus && hadFocus) {
+                                onFocusLost()
+                                hadFocus = false
+                            }
+                        },
                     value = text,
                     onValueChange = onTextChanged
                 )

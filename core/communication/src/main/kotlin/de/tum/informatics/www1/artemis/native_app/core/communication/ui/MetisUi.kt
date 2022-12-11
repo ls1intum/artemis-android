@@ -90,7 +90,7 @@ fun SmartphoneMetisUi(
             MetisStandalonePostList(
                 modifier = modifier,
                 viewModel = viewModel,
-                onClickReply = { clientPostId ->
+                onClickViewPost = { clientPostId ->
                     navController.navigateToStandalonePostScreen(
                         clientPostId = clientPostId,
                         viewType = ViewType.WRITE_COMMENT

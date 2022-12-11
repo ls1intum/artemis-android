@@ -41,7 +41,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Pos
 internal fun MetisStandalonePostList(
     modifier: Modifier,
     viewModel: MetisListViewModel,
-    onClickReply: (clientPostId: String) -> Unit,
+    onClickViewPost: (clientPostId: String) -> Unit,
     onClickViewReplies: (clientPostId: String) -> Unit
 ) {
     val posts: LazyPagingItems<Post> = viewModel.postPagingData.collectAsLazyPagingItems()
@@ -110,14 +110,24 @@ internal fun MetisStandalonePostList(
                                     answerPosts = post?.answerPostings.orEmpty(),
                                     onClickReply = {
                                         if (post != null) {
-                                            onClickReply(post.clientPostId)
+                                            onClickViewPost(post.clientPostId)
                                         }
                                     },
                                     onClickViewReplies = {
                                         if (post != null) {
                                             onClickViewReplies(post.clientPostId)
                                         }
-                                    }
+                                    },
+                                    onClickPost = {
+                                        if (post != null) {
+                                            onClickViewPost(post.clientPostId)
+                                        }
+                                    },
+                                    // TODO: Implement permission rights once refactored on server side
+                                    canEdit = false,
+                                    canDelete = false,
+                                    onClickDelete = {},
+                                    onClickEdit = {}
                                 ),
                                 getUnicodeForEmojiId = {
                                     val emoji = getEmojiForEmojiId(emojiId = it)

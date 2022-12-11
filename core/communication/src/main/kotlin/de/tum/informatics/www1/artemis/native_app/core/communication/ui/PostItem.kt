@@ -7,8 +7,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -17,7 +19,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.More
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.School
@@ -38,7 +45,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,16 +68,33 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.minutes
 
-sealed class PostItemViewType {
-    object StandaloneView : PostItemViewType()
+sealed interface PostItemViewType {
+    object StandaloneView : PostItemViewType
 
-    object AnswerItem : PostItemViewType()
+    sealed class ModifiablePostItem(
+        val canEdit: Boolean,
+        val canDelete: Boolean,
+        val onClickEdit: () -> Unit,
+        val onClickDelete: () -> Unit
+    ) : PostItemViewType
+
+    class AnswerItem(
+        canEdit: Boolean,
+        canDelete: Boolean,
+        onClickEdit: () -> Unit,
+        onClickDelete: () -> Unit
+    ) : ModifiablePostItem(canEdit, canDelete, onClickEdit, onClickDelete)
 
     class StandaloneListItem(
         val answerPosts: List<AnswerPost>,
+        val onClickPost: () -> Unit,
         val onClickReply: () -> Unit,
-        val onClickViewReplies: () -> Unit
-    ) : PostItemViewType()
+        val onClickViewReplies: () -> Unit,
+        canEdit: Boolean,
+        canDelete: Boolean,
+        onClickEdit: () -> Unit,
+        onClickDelete: () -> Unit
+    ) : ModifiablePostItem(canEdit, canDelete, onClickEdit, onClickDelete)
 }
 
 /**
@@ -103,6 +129,7 @@ internal fun PostItem(
 internal fun AnswerPostItem(
     modifier: Modifier,
     answerPost: AnswerPost,
+    answerItem: PostItemViewType.AnswerItem,
     getUnicodeForEmojiId: @Composable (String) -> String,
     onReactWithEmoji: (emojiId: String) -> Unit,
     onClickOnPresentReaction: (emojiId: String) -> Unit
@@ -116,7 +143,7 @@ internal fun AnswerPostItem(
         title = null,
         content = answerPost.content,
         reactions = answerPost.reactions,
-        postItemViewType = PostItemViewType.AnswerItem,
+        postItemViewType = answerItem,
         getUnicodeForEmojiId = getUnicodeForEmojiId,
         onReactWithEmoji = onReactWithEmoji,
         onClickOnPresentReaction = onClickOnPresentReaction
@@ -138,7 +165,7 @@ private fun PostItemBase(
     onReactWithEmoji: (emojiId: String) -> Unit,
     onClickOnPresentReaction: (emojiId: String) -> Unit
 ) {
-    OutlinedCard(modifier = modifier) {
+    val cardContent = @Composable {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -183,6 +210,24 @@ private fun PostItemBase(
                 onReactWithEmoji = onReactWithEmoji,
                 onClickReaction = onClickOnPresentReaction
             )
+        }
+    }
+
+    // The composable with onClick behaves differently. Therefore we need this separation when onClick is not needed.
+    when (postItemViewType) {
+        is PostItemViewType.StandaloneListItem -> {
+            OutlinedCard(
+                modifier = modifier,
+                onClick = postItemViewType.onClickPost
+            ) {
+                cardContent()
+            }
+        }
+
+        else -> {
+            OutlinedCard(modifier = modifier) {
+                cardContent()
+            }
         }
     }
 }
@@ -302,9 +347,43 @@ private fun StandalonePostFooter(
             }
         }
 
-        if (postItemViewType is PostItemViewType.StandaloneListItem) {
-            IconButton(onClick = postItemViewType.onClickReply) {
-                Icon(imageVector = Icons.Default.Reply, contentDescription = null)
+        if (postItemViewType is PostItemViewType.ModifiablePostItem) {
+            var displayMenu: Boolean by remember { mutableStateOf(false) }
+
+            if (postItemViewType.canEdit || postItemViewType.canDelete) {
+                Box {
+                    IconButton(onClick = { displayMenu = true }) {
+                        Icon(imageVector = Icons.Default.More, contentDescription = null)
+                    }
+
+                    DropdownMenu(
+                        expanded = displayMenu,
+                        onDismissRequest = { displayMenu = false }
+                    ) {
+                        if (postItemViewType.canEdit) {
+                            DropdownMenuItem(
+                                onClick = postItemViewType.onClickEdit,
+                            ) {
+                                Icon(imageVector = Icons.Default.Edit, contentDescription = null)
+
+                                Text(text = stringResource(id = R.string.post_view_edit_post))
+                            }
+                        }
+
+                        if (postItemViewType.canDelete) {
+                            DropdownMenuItem(
+                                onClick = postItemViewType.onClickDelete,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DeleteForever,
+                                    contentDescription = null
+                                )
+
+                                Text(text = stringResource(id = R.string.post_view_delete_post))
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -415,9 +494,14 @@ private fun PostPreview(
         modifier = Modifier.fillMaxWidth(),
         post = post,
         postItemViewType = PostItemViewType.StandaloneListItem(
-            post?.answerPostings.orEmpty(),
-            {},
-            {}
+            answerPosts = post?.answerPostings.orEmpty(),
+            onClickPost = {},
+            onClickReply = {},
+            onClickViewReplies = {},
+            canEdit = true,
+            canDelete = true,
+            onClickEdit = {},
+            onClickDelete = {}
         ),
         getUnicodeForEmojiId = { "\uD83D\uDE80" },
         onReactWithEmoji = {},
