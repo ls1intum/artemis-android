@@ -103,7 +103,8 @@ internal fun CourseUi(
                             selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
                             text = { Text(text = text) },
-                            icon = { Icon(icon, contentDescription = null) }
+                            icon = { Icon(icon, contentDescription = null) },
+                            enabled = index == 0 || index == 2
                         )
                     }
 

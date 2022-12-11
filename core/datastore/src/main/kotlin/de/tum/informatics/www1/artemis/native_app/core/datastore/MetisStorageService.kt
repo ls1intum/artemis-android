@@ -59,11 +59,6 @@ interface MetisStorageService {
     fun getStandalonePost(clientPostId: String): Flow<Post?>
 
     /**
-     * Query the corresponding metis context to the post
-     */
-    suspend fun getStandalonePostMetisContext(clientPostId: String): MetisContext
-
-    /**
      * Return the amount of posts cached from the rest calls.
      * WARNING: This does ignore live created posts.
      */

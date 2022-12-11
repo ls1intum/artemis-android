@@ -22,7 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationSe
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Instant
 
-//it does not actually leak, as context will be the application context, which cannot be leaked.
+// it does not actually leak, as context will be the application context, which cannot be leaked.
 @SuppressLint("StaticFieldLeak")
 internal class ExerciseViewModel(
     private val exerciseId: Int,

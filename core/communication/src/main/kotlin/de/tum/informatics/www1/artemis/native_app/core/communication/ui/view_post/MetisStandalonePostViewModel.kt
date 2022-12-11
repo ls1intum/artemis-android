@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Pos
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -22,7 +23,9 @@ import kotlinx.datetime.Clock
 
 internal class MetisStandalonePostViewModel(
     private val clientSidePostId: String,
+    private val metisContext: MetisContext,
     subscribeToLiveUpdateService: Boolean,
+    private val websocketProvider: WebsocketProvider,
     private val metisStorageService: MetisStorageService,
     metisContextManager: MetisContextManager,
     private val metisService: MetisService,
@@ -31,15 +34,8 @@ internal class MetisStandalonePostViewModel(
     private val accountService: AccountService
 ) : MetisViewModel(metisService, metisStorageService, serverConfigurationService, accountService) {
 
-    val metisContext: Flow<MetisContext> = flow {
-        emit(metisStorageService.getStandalonePostMetisContext(clientSidePostId))
-    }
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
-
     private val collectMetisUpdates: Flow<MetisContextManager.CurrentDataAction> =
-        metisContext.flatMapLatest {
-            metisContextManager.getContextDataActionFlow(it)
-        }
+        metisContextManager.getContextDataActionFlow(metisContext)
             .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
     val post: Flow<Post?> =
@@ -61,50 +57,50 @@ internal class MetisStandalonePostViewModel(
     init {
         if (subscribeToLiveUpdateService) {
             viewModelScope.launch {
-                combine(
-                    serverConfigurationService.host,
-                    metisContext
-                ) { a, b -> a to b }
-                    .collectLatest { (host, context) ->
-                        metisContextManager.updatePosts(host, context)
-                    }
+                serverConfigurationService.host.collectLatest { host ->
+                    metisContextManager.updatePosts(host, metisContext)
+                }
             }
 
             viewModelScope.launch {
-                metisContext.collectLatest { currentMetisContext ->
-                    collectMetisUpdates
-                        .filter { it == MetisContextManager.CurrentDataAction.Refresh }
-                        .collect {
-                            val serverSidePostId = post.filterNotNull().first().serverPostId
-                            val serverUrl = serverConfigurationService.serverUrl.first()
-                            val host = serverConfigurationService.host.first()
-                            val authToken = when (val authData =
-                                accountService.authenticationData.first()) {
-                                is AccountService.AuthenticationData.LoggedIn -> authData.authToken
-                                AccountService.AuthenticationData.NotLoggedIn -> return@collect
-                            }
+                collectMetisUpdates
+                    .filter { it == MetisContextManager.CurrentDataAction.Refresh }
+                    .collect {
+                        val serverSidePostId = post.filterNotNull().first().serverPostId
+                        val serverUrl = serverConfigurationService.serverUrl.first()
+                        val host = serverConfigurationService.host.first()
+                        val authToken = when (val authData =
+                            accountService.authenticationData.first()) {
+                            is AccountService.AuthenticationData.LoggedIn -> authData.authToken
+                            AccountService.AuthenticationData.NotLoggedIn -> return@collect
+                        }
 
-                            retryOnInternet(
-                                networkStatusProvider.currentNetworkStatus
-                            ) {
-                                metisService.getPost(
-                                    currentMetisContext,
-                                    serverSidePostId,
-                                    serverUrl,
-                                    authToken
+                        retryOnInternet(
+                            networkStatusProvider.currentNetworkStatus
+                        ) {
+                            metisService.getPost(
+                                metisContext,
+                                serverSidePostId,
+                                serverUrl,
+                                authToken
+                            )
+                        }.collect { dataState ->
+                            if (dataState is DataState.Success) {
+                                metisStorageService.updatePost(
+                                    host,
+                                    metisContext,
+                                    dataState.data
                                 )
-                            }.collect { dataState ->
-                                if (dataState is DataState.Success) {
-                                    metisStorageService.updatePost(
-                                        host,
-                                        currentMetisContext,
-                                        dataState.data
-                                    )
-                                }
                             }
                         }
-                }
+                    }
             }
+        }
+    }
+
+    fun requestWebsocketReload() {
+        viewModelScope.launch {
+            websocketProvider.requestTryReconnect()
         }
     }
 
@@ -171,5 +167,5 @@ internal class MetisStandalonePostViewModel(
         }
     }
 
-    override suspend fun getMetisContext(): MetisContext = metisContext.first()
+    override suspend fun getMetisContext(): MetisContext = metisContext
 }

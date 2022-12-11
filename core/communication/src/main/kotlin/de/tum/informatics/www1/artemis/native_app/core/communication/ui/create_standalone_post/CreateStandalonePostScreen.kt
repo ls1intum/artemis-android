@@ -47,7 +47,7 @@ internal fun NavController.navigateToCreateStandalonePostScreen(
 
 fun NavGraphBuilder.createStandalonePostScreen(
     onNavigateUp: () -> Unit,
-    onCreatedPost: (clientSidePostId: String) -> Unit
+    onCreatedPost: (clientSidePostId: String, metisContext: MetisContext) -> Unit
 ) {
     composable(
         "metisCreateStandalonePost/{metisContext}",
@@ -68,7 +68,7 @@ fun NavGraphBuilder.createStandalonePostScreen(
         CreateStandalonePostScreen(
             metisContext = metisContext,
             onNavigateUp = onNavigateUp,
-            onCreatedPost = onCreatedPost
+            onCreatedPost = { clientSidePostId -> onCreatedPost(clientSidePostId, metisContext) }
         )
     }
 }

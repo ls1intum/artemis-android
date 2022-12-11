@@ -162,9 +162,6 @@ interface MetisDao {
     )
     fun queryStandalonePost(clientPostId: String): Flow<Post?>
 
-    @Query("select * from metis_post_context where client_post_id = :clientPostId")
-    suspend fun queryMetisContextForStandalonePost(clientPostId: String): MetisPostContextEntity
-
     fun queryCoursePosts(
         serverId: String,
         courseId: Int,

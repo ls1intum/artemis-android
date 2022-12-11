@@ -40,6 +40,7 @@ class WebsocketProvider(
     private val tryReconnect = MutableSharedFlow<Unit>()
     private val onReconnected = MutableSharedFlow<Unit>()
 
+    @OptIn(DelicateCoroutinesApi::class)
     private val webSocketClient =
         CloseCallbackWebsocketClient(KtorWebSocketClient(ktorProvider.ktorClient)) {
             GlobalScope.launch {
@@ -160,6 +161,10 @@ class WebsocketProvider(
                 else -> null
             }
         }
+    }
+
+    suspend fun requestTryReconnect() {
+        tryReconnect.emit(Unit)
     }
 
     sealed interface WebsocketData<T> {

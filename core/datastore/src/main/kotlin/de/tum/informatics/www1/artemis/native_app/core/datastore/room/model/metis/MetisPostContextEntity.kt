@@ -2,18 +2,26 @@ package de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.met
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.Index
 
 /**
  * Defines the relation between the client-side unique post id and server side context.
- * The only reason this class exists is a restriction by the [androidx.room.Relation] interface, where only one primary key
- * is allowed to reference a relation. However, the primary key would consist of (server_id, course_id, exercise_id, lecture_id, post_id).
- * However, we need only one primary key, therefore a uuid is instead used.
+ * This class exists to support a fully offline applications, where posts can be created even when no internet connection is available.
+ * For this, a client id is utilized which allows the creation of posts even though no server side id is known yet.
  */
 @Entity(
     tableName = "metis_post_context",
-    primaryKeys = ["server_id", "server_post_id"],
-    indices = [Index("client_post_id", unique = true)]
+    primaryKeys = ["client_post_id", "server_post_id", "course_id", "exercise_id", "lecture_id"],
+    foreignKeys = [
+        ForeignKey(
+            entity = BasePostingEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["client_post_id"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("server_post_id", unique = false)]
 )
 data class MetisPostContextEntity(
     @ColumnInfo(name = "server_id")

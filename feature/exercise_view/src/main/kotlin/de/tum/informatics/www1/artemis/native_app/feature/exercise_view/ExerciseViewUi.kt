@@ -34,7 +34,7 @@ fun NavController.navigateToExercise(exerciseId: Int, builder: NavOptionsBuilder
     navigate("exercise/$exerciseId", builder)
 }
 
-fun NavGraphBuilder.exercise(onNavigateBack: () -> Unit) {
+fun NavGraphBuilder.exercise(navController: NavController, onNavigateBack: () -> Unit) {
     composable(
         route = "exercise/{exerciseId}",
         arguments = listOf(navArgument("exerciseId") {
@@ -59,7 +59,8 @@ fun NavGraphBuilder.exercise(onNavigateBack: () -> Unit) {
                     onNavigateBack = onNavigateBack,
                     onViewResult = {
                         nestedNavController.navigate(NESTED_EXERCISE_RESULT_DESTINATION)
-                    }
+                    },
+                    navController = navController
                 )
             }
 

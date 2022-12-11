@@ -50,7 +50,7 @@ internal fun MetisStandalonePostList(
     var metisFailure: MetisModificationFailure? by remember { mutableStateOf(null) }
 
     Column(modifier = modifier) {
-        MetisOutdatedBanner(modifier = Modifier.fillMaxWidth(), isOutdated = isDataOutdated)
+        MetisOutdatedBanner(modifier = Modifier.fillMaxWidth(), isOutdated = isDataOutdated, requestRefresh = viewModel::requestRefreshWebsocket)
 
         Box(
             modifier = Modifier

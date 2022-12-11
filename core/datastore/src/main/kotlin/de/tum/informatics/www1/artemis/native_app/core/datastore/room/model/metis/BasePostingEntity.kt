@@ -10,12 +10,6 @@ import kotlinx.datetime.Instant
     primaryKeys = ["id"],
     foreignKeys = [
         ForeignKey(
-            entity = MetisPostContextEntity::class,
-            parentColumns = ["client_post_id"],
-            childColumns = ["id"],
-            onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
             entity = MetisUserEntity::class,
             parentColumns = ["server_id", "id"],
             childColumns = ["server_id", "author_id"],

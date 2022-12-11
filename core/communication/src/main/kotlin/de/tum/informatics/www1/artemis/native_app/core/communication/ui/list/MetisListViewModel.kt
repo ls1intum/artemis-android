@@ -16,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -24,6 +25,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 internal class MetisListViewModel(
     val metisContext: MetisContext,
+    private val websocketProvider: WebsocketProvider,
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,
     private val accountService: AccountService,
@@ -159,6 +161,12 @@ internal class MetisListViewModel(
             serverConfigurationService.host.collectLatest { host ->
                 metisContextManager.updatePosts(host, metisContext)
             }
+        }
+    }
+
+    fun requestRefreshWebsocket() {
+        viewModelScope.launch {
+            websocketProvider.requestTryReconnect()
         }
     }
 

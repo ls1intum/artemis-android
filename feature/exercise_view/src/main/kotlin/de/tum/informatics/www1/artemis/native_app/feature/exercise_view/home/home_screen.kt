@@ -19,8 +19,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.google.accompanist.placeholder.material.placeholder
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SmartphoneMetisUi
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIcon
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
@@ -35,6 +39,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 internal fun ExerciseScreen(
     modifier: Modifier,
     viewModel: ExerciseViewModel,
+    navController: NavController,
     onNavigateBack: () -> Unit,
     onViewResult: () -> Unit
 ) {
@@ -150,6 +155,23 @@ internal fun ExerciseScreen(
                             modifier = tabModifier,
                             exercise = exercise,
                             latestResult = null
+                        )
+                    }
+                    2 -> {
+                        // Maybe add a replacement ui
+                        val courseId = exercise.course?.id ?: return@Column
+                        val exerciseId = exercise.id ?: return@Column
+
+                        val metisContext = remember {
+                            MetisContext.Exercise(courseId = courseId, exerciseId)
+                        }
+
+                        SmartphoneMetisUi(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 8.dp),
+                            metisContext = metisContext,
+                            navController = navController
                         )
                     }
                 }

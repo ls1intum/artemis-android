@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
     implementation(project(":core:device"))
+    implementation(project(":core:communication"))
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.accompanist.placeholder.material)

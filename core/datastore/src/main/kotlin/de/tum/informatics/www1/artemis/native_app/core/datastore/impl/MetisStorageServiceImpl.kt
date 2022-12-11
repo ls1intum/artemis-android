@@ -293,13 +293,14 @@ class MetisStorageServiceImpl(
                 sp.answers.orEmpty().mapNotNull { it.id }
             )
         } else {
-            metisDao.insertPostMetisContext(
-                metisContext.toPostMetisContext(host, clientSidePostId, sp.id ?: return null)
-            )
             metisDao.insertBasePost(standaloneBasePosting)
             metisDao.insertPost(standalonePosting)
             metisDao.insertReactions(standalonePostReactions)
             metisDao.insertTags(tags)
+
+            metisDao.insertPostMetisContext(
+                metisContext.toPostMetisContext(host, clientSidePostId, sp.id ?: return null)
+            )
         }
 
         for (ap in sp.answers.orEmpty()) {
@@ -340,6 +341,9 @@ class MetisStorageServiceImpl(
 
                 metisDao.updateReactions(answerClientSidePostId, answerPostReactions)
             } else {
+                metisDao.insertBasePost(basePostingEntity)
+                metisDao.insertAnswerPosting(answerPostingEntity)
+                metisDao.insertReactions(answerPostReactions)
                 metisDao.insertPostMetisContext(
                     metisContext.toPostMetisContext(
                         host,
@@ -347,9 +351,6 @@ class MetisStorageServiceImpl(
                         ap.id ?: return null
                     )
                 )
-                metisDao.insertBasePost(basePostingEntity)
-                metisDao.insertAnswerPosting(answerPostingEntity)
-                metisDao.insertReactions(answerPostReactions)
             }
         }
 
@@ -401,17 +402,6 @@ class MetisStorageServiceImpl(
 
     override fun getStandalonePost(clientPostId: String): Flow<Post?> {
         return databaseProvider.database.metisDao().queryStandalonePost(clientPostId)
-    }
-
-    override suspend fun getStandalonePostMetisContext(clientPostId: String): MetisContext {
-        val metisDao = databaseProvider.database.metisDao()
-        val entity = metisDao.queryMetisContextForStandalonePost(clientPostId)
-
-        return when {
-            entity.exerciseId != -1 -> MetisContext.Exercise(entity.courseId, entity.exerciseId)
-            entity.lectureId != -1 -> MetisContext.Lecture(entity.courseId, entity.lectureId)
-            else -> MetisContext.Course(entity.courseId)
-        }
     }
 
     override suspend fun getCachedPostCount(host: String, metisContext: MetisContext): Int {

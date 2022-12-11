@@ -24,26 +24,37 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisOutdatedBanner
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 fun NavController.navigateToStandalonePostScreen(
     clientPostId: String,
+    metisContext: MetisContext,
     viewType: ViewType,
     builder: NavOptionsBuilder.() -> Unit
 ) {
-    navigate("metisStandalonePost/$clientPostId&$viewType", builder)
+    val metisContextAsString = Json.encodeToString(metisContext)
+
+    navigate("metisStandalonePost/$clientPostId&$viewType&$metisContextAsString", builder)
 }
 
 fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
     composable(
-        "metisStandalonePost/{clientPostId}&{viewType}",
+        "metisStandalonePost/{clientPostId}&{viewType}&{metisContext}",
         arguments = listOf(
             navArgument("clientPostId") {
                 nullable = false
                 type = NavType.StringType
             },
             navArgument("viewType") {
+                nullable = false
+                type = NavType.StringType
+            },
+            navArgument("metisContext") {
                 nullable = false
                 type = NavType.StringType
             }
@@ -58,10 +69,16 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
                 ?: throw IllegalArgumentException("navType must not be null")
         )
 
+        val metisContext: MetisContext = Json.decodeFromString(
+            backStackEntry.arguments?.getString("metisContext")
+                ?: throw IllegalArgumentException("metisContext must not be null")
+        )
+
         MetisStandalonePostScreen(
             clientPostId = clientPostId,
             viewType = viewType,
-            onNavigateUp = onNavigateUp
+            onNavigateUp = onNavigateUp,
+            metisContext = metisContext
         )
     }
 }
@@ -69,11 +86,12 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
 @Composable
 private fun MetisStandalonePostScreen(
     clientPostId: String,
+    metisContext: MetisContext,
     viewType: ViewType,
     onNavigateUp: () -> Unit
 ) {
     val viewModel: MetisStandalonePostViewModel =
-        koinViewModel(parameters = { parametersOf(clientPostId, true) })
+        koinViewModel(parameters = { parametersOf(clientPostId, metisContext, true) })
 
     val isDataOutdated by viewModel.isDataOutdated.collectAsState(initial = false)
 
@@ -97,7 +115,7 @@ private fun MetisStandalonePostScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            MetisOutdatedBanner(modifier = Modifier.fillMaxWidth(), isOutdated = isDataOutdated)
+            MetisOutdatedBanner(modifier = Modifier.fillMaxWidth(), isOutdated = isDataOutdated, requestRefresh = viewModel::requestWebsocketReload)
 
             MetisStandalonePostUi(
                 modifier = Modifier

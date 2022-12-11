@@ -96,6 +96,7 @@ class MainActivity : AppCompatActivity() {
                     )
 
                     exercise(
+                        navController = navController,
                         onNavigateBack = navController::navigateUp
                     )
 
@@ -105,10 +106,11 @@ class MainActivity : AppCompatActivity() {
 
                     createStandalonePostScreen(
                         onNavigateUp = navController::navigateUp,
-                        onCreatedPost = { clientSidePostId ->
+                        onCreatedPost = { clientSidePostId, metisContext ->
                             navController.navigateUp()
                             navController.navigateToStandalonePostScreen(
                                 clientSidePostId,
+                                metisContext,
                                 ViewType.POST
                             ) {}
                         }

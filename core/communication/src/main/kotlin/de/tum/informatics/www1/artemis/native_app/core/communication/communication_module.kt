@@ -23,6 +23,7 @@ val communicationModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
@@ -31,6 +32,8 @@ val communicationModule = module {
         MetisStandalonePostViewModel(
             params[0],
             params[1],
+            params[2],
+            get(),
             get(),
             get(),
             get(),
@@ -40,7 +43,16 @@ val communicationModule = module {
         )
     }
 
-    viewModel { params -> CreateStandalonePostViewModel(params.get(), get(), get(), get(), get(), get()) }
+    viewModel { params ->
+        CreateStandalonePostViewModel(
+            params.get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
 
     singleOf(::MetisContextManager)
 }
