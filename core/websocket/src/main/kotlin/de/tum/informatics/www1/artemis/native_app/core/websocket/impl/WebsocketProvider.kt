@@ -12,7 +12,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.DeserializationStrategy
 import org.hildan.krossbow.stomp.StompClient
@@ -22,33 +21,31 @@ import kotlin.time.Duration.Companion.seconds
 import org.hildan.krossbow.stomp.conversions.kxserialization.*
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.stomp.headers.StompSubscribeHeaders
-import org.hildan.krossbow.websocket.ktor.KtorWebSocketClient
 import kotlin.time.Duration.Companion.minutes
 
 class WebsocketProvider(
-    private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
+    serverConfigurationService: ServerConfigurationService,
+    accountService: AccountService,
     private val jsonProvider: JsonProvider,
     private val networkStatusProvider: NetworkStatusProvider,
-    private val ktorProvider: KtorProvider
+    ktorProvider: KtorProvider
 ) {
 
     companion object {
         private const val TAG = "WebsocketProvider"
     }
 
-    private val tryReconnect = MutableSharedFlow<Unit>()
+    private val onWebsocketError = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     private val onReconnected = MutableSharedFlow<Unit>()
 
-    @OptIn(DelicateCoroutinesApi::class)
     private val webSocketClient =
-        CloseCallbackWebsocketClient(KtorWebSocketClient(ktorProvider.ktorClient)) {
-            GlobalScope.launch {
-                Log.d(TAG, "Websocket closed. Emitting to try reconnect")
-                tryReconnect.emit(Unit)
-                Log.d(TAG, "Websocket closed. Emitted try reconnect.")
+        CustomOkHttpWebSocketClient(
+            onError = {
+                Log.d(TAG, "Websocket on error. Emitting to try reconnect")
+                val hasEmitted = onWebsocketError.tryEmit(Unit)
+                Log.d(TAG, "Websocket closed. Emitted try reconnect=$hasEmitted")
             }
-        }
+        )
 
     private val client =
         StompClient(webSocketClient) {
@@ -66,7 +63,7 @@ class WebsocketProvider(
         combine(
             serverConfigurationService.host,
             accountService.authenticationData,
-            tryReconnect.onStart { emit(Unit) }
+            onWebsocketError.onStart { emit(Unit) }
         ) { a, b, _ -> a to b }
             .transformLatest { (host, authenticationData) ->
                 networkStatusProvider
@@ -143,11 +140,22 @@ class WebsocketProvider(
                         emit(WebsocketData.Subscribe())
                     }
                     .catch { e ->
-                        Log.d(TAG, "ERROR!, ${e.localizedMessage}")
-                        emit(WebsocketData.Disconnect())
+                        Log.d(TAG, "Subscription $channel reported error: ${e.localizedMessage}")
                     }
                     .map { Message(it) }
-                emitAll(flow)
+
+                emitAll(
+                    merge(
+                        flow,
+                        onWebsocketError.map { WebsocketData.Disconnect() }
+                    )
+                        // Stop emitting on this flow if an error occurred and wait for a new session
+                        .transformWhile { websocketData ->
+                            emit(websocketData)
+
+                            websocketData !is WebsocketData.Disconnect
+                        }
+                )
             }
     }
 
@@ -164,7 +172,7 @@ class WebsocketProvider(
     }
 
     suspend fun requestTryReconnect() {
-        tryReconnect.emit(Unit)
+        onWebsocketError.emit(Unit)
     }
 
     sealed interface WebsocketData<T> {

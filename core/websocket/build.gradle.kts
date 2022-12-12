@@ -20,6 +20,7 @@ dependencies {
     //For the websockets
     implementation(libs.krossbow.stomp.core)
     implementation(libs.krossbow.websocket.ktor)
+    implementation(libs.krossbow.websocket.okhttp)
     implementation(libs.krossbow.stomp.kxserialization.json)
     implementation(libs.kotlinx.datetime)
 

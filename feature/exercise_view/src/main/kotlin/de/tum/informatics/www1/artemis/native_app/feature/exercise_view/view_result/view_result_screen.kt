@@ -2,6 +2,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.view_re
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -59,7 +61,8 @@ internal fun ViewResultScreen(
             ResultDetailUi(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(8.dp),
+                    .padding(8.dp)
+                    .verticalScroll(rememberScrollState()),
                 exercise = exercise.data,
                 latestResult = latestResult ?: return@ExerciseDataStateUi,
                 feedbackItems = feedbackItems.orElse(emptyList()),

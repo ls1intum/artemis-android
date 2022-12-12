@@ -11,3 +11,6 @@ google-services.json
 artemis-native-keystore.jks
 passwords
 private_key.pepk
+*.aab
+*.apk
+/app/release/output-metadata.json
