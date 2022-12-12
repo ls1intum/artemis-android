@@ -112,7 +112,7 @@ class WebsocketProvider(
             .shareIn(
                 scope = GlobalScope, //We share this is the app container
                 started = SharingStarted.WhileSubscribed(
-                    stopTimeout = 10.seconds, replayExpiration = Duration.ZERO
+                    stopTimeout = 1.seconds, replayExpiration = Duration.ZERO
                 ),
                 replay = 1
             )
@@ -138,6 +138,9 @@ class WebsocketProvider(
                     .onStart {
                         Log.d(TAG, "subscribe! $channel")
                         emit(WebsocketData.Subscribe())
+                    }
+                    .onCompletion {
+                        Log.d(TAG, "unsubscribe! $channel")
                     }
                     .catch { e ->
                         Log.d(TAG, "Subscription $channel reported error: ${e.localizedMessage}")

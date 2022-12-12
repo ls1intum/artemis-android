@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
 import de.tum.informatics.www1.artemis.native_app.core.communication.emoji.EmojiService
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.common.EmojiView
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.getEmojiForEmojiId
 import kotlinx.coroutines.flow.flow
 import org.koin.androidx.compose.get
@@ -49,7 +50,7 @@ fun EmojiPicker(modifier: Modifier, onSelectEmoji: (emojiId: String) -> Unit) {
         }
 
         val emojiFontSize = with(LocalDensity.current) {
-            emojiWidth.toPx().toSp().value / 2
+            emojiWidth.toPx().toSp() / 2
         }
 
         val categoryEmojiChunks = remember(categories, emojiPerRow) {
@@ -78,23 +79,16 @@ fun EmojiPicker(modifier: Modifier, onSelectEmoji: (emojiId: String) -> Unit) {
                                 emojiId = emojiId
                             )
 
-                            AndroidView(
+                            EmojiView(
                                 modifier = Modifier
                                     .size(emojiWidth)
-                                    .clickable(onClick = {
-                                        onSelectEmoji(emojiId)
-                                    }),
-                                factory = { context ->
-                                    AppCompatTextView(context).apply {
-                                        setTextColor(Color.Black.toArgb())
-                                        text = emojiUnicode
-                                        textSize = emojiFontSize
-                                        textAlignment = View.TEXT_ALIGNMENT_CENTER
-                                    }
-                                },
-                                update = { textView ->
-                                    textView.text = emojiUnicode
-                                }
+                                    .clickable(
+                                        onClick = {
+                                            onSelectEmoji(emojiId)
+                                        }
+                                    ),
+                                emojiUnicode = emojiUnicode,
+                                emojiFontSize = emojiFontSize
                             )
                         }
                     }

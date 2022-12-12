@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.common.EmojiView
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.emoji_picker.EmojiPicker
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
@@ -308,10 +309,10 @@ private fun StandalonePostFooter(
             reactionCount.forEach { (emoji, count) ->
                 AssistChip(
                     leadingIcon = {
-                        Text(
-                            text = getUnicodeForEmojiId(emoji),
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center
+                        EmojiView(
+                            modifier = Modifier,
+                            emojiUnicode = getUnicodeForEmojiId(emoji),
+                            emojiFontSize = 16.sp
                         )
                     },
                     label = {
