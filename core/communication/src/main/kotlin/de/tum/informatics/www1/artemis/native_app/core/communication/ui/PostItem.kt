@@ -33,6 +33,7 @@ import androidx.compose.material.icons.outlined.AddReaction
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
@@ -106,6 +107,7 @@ internal fun PostItem(
     modifier: Modifier,
     post: Post?,
     postItemViewType: PostItemViewType,
+    clientId: Int,
     getUnicodeForEmojiId: @Composable (String) -> String,
     onReactWithEmoji: (emojiId: String) -> Unit,
     onClickOnPresentReaction: (emojiId: String) -> Unit
@@ -122,7 +124,8 @@ internal fun PostItem(
         postItemViewType = postItemViewType,
         getUnicodeForEmojiId = getUnicodeForEmojiId,
         onReactWithEmoji = onReactWithEmoji,
-        onClickOnPresentReaction = onClickOnPresentReaction
+        onClickOnPresentReaction = onClickOnPresentReaction,
+        clientId = clientId
     )
 }
 
@@ -131,6 +134,7 @@ internal fun AnswerPostItem(
     modifier: Modifier,
     answerPost: AnswerPost,
     answerItem: PostItemViewType.AnswerItem,
+    clientId: Int,
     getUnicodeForEmojiId: @Composable (String) -> String,
     onReactWithEmoji: (emojiId: String) -> Unit,
     onClickOnPresentReaction: (emojiId: String) -> Unit
@@ -147,7 +151,8 @@ internal fun AnswerPostItem(
         postItemViewType = answerItem,
         getUnicodeForEmojiId = getUnicodeForEmojiId,
         onReactWithEmoji = onReactWithEmoji,
-        onClickOnPresentReaction = onClickOnPresentReaction
+        onClickOnPresentReaction = onClickOnPresentReaction,
+        clientId = clientId
     )
 }
 
@@ -160,6 +165,7 @@ private fun PostItemBase(
     creationDate: Instant?,
     title: String?,
     content: String?,
+    clientId: Int,
     reactions: List<Post.Reaction>,
     postItemViewType: PostItemViewType,
     getUnicodeForEmojiId: @Composable (String) -> String,
@@ -209,7 +215,8 @@ private fun PostItemBase(
                 postItemViewType = postItemViewType,
                 getUnicodeForEmojiId = getUnicodeForEmojiId,
                 onReactWithEmoji = onReactWithEmoji,
-                onClickReaction = onClickOnPresentReaction
+                onClickReaction = onClickOnPresentReaction,
+                clientId = clientId
             )
         }
     }
@@ -287,14 +294,20 @@ private fun PostHeadline(
 private fun StandalonePostFooter(
     modifier: Modifier,
     isPlaceholder: Boolean,
+    clientId: Int,
     reactions: List<Post.Reaction>,
     postItemViewType: PostItemViewType,
     getUnicodeForEmojiId: @Composable (String) -> String,
     onReactWithEmoji: (emojiId: String) -> Unit,
     onClickReaction: (emojiId: String) -> Unit
 ) {
-    val reactionCount: Map<String, Int> = remember(reactions) {
-        reactions.groupBy { it.emojiId }.mapValues { it.value.size }
+    val reactionCount: Map<String, ReactionData> = remember(reactions) {
+        reactions.groupBy { it.emojiId }.mapValues { groupedReactions ->
+            ReactionData(
+                groupedReactions.value.size,
+                groupedReactions.value.any { it.authorId == clientId }
+            )
+        }
     }
 
     var displayEmojiPicker: Boolean by remember { mutableStateOf(false) }
@@ -306,8 +319,9 @@ private fun StandalonePostFooter(
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            reactionCount.forEach { (emoji, count) ->
-                AssistChip(
+            reactionCount.forEach { (emoji, reactionData) ->
+                InputChip(
+                    selected = reactionData.hasClientReacted,
                     leadingIcon = {
                         EmojiView(
                             modifier = Modifier,
@@ -316,7 +330,7 @@ private fun StandalonePostFooter(
                         )
                     },
                     label = {
-                        AnimatedCounter(count)
+                        AnimatedCounter(reactionData.reactionCount)
                     },
                     onClick = {
                         onClickReaction(emoji)
@@ -402,6 +416,8 @@ private fun StandalonePostFooter(
         )
     }
 }
+
+private data class ReactionData(val reactionCount: Int, val hasClientReacted: Boolean)
 
 @Composable
 private fun EmojiDialog(
@@ -506,6 +522,7 @@ private fun PostPreview(
         ),
         getUnicodeForEmojiId = { "\uD83D\uDE80" },
         onReactWithEmoji = {},
-        onClickOnPresentReaction = {}
+        onClickOnPresentReaction = {},
+        clientId = 0
     )
 }

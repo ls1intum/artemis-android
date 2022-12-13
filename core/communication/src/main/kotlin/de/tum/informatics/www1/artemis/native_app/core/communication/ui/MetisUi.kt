@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.navigateToCreateStandalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.filter_header.MetisFilterHeader
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.list.MetisStandalonePostList
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.ViewType

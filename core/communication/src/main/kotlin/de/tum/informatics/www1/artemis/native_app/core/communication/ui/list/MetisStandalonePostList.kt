@@ -35,7 +35,11 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisOut
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItem
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.getEmojiForEmojiId
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
+import de.tum.informatics.www1.artemis.native_app.core.datastore.util.clientId
+import kotlinx.coroutines.flow.map
+import org.koin.androidx.compose.get
 
 @Composable
 internal fun MetisStandalonePostList(
@@ -49,8 +53,15 @@ internal fun MetisStandalonePostList(
 
     var metisFailure: MetisModificationFailure? by remember { mutableStateOf(null) }
 
+    val accountService: AccountService = get()
+    val clientId by accountService.clientId.collectAsState(initial = -1)
+
     Column(modifier = modifier) {
-        MetisOutdatedBanner(modifier = Modifier.fillMaxWidth(), isOutdated = isDataOutdated, requestRefresh = viewModel::requestRefreshWebsocket)
+        MetisOutdatedBanner(
+            modifier = Modifier.fillMaxWidth(),
+            isOutdated = isDataOutdated,
+            requestRefresh = viewModel::requestRefreshWebsocket
+        )
 
         Box(
             modifier = Modifier
@@ -106,6 +117,7 @@ internal fun MetisStandalonePostList(
                             PostItem(
                                 modifier = Modifier.fillMaxWidth(),
                                 post = post,
+                                clientId = clientId,
                                 postItemViewType = PostItemViewType.StandaloneListItem(
                                     answerPosts = post?.answerPostings.orEmpty(),
                                     onClickReply = {

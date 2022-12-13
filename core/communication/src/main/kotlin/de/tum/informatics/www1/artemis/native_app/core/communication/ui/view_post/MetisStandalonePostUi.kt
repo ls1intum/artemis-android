@@ -52,10 +52,13 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItem
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.common.MarkdownTextField
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.getEmojiForEmojiId
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
+import de.tum.informatics.www1.artemis.native_app.core.datastore.util.clientId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.get
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -64,7 +67,10 @@ internal fun MetisStandalonePostUi(
     viewModel: MetisStandalonePostViewModel,
     viewType: ViewType
 ) {
+    val accountService: AccountService = get()
+
     val post: Post? = viewModel.post.collectAsState(initial = null).value
+    val clientId: Int by accountService.clientId.collectAsState(initial = -1)
 
     var metisFailure: MetisModificationFailure? by remember { mutableStateOf(null) }
 
@@ -102,7 +108,8 @@ internal fun MetisStandalonePostUi(
                             presentReactions = post.reactions,
                             response = { metisFailure = it }
                         )
-                    }
+                    },
+                    clientId = clientId
                 )
             }
 
@@ -140,7 +147,8 @@ internal fun MetisStandalonePostUi(
                         canDelete = false,
                         onClickEdit = {},
                         onClickDelete = {}
-                    )
+                    ),
+                    clientId = clientId
                 )
             }
         }
