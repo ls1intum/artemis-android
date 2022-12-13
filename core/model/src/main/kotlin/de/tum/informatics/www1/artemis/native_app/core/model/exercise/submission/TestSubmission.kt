@@ -15,5 +15,4 @@ class TestSubmission(
     override val durationInMinutes: Float? = null,
     override val results: List<Result>? = null,
     override val participation: Participation? = null,
-) : Submission() {
-}
+) : Submission()

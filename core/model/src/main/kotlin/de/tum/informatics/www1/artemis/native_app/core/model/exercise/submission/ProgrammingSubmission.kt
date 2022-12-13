@@ -16,5 +16,4 @@ class ProgrammingSubmission(
     override val results: List<Result>? = null,
     override val participation: Participation? = null,
     val buildFailed: Boolean? = false
-) : Submission() {
-}
+) : Submission()

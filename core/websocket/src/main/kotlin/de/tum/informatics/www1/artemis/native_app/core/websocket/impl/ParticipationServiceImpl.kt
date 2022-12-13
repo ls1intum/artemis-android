@@ -1,20 +1,22 @@
 package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
 
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationService.ProgrammingSubmissionStateData
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationService
+import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationService.ProgrammingSubmissionStateData
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import kotlinx.datetime.Clock
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.Decoder
@@ -24,9 +26,6 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
-import kotlinx.datetime.Clock
-import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 
 /**
  * From: https://github.com/ls1intum/Artemis/blob/5c13e2e1b5b6d81594b9123946f040cbf6f0cfc6/src/main/webapp/app/overview/participation-websocket.service.ts
@@ -159,7 +158,7 @@ internal class ParticipationServiceImpl(
      */
     private fun fetchLatestPendingSubmissionByParticipationId(participationId: Int): Flow<Submission> {
         //TODO: This is currently broken, the call returns a html site instead.
-        return kotlinx.coroutines.flow.emptyFlow()
+        return emptyFlow()
 //        return combine(
 //            serverConfigurationService.serverUrl,
 //            accountService.authenticationData
