@@ -1,10 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.exercise
 
+import de.tum.informatics.www1.artemis.native_app.core.common.hasPassedFlow
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation.InitializationState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.attachment.Attachment
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.KSerializer
@@ -68,33 +72,6 @@ sealed class Exercise {
         INCLUDED_COMPLETELY,
         INCLUDED_AS_BONUS,
         NOT_INCLUDED
-    }
-
-    sealed class ParticipationStatus {
-        abstract class ParticipationStatusWithParticipation(val participation: Participation) :
-            ParticipationStatus()
-
-        object QuizNotInitialized : ParticipationStatus()
-        object QuizActive : ParticipationStatus()
-        object QuizSubmitted : ParticipationStatus()
-        object QuizNotStarted : ParticipationStatus()
-        object QuizNotParticipated : ParticipationStatus()
-        class QuizFinished(participation: Participation) :
-            ParticipationStatusWithParticipation(participation)
-
-        object NoTeamAssigned : ParticipationStatus()
-        object Uninitialized : ParticipationStatus()
-        class Initialized(participation: Participation) :
-            ParticipationStatusWithParticipation(participation)
-
-        class Inactive(participation: Participation) :
-            ParticipationStatusWithParticipation(participation)
-
-        object ExerciseActive : ParticipationStatus()
-        class ExerciseSubmitted(participation: Participation) :
-            ParticipationStatusWithParticipation(participation)
-
-        object ExerciseMissed : ParticipationStatus()
     }
 
     enum class AssessmentType {
@@ -161,84 +138,17 @@ sealed class Exercise {
     // Copy of https://github.com/ls1intum/Artemis/blob/5c13e2e1b5b6d81594b9123946f040cbf6f0cfc6/src/main/webapp/app/exercises/shared/exercise/exercise.utils.ts
     // TODO: Remove me once this is calculated on the server.
 
-    fun computeParticipationStatus(testRun: Boolean?): ParticipationStatus {
-        val studentParticipation = if (testRun == null) {
-            studentParticipations.orEmpty().firstOrNull()
-        } else {
-            studentParticipations.orEmpty().firstOrNull {
-                if (it is StudentParticipation) {
-                    it.testRun == testRun
-                } else false
-            }
-        }
-
-        // For team exercises check whether the student has been assigned to a team yet
-        // !!!! TODO: Not yet implemented
-//        if (teamMode == true && studentAssignedTeamIdComputed && !studentAssignedTeamId) {
-//            return ParticipationStatus.NO_TEAM_ASSIGNED
-//        }
-
-        // Evaluate the participation status for quiz exercises.
-        if (this is QuizExercise) {
-            return participationStatusForQuizExercise(this)
-        }
-
-        // Evaluate the participation status for modeling, text and file upload exercises if the exercise has participations.
-        if ((this is ModelingExercise || this is TextExercise || this is FileUploadExercise) && studentParticipation != null) {
-            return participationStatusForModelingTextFileUploadExercise(studentParticipation)
-        }
-
-        val initState = studentParticipation?.initializationState
-
-        // The following evaluations are relevant for programming exercises in general and for modeling, text and file upload exercises that don't have participations.
-        if (studentParticipation == null ||
-            initState == InitializationState.UNINITIALIZED ||
-            initState == InitializationState.REPO_COPIED ||
-            initState == InitializationState.REPO_CONFIGURED ||
-            initState == InitializationState.BUILD_PLAN_COPIED ||
-            initState == InitializationState.BUILD_PLAN_CONFIGURED
-        ) {
-            if (this is ProgrammingExercise && !isStartExerciseAvailable(this) && testRun == null || testRun == false) {
-                return ParticipationStatus.ExerciseMissed
-            } else {
-                return ParticipationStatus.Uninitialized
-            }
-        } else if (studentParticipation.initializationState === InitializationState.INITIALIZED) {
-            return ParticipationStatus.Initialized(studentParticipation)
-        }
-        return ParticipationStatus.Inactive(studentParticipation)
-    }
-
     private fun isStartExerciseAvailable(exercise: ProgrammingExercise) =
         exercise.dueDate == null || Clock.System.now() < exercise.dueDate
 
-    private fun participationStatusForQuizExercise(exercise: QuizExercise): ParticipationStatus {
-        if (exercise.status == QuizExercise.QuizStatus.CLOSED) {
-            if (exercise.studentParticipations?.isNotEmpty() == true && exercise.studentParticipations.first().results?.isNotEmpty() == true) {
-                return ParticipationStatus.QuizFinished(exercise.studentParticipations.first())
-            }
-            return ParticipationStatus.QuizNotParticipated
-        } else if (exercise.studentParticipations?.isNotEmpty() == true) {
-            val initState = exercise.studentParticipations.first().initializationState
-            if (initState == InitializationState.INITIALIZED) {
-                return ParticipationStatus.QuizActive
-            } else if (initState == InitializationState.FINISHED) {
-                return ParticipationStatus.QuizSubmitted
-            }
-        } else if (exercise.quizBatches?.any { it.started == true } == true) {
-            return ParticipationStatus.QuizNotInitialized
-        }
-        return ParticipationStatus.QuizNotStarted
-    }
-
-    private fun participationStatusForModelingTextFileUploadExercise(participation: Participation): ParticipationStatus {
-        return if (participation.initializationState == InitializationState.INITIALIZED) {
-            if (hasDueDataPassed(participation)) ParticipationStatus.ExerciseMissed else ParticipationStatus.ExerciseActive
-        } else if (participation.initializationState == InitializationState.FINISHED) ParticipationStatus.ExerciseSubmitted(
-            participation
-        )
-        else ParticipationStatus.Uninitialized
-    }
+//    private fun participationStatusForModelingTextFileUploadExercise(participation: Participation): ParticipationStatus {
+//        return if (participation.initializationState == InitializationState.INITIALIZED) {
+//            if (hasDueDataPassed(participation)) ParticipationStatus.ExerciseMissed else ParticipationStatus.ExerciseActive
+//        } else if (participation.initializationState == InitializationState.FINISHED) ParticipationStatus.ExerciseSubmitted(
+//            participation
+//        )
+//        else ParticipationStatus.Uninitialized
+//    }
 
     private fun hasDueDataPassed(participation: Participation): Boolean {
         return if (dueDate == null) false else {
@@ -251,3 +161,20 @@ sealed class Exercise {
             participation?.initializationDate ?: dueDate
         }
 }
+
+// Extensions
+
+val Exercise.hasEnded: Flow<Boolean> get() = dueDate?.hasPassedFlow() ?: flowOf(false)
+
+private val Exercise.notSubmittedOrFinished: Boolean
+    get() = studentParticipations.orEmpty().firstOrNull()?.initializationDate == null ||
+            studentParticipations!!.first().initializationState !in
+            arrayOf(
+                InitializationState.INITIALIZED,
+                InitializationState.FINISHED
+            )
+
+val Exercise.notEndedSubmittedOrFinished: Flow<Boolean>
+    get() = hasEnded.map { hasEnded ->
+        !hasEnded && notSubmittedOrFinished
+    }

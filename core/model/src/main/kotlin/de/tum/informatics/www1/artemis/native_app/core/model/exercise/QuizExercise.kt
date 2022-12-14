@@ -4,6 +4,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.attachment.Attachment
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -44,7 +46,27 @@ data class QuizExercise(
     val quizBatches: List<QuizBatch>? = null
 ) : Exercise() {
 
-    override fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise = copy(studentParticipations = newParticipations)
+    override fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise =
+        copy(studentParticipations = newParticipations)
+
+//    fun participationStatusForQuizExercise(): ParticipationStatus {
+//        if (exercise.status == QuizExercise.QuizStatus.CLOSED) {
+//            if (exercise.studentParticipations?.isNotEmpty() == true && exercise.studentParticipations.first().results?.isNotEmpty() == true) {
+//                return ParticipationStatus.QuizFinished(exercise.studentParticipations.first())
+//            }
+//            return ParticipationStatus.QuizNotParticipated
+//        } else if (exercise.studentParticipations?.isNotEmpty() == true) {
+//            val initState = exercise.studentParticipations.first().initializationState
+//            if (initState == Participation.InitializationState.INITIALIZED) {
+//                return ParticipationStatus.QuizActive
+//            } else if (initState == Participation.InitializationState.FINISHED) {
+//                return ParticipationStatus.QuizSubmitted
+//            }
+//        } else if (exercise.quizBatches?.any { it.started == true } == true) {
+//            return ParticipationStatus.QuizNotInitialized
+//        }
+//        return ParticipationStatus.QuizNotStarted
+//    }
 
     enum class QuizStatus {
         CLOSED,
@@ -70,3 +92,14 @@ data class QuizExercise(
         val password: String? = null
     )
 }
+
+// Extensions
+
+private val QuizExercise.statedQuizBatch: Boolean
+    get() = quizBatches.orEmpty().any { it.started == true }
+
+val QuizExercise.isUninitialized: Flow<Boolean>
+    get() = notEndedSubmittedOrFinished.map { it && statedQuizBatch }
+
+val QuizExercise.notStarted: Flow<Boolean>
+    get() = notEndedSubmittedOrFinished.map { it && !statedQuizBatch }

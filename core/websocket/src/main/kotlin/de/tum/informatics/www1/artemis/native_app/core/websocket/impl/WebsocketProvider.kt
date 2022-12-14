@@ -66,12 +66,6 @@ class WebsocketProvider(
             onWebsocketError.onStart { emit(Unit) }
         ) { a, b, _ -> a to b }
             .transformLatest { (host, authenticationData) ->
-                networkStatusProvider
-                    .currentNetworkStatus
-                    .filter { it == NetworkStatusProvider.NetworkStatus.Internet }
-                    .first()
-                Log.d(TAG, "Waiting for internet done.")
-
                 emitAll(
                     channelFlow {
                         Log.d(TAG, "Websocket: Init")

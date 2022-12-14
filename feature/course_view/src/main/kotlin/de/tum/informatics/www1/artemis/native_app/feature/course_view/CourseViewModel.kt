@@ -7,6 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseService
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationService
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -40,6 +41,7 @@ internal class CourseViewModel(
                             courseService.getCourse(courseId, serverUrl, authData.authToken)
                         )
                     }
+
                     AccountService.AuthenticationData.NotLoggedIn -> {
                         emit(DataState.Suspended())
                     }
@@ -48,9 +50,9 @@ internal class CourseViewModel(
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
     /**
-     * Holds a flow of the latest participation status for each exercise (associated by the exercise id)
+     * Holds a flow of the latest exercises. Updated by the websocket.
      */
-    private val exerciseWithParticipationStatusFlow: Flow<DataState<List<ExerciseWithParticipationStatus>>> =
+    private val exerciseWithParticipationStatusFlow: Flow<DataState<List<Exercise>>> =
         course
             .map { courseDataState -> courseDataState.bind { it.exercises } }
             .transformLatest { exercisesDataState ->
@@ -61,12 +63,7 @@ internal class CourseViewModel(
 
                         val participationStatusMap =
                             exercises
-                                .associate {
-                                    (it.id ?: 0) to ExerciseWithParticipationStatus(
-                                        it,
-                                        it.computeParticipationStatus(null)
-                                    )
-                                }
+                                .associateBy { exercise -> (exercise.id ?: 0) }
                                 .toMutableMap()
 
                         emit(DataState.Success(participationStatusMap.values.toList()))
@@ -83,17 +80,15 @@ internal class CourseViewModel(
                                     exercisesById[associatedExerciseId] ?: return@collect
 
                                 //Replace the exercise
-                                val newExercise = associatedExercise.withUpdatedParticipation(participation)
+                                val newExercise =
+                                    associatedExercise.withUpdatedParticipation(participation)
                                 exercisesById[associatedExerciseId] = newExercise
 
-                                participationStatusMap[associatedExerciseId] =
-                                    ExerciseWithParticipationStatus(
-                                        newExercise,
-                                        newExercise.computeParticipationStatus(null)
-                                    )
+                                participationStatusMap[associatedExerciseId] = newExercise
                                 emit(DataState.Success(participationStatusMap.values.toList()))
                             }
                     }
+
                     else -> emit(exercisesDataState.bind { emptyList() })
                 }
             }
@@ -103,8 +98,7 @@ internal class CourseViewModel(
             exercisesDataState.bind { exercisesWithParticipationState ->
                 exercisesWithParticipationState
                     // Group the exercise based on their start of the week day (most likely monday)
-                    .groupBy { exerciseWithParticipationState ->
-                        val exercise = exerciseWithParticipationState.exercise
+                    .groupBy { exercise ->
                         val releaseDate = exercise.dueDate ?: return@groupBy null
 
                         releaseDate

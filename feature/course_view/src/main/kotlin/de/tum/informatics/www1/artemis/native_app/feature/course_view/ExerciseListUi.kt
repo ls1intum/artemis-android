@@ -11,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.AccountTree
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -79,13 +78,13 @@ internal fun ExerciseListUi(
                 }
 
                 if (weeklyExercisesExpanded[weeklyExercise] == true) {
-                    items(weeklyExercise.exercises, key = { it.exercise.id ?: it.hashCode() }) { exerciseWithParticipationStatus ->
+                    items(weeklyExercise.exercises, key = { it.id ?: it.hashCode() }) { exercise ->
                         ExerciseItem(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
-                            exerciseWithParticipationStatus = exerciseWithParticipationStatus
-                        ) { onClickExercise(exerciseWithParticipationStatus.exercise.id ?: return@ExerciseItem) }
+                            exercise = exercise
+                        ) { onClickExercise(exercise.id ?: return@ExerciseItem) }
                     }
                 }
 
@@ -158,11 +157,9 @@ private fun ExerciseWeekSectionHeader(
 @Composable
 private fun ExerciseItem(
     modifier: Modifier,
-    exerciseWithParticipationStatus: ExerciseWithParticipationStatus,
+    exercise: Exercise,
     onClickExercise: () -> Unit
 ) {
-    val exercise = exerciseWithParticipationStatus.exercise
-
     Card(modifier = modifier, onClick = onClickExercise) {
         Column(
             modifier = Modifier
@@ -177,8 +174,7 @@ private fun ExerciseItem(
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 16.dp),
-                    exercise = exercise,
-                    participationStatus = exerciseWithParticipationStatus.participationStatus
+                    exercise = exercise
                 )
             }
 
@@ -218,7 +214,7 @@ private fun ExerciseTypeIcon(modifier: Modifier, exercise: Exercise) {
  * Displays the exercise title, the due data and the participation info. The participation info is automatically updated.
  */
 @Composable
-private fun ExerciseDataText(modifier: Modifier, exercise: Exercise, participationStatus: Exercise.ParticipationStatus) {
+private fun ExerciseDataText(modifier: Modifier, exercise: Exercise) {
     //Format a relative time if the distant is
     val formattedDueDate = remember(exercise) {
         val dueDate = exercise.dueDate
@@ -248,6 +244,6 @@ private fun ExerciseDataText(modifier: Modifier, exercise: Exercise, participati
             style = MaterialTheme.typography.bodyMedium
         )
 
-        ParticipationStatusUi(exercise = exercise, participationStatus = participationStatus)
+        ParticipationStatusUi(exercise = exercise)
     }
 }

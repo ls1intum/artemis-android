@@ -35,21 +35,16 @@ internal fun ParticipationStatusUi(
     exercise: Exercise,
     viewResultInformation: () -> Unit
 ) {
-    val participationStatus = remember(exercise) {
-        exercise.computeParticipationStatus(null)
-    }
-
-    val templateStatus: ResultTemplateStatus? = when (participationStatus) {
-        is Exercise.ParticipationStatus.ParticipationStatusWithParticipation -> {
-            computeTemplateStatus(
-                exercise = exercise,
-                participation = participationStatus.participation,
-                result = null,
-                showUngradedResults = true,
-                personal = true
-            ).collectAsState(initial = ResultTemplateStatus.NoResult).value
-        }
-        else -> null
+    val templateStatus: ResultTemplateStatus? = if(exercise.studentParticipations.isNullOrEmpty()) {
+        null
+    } else {
+        computeTemplateStatus(
+            exercise = exercise,
+            participation = exercise.studentParticipations.orEmpty().first(),
+            result = null,
+            showUngradedResults = true,
+            personal = true
+        ).collectAsState(initial = ResultTemplateStatus.NoResult).value
     }
 
     Card(modifier = modifier) {
@@ -65,7 +60,6 @@ internal fun ParticipationStatusUi(
 
             ParticipationStatusUi(
                 exercise = exercise,
-                participationStatus = participationStatus,
                 getTemplateStatus = {
                     checkNotNull(templateStatus) { "template status must not be null as participation status has a participation" }
                     templateStatus

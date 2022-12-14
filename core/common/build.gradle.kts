@@ -7,5 +7,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.kotlinx.coroutines.android)
+    api(libs.kotlinx.coroutines.android)
+    api(libs.kotlinx.datetime)
 }

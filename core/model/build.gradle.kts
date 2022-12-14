@@ -8,6 +8,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.kotlinx.datetime)
+    implementation(project(":core:common"))
     api(libs.kotlinx.serialization.json)
 }
