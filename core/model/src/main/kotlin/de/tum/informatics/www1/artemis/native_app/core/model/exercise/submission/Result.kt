@@ -4,9 +4,13 @@ import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.feedback.Feedback
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isResultPreliminary
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.ProgrammingExerciseStudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
@@ -32,14 +36,12 @@ data class Result(
     val assessor: User? = null,
     val feedbacks: List<Feedback>? = null,
     val participation: Participation? = null
-) {
+)
 
-    /**
-     * @see [ProgrammingExercise.isResultPreliminary]
-     */
-    val isPreliminary: Boolean
-        get() {
-            return participation != null && participation is ProgrammingExerciseStudentParticipation &&
-                    (participation.exercise as? ProgrammingExercise)?.isResultPreliminary(this) ?: false
-        }
-}
+/**
+ * @see [ProgrammingExercise.isResultPreliminary]
+ */
+val Result.isPreliminary: Flow<Boolean>
+    get() = if (participation != null && participation is ProgrammingExerciseStudentParticipation && participation.exercise is ProgrammingExercise) {
+        (participation.exercise as ProgrammingExercise).isResultPreliminary(this)
+    } else flowOf(false)

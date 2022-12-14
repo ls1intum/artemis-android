@@ -37,6 +37,8 @@ sealed class Exercise {
     abstract val categories: List<Category>
     abstract val visibleToStudents: Boolean?
     abstract val teamMode: Boolean?
+    abstract val studentAssignedTeamId: Long?
+    abstract val studentAssignedTeamIdComputed: Boolean
     abstract val problemStatement: String?
     abstract val assessmentType: AssessmentType?
     abstract val allowComplaintsForAutomaticAssessments: Boolean?

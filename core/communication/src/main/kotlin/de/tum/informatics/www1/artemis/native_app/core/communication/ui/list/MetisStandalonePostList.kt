@@ -108,7 +108,7 @@ internal fun MetisStandalonePostList(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(top = 8.dp)
+                        contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
                     ) {
                         items(posts, key = { it.clientPostId }) { post ->
                             val asAffectedPost = post?.let {

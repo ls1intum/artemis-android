@@ -19,6 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participat
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.ProgrammingSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.isPreliminary
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ParticipationStatusUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ResultTemplateStatus
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.computeTemplateStatus
@@ -35,17 +36,18 @@ internal fun ParticipationStatusUi(
     exercise: Exercise,
     viewResultInformation: () -> Unit
 ) {
-    val templateStatus: ResultTemplateStatus? = if(exercise.studentParticipations.isNullOrEmpty()) {
-        null
-    } else {
-        computeTemplateStatus(
-            exercise = exercise,
-            participation = exercise.studentParticipations.orEmpty().first(),
-            result = null,
-            showUngradedResults = true,
-            personal = true
-        ).collectAsState(initial = ResultTemplateStatus.NoResult).value
-    }
+    val templateStatus: ResultTemplateStatus? =
+        if (exercise.studentParticipations.isNullOrEmpty()) {
+            null
+        } else {
+            computeTemplateStatus(
+                exercise = exercise,
+                participation = exercise.studentParticipations.orEmpty().first(),
+                result = null,
+                showUngradedResults = true,
+                personal = true
+            ).collectAsState(initial = ResultTemplateStatus.NoResult).value
+        }
 
     Card(modifier = modifier) {
         Column(
@@ -84,8 +86,12 @@ internal fun ParticipationStatusUi(
     }
 }
 
-private fun canShowResultDetails(@Suppress("SameParameterValue") submission: Submission?, result: Result): Boolean {
-    if (result.isPreliminary) return true
+@Composable
+private fun canShowResultDetails(
+    @Suppress("SameParameterValue") submission: Submission?,
+    result: Result
+): Boolean {
+    if (result.isPreliminary.collectAsState(initial = false).value) return true
 
     if (result.submission != null && submission is ProgrammingSubmission && submission.buildFailed == true) return true
     return result.hasFeedback == true

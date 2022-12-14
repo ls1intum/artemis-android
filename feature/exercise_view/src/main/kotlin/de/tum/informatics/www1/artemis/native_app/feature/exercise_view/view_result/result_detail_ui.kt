@@ -22,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.BuildLogEntry
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.isPreliminary
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 import kotlinx.datetime.Clock
@@ -59,7 +60,7 @@ internal fun ResultDetailUi(
             Divider()
         }
 
-        if (latestResult.isPreliminary) {
+        if (latestResult.isPreliminary.collectAsState(initial = false).value) {
             ResultIsPreliminaryWarning(
                 modifier = Modifier.fillMaxWidth(),
                 assessmentType = exercise.assessmentType

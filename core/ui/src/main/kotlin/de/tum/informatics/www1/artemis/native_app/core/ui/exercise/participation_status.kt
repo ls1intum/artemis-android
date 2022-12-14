@@ -65,10 +65,10 @@ private fun getSubmissionResultStatusText(exercise: Exercise): String {
         .firstOrNull()?.initializationState == Participation.InitializationState.FINISHED
 
     val id = when {
-        // TODO: Implement teams
-//        exercise.teamMode == true && exercise.studentAssignedTeamIdComputed && exercise.studentAssignedTeamId != null -> {
-//            R.string.exercise_user_not_assigned_to_team
-//        }
+        // TODO: Automatically update using a websocket.
+        exercise.teamMode == true && exercise.studentAssignedTeamIdComputed && exercise.studentAssignedTeamId != null -> {
+            R.string.exercise_user_not_assigned_to_team
+        }
         uninitialized -> R.string.exercise_user_not_started_exercise
         isAfterDueDate -> R.string.exercise_exercise_missed_deadline
         notSubmitted -> R.string.exercise_exercise_not_submitted
