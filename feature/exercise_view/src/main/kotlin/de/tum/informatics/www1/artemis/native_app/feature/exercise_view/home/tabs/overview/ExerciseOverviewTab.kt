@@ -13,6 +13,7 @@ internal fun ExerciseOverviewTab(
     exercise: Exercise,
     gradedParticipation: StudentParticipation?,
     onClickStartExercise: () -> Unit,
+    onClickOpenTextExercise: () -> Unit,
     onViewResult: () -> Unit
 ) {
     Column(modifier = modifier) {
@@ -26,7 +27,7 @@ internal fun ExerciseOverviewTab(
             gradedParticipation = gradedParticipation,
             onClickViewResult = onViewResult,
             onClickStartExercise = onClickStartExercise,
-            onClickOpenTextExercise = {}
+            onClickOpenTextExercise = onClickOpenTextExercise
         )
     }
 }

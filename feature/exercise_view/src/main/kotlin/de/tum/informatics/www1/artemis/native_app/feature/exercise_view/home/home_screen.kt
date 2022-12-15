@@ -41,7 +41,8 @@ internal fun ExerciseScreen(
     viewModel: ExerciseViewModel,
     navController: NavController,
     onNavigateBack: () -> Unit,
-    onViewResult: () -> Unit
+    onViewResult: () -> Unit,
+    onViewTextExerciseParticipationScreen: () -> Unit
 ) {
     val exerciseDataState = viewModel.exercise.collectAsState(initial = DataState.Loading()).value
 
@@ -153,9 +154,13 @@ internal fun ExerciseScreen(
                             exercise = exercise,
                             gradedParticipation = gradedParticipation,
                             onViewResult = onViewResult,
-                            onClickStartExercise = viewModel::startExercise
+                            onClickStartExercise = {
+                                viewModel.startExercise(onViewTextExerciseParticipationScreen)
+                            },
+                            onClickOpenTextExercise = onViewTextExerciseParticipationScreen
                         )
                     }
+
                     1 -> {
                         ExerciseDetailsTab(
                             modifier = tabModifier,
@@ -163,6 +168,7 @@ internal fun ExerciseScreen(
                             latestResult = null
                         )
                     }
+
                     2 -> {
                         // Maybe add a replacement ui
                         val courseId = exercise.course?.id ?: return@Column

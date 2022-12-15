@@ -430,7 +430,7 @@ internal class ExerciseViewModel(
         )
     }
 
-    fun startExercise() {
+    fun startExercise(onStartedSuccessfully: () -> Unit) {
         viewModelScope.launch {
             val serverUrl = serverConfigurationService.serverUrl.first()
             when (val authData = accountService.authenticationData.first()) {
@@ -442,7 +442,10 @@ internal class ExerciseViewModel(
                     )
 
                     when (response) {
-                        is NetworkResponse.Response -> _gradedParticipation.emit(response.data)
+                        is NetworkResponse.Response -> {
+                            _gradedParticipation.emit(response.data)
+                            onStartedSuccessfully()
+                        }
                         is NetworkResponse.Failure -> {}
                     }
                 }

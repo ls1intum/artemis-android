@@ -2,10 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.exercise_view
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -16,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.ExerciseScreen
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise.TextExerciseParticipationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.view_result.ViewResultScreen
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -29,6 +26,8 @@ private const val NESTED_HOME_DESTINATION = "home"
  * View the latest result
  */
 private const val NESTED_EXERCISE_RESULT_DESTINATION = "view_result"
+
+private const val NESTED_PARTICIPATE_TEXT_EXERCISE_DESTINATION = "participate/text_exercise"
 
 fun NavController.navigateToExercise(exerciseId: Long, builder: NavOptionsBuilder.() -> Unit) {
     navigate("exercise/$exerciseId", builder)
@@ -60,7 +59,10 @@ fun NavGraphBuilder.exercise(navController: NavController, onNavigateBack: () ->
                     onViewResult = {
                         nestedNavController.navigate(NESTED_EXERCISE_RESULT_DESTINATION)
                     },
-                    navController = navController
+                    navController = navController,
+                    onViewTextExerciseParticipationScreen = {
+                        nestedNavController.navigate(NESTED_PARTICIPATE_TEXT_EXERCISE_DESTINATION)
+                    }
                 )
             }
 
@@ -69,6 +71,13 @@ fun NavGraphBuilder.exercise(navController: NavController, onNavigateBack: () ->
                     modifier = Modifier.fillMaxSize(),
                     viewModel = exerciseViewModel,
                     onCloseResult = nestedNavController::navigateUp
+                )
+            }
+
+            composable(NESTED_PARTICIPATE_TEXT_EXERCISE_DESTINATION) {
+                TextExerciseParticipationScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    viewModel = exerciseViewModel
                 )
             }
         }

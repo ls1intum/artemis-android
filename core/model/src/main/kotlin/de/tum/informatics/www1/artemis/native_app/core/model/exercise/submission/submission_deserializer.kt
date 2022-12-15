@@ -11,6 +11,7 @@ val submissionSerializerModule = SerializersModule {
         subclass(InstructorSubmission::class)
         subclass(TestSubmission::class)
         subclass(ProgrammingSubmission::class)
+        subclass(TextSubmission::class)
         defaultDeserializer { UnknownSubmission.serializer() }
     }
 }
