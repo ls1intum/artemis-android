@@ -8,7 +8,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.attachment.Attachment
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -16,7 +15,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("programming")
 data class ProgrammingExercise(
-    override val id: Int? = null,
+    override val id: Long? = null,
     override val title: String? = null,
     override val shortName: String? = null,
     override val maxPoints: Float? = null,

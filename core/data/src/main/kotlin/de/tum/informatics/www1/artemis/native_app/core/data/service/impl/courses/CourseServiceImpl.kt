@@ -19,7 +19,7 @@ internal class CourseServiceImpl(
     de.tum.informatics.www1.artemis.native_app.core.data.service.CourseService {
 
     override suspend fun getCourse(
-        courseId: Int,
+        courseId: Long,
         serverUrl: String,
         authToken: String
     ): Flow<DataState<Course>> {

@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class UnknownExercise(
-    override val id: Int? = null,
+    override val id: Long? = null,
     override val title: String? = null,
     override val shortName: String? = null,
     override val maxPoints: Float? = null,

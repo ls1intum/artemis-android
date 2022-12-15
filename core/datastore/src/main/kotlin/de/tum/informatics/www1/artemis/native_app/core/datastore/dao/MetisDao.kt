@@ -28,7 +28,7 @@ interface MetisDao {
         delete from metis_post_context where server_id = :serverId and course_id = :courseId and lecture_id = :lectureId and exercise_id = :exerciseId
     """
     )
-    suspend fun clearAll(serverId: String, courseId: Int, lectureId: Int, exerciseId: Int)
+    suspend fun clearAll(serverId: String, courseId: Long, lectureId: Int, exerciseId: Long)
 
     /**
      * Query the client side post if for the given metis context. Returns null if the given post is not yet stored.
@@ -48,8 +48,8 @@ interface MetisDao {
     )
     suspend fun queryClientPostId(
         serverId: String,
-        courseId: Int,
-        exerciseId: Int,
+        courseId: Long,
+        exerciseId: Long,
         lectureId: Int,
         postId: Int
     ): String?
@@ -164,8 +164,8 @@ interface MetisDao {
 
     fun queryCoursePosts(
         serverId: String,
-        courseId: Int,
-        exerciseId: Int,
+        courseId: Long,
+        exerciseId: Long,
         lectureId: Int,
         clientId: Int,
         metisFilter: List<MetisFilter>,
@@ -295,8 +295,8 @@ interface MetisDao {
     )
     suspend fun queryContextPostCountNoLiveCreated(
         serverId: String,
-        courseId: Int,
-        exerciseId: Int,
+        courseId: Long,
+        exerciseId: Long,
         lectureId: Int
     ): Int
 
@@ -333,7 +333,7 @@ interface MetisDao {
 //                order by (select count(*) from reactions r where r.post_id = p.id) desc
 //    """
 //    )
-//    fun foo(serverId: String, courseId: Int, exerciseId: Int, lectureId: Int)
+//    fun foo(serverId: String, courseId: Long, exerciseId: Long, lectureId: Int)
 
     @Query("select server_post_id from metis_post_context where server_id = :serverId and client_post_id = :clientPostId")
     suspend fun queryServerSidePostId(serverId: String, clientPostId: String): Int

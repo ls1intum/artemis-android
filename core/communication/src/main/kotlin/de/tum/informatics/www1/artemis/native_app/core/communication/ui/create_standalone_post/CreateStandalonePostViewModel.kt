@@ -1,9 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.communication.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisModificationResponse
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisService
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisViewModel
@@ -16,9 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideCon
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
 class CreateStandalonePostViewModel(

@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
-import androidx.compose.animation.core.DecayAnimation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
@@ -16,7 +15,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.*
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.InstructorSubmission

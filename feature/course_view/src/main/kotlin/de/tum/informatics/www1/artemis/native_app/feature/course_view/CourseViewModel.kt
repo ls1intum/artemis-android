@@ -17,7 +17,7 @@ import java.util.Locale
 
 
 internal class CourseViewModel(
-    private val courseId: Int,
+    private val courseId: Long,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val courseService: CourseService,

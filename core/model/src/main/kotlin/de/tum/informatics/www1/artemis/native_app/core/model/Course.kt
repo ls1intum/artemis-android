@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Course(
-    val id: Int,
+    val id: Long,
     val title: String = "",
     val description: String = "",
     @SerialName("courseIcon") val courseIconPath: String? = null,

@@ -144,10 +144,16 @@ internal fun ExerciseScreen(
 
                 when (selectedTabIndex) {
                     0 -> {
+                        val gradedParticipation = viewModel.gradedParticipation.collectAsState(
+                            initial = null
+                        ).value
+
                         ExerciseOverviewTab(
                             modifier = tabModifier,
                             exercise = exercise,
-                            onViewResult = onViewResult
+                            gradedParticipation = gradedParticipation,
+                            onViewResult = onViewResult,
+                            onClickStartExercise = viewModel::startExercise
                         )
                     }
                     1 -> {

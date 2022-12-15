@@ -12,16 +12,16 @@ sealed class MetisContext(
     val standalonePostResourceEndpoint: String,
     val answerPostResourceEndpoint: String
 ) {
-    abstract val courseId: Int
+    abstract val courseId: Long
 
     @Serializable
     @SerialName("course")
-    data class Course(override val courseId: Int) :
+    data class Course(override val courseId: Long) :
         MetisContext(listOf("courses", courseId.toString(), "discussion"), "posts", "answer-posts")
 
     @Serializable
     @SerialName("exercise")
-    data class Exercise(override val courseId: Int, val exerciseId: Int) :
+    data class Exercise(override val courseId: Long, val exerciseId: Long) :
         MetisContext(
             listOf("courses", courseId.toString(), "exercises", exerciseId.toString()),
             "posts",
@@ -30,7 +30,7 @@ sealed class MetisContext(
 
     @Serializable
     @SerialName("lecture")
-    data class Lecture(override val courseId: Int, val lectureId: Int) :
+    data class Lecture(override val courseId: Long, val lectureId: Int) :
         MetisContext(
             listOf("courses", courseId.toString(), "lectures", lectureId.toString()),
             "posts",
@@ -39,6 +39,6 @@ sealed class MetisContext(
 
     @Serializable
     @SerialName("conversation")
-    data class Conversation(override val courseId: Int, val conversationId: Int) :
+    data class Conversation(override val courseId: Long, val conversationId: Int) :
         MetisContext(listOf(), "messages", "answer-messages")
 }

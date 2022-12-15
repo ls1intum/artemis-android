@@ -12,10 +12,10 @@ interface ExerciseService {
      * Get exercise details including all results for the currently logged-in user
      * @param exerciseId - Id of the exercise to get the repos from
      */
-    fun getExerciseDetails(exerciseId: Int, serverUrl: String, authToken: String): Flow<DataState<Exercise>>
+    fun getExerciseDetails(exerciseId: Long, serverUrl: String, authToken: String): Flow<DataState<Exercise>>
 
     /**
      * Reqzest the latest due date.
      */
-    fun getLatestDueDate(exerciseId: Int, serverUrl: String, authToken: String): Flow<DataState<Instant?>>
+    fun getLatestDueDate(exerciseId: Long, serverUrl: String, authToken: String): Flow<DataState<Instant?>>
 }

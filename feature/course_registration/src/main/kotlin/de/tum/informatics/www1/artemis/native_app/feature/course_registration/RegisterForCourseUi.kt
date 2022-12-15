@@ -36,7 +36,7 @@ fun NavController.navigateToCourseRegistration(builder: NavOptionsBuilder.() -> 
 
 fun NavGraphBuilder.courseRegistration(
     onNavigateUp: () -> Unit,
-    onRegisteredInCourse: (courseId: Int) -> Unit
+    onRegisteredInCourse: (courseId: Long) -> Unit
 ) {
     composable(COURSE_REGISTRATION_DESTINATION) {
         RegisterForCourseScreen(
@@ -53,7 +53,7 @@ internal fun RegisterForCourseScreen(
     modifier: Modifier,
     viewModel: RegisterForCourseViewModel = getViewModel(),
     onNavigateUp: () -> Unit,
-    onRegisteredInCourse: (courseId: Int) -> Unit
+    onRegisteredInCourse: (courseId: Long) -> Unit
 ) {
     val courses by viewModel.registrableCourses.collectAsState(initial = DataState.Loading())
 

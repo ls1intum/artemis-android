@@ -34,7 +34,7 @@ interface ParticipationService {
      */
     fun getLatestPendingSubmissionByParticipationIdFlow(
         participationId: Int,
-        exerciseId: Int,
+        exerciseId: Long,
         personal: Boolean,
         fetchPending: Boolean = true
     ): Flow<ProgrammingSubmissionStateData?>

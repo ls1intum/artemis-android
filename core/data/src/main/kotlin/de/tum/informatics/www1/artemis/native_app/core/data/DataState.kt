@@ -61,6 +61,13 @@ val <T> DataState<T>.isSuccess: Boolean
         else -> false
     }
 
+fun <T> Flow<DataState<T>>.filterSuccess(): Flow<T> = transform {
+    when (it) {
+        is DataState.Success<T> -> emit(it.data)
+        else -> {}
+    }
+}
+
 /**
  * Performs the given network response once an internet connection is available.
  * If the request fails, it is retried using an exponential backoff approach, however, only if internet is available.
@@ -96,6 +103,7 @@ inline fun <T> retryOnInternet(
                                 emit(DataState.Success(response.data))
                                 return@transformLatest
                             }
+
                             is NetworkResponse.Failure -> {
                                 emit(DataState.Failure(response.exception))
                             }
@@ -106,6 +114,7 @@ inline fun <T> retryOnInternet(
                         currentBackoff *= 2
                     }
                 }
+
                 NetworkStatusProvider.NetworkStatus.Unavailable -> {
                     //Just emit that this is suspended for now.
                     emit(DataState.Suspended())

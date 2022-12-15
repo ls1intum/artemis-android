@@ -24,7 +24,7 @@ internal class ExerciseServiceImpl(
 ) :
     de.tum.informatics.www1.artemis.native_app.core.data.service.ExerciseService {
     override fun getExerciseDetails(
-        exerciseId: Int,
+        exerciseId: Long,
         serverUrl: String,
         authToken: String
     ): Flow<DataState<Exercise>> {
@@ -43,7 +43,7 @@ internal class ExerciseServiceImpl(
     }
 
     override fun getLatestDueDate(
-        exerciseId: Int,
+        exerciseId: Long,
         serverUrl: String,
         authToken: String
     ): Flow<DataState<Instant?>> {

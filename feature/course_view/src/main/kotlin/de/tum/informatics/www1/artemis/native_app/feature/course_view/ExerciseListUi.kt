@@ -38,7 +38,7 @@ import java.util.*
 internal fun ExerciseListUi(
     modifier: Modifier,
     exercisesDataState: DataState<List<WeeklyExercises>>,
-    onClickExercise: (exerciseId: Int) -> Unit
+    onClickExercise: (exerciseId: Long) -> Unit
 ) {
     EmptyDataStateUi(dataState = exercisesDataState) { weeklyExercises ->
         val weeklyExercisesExpanded: MutableMap<WeeklyExercises, Boolean> = remember(

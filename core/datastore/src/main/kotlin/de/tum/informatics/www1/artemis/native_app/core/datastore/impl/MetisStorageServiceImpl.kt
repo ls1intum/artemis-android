@@ -140,7 +140,7 @@ class MetisStorageServiceImpl(
             )
 
         private val MetisContext.lectureId: Int get() = if (this is MetisContext.Lecture) lectureId else -1
-        private val MetisContext.exerciseId: Int get() = if (this is MetisContext.Exercise) exerciseId else -1
+        private val MetisContext.exerciseId: Long get() = if (this is MetisContext.Exercise) exerciseId else -1
     }
 
     override suspend fun insertOrUpdatePosts(

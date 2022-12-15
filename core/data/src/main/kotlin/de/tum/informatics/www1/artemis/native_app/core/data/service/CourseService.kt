@@ -7,5 +7,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface CourseService {
 
-    suspend fun getCourse(courseId: Int, serverUrl: String, authToken: String): Flow<DataState<Course>>
+    suspend fun getCourse(courseId: Long, serverUrl: String, authToken: String): Flow<DataState<Course>>
 }

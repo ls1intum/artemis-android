@@ -15,5 +15,5 @@ interface CourseRegistrationService {
      */
     suspend fun fetchRegistrableCourses(serverUrl: String, authToken: String): Flow<DataState<List<Course>>>
 
-    suspend fun registerInCourse(serverUrl: String, authToken: String, courseId: Int): NetworkResponse<Unit>
+    suspend fun registerInCourse(serverUrl: String, authToken: String, courseId: Long): NetworkResponse<Unit>
 }

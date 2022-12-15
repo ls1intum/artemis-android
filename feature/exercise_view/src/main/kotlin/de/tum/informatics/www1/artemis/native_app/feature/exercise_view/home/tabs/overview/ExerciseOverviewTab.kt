@@ -5,9 +5,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 
 @Composable
-internal fun ExerciseOverviewTab(modifier: Modifier, exercise: Exercise, onViewResult: () -> Unit) {
+internal fun ExerciseOverviewTab(
+    modifier: Modifier,
+    exercise: Exercise,
+    gradedParticipation: StudentParticipation?,
+    onClickStartExercise: () -> Unit,
+    onViewResult: () -> Unit
+) {
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -16,7 +23,10 @@ internal fun ExerciseOverviewTab(modifier: Modifier, exercise: Exercise, onViewR
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp),
             exercise = exercise,
-            viewResultInformation = onViewResult
+            gradedParticipation = gradedParticipation,
+            onClickViewResult = onViewResult,
+            onClickStartExercise = onClickStartExercise,
+            onClickOpenTextExercise = {}
         )
     }
 }

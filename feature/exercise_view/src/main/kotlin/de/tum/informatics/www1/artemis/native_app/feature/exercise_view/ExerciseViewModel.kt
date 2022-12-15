@@ -7,31 +7,37 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.service.BuildLogService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ResultService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.feedback.Feedback
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.BuildLogEntry
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.ProgrammingSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationService
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 
 // it does not actually leak, as context will be the application context, which cannot be leaked.
 @SuppressLint("StaticFieldLeak")
 internal class ExerciseViewModel(
-    private val exerciseId: Int,
+    private val exerciseId: Long,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val exerciseService: ExerciseService,
     private val participationService: ParticipationService,
     private val resultService: ResultService,
     private val buildLogService: BuildLogService,
+    private val courseExerciseService: CourseExerciseService,
     private val context: Context
 ) : ViewModel() {
 
@@ -63,6 +69,7 @@ internal class ExerciseViewModel(
                             )
                         )
                     }
+
                     AccountService.AuthenticationData.NotLoggedIn -> {
                         emit(DataState.Suspended())
                     }
@@ -95,6 +102,7 @@ internal class ExerciseViewModel(
                                 }
                         )
                     }
+
                     else -> emit(exercise)
                 }
             }
@@ -113,6 +121,7 @@ internal class ExerciseViewModel(
                             )
                         )
                     }
+
                     AccountService.AuthenticationData.NotLoggedIn -> {
                         emit(DataState.Suspended())
                     }
@@ -160,6 +169,7 @@ internal class ExerciseViewModel(
                                                 }
                                         )
                                     }
+
                                     AccountService.AuthenticationData.NotLoggedIn -> {
                                         emit(DataState.Suspended())
                                     }
@@ -168,6 +178,7 @@ internal class ExerciseViewModel(
                             }
                         }
                     }
+
                     else -> {
                         emit(exerciseData.bind<Result?> { null })
                     }
@@ -213,7 +224,7 @@ internal class ExerciseViewModel(
                     .transformLatest { latestResult ->
                         val resultId = latestResult.bind { it?.id }.orElse(null)
 
-                        //This is rexecuted when exercise is reloaded anyway. And exercise is reloaded
+                        //This is reexecuted when exercise is reloaded anyway. And exercise is reloaded
                         //When server url or auth data changes.
                         val serverUrl = serverConfigurationService.serverUrl.first()
                         val accountData = accountService.authenticationData.first()
@@ -230,6 +241,7 @@ internal class ExerciseViewModel(
                                         )
                                 )
                             }
+
                             AccountService.AuthenticationData.NotLoggedIn -> {
                                 emit(DataState.Suspended())
                             }
@@ -237,6 +249,24 @@ internal class ExerciseViewModel(
 
                     }
             }
+
+    /**
+     * Emitted to when startExercise is successful
+     */
+    private val _gradedParticipation = MutableSharedFlow<StudentParticipation>()
+    val gradedParticipation: Flow<StudentParticipation?> = merge<StudentParticipation?>(
+        _gradedParticipation,
+        exercise
+            .filterSuccess()
+            .map { exercise ->
+                exercise
+                    .studentParticipations
+                    .orEmpty()
+                    .filterIsInstance<StudentParticipation>()
+                    .firstOrNull()
+            }
+            .filterNotNull()
+    )
 
     fun requestReloadExercise() {
         requestReloadExercise.tryEmit(Unit)
@@ -274,17 +304,21 @@ internal class ExerciseViewModel(
             feedback.isSubmissionPolicy -> {
                 createProgrammingExerciseSubmissionPolicyFeedbackItem(feedback)
             }
+
             feedback.isStaticCodeAnalysis -> {
                 createProgrammingExerciseScaFeedbackItem(feedback, showTestDetails)
             }
+
             feedback.type == Feedback.FeedbackCreationType.AUTOMATIC -> {
                 createProgrammingExerciseAutomaticFeedbackItem(feedback, showTestDetails)
             }
+
             (feedback.type == Feedback.FeedbackCreationType.MANUAL
                     || feedback.type == Feedback.FeedbackCreationType.MANUAL_UNREFERENCED)
                     && feedback.gradingInstruction != null -> {
                 createProgrammingExerciseGradingInstructionFeedbackItem(feedback, showTestDetails)
             }
+
             else -> {
                 createProgrammingExerciseTutorFeedbackItem(feedback, showTestDetails)
             }
@@ -394,6 +428,28 @@ internal class ExerciseViewModel(
             credits = feedback.credits,
             actualCredits = null
         )
+    }
+
+    fun startExercise() {
+        viewModelScope.launch {
+            val serverUrl = serverConfigurationService.serverUrl.first()
+            when (val authData = accountService.authenticationData.first()) {
+                is AccountService.AuthenticationData.LoggedIn -> {
+                    val response = courseExerciseService.startExercise(
+                        exerciseId,
+                        serverUrl,
+                        authData.authToken
+                    )
+
+                    when (response) {
+                        is NetworkResponse.Response -> _gradedParticipation.emit(response.data)
+                        is NetworkResponse.Failure -> {}
+                    }
+                }
+
+                AccountService.AuthenticationData.NotLoggedIn -> {}
+            }
+        }
     }
 
     enum class FeedbackItemType {

@@ -20,4 +20,5 @@ val dataModule = module {
     single<ServerDataService> { ServerDataServiceImpl(get(), get()) }
     single<ResultService> { ResultServiceImpl(get(), get()) }
     single<BuildLogService> { BuildLogServiceImpl(get(), get()) }
+    single<CourseExerciseService> { CourseExerciseServiceImpl(get()) }
 }

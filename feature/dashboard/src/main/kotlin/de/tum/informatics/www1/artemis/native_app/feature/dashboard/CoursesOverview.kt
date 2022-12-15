@@ -37,7 +37,7 @@ fun NavController.navigateToDashboard(builder: NavOptionsBuilder.() -> Unit) {
 fun NavGraphBuilder.dashboard(
     onLogout: () -> Unit,
     onClickRegisterForCourse: () -> Unit,
-    onViewCourse: (courseId: Int) -> Unit
+    onViewCourse: (courseId: Long) -> Unit
 ) {
     composable(DASHBOARD_DESTINATION) {
         CoursesOverview(
@@ -60,7 +60,7 @@ internal fun CoursesOverview(
     viewModel: CourseOverviewViewModel,
     onLogout: () -> Unit,
     onClickRegisterForCourse: () -> Unit,
-    onViewCourse: (courseId: Int) -> Unit
+    onViewCourse: (courseId: Long) -> Unit
 ) {
     val courses = viewModel.dashboard.collectAsState(initial = DataState.Loading()).value
 

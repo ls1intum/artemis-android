@@ -1,15 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.exercise
 
 import de.tum.informatics.www1.artemis.native_app.core.common.hasPassedFlow
+import de.tum.informatics.www1.artemis.native_app.core.common.isInFutureFlow
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation.InitializationState
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.attachment.Attachment
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -24,7 +23,7 @@ import kotlin.math.roundToInt
 @JsonClassDiscriminator("type") //Default is type anyway, however here I make it explicit
 @Serializable
 sealed class Exercise {
-    abstract val id: Int?
+    abstract val id: Long?
     abstract val title: String?
     abstract val shortName: String?
     abstract val maxPoints: Float?
@@ -136,28 +135,6 @@ sealed class Exercise {
      */
     abstract fun copyWithUpdatedParticipations(newParticipations: List<Participation>): Exercise
 
-    //-------------------------------------------------------------
-    // Copy of https://github.com/ls1intum/Artemis/blob/5c13e2e1b5b6d81594b9123946f040cbf6f0cfc6/src/main/webapp/app/exercises/shared/exercise/exercise.utils.ts
-    // TODO: Remove me once this is calculated on the server.
-
-    private fun isStartExerciseAvailable(exercise: ProgrammingExercise) =
-        exercise.dueDate == null || Clock.System.now() < exercise.dueDate
-
-//    private fun participationStatusForModelingTextFileUploadExercise(participation: Participation): ParticipationStatus {
-//        return if (participation.initializationState == InitializationState.INITIALIZED) {
-//            if (hasDueDataPassed(participation)) ParticipationStatus.ExerciseMissed else ParticipationStatus.ExerciseActive
-//        } else if (participation.initializationState == InitializationState.FINISHED) ParticipationStatus.ExerciseSubmitted(
-//            participation
-//        )
-//        else ParticipationStatus.Uninitialized
-//    }
-
-    private fun hasDueDataPassed(participation: Participation): Boolean {
-        return if (dueDate == null) false else {
-            (getDueDate(participation) ?: return false) > Clock.System.now()
-        }
-    }
-
     fun getDueDate(participation: Participation?): Instant? =
         if (dueDate == null) null else {
             participation?.initializationDate ?: dueDate
@@ -179,4 +156,10 @@ private val Exercise.notSubmittedOrFinished: Boolean
 val Exercise.notEndedSubmittedOrFinished: Flow<Boolean>
     get() = hasEnded.map { hasEnded ->
         !hasEnded && notSubmittedOrFinished
+    }
+
+val Exercise.isStartExerciseAvailable: Flow<Boolean>
+    get() {
+        return if (this !is ProgrammingExercise) flowOf(true)
+        else dueDate?.isInFutureFlow() ?: flowOf(true)
     }

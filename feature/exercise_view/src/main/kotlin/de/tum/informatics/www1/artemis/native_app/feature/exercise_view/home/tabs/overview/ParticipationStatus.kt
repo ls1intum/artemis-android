@@ -9,13 +9,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.ProgrammingExerciseStudentParticipation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isStartExerciseAvailable
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.ProgrammingSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
@@ -28,13 +30,17 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 /**
  * Display the default participation status ui in combination with enhancing options.
  * These additional options are, e.g, a button to inspect the result.
- * @param viewResultInformation called when the user wants to view their latest result.
+ * @param onClickViewResult called when the user wants to view their latest result.
  */
 @Composable
 internal fun ParticipationStatusUi(
     modifier: Modifier,
     exercise: Exercise,
-    viewResultInformation: () -> Unit
+    gradedParticipation: StudentParticipation?,
+    showResult: Boolean = true,
+    onClickStartExercise: () -> Unit,
+    onClickOpenTextExercise: () -> Unit,
+    onClickViewResult: () -> Unit
 ) {
     val templateStatus: ResultTemplateStatus? =
         if (exercise.studentParticipations.isNullOrEmpty()) {
@@ -69,6 +75,43 @@ internal fun ParticipationStatusUi(
             )
 
             if (templateStatus != null) {
+                if (exercise is TextExercise) {
+                    if (gradedParticipation == null && isStartExerciseAvailable(exercise)) {
+                        Button(
+                            modifier = Modifier.align(Alignment.End),
+                            onClick = onClickStartExercise
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.exercise_participation_status_view_start_exercise_button)
+                            )
+                        }
+                    }
+
+                    if (gradedParticipation?.initializationState == Participation.InitializationState.INITIALIZED) {
+                        Button(
+                            modifier = Modifier.align(Alignment.End),
+                            onClick = onClickOpenTextExercise
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.exercise_participation_status_view_open_exercise_button)
+                            )
+                        }
+                    }
+
+                    if (gradedParticipation?.initializationState == Participation.InitializationState.FINISHED &&
+                        (gradedParticipation.results.isNullOrEmpty() || !showResult)
+                    ) {
+                        Button(
+                            modifier = Modifier.align(Alignment.End),
+                            onClick = onClickOpenTextExercise
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.exercise_participation_status_view_view_submission_button)
+                            )
+                        }
+                    }
+                }
+
                 if (templateStatus is ResultTemplateStatus.WithResult && canShowResultDetails(
                         null,
                         templateStatus.result
@@ -76,7 +119,7 @@ internal fun ParticipationStatusUi(
                 ) {
                     Button(
                         modifier = Modifier.align(Alignment.End),
-                        onClick = viewResultInformation
+                        onClick = onClickViewResult
                     ) {
                         Text(text = stringResource(id = R.string.exercise_participation_status_view_result_button))
                     }
@@ -95,4 +138,9 @@ private fun canShowResultDetails(
 
     if (result.submission != null && submission is ProgrammingSubmission && submission.buildFailed == true) return true
     return result.hasFeedback == true
+}
+
+@Composable
+private fun isStartExerciseAvailable(exercise: Exercise): Boolean {
+    return exercise.isStartExerciseAvailable.collectAsState(initial = false).value
 }

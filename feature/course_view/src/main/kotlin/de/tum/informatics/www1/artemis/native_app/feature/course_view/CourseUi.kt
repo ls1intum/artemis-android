@@ -27,20 +27,20 @@ import org.koin.androidx.compose.get
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-fun NavController.navigateToCourse(courseId: Int, builder: NavOptionsBuilder.() -> Unit) {
+fun NavController.navigateToCourse(courseId: Long, builder: NavOptionsBuilder.() -> Unit) {
     navigate("course/$courseId", builder)
 }
 
 fun NavGraphBuilder.course(
     navController: NavController,
-    onNavigateToExercise: (exerciseId: Int) -> Unit,
+    onNavigateToExercise: (exerciseId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     composable("course/{courseId}", arguments = listOf(
-        navArgument("courseId") { type = NavType.IntType; nullable = false }
+        navArgument("courseId") { type = NavType.LongType; nullable = false }
     )) { backStackEntry ->
         val courseId =
-            backStackEntry.arguments?.getInt("courseId")
+            backStackEntry.arguments?.getLong("courseId")
         checkNotNull(courseId)
 
         CourseUi(
@@ -58,9 +58,9 @@ fun NavGraphBuilder.course(
 internal fun CourseUi(
     modifier: Modifier,
     viewModel: CourseViewModel,
-    courseId: Int,
+    courseId: Long,
     navController: NavController,
-    onNavigateToExercise: (exerciseId: Int) -> Unit,
+    onNavigateToExercise: (exerciseId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val courseDataState by viewModel.course.collectAsState(initial = DataState.Loading())

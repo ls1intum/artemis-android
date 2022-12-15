@@ -30,7 +30,7 @@ private const val NESTED_HOME_DESTINATION = "home"
  */
 private const val NESTED_EXERCISE_RESULT_DESTINATION = "view_result"
 
-fun NavController.navigateToExercise(exerciseId: Int, builder: NavOptionsBuilder.() -> Unit) {
+fun NavController.navigateToExercise(exerciseId: Long, builder: NavOptionsBuilder.() -> Unit) {
     navigate("exercise/$exerciseId", builder)
 }
 
@@ -38,13 +38,13 @@ fun NavGraphBuilder.exercise(navController: NavController, onNavigateBack: () ->
     composable(
         route = "exercise/{exerciseId}",
         arguments = listOf(navArgument("exerciseId") {
-            type = NavType.IntType
+            type = NavType.LongType
             nullable = false
         }
         )
     ) { backStackEntry ->
         val exerciseId =
-            backStackEntry.arguments?.getInt("exerciseId")
+            backStackEntry.arguments?.getLong("exerciseId")
         checkNotNull(exerciseId)
 
         val exerciseViewModel = koinViewModel<ExerciseViewModel> { parametersOf(exerciseId) }

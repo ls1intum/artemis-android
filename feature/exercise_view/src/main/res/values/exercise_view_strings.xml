@@ -11,6 +11,12 @@
 
     <string name="exercise_participation_status_title">Your exercise status:</string>
     <string name="exercise_participation_status_view_result_button">View result</string>
+    <string name="exercise_participation_status_view_start_exercise_button">Start exercise</string>
+    <string name="exercise_participation_status_view_open_exercise_button">Open exercise</string>
+    <string name="exercise_participation_status_view_view_submission_button">View submission</string>
+    <string name="exercise_participation_status_view_start_quiz_button">Start quiz</string>
+    <string name="exercise_participation_status_view_practice_quiz_button">Practice</string>
+    <string name="exercise_participation_status_view_open_quiz_button">Open quiz</string>
 
     <string name="exercise_info_title">Exercise info</string>
     <string name="exercise_info_exercise_type">Type</string>

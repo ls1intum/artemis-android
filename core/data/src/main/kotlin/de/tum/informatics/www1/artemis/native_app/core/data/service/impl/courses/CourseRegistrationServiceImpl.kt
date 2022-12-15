@@ -41,7 +41,7 @@ internal class CourseRegistrationServiceImpl(
     override suspend fun registerInCourse(
         serverUrl: String,
         authToken: String,
-        courseId: Int
+        courseId: Long
     ): NetworkResponse<Unit> {
         return performNetworkCall {
             val user: Account = ktorProvider.ktorClient

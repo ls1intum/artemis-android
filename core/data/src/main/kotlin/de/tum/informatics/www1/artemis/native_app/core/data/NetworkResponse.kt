@@ -9,7 +9,6 @@ import kotlin.time.Duration.Companion.seconds
  * Wrapper around network responses. Used to propagate failures correctly.
  */
 sealed class NetworkResponse<T> {
-
     fun <K> bind(transform: (T) -> K): NetworkResponse<K> {
         return when (this) {
             is Failure -> Failure(exception)

@@ -43,7 +43,7 @@ internal class ParticipationServiceImpl(
     companion object Foo {
         private const val PERSONAL_PARTICIPATION_TOPIC = "/user/topic/newResults"
         private const val PERSONAL_NEW_SUBMISSIONS_TOPIC = "/user/topic/newSubmissions"
-        private fun exerciseParticipationTopic(exerciseId: Int) =
+        private fun exerciseParticipationTopic(exerciseId: Long) =
             "/topic/exercise/${exerciseId}/newResults"
     }
 
@@ -70,7 +70,7 @@ internal class ParticipationServiceImpl(
 
     override fun getLatestPendingSubmissionByParticipationIdFlow(
         participationId: Int,
-        exerciseId: Int,
+        exerciseId: Long,
         personal: Boolean,
         fetchPending: Boolean
     ): Flow<ProgrammingSubmissionStateData?> {
