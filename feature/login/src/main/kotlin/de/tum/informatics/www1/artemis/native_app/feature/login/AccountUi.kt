@@ -101,8 +101,7 @@ internal fun AccountScreen(
     onNavigateToRegisterScreen: () -> Unit,
     onLoggedIn: () -> Unit
 ) {
-    val artemisInstance by viewModel.selectedArtemisInstance
-        .collectAsState(initial = ArtemisInstances.TUM_ARTEMIS)
+    val artemisInstance by viewModel.selectedArtemisInstance.collectAsState()
 
     val serverProfileInfo by viewModel.serverProfileInfo.collectAsState(initial = DataState.Suspended())
 
@@ -135,12 +134,12 @@ private fun AccountUi(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-
             ArtemisInstanceSelection(
                 modifier = Modifier
-                    .fillMaxWidth(1f)
-                    .height(80.dp)
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                    .fillMaxWidth(0.8f)
+                    .height(70.dp)
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                    .align(Alignment.End),
                 artemisInstance = artemisInstance,
                 changeUrl = updateServerUrl
             )
@@ -204,7 +203,7 @@ fun ArtemisInstanceSelection(
             modifier = Modifier.weight(2f),
             text = stringResource(id = R.string.account_select_artemis_instance_select_text),
             textAlign = TextAlign.Center,
-            fontSize = 20.sp,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
         )
 
