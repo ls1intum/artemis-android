@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("programming")
 class ProgrammingExerciseStudentParticipation(
-    override val id: Int? = null,
+    override val id: Long? = null,
     override val initializationState: InitializationState? = null,
     override val initializationDate: Instant? = null,
     override val individualDueDate: Instant? = null,

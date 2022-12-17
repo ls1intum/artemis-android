@@ -33,7 +33,7 @@ interface ParticipationService {
      * @param fetchPending whether the latest pending submission should be fetched from the server
      */
     fun getLatestPendingSubmissionByParticipationIdFlow(
-        participationId: Int,
+        participationId: Long,
         exerciseId: Long,
         personal: Boolean,
         fetchPending: Boolean = true
@@ -48,18 +48,18 @@ interface ParticipationService {
     fun subscribeForParticipationChanges(): Flow<StudentParticipation>
 
     sealed class ProgrammingSubmissionStateData(
-        val participationId: Int
+        val participationId: Long
     ) {
         // The last submission of participation has a result.
-        class NoPendingSubmission(participationId: Int) :
+        class NoPendingSubmission(participationId: Long) :
             ProgrammingSubmissionStateData(participationId)
 
         // The submission was created on the server, we assume that the build is running within an expected time frame.
-        class IsBuildingPendingSubmission(participationId: Int, val submission: Submission) :
+        class IsBuildingPendingSubmission(participationId: Long, val submission: Submission) :
             ProgrammingSubmissionStateData(participationId)
 
         // A failed submission is a pending submission that has not received a result within an expected time frame.
-        class FailedSubmission(participationId: Int) :
+        class FailedSubmission(participationId: Long) :
             ProgrammingSubmissionStateData(participationId)
     }
 }

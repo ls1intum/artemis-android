@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.service
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TextSubmission
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.service.TextSubmissionService
 import io.ktor.client.call.body
@@ -47,7 +48,7 @@ class TextSubmissionServiceImpl(
                     appendPathSegments("api", "exercises", exerciseId.toString(), "text-submissions")
                 }
                 contentType(ContentType.Application.Json)
-                setBody(textSubmission)
+                setBody<Submission>(textSubmission)
                 bearerAuth(authToken)
             }.body()
         }

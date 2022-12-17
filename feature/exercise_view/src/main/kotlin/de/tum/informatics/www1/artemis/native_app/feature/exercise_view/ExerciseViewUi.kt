@@ -27,7 +27,8 @@ private const val NESTED_HOME_DESTINATION = "home"
  */
 private const val NESTED_EXERCISE_RESULT_DESTINATION = "view_result"
 
-private const val NESTED_PARTICIPATE_TEXT_EXERCISE_DESTINATION = "participate/text_exercise"
+private const val NESTED_PARTICIPATE_TEXT_EXERCISE_DESTINATION =
+    "participate/text_exercise/{participationId}"
 
 fun NavController.navigateToExercise(exerciseId: Long, builder: NavOptionsBuilder.() -> Unit) {
     navigate("exercise/$exerciseId", builder)
@@ -60,8 +61,8 @@ fun NavGraphBuilder.exercise(navController: NavController, onNavigateBack: () ->
                         nestedNavController.navigate(NESTED_EXERCISE_RESULT_DESTINATION)
                     },
                     navController = navController,
-                    onViewTextExerciseParticipationScreen = {
-                        nestedNavController.navigate(NESTED_PARTICIPATE_TEXT_EXERCISE_DESTINATION)
+                    onViewTextExerciseParticipationScreen = { participationId ->
+                        nestedNavController.navigate("participate/text_exercise/$participationId")
                     }
                 )
             }
@@ -74,10 +75,25 @@ fun NavGraphBuilder.exercise(navController: NavController, onNavigateBack: () ->
                 )
             }
 
-            composable(NESTED_PARTICIPATE_TEXT_EXERCISE_DESTINATION) {
+            composable(
+                NESTED_PARTICIPATE_TEXT_EXERCISE_DESTINATION,
+                arguments = listOf(
+                    navArgument(
+                        "participationId"
+                    ) {
+                        type = NavType.LongType
+                        nullable = false
+                    }
+                )
+            ) { backStackEntry ->
+                val participationId: Long = backStackEntry.arguments?.getLong("participationId")
+                    ?: throw IllegalArgumentException()
+
                 TextExerciseParticipationScreen(
                     modifier = Modifier.fillMaxSize(),
-                    viewModel = exerciseViewModel
+                    viewModel = exerciseViewModel,
+                    participationId = participationId,
+                    onNavigateUp = nestedNavController::navigateUp
                 )
             }
         }
@@ -85,7 +101,12 @@ fun NavGraphBuilder.exercise(navController: NavController, onNavigateBack: () ->
 }
 
 @Composable
-internal fun <T> ExerciseDataStateUi(modifier: Modifier, value: DataState<T>, viewModel: ExerciseViewModel, onSuccess: @Composable BoxScope.(T) -> Unit) {
+internal fun <T> ExerciseDataStateUi(
+    modifier: Modifier,
+    value: DataState<T>,
+    viewModel: ExerciseViewModel,
+    onSuccess: @Composable BoxScope.(T) -> Unit
+) {
     BasicDataStateUi(
         modifier = modifier,
         dataState = value,

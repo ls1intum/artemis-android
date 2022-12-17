@@ -1,7 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view
 
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise.TextExerciseParticipationViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.service.TextEditorService
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.service.TextSubmissionService
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.service.impl.TextEditorServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.service.impl.TextSubmissionServiceImpl
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -23,8 +25,9 @@ val exerciseViewModule = module {
     }
 
     viewModel { params ->
-        TextExerciseParticipationViewModel(params.get())
+        TextExerciseParticipationViewModel(params[0], params[1], get(), get(), get(), get(), get())
     }
 
     single<TextSubmissionService> { TextSubmissionServiceImpl(get()) }
+    single<TextEditorService> { TextEditorServiceImpl(get()) }
 }

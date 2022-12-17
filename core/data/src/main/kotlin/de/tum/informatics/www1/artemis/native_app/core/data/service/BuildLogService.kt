@@ -11,5 +11,5 @@ interface BuildLogService {
      * @param participationId The identifier of the participation.
      * @param resultId The identifier of an optional result to specify which submission to use
      */
-    fun loadBuildLogs(participationId: Int, resultId: Int?, serverUrl: String, bearerToken: String): Flow<DataState<List<BuildLogEntry>>>
+    fun loadBuildLogs(participationId: Long, resultId: Long?, serverUrl: String, bearerToken: String): Flow<DataState<List<BuildLogEntry>>>
 }

@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface ResultService {
     fun getFeedbackDetailsForResult(
-        participationId: Int,
-        resultId: Int,
+        participationId: Long,
+        resultId: Long,
         serverUrl: String,
         bearerToken: String
     ): Flow<DataState<List<Feedback>>>

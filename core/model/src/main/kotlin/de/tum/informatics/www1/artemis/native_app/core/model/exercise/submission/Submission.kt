@@ -2,13 +2,14 @@ package de.tum.informatics.www1.artemis.native_app.core.model.exercise.submissio
 
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import kotlinx.datetime.Instant
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
 
-@JsonClassDiscriminator("type")
+@OptIn(ExperimentalSerializationApi::class)
+@JsonClassDiscriminator("submissionExerciseType")
 @Serializable
 sealed class Submission {
-
     abstract val id: Int?
     abstract val submitted: Boolean?
     abstract val submissionDate: Instant?
@@ -16,4 +17,14 @@ sealed class Submission {
     abstract val durationInMinutes: Float?
     abstract val results: List<Result>?
     abstract val participation: Participation?
+    abstract val submissionType: SubmissionType?
+}
+
+enum class SubmissionType {
+    MANUAL,
+    TIMEOUT,
+    INSTRUCTOR,
+    EXTERNAL,
+    TEST,
+    ILLEGAL
 }

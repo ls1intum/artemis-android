@@ -42,7 +42,7 @@ internal fun ExerciseScreen(
     navController: NavController,
     onNavigateBack: () -> Unit,
     onViewResult: () -> Unit,
-    onViewTextExerciseParticipationScreen: () -> Unit
+    onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit
 ) {
     val exerciseDataState = viewModel.exercise.collectAsState(initial = DataState.Loading()).value
 

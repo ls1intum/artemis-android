@@ -1,7 +1,15 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise
 
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TextSubmission
+
 sealed interface SyncState {
-    object Synced : SyncState
+    data class Synced(val submission: TextSubmission) : SyncState
+
+    /**
+     * The text is not up to date, but we are waiting before actually syncing.
+     */
+    object SyncPending : SyncState
+
     object Syncing : SyncState
-    data class SyncFailed(val retry: () -> Unit) : SyncState
+    object SyncFailed : SyncState
 }

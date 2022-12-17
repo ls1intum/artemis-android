@@ -27,3 +27,13 @@ fun <A, B, C> transformLatest(
     return combine(flow1, flow2) { a, b -> a to b }
         .transformLatest { (a, b) -> transform(a, b) }
 }
+
+fun <A, B, C, D> transformLatest(
+    flow1: Flow<A>,
+    flow2: Flow<B>,
+    flow3: Flow<C>,
+    transform: suspend FlowCollector<D>.(A, B, C) -> Unit
+): Flow<D> {
+    return combine(flow1, flow2, flow3) { a, b, c -> Triple(a, b, c) }
+        .transformLatest { (a, b, c) -> transform(a, b, c) }
+}

@@ -17,8 +17,8 @@ class BuildLogServiceImpl(
 ) : BuildLogService {
 
     override fun loadBuildLogs(
-        participationId: Int,
-        resultId: Int?,
+        participationId: Long,
+        resultId: Long?,
         serverUrl: String,
         bearerToken: String
     ): Flow<DataState<List<BuildLogEntry>>> {

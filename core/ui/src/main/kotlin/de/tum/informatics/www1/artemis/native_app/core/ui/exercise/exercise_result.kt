@@ -17,6 +17,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.*
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.isInDueTime
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.InstructorSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TestSubmission

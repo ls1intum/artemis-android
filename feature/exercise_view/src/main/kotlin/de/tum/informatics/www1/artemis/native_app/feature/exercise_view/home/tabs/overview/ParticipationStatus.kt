@@ -39,7 +39,7 @@ internal fun ParticipationStatusUi(
     gradedParticipation: StudentParticipation?,
     showResult: Boolean = true,
     onClickStartExercise: () -> Unit,
-    onClickOpenTextExercise: () -> Unit,
+    onClickOpenTextExercise: (participationId: Long) -> Unit,
     onClickViewResult: () -> Unit
 ) {
     val templateStatus: ResultTemplateStatus? =
@@ -74,12 +74,15 @@ internal fun ParticipationStatusUi(
                 }
             )
 
+            // TODO: Team mode is currently not supported. Therefore, the buttons are disabled in team mode exercises
+
             if (templateStatus != null) {
                 if (exercise is TextExercise) {
                     if (gradedParticipation == null && isStartExerciseAvailable(exercise)) {
                         Button(
                             modifier = Modifier.align(Alignment.End),
-                            onClick = onClickStartExercise
+                            onClick = onClickStartExercise,
+                            enabled = exercise.teamMode != true
                         ) {
                             Text(
                                 text = stringResource(id = R.string.exercise_participation_status_view_start_exercise_button)
@@ -90,7 +93,12 @@ internal fun ParticipationStatusUi(
                     if (gradedParticipation?.initializationState == Participation.InitializationState.INITIALIZED) {
                         Button(
                             modifier = Modifier.align(Alignment.End),
-                            onClick = onClickOpenTextExercise
+                            onClick = {
+                                onClickOpenTextExercise(
+                                    gradedParticipation.id ?: return@Button
+                                )
+                            },
+                            enabled = exercise.teamMode != true
                         ) {
                             Text(
                                 text = stringResource(id = R.string.exercise_participation_status_view_open_exercise_button)
@@ -103,7 +111,12 @@ internal fun ParticipationStatusUi(
                     ) {
                         Button(
                             modifier = Modifier.align(Alignment.End),
-                            onClick = onClickOpenTextExercise
+                            onClick = {
+                                onClickOpenTextExercise(
+                                    gradedParticipation.id ?: return@Button
+                                )
+                            },
+                            enabled = exercise.teamMode != true
                         ) {
                             Text(
                                 text = stringResource(id = R.string.exercise_participation_status_view_view_submission_button)

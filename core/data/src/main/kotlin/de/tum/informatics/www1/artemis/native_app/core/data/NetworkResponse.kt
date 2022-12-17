@@ -40,3 +40,22 @@ suspend inline fun <T> performNetworkCall(
         NetworkResponse.Failure(e)
     }
 }
+
+suspend inline fun <T> retryNetworkCall(
+    maxRetries: Int = 3,
+    crossinline performNetworkCall: suspend () -> NetworkResponse<T>,
+): NetworkResponse<T> {
+    var tryNum = 0
+    while (true) {
+        return when (val response = performNetworkCall()) {
+            is NetworkResponse.Failure -> if (tryNum >= maxRetries - 1) {
+                response
+            } else {
+                tryNum++
+                continue
+            }
+
+            is NetworkResponse.Response -> response
+        }
+    }
+}

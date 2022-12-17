@@ -80,7 +80,7 @@ internal class ExerciseViewModel(
     /**
      * Emits the exercise updated with the latest participations and results
      */
-    val exercise: Flow<DataState<Exercise>> =
+    val exercise: StateFlow<DataState<Exercise>> =
         fetchedExercise
             .transformLatest { exercise ->
                 when (exercise) {
@@ -106,7 +106,7 @@ internal class ExerciseViewModel(
                     else -> emit(exercise)
                 }
             }
-            .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
+            .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
 
     val latestIndividualDueDate: Flow<DataState<Instant?>> =
         baseConfigurationFlow
@@ -430,7 +430,7 @@ internal class ExerciseViewModel(
         )
     }
 
-    fun startExercise(onStartedSuccessfully: () -> Unit) {
+    fun startExercise(onStartedSuccessfully: (participationId: Long) -> Unit) {
         viewModelScope.launch {
             val serverUrl = serverConfigurationService.serverUrl.first()
             when (val authData = accountService.authenticationData.first()) {
@@ -443,8 +443,10 @@ internal class ExerciseViewModel(
 
                     when (response) {
                         is NetworkResponse.Response -> {
-                            _gradedParticipation.emit(response.data)
-                            onStartedSuccessfully()
+                            val participation = response.data
+
+                            _gradedParticipation.emit(participation)
+                            onStartedSuccessfully(participation.id ?: return@launch)
                         }
                         is NetworkResponse.Failure -> {}
                     }

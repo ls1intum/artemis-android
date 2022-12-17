@@ -16,8 +16,8 @@ internal class ResultServiceImpl(
     private val ktorProvider: KtorProvider
 ) : ResultService {
     override fun getFeedbackDetailsForResult(
-        participationId: Int,
-        resultId: Int,
+        participationId: Long,
+        resultId: Long,
         serverUrl: String,
         bearerToken: String
     ): Flow<DataState<List<Feedback>>> {

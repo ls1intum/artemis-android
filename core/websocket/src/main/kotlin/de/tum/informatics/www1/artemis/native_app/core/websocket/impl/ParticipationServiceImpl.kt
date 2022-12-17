@@ -69,7 +69,7 @@ internal class ParticipationServiceImpl(
             )
 
     override fun getLatestPendingSubmissionByParticipationIdFlow(
-        participationId: Int,
+        participationId: Long,
         exerciseId: Long,
         personal: Boolean,
         fetchPending: Boolean
@@ -156,7 +156,7 @@ internal class ParticipationServiceImpl(
      *
      * @param participationId
      */
-    private fun fetchLatestPendingSubmissionByParticipationId(participationId: Int): Flow<Submission> {
+    private fun fetchLatestPendingSubmissionByParticipationId(participationId: Long): Flow<Submission> {
         //TODO: This is currently broken, the call returns a html site instead.
         return emptyFlow()
 //        return combine(
@@ -210,7 +210,7 @@ internal class ParticipationServiceImpl(
     @Serializable(with = WebsocketProgrammingSubmissionMessage.Deserializer::class)
     private sealed class WebsocketProgrammingSubmissionMessage {
         @Serializable
-        class Error(val error: String, val participationId: Int?) :
+        class Error(val error: String, val participationId: Long?) :
             WebsocketProgrammingSubmissionMessage()
 
         @Serializable(with = ReceivedSubmission.Deserializer::class)

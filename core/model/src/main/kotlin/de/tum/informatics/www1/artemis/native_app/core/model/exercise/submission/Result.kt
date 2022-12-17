@@ -7,8 +7,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.feedback.F
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isResultPreliminary
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.ProgrammingExerciseStudentParticipation
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Instant
@@ -16,7 +14,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Result(
-    val id: Int? = null,
+    val id: Long? = null,
     val completionDate: Instant? = null,
     val successful: Boolean? = null,
     val hasFeedback: Boolean? = null,

@@ -1,19 +1,19 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material.icons.filled.SyncProblem
+import androidx.compose.material.icons.outlined.Pending
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -27,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TextSubmission
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 
 @Composable
@@ -34,17 +36,16 @@ internal fun TextExerciseParticipationUi(
     modifier: Modifier,
     text: String,
     syncState: SyncState,
+    isActive: Boolean,
+    submission: TextSubmission?,
     onUpdateText: (String) -> Unit,
     requestSubmit: () -> Unit
 ) {
-    var displaySubmitDialog by rememberSaveable { mutableStateOf(false) }
 
     Column(modifier = modifier) {
         Header(
             modifier = Modifier.fillMaxWidth(),
-            onClickSubmit = {
-                displaySubmitDialog = true
-            },
+            onClickSubmit = requestSubmit,
             syncState = syncState
         )
 
@@ -52,13 +53,7 @@ internal fun TextExerciseParticipationUi(
             modifier = Modifier.fillMaxSize(),
             value = text,
             onValueChange = onUpdateText,
-        )
-    }
-
-    if (displaySubmitDialog) {
-        SubmitDialog(
-            onSubmit = requestSubmit,
-            dismissRequest = { displaySubmitDialog = false }
+            enabled = isActive && submission != null
         )
     }
 }
@@ -68,7 +63,7 @@ private fun Header(modifier: Modifier, syncState: SyncState, onClickSubmit: () -
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         SyncStateUi(modifier = Modifier.weight(1f), syncState = syncState)
 
-        Button(onClick = onClickSubmit) {
+        Button(onClick = onClickSubmit, enabled = syncState !is SyncState.Synced) {
             Text(text = stringResource(id = R.string.participate_text_exercise_submit_button))
         }
     }
@@ -76,11 +71,15 @@ private fun Header(modifier: Modifier, syncState: SyncState, onClickSubmit: () -
 
 @Composable
 private fun SyncStateUi(modifier: Modifier, syncState: SyncState) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         val statusIconModifier = Modifier
 
         when (syncState) {
-            is SyncState.SyncFailed -> {
+            SyncState.SyncFailed -> {
                 Icon(
                     modifier = statusIconModifier,
                     imageVector = Icons.Default.SyncProblem,
@@ -88,10 +87,18 @@ private fun SyncStateUi(modifier: Modifier, syncState: SyncState) {
                 )
             }
 
-            SyncState.Synced -> {
+            is SyncState.Synced -> {
                 Icon(
                     modifier = statusIconModifier,
                     imageVector = Icons.Default.Done,
+                    contentDescription = null
+                )
+            }
+
+            SyncState.SyncPending -> {
+                Icon(
+                    modifier = statusIconModifier,
+                    imageVector = Icons.Outlined.Pending,
                     contentDescription = null
                 )
             }
@@ -103,35 +110,20 @@ private fun SyncStateUi(modifier: Modifier, syncState: SyncState) {
             }
         }
 
-        val (textId, fontColor) = when (syncState) {
-            is SyncState.SyncFailed -> R.string.participate_text_exercise_failed_sync to MaterialTheme.colorScheme.error
-            SyncState.Synced -> R.string.participate_text_exercise_synced_changes to Color.Unspecified
-            SyncState.Syncing -> R.string.participate_text_exercise_uploading_changes to Color.Unspecified
+        if (syncState != SyncState.SyncPending) {
+            val (textId, fontColor) = when (syncState) {
+                SyncState.SyncFailed -> R.string.participate_text_exercise_failed_sync to MaterialTheme.colorScheme.error
+                is SyncState.Synced -> R.string.participate_text_exercise_synced_changes to Color.Unspecified
+                SyncState.Syncing -> R.string.participate_text_exercise_uploading_changes to Color.Unspecified
+                else -> 0 to Color.Unspecified
+            }
+
+            Text(
+                text = stringResource(id = textId),
+                style = MaterialTheme.typography.labelMedium,
+                color = fontColor
+            )
         }
 
-        Text(
-            text = stringResource(id = textId),
-            color = fontColor,
-            style = MaterialTheme.typography.labelMedium
-        )
     }
-}
-
-@Composable
-private fun SubmitDialog(onSubmit: () -> Unit, dismissRequest: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = dismissRequest,
-        title = { Text(text = stringResource(id = R.string.participate_text_exercise_submit_dialog_title)) },
-        text = { Text(text = stringResource(id = R.string.participate_text_exercise_submit_dialog_message)) },
-        confirmButton = {
-            TextButton(onClick = onSubmit) {
-                Text(text = stringResource(id = R.string.participate_text_exercise_submit_dialog_positive))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = dismissRequest) {
-                Text(text = stringResource(id = R.string.participate_text_exercise_submit_dialog_negative))
-            }
-        }
-    )
 }

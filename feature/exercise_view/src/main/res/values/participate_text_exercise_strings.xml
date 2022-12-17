@@ -6,13 +6,9 @@
     <string name="participate_text_exercise_failed_sync">Could not sync changes with server.</string>
 
     <string name="participate_text_exercise_submit_button">Submit</string>
-    <string name="participate_text_exercise_submit_dialog_title">Submit solution</string>
-    <string name="participate_text_exercise_submit_dialog_message">You can submit multiple times. Your last submission will count towards your score.</string>
-    <string name="participate_text_exercise_submit_dialog_positive">Submit</string>
-    <string name="participate_text_exercise_submit_dialog_negative">@android:string/cancel</string>
 
     <string name="participate_text_exercise_discard_dialog_title">Discard changes?</string>
-    <string name="participate_text_exercise_discard_dialog_message">You have unsaved changes. If you close this screen your changes will be lost.</string>
+    <string name="participate_text_exercise_discard_dialog_message">You have unsaved changes. If you close this screen your changes will be lost. Do you want to discard your changes and leave this screen?</string>
     <string name="participate_text_exercise_discard_dialog_positive">Discard</string>
     <string name="participate_text_exercise_discard_dialog_negative">@android:string/cancel</string>
 </resources>
