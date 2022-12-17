@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.data
 
 import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.seconds
@@ -35,6 +36,9 @@ suspend inline fun <T> performNetworkCall(
         withTimeout(10.seconds) {
             NetworkResponse.Response(perform())
         }
+    } catch (e: CancellationException) {
+        // Hand through cancellation
+        throw e
     } catch (e: Exception) {
         Log.d(TAG, "performNetworkCall threw", e)
         NetworkResponse.Failure(e)

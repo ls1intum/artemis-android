@@ -7,6 +7,8 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -19,7 +21,8 @@ class LoginViewModel(
     private val accountService: AccountService,
     private val serverConfigurationService: ServerConfigurationService,
     private val serverDataService: ServerDataService,
-) : ViewModel() {
+    private val networkStatusProvider: NetworkStatusProvider
+) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverDataService) {
 
     companion object {
         private const val USERNAME_KEY = "username"
@@ -42,11 +45,7 @@ class LoginViewModel(
             username,
             password,
             hasUserAcceptedTerms,
-            serverConfigurationService.serverUrl.transformLatest { serverUrl ->
-                emitAll(
-                    serverDataService.getServerProfileInfo(serverUrl)
-                )
-            }
+            serverProfileInfo
         ) { username, password, userAcceptedTerms, serverProfileInfo ->
             val needsToAcceptTerms = when (serverProfileInfo) {
                 is DataState.Success -> serverProfileInfo.data.needsToAcceptTerms

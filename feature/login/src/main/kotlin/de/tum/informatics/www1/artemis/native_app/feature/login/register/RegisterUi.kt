@@ -32,16 +32,7 @@ private val RegisterViewModel.Status.localizedErrorString: String?
 
 @Composable
 internal fun RegisterUi(modifier: Modifier, viewModel: RegisterViewModel = getViewModel()) {
-    val serverConfigurationService: ServerConfigurationService = get()
-    val serverDataService: ServerDataService = get()
-    val profileInfo: DataState<ProfileInfo> =
-        serverConfigurationService
-            .serverUrl
-            .transformLatest { serverUrl ->
-                emitAll(serverDataService.getServerProfileInfo(serverUrl))
-            }.collectAsState(
-                initial = DataState.Suspended()
-            ).value
+    val profileInfo: DataState<ProfileInfo> = viewModel.serverProfileInfo.collectAsState().value
 
     //If we did not have a profile info, we could not be in this screen.
     if (profileInfo !is DataState.Success) return

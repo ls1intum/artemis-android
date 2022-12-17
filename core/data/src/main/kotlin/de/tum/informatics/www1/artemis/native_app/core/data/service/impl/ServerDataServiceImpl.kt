@@ -19,15 +19,7 @@ internal class ServerDataServiceImpl(
 ) :
     ServerDataService {
 
-    override fun getServerProfileInfo(serverUrl: String): Flow<DataState<ProfileInfo>> {
-        return retryOnInternet(
-            networkStatusProvider.currentNetworkStatus
-        ) {
-            fetchProfileInfo(serverUrl)
-        }
-    }
-
-    private suspend fun fetchProfileInfo(serverUrl: String): NetworkResponse<ProfileInfo> {
+    override suspend fun getServerProfileInfo(serverUrl: String): NetworkResponse<ProfileInfo> {
         return performNetworkCall {
             ktorProvider.ktorClient.get(serverUrl) {
                 url { appendPathSegments("management", "info") }

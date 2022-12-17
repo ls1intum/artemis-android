@@ -39,6 +39,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.account.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginScreen
 import org.koin.androidx.compose.getStateViewModel
 import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 import java.io.IOException
 
 const val LOGIN_DESTINATION = "login"
@@ -95,7 +96,7 @@ fun NavGraphBuilder.loginScreen(
 @Composable
 internal fun AccountScreen(
     modifier: Modifier,
-    viewModel: AccountViewModel = getStateViewModel(),
+    viewModel: AccountViewModel = koinViewModel(),
     onNavigateToLoginScreen: () -> Unit,
     onNavigateToRegisterScreen: () -> Unit,
     onLoggedIn: () -> Unit

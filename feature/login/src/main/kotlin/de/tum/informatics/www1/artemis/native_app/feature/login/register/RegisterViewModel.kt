@@ -4,15 +4,24 @@ import android.util.Patterns
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.Constants
+import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
+import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /**
  * Handle the registration ui.
  */
-class RegisterViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
+class RegisterViewModel(
+    private val savedStateHandle: SavedStateHandle,
+    serverConfigurationService: ServerConfigurationService,
+    serverDataService: ServerDataService,
+    networkStatusProvider: NetworkStatusProvider
+) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverDataService) {
 
     private companion object {
         private val usernameRegex = "^[a-zA-Z0-9]*".toRegex()

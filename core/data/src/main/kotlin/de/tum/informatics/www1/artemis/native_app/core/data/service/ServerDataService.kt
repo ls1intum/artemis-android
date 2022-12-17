@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.data.service
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import kotlinx.coroutines.flow.Flow
 
 interface ServerDataService {
@@ -10,7 +11,7 @@ interface ServerDataService {
     /**
      * Load the server profile info for the given server url.
      */
-    fun getServerProfileInfo(serverUrl: String): Flow<DataState<ProfileInfo>>
+    suspend fun getServerProfileInfo(serverUrl: String): NetworkResponse<ProfileInfo>
 
     fun getAccountData(serverUrl: String, bearerToken: String): Flow<DataState<Account>>
 }

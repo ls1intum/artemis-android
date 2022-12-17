@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataSe
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.transformLatest
 import org.koin.androidx.compose.get
 
@@ -43,15 +44,10 @@ private fun <T> fromProfileInfo(
     dataState: DataState<ProfileInfo>,
     default: T,
     onSuccess: (ProfileInfo) -> T
-): T {
-    return when (dataState) {
-        is DataState.Success -> onSuccess(dataState.data)
-        else -> default
-    }
-}
+): T = dataState.bind(onSuccess).orElse(default)
 
 @Composable
-fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Unit) {
+internal fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Unit) {
     val username by viewModel.username.collectAsState(initial = "")
     val password by viewModel.password.collectAsState(initial = "")
     val rememberMe by viewModel.rememberMe.collectAsState(initial = false)
@@ -64,16 +60,9 @@ fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Uni
     val serverConfigurationService: ServerConfigurationService = get()
     val serverDataService: ServerDataService = get()
 
-    @Suppress("MoveVariableDeclarationIntoWhen")
-    val profileInfo =
-        serverConfigurationService
-            .serverUrl
-            .transformLatest { serverUrl ->
-                emitAll(serverDataService.getServerProfileInfo(serverUrl))
-            }
-            .collectAsState(initial = DataState.Loading()).value
+    val profileInfo = viewModel.serverProfileInfo.collectAsState().value
 
-    val accountName = fromProfileInfo(profileInfo, "") { it.accountName ?: "" }
+    val accountName = fromProfileInfo(profileInfo, "") { it.accountName.orEmpty() }
 
     val needsToAcceptTerms = fromProfileInfo(profileInfo, false) { it.needsToAcceptTerms }
 
@@ -156,7 +145,7 @@ fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Uni
  * @param saml2Config see [de.tum.informatics.www1.artemis.native_app.core.server_config.ProfileInfo.saml2]
  */
 @Composable
-fun LoginUi(
+internal fun LoginUi(
     modifier: Modifier,
     username: String,
     password: String,
