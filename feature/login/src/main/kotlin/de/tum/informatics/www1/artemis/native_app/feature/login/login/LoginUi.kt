@@ -3,6 +3,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.login.login
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -10,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,9 +60,6 @@ internal fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: 
 
     var displayLoginFailedDialog by rememberSaveable { mutableStateOf(false) }
     var displayPerformLoginDialog by rememberSaveable { mutableStateOf(false) }
-
-    val serverConfigurationService: ServerConfigurationService = get()
-    val serverDataService: ServerDataService = get()
 
     val profileInfo = viewModel.serverProfileInfo.collectAsState().value
 
@@ -245,6 +246,13 @@ private fun PasswordBasedLogin(
     isLoginButtonEnabled: Boolean,
     onClickLogin: () -> Unit
 ) {
+    var showPasswordPlaintext by rememberSaveable { mutableStateOf(false) }
+    val visualTransformation = remember(showPasswordPlaintext) {
+        if (showPasswordPlaintext) {
+            VisualTransformation.None
+        } else PasswordVisualTransformation()
+    }
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -261,7 +269,16 @@ private fun PasswordBasedLogin(
             value = password,
             onValueChange = updatePassword,
             label = { Text(text = stringResource(id = R.string.login_password_label)) },
-            visualTransformation = remember { PasswordVisualTransformation() }
+            visualTransformation = visualTransformation,
+            trailingIcon = {
+                IconButton(onClick = { showPasswordPlaintext = !showPasswordPlaintext }) {
+                    Icon(
+                        imageVector = if (!showPasswordPlaintext) Icons.Default.VisibilityOff
+                        else Icons.Default.Visibility,
+                        contentDescription = null
+                    )
+                }
+            }
         )
 
         RememberLoginCheckBox(
