@@ -18,11 +18,13 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.feedback.Feedback
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.BuildLogEntry
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.ProgrammingSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationService
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -89,18 +91,19 @@ internal class ExerciseViewModel(
 
                         emit(exercise)
 
-                        emitAll(
-                            participationService
-                                .personalSubmissionUpdater.filter { result -> result.participation?.exercise?.id == exerciseId }
-                                .transformLatest inner@{ result ->
-                                    val participation = result.participation ?: return@inner
+                        val newParticipationsFlow =
+                            merge(
+                                participationService
+                                    .personalSubmissionUpdater.filter { result -> result.participation?.exercise?.id == exerciseId }
+                                    .mapNotNull { it.participation },
+                                _gradedParticipation
+                            )
 
-                                    currentExercise =
-                                        currentExercise.withUpdatedParticipation(participation)
+                        newParticipationsFlow.collect { participation ->
+                            currentExercise = currentExercise.withUpdatedParticipation(participation)
 
-                                    emit(DataState.Success(currentExercise))
-                                }
-                        )
+                            emit(DataState.Success(currentExercise))
+                        }
                     }
 
                     else -> emit(exercise)
@@ -253,8 +256,8 @@ internal class ExerciseViewModel(
     /**
      * Emitted to when startExercise is successful
      */
-    private val _gradedParticipation = MutableSharedFlow<StudentParticipation>()
-    val gradedParticipation: Flow<StudentParticipation?> = merge<StudentParticipation?>(
+    private val _gradedParticipation = MutableSharedFlow<Participation>()
+    val gradedParticipation: Flow<Participation?> = merge<Participation?>(
         _gradedParticipation,
         exercise
             .filterSuccess()

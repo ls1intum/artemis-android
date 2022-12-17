@@ -104,7 +104,7 @@ internal fun CourseUi(
                             onClick = { selectedTabIndex = index },
                             text = { Text(text = text) },
                             icon = { Icon(icon, contentDescription = null) },
-                            enabled = index == 0 || index == 2
+                            enabled = index == 0 || index == 2,
                         )
                     }
 
@@ -115,7 +115,8 @@ internal fun CourseUi(
                     )
                     CourseTab(
                         1,
-                        stringResource(id = R.string.course_ui_tab_lectures),
+//                        stringResource(id = R.string.course_ui_tab_lectures),
+                        "Coming soon",
                         Icons.Default.School
                     )
                     CourseTab(
@@ -125,7 +126,8 @@ internal fun CourseUi(
                     )
                     CourseTab(
                         3,
-                        stringResource(id = R.string.course_ui_tab_other),
+//                        stringResource(id = R.string.course_ui_tab_other),
+                        "Coming soon",
                         Icons.Default.MoreHoriz
                     )
 

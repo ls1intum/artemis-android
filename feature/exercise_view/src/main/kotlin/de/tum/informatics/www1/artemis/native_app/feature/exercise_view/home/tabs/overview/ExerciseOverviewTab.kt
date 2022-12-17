@@ -5,13 +5,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 
 @Composable
 internal fun ExerciseOverviewTab(
     modifier: Modifier,
     exercise: Exercise,
-    gradedParticipation: StudentParticipation?,
+    gradedParticipation: Participation?,
     onClickStartExercise: () -> Unit,
     onClickOpenTextExercise: (participationId: Long) -> Unit,
     onViewResult: () -> Unit

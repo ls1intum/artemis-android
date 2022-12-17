@@ -36,7 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 internal fun ParticipationStatusUi(
     modifier: Modifier,
     exercise: Exercise,
-    gradedParticipation: StudentParticipation?,
+    gradedParticipation: Participation?,
     showResult: Boolean = true,
     onClickStartExercise: () -> Unit,
     onClickOpenTextExercise: (participationId: Long) -> Unit,
@@ -76,19 +76,19 @@ internal fun ParticipationStatusUi(
 
             // TODO: Team mode is currently not supported. Therefore, the buttons are disabled in team mode exercises
 
+            if (gradedParticipation == null && isStartExerciseAvailable(exercise)) {
+                Button(
+                    modifier = Modifier.align(Alignment.End),
+                    onClick = onClickStartExercise,
+                    enabled = exercise.teamMode != true
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.exercise_participation_status_view_start_exercise_button)
+                    )
+                }
+            }
             if (templateStatus != null) {
                 if (exercise is TextExercise) {
-                    if (gradedParticipation == null && isStartExerciseAvailable(exercise)) {
-                        Button(
-                            modifier = Modifier.align(Alignment.End),
-                            onClick = onClickStartExercise,
-                            enabled = exercise.teamMode != true
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.exercise_participation_status_view_start_exercise_button)
-                            )
-                        }
-                    }
 
                     if (gradedParticipation?.initializationState == Participation.InitializationState.INITIALIZED) {
                         Button(

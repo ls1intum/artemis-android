@@ -5,16 +5,13 @@ plugins {
     id("com.google.firebase.appdistribution")
 }
 
-val kotlinVersion = "1.7.0"
-val coroutinesVersion = "1.6.4"
-
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
     defaultConfig {
         applicationId = "de.tum.informatics.www1.artemis.native_app.android"
-        versionCode = 2
-        versionName = "0.1.1"
+        versionCode = 3
+        versionName = "0.1.2"
     }
     packagingOptions {
         resources {

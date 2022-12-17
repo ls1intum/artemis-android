@@ -215,7 +215,8 @@ fun ArtemisInstanceSelection(
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
@@ -235,8 +236,7 @@ fun ArtemisInstanceSelection(
                     imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = null,
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f)
+                        .size(40.dp)
                         .padding(horizontal = 4.dp)
                 )
 

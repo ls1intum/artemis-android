@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.data.service.impl
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseExerciseService
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
@@ -19,7 +20,7 @@ class CourseExerciseServiceImpl(
         exerciseId: Long,
         serverUrl: String,
         authToken: String
-    ): NetworkResponse<StudentParticipation> {
+    ): NetworkResponse<Participation> {
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
