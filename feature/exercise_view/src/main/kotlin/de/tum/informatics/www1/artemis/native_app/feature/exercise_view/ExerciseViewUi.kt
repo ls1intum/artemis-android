@@ -31,16 +31,16 @@ private const val NESTED_PARTICIPATE_TEXT_EXERCISE_DESTINATION =
     "participate/text_exercise/{participationId}"
 
 fun NavController.navigateToExercise(exerciseId: Long, builder: NavOptionsBuilder.() -> Unit) {
-    navigate("exercise/$exerciseId", builder)
+    navigate("exercise?$exerciseId", builder)
 }
 
 fun NavGraphBuilder.exercise(
     navController: NavController,
     onNavigateBack: () -> Unit,
-    onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit
+    onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit
 ) {
     composable(
-        route = "exercise/{exerciseId}",
+        route = "exercise?{exerciseId}",
         arguments = listOf(navArgument("exerciseId") {
             type = NavType.LongType
             nullable = false
@@ -68,8 +68,8 @@ fun NavGraphBuilder.exercise(
                     onViewTextExerciseParticipationScreen = { participationId ->
                         nestedNavController.navigate("participate/text_exercise/$participationId")
                     },
-                    onParticipateInQuiz = { isPractice ->
-                        onParticipateInQuiz(exerciseId, isPractice)
+                    onParticipateInQuiz = { courseId, isPractice ->
+                        onParticipateInQuiz(courseId, exerciseId, isPractice)
                     }
                 )
             }

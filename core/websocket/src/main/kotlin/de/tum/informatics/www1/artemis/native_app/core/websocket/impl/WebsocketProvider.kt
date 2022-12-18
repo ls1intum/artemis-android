@@ -111,6 +111,24 @@ class WebsocketProvider(
                 replay = 1
             )
 
+    @OptIn(DelicateCoroutinesApi::class)
+    val isConnected: Flow<Boolean> =
+        session.transformLatest { _ ->
+            emit(true)
+
+            // Wait for error
+            onWebsocketError.first()
+
+            // After error, we emit false, then wait for a new session.
+            emit(false)
+        }
+            .onStart { emit(false) }
+            .shareIn(
+                scope = GlobalScope,
+                started = SharingStarted.WhileSubscribed(),
+                replay = 1
+            )
+
     /**
      * Returns a flow that automatically unsubscribes once the collector is inactive.
      * The given flow can only be subscribed to once.

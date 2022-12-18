@@ -13,11 +13,13 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quizEnded
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.service.QuizExerciseService
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -43,8 +46,8 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 internal class QuizParticipationViewModel(
-    val courseId: Long,
-    val exerciseId: Long,
+    private val courseId: Long,
+    private val exerciseId: Long,
     val quizType: QuizType,
     private val quizExerciseService: QuizExerciseService,
     private val networkStatusProvider: NetworkStatusProvider,
@@ -94,19 +97,35 @@ internal class QuizParticipationViewModel(
         QuizType.PRACTICE -> emptyFlow()
     }
 
+    val isConnected: Flow<Boolean> = websocketProvider.isConnected
+        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+
+    private val retryLoadExercise = MutableSharedFlow<Unit>()
+
     /**
      * In live quizzes, a participation is loaded to get the exercise.
      */
     private val initialParticipationDataState: StateFlow<DataState<Participation>> =
         when (quizType) {
-            QuizType.LIVE -> transformLatest(
-                serverConfigurationService.serverUrl,
-                accountService.authToken
-            ) { serverUrl, authToken ->
-                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                    participationService.findParticipation(exerciseId, serverUrl, authToken)
-                }
-            }
+            QuizType.LIVE ->
+                retryLoadExercise
+                    .onStart { emit(Unit) }
+                    .flatMapLatest {
+                        transformLatest(
+                            serverConfigurationService.serverUrl,
+                            accountService.authToken
+                        ) { serverUrl, authToken ->
+                            emitAll(
+                                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                                    participationService.findParticipation(
+                                        exerciseId,
+                                        serverUrl,
+                                        authToken
+                                    )
+                                }
+                            )
+                        }
+                    }
 
             QuizType.PRACTICE -> emptyFlow<DataState<Participation>>()
         }
@@ -120,7 +139,7 @@ internal class QuizParticipationViewModel(
         .onStart { emit(initialParticipation.first()) }
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
-    private val quizExerciseDataState: StateFlow<DataState<QuizExercise>> = when (quizType) {
+    val quizExerciseDataState: StateFlow<DataState<QuizExercise>> = when (quizType) {
         QuizType.LIVE -> {
             initialParticipationDataState.map { participationDataState ->
                 participationDataState.transform { participation ->
@@ -133,23 +152,38 @@ internal class QuizParticipationViewModel(
         }
 
         QuizType.PRACTICE -> {
-            transformLatest(
-                serverConfigurationService.serverUrl,
-                accountService.authToken
-            ) { serverUrl, authToken ->
-                retryOnInternet(
-                    networkStatusProvider.currentNetworkStatus
-                ) {
-                    quizExerciseService.findForStudent(
-                        exerciseId,
-                        serverUrl,
-                        authToken
-                    )
+            retryLoadExercise
+                .onStart { emit(Unit) }
+                .flatMapLatest {
+                    transformLatest(
+                        serverConfigurationService.serverUrl,
+                        accountService.authToken
+                    ) { serverUrl, authToken ->
+                        retryOnInternet(
+                            networkStatusProvider.currentNetworkStatus
+                        ) {
+                            quizExerciseService.findForStudent(
+                                exerciseId,
+                                serverUrl,
+                                authToken
+                            )
+                        }
+                    }
                 }
-            }
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+
+    val quizQuestions: Flow<List<QuizQuestion>> = quizExerciseDataState
+        .filterSuccess()
+        .map { quizExercise ->
+            if (quizExercise.randomizeQuestionOrder == true) {
+                quizExercise.quizQuestions.shuffled()
+            } else {
+                quizExercise.quizQuestions
+            }
+        }
+        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
     private val batchUpdater: Flow<QuizExercise> = when (quizType) {
         QuizType.LIVE -> {
@@ -182,7 +216,7 @@ internal class QuizParticipationViewModel(
     }
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
-    private val quizBatch: Flow<QuizExercise.QuizBatch?> =
+    val quizBatch: Flow<QuizExercise.QuizBatch?> =
         quizExercise.map { it.quizBatches.orEmpty().firstOrNull() }
 
     val startDate: Flow<Instant> = when (quizType) {
@@ -251,6 +285,18 @@ internal class QuizParticipationViewModel(
                 submission,
                 QuizSubmission.serializer()
             )
+        }
+    }
+
+    fun retryLoadExercise() {
+        viewModelScope.launch {
+            retryLoadExercise.emit(Unit)
+        }
+    }
+
+    fun reconnectWebsocket() {
+        viewModelScope.launch {
+            websocketProvider.requestTryReconnect()
         }
     }
 

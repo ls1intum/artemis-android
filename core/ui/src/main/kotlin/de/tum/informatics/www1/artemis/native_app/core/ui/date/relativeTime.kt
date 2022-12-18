@@ -29,7 +29,7 @@ fun getRelativeTime(to: Instant): CharSequence {
                 )
             )
 
-            val timeDifference = now - to
+            val timeDifference = (now - to).absoluteValue
             when {
                 timeDifference < 1.minutes -> {
                     delay(1.seconds)

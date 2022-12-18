@@ -101,10 +101,10 @@ class MainActivity : AppCompatActivity() {
                     exercise(
                         navController = navController,
                         onNavigateBack = navController::navigateUp,
-                        onParticipateInQuiz = { exerciseId, isPractice ->
+                        onParticipateInQuiz = { courseId, exerciseId, isPractice ->
                             val quizType = if(isPractice) QuizType.PRACTICE else QuizType.LIVE
 
-                            navController.navigateToQuizParticipation(exerciseId, quizType)
+                            navController.navigateToQuizParticipation(courseId, exerciseId, quizType)
                         }
                     )
 

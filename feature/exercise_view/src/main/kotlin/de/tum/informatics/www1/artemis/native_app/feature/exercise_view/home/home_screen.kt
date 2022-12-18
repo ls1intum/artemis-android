@@ -43,7 +43,7 @@ internal fun ExerciseScreen(
     onNavigateBack: () -> Unit,
     onViewResult: () -> Unit,
     onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit,
-    onParticipateInQuiz: (isPractice: Boolean) -> Unit
+    onParticipateInQuiz: (courseId: Long, isPractice: Boolean) -> Unit
 ) {
     val exerciseDataState = viewModel.exercise.collectAsState(initial = DataState.Loading()).value
 
@@ -150,6 +150,8 @@ internal fun ExerciseScreen(
                             initial = null
                         ).value
 
+                        val courseId: Long = exercise.course?.id ?: return@Column
+
                         ExerciseOverviewTab(
                             modifier = tabModifier,
                             exercise = exercise,
@@ -160,13 +162,13 @@ internal fun ExerciseScreen(
                             },
                             onClickOpenTextExercise = onViewTextExerciseParticipationScreen,
                             onClickPracticeQuiz = {
-                                onParticipateInQuiz(true)
+                                onParticipateInQuiz(courseId, true)
                             },
                             onClickStartQuiz = {
-                                onParticipateInQuiz(false)
+                                onParticipateInQuiz(courseId, false)
                             },
                             onClickOpenQuiz = {
-                                onParticipateInQuiz(false)
+                                onParticipateInQuiz(courseId, false)
                             }
                         )
                     }

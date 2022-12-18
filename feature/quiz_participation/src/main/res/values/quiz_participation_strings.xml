@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="quiz_participation_loading">Loading quiz…</string>
+    <string name="quiz_participation_failure">Something went wrong while loading your quiz.</string>
+    <string name="quiz_participation_suspended">Your internet connection may be unstable.</string>
+    <string name="quiz_participation_retry">Try again</string>
+
+    <string name="quiz_participation_wait_for_start_please_wait">Please wait.</string>
+    <string name="quiz_participation_wait_for_start_explanation">The quiz will automatically be displayed once it is started.</string>
+    <string name="quiz_participation_wait_for_start_refresh_button">Refresh</string>
+    <string name="quiz_participation_wait_for_start_time_until_start">Time until planned start: %1$s.</string>
+
+    <string name="quiz_participation_connection_status_connected">Connected</string>
+    <string name="quiz_participation_connection_status_not_connected">Not connected</string>
+</resources>
