@@ -22,6 +22,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.navigate
 import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATION
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.QuizType
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.navigateToQuizParticipation
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.quizParticipation
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
@@ -97,7 +100,12 @@ class MainActivity : AppCompatActivity() {
 
                     exercise(
                         navController = navController,
-                        onNavigateBack = navController::navigateUp
+                        onNavigateBack = navController::navigateUp,
+                        onParticipateInQuiz = { exerciseId, isPractice ->
+                            val quizType = if(isPractice) QuizType.PRACTICE else QuizType.LIVE
+
+                            navController.navigateToQuizParticipation(exerciseId, quizType)
+                        }
                     )
 
                     standalonePostScreen(
@@ -114,6 +122,10 @@ class MainActivity : AppCompatActivity() {
                                 ViewType.POST
                             ) {}
                         }
+                    )
+
+                    quizParticipation(
+                        onLeaveQuiz = navController::navigateUp
                     )
                 }
             }

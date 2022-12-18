@@ -1,10 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.exercise
 
+import de.tum.informatics.www1.artemis.native_app.core.common.hasPassedFlow
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.attachment.Attachment
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
@@ -25,7 +27,7 @@ data class QuizExercise(
     override val mode: Mode = Mode.INDIVIDUAL,
     override val categories: List<Category> = emptyList(),
     override val visibleToStudents: Boolean? = null,
-    override val teamMode: Boolean? = null,
+    override val teamMode: Boolean = false,
     override val studentAssignedTeamId: Long? = null,
     override val studentAssignedTeamIdComputed: Boolean = false,
     override val problemStatement: String? = null,
@@ -105,3 +107,6 @@ val QuizExercise.isUninitialized: Flow<Boolean>
 
 val QuizExercise.notStarted: Flow<Boolean>
     get() = notEndedSubmittedOrFinished.map { it && !statedQuizBatch }
+
+val QuizExercise.quizEnded: Flow<Boolean>
+    get() = dueDate?.hasPassedFlow() ?: flowOf(false)

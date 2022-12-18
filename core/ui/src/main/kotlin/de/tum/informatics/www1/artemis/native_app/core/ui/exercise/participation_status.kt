@@ -82,8 +82,8 @@ private fun getSubmissionResultStatusText(exercise: Exercise): String {
     return stringResource(id = id)
 }
 
-private val QuizExercise.isUninitializedC: Boolean
+val QuizExercise.isUninitializedC: Boolean
     @Composable get() = isUninitialized.collectAsState(initial = false).value
 
-private val QuizExercise.notStartedC: Boolean
+val QuizExercise.notStartedC: Boolean
     @Composable get() = notStarted.collectAsState(initial = false).value

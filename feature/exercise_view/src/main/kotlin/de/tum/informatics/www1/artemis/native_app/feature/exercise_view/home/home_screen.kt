@@ -42,7 +42,8 @@ internal fun ExerciseScreen(
     navController: NavController,
     onNavigateBack: () -> Unit,
     onViewResult: () -> Unit,
-    onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit
+    onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit,
+    onParticipateInQuiz: (isPractice: Boolean) -> Unit
 ) {
     val exerciseDataState = viewModel.exercise.collectAsState(initial = DataState.Loading()).value
 
@@ -157,7 +158,16 @@ internal fun ExerciseScreen(
                             onClickStartExercise = {
                                 viewModel.startExercise(onViewTextExerciseParticipationScreen)
                             },
-                            onClickOpenTextExercise = onViewTextExerciseParticipationScreen
+                            onClickOpenTextExercise = onViewTextExerciseParticipationScreen,
+                            onClickPracticeQuiz = {
+                                onParticipateInQuiz(true)
+                            },
+                            onClickStartQuiz = {
+                                onParticipateInQuiz(false)
+                            },
+                            onClickOpenQuiz = {
+                                onParticipateInQuiz(false)
+                            }
                         )
                     }
 

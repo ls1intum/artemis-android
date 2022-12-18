@@ -14,17 +14,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.hasEnded
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isStartExerciseAvailable
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.ProgrammingSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.isPreliminary
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ParticipationStatusUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ResultTemplateStatus
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.computeTemplateStatus
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.isUninitializedC
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.notStartedC
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 
 /**
@@ -40,7 +45,10 @@ internal fun ParticipationStatusUi(
     showResult: Boolean = true,
     onClickStartExercise: () -> Unit,
     onClickOpenTextExercise: (participationId: Long) -> Unit,
-    onClickViewResult: () -> Unit
+    onClickViewResult: () -> Unit,
+    onClickPracticeQuiz: () -> Unit,
+    onClickStartQuiz: () -> Unit,
+    onClickOpenQuiz: () -> Unit
 ) {
     val templateStatus: ResultTemplateStatus? =
         if (exercise.studentParticipations.isNullOrEmpty()) {
@@ -76,29 +84,68 @@ internal fun ParticipationStatusUi(
 
             // TODO: Team mode is currently not supported. Therefore, the buttons are disabled in team mode exercises
 
-            if (gradedParticipation == null && isStartExerciseAvailable(exercise)) {
-                Button(
-                    modifier = Modifier.align(Alignment.End),
-                    onClick = onClickStartExercise,
-                    enabled = exercise.teamMode != true
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.exercise_participation_status_view_start_exercise_button)
-                    )
+            val buttonModifier = Modifier.align(Alignment.End)
+            if (exercise is TextExercise) {
+                if (gradedParticipation == null && isStartExerciseAvailable(exercise)) {
+                    Button(
+                        modifier = buttonModifier,
+                        onClick = onClickStartExercise,
+                        enabled = !exercise.teamMode
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.exercise_participation_status_view_start_exercise_button)
+                        )
+                    }
                 }
             }
+
+            if (exercise is QuizExercise) {
+                if (isStartPracticeAvailable(exercise = exercise)) {
+
+                    Button(
+                        modifier = buttonModifier,
+                        onClick = { onClickPracticeQuiz() }
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.exercise_participation_status_view_practice_quiz_button)
+                        )
+                    }
+                }
+
+                val openQuizAvailable =
+                    exercise.notStartedC || gradedParticipation?.initializationState == Participation.InitializationState.INITIALIZED
+                val startQuizAvailable = exercise.isUninitializedC
+
+
+                if (openQuizAvailable || startQuizAvailable) {
+                    Button(
+                        modifier = buttonModifier,
+                        onClick = {
+                            if (openQuizAvailable) onClickOpenQuiz()
+                            else onClickStartQuiz()
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(
+                                id = if (openQuizAvailable) R.string.exercise_participation_status_view_open_quiz_button
+                                else R.string.exercise_participation_status_view_start_quiz_button
+                            )
+                        )
+                    }
+                }
+            }
+
             if (templateStatus != null) {
                 if (exercise is TextExercise) {
-
                     if (gradedParticipation?.initializationState == Participation.InitializationState.INITIALIZED) {
                         Button(
-                            modifier = Modifier.align(Alignment.End),
+                            modifier = buttonModifier,
                             onClick = {
                                 onClickOpenTextExercise(
                                     gradedParticipation.id ?: return@Button
                                 )
                             },
-                            enabled = exercise.teamMode != true
+                            enabled = !exercise.teamMode
                         ) {
                             Text(
                                 text = stringResource(id = R.string.exercise_participation_status_view_open_exercise_button)
@@ -110,13 +157,13 @@ internal fun ParticipationStatusUi(
                         (gradedParticipation.results.isNullOrEmpty() || !showResult)
                     ) {
                         Button(
-                            modifier = Modifier.align(Alignment.End),
+                            modifier = buttonModifier,
                             onClick = {
                                 onClickOpenTextExercise(
                                     gradedParticipation.id ?: return@Button
                                 )
                             },
-                            enabled = exercise.teamMode != true
+                            enabled = !exercise.teamMode
                         ) {
                             Text(
                                 text = stringResource(id = R.string.exercise_participation_status_view_view_submission_button)
@@ -131,7 +178,7 @@ internal fun ParticipationStatusUi(
                     )
                 ) {
                     Button(
-                        modifier = Modifier.align(Alignment.End),
+                        modifier = buttonModifier,
                         onClick = onClickViewResult
                     ) {
                         Text(text = stringResource(id = R.string.exercise_participation_status_view_result_button))
@@ -157,3 +204,28 @@ private fun canShowResultDetails(
 private fun isStartExerciseAvailable(exercise: Exercise): Boolean {
     return exercise.isStartExerciseAvailable.collectAsState(initial = false).value
 }
+
+/**
+ * The start practice button should be available for programming and quiz exercises
+ * - For quizzes when they are open for practice and the regular work periode is over
+ * - For programming exercises when it's after the due date
+ */
+@Composable
+private fun isStartPracticeAvailable(exercise: Exercise): Boolean {
+    return when (exercise) {
+        is QuizExercise -> {
+            exercise.isOpenForPractice == true && hasQuizEnded(exercise)
+        }
+
+        is ProgrammingExercise -> {
+            val dueDate = exercise.dueDate
+            dueDate != null && dueDate.hasPassed() && !exercise.teamMode
+        }
+
+        else -> false
+    }
+}
+
+@Composable
+private fun hasQuizEnded(quizExercise: QuizExercise): Boolean =
+    quizExercise.hasEnded.collectAsState(initial = false).value

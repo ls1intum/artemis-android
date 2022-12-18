@@ -15,6 +15,9 @@ internal fun ExerciseOverviewTab(
     gradedParticipation: Participation?,
     onClickStartExercise: () -> Unit,
     onClickOpenTextExercise: (participationId: Long) -> Unit,
+    onClickPracticeQuiz: () -> Unit,
+    onClickStartQuiz: () -> Unit,
+    onClickOpenQuiz: () -> Unit,
     onViewResult: () -> Unit
 ) {
     Column(modifier = modifier) {
@@ -28,7 +31,10 @@ internal fun ExerciseOverviewTab(
             gradedParticipation = gradedParticipation,
             onClickViewResult = onViewResult,
             onClickStartExercise = onClickStartExercise,
-            onClickOpenTextExercise = onClickOpenTextExercise
+            onClickOpenTextExercise = onClickOpenTextExercise,
+            onClickOpenQuiz = onClickOpenQuiz,
+            onClickPracticeQuiz = onClickPracticeQuiz,
+            onClickStartQuiz = onClickStartQuiz
         )
     }
 }

@@ -22,7 +22,7 @@ data class FileUploadExercise(
     override val mode: Mode = Mode.INDIVIDUAL,
     override val categories: List<Category> = emptyList(),
     override val visibleToStudents: Boolean? = null,
-    override val teamMode: Boolean? = null,
+    override val teamMode: Boolean = false,
     override val studentAssignedTeamId: Long? = null,
     override val studentAssignedTeamIdComputed: Boolean = false,
     override val problemStatement: String? = null,

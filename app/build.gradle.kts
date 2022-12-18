@@ -40,6 +40,7 @@ dependencies {
     implementation(project(":feature:dashboard"))
     implementation(project(":feature:login"))
     implementation(project(":feature:exercise_view"))
+    implementation(project(":feature:quiz_participation"))
 
     implementation(libs.androidx.appcompat)
 

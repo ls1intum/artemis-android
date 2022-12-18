@@ -34,7 +34,11 @@ fun NavController.navigateToExercise(exerciseId: Long, builder: NavOptionsBuilde
     navigate("exercise/$exerciseId", builder)
 }
 
-fun NavGraphBuilder.exercise(navController: NavController, onNavigateBack: () -> Unit) {
+fun NavGraphBuilder.exercise(
+    navController: NavController,
+    onNavigateBack: () -> Unit,
+    onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit
+) {
     composable(
         route = "exercise/{exerciseId}",
         arguments = listOf(navArgument("exerciseId") {
@@ -63,6 +67,9 @@ fun NavGraphBuilder.exercise(navController: NavController, onNavigateBack: () ->
                     navController = navController,
                     onViewTextExerciseParticipationScreen = { participationId ->
                         nestedNavController.navigate("participate/text_exercise/$participationId")
+                    },
+                    onParticipateInQuiz = { isPractice ->
+                        onParticipateInQuiz(exerciseId, isPractice)
                     }
                 )
             }
