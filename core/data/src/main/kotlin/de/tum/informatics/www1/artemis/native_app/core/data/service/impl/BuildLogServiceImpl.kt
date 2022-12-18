@@ -11,7 +11,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.flow.Flow
 
-class BuildLogServiceImpl(
+internal class BuildLogServiceImpl(
     private val networkStatusProvider: NetworkStatusProvider,
     private val ktorProvider: KtorProvider
 ) : BuildLogService {

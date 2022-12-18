@@ -23,7 +23,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TestSubmission
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
-import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationService
+import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -109,7 +109,7 @@ fun computeTemplateStatus(
     showUngradedResults: Boolean,
     personal: Boolean
 ): Flow<ResultTemplateStatus> {
-    val service: ParticipationService = get()
+    val service: LiveParticipationService = get()
 
     val participationId = participation.id ?: 0
     val exerciseId = exercise.id ?: 0
@@ -118,7 +118,7 @@ fun computeTemplateStatus(
         .getLatestPendingSubmissionByParticipationIdFlow(participationId, exerciseId, personal)
         .filter { submissionData ->
             val shouldUpdateBasedOnData: Boolean = when (submissionData) {
-                is ParticipationService.ProgrammingSubmissionStateData.IsBuildingPendingSubmission -> {
+                is LiveParticipationService.ProgrammingSubmissionStateData.IsBuildingPendingSubmission -> {
                     val submission = submissionData.submission
 
                     val submissionDate = submission.submissionDate ?: Instant.fromEpochSeconds(0L)
@@ -128,8 +128,8 @@ fun computeTemplateStatus(
                             || submission is TestSubmission
                             || submissionDate < dueDate
                 }
-                is ParticipationService.ProgrammingSubmissionStateData.FailedSubmission,
-                is ParticipationService.ProgrammingSubmissionStateData.NoPendingSubmission,
+                is LiveParticipationService.ProgrammingSubmissionStateData.FailedSubmission,
+                is LiveParticipationService.ProgrammingSubmissionStateData.NoPendingSubmission,
                 null -> true
             }
 
@@ -138,7 +138,7 @@ fun computeTemplateStatus(
                     || shouldUpdateBasedOnData
         }
         .map { submissionData ->
-            submissionData is ParticipationService.ProgrammingSubmissionStateData.IsBuildingPendingSubmission
+            submissionData is LiveParticipationService.ProgrammingSubmissionStateData.IsBuildingPendingSubmission
         }
         .onStart { emit(false) }
 

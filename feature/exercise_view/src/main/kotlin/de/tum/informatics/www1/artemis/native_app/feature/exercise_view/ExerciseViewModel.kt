@@ -23,8 +23,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participat
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.BuildLogEntry
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.ProgrammingSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
-import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationService
-import kotlinx.coroutines.coroutineScope
+import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -36,7 +35,7 @@ internal class ExerciseViewModel(
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val exerciseService: ExerciseService,
-    private val participationService: ParticipationService,
+    private val liveParticipationService: LiveParticipationService,
     private val resultService: ResultService,
     private val buildLogService: BuildLogService,
     private val courseExerciseService: CourseExerciseService,
@@ -93,7 +92,7 @@ internal class ExerciseViewModel(
 
                         val newParticipationsFlow =
                             merge(
-                                participationService
+                                liveParticipationService
                                     .personalSubmissionUpdater.filter { result -> result.participation?.exercise?.id == exerciseId }
                                     .mapNotNull { it.participation },
                                 _gradedParticipation

@@ -5,7 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import kotlinx.coroutines.flow.Flow
 
-interface ParticipationService {
+interface LiveParticipationService {
 
     /**
      *
@@ -29,7 +29,7 @@ interface ParticipationService {
      *
      * @param participationId id of the ProgrammingExerciseStudentParticipation
      * @param exerciseId id of ProgrammingExercise
-     * @param isPersonalParticipation whether the current user is a participant in the participation.
+     * @param personal whether the current user is a participant in the participation.
      * @param fetchPending whether the latest pending submission should be fetched from the server
      */
     fun getLatestPendingSubmissionByParticipationIdFlow(

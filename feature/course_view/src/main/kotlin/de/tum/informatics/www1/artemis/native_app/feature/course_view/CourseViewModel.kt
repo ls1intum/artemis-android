@@ -8,7 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationService
+import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
@@ -21,7 +21,7 @@ internal class CourseViewModel(
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val courseService: CourseService,
-    private val participationService: ParticipationService
+    private val liveParticipationService: LiveParticipationService
 ) : ViewModel() {
 
     private val requestReloadCourse = MutableSharedFlow<Unit>()
@@ -68,7 +68,7 @@ internal class CourseViewModel(
 
                         emit(DataState.Success(participationStatusMap.values.toList()))
 
-                        participationService
+                        liveParticipationService
                             .personalSubmissionUpdater
                             .collect { latestSubmission ->
                                 //Find the associated exercise, so that the submissions can be updated.

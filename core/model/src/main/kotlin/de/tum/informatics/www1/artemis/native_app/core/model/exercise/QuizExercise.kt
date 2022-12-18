@@ -6,6 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participat
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.attachment.Attachment
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Instant
@@ -44,8 +45,7 @@ data class QuizExercise(
     val randomizeQuestionOrder: Boolean? = null,
     val isOpenForPractice: Boolean? = null,
     val duration: Int? = null,
-    val quizQuestions: List<QuizQuestion>? = null,
-    val status: QuizStatus? = null,
+    val quizQuestions: List<QuizQuestion> = emptyList(),
     val quizMode: QuizMode = QuizMode.INDIVIDUAL,
     val quizBatches: List<QuizBatch>? = null
 ) : Exercise() {
@@ -110,3 +110,19 @@ val QuizExercise.notStarted: Flow<Boolean>
 
 val QuizExercise.quizEnded: Flow<Boolean>
     get() = dueDate?.hasPassedFlow() ?: flowOf(false)
+
+val QuizExercise.quizStarted: Flow<Boolean>
+    get() = releaseDate?.hasPassedFlow() ?: flowOf(true)
+
+val QuizExercise.quizStatus: Flow<QuizExercise.QuizStatus>
+    get() = combine(quizStarted, quizEnded) { quizStarted, quizEnded ->
+        if (!quizStarted) return@combine QuizExercise.QuizStatus.INVISIBLE
+        if (quizEnded) return@combine if (isOpenForPractice == true)
+            QuizExercise.QuizStatus.OPEN_FOR_PRACTICE
+        else QuizExercise.QuizStatus.CLOSED
+
+        if (quizBatches.orEmpty()
+                .any { it.started == true }
+        ) return@combine QuizExercise.QuizStatus.ACTIVE
+        QuizExercise.QuizStatus.VISIBLE
+    }

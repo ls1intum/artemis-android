@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quizStatus
 
 /**
  * Display a row of the categories this exercise is associated with
@@ -25,8 +27,12 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExerci
 fun ExerciseCategoryChipRow(modifier: Modifier, exercise: Exercise) {
     val context = LocalContext.current
 
-    val chips = remember(exercise) {
-        collectExerciseCategoryChips(context, exercise)
+    val quizStatus = if (exercise is QuizExercise) {
+        exercise.quizStatus.collectAsState(initial = QuizExercise.QuizStatus.INVISIBLE).value
+    } else QuizExercise.QuizStatus.INVISIBLE
+
+    val chips = remember(exercise, quizStatus) {
+        collectExerciseCategoryChips(context, exercise, quizStatus)
     }
 
     Row(
@@ -71,10 +77,11 @@ private fun ExerciseCategoryChip(modifier: Modifier, data: ExerciseCategoryChipD
  */
 private fun collectExerciseCategoryChips(
     context: Context,
-    exercise: Exercise
+    exercise: Exercise,
+    quizStatus: QuizExercise.QuizStatus
 ): List<ExerciseCategoryChipData> {
     val liveQuizChips =
-        if (exercise is QuizExercise && exercise.status == QuizExercise.QuizStatus.ACTIVE)
+        if (exercise is QuizExercise && quizStatus == QuizExercise.QuizStatus.ACTIVE)
             listOf(
                 ExerciseCategoryChipData(
                     context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_live_quiz),
@@ -90,11 +97,13 @@ private fun collectExerciseCategoryChips(
                     context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_difficulty_easy),
                     Color(0xff28a745)
                 )
+
             Exercise.Difficulty.MEDIUM ->
                 ExerciseCategoryChipData(
                     context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_difficulty_medium),
                     Color(0xffffc107)
                 )
+
             Exercise.Difficulty.HARD ->
                 ExerciseCategoryChipData(
                     context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_difficulty_hard),

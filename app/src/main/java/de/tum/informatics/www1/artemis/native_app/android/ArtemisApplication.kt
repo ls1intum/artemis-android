@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.android
 
 import android.app.Application
 import de.tum.informatics.www1.artemis.native_app.core.communication.communicationModule
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.dataModule
+import de.tum.informatics.www1.artemis.native_app.core.data.service.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.impl.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.impl.deviceModule
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.websocketModule
@@ -11,6 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.course_view.courseView
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboardModule
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exerciseViewModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.quizParticipationModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -32,7 +33,8 @@ class ArtemisApplication : Application() {
                 dashboardModule,
                 loginModule,
                 exerciseViewModule,
-                communicationModule
+                communicationModule,
+                quizParticipationModule
             )
         }
     }

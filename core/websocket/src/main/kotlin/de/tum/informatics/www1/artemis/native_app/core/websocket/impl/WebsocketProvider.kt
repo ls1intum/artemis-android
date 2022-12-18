@@ -59,7 +59,7 @@ class WebsocketProvider(
      * After 10 seconds of not having any subscribers, the session will be closes
      */
     @OptIn(DelicateCoroutinesApi::class)
-    private val session: Flow<StompSessionWithKxSerialization> =
+    val session: Flow<StompSessionWithKxSerialization> =
         combine(
             serverConfigurationService.host,
             accountService.authenticationData,

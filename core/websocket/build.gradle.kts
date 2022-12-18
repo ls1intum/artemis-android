@@ -18,10 +18,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     //For the websockets
-    implementation(libs.krossbow.stomp.core)
+    api(libs.krossbow.stomp.core)
     implementation(libs.krossbow.websocket.ktor)
     implementation(libs.krossbow.websocket.okhttp)
-    implementation(libs.krossbow.stomp.kxserialization.json)
+    api(libs.krossbow.stomp.kxserialization.json)
     implementation(libs.kotlinx.datetime)
 
     implementation(libs.koin.core)

@@ -8,8 +8,8 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
-import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationService
-import de.tum.informatics.www1.artemis.native_app.core.websocket.ParticipationService.ProgrammingSubmissionStateData
+import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
+import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService.ProgrammingSubmissionStateData
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -30,7 +30,7 @@ import kotlin.time.Duration.Companion.minutes
 /**
  * From: https://github.com/ls1intum/Artemis/blob/5c13e2e1b5b6d81594b9123946f040cbf6f0cfc6/src/main/webapp/app/overview/participation-websocket.service.ts
  */
-internal class ParticipationServiceImpl(
+internal class LiveParticipationServiceImpl(
     private val websocketProvider: WebsocketProvider,
     private val ktorProvider: KtorProvider,
     private val serverConfigurationService: ServerConfigurationService,
@@ -38,7 +38,7 @@ internal class ParticipationServiceImpl(
     private val accountService: AccountService,
     private val jsonProvider: JsonProvider
 ) :
-    ParticipationService {
+    LiveParticipationService {
 
     companion object Foo {
         private const val PERSONAL_PARTICIPATION_TOPIC = "/user/topic/newResults"
