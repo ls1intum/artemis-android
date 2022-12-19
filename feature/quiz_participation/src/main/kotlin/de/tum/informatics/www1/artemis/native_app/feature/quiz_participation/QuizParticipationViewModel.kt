@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ParticipationService
@@ -127,7 +128,7 @@ internal class QuizParticipationViewModel(
                         }
                     }
 
-            QuizType.PRACTICE -> emptyFlow<DataState<Participation>>()
+            QuizType.PRACTICE -> emptyFlow()
         }
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
@@ -216,8 +217,16 @@ internal class QuizParticipationViewModel(
     }
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
-    val quizBatch: Flow<QuizExercise.QuizBatch?> =
-        quizExercise.map { it.quizBatches.orEmpty().firstOrNull() }
+    /**
+     * Emitted to when the user clicks on start batch/join batch
+     */
+    private val joinBatchFlow = MutableSharedFlow<QuizExercise.QuizBatch>()
+
+    val quizBatch: Flow<QuizExercise.QuizBatch?> = merge(
+        quizExercise.map { it.quizBatches.orEmpty().firstOrNull() },
+        joinBatchFlow
+    )
+        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
     val startDate: Flow<Instant> = when (quizType) {
         QuizType.LIVE -> {
@@ -255,7 +264,7 @@ internal class QuizParticipationViewModel(
         QuizType.PRACTICE -> flowOf(false)
     }
 
-    private val latestSubmission: StateFlow<QuizSubmission> = flow {
+    val latestSubmission: StateFlow<QuizSubmission> = flow {
         when (quizType) {
             QuizType.LIVE -> {
                 // For live quizzes, the latest submission is the one from the latest participation
@@ -298,6 +307,34 @@ internal class QuizParticipationViewModel(
         viewModelScope.launch {
             websocketProvider.requestTryReconnect()
         }
+    }
+
+    fun joinBatch(passcode: String, onFailure: () -> Unit) {
+        viewModelScope.launch {
+            val serverUrl = serverConfigurationService.serverUrl.first()
+            val authToken = accountService.authToken.first()
+
+            when (val response = quizExerciseService.join(
+                exerciseId = exerciseId,
+                password = passcode,
+                serverUrl = serverUrl,
+                authToken = authToken
+            )) {
+                is NetworkResponse.Failure -> onFailure()
+                is NetworkResponse.Response -> {
+                    joinBatchFlow.emit(response.data)
+
+                    if (response.data.started == true) {
+                        retryLoadExercise.emit(Unit)
+                    }
+                }
+            }
+
+        }
+    }
+
+    fun startBatch(onFailure: () -> Unit) {
+        joinBatch("", onFailure)
     }
 
     @Serializable

@@ -1,31 +1,41 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.ConnectionStatusUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
-import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.quizParticipationModule
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.minutes
@@ -36,7 +46,9 @@ internal fun WaitForQuizStartScreen(
     exercise: QuizExercise,
     isConnected: Boolean,
     batch: QuizExercise.QuizBatch?,
-    onRequestRefresh: () -> Unit
+    onRequestRefresh: () -> Unit,
+    onClickJoinBatch: (passcode: String) -> Unit,
+    onClickStartQuiz: () -> Unit
 ) {
     val waitingStatus: WaitingStatus = when {
         batch != null || exercise.quizMode == QuizExercise.QuizMode.SYNCHRONIZED ->
@@ -57,7 +69,9 @@ internal fun WaitForQuizStartScreen(
         modifier = modifier,
         waitingStatus = waitingStatus,
         isConnected = isConnected,
-        onRequestRefresh = onRequestRefresh
+        onRequestRefresh = onRequestRefresh,
+        onClickStartQuiz = onClickStartQuiz,
+        onClickJoinBatch = onClickJoinBatch
     )
 }
 
@@ -66,7 +80,9 @@ private fun WaitForQuizStartScreen(
     modifier: Modifier,
     waitingStatus: WaitingStatus,
     isConnected: Boolean,
-    onRequestRefresh: () -> Unit
+    onRequestRefresh: () -> Unit,
+    onClickJoinBatch: (passcode: String) -> Unit,
+    onClickStartQuiz: () -> Unit
 ) {
     Column(modifier = modifier) {
         Box(
@@ -82,7 +98,7 @@ private fun WaitForQuizStartScreen(
             when (waitingStatus) {
                 is WaitingStatus.JoinBatched -> BodyJoinBatched(
                     modifier = bodyModifier,
-                    waitingStatus = waitingStatus
+                    onClickJoinBatch = onClickJoinBatch
                 )
 
                 is WaitingStatus.NoMoreAttempts -> BodyNoMoreAttempts(
@@ -92,7 +108,7 @@ private fun WaitForQuizStartScreen(
 
                 is WaitingStatus.StartNow -> BodyStartNow(
                     modifier = bodyModifier,
-                    waitingStatus = waitingStatus
+                    onClickStartNow = onClickStartQuiz
                 )
 
                 is WaitingStatus.Synchronized -> BodySynchronized(
@@ -102,33 +118,26 @@ private fun WaitForQuizStartScreen(
             }
         }
 
-        Row(
+        Footer(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min)
-                .padding(vertical = 8.dp)
-        ) {
-            val weightOne = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-            Box(modifier = weightOne) {
+                .padding(vertical = 8.dp),
+            boxOne = {
                 ConnectionStatusUi(
                     modifier = Modifier.align(Alignment.Center),
                     isConnected = isConnected
                 )
-            }
-
-            Box(modifier = weightOne) {
+            },
+            boxTwo = {
                 Button(
                     modifier = Modifier.align(Alignment.Center),
                     onClick = onRequestRefresh
                 ) {
                     Text(text = stringResource(id = R.string.quiz_participation_wait_for_start_refresh_button))
                 }
-            }
-
-            Box(modifier = weightOne)
-        }
+            },
+            boxThree = {}
+        )
     }
 }
 
@@ -136,12 +145,14 @@ private fun WaitForQuizStartScreen(
 private fun BodySynchronized(modifier: Modifier, waitingStatus: WaitingStatus.Synchronized) {
     Column(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
             text = stringResource(id = R.string.quiz_participation_wait_for_start_please_wait),
             style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold
         )
 
         Text(
@@ -151,33 +162,104 @@ private fun BodySynchronized(modifier: Modifier, waitingStatus: WaitingStatus.Sy
         )
 
         if (waitingStatus.startDate != null) {
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             val timeUntilStart = getRelativeTime(to = waitingStatus.startDate)
 
             Text(
-                text = stringResource(
-                    id = R.string.quiz_participation_wait_for_start_time_until_start,
-                    timeUntilStart
-                ),
+                text = stringResource(id = R.string.quiz_participation_wait_for_start_time_until_start),
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center
+            )
+
+            Text(
+                text = timeUntilStart.toString(),
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                fontSize = 24.sp
             )
         }
     }
 }
 
 @Composable
-private fun BodyJoinBatched(modifier: Modifier, waitingStatus: WaitingStatus.JoinBatched) {
+private fun BodyJoinBatched(
+    modifier: Modifier,
+    onClickJoinBatch: (passcode: String) -> Unit
+) {
+    var passcode by rememberSaveable { mutableStateOf("") }
 
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = stringResource(id = R.string.quiz_participation_wait_for_start_enter_password),
+            style = MaterialTheme.typography.headlineLarge,
+            textAlign = TextAlign.Center
+        )
+
+        TextField(
+            value = passcode,
+            onValueChange = { passcode = it },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .widthIn(max = 600.dp)
+        )
+
+        Button(
+            modifier = Modifier,
+            onClick = { onClickJoinBatch(passcode) }
+        ) {
+            Text(
+                text = stringResource(id = R.string.quiz_participation_wait_for_start_join_button)
+            )
+        }
+    }
 }
 
 @Composable
-private fun BodyStartNow(modifier: Modifier, waitingStatus: WaitingStatus.StartNow) {
+private fun BodyStartNow(
+    modifier: Modifier,
+    onClickStartNow: () -> Unit
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = stringResource(id = R.string.quiz_participation_wait_for_start_start_now),
+            style = MaterialTheme.typography.headlineLarge
+        )
 
+        Button(
+            onClick = onClickStartNow
+        ) {
+            Text(
+                text = stringResource(id = R.string.quiz_participation_wait_for_start_start_now_button)
+            )
+        }
+    }
 }
 
 @Composable
 private fun BodyNoMoreAttempts(modifier: Modifier, waitingStatus: WaitingStatus.NoMoreAttempts) {
+    val textRes = when (waitingStatus.allowedAttempts) {
+        1 -> R.string.quiz_participation_wait_for_start_no_more_attempts_already_participated
+        else -> R.string.quiz_participation_wait_for_start_no_more_attempts_no_more_attempts
+    }
 
+    Box(modifier = modifier) {
+        Text(
+            modifier = Modifier.align(Alignment.Center),
+            text = stringResource(id = textRes),
+            style = MaterialTheme.typography.headlineLarge,
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 private sealed interface WaitingStatus {
@@ -204,10 +286,14 @@ private class WaitingStatusProvider : PreviewParameterProvider<WaitingStatus> {
 private fun WaitForQuizStartScreenPreview(
     @PreviewParameter(WaitingStatusProvider::class) waitingStatus: WaitingStatus
 ) {
-    WaitForQuizStartScreen(
-        modifier = Modifier.fillMaxSize(),
-        waitingStatus = waitingStatus,
-        isConnected = true,
-        onRequestRefresh = {}
-    )
+    Surface {
+        WaitForQuizStartScreen(
+            modifier = Modifier.fillMaxSize(),
+            waitingStatus = waitingStatus,
+            isConnected = true,
+            onRequestRefresh = {},
+            onClickStartQuiz = {},
+            onClickJoinBatch = {}
+        )
+    }
 }

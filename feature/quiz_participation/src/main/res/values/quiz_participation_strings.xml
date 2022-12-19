@@ -6,10 +6,43 @@
     <string name="quiz_participation_retry">Try again</string>
 
     <string name="quiz_participation_wait_for_start_please_wait">Please wait.</string>
-    <string name="quiz_participation_wait_for_start_explanation">The quiz will automatically be displayed once it is started.</string>
+    <string name="quiz_participation_wait_for_start_explanation">The quiz will be displayed automatically once it is started.</string>
     <string name="quiz_participation_wait_for_start_refresh_button">Refresh</string>
-    <string name="quiz_participation_wait_for_start_time_until_start">Time until planned start: %1$s.</string>
+    <string name="quiz_participation_wait_for_start_time_until_start">Time until planned start:</string>
+    <string name="quiz_participation_wait_for_start_enter_password">Please enter the passcode:</string>
+    <string name="quiz_participation_wait_for_start_join_button">Join now</string>
+    <string name="quiz_participation_wait_for_start_start_now">Start your quiz run now.</string>
+    <string name="quiz_participation_wait_for_start_start_now_button">Start now</string>
+
+    <string name="quiz_participation_wait_for_start_no_more_attempts_already_participated">You have already participated.</string>
+    <string name="quiz_participation_wait_for_start_no_more_attempts_no_more_attempts">You have used up all of your attempts.</string>
+
+    <string name="quiz_participation_wait_for_start_join_batch_error_message">Could not join quiz batch.</string>
+    <string name="quiz_participation_wait_for_start_start_batch_error_message">Could not start quiz batch.</string>
+    <string name="quiz_participation_wait_for_start_batch_error_positive_button">@android:string/ok</string>
+
+    <!--  Participation header  -->
+    <string name="quiz_participation_submit_button">Submit</string>
+
+    <string name="quiz_participation_multiple_choice_short">MC</string>
+    <string name="quiz_participation_short_answer_short">SA</string>
+    <string name="quiz_participation_drag_and_drop_short">DD</string>
+    <string name="quiz_participation_answered_question_count">%1$d/%2$d</string>
+
+    <!-- Participation footer -->
+    <string name="quiz_participation_time_left">Deadline: %1$s</string>
+    <string name="quiz_participation_time_left_quiz_ended">Quiz has ended!</string>
+    <string name="quiz_participation_last_saved">Saved: %1$s</string>
+    <string name="quiz_participation_never_saved">Never saved!</string>
+    <string name="quiz_participation_button_previous_question">Previous</string>
+    <string name="quiz_participation_button_next_question">Next</string>
+
 
     <string name="quiz_participation_connection_status_connected">Connected</string>
     <string name="quiz_participation_connection_status_not_connected">Not connected</string>
+
+    <string name="quiz_participation_submit_dialog_title">Submit?</string>
+    <string name="quiz_participation_submit_dialog_message">You still have time left. Are you sure you want to submit your solution and end this quiz?</string>
+    <string name="quiz_participation_submit_dialog_positive">Submit</string>
+    <string name="quiz_participation_submit_dialog_negative">@android:string/cancel</string>
 </resources>

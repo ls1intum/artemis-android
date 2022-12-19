@@ -26,4 +26,11 @@ internal interface QuizExerciseService {
         serverUrl: String,
         authToken: String
     ): NetworkResponse<QuizExercise>
+
+    suspend fun join(
+        exerciseId: Long,
+        password: String,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<QuizExercise.QuizBatch>
 }
