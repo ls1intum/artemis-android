@@ -6,8 +6,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -96,7 +98,7 @@ private fun QuizParticipationScreen(
                 },
                 actions = {
                     if (!isWaitingForQuizStart) {
-                        TextButton(onClick = { displaySubmitDialog = true }) {
+                        OutlinedButton(onClick = { displaySubmitDialog = true }) {
                             Text(text = stringResource(id = R.string.quiz_participation_submit_button))
                         }
                     }

@@ -37,6 +37,9 @@
     <string name="quiz_participation_button_previous_question">Previous</string>
     <string name="quiz_participation_button_next_question">Next</string>
 
+    <!--  Quiz question header  -->
+    <string name="quiz_participation_question_header_title">%1$d) %2$s</string>
+    <string name="quiz_participation_question_header_hint_button">Hint</string>
 
     <string name="quiz_participation_connection_status_connected">Connected</string>
     <string name="quiz_participation_connection_status_not_connected">Not connected</string>
@@ -45,4 +48,9 @@
     <string name="quiz_participation_submit_dialog_message">You still have time left. Are you sure you want to submit your solution and end this quiz?</string>
     <string name="quiz_participation_submit_dialog_positive">Submit</string>
     <string name="quiz_participation_submit_dialog_negative">@android:string/cancel</string>
+
+    <string name="quiz_participation_question_hint_dialog_title">Hint</string>
+    <string name="quiz_participation_question_hint_dialog_positive">@android:string/ok</string>
+
+
 </resources>
