@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz_participation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
@@ -14,7 +15,10 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.ShortAnswerQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quizEnded
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
@@ -23,13 +27,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -46,8 +47,11 @@ import org.hildan.krossbow.stomp.headers.StompSendHeaders
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * This class persists the answers/solutions of the user in the saved state handle.
+ */
 internal class QuizParticipationViewModel(
-    private val courseId: Long,
+    courseId: Long,
     private val exerciseId: Long,
     val quizType: QuizType,
     private val quizExerciseService: QuizExerciseService,
@@ -55,8 +59,15 @@ internal class QuizParticipationViewModel(
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val participationService: ParticipationService,
-    private val websocketProvider: WebsocketProvider
+    private val websocketProvider: WebsocketProvider,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    private companion object {
+        private const val TAG_SHORT_ANSWER_DATA = "short_answer_data"
+        private const val TAG_DRAG_AND_DROP_DATA = "short_answer_data"
+        private const val TAG_MULTIPLE_CHOICE_DATA = "short_answer_data"
+    }
 
     private val submissionChannel = "/topic/quizExercise/$exerciseId/submission"
     private val quizExerciseChannel = "/topic/courses/$courseId/quizExercises"
@@ -185,6 +196,25 @@ internal class QuizParticipationViewModel(
             }
         }
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+
+    /**
+     * Map the question id to the data
+     */
+    private val shortAnswerData: Flow<Map<Long, ShortAnswerStorageData>> =
+        savedStateHandle.getStateFlow(
+            TAG_SHORT_ANSWER_DATA,
+            emptyMap()
+        )
+
+    /*
+     * Construct the question data from the questions and the flows (which are itself coming from the saved state handle)
+     */
+    val quizQuestionsWithData: Flow<List<QuizQuestionData<*>>> = combine(
+        quizQuestions,
+        shortAnswerData
+    ) { questions, shortAnswerData ->
+        constructQuizQuestionData(questions, shortAnswerData)
+    }
 
     private val batchUpdater: Flow<QuizExercise> = when (quizType) {
         QuizType.LIVE -> {
@@ -337,6 +367,41 @@ internal class QuizParticipationViewModel(
         joinBatch("", onFailure)
     }
 
+    private fun constructQuizQuestionData(
+        questions: List<QuizQuestion>,
+        shortAnswerData: Map<Long, ShortAnswerStorageData>
+    ): List<QuizQuestionData<*>> {
+        return questions.map { question ->
+            when (question) {
+                is DragAndDropQuizQuestion -> QuizQuestionData.DragAndDropData(question)
+                is MultipleChoiceQuizQuestion -> QuizQuestionData.MultipleChoiceData(question)
+                is ShortAnswerQuizQuestion -> {
+                    val questionId = question.id ?: 0
+
+                    val solutionTexts: Map<Int, String> =
+                        shortAnswerData.getOrDefault(questionId, emptyMap())
+
+                    QuizQuestionData.ShortAnswerData(
+                        question = question,
+                        solutionTexts = solutionTexts,
+                        onUpdateSolutionText = { spotId, newSolutionText ->
+                            val newSolutionTexts = solutionTexts.toMutableMap()
+                            newSolutionTexts[spotId] = newSolutionText
+
+                            val newShortAnswerStorageData = shortAnswerData.toMutableMap()
+                            newShortAnswerStorageData[questionId] = newSolutionTexts
+
+                            savedStateHandle[TAG_SHORT_ANSWER_DATA] = newShortAnswerStorageData
+                        }
+                    )
+                }
+            }
+        }
+    }
+
     @Serializable
     private data class SubmissionData(val error: String? = null)
+
 }
+
+private typealias ShortAnswerStorageData = Map<Int, String>

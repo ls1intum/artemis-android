@@ -56,13 +56,13 @@ internal fun QuizParticipationUi(modifier: Modifier, viewModel: QuizParticipatio
                 }
             )
         } else {
-            val questions by viewModel.quizQuestions.collectAsState(initial = emptyList())
+            val questionWithData by viewModel.quizQuestionsWithData.collectAsState(initial = emptyList())
             val lastSubmission by viewModel.latestSubmission.collectAsState()
             val endDate by viewModel.endDate.collectAsState(initial = null)
 
             WorkOnQuizQuestionsScreen(
                 modifier = Modifier.fillMaxSize(),
-                questions = questions,
+                questionsWithData = questionWithData,
                 lastSubmissionTime = lastSubmission.submissionDate,
                 endDate = endDate
             )

@@ -15,11 +15,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.ShortAnswerQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.DragAndDropQuizQuestionUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.MultipleChoiceQuizQuestionUi
@@ -29,18 +27,18 @@ import kotlinx.datetime.Instant
 @Composable
 internal fun WorkOnQuizQuestionsScreen(
     modifier: Modifier,
-    questions: List<QuizQuestion>,
+    questionsWithData: List<QuizQuestionData<*>>,
     lastSubmissionTime: Instant?,
     endDate: Instant?
 ) {
-    var selectedQuestionIndex by rememberSaveable(questions.size) { mutableStateOf(0) }
+    var selectedQuestionIndex by rememberSaveable(questionsWithData.size) { mutableStateOf(0) }
 
-    val currentQuestion = questions.getOrNull(selectedQuestionIndex)
+    val currentQuestion = questionsWithData.getOrNull(selectedQuestionIndex)
 
     Column(modifier = modifier) {
         WorkOnQuizHeader(
             modifier = Modifier.fillMaxWidth(),
-            questions = questions,
+            questions = questionsWithData.map { it.question },
             selectedQuestionIndex = selectedQuestionIndex,
             onChangeSelectionQuestionIndex = { selectedQuestionIndex = it }
         )
@@ -52,7 +50,7 @@ internal fun WorkOnQuizQuestionsScreen(
         if (currentQuestion != null) {
             WorkOnQuizBody(
                 modifier = bodyModifier,
-                currentQuestion = currentQuestion,
+                quizQuestionData = currentQuestion,
                 questionIndex = selectedQuestionIndex
             )
         } else {
@@ -66,7 +64,7 @@ internal fun WorkOnQuizQuestionsScreen(
             lastSubmissionTime = lastSubmissionTime,
             endDate = endDate,
             canNavigateToPreviousQuestion = selectedQuestionIndex > 0,
-            canNavigateToNextQuestion = selectedQuestionIndex < questions.size - 1,
+            canNavigateToNextQuestion = selectedQuestionIndex < questionsWithData.size - 1,
             onRequestPreviousQuestion = { selectedQuestionIndex-- },
             onRequestNextQuestion = { selectedQuestionIndex++ }
         )
@@ -74,33 +72,39 @@ internal fun WorkOnQuizQuestionsScreen(
 }
 
 @Composable
-private fun WorkOnQuizBody(modifier: Modifier, questionIndex: Int, currentQuestion: QuizQuestion) {
+private fun WorkOnQuizBody(
+    modifier: Modifier,
+    questionIndex: Int,
+    quizQuestionData: QuizQuestionData<*>
+) {
     var displayHint by rememberSaveable { mutableStateOf(false) }
 
     val onRequestDisplayHint = {
         displayHint = true
     }
 
-    when (currentQuestion) {
-        is DragAndDropQuizQuestion -> DragAndDropQuizQuestionUi(
+    when (quizQuestionData) {
+        is QuizQuestionData.DragAndDropData -> DragAndDropQuizQuestionUi(
             modifier = modifier,
             questionIndex = questionIndex,
-            question = currentQuestion,
+            question = quizQuestionData.question,
             onRequestDisplayHint = onRequestDisplayHint
         )
 
-        is MultipleChoiceQuizQuestion -> MultipleChoiceQuizQuestionUi(
+        is QuizQuestionData.MultipleChoiceData -> MultipleChoiceQuizQuestionUi(
             modifier = modifier,
             questionIndex = questionIndex,
-            question = currentQuestion,
+            question = quizQuestionData.question,
             onRequestDisplayHint = onRequestDisplayHint
         )
 
-        is ShortAnswerQuizQuestion -> ShortAnswerQuizQuestionUi(
+        is QuizQuestionData.ShortAnswerData -> ShortAnswerQuizQuestionUi(
             modifier = modifier,
             questionIndex = questionIndex,
-            question = currentQuestion,
-            onRequestDisplayHint = onRequestDisplayHint
+            question = quizQuestionData.question,
+            onRequestDisplayHint = onRequestDisplayHint,
+            solutionTexts = quizQuestionData.solutionTexts,
+            onUpdateSolutionText = quizQuestionData.onUpdateSolutionText
         )
     }
 
@@ -108,7 +112,7 @@ private fun WorkOnQuizBody(modifier: Modifier, questionIndex: Int, currentQuesti
         AlertDialog(
             onDismissRequest = { displayHint = false },
             title = { Text(text = stringResource(id = R.string.quiz_participation_question_hint_dialog_title)) },
-            text = { MarkdownText(markdown = currentQuestion.hint.orEmpty()) },
+            text = { MarkdownText(markdown = quizQuestionData.question.hint.orEmpty()) },
             confirmButton = {
                 TextButton(onClick = { displayHint = false }) {
                     Text(text = stringResource(id = R.string.quiz_participation_question_hint_dialog_positive))
@@ -117,3 +121,4 @@ private fun WorkOnQuizBody(modifier: Modifier, questionIndex: Int, currentQuesti
         )
     }
 }
+

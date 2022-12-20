@@ -27,6 +27,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import org.koin.androidx.compose.getStateViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -64,7 +65,7 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
         val quizType: QuizType = QuizType.valueOf(quizTypeString)
 
         val viewModel: QuizParticipationViewModel =
-            koinViewModel { parametersOf(courseId, exerciseId, quizType) }
+            getStateViewModel { parametersOf(courseId, exerciseId, quizType) }
 
         QuizParticipationScreen(
             modifier = Modifier.fillMaxSize(),

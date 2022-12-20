@@ -8,5 +8,18 @@ import org.koin.dsl.module
 val quizParticipationModule = module {
     single<QuizExerciseService> { QuizExerciseServiceImpl(get()) }
 
-    viewModel { params -> QuizParticipationViewModel(params[0], params[1], params[2], get(), get(), get(), get(), get(), get()) }
+    viewModel { params ->
+        QuizParticipationViewModel(
+            params[0],
+            params[1],
+            params[2],
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
 }

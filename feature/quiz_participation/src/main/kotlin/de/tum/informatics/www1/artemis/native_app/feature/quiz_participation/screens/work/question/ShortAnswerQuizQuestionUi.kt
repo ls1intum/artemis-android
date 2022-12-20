@@ -45,7 +45,7 @@ internal fun ShortAnswerQuizQuestionUi(
         shortAnswerBuildAnnotatedString(question.text.orEmpty())
     }
 
-    val inlineContentMap = remember(question.spots) {
+    val inlineContentMap = remember(question.spots, solutionTexts) {
         question.spots.associate { spot ->
             val spotNr = spot.spotNr ?: 0
             val key = spotNr.toString()
