@@ -201,15 +201,12 @@ private fun DragAndDropArea(
             val imageWidth = with(LocalDensity.current) { maxWidth.toPx() }
             val imageHeight = imageWidth * imageAspectRatio
 
-            val xRatio = imageWidth / currentDrawable.intrinsicWidth.toFloat()
-            val yRatio = imageHeight / currentDrawable.intrinsicHeight.toFloat()
-
             dropLocations.forEach { dropLocation ->
                 with(LocalDensity.current) {
-                    val xPos = imageWidth * (dropLocation.posX?.toFloat() ?: 0f) / 2f
-                    val yPos = imageHeight * (dropLocation.posY?.toFloat() ?: 0f) / 2f
-                    val width = imageWidth * (dropLocation.width ?: 0.0).toFloat() / 2f
-                    val height = imageHeight * (dropLocation.height ?: 0.0).toFloat() / 2f
+                    val xPos = imageWidth * (dropLocation.posX?.toFloat() ?: 0f) / 2f / 100f
+                    val yPos = imageHeight * (dropLocation.posY?.toFloat() ?: 0f) / 2f / 100f
+                    val width = imageWidth * (dropLocation.width ?: 0.0).toFloat() / 2f / 100f
+                    val height = imageHeight * (dropLocation.height ?: 0.0).toFloat() / 2f / 100f
 
                     ImageDropLocation(
                         modifier = Modifier
