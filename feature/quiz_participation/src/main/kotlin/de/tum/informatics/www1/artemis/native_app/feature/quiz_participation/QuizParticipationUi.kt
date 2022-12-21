@@ -12,12 +12,26 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.WaitForQuizStartScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.WorkOnQuizQuestionsScreen
+import kotlinx.coroutines.flow.map
+import org.koin.androidx.compose.get
 
 @Composable
 internal fun QuizParticipationUi(modifier: Modifier, viewModel: QuizParticipationViewModel) {
+    val accountService: AccountService = get()
+    val authToken = accountService.authToken.collectAsState(initial = "").value
+
+    val serverConfigurationService: ServerConfigurationService = get()
+    val serverUrl: String =
+        serverConfigurationService.serverUrl.map { it.dropLast(1) }.collectAsState(
+            initial = ""
+        ).value
+
     val exerciseDataState = viewModel.quizExerciseDataState.collectAsState().value
     val isWaitingForQuizStart = viewModel.waitingForQuizStart.collectAsState(initial = false).value
     val isConnected = viewModel.isConnected.collectAsState(initial = false).value
@@ -64,7 +78,9 @@ internal fun QuizParticipationUi(modifier: Modifier, viewModel: QuizParticipatio
                 modifier = Modifier.fillMaxSize(),
                 questionsWithData = questionWithData,
                 lastSubmissionTime = lastSubmission.submissionDate,
-                endDate = endDate
+                endDate = endDate,
+                authToken = authToken,
+                serverUrl = serverUrl
             )
         }
     }

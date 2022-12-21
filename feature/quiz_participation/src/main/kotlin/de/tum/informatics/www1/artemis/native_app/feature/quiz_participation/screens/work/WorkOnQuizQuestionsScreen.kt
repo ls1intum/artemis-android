@@ -29,7 +29,9 @@ internal fun WorkOnQuizQuestionsScreen(
     modifier: Modifier,
     questionsWithData: List<QuizQuestionData<*>>,
     lastSubmissionTime: Instant?,
-    endDate: Instant?
+    endDate: Instant?,
+    serverUrl: String,
+    authToken: String
 ) {
     var selectedQuestionIndex by rememberSaveable(questionsWithData.size) { mutableStateOf(0) }
 
@@ -51,7 +53,9 @@ internal fun WorkOnQuizQuestionsScreen(
             WorkOnQuizBody(
                 modifier = bodyModifier,
                 quizQuestionData = currentQuestion,
-                questionIndex = selectedQuestionIndex
+                questionIndex = selectedQuestionIndex,
+                serverUrl = serverUrl,
+                authToken = authToken
             )
         } else {
             Box(modifier = bodyModifier)
@@ -75,7 +79,9 @@ internal fun WorkOnQuizQuestionsScreen(
 private fun WorkOnQuizBody(
     modifier: Modifier,
     questionIndex: Int,
-    quizQuestionData: QuizQuestionData<*>
+    quizQuestionData: QuizQuestionData<*>,
+    serverUrl: String,
+    authToken: String
 ) {
     var displayHint by rememberSaveable { mutableStateOf(false) }
 
@@ -88,7 +94,9 @@ private fun WorkOnQuizBody(
             modifier = modifier,
             questionIndex = questionIndex,
             question = quizQuestionData.question,
-            onRequestDisplayHint = onRequestDisplayHint
+            onRequestDisplayHint = onRequestDisplayHint,
+            serverUrl = serverUrl,
+            authToken = authToken
         )
 
         is QuizQuestionData.MultipleChoiceData -> MultipleChoiceQuizQuestionUi(

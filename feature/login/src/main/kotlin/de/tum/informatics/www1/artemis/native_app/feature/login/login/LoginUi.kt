@@ -54,7 +54,7 @@ private fun <T> fromProfileInfo(
 internal fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Unit) {
     val username by viewModel.username.collectAsState(initial = "")
     val password by viewModel.password.collectAsState(initial = "")
-    val rememberMe by viewModel.rememberMe.collectAsState(initial = false)
+    val rememberMe by viewModel.rememberMe.collectAsState(initial = true)
     val hasUserAcceptedTerms by viewModel.hasUserAcceptedTerms.collectAsState(initial = false)
     val isLoginButtonEnabled by viewModel.loginButtonEnabled.collectAsState(initial = false)
 
