@@ -15,7 +15,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
@@ -96,7 +95,9 @@ private fun WorkOnQuizBody(
             question = quizQuestionData.question,
             onRequestDisplayHint = onRequestDisplayHint,
             serverUrl = serverUrl,
-            authToken = authToken
+            authToken = authToken,
+            dropLocationMapping = quizQuestionData.dropLocationMapping,
+            onDragItemIntoDropLocation = quizQuestionData.onDragItemIntoDropLocation
         )
 
         is QuizQuestionData.MultipleChoiceData -> MultipleChoiceQuizQuestionUi(

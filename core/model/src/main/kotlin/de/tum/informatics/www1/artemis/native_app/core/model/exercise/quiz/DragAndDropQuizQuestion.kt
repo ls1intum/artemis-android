@@ -20,8 +20,12 @@ data class DragAndDropQuizQuestion(
     val dragItems: List<DragItem> = emptyList(),
 ) : QuizQuestion() {
 
+    val dropLocationById: Map<Long, DropLocation> = dropLocations.associateBy { it.id }
+    val dragItemById: Map<Long, DragItem> = dragItems.associateBy { it.id }
+
     @Serializable
     data class DropLocation(
+        val id: Long = 0,
         val posX: Double? = null,
         val posY: Double? = null,
         val width: Double? = null,
@@ -31,6 +35,7 @@ data class DragAndDropQuizQuestion(
 
     @Serializable
     data class DragItem(
+        val id: Long = 0,
         val pictureFilePath: String? = null,
         val text: String? = null,
         val invalid: Boolean = false

@@ -14,9 +14,17 @@ sealed class QuizQuestionData<T : QuizQuestion>(val question: T) {
 
     class MultipleChoiceData(
         question: MultipleChoiceQuizQuestion
-    ): QuizQuestionData<MultipleChoiceQuizQuestion>(question)
+    ) : QuizQuestionData<MultipleChoiceQuizQuestion>(question)
 
+    /**
+     * @property availableDragItems the items that are still freely available
+     * @property dropLocationMapping holds an entry for every drop location that has a drag item placed on it
+     */
     class DragAndDropData(
-        question: DragAndDropQuizQuestion
+        question: DragAndDropQuizQuestion,
+        val availableDragItems: List<DragAndDropQuizQuestion.DragItem>,
+        val dropLocationMapping: Map<DragAndDropQuizQuestion.DropLocation, DragAndDropQuizQuestion.DragItem>,
+        val onDragItemIntoDropLocation: (itemId: Long, dropId: Long) -> Unit,
+        val onClearDropLocation: (dropId: Long) -> Unit
     ) : QuizQuestionData<DragAndDropQuizQuestion>(question)
 }
