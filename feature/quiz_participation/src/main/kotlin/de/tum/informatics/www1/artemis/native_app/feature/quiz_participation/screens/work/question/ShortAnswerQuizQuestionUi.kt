@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -20,6 +22,8 @@ import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
@@ -56,6 +60,8 @@ internal fun ShortAnswerQuizQuestionUi(
                     PlaceholderVerticalAlign.Center
                 ),
                 children = {
+                    val textColor = if(isSystemInDarkTheme()) Color.White else Color.Black
+
                     BasicTextField(
                         modifier = Modifier
                             .fillMaxSize()
@@ -68,7 +74,9 @@ internal fun ShortAnswerQuizQuestionUi(
                         onValueChange = { newText ->
                             onUpdateSolutionText(spotNr, newText)
                         },
-                        maxLines = 1
+                        maxLines = 1,
+                        textStyle = LocalTextStyle.current.copy(color = textColor),
+                        cursorBrush = SolidColor(textColor)
                     )
                 }
             )
