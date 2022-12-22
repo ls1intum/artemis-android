@@ -411,15 +411,19 @@ internal class QuizParticipationViewModel(
                         onDragItemIntoDropLocation = { itemId, dropId ->
                             updateDragAndDropDropLocation(
                                 questionId = questionId,
-                                dropId = dropId,
-                                newDragItemId = itemId
+                                action = DragAndDropAction.Put(dropId, itemId)
                             )
                         },
                         onClearDropLocation = { dropId ->
                             updateDragAndDropDropLocation(
                                 questionId = questionId,
-                                dropId = dropId,
-                                newDragItemId = null
+                                action = DragAndDropAction.Clear(dropId)
+                            )
+                        },
+                        onSwapDropLocations = { oldDropLocationId, newDropLocationId ->
+                            updateDragAndDropDropLocation(
+                                questionId = questionId,
+                                action = DragAndDropAction.Swap(oldDropLocationId, newDropLocationId)
                             )
                         }
                     )
@@ -448,12 +452,11 @@ internal class QuizParticipationViewModel(
     }
 
     /**
-     * Updates the drag and drop storage in the saved state handle
+     * Updates the drag and drop storage in the saved state handle.
      */
     private fun updateDragAndDropDropLocation(
         questionId: Long,
-        dropId: Long,
-        newDragItemId: Long?
+        action: DragAndDropAction
     ) {
         val dragAndDropAnswerData: Map<Long, DragAndDropStorageData> =
             savedStateHandle.get<Map<Long, DragAndDropStorageData>>(TAG_DRAG_AND_DROP_DATA)
@@ -461,10 +464,29 @@ internal class QuizParticipationViewModel(
         val storageData = dragAndDropAnswerData[questionId].orEmpty()
 
         val newStorageData = storageData.toMutableMap()
-        if (newDragItemId != null) {
-            newStorageData[dropId] = newDragItemId
-        } else {
-            newStorageData.remove(dropId)
+
+        when (action) {
+            is DragAndDropAction.Put -> {
+                newStorageData[action.dropLocationId] = action.dragItemId
+            }
+
+            is DragAndDropAction.Clear -> {
+                newStorageData.remove(action.dropLocationId)
+            }
+
+            is DragAndDropAction.Swap -> {
+                // there must be an item in previous.
+                val inPrevious = newStorageData[action.previousDropLocationId] ?: return
+
+                val inNew = newStorageData[action.newDropLocationId]
+                if (inNew != null) {
+                    newStorageData[action.previousDropLocationId] = inNew
+                } else {
+                    newStorageData.remove(action.previousDropLocationId)
+                }
+
+                newStorageData[action.newDropLocationId] = inPrevious
+            }
         }
 
         val newAnswerData = dragAndDropAnswerData.toMutableMap()
@@ -476,6 +498,29 @@ internal class QuizParticipationViewModel(
     @Serializable
     private data class SubmissionData(val error: String? = null)
 
+    private sealed interface DragAndDropAction {
+        /***
+         * Move from the available drop items to a drop location
+         */
+        data class Put(val dropLocationId: DropLocationId, val dragItemId: DragItemId) :
+            DragAndDropAction
+
+        /**
+         * Move from one drop location to another, swapping the contents.
+         * If one location does not hold a drag item, the null value is swapped.
+         */
+        data class Swap(
+            val previousDropLocationId: DropLocationId,
+            val newDropLocationId: DropLocationId
+        ) : DragAndDropAction
+
+        /**
+         * Clear the drop location, returning the present drag item to the available items.
+         */
+        data class Clear(
+            val dropLocationId: DropLocationId
+        ) : DragAndDropAction
+    }
 }
 
 private typealias ShortAnswerStorageData = Map<Int, String>

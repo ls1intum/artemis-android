@@ -18,9 +18,9 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
-import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.DragAndDropQuizQuestionUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.MultipleChoiceQuizQuestionUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.ShortAnswerQuizQuestionUi
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.draganddrop.DragAndDropQuizQuestionUi
 import kotlinx.datetime.Instant
 
 @Composable
@@ -93,11 +93,14 @@ private fun WorkOnQuizBody(
             modifier = modifier,
             questionIndex = questionIndex,
             question = quizQuestionData.question,
-            onRequestDisplayHint = onRequestDisplayHint,
+            availableDragItems = quizQuestionData.availableDragItems,
             serverUrl = serverUrl,
             authToken = authToken,
             dropLocationMapping = quizQuestionData.dropLocationMapping,
-            onDragItemIntoDropLocation = quizQuestionData.onDragItemIntoDropLocation
+            onDragItemIntoDropLocation = quizQuestionData.onDragItemIntoDropLocation,
+            onClearDropLocation = quizQuestionData.onClearDropLocation,
+            onSwapDropLocations = quizQuestionData.onSwapDropLocations,
+            onRequestDisplayHint = onRequestDisplayHint
         )
 
         is QuizQuestionData.MultipleChoiceData -> MultipleChoiceQuizQuestionUi(

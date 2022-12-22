@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question
+package de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.draganddrop
 
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Canvas
@@ -24,15 +24,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.asImageBitmap
@@ -56,23 +55,27 @@ import com.google.accompanist.flowlayout.FlowRow
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion.DragItem
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion.DropLocation
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.QuizQuestionHeader
 import io.ktor.http.HttpHeaders
 
 // The drag and drop functionality is inspired by: https://blog.canopas.com/android-drag-and-drop-ui-element-in-jetpack-compose-14922073b3f1
 // The code can be found here: https://github.com/cp-radhika-s/Drag_and_drop_jetpack_compose
 
-private val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
+private val LocalDragTargetInfo = compositionLocalOf { DragInfo() }
 
 @Composable
 internal fun DragAndDropQuizQuestionUi(
     modifier: Modifier,
     questionIndex: Int,
     question: DragAndDropQuizQuestion,
+    availableDragItems: List<DragItem>,
     serverUrl: String,
     authToken: String,
     dropLocationMapping: Map<DropLocation, DragItem>,
     onRequestDisplayHint: () -> Unit,
-    onDragItemIntoDropLocation: (itemId: Long, dropId: Long) -> Unit
+    onDragItemIntoDropLocation: (itemId: Long, dropId: Long) -> Unit,
+    onSwapDropLocations: (oldDropLocationId: Long, newDropLocationId: Long) -> Unit,
+    onClearDropLocation: (dropLocationId: Long) -> Unit
 ) {
     Column(modifier = modifier) {
         QuizQuestionHeader(
@@ -83,39 +86,94 @@ internal fun DragAndDropQuizQuestionUi(
             onRequestDisplayHint = onRequestDisplayHint
         )
 
-        val currentDragTargetInfo = remember { DragTargetInfo() }
+        val currentDragTargetInfo = remember { DragInfo() }
+        val dragOffset = currentDragTargetInfo.currentDragTargetInfo.dragOffset
+        val dragPosition = currentDragTargetInfo.currentDragTargetInfo.dragPosition
 
-        var currentDropTarget: DropLocation? by remember { mutableStateOf(null) }
+        var currentDropTarget: DropTarget by remember { mutableStateOf(DropTarget.Nothing) }
 
         CompositionLocalProvider(LocalDragTargetInfo provides currentDragTargetInfo) {
             DragAndDropDragItemsRow(
-                modifier = Modifier.fillMaxWidth(),
-                dragItems = question.dragItems,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 60.dp)
+                    .onGloballyPositioned {
+                        val bounds = it.boundsInWindow()
+                        val isDropTarget =
+                            currentDragTargetInfo.currentDragTargetInfo is DragTargetInfo.Dragging &&
+                                    bounds.contains(dragOffset + dragPosition)
+
+                        if (currentDropTarget == DropTarget.AvailableItemsRow && !isDropTarget) {
+                            currentDropTarget = DropTarget.Nothing
+                        } else if (isDropTarget) {
+                            currentDropTarget = DropTarget.AvailableItemsRow
+                        }
+                    },
+                dragItems = availableDragItems,
                 authToken = authToken,
                 serverUrl = serverUrl,
                 onDragRelease = { dragItem ->
-                    val selectedDropLocationId = currentDropTarget?.id
+                    val currentlySelectedDropTarget = currentDropTarget
 
-                    if (selectedDropLocationId != null) {
-                        onDragItemIntoDropLocation(dragItem.id, selectedDropLocationId)
+                    if (currentlySelectedDropTarget is DropTarget.DropLocationTarget) {
+                        onDragItemIntoDropLocation(
+                            dragItem.id,
+                            currentlySelectedDropTarget.dropLocationTarget.id
+                        )
                     }
                 }
             )
 
             val backgroundFilePath = question.backgroundFilePath
             if (backgroundFilePath != null) {
+                // If there is currently a drag happening and it is originating from
+                // one of the drop locations inside this area.
+                val targetInfo = currentDragTargetInfo.currentDragTargetInfo
+                val isDraggingFromArea = remember(targetInfo) {
+                    targetInfo is DragTargetInfo.Dragging
+                            && targetInfo.dragItem !in availableDragItems
+                }
+
                 DragAndDropArea(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .zIndex(if (isDraggingFromArea) 20f else 0f),
                     dropLocationMapping = dropLocationMapping,
                     imageUrl = serverUrl + backgroundFilePath,
                     dropLocations = question.dropLocations,
                     serverUrl = serverUrl,
                     authToken = authToken,
                     onUpdateIsCurrentDropTarget = { dropLocation, isCurrentDropTarget ->
-                        if (!isCurrentDropTarget && dropLocation == currentDropTarget) {
-                            currentDropTarget = null
+                        val currentlySetDropTarget = currentDropTarget
+
+                        // Set drop location to nothing if it is currently set to this drop location target.
+                        // If it is the current drop target, set it.
+                        if (
+                            !isCurrentDropTarget && currentlySetDropTarget is DropTarget.DropLocationTarget
+                            && currentlySetDropTarget.dropLocationTarget == dropLocation
+                        ) {
+                            currentDropTarget = DropTarget.Nothing
                         } else if (isCurrentDropTarget) {
-                            currentDropTarget = dropLocation
+                            currentDropTarget = DropTarget.DropLocationTarget(dropLocation)
+                        }
+                    },
+                    onDragRelease = { originalDropLocation ->
+                        when (val currentlySelectedDropTarget = currentDropTarget) {
+                            is DropTarget.DropLocationTarget -> {
+                                // trigger swap
+                                onSwapDropLocations(
+                                    originalDropLocation.id,
+                                    currentlySelectedDropTarget.dropLocationTarget.id
+                                )
+                            }
+
+                            DropTarget.AvailableItemsRow -> {
+                                // trigger clear
+                                onClearDropLocation(originalDropLocation.id)
+                            }
+
+                            // Do nothing here.
+                            DropTarget.Nothing -> {}
                         }
                     }
                 )
@@ -158,7 +216,7 @@ private fun DragAndDropDragItemsRow(
             crossAxisSpacing = 8.dp
         ) {
             dragItems.forEach { dragItem ->
-                DraggableDragItem(
+                DragItemDraggableContainer(
                     modifier = Modifier.zIndex(10f),
                     dragItem = dragItem,
                     onDragRelease = { onDragRelease(dragItem) }
@@ -189,36 +247,53 @@ private fun DragItemUiElement(
             .border(width = 1.dp, color = dragItemOutlineColor),
         contentAlignment = Alignment.Center
     ) {
-        Box(
+        DragItemUiElementContent(
             modifier = Modifier.padding(4.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            if (pictureFilePath != null) {
-                val request = ImageRequest.Builder(LocalContext.current)
-                    .data(pictureFilePath)
-                    .addHeader(HttpHeaders.Authorization, "Bearer $authToken")
-                    .build()
-
-                AsyncImage(
-                    model = request, contentDescription = null,
-                    modifier = Modifier
-                        .widthIn(max = 60.dp)
-                        .heightIn(max = 60.dp)
-                )
-            }
-
-            if (text != null) {
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = dragItemTextColor
-                )
-            }
-        }
-
+            text = text,
+            pictureFilePath = pictureFilePath,
+            authToken = authToken
+        )
     }
 }
 
+@Composable
+private fun DragItemUiElementContent(
+    modifier: Modifier, text: String?,
+    pictureFilePath: String?,
+    authToken: String
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        if (pictureFilePath != null) {
+            val request = ImageRequest.Builder(LocalContext.current)
+                .data(pictureFilePath)
+                .addHeader(HttpHeaders.Authorization, "Bearer $authToken")
+                .build()
+
+            AsyncImage(
+                model = request, contentDescription = null,
+                modifier = Modifier
+                    .widthIn(max = 60.dp)
+                    .heightIn(max = 60.dp)
+            )
+        }
+
+        if (text != null) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodySmall,
+                color = dragItemTextColor
+            )
+        }
+    }
+}
+
+/**
+ * Load and display the background image. Renders the drop locations onto the image and reports
+ * drag events about drag items already placed in the drop locations.
+ */
 @Composable
 private fun DragAndDropArea(
     modifier: Modifier,
@@ -227,7 +302,8 @@ private fun DragAndDropArea(
     dropLocations: List<DropLocation>,
     serverUrl: String,
     authToken: String,
-    onUpdateIsCurrentDropTarget: (dropLocation: DropLocation, isCurrentDropTarget: Boolean) -> Unit
+    onUpdateIsCurrentDropTarget: (dropLocation: DropLocation, isCurrentDropTarget: Boolean) -> Unit,
+    onDragRelease: (originalDropLocation: DropLocation) -> Unit
 ) {
     val context = LocalContext.current
     var loadedDrawable: Drawable? by remember { mutableStateOf(null) }
@@ -287,6 +363,9 @@ private fun DragAndDropArea(
                                 dropLocation,
                                 isCurrentDropTarget
                             )
+                        },
+                        onDragRelease = {
+                            if (dragItem != null) onDragRelease(dropLocation)
                         }
                     )
                 }
@@ -304,17 +383,24 @@ private val dropTargetColorDragging: Color
 private val dropTargetColorDropTarget: Color
     @Composable get() = Color.Green
 
+/**
+ * The drop location inside the background image.
+ * Draws an outline and a background color into the image. If the drop location holds a drag item,
+ * the drag item is displayed. Handles dragging of the drag item it holds.
+ */
 @Composable
 private fun ImageDropLocation(
     modifier: Modifier,
     dragItem: DragItem?,
     serverUrl: String,
     authToken: String,
-    onUpdateIsCurrentDragTarget: (isCurrentDragTarget: Boolean) -> Unit
+    onUpdateIsCurrentDragTarget: (isCurrentDragTarget: Boolean) -> Unit,
+    onDragRelease: () -> Unit
 ) {
-    val dragInfo = LocalDragTargetInfo.current
-    val dragPosition = dragInfo.dragPosition
-    val dragOffset = dragInfo.dragOffset
+    val targetInfo = LocalDragTargetInfo.current.currentDragTargetInfo
+    val dragPosition = targetInfo.dragPosition
+    val dragOffset = targetInfo.dragOffset
+
     var isCurrentDropTarget by remember { mutableStateOf(false) }
 
     val oneDp = with(LocalDensity.current) {
@@ -334,18 +420,28 @@ private fun ImageDropLocation(
     val outlineColor = dragItemOutlineColor
     val backgroundColor = when {
         isCurrentDropTarget -> dropTargetColorDropTarget
-        dragInfo.isDragging -> dropTargetColorDragging
+        targetInfo is DragTargetInfo.Dragging -> dropTargetColorDragging
         else -> dropTargetColorNotDragging
     }
+
+    val isDraggingDragChild =
+        targetInfo is DragTargetInfo.Dragging && targetInfo.dragItem == dragItem
 
     Box(
         modifier = modifier
             .onGloballyPositioned {
                 val bounds = it.boundsInWindow()
-                isCurrentDropTarget = bounds.contains(dragPosition + dragOffset)
+                val wasCurrentDropTarget = isCurrentDropTarget
 
-                onUpdateIsCurrentDragTarget(isCurrentDropTarget)
+                isCurrentDropTarget =
+                    targetInfo is DragTargetInfo.Dragging && bounds.contains(dragPosition + dragOffset)
+
+                // Update either when it is the current drag target or it previously was and no longer is now.
+                if (isCurrentDropTarget || wasCurrentDropTarget) {
+                    onUpdateIsCurrentDragTarget(isCurrentDropTarget)
+                }
             }
+            .zIndex(if (isDraggingDragChild) 20f else 0f)
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawRect(backgroundColor)
@@ -356,27 +452,62 @@ private fun ImageDropLocation(
         }
 
         if (dragItem != null) {
-            DragItemUiElement(
-                modifier = Modifier,
-                text = dragItem.text,
-                pictureFilePath = dragItem.backgroundPictureServerUrl(serverUrl),
-                authToken = authToken
-            )
+            val pictureFilePath = dragItem.backgroundPictureServerUrl(serverUrl)
+
+            DragItemDraggableContainer(
+                modifier = Modifier.fillMaxSize(),
+                dragItem = dragItem,
+                onDragRelease = onDragRelease
+            ) {
+                if (isDraggingDragChild) {
+                    DragItemUiElement(
+                        modifier = Modifier.zIndex(20f),
+                        text = dragItem.text,
+                        pictureFilePath = pictureFilePath,
+                        authToken = authToken
+                    )
+                } else {
+                    DragItemUiElementContent(
+                        modifier = Modifier.fillMaxSize(),
+                        text = dragItem.text,
+                        pictureFilePath = pictureFilePath,
+                        authToken = authToken
+                    )
+                }
+            }
         }
     }
 }
 
+/**
+ * A container for a draggable composable that is made up of a DragItem.
+ * When the drag on this composable is started/ended, it updates LocalDragTargetInfo.
+ */
 @Composable
-private fun DraggableDragItem(
+private fun DragItemDraggableContainer(
     modifier: Modifier,
     dragItem: DragItem,
     onDragRelease: () -> Unit,
     content: @Composable BoxScope.() -> Unit
 ) {
-    var currentPosition by remember { mutableStateOf(Offset.Zero) }
-    val currentState = LocalDragTargetInfo.current
+    var currentPosition by remember(dragItem) { mutableStateOf(Offset.Zero) }
+    val currentDragTargetInfo = LocalDragTargetInfo.current
+    // The drag target info currently set
+    val currentTargetInfo = currentDragTargetInfo.currentDragTargetInfo
 
-    var targetSize by remember { mutableStateOf(IntSize.Zero) }
+    // A drag target info representing this drag item
+    val selfTargetInfo: DragTargetInfo.Dragging by remember(dragItem) {
+        mutableStateOf(DragTargetInfo.Dragging(dragItem))
+    }
+
+    var targetSize by remember(dragItem) { mutableStateOf(IntSize.Zero) }
+
+    val onDragDone = {
+        selfTargetInfo.dragOffset = Offset.Zero
+        selfTargetInfo.dragPosition = Offset.Zero
+
+        currentDragTargetInfo.currentDragTargetInfo = DragTargetInfo.NotDragging
+    }
 
     Box(
         modifier = modifier
@@ -384,47 +515,63 @@ private fun DraggableDragItem(
                 currentPosition = it.localToWindow(Offset.Zero)
                 targetSize = it.size
             }
-            .pointerInput(Unit) {
+            .pointerInput(dragItem) {
                 detectDragGestures(
                     onDragStart = {
-                        currentState.dragItem = dragItem
-                        currentState.isDragging = true
-                        currentState.dragPosition = currentPosition + it
+                        currentDragTargetInfo.currentDragTargetInfo = selfTargetInfo
+                        selfTargetInfo.dragPosition = currentPosition + it
                     }, onDrag = { change, dragAmount ->
                         change.consume()
-                        currentState.dragOffset += Offset(dragAmount.x, dragAmount.y)
+                        selfTargetInfo.dragOffset += Offset(dragAmount.x, dragAmount.y)
                     }, onDragEnd = {
-                        currentState.isDragging = false
-                        currentState.dragOffset = Offset.Zero
-
+                        onDragDone()
                         onDragRelease()
                     }, onDragCancel = {
-                        currentState.dragOffset = Offset.Zero
-                        currentState.isDragging = false
+                        onDragDone()
                     }
                 )
             }
             .graphicsLayer {
-                if (currentState.dragItem == dragItem && currentState.isDragging) {
+                if (currentTargetInfo == selfTargetInfo) {
                     val offset =
-                        (currentState.dragPosition + currentState.dragOffset - currentPosition)
+                        (selfTargetInfo.dragPosition + selfTargetInfo.dragOffset - currentPosition)
                     alpha = if (targetSize == IntSize.Zero) 0f else .9f
                     translationX = offset.x.minus(targetSize.width / 2)
                     translationY = offset.y.minus(targetSize.height / 2)
                 }
             }
-            .zIndex(if (currentState.isDragging) 10f else 0f),
+            .zIndex(if (currentTargetInfo == selfTargetInfo) 10f else 0f),
         content = content
     )
 
 }
 
-internal class DragTargetInfo {
-    var isDragging: Boolean by mutableStateOf(false)
-    var dragPosition by mutableStateOf(Offset.Zero)
-    var dragOffset by mutableStateOf(Offset.Zero)
-    var dragItem by mutableStateOf<DragItem?>(null)
+private class DragInfo {
+    var currentDragTargetInfo: DragTargetInfo by mutableStateOf(DragTargetInfo.NotDragging)
 }
+
+private sealed interface DragTargetInfo {
+    object NotDragging : DragTargetInfo
+
+    class Dragging(
+        val dragItem: DragItem
+    ) : DragTargetInfo {
+        var dragPosition by mutableStateOf(Offset.Zero)
+        var dragOffset by mutableStateOf(Offset.Zero)
+    }
+}
+
+private val DragTargetInfo.dragPosition: Offset
+    @Composable get() = when (this) {
+        is DragTargetInfo.Dragging -> dragPosition
+        DragTargetInfo.NotDragging -> Offset.Zero
+    }
+
+private val DragTargetInfo.dragOffset: Offset
+    @Composable get() = when (this) {
+        is DragTargetInfo.Dragging -> dragOffset
+        DragTargetInfo.NotDragging -> Offset.Zero
+    }
 
 private fun DragItem.backgroundPictureServerUrl(serverUrl: String): String? =
     pictureFilePath?.let { serverUrl + it }

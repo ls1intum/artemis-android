@@ -28,9 +28,7 @@ internal fun QuizParticipationUi(modifier: Modifier, viewModel: QuizParticipatio
 
     val serverConfigurationService: ServerConfigurationService = get()
     val serverUrl: String =
-        serverConfigurationService.serverUrl.map { it.dropLast(1) }.collectAsState(
-            initial = ""
-        ).value
+        serverConfigurationService.serverUrl.collectAsState(initial = "").value.dropLast(1)
 
     val exerciseDataState = viewModel.quizExerciseDataState.collectAsState().value
     val isWaitingForQuizStart = viewModel.waitingForQuizStart.collectAsState(initial = false).value

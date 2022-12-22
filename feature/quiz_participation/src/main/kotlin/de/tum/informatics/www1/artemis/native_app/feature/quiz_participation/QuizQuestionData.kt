@@ -25,6 +25,7 @@ sealed class QuizQuestionData<T : QuizQuestion>(val question: T) {
         val availableDragItems: List<DragAndDropQuizQuestion.DragItem>,
         val dropLocationMapping: Map<DragAndDropQuizQuestion.DropLocation, DragAndDropQuizQuestion.DragItem>,
         val onDragItemIntoDropLocation: (itemId: Long, dropId: Long) -> Unit,
+        val onSwapDropLocations: (oldDropLocationId: Long, newDropLocationId: Long) -> Unit,
         val onClearDropLocation: (dropId: Long) -> Unit
     ) : QuizQuestionData<DragAndDropQuizQuestion>(question)
 }
