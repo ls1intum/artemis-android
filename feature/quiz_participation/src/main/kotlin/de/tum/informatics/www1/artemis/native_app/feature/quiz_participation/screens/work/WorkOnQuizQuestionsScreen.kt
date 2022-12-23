@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -18,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
-import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.MultipleChoiceQuizQuestionUi
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.multiple_choice.MultipleChoiceQuizQuestionUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.ShortAnswerQuizQuestionUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.draganddrop.DragAndDropQuizQuestionUi
 import kotlinx.datetime.Instant
@@ -48,6 +50,7 @@ internal fun WorkOnQuizQuestionsScreen(
             .fillMaxWidth()
             .weight(1f)
             .padding(8.dp)
+            .verticalScroll(rememberScrollState())
         if (currentQuestion != null) {
             WorkOnQuizBody(
                 modifier = bodyModifier,
@@ -82,10 +85,12 @@ private fun WorkOnQuizBody(
     serverUrl: String,
     authToken: String
 ) {
-    var displayHint by rememberSaveable { mutableStateOf(false) }
+    var displayQuestionHint by rememberSaveable { mutableStateOf(false) }
+    // Store the hint text of the answer option
+    var displayAnswerOptionHint: String? by rememberSaveable { mutableStateOf(null) }
 
     val onRequestDisplayHint = {
-        displayHint = true
+        displayQuestionHint = true
     }
 
     when (quizQuestionData) {
@@ -107,7 +112,14 @@ private fun WorkOnQuizBody(
             modifier = modifier,
             questionIndex = questionIndex,
             question = quizQuestionData.question,
-            onRequestDisplayHint = onRequestDisplayHint
+            optionSelectionMapping = quizQuestionData.optionSelectionMapping,
+            onRequestDisplayHint = onRequestDisplayHint,
+            onRequestChangeAnswerOptionSelectionState = { option, isSelected ->
+                quizQuestionData.onRequestChangeAnswerOptionSelectionState(option.id, isSelected)
+            },
+            onRequestDisplayAnswerOptionHint = { option ->
+                displayAnswerOptionHint = option.hint.orEmpty()
+            }
         )
 
         is QuizQuestionData.ShortAnswerData -> ShortAnswerQuizQuestionUi(
@@ -120,17 +132,32 @@ private fun WorkOnQuizBody(
         )
     }
 
-    if (displayHint) {
-        AlertDialog(
-            onDismissRequest = { displayHint = false },
-            title = { Text(text = stringResource(id = R.string.quiz_participation_question_hint_dialog_title)) },
-            text = { MarkdownText(markdown = quizQuestionData.question.hint.orEmpty()) },
-            confirmButton = {
-                TextButton(onClick = { displayHint = false }) {
-                    Text(text = stringResource(id = R.string.quiz_participation_question_hint_dialog_positive))
-                }
-            }
+    if (displayQuestionHint) {
+        HintAlertDialog(
+            hint = quizQuestionData.question.hint.orEmpty(),
+            onDismissRequest = { displayQuestionHint = false }
         )
     }
+
+    if (displayAnswerOptionHint != null) {
+        HintAlertDialog(
+            hint = displayAnswerOptionHint.orEmpty(),
+            onDismissRequest = { displayAnswerOptionHint = null }
+        )
+    }
+}
+
+@Composable
+private fun HintAlertDialog(hint: String, onDismissRequest: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(text = stringResource(id = R.string.quiz_participation_question_hint_dialog_title)) },
+        text = { MarkdownText(markdown = hint) },
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = stringResource(id = R.string.quiz_participation_question_hint_dialog_positive))
+            }
+        }
+    )
 }
 

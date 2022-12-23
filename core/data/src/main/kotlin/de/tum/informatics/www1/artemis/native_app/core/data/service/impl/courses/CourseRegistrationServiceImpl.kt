@@ -53,7 +53,7 @@ internal class CourseRegistrationServiceImpl(
                     bearerAuth(authToken)
                 }.body()
 
-            //TODO: sync groups
+            // TODO: sync groups
         }
     }
 }

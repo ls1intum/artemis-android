@@ -40,6 +40,12 @@
     <!--  Quiz question header  -->
     <string name="quiz_participation_question_header_title">%1$d) %2$s</string>
     <string name="quiz_participation_question_header_hint_button">Hint</string>
+    <string name="quiz_participation_question_header_points">%1$dP</string>
+
+    <!--  Multiple choice question  -->
+    <string name="quiz_participation_multiple_choice_instruction">Please choose all correct answer options.</string>
+    <string name="quiz_participation_single_choice_instruction">Please choose the correct answer option.</string>
+    <string name="quiz_participation_multiple_choice_help_button_content_description">Display multiple choice item hint button.</string>
 
     <!-- Drag and drop question  -->
     <string name="quiz_participation_drag_and_drop_instruction">Drag &amp; Drop: Place the suitable items on the correct areas.</string>

@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,9 +20,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
+
+@Composable
+internal fun QuizQuestionHeader(
+    modifier: Modifier,
+    question: QuizQuestion,
+    questionIndex: Int,
+    onRequestDisplayHint: () -> Unit
+) {
+    QuizQuestionHeader(
+        modifier = modifier,
+        questionIndex = questionIndex,
+        title = question.title.orEmpty(),
+        hasHint = question.hint != null,
+        onRequestDisplayHint = onRequestDisplayHint,
+        points = question.points
+    )
+}
 
 @Composable
 internal fun QuizQuestionHeader(
@@ -29,11 +50,13 @@ internal fun QuizQuestionHeader(
     questionIndex: Int,
     title: String,
     hasHint: Boolean,
+    points: Int?,
     onRequestDisplayHint: () -> Unit
 ) {
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
             modifier = Modifier.weight(1f),
@@ -56,6 +79,18 @@ internal fun QuizQuestionHeader(
         } else {
             Box(modifier = Modifier.height(ButtonDefaults.MinHeight))
         }
+
+        if (points != null) {
+            Text(
+                modifier = Modifier,
+                text = stringResource(
+                    id = R.string.quiz_participation_question_header_points,
+                    points
+                ),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 
@@ -68,7 +103,8 @@ private fun QuizQuestionHeaderPreview() {
             questionIndex = 0,
             title = "My multiple choice question",
             hasHint = true,
-            onRequestDisplayHint = {}
+            onRequestDisplayHint = {},
+            points = 1
         )
     }
 }
@@ -82,7 +118,8 @@ private fun QuizQuestionHeaderPreviewMultiline() {
             questionIndex = 0,
             title = "My multiple choice question with a very long title that will stretch over multiple lines",
             hasHint = true,
-            onRequestDisplayHint = {}
+            onRequestDisplayHint = {},
+            points = 1
         )
     }
 }

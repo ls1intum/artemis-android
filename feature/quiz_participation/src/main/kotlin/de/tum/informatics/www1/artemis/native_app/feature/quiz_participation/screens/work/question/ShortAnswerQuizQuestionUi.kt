@@ -89,9 +89,8 @@ internal fun ShortAnswerQuizQuestionUi(
         QuizQuestionHeader(
             modifier = Modifier.fillMaxWidth(),
             questionIndex = questionIndex,
-            title = question.title.orEmpty(),
-            hasHint = question.hint != null,
-            onRequestDisplayHint = onRequestDisplayHint
+            onRequestDisplayHint = onRequestDisplayHint,
+            question = question
         )
 
         Text(

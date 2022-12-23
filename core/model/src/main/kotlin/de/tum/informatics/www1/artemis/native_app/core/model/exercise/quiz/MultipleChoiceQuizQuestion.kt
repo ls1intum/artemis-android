@@ -22,7 +22,7 @@ data class MultipleChoiceQuizQuestion(
 
     @Serializable
     data class AnswerOption(
-        val id: Long? = null,
+        val id: Long = 0,
         val text: String? = null,
         val hint: String? = null,
         val explanation: String? = null,

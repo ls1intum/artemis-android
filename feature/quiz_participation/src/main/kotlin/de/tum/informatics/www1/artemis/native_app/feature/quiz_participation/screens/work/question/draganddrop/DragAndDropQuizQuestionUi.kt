@@ -60,7 +60,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.image.loadAsyncImageDrawable
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.QuizQuestionBodyText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.QuizQuestionHeader
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.QuizQuestionInstructionText
 import io.ktor.http.HttpHeaders
 
 
@@ -82,9 +84,8 @@ internal fun DragAndDropQuizQuestionUi(
         QuizQuestionHeader(
             modifier = Modifier.fillMaxWidth(),
             questionIndex = questionIndex,
-            title = question.title.orEmpty(),
-            hasHint = question.hint != null,
-            onRequestDisplayHint = onRequestDisplayHint
+            onRequestDisplayHint = onRequestDisplayHint,
+            question = question
         )
 
         val currentDragTargetInfo = remember { DragInfo() }
@@ -99,10 +100,9 @@ internal fun DragAndDropQuizQuestionUi(
                 .weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            MarkdownText(
+            QuizQuestionBodyText(
                 modifier = Modifier.fillMaxWidth(),
-                markdown = question.text.orEmpty(),
-                style = MaterialTheme.typography.bodyMedium
+                question = question
             )
 
             CompositionLocalProvider(LocalDragTargetInfo provides currentDragTargetInfo) {
@@ -116,11 +116,9 @@ internal fun DragAndDropQuizQuestionUi(
                                 && targetInfo.dragItem !in availableDragItems
                     }
 
-                    Text(
+                    QuizQuestionInstructionText(
                         modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(id = R.string.quiz_participation_drag_and_drop_instruction),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
+                        instructionText = stringResource(id = R.string.quiz_participation_drag_and_drop_instruction)
                     )
 
                     DragAndDropDragItemsRow(

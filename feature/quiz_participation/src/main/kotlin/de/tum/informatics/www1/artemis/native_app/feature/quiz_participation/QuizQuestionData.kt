@@ -13,7 +13,9 @@ sealed class QuizQuestionData<T : QuizQuestion>(val question: T) {
     ) : QuizQuestionData<ShortAnswerQuizQuestion>(question)
 
     class MultipleChoiceData(
-        question: MultipleChoiceQuizQuestion
+        question: MultipleChoiceQuizQuestion,
+        val optionSelectionMapping: Map<Long, Boolean>,
+        val onRequestChangeAnswerOptionSelectionState: (Long, Boolean) -> Unit
     ) : QuizQuestionData<MultipleChoiceQuizQuestion>(question)
 
     /**

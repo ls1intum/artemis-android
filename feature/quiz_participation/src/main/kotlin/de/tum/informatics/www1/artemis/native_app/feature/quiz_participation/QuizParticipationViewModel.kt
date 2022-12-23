@@ -213,15 +213,22 @@ internal class QuizParticipationViewModel(
             emptyMap()
         )
 
+    private val multipleChoiceData: Flow<Map<Long, MultipleChoiceStorageData>> =
+        savedStateHandle.getStateFlow(
+            TAG_MULTIPLE_CHOICE_DATA,
+            emptyMap()
+        )
+
     /*
      * Construct the question data from the questions and the flows (which are itself coming from the saved state handle)
      */
     val quizQuestionsWithData: Flow<List<QuizQuestionData<*>>> = combine(
         quizQuestions,
         shortAnswerData,
-        dragAndDropData
-    ) { questions, shortAnswerData, dragAndDropData ->
-        constructQuizQuestionData(questions, shortAnswerData, dragAndDropData)
+        dragAndDropData,
+        multipleChoiceData
+    ) { questions, shortAnswerData, dragAndDropData, multipleChoiceData ->
+        constructQuizQuestionData(questions, shortAnswerData, dragAndDropData, multipleChoiceData)
     }
 
     private val batchUpdater: Flow<QuizExercise> = when (quizType) {
@@ -378,7 +385,8 @@ internal class QuizParticipationViewModel(
     private fun constructQuizQuestionData(
         questions: List<QuizQuestion>,
         shortAnswerData: Map<Long, ShortAnswerStorageData>,
-        dragAndDropAnswerData: Map<Long, DragAndDropStorageData>
+        dragAndDropAnswerData: Map<Long, DragAndDropStorageData>,
+        multipleChoiceData: Map<Long, MultipleChoiceStorageData>
     ): List<QuizQuestionData<*>> {
         return questions.map { question ->
             val questionId = question.id ?: 0
@@ -423,13 +431,37 @@ internal class QuizParticipationViewModel(
                         onSwapDropLocations = { oldDropLocationId, newDropLocationId ->
                             updateDragAndDropDropLocation(
                                 questionId = questionId,
-                                action = DragAndDropAction.Swap(oldDropLocationId, newDropLocationId)
+                                action = DragAndDropAction.Swap(
+                                    oldDropLocationId,
+                                    newDropLocationId
+                                )
                             )
                         }
                     )
                 }
 
-                is MultipleChoiceQuizQuestion -> QuizQuestionData.MultipleChoiceData(question)
+                is MultipleChoiceQuizQuestion -> {
+                    val optionSelectionMapping = multipleChoiceData[questionId].orEmpty()
+
+                    QuizQuestionData.MultipleChoiceData(
+                        question = question,
+                        optionSelectionMapping = optionSelectionMapping,
+                        onRequestChangeAnswerOptionSelectionState = { optionId, isSelected ->
+                            // if the mode is single choice, only one option can be selected at a time
+                            val newOptionSelectionMapping =
+                                if (question.singleChoice) mutableMapOf()
+                                else optionSelectionMapping.toMutableMap()
+
+                            newOptionSelectionMapping[optionId] = isSelected
+
+                            val newMultipleChoiceData = multipleChoiceData.toMutableMap()
+                            newMultipleChoiceData[questionId] = newOptionSelectionMapping
+
+                            savedStateHandle[TAG_MULTIPLE_CHOICE_DATA] = newMultipleChoiceData
+                        }
+                    )
+                }
+
                 is ShortAnswerQuizQuestion -> {
                     val solutionTexts: Map<Int, String> = shortAnswerData[questionId].orEmpty()
 
@@ -527,3 +559,5 @@ private typealias ShortAnswerStorageData = Map<Int, String>
 private typealias DropLocationId = Long
 private typealias DragItemId = Long
 private typealias DragAndDropStorageData = Map<DropLocationId, DragItemId>
+private typealias AnswerOptionId = Long
+private typealias MultipleChoiceStorageData = Map<AnswerOptionId, Boolean>
