@@ -34,11 +34,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
@@ -50,9 +50,9 @@ internal fun WorkOnQuizHeader(
     modifier: Modifier,
     questions: List<QuizQuestion>,
     selectedQuestionIndex: Int,
+    overallPoints: Int,
     onChangeSelectionQuestionIndex: (questionIndex: Int) -> Unit
 ) {
-    val answeredCount = 0
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         QuizOverviewRow(
@@ -65,14 +65,13 @@ internal fun WorkOnQuizHeader(
         )
 
         Text(
+            modifier = Modifier.padding(8.dp),
             text = stringResource(
-                id = R.string.quiz_participation_answered_question_count,
-                answeredCount,
-                questions.size
+                id = R.string.quiz_participation_overall_score_points,
+                overallPoints
             ),
             style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(horizontal = 8.dp),
-            fontSize = 24.sp
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -215,8 +214,8 @@ private fun QuizHeaderPreview(
             modifier = Modifier.fillMaxWidth(),
             questions = questions,
             selectedQuestionIndex = selectedIndex,
-            onChangeSelectionQuestionIndex = { selectedIndex = it }
-        )
+            overallPoints = 5
+        ) { selectedIndex = it }
     }
 }
 

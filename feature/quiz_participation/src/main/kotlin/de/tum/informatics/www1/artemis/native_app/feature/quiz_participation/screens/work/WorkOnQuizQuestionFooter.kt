@@ -1,8 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
@@ -11,9 +15,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,22 +28,35 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.ConnectionStatusUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.Footer
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun WorkOnQuizQuestionFooter(
     modifier: Modifier,
     lastSubmissionTime: Instant?,
     endDate: Instant?,
+    isConnected: Boolean,
+    latestWebsocketSubmission: Result<QuizSubmission>?,
     canNavigateToPreviousQuestion: Boolean,
     canNavigateToNextQuestion: Boolean,
     onRequestPreviousQuestion: () -> Unit,
-    onRequestNextQuestion: () -> Unit
+    onRequestNextQuestion: () -> Unit,
+    onRequestRetrySave: () -> Unit
 ) {
     var displayButtonText by remember { mutableStateOf(true) }
     val onTextLayout = { result: TextLayoutResult ->
@@ -45,6 +64,38 @@ internal fun WorkOnQuizQuestionFooter(
     }
 
     val buttonModifier = if (displayButtonText) Modifier.fillMaxWidth() else Modifier
+
+    if (!isConnected) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            ConnectionStatusUi(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .align(Alignment.Center),
+                isConnected = false
+            )
+        }
+    }
+
+    if (latestWebsocketSubmission != null && latestWebsocketSubmission.isFailure) {
+        // Display ui that the latest submission could not be uploaded
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.errorContainer)
+        ) {
+            Row(modifier = Modifier.padding(8.dp)) {
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(id = R.string.quiz_participation_save_failed),
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+
+                Button(onClick = onRequestRetrySave) {
+                    Text(text = stringResource(id = R.string.quiz_participation_save_failed_try_again_button))
+                }
+            }
+        }
+    }
 
     Footer(
         modifier = modifier,
@@ -75,7 +126,7 @@ internal fun WorkOnQuizQuestionFooter(
             ) {
                 if (endDate != null) {
                     val isQuizDone = endDate.hasPassed()
-                    val relativeTime = getRelativeTime(to = endDate)
+                    val relativeTime = getFormattedRelativeTimeUntilQuizEnd(endDate)
 
                     val text = if (isQuizDone) {
                         stringResource(id = R.string.quiz_participation_time_left_quiz_ended)
@@ -128,4 +179,66 @@ internal fun WorkOnQuizQuestionFooter(
             }
         }
     )
+}
+
+@Composable
+private fun getFormattedRelativeTimeUntilQuizEnd(quizEnd: Instant): String {
+    val scope = rememberCoroutineScope()
+
+    val flow = remember(scope) {
+        flow {
+            while (true) {
+                val now = Clock.System.now()
+                val remainingDuration = (quizEnd - now).absoluteValue
+                emit(remainingDuration)
+
+                val waitDuration = if (remainingDuration >= 6.minutes) {
+                    val remainingSeconds = remainingDuration.inWholeSeconds
+                    val toNextMinuteSeconds = remainingSeconds % 60
+                    if (toNextMinuteSeconds == 0L) {
+                        delay(2.seconds)
+                        continue
+                    } else {
+                        toNextMinuteSeconds.seconds
+                    }
+                } else {
+                    val remainingMillis = remainingDuration.inWholeMilliseconds
+                    val toNextSecondMillis = remainingMillis % 1000
+
+                    // Wait for the next whole second
+                    if (toNextSecondMillis == 0L) {
+                        delay(20.milliseconds)
+                        continue
+                    } else {
+                        toNextSecondMillis.milliseconds
+                    }
+                }
+
+                delay(waitDuration)
+            }
+        }.stateIn(scope, SharingStarted.Lazily, quizEnd - Clock.System.now())
+    }
+
+    return formatRelativeTimeUntilQuizTime(duration = flow.collectAsState().value)
+}
+
+@Composable
+private fun formatRelativeTimeUntilQuizTime(duration: Duration): String {
+    return if (duration > 5.minutes) {
+        val minutes = duration.inWholeMinutes
+
+        stringResource(id = R.string.quiz_participation_time_left_whole_minutes, minutes)
+    } else if (duration > 1.minutes) {
+        val minutes = duration.inWholeMinutes
+        val seconds = (duration - minutes.minutes).inWholeSeconds
+
+        stringResource(
+            id = R.string.quiz_participation_time_left_minutes_and_seconds,
+            minutes,
+            seconds
+        )
+    } else {
+        val seconds = duration.inWholeSeconds
+        stringResource(id = R.string.quiz_participation_time_left_whole_seconds, seconds)
+    }
 }

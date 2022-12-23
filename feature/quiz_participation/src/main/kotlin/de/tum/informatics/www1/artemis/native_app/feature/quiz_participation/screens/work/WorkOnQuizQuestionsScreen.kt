@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
@@ -31,8 +32,12 @@ internal fun WorkOnQuizQuestionsScreen(
     questionsWithData: List<QuizQuestionData<*>>,
     lastSubmissionTime: Instant?,
     endDate: Instant?,
+    isConnected: Boolean,
+    overallPoints: Int,
+    latestWebsocketSubmission: Result<QuizSubmission>?,
     serverUrl: String,
-    authToken: String
+    authToken: String,
+    onRequestRetrySave: () -> Unit
 ) {
     var selectedQuestionIndex by rememberSaveable(questionsWithData.size) { mutableStateOf(0) }
 
@@ -43,8 +48,8 @@ internal fun WorkOnQuizQuestionsScreen(
             modifier = Modifier.fillMaxWidth(),
             questions = questionsWithData.map { it.question },
             selectedQuestionIndex = selectedQuestionIndex,
-            onChangeSelectionQuestionIndex = { selectedQuestionIndex = it }
-        )
+            overallPoints = overallPoints
+        ) { selectedQuestionIndex = it }
 
         val bodyModifier = Modifier
             .fillMaxWidth()
@@ -68,11 +73,14 @@ internal fun WorkOnQuizQuestionsScreen(
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
             lastSubmissionTime = lastSubmissionTime,
+            latestWebsocketSubmission = latestWebsocketSubmission,
+            isConnected = isConnected,
             endDate = endDate,
             canNavigateToPreviousQuestion = selectedQuestionIndex > 0,
             canNavigateToNextQuestion = selectedQuestionIndex < questionsWithData.size - 1,
             onRequestPreviousQuestion = { selectedQuestionIndex-- },
-            onRequestNextQuestion = { selectedQuestionIndex++ }
+            onRequestNextQuestion = { selectedQuestionIndex++ },
+            onRequestRetrySave = onRequestRetrySave
         )
     }
 }

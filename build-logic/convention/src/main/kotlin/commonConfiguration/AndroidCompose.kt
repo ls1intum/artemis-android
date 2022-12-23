@@ -23,10 +23,10 @@ internal fun Project.configureCompose(commonExtension: CommonExtension<*, *, *, 
             freeCompilerArgs = freeCompilerArgs + listOf(
                 "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
                 "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
-                "-Xopt-in=kotlin.RequiresOptIn",
-                "-Xopt-in=com.google.accompanist.pager.ExperimentalPagerApi",
-                "-Xopt-in=androidx.compose.ui.ExperimentalComposeUiApi",
-                "-Xopt-in=androidx.compose.animation.ExperimentalAnimationApi"
+                "-opt-in=kotlin.RequiresOptIn",
+                "-opt-in=com.google.accompanist.pager.ExperimentalPagerApi",
+                "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
+                "-opt-in=androidx.compose.animation.ExperimentalAnimationApi"
             )
         }
 

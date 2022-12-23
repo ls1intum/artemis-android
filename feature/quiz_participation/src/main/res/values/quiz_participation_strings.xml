@@ -27,7 +27,7 @@
     <string name="quiz_participation_multiple_choice_short">MC</string>
     <string name="quiz_participation_short_answer_short">SA</string>
     <string name="quiz_participation_drag_and_drop_short">DD</string>
-    <string name="quiz_participation_answered_question_count">%1$d/%2$d</string>
+    <string name="quiz_participation_overall_score_points">Overall: %1$dP</string>
 
     <!-- Participation footer -->
     <string name="quiz_participation_time_left">Deadline: %1$s</string>
@@ -36,6 +36,13 @@
     <string name="quiz_participation_never_saved">Never saved!</string>
     <string name="quiz_participation_button_previous_question">Previous</string>
     <string name="quiz_participation_button_next_question">Next</string>
+
+    <string name="quiz_participation_time_left_whole_minutes">In %1$d min</string>
+    <string name="quiz_participation_time_left_minutes_and_seconds">In %1$d:%2$02d</string>
+    <string name="quiz_participation_time_left_whole_seconds">In %1$02d sec</string>
+
+    <string name="quiz_participation_save_failed">Something went wrong while uploading your changes.</string>
+    <string name="quiz_participation_save_failed_try_again_button">Try again</string>
 
     <!--  Quiz question header  -->
     <string name="quiz_participation_question_header_title">%1$d) %2$s</string>
@@ -58,10 +65,29 @@
 
     <string name="quiz_participation_submit_dialog_title">Submit?</string>
     <string name="quiz_participation_submit_dialog_message">You still have time left. Are you sure you want to submit your solution and end this quiz?</string>
+    <string name="quiz_participation_submit_dialog_message_not_all_answered">You still have time left. **You have not answered all questions yet**. Are you sure you want to submit your solution and end this quiz?</string>
     <string name="quiz_participation_submit_dialog_positive">Submit</string>
     <string name="quiz_participation_submit_dialog_negative">@android:string/cancel</string>
 
+    <string name="quiz_participation_submitting_dialog_message">Uploading submission…</string>
+
+    <string name="quiz_participation_submit_failed_dialog_title">Submit failed</string>
+    <string name="quiz_participation_submit_failed_dialog_message">Something went wrong while uploading your submission.</string>
+    <string name="quiz_participation_submit_failed_dialog_positive">Try again</string>
+    <string name="quiz_participation_submit_failed_dialog_negative">@android:string/cancel</string>
+
     <string name="quiz_participation_question_hint_dialog_title">Hint</string>
     <string name="quiz_participation_question_hint_dialog_positive">@android:string/ok</string>
+
+    <!--  leave quiz without submitting dialog  -->
+    <string name="quiz_participation_leave_without_submit_dialog_title">Leave?</string>
+    <string name="quiz_participation_leave_without_submit_dialog_message">**You have not submitted yet.** Do you want to leave anyway?</string>
+    <string name="quiz_participation_leave_without_submit_dialog_message_unsaved_changes">**You have unsaved changes which will be lost if you leave now. You have not submitted yet.** Do you want to leave anyway?</string>
+    <string name="quiz_participation_leave_without_submit_dialog_positive">Leave</string>
+    <string name="quiz_participation_leave_without_submit_dialog_negative">Stay</string>
+
+    <!--  Quiz ended screen   -->
+    <string name="quiz_participation_quiz_ended_text">The working period for this quiz is over. You can view your results in the web application once they are available.</string>
+    <string name="quiz_participation_quiz_ended_leave_button">Leave now.</string>
 
 </resources>

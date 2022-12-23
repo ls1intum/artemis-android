@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.quiz_participation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.hasPassedFlow
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -21,30 +22,47 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQ
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.ShortAnswerQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quizEnded
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.DragAndDropSubmittedAnswer
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.MultipleChoiceSubmittedAnswer
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.SubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.service.QuizExerciseService
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.service.QuizParticipationService
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import okhttp3.internal.wait
+import org.hildan.krossbow.stomp.LostReceiptException
 import org.hildan.krossbow.stomp.headers.StompSendHeaders
-import kotlin.time.Duration
+import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -60,6 +78,7 @@ internal class QuizParticipationViewModel(
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val participationService: ParticipationService,
+    private val quizParticipationService: QuizParticipationService,
     private val websocketProvider: WebsocketProvider,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -152,6 +171,14 @@ internal class QuizParticipationViewModel(
         .onStart { emit(initialParticipation.first()) }
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
+    private val initialSubmission: Flow<QuizSubmission> = latestParticipation
+        .map { latestParticipation ->
+            latestParticipation
+                .results
+                .orEmpty()
+                .firstOrNull()?.submission as? QuizSubmission ?: QuizSubmission()
+        }
+
     val quizExerciseDataState: StateFlow<DataState<QuizExercise>> = when (quizType) {
         QuizType.LIVE -> {
             initialParticipationDataState.map { participationDataState ->
@@ -226,10 +253,22 @@ internal class QuizParticipationViewModel(
         quizQuestions,
         shortAnswerData,
         dragAndDropData,
-        multipleChoiceData
-    ) { questions, shortAnswerData, dragAndDropData, multipleChoiceData ->
-        constructQuizQuestionData(questions, shortAnswerData, dragAndDropData, multipleChoiceData)
-    }
+        multipleChoiceData,
+        ::constructQuizQuestionData
+    )
+
+    private val answeredQuestionCount: Flow<Int> = combine(
+        quizQuestions,
+        shortAnswerData,
+        dragAndDropData,
+        multipleChoiceData,
+        ::computeAnsweredQuestionCount
+    )
+
+    val haveAllQuestionsBeenAnswered: Flow<Boolean> =
+        combine(answeredQuestionCount, quizQuestions) { answeredQuestionCount, quizQuestions ->
+            answeredQuestionCount == quizQuestions.size
+        }
 
     private val batchUpdater: Flow<QuizExercise> = when (quizType) {
         QuizType.LIVE -> {
@@ -257,7 +296,7 @@ internal class QuizParticipationViewModel(
     )
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
-    val totalScore: Flow<Int> = quizExercise.map { exercise ->
+    val overallPoints: Flow<Int> = quizExercise.map { exercise ->
         exercise.quizQuestions.sumOf { it.points ?: 0 }
     }
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
@@ -290,13 +329,6 @@ internal class QuizParticipationViewModel(
         startDate + (quizExercise.duration ?: 0).seconds
     }
 
-    /**
-     * The remaining time the student has to complete the quiz.
-     */
-    val remainingDuration: Flow<Duration> = combine(startDate, endDate) { startDate, endDate ->
-        endDate - startDate
-    }
-
     val waitingForQuizStart: Flow<Boolean> = when (quizType) {
         QuizType.LIVE -> {
             combine(quizExercise.flatMapLatest { it.quizEnded }, quizBatch) { quizEnded, batch ->
@@ -309,18 +341,89 @@ internal class QuizParticipationViewModel(
         QuizType.PRACTICE -> flowOf(false)
     }
 
+    val hasQuizEnded: Flow<Boolean> =
+        combine(
+            quizExercise.flatMapLatest { it.quizEnded },
+            quizBatch,
+            endDate.flatMapLatest { it.hasPassedFlow() }) { quizEnded, batch, endDataHasPassed ->
+            quizEnded || (batch != null && batch.ended == true) || endDataHasPassed
+        }
+
+    /**
+     * Set to true after the initial submission was loaded and the values have been stored
+     */
+    private val hasStoredInitialSubmission = MutableStateFlow(false)
+
+    /**
+     * Emitted to when buildAndUploadSubmission successfully uploaded a submission through the websocket
+     */
+    private val onRequestUploadSubmissionToWebsocket =
+        MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val latestWebsocketSubmission: Flow<Result<QuizSubmission>> = flow {
+        // Wait for the initial storage to avoid uploading an empty submission
+        hasStoredInitialSubmission.filter { it }.first()
+
+        var emittedFirst = false
+        val submissionFlow = combine(
+            dragAndDropData,
+            multipleChoiceData,
+            shortAnswerData,
+            onRequestUploadSubmissionToWebsocket.onStart { emit(Unit) }
+        ) { dragAndDropData, multipleChoiceData, shortAnswerData, _ ->
+            Triple(dragAndDropData, multipleChoiceData, shortAnswerData)
+        }
+            .transform {
+                if (emittedFirst) {
+                    emit(it)
+                } else emittedFirst = true
+            }
+            .transformLatest {
+                // Wait for 1 seconds to avoid sending a submission on every keystroke.
+                delay(1.seconds)
+                emit(it)
+            }
+            .map { (dragAndDropData, multipleChoiceData, shortAnswerData) ->
+                val submission = buildAndUploadSubmission(
+                    questions = quizQuestions.first(),
+                    isFinalSubmission = false,
+                    dragAndDropData = dragAndDropData,
+                    multipleChoiceData = multipleChoiceData,
+                    shortAnswerData = shortAnswerData
+                )
+
+                val receipt = try {
+                    websocketProvider.session.first().convertAndSend(
+                        headers = StompSendHeaders(
+                            destination = submissionChannel,
+                            receipt = UUID.randomUUID().toString()
+                        ),
+                        body = submission,
+                        serializer = Submission.serializer()
+                    )
+                } catch (exception: LostReceiptException) {
+                    null
+                }
+
+                if (receipt != null) {
+                    Result.success(submission)
+                } else {
+                    Result.failure(RuntimeException("Could not send through websocket"))
+                }
+            }
+
+        emitAll(submissionFlow)
+    }
+        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+
     val latestSubmission: StateFlow<QuizSubmission> = flow {
         when (quizType) {
             QuizType.LIVE -> {
                 // For live quizzes, the latest submission is the one from the latest participation
                 emitAll(
-                    latestParticipation
-                        .map { latestParticipation ->
-                            latestParticipation
-                                .results
-                                .orEmpty()
-                                .firstOrNull()?.submission as? QuizSubmission ?: QuizSubmission()
-                        }
+                    merge(
+                        initialSubmission,
+                        latestWebsocketSubmission.mapNotNull { it.getOrNull() }
+                    )
                 )
             }
 
@@ -329,17 +432,181 @@ internal class QuizParticipationViewModel(
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, QuizSubmission())
 
-    fun saveSubmission() {
-        // TODO: Build submission
-        val submission = QuizSubmission()
+    init {
         viewModelScope.launch {
-            val session = websocketProvider.session.first()
-            session.convertAndSend(
-                headers = StompSendHeaders(destination = submissionChannel),
-                submission,
-                QuizSubmission.serializer()
-            )
+            combine(waitingForQuizStart, quizBatch) { a, b -> a to b }
+                .collectLatest { (isWaitingForQuizStart, batch) ->
+                    val startTime = batch?.startTime
+                    if (isWaitingForQuizStart && startTime != null) {
+                        delay(startTime - serverClock.now() + 1.seconds)
+                        retryLoadExercise.emit(Unit)
+                    }
+                }
         }
+        viewModelScope.launch {
+            // First wait for the initial submission to load. Then fill the savedStateHandle with it
+            val initialSubmission = initialSubmission.first()
+            fillSavedStateHandleFromSubmission(initialSubmission)
+
+            hasStoredInitialSubmission.value = true
+        }
+    }
+
+    fun submit(onResponse: (successful: Boolean) -> Unit): Job {
+        return viewModelScope.launch {
+            val submission = buildAndUploadSubmission(
+                questions = quizQuestions.first(),
+                isFinalSubmission = true,
+                shortAnswerData = shortAnswerData.first(),
+                dragAndDropData = dragAndDropData.first(),
+                multipleChoiceData = multipleChoiceData.first()
+            )
+
+            val serverUrl = serverConfigurationService.serverUrl.first()
+            val authToken = accountService.authToken.first()
+
+            val successful = when (quizType) {
+                QuizType.LIVE -> quizParticipationService.submitForLiveMode(
+                    submission, exerciseId, serverUrl, authToken
+                )
+
+                QuizType.PRACTICE -> quizParticipationService.submitForPractice(
+                    submission, exerciseId, serverUrl, authToken
+                )
+            } is NetworkResponse.Response
+
+            onResponse(successful)
+        }
+    }
+
+    /**
+     * Request to upload a submission of the current state through the websocket
+     */
+    fun requestSaveSubmissionThroughWebsocket() {
+        viewModelScope.launch {
+            websocketProvider.requestTryReconnect()
+            onRequestUploadSubmissionToWebsocket.tryEmit(Unit)
+        }
+    }
+
+    /**
+     * Load the saved state handle with the values from the given submission
+     */
+    private fun fillSavedStateHandleFromSubmission(submission: QuizSubmission) {
+        val dragAndDropData: MutableMap<Long, DragAndDropStorageData> = mutableMapOf()
+        val shortAnswerData: MutableMap<Long, ShortAnswerStorageData> = mutableMapOf()
+        val multipleChoiceData: MutableMap<Long, MultipleChoiceStorageData> = mutableMapOf()
+
+        submission.submittedAnswers.forEach { submittedAnswer ->
+            val quizQuestionId = submittedAnswer.quizQuestion?.id ?: 0
+
+            when (submittedAnswer) {
+                is DragAndDropSubmittedAnswer -> {
+                    dragAndDropData[quizQuestionId] = submittedAnswer
+                        .mappings
+                        .associate {
+                            val dragItemId = it.dragItem?.id ?: 0
+                            val dropLocationId = it.dropLocation?.id ?: 0
+                            dropLocationId to dragItemId
+                        }
+                }
+
+                is MultipleChoiceSubmittedAnswer -> {
+                    multipleChoiceData[quizQuestionId] = submittedAnswer
+                        .selectedOptions
+                        .associate {
+                            it.id to true
+                        }
+                }
+
+                is ShortAnswerSubmittedAnswer -> {
+                    shortAnswerData[quizQuestionId] = submittedAnswer
+                        .submittedTexts
+                        .associate {
+                            val spotId = it.spot?.spotNr ?: 0
+                            spotId to it.text.orEmpty()
+                        }
+                }
+            }
+        }
+
+        savedStateHandle[TAG_DRAG_AND_DROP_DATA] = dragAndDropData
+        savedStateHandle[TAG_SHORT_ANSWER_DATA] = shortAnswerData
+        savedStateHandle[TAG_MULTIPLE_CHOICE_DATA] = multipleChoiceData
+    }
+
+    /**
+     * Constructs a submission from the stored data in the savedStateHandle and uploads it to the server.
+     * If isFinalSubmission is set to true, a http request is sent, otherwise the submission is sent
+     * through the websocket.
+     *
+     * @return true if uploading the submission was successful.
+     */
+    private fun buildAndUploadSubmission(
+        questions: List<QuizQuestion>,
+        isFinalSubmission: Boolean,
+        shortAnswerData: Map<Long, ShortAnswerStorageData>,
+        dragAndDropData: Map<Long, DragAndDropStorageData>,
+        multipleChoiceData: Map<Long, MultipleChoiceStorageData>
+    ): QuizSubmission {
+        val submittedAnswers: List<SubmittedAnswer> = questions.map { question ->
+            when (question) {
+                is DragAndDropQuizQuestion -> {
+                    val data = dragAndDropData[question.id].orEmpty()
+                    val mappedMappingEntries = data
+                        .map { (dropLocationId, dragItemId) ->
+                            val dropLocation = DragAndDropQuizQuestion.DropLocation(
+                                id = dropLocationId
+                            )
+                            val dragItem = DragAndDropQuizQuestion.DragItem(id = dragItemId)
+
+                            DragAndDropSubmittedAnswer.DragAndDropMapping(
+                                dropLocation = dropLocation,
+                                dragItem = dragItem
+                            )
+                        }
+
+                    DragAndDropSubmittedAnswer(
+                        mappings = mappedMappingEntries,
+                        quizQuestion = question
+                    )
+                }
+
+                is MultipleChoiceQuizQuestion -> {
+                    val data = multipleChoiceData[question.id].orEmpty()
+                    val selectedOptions = question.answerOptions.filter { answerOption ->
+                        data[answerOption.id] ?: false
+                    }
+
+                    MultipleChoiceSubmittedAnswer(
+                        selectedOptions = selectedOptions,
+                        quizQuestion = question
+                    )
+                }
+
+                is ShortAnswerQuizQuestion -> {
+                    val data = shortAnswerData[question.id].orEmpty()
+                    val submittedTexts: List<ShortAnswerSubmittedAnswer.ShortAnswerSubmittedText> =
+                        data.map { (spotId, text) ->
+                            ShortAnswerSubmittedAnswer.ShortAnswerSubmittedText(
+                                text = text,
+                                spot = ShortAnswerQuizQuestion.ShortAnswerSpot(spotNr = spotId)
+                            )
+                        }
+
+                    ShortAnswerSubmittedAnswer(
+                        quizQuestion = question,
+                        submittedTexts = submittedTexts
+                    )
+                }
+            }
+        }
+
+        return QuizSubmission(
+            submissionDate = serverClock.now(),
+            submitted = isFinalSubmission,
+            submittedAnswers = submittedAnswers
+        )
     }
 
     fun retryLoadExercise() {
@@ -525,6 +792,32 @@ internal class QuizParticipationViewModel(
         newAnswerData[questionId] = newStorageData
 
         savedStateHandle[TAG_DRAG_AND_DROP_DATA] = newAnswerData
+    }
+
+    /**
+     * Tests for each question if the student has interacted with.
+     */
+    private fun computeAnsweredQuestionCount(
+        questions: List<QuizQuestion>,
+        shortAnswerData: Map<Long, ShortAnswerStorageData>,
+        dragAndDropAnswerData: Map<Long, DragAndDropStorageData>,
+        multipleChoiceData: Map<Long, MultipleChoiceStorageData>
+    ): Int {
+        return questions.count { question ->
+            when (question) {
+                is DragAndDropQuizQuestion -> dragAndDropAnswerData[question.id]
+                    .orEmpty()
+                    .isNotEmpty()
+
+                is MultipleChoiceQuizQuestion -> multipleChoiceData[question.id]
+                    .orEmpty()
+                    .isNotEmpty()
+
+                is ShortAnswerQuizQuestion -> shortAnswerData[question.id]
+                    .orEmpty()
+                    .isNotEmpty()
+            }
+        }
     }
 
     @Serializable

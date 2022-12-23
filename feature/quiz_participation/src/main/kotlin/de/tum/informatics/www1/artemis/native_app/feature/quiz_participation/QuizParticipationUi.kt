@@ -16,13 +16,17 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.QuizEndedScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.WaitForQuizStartScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.WorkOnQuizQuestionsScreen
-import kotlinx.coroutines.flow.map
 import org.koin.androidx.compose.get
 
 @Composable
-internal fun QuizParticipationUi(modifier: Modifier, viewModel: QuizParticipationViewModel) {
+internal fun QuizParticipationUi(
+    modifier: Modifier,
+    viewModel: QuizParticipationViewModel,
+    onNavigateUp: () -> Unit
+) {
     val accountService: AccountService = get()
     val authToken = accountService.authToken.collectAsState(initial = "").value
 
@@ -32,6 +36,7 @@ internal fun QuizParticipationUi(modifier: Modifier, viewModel: QuizParticipatio
 
     val exerciseDataState = viewModel.quizExerciseDataState.collectAsState().value
     val isWaitingForQuizStart = viewModel.waitingForQuizStart.collectAsState(initial = false).value
+    val hasQuizEnded = viewModel.hasQuizEnded.collectAsState(initial = false).value
     val isConnected = viewModel.isConnected.collectAsState(initial = false).value
     val batch = viewModel.quizBatch.collectAsState(initial = null).value
 
@@ -67,10 +72,18 @@ internal fun QuizParticipationUi(modifier: Modifier, viewModel: QuizParticipatio
                     }
                 }
             )
+        } else if (hasQuizEnded) {
+            QuizEndedScreen(
+                modifier = Modifier.fillMaxSize(),
+                onRequestLeave = onNavigateUp
+            )
         } else {
             val questionWithData by viewModel.quizQuestionsWithData.collectAsState(initial = emptyList())
             val lastSubmission by viewModel.latestSubmission.collectAsState()
             val endDate by viewModel.endDate.collectAsState(initial = null)
+            val overallPoints by viewModel.overallPoints.collectAsState(initial = 0)
+            val latestWebsocketSubmission by viewModel
+                .latestWebsocketSubmission.collectAsState(initial = null)
 
             WorkOnQuizQuestionsScreen(
                 modifier = Modifier.fillMaxSize(),
@@ -78,7 +91,11 @@ internal fun QuizParticipationUi(modifier: Modifier, viewModel: QuizParticipatio
                 lastSubmissionTime = lastSubmission.submissionDate,
                 endDate = endDate,
                 authToken = authToken,
-                serverUrl = serverUrl
+                serverUrl = serverUrl,
+                isConnected = isConnected,
+                overallPoints = overallPoints,
+                latestWebsocketSubmission = latestWebsocketSubmission,
+                onRequestRetrySave = viewModel::requestSaveSubmissionThroughWebsocket
             )
         }
     }

@@ -1,8 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestionType
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.SubmittedAnswer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -22,11 +21,4 @@ data class QuizSubmission(
     val submittedAnswers: List<SubmittedAnswer> = emptyList()
 ) : Submission() {
 
-    @Serializable
-    data class SubmittedAnswer(
-        val id: Long? = null,
-        val scoreInPoints: Double? = null,
-        val quizQuestion: QuizQuestion? = null,
-        val type: QuizQuestionType? = null
-    )
 }
