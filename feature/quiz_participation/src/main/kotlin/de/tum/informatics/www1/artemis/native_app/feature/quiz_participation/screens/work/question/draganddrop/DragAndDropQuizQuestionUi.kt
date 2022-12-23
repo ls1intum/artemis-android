@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.draganddrop
 
-import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,15 +18,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +42,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
@@ -55,10 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.core.graphics.drawable.toBitmap
-import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.imageLoader
-import coil.memory.MemoryCache
 import coil.request.ImageRequest
 import com.google.accompanist.flowlayout.FlowRow
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
@@ -71,10 +63,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.QuizQuestionHeader
 import io.ktor.http.HttpHeaders
 
-// The drag and drop functionality is inspired by: https://blog.canopas.com/android-drag-and-drop-ui-element-in-jetpack-compose-14922073b3f1
-// The code can be found here: https://github.com/cp-radhika-s/Drag_and_drop_jetpack_compose
-
-private val LocalDragTargetInfo = compositionLocalOf { DragInfo() }
 
 @Composable
 internal fun DragAndDropQuizQuestionUi(
@@ -274,7 +262,7 @@ private fun DragItemUiElement(
     text: String?,
     pictureFilePath: String?,
     authToken: String,
-    fontSize: TextUnit = 15.sp
+    fontSize: TextUnit = 18.sp
 ) {
     Box(
         modifier = modifier
@@ -320,7 +308,8 @@ private fun DragItemUiElementContent(
         }
 
         if (text != null) {
-            Text(
+            AutosizeText(
+                modifier = Modifier,
                 text = text,
                 style = MaterialTheme.typography.bodySmall,
                 color = fontColor,
@@ -366,7 +355,7 @@ private fun DragAndDropArea(
         suspendedText = "",
         retryButtonText = stringResource(id = R.string.quiz_participation_load_dnd_image_retry),
         onClickRetry = resultData.requestRetry
-    ) {loadedDrawable ->
+    ) { loadedDrawable ->
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val painter = remember { BitmapPainter(loadedDrawable.toBitmap().asImageBitmap()) }
             Image(
@@ -531,7 +520,7 @@ private fun ImageDropLocation(
  * When the drag on this composable is started/ended, it updates LocalDragTargetInfo.
  */
 @Composable
-private fun DragItemDraggableContainer(
+internal fun DragItemDraggableContainer(
     modifier: Modifier,
     dragItem: DragItem,
     onDragRelease: () -> Unit,
@@ -590,35 +579,33 @@ private fun DragItemDraggableContainer(
             .zIndex(if (currentTargetInfo == selfTargetInfo) 10f else 0f),
         content = content
     )
-
 }
 
-private class DragInfo {
-    var currentDragTargetInfo: DragTargetInfo by mutableStateOf(DragTargetInfo.NotDragging)
+@Composable
+private fun AutosizeText(
+    modifier: Modifier,
+    text: String,
+    style: TextStyle,
+    fontSize: TextUnit,
+    maxLines: Int = Int.MAX_VALUE,
+    color: Color = Color.Unspecified
+) {
+    var textSize by remember { mutableStateOf(fontSize) }
+
+    Text(
+        modifier = modifier,
+        text = text,
+        style = style,
+        maxLines = maxLines,
+        color = color,
+        fontSize = textSize,
+        onTextLayout = { result ->
+            if (result.isLineEllipsized(result.lineCount - 1)) {
+                textSize *= 0.9
+            }
+        }
+    )
 }
-
-private sealed interface DragTargetInfo {
-    object NotDragging : DragTargetInfo
-
-    class Dragging(
-        val dragItem: DragItem
-    ) : DragTargetInfo {
-        var dragPosition by mutableStateOf(Offset.Zero)
-        var dragOffset by mutableStateOf(Offset.Zero)
-    }
-}
-
-private val DragTargetInfo.dragPosition: Offset
-    @Composable get() = when (this) {
-        is DragTargetInfo.Dragging -> dragPosition
-        DragTargetInfo.NotDragging -> Offset.Zero
-    }
-
-private val DragTargetInfo.dragOffset: Offset
-    @Composable get() = when (this) {
-        is DragTargetInfo.Dragging -> dragOffset
-        DragTargetInfo.NotDragging -> Offset.Zero
-    }
 
 private fun DragItem.backgroundPictureServerUrl(serverUrl: String): String? =
     pictureFilePath?.let { serverUrl + it }
