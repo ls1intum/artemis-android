@@ -133,7 +133,7 @@ private fun QuizParticipationScreen(
 
     // Called when the user tries to leave this quiz
     val onRequestLeave = {
-        if (isWaitingForQuizStart) onNavigateUp()
+        if (isWaitingForQuizStart || hasQuizEnded) onNavigateUp()
         else {
             displayLeaveQuizDialog = true
         }
