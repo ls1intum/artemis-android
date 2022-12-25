@@ -36,6 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExerci
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.ConnectionStatusUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.getFormattedRelativeToFutureTimeQuizStyle
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.minutes
@@ -46,6 +47,7 @@ internal fun WaitForQuizStartScreen(
     exercise: QuizExercise,
     isConnected: Boolean,
     batch: QuizExercise.QuizBatch?,
+    clock: Clock,
     onRequestRefresh: () -> Unit,
     onClickJoinBatch: (passcode: String) -> Unit,
     onClickStartQuiz: () -> Unit
@@ -69,6 +71,7 @@ internal fun WaitForQuizStartScreen(
         modifier = modifier,
         waitingStatus = waitingStatus,
         isConnected = isConnected,
+        clock = clock,
         onRequestRefresh = onRequestRefresh,
         onClickStartQuiz = onClickStartQuiz,
         onClickJoinBatch = onClickJoinBatch
@@ -80,6 +83,7 @@ private fun WaitForQuizStartScreen(
     modifier: Modifier,
     waitingStatus: WaitingStatus,
     isConnected: Boolean,
+    clock: Clock,
     onRequestRefresh: () -> Unit,
     onClickJoinBatch: (passcode: String) -> Unit,
     onClickStartQuiz: () -> Unit
@@ -113,7 +117,8 @@ private fun WaitForQuizStartScreen(
 
                 is WaitingStatus.Synchronized -> BodySynchronized(
                     modifier = bodyModifier,
-                    waitingStatus = waitingStatus
+                    waitingStatus = waitingStatus,
+                    clock = clock
                 )
             }
         }
@@ -142,7 +147,11 @@ private fun WaitForQuizStartScreen(
 }
 
 @Composable
-private fun BodySynchronized(modifier: Modifier, waitingStatus: WaitingStatus.Synchronized) {
+private fun BodySynchronized(
+    modifier: Modifier,
+    waitingStatus: WaitingStatus.Synchronized,
+    clock: Clock
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -165,7 +174,8 @@ private fun BodySynchronized(modifier: Modifier, waitingStatus: WaitingStatus.Sy
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val timeUntilStart = getRelativeTime(to = waitingStatus.startDate)
+            val timeUntilStart =
+                getFormattedRelativeToFutureTimeQuizStyle(waitingStatus.startDate, clock)
 
             Text(
                 text = stringResource(id = R.string.quiz_participation_wait_for_start_time_until_start),
@@ -291,6 +301,7 @@ private fun WaitForQuizStartScreenPreview(
             modifier = Modifier.fillMaxSize(),
             waitingStatus = waitingStatus,
             isConnected = true,
+            clock = Clock.System,
             onRequestRefresh = {},
             onClickStartQuiz = {},
             onClickJoinBatch = {}

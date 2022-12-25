@@ -33,6 +33,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.ConnectionStatusUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.getFormattedRelativeToFutureTimeQuizStyle
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.Footer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
@@ -52,6 +53,7 @@ internal fun WorkOnQuizQuestionFooter(
     endDate: Instant?,
     isConnected: Boolean,
     latestWebsocketSubmission: Result<QuizSubmission>?,
+    clock: Clock,
     canNavigateToPreviousQuestion: Boolean,
     canNavigateToNextQuestion: Boolean,
     onRequestPreviousQuestion: () -> Unit,
@@ -126,7 +128,7 @@ internal fun WorkOnQuizQuestionFooter(
             ) {
                 if (endDate != null) {
                     val isQuizDone = endDate.hasPassed()
-                    val relativeTime = getFormattedRelativeTimeUntilQuizEnd(endDate)
+                    val relativeTime = getFormattedRelativeToFutureTimeQuizStyle(endDate, clock)
 
                     val text = if (isQuizDone) {
                         stringResource(id = R.string.quiz_participation_time_left_quiz_ended)
@@ -179,66 +181,4 @@ internal fun WorkOnQuizQuestionFooter(
             }
         }
     )
-}
-
-@Composable
-private fun getFormattedRelativeTimeUntilQuizEnd(quizEnd: Instant): String {
-    val scope = rememberCoroutineScope()
-
-    val flow = remember(scope) {
-        flow {
-            while (true) {
-                val now = Clock.System.now()
-                val remainingDuration = (quizEnd - now).absoluteValue
-                emit(remainingDuration)
-
-                val waitDuration = if (remainingDuration >= 6.minutes) {
-                    val remainingSeconds = remainingDuration.inWholeSeconds
-                    val toNextMinuteSeconds = remainingSeconds % 60
-                    if (toNextMinuteSeconds == 0L) {
-                        delay(2.seconds)
-                        continue
-                    } else {
-                        toNextMinuteSeconds.seconds
-                    }
-                } else {
-                    val remainingMillis = remainingDuration.inWholeMilliseconds
-                    val toNextSecondMillis = remainingMillis % 1000
-
-                    // Wait for the next whole second
-                    if (toNextSecondMillis == 0L) {
-                        delay(20.milliseconds)
-                        continue
-                    } else {
-                        toNextSecondMillis.milliseconds
-                    }
-                }
-
-                delay(waitDuration)
-            }
-        }.stateIn(scope, SharingStarted.Lazily, quizEnd - Clock.System.now())
-    }
-
-    return formatRelativeTimeUntilQuizTime(duration = flow.collectAsState().value)
-}
-
-@Composable
-private fun formatRelativeTimeUntilQuizTime(duration: Duration): String {
-    return if (duration > 5.minutes) {
-        val minutes = duration.inWholeMinutes
-
-        stringResource(id = R.string.quiz_participation_time_left_whole_minutes, minutes)
-    } else if (duration > 1.minutes) {
-        val minutes = duration.inWholeMinutes
-        val seconds = (duration - minutes.minutes).inWholeSeconds
-
-        stringResource(
-            id = R.string.quiz_participation_time_left_minutes_and_seconds,
-            minutes,
-            seconds
-        )
-    } else {
-        val seconds = duration.inWholeSeconds
-        stringResource(id = R.string.quiz_participation_time_left_whole_seconds, seconds)
-    }
 }

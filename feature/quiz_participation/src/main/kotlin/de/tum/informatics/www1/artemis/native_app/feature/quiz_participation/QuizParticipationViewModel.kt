@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.quiz_participation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.ClockWithOffset
 import de.tum.informatics.www1.artemis.native_app.core.common.hasPassedFlow
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -27,6 +28,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.MultipleChoiceSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.SubmittedAnswer
+import de.tum.informatics.www1.artemis.native_app.core.websocket.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.service.QuizExerciseService
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.service.QuizParticipationService
@@ -43,11 +45,11 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
@@ -59,7 +61,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import okhttp3.internal.wait
 import org.hildan.krossbow.stomp.LostReceiptException
 import org.hildan.krossbow.stomp.headers.StompSendHeaders
 import java.util.UUID
@@ -80,6 +81,7 @@ internal class QuizParticipationViewModel(
     private val participationService: ParticipationService,
     private val quizParticipationService: QuizParticipationService,
     private val websocketProvider: WebsocketProvider,
+    private val serverTimeService: ServerTimeService,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -92,8 +94,13 @@ internal class QuizParticipationViewModel(
     private val submissionChannel = "/topic/quizExercise/$exerciseId/submission"
     private val quizExerciseChannel = "/topic/courses/$courseId/quizExercises"
 
-    // TODO: Actually use server clock here.
-    private val serverClock: Clock = Clock.System
+    /**
+     * Use server time for best time approximation.
+     * The server time may change multiple times, as new clocks may be emitted regularly
+     */
+    val serverClock: Flow<ClockWithOffset> = serverTimeService
+        .serverClock
+        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
     private val submissionUpdater: Flow<SubmissionData> = when (quizType) {
         QuizType.LIVE -> {
@@ -312,10 +319,26 @@ internal class QuizParticipationViewModel(
     )
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
+    /**
+     * The start date of the quiz in server time.
+     */
     private val startDate: Flow<Instant> = when (quizType) {
         QuizType.LIVE -> {
             // The start date depends on the quiz batches
-            quizBatch.map { batch -> batch?.startTime ?: serverClock.now() }
+            quizBatch.transformLatest { quizBatch ->
+                val batchStartTime = quizBatch?.startTime
+                if (batchStartTime != null) {
+                    emit(batchStartTime)
+                } else {
+                    val systemTimeStart = Clock.System.now()
+                    // The start time always stays the same. But the offset might change
+                    emitAll(
+                        serverClock.map { clock ->
+                            systemTimeStart + clock.delta
+                        }
+                    )
+                }
+            }
         }
 
         QuizType.PRACTICE -> {
@@ -388,7 +411,8 @@ internal class QuizParticipationViewModel(
                     isFinalSubmission = false,
                     dragAndDropData = dragAndDropData,
                     multipleChoiceData = multipleChoiceData,
-                    shortAnswerData = shortAnswerData
+                    shortAnswerData = shortAnswerData,
+                    serverClock = serverClock.first()
                 )
 
                 val receipt = try {
@@ -438,7 +462,11 @@ internal class QuizParticipationViewModel(
                 .collectLatest { (isWaitingForQuizStart, batch) ->
                     val startTime = batch?.startTime
                     if (isWaitingForQuizStart && startTime != null) {
-                        delay(startTime - serverClock.now() + 1.seconds)
+                        // Wait until the start time has begun. The delay may be restarted multiple times when the server clock changes.
+                        serverClock.mapLatest { serverClock ->
+                            delay(startTime - serverClock.now() + 1.seconds)
+                        }.first()
+
                         retryLoadExercise.emit(Unit)
                     }
                 }
@@ -459,7 +487,8 @@ internal class QuizParticipationViewModel(
                 isFinalSubmission = true,
                 shortAnswerData = shortAnswerData.first(),
                 dragAndDropData = dragAndDropData.first(),
-                multipleChoiceData = multipleChoiceData.first()
+                multipleChoiceData = multipleChoiceData.first(),
+                serverClock = serverClock.first()
             )
 
             val serverUrl = serverConfigurationService.serverUrl.first()
@@ -547,7 +576,8 @@ internal class QuizParticipationViewModel(
         isFinalSubmission: Boolean,
         shortAnswerData: Map<Long, ShortAnswerStorageData>,
         dragAndDropData: Map<Long, DragAndDropStorageData>,
-        multipleChoiceData: Map<Long, MultipleChoiceStorageData>
+        multipleChoiceData: Map<Long, MultipleChoiceStorageData>,
+        serverClock: Clock
     ): QuizSubmission {
         val submittedAnswers: List<SubmittedAnswer> = questions.map { question ->
             when (question) {

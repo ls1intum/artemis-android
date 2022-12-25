@@ -7,9 +7,9 @@ import coil.memory.MemoryCache
 import de.tum.informatics.www1.artemis.native_app.core.communication.communicationModule
 import de.tum.informatics.www1.artemis.native_app.core.data.service.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.impl.datastoreModule
-import de.tum.informatics.www1.artemis.native_app.core.device.impl.deviceModule
+import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
 import de.tum.informatics.www1.artemis.native_app.core.ui.uiModule
-import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.websocketModule
+import de.tum.informatics.www1.artemis.native_app.core.websocket.websocketModule
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistrationModule
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.courseViewModule
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboardModule

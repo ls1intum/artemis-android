@@ -24,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.multiple_choice.MultipleChoiceQuizQuestionUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.ShortAnswerQuizQuestionUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.draganddrop.DragAndDropQuizQuestionUi
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
 @Composable
@@ -35,6 +36,7 @@ internal fun WorkOnQuizQuestionsScreen(
     isConnected: Boolean,
     overallPoints: Int,
     latestWebsocketSubmission: Result<QuizSubmission>?,
+    clock: Clock,
     serverUrl: String,
     authToken: String,
     onRequestRetrySave: () -> Unit
@@ -76,6 +78,7 @@ internal fun WorkOnQuizQuestionsScreen(
             latestWebsocketSubmission = latestWebsocketSubmission,
             isConnected = isConnected,
             endDate = endDate,
+            clock = clock,
             canNavigateToPreviousQuestion = selectedQuestionIndex > 0,
             canNavigateToNextQuestion = selectedQuestionIndex < questionsWithData.size - 1,
             onRequestPreviousQuestion = { selectedQuestionIndex-- },

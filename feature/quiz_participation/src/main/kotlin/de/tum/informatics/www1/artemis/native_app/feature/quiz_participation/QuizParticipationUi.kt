@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -19,7 +21,17 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.QuizEndedScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.WaitForQuizStartScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.WorkOnQuizQuestionsScreen
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.koin.androidx.compose.get
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun QuizParticipationUi(
@@ -28,17 +40,19 @@ internal fun QuizParticipationUi(
     onNavigateUp: () -> Unit
 ) {
     val accountService: AccountService = get()
-    val authToken = accountService.authToken.collectAsState(initial = "").value
+    val authToken by accountService.authToken.collectAsState(initial = "")
 
     val serverConfigurationService: ServerConfigurationService = get()
     val serverUrl: String =
         serverConfigurationService.serverUrl.collectAsState(initial = "").value.dropLast(1)
 
-    val exerciseDataState = viewModel.quizExerciseDataState.collectAsState().value
-    val isWaitingForQuizStart = viewModel.waitingForQuizStart.collectAsState(initial = false).value
-    val hasQuizEnded = viewModel.hasQuizEnded.collectAsState(initial = false).value
-    val isConnected = viewModel.isConnected.collectAsState(initial = false).value
-    val batch = viewModel.quizBatch.collectAsState(initial = null).value
+    val exerciseDataState by viewModel.quizExerciseDataState.collectAsState()
+    val isWaitingForQuizStart by viewModel.waitingForQuizStart.collectAsState(initial = false)
+    val hasQuizEnded by viewModel.hasQuizEnded.collectAsState(initial = false)
+    val isConnected by viewModel.isConnected.collectAsState(initial = false)
+    val batch by viewModel.quizBatch.collectAsState(initial = null)
+
+    val serverClock by viewModel.serverClock.collectAsState(initial = Clock.System)
 
     var joinBatchError: JoinBatchErrorType? by rememberSaveable { mutableStateOf(null) }
 
@@ -57,6 +71,7 @@ internal fun QuizParticipationUi(
                 exercise = quizExercise,
                 isConnected = isConnected,
                 batch = batch,
+                clock = serverClock,
                 onRequestRefresh = {
                     viewModel.retryLoadExercise()
                     viewModel.reconnectWebsocket()
@@ -95,6 +110,7 @@ internal fun QuizParticipationUi(
                 isConnected = isConnected,
                 overallPoints = overallPoints,
                 latestWebsocketSubmission = latestWebsocketSubmission,
+                clock = serverClock,
                 onRequestRetrySave = viewModel::requestSaveSubmissionThroughWebsocket
             )
         }
@@ -120,6 +136,72 @@ internal fun QuizParticipationUi(
                 }
             }
         )
+    }
+}
+
+
+/**
+ * Formats a time that is in the future in a relative style. Automatically updates when necessary.
+ */
+@Composable
+fun getFormattedRelativeToFutureTimeQuizStyle(timeInFuture: Instant, clock: Clock): String {
+    val scope = rememberCoroutineScope()
+
+    val flow = remember(scope, clock, timeInFuture) {
+        flow {
+            while (true) {
+                val now = clock.now()
+                val remainingDuration = (timeInFuture - now).absoluteValue
+                emit(remainingDuration)
+
+                val waitDuration = if (remainingDuration >= 30.minutes) {
+                    val remainingSeconds = remainingDuration.inWholeSeconds
+                    val toNextMinuteSeconds = remainingSeconds % 60
+                    if (toNextMinuteSeconds == 0L) {
+                        delay(2.seconds)
+                        continue
+                    } else {
+                        toNextMinuteSeconds.seconds
+                    }
+                } else {
+                    val remainingMillis = remainingDuration.inWholeMilliseconds
+                    val toNextSecondMillis = remainingMillis % 1000
+
+                    // Wait for the next whole second
+                    if (toNextSecondMillis == 0L) {
+                        delay(20.milliseconds)
+                        continue
+                    } else {
+                        toNextSecondMillis.milliseconds
+                    }
+                }
+
+                delay(waitDuration)
+            }
+        }.stateIn(scope, SharingStarted.Lazily, timeInFuture - clock.now())
+    }
+
+    return formatRelativeTimeUntilQuizTime(duration = flow.collectAsState().value)
+}
+
+@Composable
+private fun formatRelativeTimeUntilQuizTime(duration: Duration): String {
+    return if (duration > 30.minutes) {
+        val minutes = duration.inWholeMinutes
+
+        stringResource(id = R.string.quiz_participation_time_left_whole_minutes, minutes)
+    } else if (duration > 1.minutes) {
+        val minutes = duration.inWholeMinutes
+        val seconds = (duration - minutes.minutes).inWholeSeconds
+
+        stringResource(
+            id = R.string.quiz_participation_time_left_minutes_and_seconds,
+            minutes,
+            seconds
+        )
+    } else {
+        val seconds = duration.inWholeSeconds
+        stringResource(id = R.string.quiz_participation_time_left_whole_seconds, seconds)
     }
 }
 
