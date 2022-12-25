@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
@@ -482,12 +483,30 @@ internal class QuizParticipationViewModel(
                 }
         }
 
+        // For batched quizzes, the logic simply swaps from waiting to not waiting
+        // Therefore, in these cases we need to trigger a reload
         viewModelScope.launch {
             waitingForQuizStart.withPrevious().collectLatest { (previouslyWaiting, nowWaiting) ->
                 if (previouslyWaiting == true && !nowWaiting) {
+                    // Use tryEmit, if we are already reloading the quiz, do not trigger it again
                     retryLoadExercise.tryEmit(Unit)
                 }
             }
+        }
+
+        // Handle disconnects in quiz waiting screen
+        viewModelScope.launch {
+            combine(
+                waitingForQuizStart,
+                websocketProvider.isConnected.withPrevious()
+            ) { a, b -> a to b }
+                .collect { (isWaitingForQuizStart, connectionStatus) ->
+                    val (wasConnected, isConnected) = connectionStatus
+                    if (isWaitingForQuizStart && wasConnected == false && isConnected) {
+                        // we may have missed the exercise start, trigger reload now
+                        retryLoadExercise.tryEmit(Unit)
+                    }
+                }
         }
 
         viewModelScope.launch {
