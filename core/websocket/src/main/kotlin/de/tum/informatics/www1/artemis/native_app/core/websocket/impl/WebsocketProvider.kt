@@ -4,13 +4,17 @@ import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.device.awaitInternetConnection
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider.WebsocketData.Message
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.DeserializationStrategy
 import org.hildan.krossbow.stomp.StompClient
 import org.hildan.krossbow.stomp.config.HeartBeat
@@ -24,7 +28,8 @@ import kotlin.time.Duration.Companion.minutes
 class WebsocketProvider(
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
-    private val jsonProvider: JsonProvider
+    private val jsonProvider: JsonProvider,
+    private val networkStatusProvider: NetworkStatusProvider
 ) {
 
     companion object {
@@ -93,9 +98,16 @@ class WebsocketProvider(
                         }
                     }
                         .retryWhen { e, attempt ->
-                            Log.d(TAG, "Websocket connection failure (attempt $attempt): $e.")
-                            delay(1.seconds * attempt.toInt())
-                            true
+                            // Never retry on cancellation
+                            if (e !is CancellationException) {
+                                Log.d(TAG, "Websocket connection failure (attempt $attempt): $e.")
+                                // Either we wait the specified time, or we immediately try again when we have internet
+                                withTimeoutOrNull(1.seconds * attempt.toInt()) {
+                                    networkStatusProvider.awaitInternetConnection()
+                                }
+                                delay(1.seconds * attempt.toInt())
+                                true
+                            } else false
                         }
                 )
             }
