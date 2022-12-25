@@ -83,42 +83,34 @@ inline fun <T> retryOnInternet(
     crossinline perform: suspend () -> NetworkResponse<T>
 ): Flow<DataState<T>> {
     return connectivity
-        .transformLatest { networkStatus ->
-            when (networkStatus) {
-                NetworkStatusProvider.NetworkStatus.Internet -> {
-                    //Fetch data with exponential backoff
+        // We simply restart the exponential backoff when the connectivity has changed.
+        .transformLatest { _ ->
+            //Fetch data with exponential backoff
 
-                    var currentBackoff = baseBackoffMillis
+            var currentBackoff = baseBackoffMillis
 
-                    while (true) {
-                        emit(DataState.Loading())
+            while (true) {
+                emit(DataState.Loading())
 
-                        val start = System.currentTimeMillis()
-                        when (val response = perform()) {
-                            is NetworkResponse.Response -> {
-                                val end = System.currentTimeMillis()
-                                val remainingWaitTime = minimumLoadingMillis - (end - start)
-                                if (remainingWaitTime > 0) delay(remainingWaitTime)
+                val start = System.currentTimeMillis()
+                when (val response = perform()) {
+                    is NetworkResponse.Response -> {
+                        val end = System.currentTimeMillis()
+                        val remainingWaitTime = minimumLoadingMillis - (end - start)
+                        if (remainingWaitTime > 0) delay(remainingWaitTime)
 
-                                emit(DataState.Success(response.data))
-                                return@transformLatest
-                            }
+                        emit(DataState.Success(response.data))
+                        return@transformLatest
+                    }
 
-                            is NetworkResponse.Failure -> {
-                                emit(DataState.Failure(response.exception))
-                            }
-                        }
-
-                        //Perform exponential backoff
-                        delay(currentBackoff)
-                        currentBackoff *= 2
+                    is NetworkResponse.Failure -> {
+                        emit(DataState.Failure(response.exception))
                     }
                 }
 
-                NetworkStatusProvider.NetworkStatus.Unavailable -> {
-                    //Just emit that this is suspended for now.
-                    emit(DataState.Suspended())
-                }
+                //Perform exponential backoff
+                delay(currentBackoff)
+                currentBackoff *= 2
             }
         }
         .catch { error -> emit(DataState.Failure(error)) }

@@ -17,6 +17,15 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.view_res
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+object ExerciseViewDestination {
+    const val EXERCISE_VIEW_ROUTE = "exercise?{exerciseId}"
+
+    /**
+     * Set this to true to on the backStackEntry and the exercise will be reloaded
+     */
+    const val REQUIRE_RELOAD_KEY = "requireReload"
+}
+
 /**
  * Display the exercise view
  */
@@ -40,7 +49,7 @@ fun NavGraphBuilder.exercise(
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit
 ) {
     composable(
-        route = "exercise?{exerciseId}",
+        route = ExerciseViewDestination.EXERCISE_VIEW_ROUTE,
         arguments = listOf(navArgument("exerciseId") {
             type = NavType.LongType
             nullable = false
@@ -54,6 +63,15 @@ fun NavGraphBuilder.exercise(
         val exerciseViewModel = koinViewModel<ExerciseViewModel> { parametersOf(exerciseId) }
 
         val nestedNavController = rememberNavController()
+
+        SideEffect {
+            val isReloadRequested =
+                backStackEntry.savedStateHandle.remove<Boolean>(ExerciseViewDestination.REQUIRE_RELOAD_KEY)
+
+            if (isReloadRequested == true) {
+                exerciseViewModel.requestReloadExercise()
+            }
+        }
 
         NavHost(navController = nestedNavController, startDestination = NESTED_HOME_DESTINATION) {
             composable(NESTED_HOME_DESTINATION) {

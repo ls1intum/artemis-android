@@ -15,4 +15,5 @@ dependencies {
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.accompanist.placeholder.material)
+    implementation(libs.accompanist.swiperefresh)
 }

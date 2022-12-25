@@ -42,7 +42,7 @@ internal class ExerciseViewModel(
     private val context: Context
 ) : ViewModel() {
 
-    private val requestReloadExercise = MutableSharedFlow<Unit>()
+    private val requestReloadExercise = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     /**
      * Flow that holds (serverUrl, authData) and emits every time the exercise should be reloaded.

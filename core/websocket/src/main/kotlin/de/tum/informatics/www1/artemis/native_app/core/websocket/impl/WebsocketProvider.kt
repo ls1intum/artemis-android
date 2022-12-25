@@ -2,10 +2,8 @@ package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
 
 import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider.WebsocketData.Message
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -26,9 +24,7 @@ import kotlin.time.Duration.Companion.minutes
 class WebsocketProvider(
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
-    private val jsonProvider: JsonProvider,
-    private val networkStatusProvider: NetworkStatusProvider,
-    ktorProvider: KtorProvider
+    private val jsonProvider: JsonProvider
 ) {
 
     companion object {

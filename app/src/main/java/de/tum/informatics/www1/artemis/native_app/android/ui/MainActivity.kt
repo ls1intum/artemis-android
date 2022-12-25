@@ -17,6 +17,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.course_view.navigateTo
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.DASHBOARD_DESTINATION
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboard
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.navigateToDashboard
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewDestination
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exercise
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.navigateToExercise
 import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATION
@@ -102,9 +103,13 @@ class MainActivity : AppCompatActivity() {
                         navController = navController,
                         onNavigateBack = navController::navigateUp,
                         onParticipateInQuiz = { courseId, exerciseId, isPractice ->
-                            val quizType = if(isPractice) QuizType.PRACTICE else QuizType.LIVE
+                            val quizType = if (isPractice) QuizType.PRACTICE else QuizType.LIVE
 
-                            navController.navigateToQuizParticipation(courseId, exerciseId, quizType)
+                            navController.navigateToQuizParticipation(
+                                courseId,
+                                exerciseId,
+                                quizType
+                            )
                         }
                     )
 
@@ -125,7 +130,16 @@ class MainActivity : AppCompatActivity() {
                     )
 
                     quizParticipation(
-                        onLeaveQuiz = navController::navigateUp
+                        onLeaveQuiz = {
+                            val previousBackStackEntry = navController.previousBackStackEntry
+                            if (previousBackStackEntry?.destination?.route == ExerciseViewDestination.EXERCISE_VIEW_ROUTE) {
+                                previousBackStackEntry.savedStateHandle.set(
+                                    ExerciseViewDestination.REQUIRE_RELOAD_KEY,
+                                    true
+                                )
+                            }
+                            navController.navigateUp()
+                        }
                     )
                 }
             }

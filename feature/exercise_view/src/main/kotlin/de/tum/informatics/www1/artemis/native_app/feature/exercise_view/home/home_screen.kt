@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -22,6 +23,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SmartphoneMetisUi
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
@@ -100,6 +103,16 @@ internal fun ExerciseScreen(
             )
         }
     ) { padding ->
+        var triggeredRefreshManually by remember { mutableStateOf(false) }
+        val isRefreshing = triggeredRefreshManually && exerciseDataState is DataState.Loading
+
+        val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
+
+        val triggerRefresh = {
+            triggeredRefreshManually = true
+            viewModel.requestReloadExercise()
+        }
+
         ExerciseDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
@@ -152,33 +165,43 @@ internal fun ExerciseScreen(
 
                         val courseId: Long = exercise.course?.id ?: return@Column
 
-                        ExerciseOverviewTab(
-                            modifier = tabModifier,
-                            exercise = exercise,
-                            gradedParticipation = gradedParticipation,
-                            onViewResult = onViewResult,
-                            onClickStartExercise = {
-                                viewModel.startExercise(onViewTextExerciseParticipationScreen)
-                            },
-                            onClickOpenTextExercise = onViewTextExerciseParticipationScreen,
-                            onClickPracticeQuiz = {
-                                onParticipateInQuiz(courseId, true)
-                            },
-                            onClickStartQuiz = {
-                                onParticipateInQuiz(courseId, false)
-                            },
-                            onClickOpenQuiz = {
-                                onParticipateInQuiz(courseId, false)
-                            }
-                        )
+                        SwipeRefresh(
+                            state = swipeRefreshState,
+                            onRefresh = triggerRefresh
+                        ) {
+                            ExerciseOverviewTab(
+                                modifier = tabModifier,
+                                exercise = exercise,
+                                gradedParticipation = gradedParticipation,
+                                onViewResult = onViewResult,
+                                onClickStartExercise = {
+                                    viewModel.startExercise(onViewTextExerciseParticipationScreen)
+                                },
+                                onClickOpenTextExercise = onViewTextExerciseParticipationScreen,
+                                onClickPracticeQuiz = {
+                                    onParticipateInQuiz(courseId, true)
+                                },
+                                onClickStartQuiz = {
+                                    onParticipateInQuiz(courseId, false)
+                                },
+                                onClickOpenQuiz = {
+                                    onParticipateInQuiz(courseId, false)
+                                }
+                            )
+                        }
                     }
 
                     1 -> {
-                        ExerciseDetailsTab(
-                            modifier = tabModifier,
-                            exercise = exercise,
-                            latestResult = null
-                        )
+                        SwipeRefresh(
+                            state = swipeRefreshState,
+                            onRefresh = triggerRefresh
+                        ) {
+                            ExerciseDetailsTab(
+                                modifier = tabModifier,
+                                exercise = exercise,
+                                latestResult = null
+                            )
+                        }
                     }
 
                     2 -> {
@@ -201,6 +224,7 @@ internal fun ExerciseScreen(
                 }
             }
         }
+
 
     }
 }
