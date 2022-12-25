@@ -11,10 +11,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,7 +20,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -35,9 +32,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.MarkdownTextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
-import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getStateViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -99,7 +94,7 @@ private fun QuizParticipationScreen(
 ) {
     val exerciseDataState = viewModel.quizExerciseDataState.collectAsState().value
     val isWaitingForQuizStart by viewModel.waitingForQuizStart.collectAsState(initial = true)
-    val hasQuizEnded by viewModel.hasQuizEnded.collectAsState(initial = false)
+    val hasQuizEnded by viewModel.quizEndedStatus.collectAsState(initial = false)
 
     val haveAllQuestionsBeenAnswered by viewModel.haveAllQuestionsBeenAnswered.collectAsState(
         initial = false
@@ -132,8 +127,6 @@ private fun QuizParticipationScreen(
         submissionJob = viewModel.submit { successful ->
             if (!successful) {
                 displaySubmissionFailedDialog = true
-            } else {
-                onNavigateUp()
             }
         }
     }

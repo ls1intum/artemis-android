@@ -48,7 +48,7 @@ internal fun QuizParticipationUi(
 
     val exerciseDataState by viewModel.quizExerciseDataState.collectAsState()
     val isWaitingForQuizStart by viewModel.waitingForQuizStart.collectAsState(initial = false)
-    val hasQuizEnded by viewModel.hasQuizEnded.collectAsState(initial = false)
+    val hasQuizEnded by viewModel.quizEndedStatus.collectAsState(initial = false)
     val isConnected by viewModel.isConnected.collectAsState(initial = false)
     val batch by viewModel.quizBatch.collectAsState(initial = null)
 

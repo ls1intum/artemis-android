@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -374,15 +375,6 @@ internal class QuizParticipationViewModel(
         QuizType.PRACTICE -> flowOf(false)
     }
 
-    val hasQuizEnded: Flow<Boolean> =
-        combine(
-            quizExercise.flatMapLatest { it.quizEnded },
-            quizBatch,
-            endDate.flatMapLatest { it.hasPassedFlow() }
-        ) { quizEnded, batch, endDataHasPassed ->
-            (quizType == QuizType.LIVE && ((quizEnded) || (batch != null && batch.ended == true))) || endDataHasPassed
-        }
-
     /**
      * Set to true after the initial submission was loaded and the values have been stored
      */
@@ -393,6 +385,7 @@ internal class QuizParticipationViewModel(
      */
     private val onRequestUploadSubmissionToWebsocket =
         MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
     val latestWebsocketSubmission: Flow<Result<QuizSubmission>> = flow {
         // Wait for the initial storage to avoid uploading an empty submission
         hasStoredInitialSubmission.filter { it }.first()
@@ -450,6 +443,11 @@ internal class QuizParticipationViewModel(
     }
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
+    /**
+     * Set when the user has uploaded a submission using the submit button
+     */
+    private val uploadedSubmission: MutableStateFlow<QuizSubmission?> = MutableStateFlow(null)
+
     val latestSubmission: StateFlow<QuizSubmission> = flow {
         when (quizType) {
             QuizType.LIVE -> {
@@ -457,7 +455,8 @@ internal class QuizParticipationViewModel(
                 emitAll(
                     merge(
                         initialSubmission,
-                        latestWebsocketSubmission.mapNotNull { it.getOrNull() }
+                        latestWebsocketSubmission.mapNotNull { it.getOrNull() },
+                        uploadedSubmission.filterNotNull()
                     )
                 )
             }
@@ -466,6 +465,20 @@ internal class QuizParticipationViewModel(
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, QuizSubmission())
+
+    val quizEndedStatus: Flow<Boolean> =
+        combine(
+            quizExercise.flatMapLatest { it.quizEnded },
+            quizBatch,
+            endDate.flatMapLatest { it.hasPassedFlow() },
+            latestParticipation,
+            latestSubmission
+        ) { quizEnded, batch, endDataHasPassed, latestParticipation, latestSubmission ->
+            (quizType == QuizType.LIVE && ((quizEnded) || (batch != null && batch.ended == true)))
+                    || endDataHasPassed
+                    || latestParticipation.initializationState == Participation.InitializationState.FINISHED
+                    || latestSubmission.submitted == true
+        }
 
     init {
         viewModelScope.launch {
@@ -541,6 +554,10 @@ internal class QuizParticipationViewModel(
                     submission, exerciseId, serverUrl, authToken
                 )
             } is NetworkResponse.Response
+
+            if (successful) {
+                uploadedSubmission.value = submission
+            }
 
             onResponse(successful)
         }

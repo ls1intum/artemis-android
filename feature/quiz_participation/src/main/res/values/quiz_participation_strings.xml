@@ -87,7 +87,7 @@
     <string name="quiz_participation_leave_without_submit_dialog_negative">Stay</string>
 
     <!--  Quiz ended screen   -->
-    <string name="quiz_participation_quiz_ended_text">The working period for this quiz is over. You can view your results in the web application once they are available.</string>
+    <string name="quiz_participation_quiz_ended_text">You can no longer make changes to this quiz. Either the working period is over or you have already submitted your solution. You can view your results in the web application once they are available.</string>
     <string name="quiz_participation_quiz_ended_leave_button">Leave now.</string>
 
 </resources>
