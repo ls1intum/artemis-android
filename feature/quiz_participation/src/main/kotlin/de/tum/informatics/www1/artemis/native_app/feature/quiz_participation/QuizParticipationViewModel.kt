@@ -81,7 +81,7 @@ internal class QuizParticipationViewModel(
     private val participationService: ParticipationService,
     private val quizParticipationService: QuizParticipationService,
     private val websocketProvider: WebsocketProvider,
-    private val serverTimeService: ServerTimeService,
+    serverTimeService: ServerTimeService,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -199,24 +199,23 @@ internal class QuizParticipationViewModel(
         }
 
         QuizType.PRACTICE -> {
-            retryLoadExercise
-                .onStart { emit(Unit) }
-                .flatMapLatest {
-                    transformLatest(
-                        serverConfigurationService.serverUrl,
-                        accountService.authToken
-                    ) { serverUrl, authToken ->
-                        retryOnInternet(
-                            networkStatusProvider.currentNetworkStatus
-                        ) {
-                            quizExerciseService.findForStudent(
-                                exerciseId,
-                                serverUrl,
-                                authToken
-                            )
-                        }
+            transformLatest(
+                serverConfigurationService.serverUrl,
+                accountService.authToken,
+                retryLoadExercise.onStart { emit(Unit) }
+            ) { serverUrl, authToken, _ ->
+                emitAll(
+                    retryOnInternet(
+                        networkStatusProvider.currentNetworkStatus
+                    ) {
+                        quizExerciseService.findForStudent(
+                            exerciseId,
+                            serverUrl,
+                            authToken
+                        )
                     }
-                }
+                )
+            }
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
@@ -368,8 +367,9 @@ internal class QuizParticipationViewModel(
         combine(
             quizExercise.flatMapLatest { it.quizEnded },
             quizBatch,
-            endDate.flatMapLatest { it.hasPassedFlow() }) { quizEnded, batch, endDataHasPassed ->
-            quizEnded || (batch != null && batch.ended == true) || endDataHasPassed
+            endDate.flatMapLatest { it.hasPassedFlow() }
+        ) { quizEnded, batch, endDataHasPassed ->
+            (quizType == QuizType.LIVE && ((quizEnded) || (batch != null && batch.ended == true))) || endDataHasPassed
         }
 
     /**
@@ -471,6 +471,7 @@ internal class QuizParticipationViewModel(
                     }
                 }
         }
+
         viewModelScope.launch {
             // First wait for the initial submission to load. Then fill the savedStateHandle with it
             val initialSubmission = initialSubmission.first()
@@ -635,7 +636,8 @@ internal class QuizParticipationViewModel(
         return QuizSubmission(
             submissionDate = serverClock.now(),
             submitted = isFinalSubmission,
-            submittedAnswers = submittedAnswers
+            submittedAnswers = submittedAnswers,
+            results = emptyList()
         )
     }
 

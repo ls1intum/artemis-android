@@ -145,7 +145,8 @@ internal fun WorkOnQuizQuestionFooter(
                 }
 
                 val submissionText = if (lastSubmissionTime != null) {
-                    val relLastSubmissionTime = getRelativeTime(to = lastSubmissionTime)
+                    val relLastSubmissionTime =
+                        getRelativeTime(to = lastSubmissionTime, clock = clock)
                     stringResource(
                         id = R.string.quiz_participation_last_saved,
                         relLastSubmissionTime

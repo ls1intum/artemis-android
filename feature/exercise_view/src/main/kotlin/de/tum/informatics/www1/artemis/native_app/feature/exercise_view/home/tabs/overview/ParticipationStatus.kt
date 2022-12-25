@@ -101,7 +101,6 @@ internal fun ParticipationStatusUi(
 
             if (exercise is QuizExercise) {
                 if (isStartPracticeAvailable(exercise = exercise)) {
-
                     Button(
                         modifier = buttonModifier,
                         onClick = { onClickPracticeQuiz() }
@@ -115,7 +114,6 @@ internal fun ParticipationStatusUi(
                 val openQuizAvailable =
                     exercise.notStartedC || gradedParticipation?.initializationState == Participation.InitializationState.INITIALIZED
                 val startQuizAvailable = exercise.isUninitializedC
-
 
                 if (openQuizAvailable || startQuizAvailable) {
                     Button(

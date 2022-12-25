@@ -8,6 +8,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.minutes
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import okhttp3.internal.wait
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
@@ -16,37 +17,39 @@ import kotlin.time.Duration.Companion.seconds
  * Format the given time relative to now and update as often as relevant.
  */
 @Composable
-fun getRelativeTime(to: Instant): CharSequence {
-    val flow = flow {
-        while (true) {
-            val now = Clock.System.now()
-            emit(
-                DateUtils.getRelativeTimeSpanString(
-                    to.toEpochMilliseconds(),
-                    now.toEpochMilliseconds(),
-                    0L,
-                    DateUtils.FORMAT_ABBREV_RELATIVE
+fun getRelativeTime(to: Instant, clock: Clock = Clock.System): CharSequence {
+    val flow = remember(to, clock) {
+        flow {
+            while (true) {
+                val now = clock.now()
+                emit(
+                    DateUtils.getRelativeTimeSpanString(
+                        to.toEpochMilliseconds(),
+                        now.toEpochMilliseconds(),
+                        0L,
+                        DateUtils.FORMAT_ABBREV_RELATIVE
+                    )
                 )
-            )
 
-            val timeDifference = (now - to).absoluteValue
-            when {
-                timeDifference < 1.minutes -> {
-                    delay(1.seconds)
-                }
+                val timeDifference = (now - to).absoluteValue
+                when {
+                    timeDifference < 1.minutes -> {
+                        delay(1.seconds)
+                    }
 
-                timeDifference < 1.hours -> {
-                    // Wait until the next minute
-                    val passedMinutes = timeDifference.inWholeMinutes
-                    val waitUntil = to + (passedMinutes + 1).minutes
-                    delay(waitUntil - now)
-                }
+                    timeDifference < 1.hours -> {
+                        // Wait until the next minute
+                        val passedMinutes = timeDifference.inWholeMinutes
+                        val waitUntil = to + (passedMinutes + 1).minutes
+                        delay(waitUntil - now)
+                    }
 
-                else -> {
-                    // update every hour
-                    val passedHours = timeDifference.inWholeHours
-                    val waitUntil = to + (passedHours + 1).hours
-                    delay(waitUntil - now)
+                    else -> {
+                        // update every hour
+                        val passedHours = timeDifference.inWholeHours
+                        val waitUntil = to + (passedHours + 1).hours
+                        delay(waitUntil - now)
+                    }
                 }
             }
         }
