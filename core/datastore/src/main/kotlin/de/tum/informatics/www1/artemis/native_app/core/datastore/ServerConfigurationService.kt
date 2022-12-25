@@ -16,7 +16,10 @@ interface ServerConfigurationService {
      */
     val host: Flow<String>
 
-    suspend fun updateServerUrl(serverUrl: String)
+    /**
+     * If [updateServerUrl] has ever been called.
+     */
+    val hasUserSelectedInstance: Flow<Boolean>
 
-    suspend fun retryLoadServerProfileInfo()
+    suspend fun updateServerUrl(serverUrl: String)
 }

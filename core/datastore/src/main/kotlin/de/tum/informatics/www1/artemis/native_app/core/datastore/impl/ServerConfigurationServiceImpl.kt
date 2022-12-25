@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.datastore.impl
 
 import android.content.Context
 import android.provider.Settings.Global
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -30,9 +31,8 @@ internal class ServerConfigurationServiceImpl(
         private val Context.serverCommunicationPreferences by preferencesDataStore("server_communication")
 
         private val SERVER_URL_KEY = stringPreferencesKey("server_url")
+        private val HAS_SELECTED_INSTANCE_KEY = booleanPreferencesKey("has_selected_instance")
     }
-
-    private val retryLoadServerProfileInfo = MutableSharedFlow<Unit>()
 
     @OptIn(DelicateCoroutinesApi::class)
     override val serverUrl: Flow<String> =
@@ -47,14 +47,16 @@ internal class ServerConfigurationServiceImpl(
         serverUrl
             .map { Url(it).host }
 
+    override val hasUserSelectedInstance: Flow<Boolean> =
+        context
+            .serverCommunicationPreferences
+            .data
+            .map { it[HAS_SELECTED_INSTANCE_KEY] ?: false }
 
     override suspend fun updateServerUrl(serverUrl: String) {
         context.serverCommunicationPreferences.edit { data ->
             data[SERVER_URL_KEY] = serverUrl
+            data[HAS_SELECTED_INSTANCE_KEY] = true
         }
-    }
-
-    override suspend fun retryLoadServerProfileInfo() {
-        retryLoadServerProfileInfo.emit(Unit)
     }
 }

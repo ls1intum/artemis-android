@@ -35,7 +35,7 @@ class LoginViewModel(
 
     val password: Flow<String> = savedStateHandle.getStateFlow(PASSWORD_KEY, "")
 
-    val rememberMe: Flow<Boolean> = savedStateHandle.getStateFlow(REMEMBER_ME_KEY, false)
+    val rememberMe: Flow<Boolean> = savedStateHandle.getStateFlow(REMEMBER_ME_KEY, true)
 
     val hasUserAcceptedTerms: Flow<Boolean> =
         savedStateHandle.getStateFlow(USER_ACCEPTED_TERMS_KEY, false)

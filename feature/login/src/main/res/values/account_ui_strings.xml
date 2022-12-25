@@ -14,9 +14,21 @@
     <string name="account_login_register_selection_register_text">Or sign up now.</string>
     <string name="account_login_register_selection_register_button">Create account</string>
 
+    <string name="account_change_artemis_instance_label">Not your university?</string>
+
 
     <!--  Artemis instance selection ui  -->
-    <string name="account_select_artemis_instance_select_text">Your artemis server:</string>
+    <string name="account_select_artemis_instance_select_text">Please select your university:</string>
+    <string name="account_select_artemis_instance_custom_instance">Custom instance</string>
+
+    <string name="account_select_custom_instance_selection_title">Custom artemis instance</string>
+    <string name="account_select_custom_instance_selection_instruction">Enter the url of your artemis instance. For example _https://artemis.ase.in.tum.de_. If you are unsure what your artemis instance is, ask your teacher or instructor.</string>
+    <string name="account_select_custom_instance_selection_text_field_label">Your instance url</string>
+    <string name="account_select_custom_instance_selection_reach_success">Successfully connected to entered instance.</string>
+    <string name="account_select_custom_instance_selection_reach_failure">Could not connect to your instance.</string>
+    <string name="account_select_custom_instance_selection_reach_unknown">Waiting for connection</string>
+    <string name="account_select_custom_instance_selection_set_instance_button">Set custom instance</string>
+
     <!--  Login/Register selection ui  -->
     <string name="account_login_button">Login</string>
     <string name="account_register_button">Register</string>

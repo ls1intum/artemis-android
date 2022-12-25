@@ -1,22 +1,20 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
-import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 class AccountViewModel(
-    private val serverConfigurationService: ServerConfigurationService,
-    private val serverDataService: ServerDataService,
-    private val networkStatusProvider: NetworkStatusProvider
+    serverConfigurationService: ServerConfigurationService,
+    serverDataService: ServerDataService,
+    networkStatusProvider: NetworkStatusProvider
 ) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverDataService) {
 
     val selectedArtemisInstance: StateFlow<ArtemisInstances.ArtemisInstance> =
@@ -31,16 +29,4 @@ class AccountViewModel(
             )
         }
             .stateIn(viewModelScope, SharingStarted.Eagerly, ArtemisInstances.TUM_ARTEMIS)
-
-    fun updateServerUrl(serverUrl: String) {
-        viewModelScope.launch {
-            serverConfigurationService.updateServerUrl(serverUrl)
-        }
-    }
-
-    fun retryLoadServerProfileInfo() {
-        viewModelScope.launch {
-            serverConfigurationService.retryLoadServerProfileInfo()
-        }
-    }
 }
