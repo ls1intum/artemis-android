@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.ClockWithOffset
 import de.tum.informatics.www1.artemis.native_app.core.common.hasPassedFlow
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
+import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
@@ -61,6 +62,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import okhttp3.internal.wait
 import org.hildan.krossbow.stomp.LostReceiptException
 import org.hildan.krossbow.stomp.headers.StompSendHeaders
 import java.util.UUID
@@ -139,7 +141,7 @@ internal class QuizParticipationViewModel(
     val isConnected: Flow<Boolean> = websocketProvider.isConnected
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
-    private val retryLoadExercise = MutableSharedFlow<Unit>()
+    private val retryLoadExercise = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     /**
      * In live quizzes, a participation is loaded to get the exercise.
@@ -276,21 +278,34 @@ internal class QuizParticipationViewModel(
             answeredQuestionCount == quizQuestions.size
         }
 
+    /**
+     * Emitted to when the user clicks on start batch/join batch
+     */
+    private val joinBatchFlow = MutableSharedFlow<QuizExercise.QuizBatch>()
+
     private val batchUpdater: Flow<QuizExercise> = when (quizType) {
         QuizType.LIVE -> {
-            quizExerciseDataState.filterSuccess().flatMapLatest { loadedQuizExercise ->
-                val batch = loadedQuizExercise.quizBatches.orEmpty().firstOrNull()
-                if (batch != null && batch.started != true && batch.id != null) {
-                    websocketProvider.subscribeMessage(
-                        "$quizExerciseChannel/${batch.id ?: 0}",
-                        QuizExercise.serializer()
-                    )
-                } else emptyFlow()
-            }
+            val quizExerciseDataStateBatch: Flow<QuizExercise.QuizBatch> = quizExerciseDataState
+                .filterSuccess()
+                .mapNotNull { it.quizBatches.orEmpty().firstOrNull() }
+
+            merge(
+                quizExerciseDataStateBatch,
+                joinBatchFlow
+            )
+                .flatMapLatest { batch ->
+                    if (batch.started != true && batch.id != null) {
+                        websocketProvider.subscribeMessage(
+                            "$quizExerciseChannel/${batch.id ?: 0}",
+                            QuizExercise.serializer()
+                        )
+                    } else emptyFlow()
+                }
         }
 
         QuizType.PRACTICE -> emptyFlow()
     }
+        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
     /**
      * Everything depends on this quiz exercise
@@ -306,11 +321,6 @@ internal class QuizParticipationViewModel(
         exercise.quizQuestions.sumOf { it.points ?: 0 }
     }
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
-
-    /**
-     * Emitted to when the user clicks on start batch/join batch
-     */
-    private val joinBatchFlow = MutableSharedFlow<QuizExercise.QuizBatch>()
 
     val quizBatch: Flow<QuizExercise.QuizBatch?> = merge(
         quizExercise.map { it.quizBatches.orEmpty().firstOrNull() },
@@ -470,6 +480,14 @@ internal class QuizParticipationViewModel(
                         retryLoadExercise.emit(Unit)
                     }
                 }
+        }
+
+        viewModelScope.launch {
+            waitingForQuizStart.withPrevious().collectLatest { (previouslyWaiting, nowWaiting) ->
+                if (previouslyWaiting == true && !nowWaiting) {
+                    retryLoadExercise.tryEmit(Unit)
+                }
+            }
         }
 
         viewModelScope.launch {
