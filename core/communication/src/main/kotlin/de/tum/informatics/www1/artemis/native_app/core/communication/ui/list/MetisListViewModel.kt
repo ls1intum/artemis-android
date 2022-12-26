@@ -165,9 +165,7 @@ internal class MetisListViewModel(
     }
 
     fun requestRefreshWebsocket() {
-        viewModelScope.launch {
-            websocketProvider.requestTryReconnect()
-        }
+        websocketProvider.requestTryReconnect()
     }
 
     fun addMetisFilter(metisFilter: MetisFilter) {

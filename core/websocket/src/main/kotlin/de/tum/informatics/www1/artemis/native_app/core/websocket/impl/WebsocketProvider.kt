@@ -24,6 +24,7 @@ import kotlin.time.Duration.Companion.seconds
 import org.hildan.krossbow.stomp.conversions.kxserialization.*
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.stomp.headers.StompSubscribeHeaders
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
 class WebsocketProvider(
@@ -37,6 +38,7 @@ class WebsocketProvider(
         private const val TAG = "WebsocketProvider"
     }
 
+    private val onRequestReconnect = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     private val onWebsocketError = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     private val onReconnected = MutableSharedFlow<Unit>()
 
@@ -65,8 +67,9 @@ class WebsocketProvider(
         combine(
             serverConfigurationService.host,
             accountService.authenticationData,
-            onWebsocketError.onStart { emit(Unit) }
-        ) { a, b, _ -> a to b }
+            onWebsocketError.onStart { emit(Unit) },
+            onRequestReconnect.onStart { emit(Unit) }
+        ) { a, b, _, _ -> a to b }
             .transformLatest { (host, authenticationData) ->
                 emitAll(
                     channelFlow {
@@ -94,7 +97,9 @@ class WebsocketProvider(
 
                             //Graceful disconnect is disabled, runBlocking should not block
                             runBlocking {
-                                session.disconnect()
+                                withTimeoutOrNull(200.milliseconds) {
+                                    session.disconnect()
+                                }
                             }
                         }
                     }
@@ -121,22 +126,24 @@ class WebsocketProvider(
             )
 
     @OptIn(DelicateCoroutinesApi::class)
-    val isConnected: Flow<Boolean> =
-        session.transformLatest { _ ->
-            emit(true)
+    val connectionState: Flow<WebsocketConnectionState> =
+        session.transformLatest<StompSessionWithKxSerialization, WebsocketConnectionState> { _ ->
+            emit(WebsocketConnectionState.WithSession(true))
 
-            // Wait for error
-            onWebsocketError.first()
+            // Wait for error or reconnect
+            merge(onWebsocketError, onRequestReconnect).first()
 
             // After error, we emit false, then wait for a new session.
-            emit(false)
+            emit(WebsocketConnectionState.WithSession(false))
         }
-            .onStart { emit(false) }
+            .onStart { emit(WebsocketConnectionState.Empty) }
             .shareIn(
                 scope = GlobalScope,
                 started = SharingStarted.WhileSubscribed(),
                 replay = 1
             )
+
+    val isConnected: Flow<Boolean> = connectionState.map { it.isConnected }
 
     /**
      * Returns a flow that automatically unsubscribes once the collector is inactive.
@@ -171,11 +178,12 @@ class WebsocketProvider(
                 emitAll(
                     merge(
                         flow,
-                        isConnected.withPrevious().mapNotNull { (previouslyConnected, nowConnected) ->
-                            if (previouslyConnected == true && !nowConnected) {
-                                WebsocketData.Disconnect()
-                            } else null
-                        }
+                        connectionState
+                            .mapNotNull { currentState ->
+                                if (currentState is WebsocketConnectionState.WithSession && !currentState.isConnected) {
+                                    WebsocketData.Disconnect()
+                                } else null
+                            }
                     )
                         // Stop emitting on this flow if an error occurred and wait for a new session
                         .transformWhile { websocketData ->
@@ -199,8 +207,8 @@ class WebsocketProvider(
         }
     }
 
-    suspend fun requestTryReconnect() {
-        onWebsocketError.emit(Unit)
+    fun requestTryReconnect() {
+        onRequestReconnect.tryEmit(Unit)
     }
 
     sealed interface WebsocketData<T> {
@@ -209,6 +217,16 @@ class WebsocketProvider(
         class Disconnect<T> : WebsocketData<T>
 
         class Message<T>(val message: T) : WebsocketData<T>
+    }
+
+    sealed interface WebsocketConnectionState {
+        abstract val isConnected: Boolean
+
+        object Empty : WebsocketConnectionState {
+            override val isConnected: Boolean = false
+        }
+
+        data class WithSession(override val isConnected: Boolean) : WebsocketConnectionState
     }
 }
 
