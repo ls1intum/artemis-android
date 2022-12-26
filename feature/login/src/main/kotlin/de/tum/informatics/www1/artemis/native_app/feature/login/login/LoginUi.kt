@@ -10,7 +10,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillNode
+import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalAutofill
+import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -29,10 +37,19 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.transformLatest
 import org.koin.androidx.compose.get
 
+/*
+ * Autofill code is taken and inspired by https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui/integration-tests/ui-demos/src/main/java/androidx/compose/ui/demos/autofill/ExplicitAutofillTypesDemo.kt
+ * https://cs.android.com/androidx/platform/frameworks/support
+ * */
+
 @Composable
 internal fun LoginScreen(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Unit) {
-    Scaffold(modifier = modifier) {
-        Box(modifier = Modifier.fillMaxSize()) {
+    Scaffold(modifier = modifier) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             LoginUi(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -253,33 +270,60 @@ private fun PasswordBasedLogin(
         } else PasswordVisualTransformation()
     }
 
+    val autofill = LocalAutofill.current
+    val createAutofillModifier = { autofillNode: AutofillNode ->
+        Modifier.onFocusChanged { focusState ->
+            if (autofill != null) {
+                if (focusState.isFocused) {
+                    autofill.requestAutofillForNode(autofillNode)
+                } else {
+                    autofill.cancelAutofillForNode(autofillNode)
+                }
+            }
+        }
+    }
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = username,
-            onValueChange = updateUsername,
-            label = { Text(text = stringResource(id = R.string.login_username_label)) }
-        )
+        Autofill(
+            autofillTypes = listOf(AutofillType.Username),
+            onFill = updateUsername
+        ) { autofillNode ->
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(createAutofillModifier(autofillNode)),
+                value = username,
+                onValueChange = updateUsername,
+                label = { Text(text = stringResource(id = R.string.login_username_label)) }
+            )
+        }
 
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = password,
-            onValueChange = updatePassword,
-            label = { Text(text = stringResource(id = R.string.login_password_label)) },
-            visualTransformation = visualTransformation,
-            trailingIcon = {
-                IconButton(onClick = { showPasswordPlaintext = !showPasswordPlaintext }) {
-                    Icon(
-                        imageVector = if (!showPasswordPlaintext) Icons.Default.VisibilityOff
-                        else Icons.Default.Visibility,
-                        contentDescription = null
-                    )
+        Autofill(
+            autofillTypes = listOf(AutofillType.Password),
+            onFill = updatePassword
+        ) { autofillNode ->
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(createAutofillModifier(autofillNode)),
+                value = password,
+                onValueChange = updatePassword,
+                label = { Text(text = stringResource(id = R.string.login_password_label)) },
+                visualTransformation = visualTransformation,
+                trailingIcon = {
+                    IconButton(onClick = { showPasswordPlaintext = !showPasswordPlaintext }) {
+                        Icon(
+                            imageVector = if (!showPasswordPlaintext) Icons.Default.VisibilityOff
+                            else Icons.Default.Visibility,
+                            contentDescription = null
+                        )
+                    }
                 }
-            }
-        )
+            )
+        }
 
         RememberLoginCheckBox(
             modifier = Modifier.fillMaxWidth(),
@@ -411,5 +455,26 @@ private fun DividerWithText(modifier: Modifier, text: @Composable (Modifier) -> 
                 .weight(1f)
                 .padding(start = 8.dp)
         )
+    }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+private fun Autofill(
+    autofillTypes: List<AutofillType>,
+    onFill: ((String) -> Unit),
+    content: @Composable (AutofillNode) -> Unit
+) {
+    val autofillNode = AutofillNode(onFill = onFill, autofillTypes = autofillTypes)
+
+    val autofillTree = LocalAutofillTree.current
+    autofillTree += autofillNode
+
+    Box(
+        Modifier.onGloballyPositioned {
+            autofillNode.boundingBox = it.boundsInWindow()
+        }
+    ) {
+        content(autofillNode)
     }
 }
