@@ -22,10 +22,10 @@ internal class CourseOverviewViewModel(
     /**
      * Emit a unit to this flow, to reload the dashboard.
      */
-    private val reloadDashboard = MutableSharedFlow<Unit>()
+    private val reloadDashboard = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     /**
-     * Always emits the latest dashboard. Automatically updated when [reloadDashboard] is requested,
+     * Always emits the latest dashboard. Automatically updated when [requestReloadDashboard] is requested,
      * the login status changes or the server is updated.
      */
     val dashboard: StateFlow<DataState<Dashboard>> =
@@ -77,10 +77,8 @@ internal class CourseOverviewViewModel(
     /**
      * Request a reload of the dashboard.
      */
-    fun reloadDashboard() {
-        viewModelScope.launch {
-            reloadDashboard.emit(Unit)
-        }
+    fun requestReloadDashboard() {
+        reloadDashboard.tryEmit(Unit)
     }
 
     fun logout(onDone: () -> Unit) {

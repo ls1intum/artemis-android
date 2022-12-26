@@ -14,15 +14,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.isScrollingUp
+import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseItemHeader
@@ -62,7 +66,7 @@ internal fun CoursesOverview(
     onClickRegisterForCourse: () -> Unit,
     onViewCourse: (courseId: Long) -> Unit
 ) {
-    val courses = viewModel.dashboard.collectAsState(initial = DataState.Loading()).value
+    val coursesDataState = viewModel.dashboard.collectAsState(initial = DataState.Loading()).value
 
     //The course composable needs the serverUrl to build the correct url to fetch the course icon from.
     val serverUrl by viewModel.serverUrl.collectAsState(initial = "")
@@ -83,49 +87,49 @@ internal fun CoursesOverview(
             TopAppBar(
                 title = { Text(text = stringResource(id = R.string.course_overview_title)) },
                 actions = {
+                    IconButton(onClick = onClickRegisterForCourse) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(id = R.string.course_overview_action_register)
+                        )
+                    }
+
                     IconButton(onClick = { viewModel.logout(onLogout) }) {
                         Icon(imageVector = Icons.Default.Logout, contentDescription = null)
                     }
                 },
                 scrollBehavior = scrollBehavior
             )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onClickRegisterForCourse,
-                text = {
-                    Text(text = stringResource(id = R.string.course_overview_fab_text))
-                },
-                icon = {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
-                },
-                expanded = coursesListState.isScrollingUp(),
-            )
         }
     ) { padding ->
-        Box(
+        BasicDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-        ) {
-            when (courses) {
-                is DataState.Loading -> CircularProgressIndicator(
-                    modifier = Modifier.align(
-                        Alignment.Center
+                .padding(padding),
+            dataState = coursesDataState,
+            loadingText = stringResource(id = R.string.courses_loading_loading),
+            failureText = stringResource(id = R.string.courses_loading_failure),
+            suspendedText = stringResource(id = R.string.courses_loading_suspended),
+            retryButtonText = stringResource(id = R.string.courses_loading_try_again),
+            onClickRetry = viewModel::requestReloadDashboard
+        ) { dashboard: Dashboard ->
+            val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = false)
+
+            SwipeRefresh(state = swipeRefreshState, onRefresh = viewModel::requestReloadDashboard) {
+                if (dashboard.courses.isEmpty()) {
+                    DashboardEmpty(
+                        modifier = Modifier.fillMaxSize(),
+                        onClickSignup = onClickRegisterForCourse
                     )
-                )
-                is DataState.Success -> {
+                } else {
                     CourseList(
                         modifier = Modifier.fillMaxSize(),
-                        courses = courses.data.courses,
+                        courses = dashboard.courses,
                         serverUrl = serverUrl,
                         authorizationToken = authorizationBearer,
                         listState = coursesListState,
                         onClickOnCourse = { course -> onViewCourse(course.id) }
                     )
-                }
-                else -> {
-
                 }
             }
         }
@@ -220,5 +224,29 @@ fun CourseItem(
             )
         }
     }
+}
 
+@Composable
+private fun DashboardEmpty(modifier: Modifier, onClickSignup: () -> Unit) {
+    Box(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = R.string.courses_empty_text),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center
+            )
+
+            Button(onClick = onClickSignup) {
+                Text(text = stringResource(id = R.string.courses_empty_register_now_button))
+            }
+        }
+    }
 }
