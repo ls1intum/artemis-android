@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
 
 import android.util.Log
+import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -170,7 +171,11 @@ class WebsocketProvider(
                 emitAll(
                     merge(
                         flow,
-                        onWebsocketError.map { WebsocketData.Disconnect() }
+                        isConnected.withPrevious().mapNotNull { (previouslyConnected, nowConnected) ->
+                            if (previouslyConnected == true && !nowConnected) {
+                                WebsocketData.Disconnect()
+                            } else null
+                        }
                     )
                         // Stop emitting on this flow if an error occurred and wait for a new session
                         .transformWhile { websocketData ->

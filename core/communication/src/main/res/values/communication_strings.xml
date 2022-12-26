@@ -20,8 +20,6 @@
     <string name="metis_filter_with_reaction">Has reaction</string>
     <string name="metis_filter_unresolved">Unresolved</string>
 
-    <string name="configuration_card_title">Tune posts</string>
-
     <string name="metis_sorting_strategy_criteria_title">Sort by:</string>
     <string name="metis_sorting_strategy_criteria_date">Date</string>
     <string name="metis_sorting_strategy_criteria_votes">Votes</string>

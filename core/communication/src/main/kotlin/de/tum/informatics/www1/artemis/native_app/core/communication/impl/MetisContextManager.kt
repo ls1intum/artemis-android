@@ -108,7 +108,7 @@ class MetisContextManager(
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun getMetisUpdateListenerFlow(metisContext: MetisContext) =
+    private fun getMetisUpdateListenerFlow(metisContext: MetisContext): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>> =
         metisUpdateListenerMap
             .getOrPut(metisContext) {
                 metisService.subscribeToPostUpdates(metisContext)

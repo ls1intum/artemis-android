@@ -94,7 +94,7 @@ fun SmartphoneMetisUi(
             )
 
             MetisStandalonePostList(
-                modifier = modifier,
+                modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
                 onClickViewPost = { clientPostId ->
                     navController.navigateToStandalonePostScreen(

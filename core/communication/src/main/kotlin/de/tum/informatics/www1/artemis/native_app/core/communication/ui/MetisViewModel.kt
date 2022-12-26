@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
@@ -102,7 +103,7 @@ abstract class MetisViewModel(
         post: MetisService.AffectedPost,
         response: (MetisModificationFailure?) -> Unit
     ) {
-        metisService.createReaction(
+        val networkResponse: NetworkResponse<Reaction> = metisService.createReaction(
             context = getMetisContext(),
             post = post,
             emojiId = emojiId,
@@ -113,6 +114,13 @@ abstract class MetisViewModel(
                     response(MetisModificationFailure.CREATE_REACTION)
                     return
                 }
+            }
+        )
+
+        response(
+            when (networkResponse) {
+                is NetworkResponse.Failure -> MetisModificationFailure.CREATE_REACTION
+                is NetworkResponse.Response -> null
             }
         )
     }

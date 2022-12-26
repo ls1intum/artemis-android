@@ -124,9 +124,7 @@ internal fun MetisFilterHeader(
 
         AnimatedVisibility(visible = displayTuning) {
             TuneCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 context = context,
                 displayMetisFilterRow = MetisFilterRow,
                 displayCourseWideContextFilterRow = CourseWideContextFilterRow,
@@ -140,7 +138,6 @@ internal fun MetisFilterHeader(
             FilterQueryPosts(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
                     .padding(bottom = 8.dp),
                 query = query,
                 onUpdateQuery = onUpdateQuery,
@@ -167,18 +164,12 @@ private fun TuneCard(
         modifier = modifier
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(id = R.string.configuration_card_title),
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(8.dp),
-                    style = MaterialTheme.typography.headlineSmall
-                )
-
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
                 IconButton(
                     onClick = hideTuning
                 ) {
