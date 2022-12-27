@@ -215,7 +215,7 @@ private fun UserInformationSection(
 private fun NotificationSection(modifier: Modifier, onOpenNotificationSettings: () -> Unit) {
     PreferenceSection(
         modifier = modifier,
-        title = stringResource(id = R.string.settings_account_information_section)
+        title = stringResource(id = R.string.settings_notification_section)
     ) {
         PreferenceEntry(
             modifier = Modifier.fillMaxWidth(),
