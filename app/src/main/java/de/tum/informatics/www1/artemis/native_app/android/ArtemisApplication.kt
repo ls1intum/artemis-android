@@ -16,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboardMod
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exerciseViewModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.quizParticipationModule
+import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -39,7 +40,8 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
                 loginModule,
                 exerciseViewModule,
                 communicationModule,
-                quizParticipationModule
+                quizParticipationModule,
+                settingsModule
             )
         }
     }

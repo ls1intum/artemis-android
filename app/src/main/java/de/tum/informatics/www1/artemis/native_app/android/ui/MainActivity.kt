@@ -1,10 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.android.ui
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import de.tum.informatics.www1.artemis.native_app.android.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.createStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.ViewType
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.navigateToStandalonePostScreen
@@ -26,6 +29,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.navigateToQuizParticipation
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.quizParticipation
+import de.tum.informatics.www1.artemis.native_app.feature.settings.navigateToSettings
+import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsScreen
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
@@ -67,13 +72,8 @@ class MainActivity : AppCompatActivity() {
                     loginScreen(onLoggedIn)
 
                     dashboard(
-                        onLogout = {
-                            //Navigate to the login screen and remove the course overview screen from the navigation stack.
-                            navController.navigateToLogin {
-                                popUpTo(DASHBOARD_DESTINATION) {
-                                    inclusive = true
-                                }
-                            }
+                        onOpenSettings = {
+                            navController.navigateToSettings { }
                         },
                         onClickRegisterForCourse = {
                             navController.navigateToCourseRegistration { }
@@ -140,6 +140,23 @@ class MainActivity : AppCompatActivity() {
                             }
                             navController.navigateUp()
                         }
+                    )
+
+                    settingsScreen(
+                        versionCode = BuildConfig.VERSION_CODE,
+                        versionName = BuildConfig.VERSION_NAME,
+                        onLoggedOut = {
+                            navController.navigateToLogin {
+                                popUpTo(DASHBOARD_DESTINATION) {
+                                    inclusive = true
+                                }
+                            }
+                        },
+                        onDisplayThirdPartyLicenses = {
+                            val intent = Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
+                            startActivity(intent)
+                        },
+                        onNavigateUp = navController::navigateUp
                     )
                 }
             }

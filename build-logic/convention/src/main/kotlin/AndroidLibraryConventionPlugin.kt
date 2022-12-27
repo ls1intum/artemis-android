@@ -19,7 +19,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 defaultConfig.targetSdk = 33
             }
 
-            val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+            // val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
             configurations.configureEach {
                 resolutionStrategy {
                     // Temporary workaround for https://issuetracker.google.com/174733673

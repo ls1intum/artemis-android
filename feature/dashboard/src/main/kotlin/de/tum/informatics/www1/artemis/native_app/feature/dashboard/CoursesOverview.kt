@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,7 +39,7 @@ fun NavController.navigateToDashboard(builder: NavOptionsBuilder.() -> Unit) {
 }
 
 fun NavGraphBuilder.dashboard(
-    onLogout: () -> Unit,
+    onOpenSettings: () -> Unit,
     onClickRegisterForCourse: () -> Unit,
     onViewCourse: (courseId: Long) -> Unit
 ) {
@@ -47,7 +47,7 @@ fun NavGraphBuilder.dashboard(
         CoursesOverview(
             modifier = Modifier.fillMaxSize(),
             viewModel = getViewModel(),
-            onLogout = onLogout,
+            onOpenSettings = onOpenSettings,
             onClickRegisterForCourse = onClickRegisterForCourse,
             onViewCourse = onViewCourse
         )
@@ -62,7 +62,7 @@ fun NavGraphBuilder.dashboard(
 internal fun CoursesOverview(
     modifier: Modifier,
     viewModel: CourseOverviewViewModel,
-    onLogout: () -> Unit,
+    onOpenSettings: () -> Unit,
     onClickRegisterForCourse: () -> Unit,
     onViewCourse: (courseId: Long) -> Unit
 ) {
@@ -94,8 +94,8 @@ internal fun CoursesOverview(
                         )
                     }
 
-                    IconButton(onClick = { viewModel.logout(onLogout) }) {
-                        Icon(imageVector = Icons.Default.Logout, contentDescription = null)
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(imageVector = Icons.Default.Settings, contentDescription = null)
                     }
                 },
                 scrollBehavior = scrollBehavior

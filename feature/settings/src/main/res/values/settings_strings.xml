@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_screen_title">Settings</string>
+    <string name="settings_account_information_section">Account information</string>
+    <string name="settings_account_information_full_name">Full name: %1$s</string>
+    <string name="settings_account_information_login">Login: %1$s</string>
+    <string name="settings_account_information_email">Email: %1$s</string>
+    <string name="settings_account_logout">Logout</string>
+
+    <string name="settings_notification_section">Notifications</string>
+    <string name="settings_notification_settings">Open notification settings</string>
+
+    <string name="settings_about_section">About</string>
+    <string name="settings_about_privacy_policy">Privacy policy</string>
+    <string name="settings_about_third_party_licences">Third party licenses</string>
+
+    <string name="settings_build_section">Build information</string>
+    <string name="settings_build_version_code">Version code: %1$d</string>
+    <string name="settings_build_version_name">Version name: %1$s</string>
+</resources>

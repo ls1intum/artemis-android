@@ -3,6 +3,7 @@ plugins {
     id("artemis.android.application.compose")
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
+    id("com.google.android.gms.oss-licenses-plugin")
 }
 
 android {
@@ -40,7 +41,10 @@ dependencies {
     implementation(project(":feature:dashboard"))
     implementation(project(":feature:login"))
     implementation(project(":feature:exercise_view"))
+    implementation(project(":feature:settings"))
     implementation(project(":feature:quiz_participation"))
+
+    implementation(libs.play.services.oss.licences)
 
     implementation(libs.androidx.appcompat)
 

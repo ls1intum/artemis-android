@@ -84,10 +84,11 @@ fun <T> BasicDataStateUi(
 @Composable
 fun <T> EmptyDataStateUi(
     dataState: DataState<T>,
+    otherwise: @Composable () -> Unit = {},
     content: @Composable (T) -> Unit
 ) {
     when (dataState) {
         is DataState.Success -> content(dataState.data)
-        else -> {}
+        else -> otherwise()
     }
 }
