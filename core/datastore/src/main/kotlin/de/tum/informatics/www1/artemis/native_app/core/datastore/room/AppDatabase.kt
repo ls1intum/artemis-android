@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.datastore.room
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -17,7 +18,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.meti
         MetisPostContextEntity::class
     ],
     exportSchema = true,
-    version = 1
+    version = 2
 )
 @TypeConverters(RoomTypeConverters::class)
 abstract class AppDatabase : RoomDatabase() {

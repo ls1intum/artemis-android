@@ -31,9 +31,9 @@ data class MetisPostContextEntity(
     @ColumnInfo(name = "exercise_id")
     val exerciseId: Long,
     @ColumnInfo(name = "lecture_id")
-    val lectureId: Int,
+    val lectureId: Long,
     @ColumnInfo(name = "server_post_id")
-    val serverPostId: Int,
+    val serverPostId: Long,
     @ColumnInfo(name = "client_post_id")
     val clientPostId: String
 )

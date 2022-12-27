@@ -229,8 +229,6 @@ private fun FilterChipRow(modifier: Modifier, filterRowType: FilterRowType) {
                     )
                 }
             }
-
-            else -> {}
         }
     }
 }

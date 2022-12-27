@@ -29,7 +29,7 @@ interface MetisService {
      */
     suspend fun getPost(
         metisContext: MetisContext,
-        serverSidePostId: Int,
+        serverSidePostId: Long,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<StandalonePost>
@@ -88,8 +88,8 @@ interface MetisService {
     ): NetworkResponse<Unit>
 
     sealed class AffectedPost {
-        data class Standalone(val postId: Int) : AffectedPost()
-        data class Answer(val postId: Int) : AffectedPost()
+        data class Standalone(val postId: Long) : AffectedPost()
+        data class Answer(val postId: Long) : AffectedPost()
     }
 
     /**

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AnswerPost(
-    override val id: Int? = null,
+    override val id: Long? = null,
     override val author: User? = null,
     override val authorRole: UserRole? = null,
     override val creationDate: Instant? = null,

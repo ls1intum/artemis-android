@@ -120,7 +120,7 @@ class MetisServiceImpl(
      */
     override suspend fun getPost(
         metisContext: MetisContext,
-        serverSidePostId: Int,
+        serverSidePostId: Long,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<StandalonePost> {

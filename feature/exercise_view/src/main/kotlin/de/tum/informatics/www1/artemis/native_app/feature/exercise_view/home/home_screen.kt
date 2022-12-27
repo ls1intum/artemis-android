@@ -29,6 +29,7 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.ui.Smartpho
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIcon
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.tabs.details.ExerciseDetailsTab
@@ -123,32 +124,16 @@ internal fun ExerciseScreen(
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                var selectedTabIndex by remember { mutableStateOf(0) }
+                val selectedTabIndexState = rememberSaveable { mutableStateOf(0) }
+                var selectedTabIndex by selectedTabIndexState
 
                 TabRow(
                     modifier = Modifier.fillMaxWidth(),
                     selectedTabIndex = selectedTabIndex
                 ) {
-                    @Suppress("LocalVariableName")
-                    val DefaultTab = @Composable { index: Int, icon: ImageVector, textRes: Int ->
-                        Tab(
-                            selected = selectedTabIndex == index,
-                            onClick = { selectedTabIndex = index },
-                            icon = {
-                                Icon(
-                                    imageVector = icon,
-                                    contentDescription = null
-                                )
-                            },
-                            text = {
-                                Text(text = stringResource(id = textRes))
-                            }
-                        )
-                    }
-
-                    DefaultTab(0, Icons.Default.ViewHeadline, R.string.exercise_view_tab_overview)
-                    DefaultTab(1, Icons.Default.Info, R.string.exercise_view_tab_info)
-                    DefaultTab(2, Icons.Default.HelpCenter, R.string.exercise_view_tab_qna)
+                    DefaultTab(0, Icons.Default.ViewHeadline, R.string.exercise_view_tab_overview, selectedTabIndexState)
+                    DefaultTab(1, Icons.Default.Info, R.string.exercise_view_tab_info, selectedTabIndexState)
+                    DefaultTab(2, Icons.Default.HelpCenter, R.string.exercise_view_tab_qna, selectedTabIndexState)
                 }
 
                 val tabModifier = Modifier
@@ -209,7 +194,7 @@ internal fun ExerciseScreen(
                         val courseId = exercise.course?.id ?: return@Column
                         val exerciseId = exercise.id ?: return@Column
 
-                        val metisContext = remember {
+                        val metisContext = remember(courseId, exerciseId) {
                             MetisContext.Exercise(courseId = courseId, exerciseId)
                         }
 

@@ -23,6 +23,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.navigateToDa
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewDestination
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exercise
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.navigateToExercise
+import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture
+import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.navigateToLecture
 import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATION
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
@@ -59,7 +61,7 @@ class MainActivity : AppCompatActivity() {
                 val navController = rememberNavController()
 
                 val onLoggedIn = {
-                    //Navigate to the course overview and remove the login screen from the navigation stack.
+                    // Navigate to the course overview and remove the login screen from the navigation stack.
                     navController.navigateToDashboard {
                         popUpTo(LOGIN_DESTINATION) {
                             inclusive = true
@@ -67,7 +69,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                //Use jetpack compose navigation for the navigation logic.
+                // Use jetpack compose navigation for the navigation logic.
                 NavHost(navController = navController, startDestination = startDestination) {
                     loginScreen(onLoggedIn)
 
@@ -95,7 +97,12 @@ class MainActivity : AppCompatActivity() {
                         onNavigateToExercise = { exerciseId ->
                             navController.navigateToExercise(exerciseId) { }
                         },
-                        onNavigateToLecture = {},
+                        onNavigateToLecture = { courseId, lectureId ->
+                            navController.navigateToLecture(
+                                courseId = courseId,
+                                lectureId = lectureId
+                            ) { }
+                        },
                         onNavigateBack = navController::navigateUp,
                         navController = navController
                     )
@@ -112,6 +119,11 @@ class MainActivity : AppCompatActivity() {
                                 quizType
                             )
                         }
+                    )
+
+                    lecture(
+                        navController = navController,
+                        onNavigateBack = navController::navigateUp
                     )
 
                     standalonePostScreen(

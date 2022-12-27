@@ -30,7 +30,7 @@ sealed class MetisContext(
 
     @Serializable
     @SerialName("lecture")
-    data class Lecture(override val courseId: Long, val lectureId: Int) :
+    data class Lecture(override val courseId: Long, val lectureId: Long) :
         MetisContext(
             listOf("courses", courseId.toString(), "lectures", lectureId.toString()),
             "posts",

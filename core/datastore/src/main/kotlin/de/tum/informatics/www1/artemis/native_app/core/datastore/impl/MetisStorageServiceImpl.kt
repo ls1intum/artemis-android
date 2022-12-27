@@ -128,7 +128,7 @@ class MetisStorageServiceImpl(
         private fun MetisContext.toPostMetisContext(
             serverId: String,
             clientSidePostId: String,
-            serverSidePostId: Int
+            serverSidePostId: Long
         ) =
             MetisPostContextEntity(
                 serverId,
@@ -139,7 +139,7 @@ class MetisStorageServiceImpl(
                 clientSidePostId
             )
 
-        private val MetisContext.lectureId: Int get() = if (this is MetisContext.Lecture) lectureId else -1
+        private val MetisContext.lectureId: Long get() = if (this is MetisContext.Lecture) lectureId else -1
         private val MetisContext.exerciseId: Long get() = if (this is MetisContext.Exercise) exerciseId else -1
     }
 
@@ -373,7 +373,7 @@ class MetisStorageServiceImpl(
         insertReactions(reactions)
     }
 
-    override suspend fun deletePosts(host: String, postIds: List<Int>) {
+    override suspend fun deletePosts(host: String, postIds: List<Long>) {
         val metisDao = databaseProvider.database.metisDao()
         databaseProvider.database.withTransaction {
             metisDao.deletePostingsWithServerIds(host, postIds)
@@ -413,7 +413,7 @@ class MetisStorageServiceImpl(
         )
     }
 
-    override suspend fun getServerSidePostId(host: String, clientSidePostId: String): Int {
+    override suspend fun getServerSidePostId(host: String, clientSidePostId: String): Long {
         return databaseProvider.database.metisDao().queryServerSidePostId(host, clientSidePostId)
     }
 }

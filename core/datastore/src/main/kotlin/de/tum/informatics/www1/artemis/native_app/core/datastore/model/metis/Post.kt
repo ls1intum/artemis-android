@@ -10,7 +10,7 @@ data class Post(
     @ColumnInfo(name = "client_post_id")
     val clientPostId: String,
     @ColumnInfo(name = "server_post_id")
-    val serverPostId: Int,
+    val serverPostId: Long,
     @ColumnInfo(name = "title")
     val title: String?,
     @ColumnInfo(name = "content")

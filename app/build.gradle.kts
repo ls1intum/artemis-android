@@ -13,6 +13,12 @@ android {
         applicationId = "de.tum.informatics.www1.artemis.native_app.android"
         versionCode = 4
         versionName = "0.2.0"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments["room.schemaLocation"] = "$projectDir/schemas"
+            }
+        }
     }
     packagingOptions {
         resources {
@@ -41,6 +47,7 @@ dependencies {
     implementation(project(":feature:dashboard"))
     implementation(project(":feature:login"))
     implementation(project(":feature:exercise_view"))
+    implementation(project(":feature:lecture_view"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:quiz_participation"))
 

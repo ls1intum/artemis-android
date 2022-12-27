@@ -9,5 +9,8 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.room.AppDatabas
  */
 class DatabaseProvider(context: Context) {
     val database: AppDatabase =
-        Room.databaseBuilder(context, AppDatabase::class.java, "artemis_db").build()
+        Room
+            .databaseBuilder(context, AppDatabase::class.java, "artemis_db")
+            .fallbackToDestructiveMigration()
+            .build()
 }

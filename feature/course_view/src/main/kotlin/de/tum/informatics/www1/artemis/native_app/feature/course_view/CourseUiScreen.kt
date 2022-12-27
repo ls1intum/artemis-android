@@ -33,7 +33,7 @@ fun NavController.navigateToCourse(courseId: Long, builder: NavOptionsBuilder.()
 fun NavGraphBuilder.course(
     navController: NavController,
     onNavigateToExercise: (exerciseId: Long) -> Unit,
-    onNavigateToLecture: (lectureId: Long) -> Unit,
+    onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     composable("course/{courseId}", arguments = listOf(
@@ -50,7 +50,7 @@ fun NavGraphBuilder.course(
             onNavigateToExercise = onNavigateToExercise,
             courseId = courseId,
             navController = navController,
-            onNavigateToLecture = onNavigateToLecture
+            onNavigateToLecture = { lectureId -> onNavigateToLecture(courseId, lectureId) }
         )
     }
 }

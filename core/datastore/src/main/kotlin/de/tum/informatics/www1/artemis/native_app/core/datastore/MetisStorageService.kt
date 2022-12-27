@@ -41,7 +41,7 @@ interface MetisStorageService {
     /**
      * Deletes the posts with the given post ids. Can delete both answer and standalone posts.
      */
-    suspend fun deletePosts(host: String, postIds: List<Int>)
+    suspend fun deletePosts(host: String, postIds: List<Long>)
 
     fun getStoredPosts(
         serverId: String,
@@ -64,5 +64,5 @@ interface MetisStorageService {
      */
     suspend fun getCachedPostCount(host: String, metisContext: MetisContext): Int
 
-    suspend fun getServerSidePostId(host: String, clientSidePostId: String): Int
+    suspend fun getServerSidePostId(host: String, clientSidePostId: String): Long
 }

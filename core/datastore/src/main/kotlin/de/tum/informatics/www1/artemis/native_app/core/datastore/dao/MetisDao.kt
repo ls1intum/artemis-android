@@ -28,7 +28,7 @@ interface MetisDao {
         delete from metis_post_context where server_id = :serverId and course_id = :courseId and lecture_id = :lectureId and exercise_id = :exerciseId
     """
     )
-    suspend fun clearAll(serverId: String, courseId: Long, lectureId: Int, exerciseId: Long)
+    suspend fun clearAll(serverId: String, courseId: Long, lectureId: Long, exerciseId: Long)
 
     /**
      * Query the client side post if for the given metis context. Returns null if the given post is not yet stored.
@@ -50,8 +50,8 @@ interface MetisDao {
         serverId: String,
         courseId: Long,
         exerciseId: Long,
-        lectureId: Int,
-        postId: Int
+        lectureId: Long,
+        postId: Long
     ): String?
 
     @Insert
@@ -116,7 +116,7 @@ interface MetisDao {
     )
     suspend fun deletePostingsWithServerIds(
         host: String,
-        serverPostIds: List<Int>
+        serverPostIds: List<Long>
     )
 
     @Query(
@@ -134,7 +134,7 @@ interface MetisDao {
     suspend fun removeSuperfluousAnswerPosts(
         host: String,
         standalonePostClientId: String,
-        answerServerIds: List<Int>
+        answerServerIds: List<Long>
     )
 
     @Query(
@@ -166,7 +166,7 @@ interface MetisDao {
         serverId: String,
         courseId: Long,
         exerciseId: Long,
-        lectureId: Int,
+        lectureId: Long,
         clientId: Int,
         metisFilter: List<MetisFilter>,
         metisSortingStrategy: MetisSortingStrategy,
@@ -297,7 +297,7 @@ interface MetisDao {
         serverId: String,
         courseId: Long,
         exerciseId: Long,
-        lectureId: Int
+        lectureId: Long
     ): Int
 
     @Query("select author_role from postings where id = :clientPostId")
@@ -333,8 +333,8 @@ interface MetisDao {
 //                order by (select count(*) from reactions r where r.post_id = p.id) desc
 //    """
 //    )
-//    fun foo(serverId: String, courseId: Long, exerciseId: Long, lectureId: Int)
+//    fun foo(serverId: String, courseId: Long, exerciseId: Long, lectureId: Long)
 
     @Query("select server_post_id from metis_post_context where server_id = :serverId and client_post_id = :clientPostId")
-    suspend fun queryServerSidePostId(serverId: String, clientPostId: String): Int
+    suspend fun queryServerSidePostId(serverId: String, clientPostId: String): Long
 }
