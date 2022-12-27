@@ -114,33 +114,35 @@ fun computeTemplateStatus(
     val participationId = participation.id ?: 0
     val exerciseId = exercise.id ?: 0
 
-    val isBuildingFlow = service
-        .getLatestPendingSubmissionByParticipationIdFlow(participationId, exerciseId, personal)
-        .filter { submissionData ->
-            val shouldUpdateBasedOnData: Boolean = when (submissionData) {
-                is LiveParticipationService.ProgrammingSubmissionStateData.IsBuildingPendingSubmission -> {
-                    val submission = submissionData.submission
+    val isBuildingFlow = remember(participationId, exerciseId, personal, showUngradedResults) {
+        service
+            .getLatestPendingSubmissionByParticipationIdFlow(participationId, exerciseId, personal)
+            .filter { submissionData ->
+                val shouldUpdateBasedOnData: Boolean = when (submissionData) {
+                    is LiveParticipationService.ProgrammingSubmissionStateData.IsBuildingPendingSubmission -> {
+                        val submission = submissionData.submission
 
-                    val submissionDate = submission.submissionDate ?: Instant.fromEpochSeconds(0L)
-                    val dueDate = exercise.getDueDate(participation) ?: Instant.fromEpochSeconds(0L)
+                        val submissionDate = submission.submissionDate ?: Instant.fromEpochSeconds(0L)
+                        val dueDate = exercise.getDueDate(participation) ?: Instant.fromEpochSeconds(0L)
 
-                    submission is InstructorSubmission
-                            || submission is TestSubmission
-                            || submissionDate < dueDate
+                        submission is InstructorSubmission
+                                || submission is TestSubmission
+                                || submissionDate < dueDate
+                    }
+                    is LiveParticipationService.ProgrammingSubmissionStateData.FailedSubmission,
+                    is LiveParticipationService.ProgrammingSubmissionStateData.NoPendingSubmission,
+                    null -> true
                 }
-                is LiveParticipationService.ProgrammingSubmissionStateData.FailedSubmission,
-                is LiveParticipationService.ProgrammingSubmissionStateData.NoPendingSubmission,
-                null -> true
-            }
 
-            showUngradedResults
-                    || exercise.dueDate == null
-                    || shouldUpdateBasedOnData
-        }
-        .map { submissionData ->
-            submissionData is LiveParticipationService.ProgrammingSubmissionStateData.IsBuildingPendingSubmission
-        }
-        .onStart { emit(false) }
+                showUngradedResults
+                        || exercise.dueDate == null
+                        || shouldUpdateBasedOnData
+            }
+            .map { submissionData ->
+                submissionData is LiveParticipationService.ProgrammingSubmissionStateData.IsBuildingPendingSubmission
+            }
+            .onStart { emit(false) }
+    }
 
     val chosenResult: Result? = remember(participation, result) {
         result
@@ -148,8 +150,10 @@ fun computeTemplateStatus(
                 .maxByOrNull { it.completionDate ?: Instant.fromEpochSeconds(0L) }
     }
 
-    return isBuildingFlow.map { isBuilding ->
-        evaluateTemplateStatus(participation, exercise, chosenResult, isBuilding)
+    return remember(isBuildingFlow, chosenResult) {
+        isBuildingFlow.map { isBuilding ->
+            evaluateTemplateStatus(participation, exercise, chosenResult, isBuilding)
+        }
     }
 }
 
@@ -207,7 +211,9 @@ fun ExerciseResult(
                 maxPoints = exercise.maxPoints
             )
         }
-        ResultTemplateStatus.Missing -> TODO()
+        ResultTemplateStatus.Missing -> {
+            // TODO
+        }
     }
 }
 
@@ -279,7 +285,7 @@ private fun StatusHasResult(
     }
 
     IconTextStatus(
-        modifier = modifier,
+        modifier = modifier.height(IntrinsicSize.Min),
         icon = icon,
         text = text,
         iconColor = textAndIconColor,

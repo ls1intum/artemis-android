@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
  */
 @Composable
 fun ParticipationStatusUi(
+    modifier: Modifier,
     exercise: Exercise,
     getTemplateStatus: @Composable (Participation) -> ResultTemplateStatus = { participation ->
         computeTemplateStatus(
@@ -37,7 +37,7 @@ fun ParticipationStatusUi(
         val templateStatus = getTemplateStatus(exercise.studentParticipations!!.first())
 
         ExerciseResult(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier,
             showUngradedResults = true,
             templateStatus = templateStatus,
             exercise = exercise
@@ -45,6 +45,7 @@ fun ParticipationStatusUi(
     } else {
         //Simply display text
         Text(
+            modifier = modifier,
             text = getSubmissionResultStatusText(exercise = exercise),
             style = MaterialTheme.typography.labelLarge
         )

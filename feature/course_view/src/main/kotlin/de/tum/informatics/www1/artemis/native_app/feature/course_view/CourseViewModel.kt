@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -93,36 +94,48 @@ internal class CourseViewModel(
                 }
             }
 
-    val exercisesGroupedByWeek: Flow<DataState<List<WeeklyExercises>>> =
+    val exercisesGroupedByWeek: Flow<DataState<List<GroupedByWeek<Exercise>>>> =
         exerciseWithParticipationStatusFlow.map { exercisesDataState ->
             exercisesDataState.bind { exercisesWithParticipationState ->
                 exercisesWithParticipationState
-                    // Group the exercise based on their start of the week day (most likely monday)
-                    .groupBy { exercise ->
-                        val releaseDate = exercise.dueDate ?: return@groupBy null
-
-                        releaseDate
-                            .toLocalDateTime(TimeZone.currentSystemDefault())
-                            .date
-                            .toJavaLocalDate()
-                            .with(WeekFields.of(Locale.getDefault()).firstDayOfWeek)
-                            .toKotlinLocalDate()
-                    }
-                    .map { (firstDayOfWeek, exercises) ->
-                        if (firstDayOfWeek != null) {
-                            val lastDayOfWeek = firstDayOfWeek.plus(6, DateTimeUnit.DAY)
-                            WeeklyExercises.BoundToWeek(firstDayOfWeek, lastDayOfWeek, exercises)
-                        } else WeeklyExercises.Unbound(exercises)
-                    }
-                    .sortedBy { weeklyExercise ->
-                        when (weeklyExercise) {
-                            is WeeklyExercises.BoundToWeek -> weeklyExercise.firstDayOfWeek
-                            is WeeklyExercises.Unbound -> LocalDate(9999, 1, 1)
-                        }
-                    }
+                    .filter { it.visibleToStudents != false }
+                    .groupByWeek { dueDate }
             }
         }
             .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
+
+    val lecturesGroupedByWeek: Flow<DataState<List<GroupedByWeek<Lecture>>>> = course.map { courseDataState ->
+        courseDataState.bind { course ->
+            course
+                .lectures
+                .groupByWeek { startDate }
+        }
+    }
+
+    private fun <T> List<T>.groupByWeek(getSortDate: T.() -> Instant?): List<GroupedByWeek<T>> =
+        // Group the items based on their start of the week day (most likely monday)
+        groupBy { item ->
+            val sortDate = getSortDate(item) ?: return@groupBy null
+
+            sortDate
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+                .date
+                .toJavaLocalDate()
+                .with(WeekFields.of(Locale.getDefault()).firstDayOfWeek)
+                .toKotlinLocalDate()
+        }
+            .map { (firstDayOfWeek, items) ->
+                if (firstDayOfWeek != null) {
+                    val lastDayOfWeek = firstDayOfWeek.plus(6, DateTimeUnit.DAY)
+                    GroupedByWeek.BoundToWeek(firstDayOfWeek, lastDayOfWeek, items)
+                } else GroupedByWeek.Unbound(items)
+            }
+            .sortedBy { itemsBoundByWeek ->
+                when (itemsBoundByWeek) {
+                    is GroupedByWeek.BoundToWeek -> itemsBoundByWeek.firstDayOfWeek
+                    is GroupedByWeek.Unbound -> LocalDate(9999, 1, 1)
+                }
+            }
 
 //    /**
 //     * The tabs that are displayed for this course.

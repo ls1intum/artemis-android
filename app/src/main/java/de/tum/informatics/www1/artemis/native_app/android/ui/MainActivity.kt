@@ -95,6 +95,7 @@ class MainActivity : AppCompatActivity() {
                         onNavigateToExercise = { exerciseId ->
                             navController.navigateToExercise(exerciseId) { }
                         },
+                        onNavigateToLecture = {},
                         onNavigateBack = navController::navigateUp,
                         navController = navController
                     )
@@ -153,7 +154,8 @@ class MainActivity : AppCompatActivity() {
                             }
                         },
                         onDisplayThirdPartyLicenses = {
-                            val intent = Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
+                            val intent =
+                                Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
                             startActivity(intent)
                         },
                         onNavigateUp = navController::navigateUp

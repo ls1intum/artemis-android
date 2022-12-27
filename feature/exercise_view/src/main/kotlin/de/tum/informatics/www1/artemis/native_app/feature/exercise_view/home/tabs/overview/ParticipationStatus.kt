@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.ta
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -75,6 +76,7 @@ internal fun ParticipationStatusUi(
             )
 
             ParticipationStatusUi(
+                modifier = Modifier.fillMaxWidth(),
                 exercise = exercise,
                 getTemplateStatus = {
                     checkNotNull(templateStatus) { "template status must not be null as participation status has a participation" }

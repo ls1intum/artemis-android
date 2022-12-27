@@ -22,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.ui.Smartpho
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -32,6 +33,7 @@ fun NavController.navigateToCourse(courseId: Long, builder: NavOptionsBuilder.()
 fun NavGraphBuilder.course(
     navController: NavController,
     onNavigateToExercise: (exerciseId: Long) -> Unit,
+    onNavigateToLecture: (lectureId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     composable("course/{courseId}", arguments = listOf(
@@ -47,7 +49,8 @@ fun NavGraphBuilder.course(
             onNavigateBack = onNavigateBack,
             onNavigateToExercise = onNavigateToExercise,
             courseId = courseId,
-            navController = navController
+            navController = navController,
+            onNavigateToLecture = onNavigateToLecture
         )
     }
 }
@@ -59,10 +62,12 @@ internal fun CourseUiScreen(
     courseId: Long,
     navController: NavController,
     onNavigateToExercise: (exerciseId: Long) -> Unit,
+    onNavigateToLecture: (lectureId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val courseDataState by viewModel.course.collectAsState(initial = DataState.Loading())
-    val weeklyExercises by viewModel.exercisesGroupedByWeek.collectAsState(initial = DataState.Loading())
+    val weeklyExercisesDataState by viewModel.exercisesGroupedByWeek.collectAsState(initial = DataState.Loading())
+    val weeklyLecturesDataState by viewModel.lecturesGroupedByWeek.collectAsState(initial = DataState.Loading())
 
     val topAppBarState = rememberTopAppBarState()
 
@@ -96,7 +101,7 @@ internal fun CourseUiScreen(
                     },
                     scrollBehavior = scrollBehavior
                 )
-                ScrollableTabRow(
+                TabRow(
                     modifier = Modifier.fillMaxWidth(),
                     selectedTabIndex = selectedTabIndex
                 ) {
@@ -106,8 +111,7 @@ internal fun CourseUiScreen(
                             selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
                             text = { Text(text = text) },
-                            icon = { Icon(icon, contentDescription = null) },
-                            enabled = index == 0 || index == 2,
+                            icon = { Icon(icon, contentDescription = null) }
                         )
                     }
 
@@ -118,8 +122,7 @@ internal fun CourseUiScreen(
                     )
                     CourseTab(
                         1,
-//                        stringResource(id = R.string.course_ui_tab_lectures),
-                        "Coming soon",
+                        stringResource(id = R.string.course_ui_tab_lectures),
                         Icons.Default.School
                     )
                     CourseTab(
@@ -127,12 +130,12 @@ internal fun CourseUiScreen(
                         stringResource(id = R.string.course_ui_tab_communication),
                         Icons.Default.Chat
                     )
-                    CourseTab(
-                        3,
-//                        stringResource(id = R.string.course_ui_tab_other),
-                        "Coming soon",
-                        Icons.Default.MoreHoriz
-                    )
+//                    CourseTab(
+//                        3,
+////                        stringResource(id = R.string.course_ui_tab_other),
+//                        "Coming soon",
+//                        Icons.Default.MoreHoriz
+//                    )
 
                 }
             }
@@ -165,11 +168,23 @@ internal fun CourseUiScreen(
             ) { tabIndex ->
                 when (tabIndex) {
                     0 -> {
-                        ExerciseListUi(
-                            modifier = Modifier.fillMaxSize(),
-                            exercisesDataState = weeklyExercises,
-                            onClickExercise = onNavigateToExercise
-                        )
+                        EmptyDataStateUi(dataState = weeklyExercisesDataState) { weeklyExercises ->
+                            ExerciseListUi(
+                                modifier = Modifier.fillMaxSize(),
+                                weeklyExercises = weeklyExercises,
+                                onClickExercise = onNavigateToExercise
+                            )
+                        }
+                    }
+
+                    1 -> {
+                        EmptyDataStateUi(dataState = weeklyLecturesDataState) { weeklyLectures ->
+                            LectureListUi(
+                                modifier = Modifier.fillMaxWidth(),
+                                lectures = weeklyLectures,
+                                onClickLecture = { onNavigateToLecture(it.id) }
+                            )
+                        }
                     }
 
                     2 -> {
