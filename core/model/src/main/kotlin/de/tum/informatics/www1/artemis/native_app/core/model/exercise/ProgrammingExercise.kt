@@ -5,7 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.ProgrammingExerciseStudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.attachment.Attachment
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Instant

@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.model.exercise
 
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.attachment.Attachment
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
