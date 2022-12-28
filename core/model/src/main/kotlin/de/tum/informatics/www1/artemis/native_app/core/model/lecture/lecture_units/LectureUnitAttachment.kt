@@ -16,4 +16,5 @@ data class LectureUnitAttachment(
     val description: String? = null,
     val attachment: Attachment? = null
 ) : LectureUnit() {
+    override fun withCompleted(newCompleted: Boolean): LectureUnit = copy(completed = newCompleted)
 }

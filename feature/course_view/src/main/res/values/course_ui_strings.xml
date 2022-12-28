@@ -21,9 +21,6 @@
     <string name="course_ui_list_expand_button_more_content_info">Expand  list</string>
     <string name="course_ui_list_expand_button_less_content_info">Collapse list</string>
 
-    <string name="course_ui_exercise_item_due_date_set">Due date: %1$s</string>
-    <string name="course_ui_exercise_item_due_date_not_set">No due date</string>
-
     <string name="course_ui_lecture_item_start_date_set">Start date: %1$s</string>
     <string name="course_ui_lecture_item_start_date_not_set">No start date</string>
 </resources>

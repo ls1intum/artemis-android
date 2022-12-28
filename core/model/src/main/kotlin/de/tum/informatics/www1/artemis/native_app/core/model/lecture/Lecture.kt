@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.lecture
 
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
@@ -10,5 +11,6 @@ data class Lecture(
     val description: String? = null,
     val startDate: Instant? = null,
     val endDate: Instant? = null,
-    val attachments: List<Attachment> = emptyList()
+    val attachments: List<Attachment> = emptyList(),
+    val lectureUnits: List<LectureUnit> = emptyList()
 )

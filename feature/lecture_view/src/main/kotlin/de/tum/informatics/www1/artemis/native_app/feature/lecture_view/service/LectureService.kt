@@ -10,4 +10,12 @@ interface LectureService {
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Lecture>
+
+    suspend fun completeLectureUnit(
+        lectureUnitId: Long,
+        lectureId: Long,
+        completed: Boolean,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<Unit>
 }

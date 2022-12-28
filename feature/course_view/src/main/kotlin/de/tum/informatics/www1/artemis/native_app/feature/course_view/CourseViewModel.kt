@@ -151,5 +151,4 @@ internal class CourseViewModel(
             requestReloadCourse.emit(Unit)
         }
     }
-
 }

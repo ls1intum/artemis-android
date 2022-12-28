@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("online")
-class LectureUnitOnline(
+data class LectureUnitOnline(
     override val id: Long = 0,
     override val name: String? = null,
     override val releaseDate: Instant? = null,
@@ -14,6 +14,8 @@ class LectureUnitOnline(
     override val completed: Boolean = false,
     val description: String? = null,
     val source: String? = null
-) : LectureUnit()
+) : LectureUnit() {
+    override fun withCompleted(newCompleted: Boolean): LectureUnit = copy(completed = newCompleted)
+}
 
 

@@ -24,7 +24,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -48,6 +47,8 @@ import io.ktor.http.appendPathSegments
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
+import org.koin.androidx.compose.getStateViewModel
+import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -62,7 +63,8 @@ fun NavController.navigateToLecture(
 fun NavGraphBuilder.lecture(
     navController: NavController,
     onNavigateBack: () -> Unit,
-    onRequestOpenLink: (String) -> Unit
+    onRequestOpenLink: (String) -> Unit,
+    onViewExercise: (exerciseId: Long) -> Unit
 ) {
     composable(
         route = "lecture/{lectureId}/{courseId}",
@@ -84,7 +86,7 @@ fun NavGraphBuilder.lecture(
         checkNotNull(lectureId)
         checkNotNull(courseId)
 
-        val viewModel: LectureViewModel = koinViewModel { parametersOf(lectureId) }
+        val viewModel: LectureViewModel = getStateViewModel { parametersOf(lectureId) }
         LectureScreen(
             modifier = Modifier.fillMaxSize(),
             courseId = courseId,
@@ -92,7 +94,8 @@ fun NavGraphBuilder.lecture(
             viewModel = viewModel,
             navController = navController,
             onNavigateBack = onNavigateBack,
-            onRequestOpenLink = onRequestOpenLink
+            onRequestOpenLink = onRequestOpenLink,
+            onViewExercise = onViewExercise
         )
     }
 }
@@ -105,7 +108,8 @@ private fun LectureScreen(
     viewModel: LectureViewModel,
     navController: NavController,
     onNavigateBack: () -> Unit,
-    onRequestOpenLink: (String) -> Unit
+    onRequestOpenLink: (String) -> Unit,
+    onViewExercise: (exerciseId: Long) -> Unit
 ) {
     val serverConfigurationService: ServerConfigurationService = get()
     val accountService: AccountService = get()
@@ -117,6 +121,9 @@ private fun LectureScreen(
 
     // Set if the user clicked on a file attachment.
     var pendingOpenFileAttachment: Attachment? by remember { mutableStateOf(null) }
+    var pendingOpenLink: String? by remember { mutableStateOf(null) }
+
+    var displaySetCompletedFailureDialog: Boolean by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,
@@ -139,7 +146,7 @@ private fun LectureScreen(
         val selectedTabIndexState = rememberSaveable {
             mutableStateOf(0)
         }
-        var selectedTabIndex by selectedTabIndexState
+        val selectedTabIndex by selectedTabIndexState
 
         Column(
             modifier = Modifier
@@ -182,11 +189,33 @@ private fun LectureScreen(
             ) { lecture ->
                 when (selectedTabIndex) {
                     0 -> {
+                        val lectureUnits by viewModel.lectureUnits.collectAsState(
+                            initial = emptyList()
+                        )
+
                         OverviewTab(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 8.dp),
-                            description = lecture.description
+                            description = lecture.description,
+                            lectureUnits = lectureUnits,
+                            onViewExercise = onViewExercise,
+                            onMarkAsCompleted = { lectureUnitId, isCompleted ->
+                                viewModel.updateLectureUnitIsComplete(
+                                    lectureUnitId,
+                                    isCompleted
+                                ) { isSuccessful ->
+                                    if (!isSuccessful) {
+                                        displaySetCompletedFailureDialog = true
+                                    }
+                                }
+                            },
+                            onRequestViewLink = {
+                                pendingOpenLink = it
+                            },
+                            onRequestOpenAttachment = { attachment ->
+                                pendingOpenFileAttachment = attachment
+                            }
                         )
                     }
 
@@ -211,8 +240,8 @@ private fun LectureScreen(
                             onClickFileAttachment = { fileAttachment ->
                                 pendingOpenFileAttachment = fileAttachment
                             },
-                            onClickOpenLinkAttachment = { linkAttachment ->
-
+                            onClickOpenLinkAttachment = { attachment ->
+                                pendingOpenFileAttachment = attachment
                             }
                         )
                     }
@@ -228,12 +257,11 @@ private fun LectureScreen(
                 dismissButtonText = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_negative),
                 onPressPositiveButton = {
                     scope.launch {
-                        val url = URLBuilder(serverConfigurationService.serverUrl.first()).apply {
-                            appendPathSegments(pendingOpenFileAttachment?.link.orEmpty())
-
-                            parameters.append("access_token", accountService.authToken.first())
-                        }.buildString()
-
+                        val url = buildOpenAttachmentLink(
+                            serverUrl = serverConfigurationService.serverUrl.first(),
+                            authToken = accountService.authToken.first(),
+                            attachmentLink = pendingOpenFileAttachment?.link.orEmpty()
+                        )
                         onRequestOpenLink(url)
                         pendingOpenFileAttachment = null
                     }
@@ -241,5 +269,45 @@ private fun LectureScreen(
                 onDismissRequest = { pendingOpenFileAttachment = null }
             )
         }
+
+        if (pendingOpenLink != null) {
+            TextAlertDialog(
+                title = stringResource(id = R.string.lecture_view_open_link_dialog_title),
+                text = stringResource(
+                    id = R.string.lecture_view_open_link_dialog_message,
+                    pendingOpenLink.orEmpty()
+                ),
+                confirmButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_positive),
+                dismissButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_negative),
+                onPressPositiveButton = {
+                    onRequestOpenLink(pendingOpenLink.orEmpty())
+                    pendingOpenLink = null
+                },
+                onDismissRequest = { pendingOpenLink = null }
+            )
+        }
+
+        if (displaySetCompletedFailureDialog) {
+            TextAlertDialog(
+                title = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_title),
+                text = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_message),
+                confirmButtonText = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_positive),
+                dismissButtonText = null,
+                onPressPositiveButton = { displaySetCompletedFailureDialog = false },
+                onDismissRequest = { displaySetCompletedFailureDialog = false }
+            )
+        }
     }
+}
+
+private fun buildOpenAttachmentLink(
+    serverUrl: String,
+    authToken: String,
+    attachmentLink: String
+): String {
+    return URLBuilder(serverUrl).apply {
+        appendPathSegments(attachmentLink)
+
+        parameters.append("access_token", authToken)
+    }.buildString()
 }

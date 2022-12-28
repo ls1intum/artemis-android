@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Strings associated with an exercise -->
 <resources>
+
+    <string name="exercise_item_due_date_set">Due date: %1$s</string>
+    <string name="exercise_item_due_date_not_set">No due date</string>
+
     <!--  Difficulty  -->
     <string name="exercise_difficulty_easy">Easy</string>
     <string name="exercise_difficulty_medium">Medium</string>

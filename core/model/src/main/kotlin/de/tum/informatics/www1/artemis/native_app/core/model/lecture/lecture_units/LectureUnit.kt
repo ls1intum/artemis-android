@@ -10,4 +10,6 @@ sealed class LectureUnit {
     abstract val releaseDate: Instant?
     abstract val visibleToStudents: Boolean
     abstract val completed: Boolean
+
+    abstract fun withCompleted(newCompleted: Boolean): LectureUnit
 }

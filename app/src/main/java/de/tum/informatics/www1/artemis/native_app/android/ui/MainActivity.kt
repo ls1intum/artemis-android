@@ -129,6 +129,9 @@ class MainActivity : AppCompatActivity() {
                         onRequestOpenLink = { url ->
                             CustomTabsIntent.Builder().build()
                                 .launchUrl(this@MainActivity, Uri.parse(url))
+                        },
+                        onViewExercise = { exerciseId ->
+                            navController.navigateToExercise(exerciseId) { }
                         }
                     )
 

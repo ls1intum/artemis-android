@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("video")
-class LectureUnitVideo(
+data class LectureUnitVideo(
     override val id: Long = 0,
     override val name: String? = null,
     override val releaseDate: Instant? = null,
@@ -14,4 +14,6 @@ class LectureUnitVideo(
     override val completed: Boolean = false,
     val description: String? = null,
     val source: String? = null
-) : LectureUnit()
+) : LectureUnit() {
+    override fun withCompleted(newCompleted: Boolean): LectureUnit = copy(completed = newCompleted)
+}
