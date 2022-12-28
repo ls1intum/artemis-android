@@ -1,9 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.android.ui
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
@@ -123,7 +125,11 @@ class MainActivity : AppCompatActivity() {
 
                     lecture(
                         navController = navController,
-                        onNavigateBack = navController::navigateUp
+                        onNavigateBack = navController::navigateUp,
+                        onRequestOpenLink = { url ->
+                            CustomTabsIntent.Builder().build()
+                                .launchUrl(this@MainActivity, Uri.parse(url))
+                        }
                     )
 
                     standalonePostScreen(

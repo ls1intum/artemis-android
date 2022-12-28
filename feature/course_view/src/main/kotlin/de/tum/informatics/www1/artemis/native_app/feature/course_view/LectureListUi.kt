@@ -1,10 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.course_view
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +24,7 @@ internal fun LectureListUi(
 ) {
     WeeklyItemsLazyColumn(
         modifier = modifier,
+        verticalArrangement = Arrangement.Top,
         weeklyItemGroups = lectures,
         getItemId = Lecture::id
     ) { lecture ->
@@ -43,21 +46,9 @@ private fun LectureListItem(modifier: Modifier, lecture: Lecture, onClick: () ->
         )
     } else stringResource(id = R.string.course_ui_lecture_item_start_date_not_set)
 
-    Box(modifier = modifier.clickable(onClick = onClick)) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = lecture.title,
-                maxLines = 1,
-                style = MaterialTheme.typography.bodyLarge
-            )
-
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = startTimeText,
-                maxLines = 1,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
+    ListItem(
+        modifier = modifier.clickable(onClick = onClick),
+        headlineText = { Text(text = lecture.title) },
+        supportingText = { Text(text = startTimeText) }
+    )
 }

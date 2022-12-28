@@ -11,4 +11,17 @@
 
     <!--  Overview tab   -->
     <string name="lecture_view_overview_section_description">Description</string>
+    <string name="lecture_view_overview_section_lecture_units">Lecture units</string>
+
+    <!--  Attachments Tab  -->
+    <string name="lecture_view_attachments_empty">This lecture has no attachments.</string>
+
+    <string name="lecture_view_attachments_file_info_version">Version: %1$d</string>
+    <string name="lecture_view_attachments_file_info_date">Date: %1$s</string>
+    <string name="lecture_view_attachments_file_info_version_date">Version: %1$d - Date: %2$s</string>
+
+    <string name="lecture_view_open_file_attachment_dialog_title">Open file attachment?</string>
+    <string name="lecture_view_open_file_attachment_dialog_message">Do you want to open and potentially download the file attachment?</string>
+    <string name="lecture_view_open_file_attachment_dialog_positive">Open</string>
+    <string name="lecture_view_open_file_attachment_dialog_negative">@android:string/cancel</string>
 </resources>

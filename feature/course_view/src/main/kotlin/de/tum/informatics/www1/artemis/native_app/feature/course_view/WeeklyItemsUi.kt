@@ -39,6 +39,7 @@ import java.util.Date
 internal fun <T> WeeklyItemsLazyColumn(
     modifier: Modifier,
     weeklyItemGroups: List<GroupedByWeek<T>>,
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
     getItemId: T.() -> Long,
     itemContent: @Composable (T) -> Unit
 ) {
@@ -62,7 +63,7 @@ internal fun <T> WeeklyItemsLazyColumn(
         }
     }
 
-    LazyColumn(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    LazyColumn(modifier = modifier, verticalArrangement = verticalArrangement) {
         weeklyItemGroups.forEachIndexed { index, weeklyItems ->
             item {
                 WeeklyItemsSectionHeader(

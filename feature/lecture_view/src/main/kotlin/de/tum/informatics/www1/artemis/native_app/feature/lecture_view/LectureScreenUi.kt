@@ -20,9 +20,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -33,10 +35,19 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SmartphoneMetisUi
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
+import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.service.OverviewTab
+import io.ktor.http.URLBuilder
+import io.ktor.http.appendPathSegments
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -50,7 +61,8 @@ fun NavController.navigateToLecture(
 
 fun NavGraphBuilder.lecture(
     navController: NavController,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onRequestOpenLink: (String) -> Unit
 ) {
     composable(
         route = "lecture/{lectureId}/{courseId}",
@@ -79,7 +91,8 @@ fun NavGraphBuilder.lecture(
             lectureId = lectureId,
             viewModel = viewModel,
             navController = navController,
-            onNavigateBack = onNavigateBack
+            onNavigateBack = onNavigateBack,
+            onRequestOpenLink = onRequestOpenLink
         )
     }
 }
@@ -91,11 +104,19 @@ private fun LectureScreen(
     lectureId: Long,
     viewModel: LectureViewModel,
     navController: NavController,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onRequestOpenLink: (String) -> Unit
 ) {
+    val serverConfigurationService: ServerConfigurationService = get()
+    val accountService: AccountService = get()
+    val scope = rememberCoroutineScope()
+
     val lectureDataState by viewModel.lectureDataState.collectAsState()
 
     val lectureTitle = lectureDataState.bind<String?> { it.title }.orElse(null)
+
+    // Set if the user clicked on a file attachment.
+    var pendingOpenFileAttachment: Attachment? by remember { mutableStateOf(null) }
 
     Scaffold(
         modifier = modifier,
@@ -185,12 +206,40 @@ private fun LectureScreen(
 
                     2 -> {
                         AttachmentsTab(
-                            modifier = Modifier.fillMaxWidth(),
-                            attachments = lecture.attachments
+                            modifier = Modifier.fillMaxSize(),
+                            attachments = lecture.attachments,
+                            onClickFileAttachment = { fileAttachment ->
+                                pendingOpenFileAttachment = fileAttachment
+                            },
+                            onClickOpenLinkAttachment = { linkAttachment ->
+
+                            }
                         )
                     }
                 }
             }
+        }
+
+        if (pendingOpenFileAttachment != null) {
+            TextAlertDialog(
+                title = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_title),
+                text = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_message),
+                confirmButtonText = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_positive),
+                dismissButtonText = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_negative),
+                onPressPositiveButton = {
+                    scope.launch {
+                        val url = URLBuilder(serverConfigurationService.serverUrl.first()).apply {
+                            appendPathSegments(pendingOpenFileAttachment?.link.orEmpty())
+
+                            parameters.append("access_token", accountService.authToken.first())
+                        }.buildString()
+
+                        onRequestOpenLink(url)
+                        pendingOpenFileAttachment = null
+                    }
+                },
+                onDismissRequest = { pendingOpenFileAttachment = null }
+            )
         }
     }
 }
