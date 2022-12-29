@@ -100,79 +100,59 @@ internal fun CustomInstanceSelectionScreen(
 
     val reachStatus: CanReachState = viewModel.isServerReachable.collectAsState().value
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = stringResource(id = R.string.account_select_custom_instance_selection_title))
+    Column(
+        modifier = modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        MarkdownText(
+            modifier = Modifier.fillMaxWidth(),
+            markdown = stringResource(id = R.string.account_select_custom_instance_selection_instruction)
+        )
+
+        TextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = enteredUrl,
+            onValueChange = viewModel::updateServerUrl,
+            textStyle = MaterialTheme.typography.bodyLarge,
+            label = { Text(text = stringResource(id = R.string.account_select_custom_instance_selection_text_field_label)) }
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = when (reachStatus) {
+                    CanReachState.UNKNOWN -> Icons.Default.QuestionMark
+                    CanReachState.CONNECTED -> Icons.Default.DoneOutline
+                    CanReachState.FAILED -> Icons.Default.ErrorOutline
                 },
-                navigationIcon = {
-                    IconButton(onClick = onRequestNavigateUp) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                contentDescription = null
+            )
+
+            Text(
+                text = stringResource(
+                    id = when (reachStatus) {
+                        CanReachState.UNKNOWN -> R.string.account_select_custom_instance_selection_reach_unknown
+                        CanReachState.CONNECTED -> R.string.account_select_custom_instance_selection_reach_success
+                        CanReachState.FAILED -> R.string.account_select_custom_instance_selection_reach_failure
                     }
-                }
+                )
             )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(paddingValues)
-                .padding(8.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            MarkdownText(
-                modifier = Modifier.fillMaxWidth(),
-                markdown = stringResource(id = R.string.account_select_custom_instance_selection_instruction)
-            )
 
-            TextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = enteredUrl,
-                onValueChange = viewModel::updateServerUrl,
-                textStyle = MaterialTheme.typography.bodyLarge,
-                label = { Text(text = stringResource(id = R.string.account_select_custom_instance_selection_text_field_label)) }
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = when (reachStatus) {
-                        CanReachState.UNKNOWN -> Icons.Default.QuestionMark
-                        CanReachState.CONNECTED -> Icons.Default.DoneOutline
-                        CanReachState.FAILED -> Icons.Default.ErrorOutline
-                    },
-                    contentDescription = null
-                )
-
-                Text(
-                    text = stringResource(
-                        id = when (reachStatus) {
-                            CanReachState.UNKNOWN -> R.string.account_select_custom_instance_selection_reach_unknown
-                            CanReachState.CONNECTED -> R.string.account_select_custom_instance_selection_reach_success
-                            CanReachState.FAILED -> R.string.account_select_custom_instance_selection_reach_failure
-                        }
-                    )
-                )
-            }
-
-            Button(
-                modifier = Modifier.align(Alignment.End),
-                enabled = reachStatus == CanReachState.CONNECTED,
-                onClick = {
-                    viewModel.setCustomInstance {
-                        onSuccessfullySetCustomInstance()
-                    }
+        Button(
+            modifier = Modifier.align(Alignment.End),
+            enabled = reachStatus == CanReachState.CONNECTED,
+            onClick = {
+                viewModel.setCustomInstance {
+                    onSuccessfullySetCustomInstance()
                 }
-            ) {
-                Text(
-                    text = stringResource(id = R.string.account_select_custom_instance_selection_set_instance_button)
-                )
             }
+        ) {
+            Text(
+                text = stringResource(id = R.string.account_select_custom_instance_selection_set_instance_button)
+            )
         }
     }
 }

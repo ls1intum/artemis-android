@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,7 +30,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -58,7 +58,8 @@ fun NavGraphBuilder.settingsScreen(
     versionName: String,
     onNavigateUp: () -> Unit,
     onLoggedOut: () -> Unit,
-    onDisplayThirdPartyLicenses: () -> Unit
+    onDisplayThirdPartyLicenses: () -> Unit,
+    onRequestOpenLink: (String) -> Unit
 ) {
     composable(SETTINGS_DESTINATION) {
         SettingsScreen(
@@ -67,7 +68,8 @@ fun NavGraphBuilder.settingsScreen(
             versionName = versionName,
             onLoggedOut = onLoggedOut,
             onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses,
-            onNavigateUp = onNavigateUp
+            onNavigateUp = onNavigateUp,
+            onRequestOpenLink = onRequestOpenLink
         )
     }
 }
@@ -79,7 +81,8 @@ private fun SettingsScreen(
     versionName: String,
     onNavigateUp: () -> Unit,
     onLoggedOut: () -> Unit,
-    onDisplayThirdPartyLicenses: () -> Unit
+    onDisplayThirdPartyLicenses: () -> Unit,
+    onRequestOpenLink: (String) -> Unit
 ) {
     val accountService: AccountService = get()
     val authenticationData: AccountService.AuthenticationData? by accountService.authenticationData.collectAsState(
@@ -88,9 +91,12 @@ private fun SettingsScreen(
     val serverConfigurationService: ServerConfigurationService = get()
     val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
 
-
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+
+    val isLoggedIn = authenticationData is AccountService.AuthenticationData.LoggedIn
+    val hasUserSelectedInstance by serverConfigurationService.hasUserSelectedInstance.collectAsState(
+        initial = false
+    )
 
     Scaffold(
         modifier = modifier,
@@ -114,34 +120,44 @@ private fun SettingsScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            UserInformationSection(
-                modifier = Modifier.fillMaxWidth(),
-                authData = authenticationData,
-                onRequestLogout = {
-                    scope.launch {
-                        accountService.logout()
-                        onLoggedOut()
+            if (isLoggedIn) {
+                UserInformationSection(
+                    modifier = Modifier.fillMaxWidth(),
+                    authData = authenticationData,
+                    onRequestLogout = {
+                        scope.launch {
+                            accountService.logout()
+                            onLoggedOut()
+                        }
                     }
-                }
-            )
+                )
 
-            Divider()
+                Divider()
 
-            NotificationSection(
-                modifier = Modifier.fillMaxWidth(),
-                onOpenNotificationSettings = {}
-            )
+                NotificationSection(
+                    modifier = Modifier.fillMaxWidth(),
+                    onOpenNotificationSettings = {}
+                )
 
-            Divider()
+                Divider()
+            }
 
             AboutSection(
                 modifier = Modifier.fillMaxWidth(),
+                hasUserSelectedInstance = hasUserSelectedInstance,
                 onOpenPrivacyPolicy = {
                     val link = URLBuilder(serverUrl).appendPathSegments("privacy").buildString()
 
-                    openLink(context, link)
+                    onRequestOpenLink(link)
                 },
-                onOpenThirdPartyLicenses = onDisplayThirdPartyLicenses
+                onOpenImprint = {
+                    val link = URLBuilder(serverUrl).appendPathSegments("imprint").buildString()
+                    onRequestOpenLink(link)
+                },
+                onOpenThirdPartyLicenses = onDisplayThirdPartyLicenses,
+                // it can only be unselected, if the user has navigated to the settings from the instance selection screen.
+                // Therefore, a simple navigate up will let the user select the server instance.
+                onRequestSelectServerInstance = onNavigateUp
             )
 
             Divider()
@@ -228,18 +244,49 @@ private fun NotificationSection(modifier: Modifier, onOpenNotificationSettings: 
 @Composable
 private fun AboutSection(
     modifier: Modifier,
+    hasUserSelectedInstance: Boolean,
+    onRequestSelectServerInstance: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
+    onOpenImprint: () -> Unit,
     onOpenThirdPartyLicenses: () -> Unit
 ) {
     PreferenceSection(
         modifier = modifier,
         title = stringResource(id = R.string.settings_about_section)
     ) {
-        PreferenceEntry(
-            modifier = Modifier.fillMaxWidth(),
-            text = stringResource(id = R.string.settings_about_privacy_policy),
-            onClick = onOpenPrivacyPolicy
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            text = stringResource(id = R.string.settings_server_specifics_information),
+            style = MaterialTheme.typography.labelMedium
         )
+
+        if (hasUserSelectedInstance) {
+            PreferenceEntry(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = R.string.settings_about_privacy_policy),
+                onClick = onOpenPrivacyPolicy
+            )
+
+            PreferenceEntry(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = R.string.settings_about_imprint),
+                onClick = onOpenImprint
+            )
+        } else {
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                Text(
+                    text = stringResource(id = R.string.settings_server_specifics_unavailable),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
+
+                Button(
+                    onClick = onRequestSelectServerInstance
+                ) {
+                    Text(text = stringResource(id = R.string.settings_server_specifics_unavailable_select_instance_button))
+                }
+            }
+        }
 
         PreferenceEntry(
             modifier = Modifier.fillMaxWidth(),

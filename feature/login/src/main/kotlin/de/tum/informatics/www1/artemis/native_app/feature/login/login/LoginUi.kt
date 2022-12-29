@@ -44,20 +44,16 @@ import org.koin.androidx.compose.get
 
 @Composable
 internal fun LoginScreen(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Unit) {
-    Scaffold(modifier = modifier) { padding ->
-        Box(
+    Box(
+        modifier = modifier
+    ) {
+        LoginUi(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            LoginUi(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.Center),
-                viewModel = viewModel,
-                onLoggedIn = onLoggedIn
-            )
-        }
+                .fillMaxWidth()
+                .align(Alignment.Center),
+            viewModel = viewModel,
+            onLoggedIn = onLoggedIn
+        )
     }
 }
 

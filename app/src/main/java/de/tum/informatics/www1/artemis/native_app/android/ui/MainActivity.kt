@@ -58,6 +58,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val onRequestOpenLink = { link: String ->
+            CustomTabsIntent.Builder().build()
+                .launchUrl(this@MainActivity, Uri.parse(link))
+        }
+
         setContent {
             AppTheme {
                 val navController = rememberNavController()
@@ -73,7 +78,12 @@ class MainActivity : AppCompatActivity() {
 
                 // Use jetpack compose navigation for the navigation logic.
                 NavHost(navController = navController, startDestination = startDestination) {
-                    loginScreen(onLoggedIn)
+                    loginScreen(
+                        onLoggedIn = onLoggedIn,
+                        onRequestOpenSettings = {
+                            navController.navigateToSettings { }
+                        }
+                    )
 
                     dashboard(
                         onOpenSettings = {
@@ -126,10 +136,7 @@ class MainActivity : AppCompatActivity() {
                     lecture(
                         navController = navController,
                         onNavigateBack = navController::navigateUp,
-                        onRequestOpenLink = { url ->
-                            CustomTabsIntent.Builder().build()
-                                .launchUrl(this@MainActivity, Uri.parse(url))
-                        },
+                        onRequestOpenLink = onRequestOpenLink,
                         onViewExercise = { exerciseId ->
                             navController.navigateToExercise(exerciseId) { }
                         }
@@ -179,7 +186,8 @@ class MainActivity : AppCompatActivity() {
                                 Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
                             startActivity(intent)
                         },
-                        onNavigateUp = navController::navigateUp
+                        onNavigateUp = navController::navigateUp,
+                        onRequestOpenLink = onRequestOpenLink
                     )
                 }
             }

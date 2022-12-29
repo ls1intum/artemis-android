@@ -43,60 +43,55 @@ internal fun InstanceSelectionScreen(
     onSelectArtemisInstance: (String) -> Unit,
     onRequestOpenCustomInstanceSelection: () -> Unit
 ) {
-    Scaffold(modifier = modifier) { padding ->
-        Column(
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxWidth()
+                .fillMaxHeight(0.05f)
+        )
+
+        ArtemisHeader(modifier = Modifier.fillMaxWidth())
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.05f)
+        )
+
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(id = R.string.account_select_artemis_instance_select_text),
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold
+        )
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.05f)
-            )
+            items(availableInstances) { instance ->
+                val item = GridCellItem.ArtemisInstanceGridCellItem(
+                    instance = instance,
+                    imageUrl = "${instance.serverUrl}public/images/logo.png"
+                )
+                ArtemisInstanceGridCell(
+                    modifier = Modifier.fillMaxWidth(),
+                    item = item,
+                    onClick = { onSelectArtemisInstance(instance.serverUrl) }
+                )
+            }
 
-            ArtemisHeader(modifier = Modifier.fillMaxWidth())
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.05f)
-            )
-
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.account_select_artemis_instance_select_text),
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 16.dp)
-            ) {
-                items(availableInstances) { instance ->
-                    val item = GridCellItem.ArtemisInstanceGridCellItem(
-                        instance = instance,
-                        imageUrl = "${instance.serverUrl}public/images/logo.png"
-                    )
-                    ArtemisInstanceGridCell(
-                        modifier = Modifier.fillMaxWidth(),
-                        item = item,
-                        onClick = { onSelectArtemisInstance(instance.serverUrl) }
-                    )
-                }
-
-                item {
-                    ArtemisInstanceGridCell(
-                        modifier = Modifier.fillMaxWidth(),
-                        item = GridCellItem.SelectCustom,
-                        onClick = onRequestOpenCustomInstanceSelection
-                    )
-                }
+            item {
+                ArtemisInstanceGridCell(
+                    modifier = Modifier.fillMaxWidth(),
+                    item = GridCellItem.SelectCustom,
+                    onClick = onRequestOpenCustomInstanceSelection
+                )
             }
         }
     }
