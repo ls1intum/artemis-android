@@ -41,6 +41,7 @@ dependencies {
     implementation(project(":core:device"))
     implementation(project(":core:websocket"))
     implementation(project(":core:communication"))
+    implementation(project(":core:push_notification_settings"))
 
     implementation(project(":feature:course_registration"))
     implementation(project(":feature:course_view"))

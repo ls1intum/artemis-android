@@ -172,6 +172,7 @@ class MainActivity : AppCompatActivity() {
                     )
 
                     settingsScreen(
+                        navController = navController,
                         versionCode = BuildConfig.VERSION_CODE,
                         versionName = BuildConfig.VERSION_NAME,
                         onLoggedOut = {

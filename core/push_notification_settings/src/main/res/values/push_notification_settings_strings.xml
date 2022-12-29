@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="push_notification_settings_receive_label">Receive push notifications on this device?</string>
+    <string name="push_notification_settings_receive_information">When push notifications are enabled, your device will communicate with third party services, such as Google. Push notifications are end-to-end encrypted. Therefore, third parties cannot read the content of the push notifications you receive. Push notifications are entirely optional.</string>
+
+    <string name="push_notification_settings_loading">Loading settings…</string>
+    <string name="push_notification_settings_failure">Something went wrong while loading your settings</string>
+    <string name="push_notification_settings_try_again">Try again</string>
+
+
+    <string name="push_notification_settings_label_email">Email</string>
+    <string name="push_notification_settings_label_webapp">Webapp</string>
+
+    <string name="push_notification_settings_group_weeklySummary">Weekly Summary</string>
+    <string name="push_notification_settings_group_exerciseNotifications">Exercise Notifications</string>
+    <string name="push_notification_settings_group_lectureNotifications">Lecture Notifications</string>
+    <string name="push_notification_settings_group_tutorialGroupNotifications">Tutorial Group Notifications</string>
+    <string name="push_notification_settings_group_courseWideDiscussionNotifications">Course-wide Discussion Notifications</string>
+    <string name="push_notification_settings_group_tutorNotifications">Tutor Notifications</string>
+    <string name="push_notification_settings_group_editorNotifications">Editor Notifications</string>
+    <string name="push_notification_settings_group_instructorNotifications">Instructor Notifications</string>
+
+    <string name="push_notification_settings_setting_basicWeeklySummary">Basic Weekly Summary</string>
+    <string name="push_notification_settings_setting_exerciseReleased">Exercise released</string>
+    <string name="push_notification_settings_setting_exerciseOpenForPractice">Exercise Open for Practice</string>
+    <string name="push_notification_settings_setting_exerciseSubmissionAssessed">Exercise Submission assessed</string>
+    <string name="push_notification_settings_setting_attachmentChanges">Attachment Changes</string>
+    <string name="push_notification_settings_setting_newExercisePost">New Exercise Post</string>
+    <string name="push_notification_settings_setting_newReplyForExercisePost">New Reply for Exercise Post</string>
+    <string name="push_notification_settings_setting_newLecturePost">New Lecture Post</string>
+    <string name="push_notification_settings_setting_newReplyForLecturePost">New Reply for Lecture Post</string>
+    <string name="push_notification_settings_setting_newCoursePost">New Course Post</string>
+    <string name="push_notification_settings_setting_newReplyForCoursePost">New Reply for Course Post</string>
+    <string name="push_notification_settings_setting_newAnnouncementPost">New Announcement</string>
+    <string name="push_notification_settings_setting_courseAndExamArchivingStarted">Course &amp; Exam Archiving Started</string>
+    <string name="push_notification_settings_setting_fileSubmissionSuccessful">File Submission Successful</string>
+    <string name="push_notification_settings_setting_programmingTestCasesChanged">Changed Test Cases for Programming Exercises</string>
+    <string name="push_notification_settings_setting_registrationTutorialGroup">Registration and Deregistration for Tutorial Group</string>
+    <string name="push_notification_settings_setting_tutorialGroupUpdateDelete">Update and Delete of Tutorial Groups</string>
+    <string name="push_notification_settings_setting_assignUnassignTutorialGroup">Assign and Unassign of Tutorial Groups</string>
+
+    <string name="push_notification_setting_setting_description_basicWeeklySummaryDescription">Receive a basic weekly summary every Friday at 5pm (e.g. what new exercises have been released this week and are still open)"</string>
+    <string name="push_notification_setting_setting_description_exerciseReleasedDescription">Get notified when a new exercise has been released"</string>
+    <string name="push_notification_setting_setting_description_exerciseOpenForPracticeDescription">Get notified when an exercise has been opened for practice (e.g. Quiz)"</string>
+    <string name="push_notification_setting_setting_description_exerciseSubmissionAssessedDescription">Get notified when your exercise submissions get assessed"</string>
+    <string name="push_notification_setting_setting_description_attachmentChangesDescription">Receive a notification when an attachment was changed"</string>
+    <string name="push_notification_setting_setting_description_newExercisePostDescription">Get notified when a new exercise post has been created"</string>
+    <string name="push_notification_setting_setting_description_newReplyForExercisePostDescription">Get notified when a new reply for an exercise post has been created"</string>
+    <string name="push_notification_setting_setting_description_newLecturePostDescription">Get notified when a new lecture post has been created"</string>
+    <string name="push_notification_setting_setting_description_newReplyForLecturePostDescription">Get notified when a new reply for a lecture post has been created"</string>
+    <string name="push_notification_setting_setting_description_newCoursePostDescription">Receive a notification when a new course-wide post has been created"</string>
+    <string name="push_notification_setting_setting_description_newReplyForCoursePostDescription">Receive a notification when a new reply for a course-wide post has been created"</string>
+    <string name="push_notification_setting_setting_description_newAnnouncementPostDescription">Receive a notification when a new announcement has been created"</string>
+    <string name="push_notification_setting_setting_description_courseAndExamArchivingStartedDescription">Receive a notification when the process of archiving a course or exam has been started"</string>
+    <string name="push_notification_setting_setting_description_fileSubmissionSuccessfulDescription">Receive a notification after you successfully submitted a file upload exercise"</string>
+    <string name="push_notification_setting_setting_description_programmingTestCasesChangedDescription">Get notified if test cases for a programming exercises have been changed"</string>
+    <string name="push_notification_setting_setting_description_registrationTutorialGroupTutorDescription">Get notified when a student was registered or deregistered from your tutorial group"</string>
+    <string name="push_notification_setting_setting_description_registrationTutorialGroupStudentDescription">Get notified when you were registered or deregistered from a tutorial group"</string>
+    <string name="push_notification_setting_setting_description_tutorialGroupUpdateDeleteDescription">Get notified when a tutorial group for which you are registered or a tutor was updated or deleted"</string>
+    <string name="push_notification_setting_setting_description_assignUnassignTutorialGroupDescription">Get notified when you were assigned or unassigned to lead a tutorial group"</string>
+</resources>

@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:device"))
     implementation(project(":core:datastore"))
+    implementation(project(":core:push_notification_settings"))
 
     implementation(libs.accompanist.placeholder.material)
     implementation(libs.androidx.browser)

@@ -45,6 +45,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
 private const val SETTINGS_DESTINATION = "settings"
+private const val PUSH_NOTIFICATION_SETTINGS_DESTINATION = "push_notification_settings"
 
 fun NavController.navigateToSettings(builder: NavOptionsBuilder.() -> Unit) {
     navigate(SETTINGS_DESTINATION, builder)
@@ -54,6 +55,7 @@ fun NavController.navigateToSettings(builder: NavOptionsBuilder.() -> Unit) {
  * version information has to be supplied externally, as they come from the app module
  */
 fun NavGraphBuilder.settingsScreen(
+    navController: NavController,
     versionCode: Int,
     versionName: String,
     onNavigateUp: () -> Unit,
@@ -69,7 +71,17 @@ fun NavGraphBuilder.settingsScreen(
             onLoggedOut = onLoggedOut,
             onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses,
             onNavigateUp = onNavigateUp,
-            onRequestOpenLink = onRequestOpenLink
+            onRequestOpenLink = onRequestOpenLink,
+            onRequestOpenNotificationSettings = {
+                navController.navigate(PUSH_NOTIFICATION_SETTINGS_DESTINATION)
+            }
+        )
+    }
+
+    composable(PUSH_NOTIFICATION_SETTINGS_DESTINATION) {
+        PushNotificationSettingsScreen(
+            modifier = Modifier.fillMaxSize(),
+            onNavigateBack = onNavigateUp
         )
     }
 }
@@ -82,7 +94,8 @@ private fun SettingsScreen(
     onNavigateUp: () -> Unit,
     onLoggedOut: () -> Unit,
     onDisplayThirdPartyLicenses: () -> Unit,
-    onRequestOpenLink: (String) -> Unit
+    onRequestOpenLink: (String) -> Unit,
+    onRequestOpenNotificationSettings: () -> Unit
 ) {
     val accountService: AccountService = get()
     val authenticationData: AccountService.AuthenticationData? by accountService.authenticationData.collectAsState(
@@ -136,7 +149,7 @@ private fun SettingsScreen(
 
                 NotificationSection(
                     modifier = Modifier.fillMaxWidth(),
-                    onOpenNotificationSettings = {}
+                    onOpenNotificationSettings = onRequestOpenNotificationSettings
                 )
 
                 Divider()

@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.communicati
 import de.tum.informatics.www1.artemis.native_app.core.data.service.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.impl.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
+import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.pushNotificationModule
 import de.tum.informatics.www1.artemis.native_app.core.ui.uiModule
 import de.tum.informatics.www1.artemis.native_app.core.websocket.websocketModule
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistrationModule
@@ -35,6 +36,7 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
                 datastoreModule,
                 deviceModule,
                 websocketModule,
+                pushNotificationModule,
                 courseRegistrationModule,
                 courseViewModule,
                 dashboardModule,
