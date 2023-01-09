@@ -179,7 +179,7 @@ internal fun CourseUiScreen(
                     1 -> {
                         EmptyDataStateUi(dataState = weeklyLecturesDataState) { weeklyLectures ->
                             LectureListUi(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxSize(),
                                 lectures = weeklyLectures,
                                 onClickLecture = { onNavigateToLecture(it.id) }
                             )

@@ -23,4 +23,7 @@
 
     <string name="course_ui_lecture_item_start_date_set">Start date: %1$s</string>
     <string name="course_ui_lecture_item_start_date_not_set">No start date</string>
+
+    <!--  Lecture list  -->
+    <string name="course_ui_lectures_empty">This course does not have any lectures yet.</string>
 </resources>

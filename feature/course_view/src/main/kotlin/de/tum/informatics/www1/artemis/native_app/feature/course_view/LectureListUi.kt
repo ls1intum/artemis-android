@@ -10,8 +10,10 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
@@ -22,17 +24,28 @@ internal fun LectureListUi(
     lectures: List<GroupedByWeek<Lecture>>,
     onClickLecture: (Lecture) -> Unit
 ) {
-    WeeklyItemsLazyColumn(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Top,
-        weeklyItemGroups = lectures,
-        getItemId = Lecture::id
-    ) { lecture ->
-        LectureListItem(
-            modifier = Modifier.fillMaxWidth(),
-            lecture = lecture,
-            onClick = { onClickLecture(lecture) }
-        )
+    if (lectures.isEmpty()) {
+        Box(modifier = modifier) {
+            Text(
+                modifier = Modifier.align(Alignment.Center).padding(16.dp),
+                text = stringResource(id = R.string.course_ui_lectures_empty),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center
+            )
+        }
+    } else {
+        WeeklyItemsLazyColumn(
+            modifier = modifier,
+            verticalArrangement = Arrangement.Top,
+            weeklyItemGroups = lectures,
+            getItemId = Lecture::id
+        ) { lecture ->
+            LectureListItem(
+                modifier = Modifier.fillMaxWidth(),
+                lecture = lecture,
+                onClick = { onClickLecture(lecture) }
+            )
+        }
     }
 }
 
