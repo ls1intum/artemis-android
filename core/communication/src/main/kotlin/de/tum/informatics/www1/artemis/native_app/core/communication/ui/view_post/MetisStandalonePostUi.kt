@@ -79,9 +79,9 @@ internal fun MetisStandalonePostUi(
         Column(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 8.dp)
                     .weight(1f),
-                contentPadding = PaddingValues(top = 8.dp),
+                contentPadding = PaddingValues(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item {
@@ -279,31 +279,25 @@ private fun CreateReplyUi(
         if (displayTextField) {
             val focusRequest = remember { FocusRequester() }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                MarkdownTextField(
-                    modifier = Modifier.weight(1f),
-                    text = replyContent,
-                    onTextChanged = updateReplyContent,
-                    focusRequester = focusRequest,
-                    onFocusLost = {
-                        if (displayTextField && replyContent.isEmpty()) {
-                            displayTextField = false
-                        }
+            MarkdownTextField(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 8.dp),
+                text = replyContent,
+                onTextChanged = updateReplyContent,
+                focusRequester = focusRequest,
+                onFocusLost = {
+                    if (displayTextField && replyContent.isEmpty()) {
+                        displayTextField = false
                     }
-                )
-
-                IconButton(
-                    onClick = { onReply(replyContent) },
-                    enabled = replyContent.isNotBlank()
-                ) {
-                    Icon(imageVector = Icons.Default.Send, contentDescription = null)
+                },
+                sendButton = {
+                    IconButton(
+                        onClick = { onReply(replyContent) },
+                        enabled = replyContent.isNotBlank()
+                    ) {
+                        Icon(imageVector = Icons.Default.Send, contentDescription = null)
+                    }
                 }
-            }
+            )
 
             LaunchedEffect(key1 = displayTextField) {
                 focusRequest.requestFocus()

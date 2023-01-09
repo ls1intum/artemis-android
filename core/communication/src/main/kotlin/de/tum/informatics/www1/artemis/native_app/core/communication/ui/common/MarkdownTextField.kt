@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -26,11 +27,15 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 
+/**
+ * @param sendButton composable centered vertically right to the text field.
+ */
 @Composable
 internal fun MarkdownTextField(
     modifier: Modifier,
     text: String,
     focusRequester: FocusRequester = remember { FocusRequester() },
+    sendButton: @Composable () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (String) -> Unit
 ) {
@@ -57,35 +62,39 @@ internal fun MarkdownTextField(
             )
         }
 
-        when (selectedType) {
-            ViewType.TEXT -> {
-                Spacer(modifier = Modifier.height(8.dp))
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            val textModifier = Modifier.weight(1f)
+            when (selectedType) {
+                ViewType.TEXT -> {
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester)
-                        .onFocusChanged { focusState ->
-                            if (focusState.hasFocus) {
-                                hadFocus = true
-                            }
+                    OutlinedTextField(
+                        modifier = textModifier
+                            .focusRequester(focusRequester)
+                            .onFocusChanged { focusState ->
+                                if (focusState.hasFocus) {
+                                    hadFocus = true
+                                }
 
-                            if (!focusState.hasFocus && hadFocus) {
-                                onFocusLost()
-                                hadFocus = false
-                            }
-                        },
-                    value = text,
-                    onValueChange = onTextChanged
-                )
+                                if (!focusState.hasFocus && hadFocus) {
+                                    onFocusLost()
+                                    hadFocus = false
+                                }
+                            },
+                        value = text,
+                        onValueChange = onTextChanged
+                    )
+                }
+
+                ViewType.PREVIEW -> {
+                    MarkdownText(
+                        modifier = textModifier,
+                        markdown = text
+                    )
+                }
             }
 
-            ViewType.PREVIEW -> {
-                MarkdownText(
-                    modifier = Modifier.fillMaxWidth(),
-                    markdown = text
-                )
-            }
+            sendButton()
         }
     }
 }
