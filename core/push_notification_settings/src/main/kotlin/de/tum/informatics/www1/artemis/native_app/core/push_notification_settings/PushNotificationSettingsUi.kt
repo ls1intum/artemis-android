@@ -23,7 +23,7 @@ fun PushNotificationSettingsUi(
     modifier: Modifier,
     viewModel: PushNotificationSettingsViewModel = koinViewModel()
 ) {
-    val settingsByGroupDataStore: DataState<Map<String, List<PushNotificationSetting>>> by viewModel.currentSettingsByGroup.collectAsState()
+    val settingsByGroupDataStore: DataState<List<PushNotificationSettingsViewModel.NotificationCategory>> by viewModel.currentSettingsByGroup.collectAsState()
     val arePushNotificationEnabled by viewModel.arePushNotificationsEnabled.collectAsState(initial = false)
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {

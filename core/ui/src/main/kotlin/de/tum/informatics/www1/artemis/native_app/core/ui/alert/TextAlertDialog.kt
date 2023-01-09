@@ -10,7 +10,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 fun TextAlertDialog(
     title: String?,
     text: String?,
-    confirmButtonText: String,
+    confirmButtonText: String?,
     dismissButtonText: String?,
     onPressPositiveButton: () -> Unit,
     onDismissRequest: () -> Unit
@@ -48,7 +48,7 @@ fun MarkdownTextAlertDialog(
 private fun TextAlertImpl(
     title: String?,
     text: (@Composable () -> Unit)?,
-    confirmButtonText: String,
+    confirmButtonText: String?,
     dismissButtonText: String?,
     onPressPositiveButton: () -> Unit,
     onDismissRequest: () -> Unit
@@ -57,11 +57,13 @@ private fun TextAlertImpl(
         onDismissRequest = onDismissRequest,
         title = title?.let { { Text(text = title) } },
         text = text,
-        confirmButton = {
-            TextButton(onClick = onPressPositiveButton) {
-                Text(text = confirmButtonText)
+        confirmButton = confirmButtonText?.let {
+            {
+                TextButton(onClick = onPressPositiveButton) {
+                    Text(text = it)
+                }
             }
-        },
+        } ?: {},
         dismissButton = dismissButtonText?.let {
             {
                 TextButton(onClick = onDismissRequest) {

@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PushNotificationSetting(
+    val id: Long = 0L,
     val settingId: String = "",
     val webapp: Boolean? = null,
     val email: Boolean? = null

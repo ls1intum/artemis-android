@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
@@ -26,7 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 @Composable
 internal fun PushNotificationSettingCategoriesListUi(
     modifier: Modifier,
-    settingsByGroupDataStore: DataState<Map<String, List<PushNotificationSetting>>>,
+    settingsByGroupDataStore: DataState<List<PushNotificationSettingsViewModel.NotificationCategory>>,
     onUpdate: (PushNotificationSetting, webapp: Boolean?, email: Boolean?) -> Unit,
     onRequestReload: () -> Unit
 ) {
@@ -41,7 +39,7 @@ internal fun PushNotificationSettingCategoriesListUi(
     ) { settingsByGroup ->
         PushNotificationSettingsList(
             modifier = Modifier.fillMaxSize(),
-            settingsByGroup = settingsByGroup,
+            settingCategories = settingsByGroup,
             onUpdate = onUpdate
         )
     }
@@ -50,21 +48,21 @@ internal fun PushNotificationSettingCategoriesListUi(
 @Composable
 private fun PushNotificationSettingsList(
     modifier: Modifier,
-    settingsByGroup: Map<String, List<PushNotificationSetting>>,
+    settingCategories: List<PushNotificationSettingsViewModel.NotificationCategory>,
     onUpdate: (PushNotificationSetting, webapp: Boolean?, email: Boolean?) -> Unit
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        settingsByGroup.entries.forEach { (group, settingsInGroup) ->
+        settingCategories.forEach { category ->
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = getLocalizedNotificationGroupName(groupName = group),
+                    text = getLocalizedNotificationGroupName(groupName = category.categoryId),
                     style = MaterialTheme.typography.headlineMedium
                 )
 
-                settingsInGroup.forEachIndexed { settingIndex, pushNotificationSetting ->
+                category.settings.forEachIndexed { settingIndex, pushNotificationSetting ->
                     PushNotificationSettingEntry(
                         modifier = Modifier.fillMaxWidth(),
                         setting = pushNotificationSetting,
@@ -77,12 +75,11 @@ private fun PushNotificationSettingsList(
                         }
                     )
 
-                    if (settingIndex != settingsInGroup.size - 1) {
+                    if (settingIndex != category.settings.size - 1) {
                         Divider()
                     }
                 }
             }
-
         }
     }
 }
@@ -162,7 +159,7 @@ private fun getLocalizedNotificationGroupName(groupName: String): String {
         "exercise-notification" -> R.string.push_notification_settings_group_exerciseNotifications
         "lecture-notification" -> R.string.push_notification_settings_group_lectureNotifications
         "tutorial-group-notification" -> R.string.push_notification_settings_group_tutorialGroupNotifications
-        "course-wide-discussion-notification" -> R.string.push_notification_settings_group_courseWideDiscussionNotifications
+        "course-wide-discussion" -> R.string.push_notification_settings_group_courseWideDiscussionNotifications
         "tutor-notification" -> R.string.push_notification_settings_group_tutorNotifications
         "editor-notification" -> R.string.push_notification_settings_group_editorNotifications
         "instructor-notification" -> R.string.push_notification_settings_group_instructorNotifications
