@@ -19,6 +19,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lectureMo
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.quizParticipationModule
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsModule
+import io.sentry.Sentry
+import io.sentry.SentryOptions
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -26,6 +28,10 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+
+        Sentry.init(
+            if (BuildConfig.DEBUG) "" else "https://8b4d69ac628d4462995ee6178365541f@sentry.ase.in.tum.de/3"
+        )
 
         startKoin {
             androidContext(this@ArtemisApplication)

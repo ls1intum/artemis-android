@@ -4,6 +4,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
     id("com.google.android.gms.oss-licenses-plugin")
+    id("io.sentry.android.gradle") version "3.3.0"
 }
 
 android {
@@ -59,4 +60,8 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.coil.compose)
     implementation(libs.androidx.browser)
+
+    implementation(libs.sentry.android)
+    // Not needed yet.
+    // implementation(libs.sentry.compose.android)
 }
