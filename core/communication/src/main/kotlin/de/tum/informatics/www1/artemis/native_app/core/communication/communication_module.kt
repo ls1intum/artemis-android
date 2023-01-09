@@ -24,6 +24,8 @@ val communicationModule = module {
             get(),
             get(),
             get(),
+            get(),
+            get(),
             get()
         )
     }
@@ -39,6 +41,7 @@ val communicationModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
@@ -46,6 +49,8 @@ val communicationModule = module {
     viewModel { params ->
         CreateStandalonePostViewModel(
             params.get(),
+            get(),
+            get(),
             get(),
             get(),
             get(),

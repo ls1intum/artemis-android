@@ -3,20 +3,16 @@ package de.tum.informatics.www1.artemis.native_app.core.data
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.datetime.Clock
 
 /**
  * The data state of the request.
  */
 sealed class DataState<T> {
     /**
-     * Waiting until a valid internet connection is available again.
-     */
-    class Suspended<T>(val exception: Exception? = null) : DataState<T>()
-
-    /**
      * Currently loading.
      */
-    class Loading<T> : DataState<T>()
+    data class Loading<T>(val isSuspended: Boolean = false) : DataState<T>()
 
     class Failure<T>(val throwable: Throwable) : DataState<T>()
 
@@ -27,7 +23,6 @@ sealed class DataState<T> {
             is Success -> Success(op(data))
             is Failure -> Failure(throwable)
             is Loading -> Loading()
-            is Suspended -> Suspended(exception)
         }
     }
 
@@ -36,7 +31,6 @@ sealed class DataState<T> {
             is Success -> op(data)
             is Failure -> Failure(throwable)
             is Loading -> Loading()
-            is Suspended -> Suspended(exception)
         }
     }
 
@@ -69,6 +63,60 @@ fun <T> Flow<DataState<T>>.filterSuccess(): Flow<T> = transform {
 }
 
 /**
+ * Retries the given network call up to [maxRetries] times, after each attempt pausing using an exponential backoff
+ * strategy, with [baseBackoffMillis] as initial parameter. If the connectivity state changes, the
+ * whole function is executed again from scratch. Once the call was successful, no more elements will be emitted
+ */
+inline fun <T> retryOnInternet(
+    connectivity: Flow<NetworkStatusProvider.NetworkStatus>,
+    baseBackoffMillis: Long = 200,
+    minimumLoadingMillis: Long = 0,
+    maxRetries: Int = 3,
+    crossinline perform: suspend () -> NetworkResponse<T>
+): Flow<DataState<T>> {
+    check(maxRetries > 0)
+
+    return connectivity
+        .transformLatest {
+            emit(DataState.Loading())
+
+            var currentBackoff = baseBackoffMillis
+
+            val start = System.currentTimeMillis()
+            for (i in 0 until maxRetries) {
+                when (val result = perform()) {
+                    is NetworkResponse.Response -> {
+                        val end = Clock.System.now().toEpochMilliseconds()
+                        val remainingWaitTime = minimumLoadingMillis - (end - start)
+                        if (remainingWaitTime > 0) delay(remainingWaitTime)
+
+                        emit(DataState.Success(result.data))
+                        return@transformLatest
+                    }
+
+                    is NetworkResponse.Failure -> {
+                        if (i == maxRetries - 1) {
+                            // Failure
+                            emit(DataState.Failure(result.exception))
+                        }
+                    }
+                }
+
+                delay(currentBackoff)
+                currentBackoff += 2
+            }
+        }
+        .catch {  error ->
+            emit(DataState.Failure(error))
+        }
+        .transformWhile { dataState ->
+            emit(dataState)
+            // Continue while the network response is still a failure.
+            dataState !is DataState.Success
+        }
+}
+
+/**
  * Performs the given network response once an internet connection is available.
  * If the request fails, it is retried using an exponential backoff approach, however, only if internet is available.
  * The exponential backoff timer is reset if connection is lost.
@@ -76,29 +124,21 @@ fun <T> Flow<DataState<T>>.filterSuccess(): Flow<T> = transform {
  *
  * The first element emitted is always [DataState.Suspended]
  */
-inline fun <T> retryOnInternet(
+inline fun <T> retryOnInternetIndefinetly(
     connectivity: Flow<NetworkStatusProvider.NetworkStatus>,
     baseBackoffMillis: Long = 2000,
-    minimumLoadingMillis: Long = 0,
     crossinline perform: suspend () -> NetworkResponse<T>
 ): Flow<DataState<T>> {
     return connectivity
         // We simply restart the exponential backoff when the connectivity has changed.
         .transformLatest { _ ->
             //Fetch data with exponential backoff
-
             var currentBackoff = baseBackoffMillis
 
             while (true) {
                 emit(DataState.Loading())
-
-                val start = System.currentTimeMillis()
                 when (val response = perform()) {
                     is NetworkResponse.Response -> {
-                        val end = System.currentTimeMillis()
-                        val remainingWaitTime = minimumLoadingMillis - (end - start)
-                        if (remainingWaitTime > 0) delay(remainingWaitTime)
-
                         emit(DataState.Success(response.data))
                         return@transformLatest
                     }
@@ -116,7 +156,7 @@ inline fun <T> retryOnInternet(
         .catch { error -> emit(DataState.Failure(error)) }
         .transformWhile { dataState ->
             emit(dataState)
-            //Continue while the network response is still a failure.
+            // Continue while the network response is still a failure.
             dataState !is DataState.Success
         }
         .onStart { emit(DataState.Loading()) }

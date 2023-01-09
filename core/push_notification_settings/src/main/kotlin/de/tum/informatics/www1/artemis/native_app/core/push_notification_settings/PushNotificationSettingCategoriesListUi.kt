@@ -33,7 +33,6 @@ internal fun PushNotificationSettingCategoriesListUi(
         dataState = settingsByGroupDataStore,
         loadingText = stringResource(id = R.string.push_notification_settings_loading),
         failureText = stringResource(id = R.string.push_notification_settings_failure),
-        suspendedText = "",
         retryButtonText = stringResource(id = R.string.push_notification_settings_try_again),
         onClickRetry = onRequestReload
     ) { settingsByGroup ->

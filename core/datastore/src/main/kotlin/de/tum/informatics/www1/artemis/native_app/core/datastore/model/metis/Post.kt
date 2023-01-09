@@ -54,7 +54,7 @@ data class Post(
         @ColumnInfo(name = "emoji")
         val emojiId: String,
         @ColumnInfo(name = "author_id")
-        val authorId: Int,
+        val authorId: Long,
         @Relation(
             entity = MetisUserEntity::class,
             parentColumn = "author_id",
@@ -63,6 +63,6 @@ data class Post(
         )
         val username: String,
         @ColumnInfo(name = "id")
-        val id: Int
+        val id: Long
     )
 }

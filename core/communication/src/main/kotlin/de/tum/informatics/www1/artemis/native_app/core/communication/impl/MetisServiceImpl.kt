@@ -287,7 +287,7 @@ class MetisServiceImpl(
 
     override suspend fun deleteReaction(
         context: MetisContext,
-        reactionId: Int,
+        reactionId: Long,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Unit> {

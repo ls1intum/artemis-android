@@ -48,8 +48,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getStateViewModel
-import org.koin.androidx.compose.getViewModel
-import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 fun NavController.navigateToLecture(
@@ -183,7 +181,6 @@ private fun LectureScreen(
                 dataState = lectureDataState,
                 loadingText = stringResource(id = R.string.lecture_view_lecture_loading),
                 failureText = stringResource(id = R.string.lecture_view_lecture_loading_failure),
-                suspendedText = stringResource(id = R.string.lecture_view_lecture_loading_suspended),
                 retryButtonText = stringResource(id = R.string.lecture_view_lecture_loading_try_again),
                 onClickRetry = viewModel::requestReloadLecture
             ) { lecture ->

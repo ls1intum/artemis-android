@@ -45,7 +45,7 @@ interface MetisStorageService {
 
     fun getStoredPosts(
         serverId: String,
-        clientId: Int,
+        clientId: Long,
         filter: List<MetisFilter>,
         sortingStrategy: MetisSortingStrategy,
         query: String?,

@@ -148,7 +148,6 @@ internal fun CourseUiScreen(
             dataState = courseDataState,
             loadingText = stringResource(id = R.string.course_ui_loading_course_loading),
             failureText = stringResource(id = R.string.course_ui_loading_course_failed),
-            suspendedText = stringResource(id = R.string.course_ui_loading_course_suspended),
             retryButtonText = stringResource(id = R.string.course_ui_loading_course_try_again),
             onClickRetry = { viewModel.reloadCourse() }
         ) {

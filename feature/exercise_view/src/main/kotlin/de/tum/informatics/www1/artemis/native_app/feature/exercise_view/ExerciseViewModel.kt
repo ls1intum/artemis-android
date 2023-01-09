@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -16,6 +17,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.ExerciseServ
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ResultService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.feedback.Feedback
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
@@ -47,10 +49,10 @@ internal class ExerciseViewModel(
     /**
      * Flow that holds (serverUrl, authData) and emits every time the exercise should be reloaded.
      */
-    private val baseConfigurationFlow: Flow<Pair<String, AccountService.AuthenticationData>> =
+    private val baseConfigurationFlow: Flow<Pair<String, String>> =
         combine(
             serverConfigurationService.serverUrl,
-            accountService.authenticationData,
+            accountService.authToken,
             requestReloadExercise.onStart { emit(Unit) }
         ) { serverUrl, authData, _ ->
             serverUrl to authData
@@ -59,22 +61,12 @@ internal class ExerciseViewModel(
 
     private val fetchedExercise: Flow<DataState<Exercise>> =
         baseConfigurationFlow
-            .transformLatest { (serverUrl, authData) ->
-                when (authData) {
-                    is AccountService.AuthenticationData.LoggedIn -> {
-                        emitAll(
-                            exerciseService.getExerciseDetails(
-                                exerciseId,
-                                serverUrl,
-                                authData.authToken
-                            )
-                        )
-                    }
-
-                    AccountService.AuthenticationData.NotLoggedIn -> {
-                        emit(DataState.Suspended())
-                    }
-                }
+            .flatMapLatest { (serverUrl, authToken) ->
+                exerciseService.getExerciseDetails(
+                    exerciseId,
+                    serverUrl,
+                    authToken
+                )
             }
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
@@ -112,22 +104,12 @@ internal class ExerciseViewModel(
 
     val latestIndividualDueDate: Flow<DataState<Instant?>> =
         baseConfigurationFlow
-            .transformLatest { (serverUrl, authData) ->
-                when (authData) {
-                    is AccountService.AuthenticationData.LoggedIn -> {
-                        emitAll(
-                            exerciseService.getLatestDueDate(
-                                exerciseId,
-                                serverUrl,
-                                authData.authToken
-                            )
-                        )
-                    }
-
-                    AccountService.AuthenticationData.NotLoggedIn -> {
-                        emit(DataState.Suspended())
-                    }
-                }
+            .flatMapLatest { (serverUrl, authToken) ->
+                exerciseService.getLatestDueDate(
+                    exerciseId,
+                    serverUrl,
+                    authToken
+                )
             }
             .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
 
@@ -135,12 +117,11 @@ internal class ExerciseViewModel(
      * The latest result for the exercise.
      */
     val latestResult: Flow<DataState<Result?>> =
-        combine(
+        transformLatest(
             exercise,
             serverConfigurationService.serverUrl,
-            accountService.authenticationData
-        ) { a, b, c -> Triple(a, b, c) }
-            .transformLatest { (exerciseData, serverUrl, authData) ->
+            accountService.authToken
+        ) { exerciseData, serverUrl, authToken ->
                 when (exerciseData) {
                     is DataState.Success -> {
                         val participation =
@@ -154,29 +135,20 @@ internal class ExerciseViewModel(
                             //Feedback is missing, fetch from server
                             val resultId = latestResult.id
                             if (participationId != null && resultId != null) {
-                                when (authData) {
-                                    is AccountService.AuthenticationData.LoggedIn -> {
-                                        emitAll(
-                                            resultService
-                                                .getFeedbackDetailsForResult(
-                                                    participationId,
-                                                    resultId,
-                                                    serverUrl,
-                                                    authData.authToken
-                                                )
-                                                .map { feedbackListDataState ->
-                                                    feedbackListDataState.bind<Result?> { loadedFeedbacksList ->
-                                                        latestResult.copy(feedbacks = loadedFeedbacksList)
-                                                    }
-                                                }
+                                emitAll(
+                                    resultService
+                                        .getFeedbackDetailsForResult(
+                                            participationId,
+                                            resultId,
+                                            serverUrl,
+                                            authToken
                                         )
-                                    }
-
-                                    AccountService.AuthenticationData.NotLoggedIn -> {
-                                        emit(DataState.Suspended())
-                                    }
-                                }
-
+                                        .map { feedbackListDataState ->
+                                            feedbackListDataState.bind<Result?> { loadedFeedbacksList ->
+                                                latestResult.copy(feedbacks = loadedFeedbacksList)
+                                            }
+                                        }
+                                )
                             }
                         }
                     }
@@ -229,26 +201,17 @@ internal class ExerciseViewModel(
                         //This is reexecuted when exercise is reloaded anyway. And exercise is reloaded
                         //When server url or auth data changes.
                         val serverUrl = serverConfigurationService.serverUrl.first()
-                        val accountData = accountService.authenticationData.first()
+                        val authToken = accountService.authToken.first()
 
-                        when (accountData) {
-                            is AccountService.AuthenticationData.LoggedIn -> {
-                                emitAll(
-                                    buildLogService
-                                        .loadBuildLogs(
-                                            participationId,
-                                            resultId,
-                                            serverUrl,
-                                            accountData.authToken
-                                        )
+                        emitAll(
+                            buildLogService
+                                .loadBuildLogs(
+                                    participationId,
+                                    resultId,
+                                    serverUrl,
+                                    authToken
                                 )
-                            }
-
-                            AccountService.AuthenticationData.NotLoggedIn -> {
-                                emit(DataState.Suspended())
-                            }
-                        }
-
+                        )
                     }
             }
 

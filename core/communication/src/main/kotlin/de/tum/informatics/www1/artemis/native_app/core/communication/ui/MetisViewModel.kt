@@ -2,20 +2,33 @@ package de.tum.informatics.www1.artemis.native_app.core.communication.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisModificationResponse
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisService
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndefinetly
+import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
+import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -25,8 +38,27 @@ abstract class MetisViewModel(
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService
+    private val accountService: AccountService,
+    private val serverDataService: ServerDataService,
+    private val networkStatusProvider: NetworkStatusProvider
 ) : ViewModel() {
+
+    protected val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    val clientId: StateFlow<DataState<Long>> = transformLatest(
+        serverConfigurationService.serverUrl,
+        accountService.authToken,
+        onRequestReload.onStart { emit(Unit) }
+    ) { serverUrl, authToken, _ ->
+        emitAll(
+            retryOnInternetIndefinetly(
+                networkStatusProvider.currentNetworkStatus
+            ) {
+                serverDataService.getAccountData(serverUrl, authToken).bind { it.id }
+            }
+        )
+    }
+        .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
 
     /**
      * Handles a reaction click. If the client has already reacted, it deletes the reaction.
@@ -49,9 +81,9 @@ abstract class MetisViewModel(
         presentReactions: List<Post.Reaction>,
         response: (MetisModificationFailure?) -> Unit
     ) {
-        when (val authData = accountService.authenticationData.first()) {
-            is AccountService.AuthenticationData.LoggedIn -> {
-                val userId = authData.account.bind { it.id }.orElse(null) ?: return
+        when (val clientId = clientId.first()) {
+            is DataState.Success -> {
+                val userId = clientId.data
 
                 val existingReaction = presentReactions
                     .filter { it.emojiId == emojiId }
@@ -64,8 +96,8 @@ abstract class MetisViewModel(
                 }
             }
 
-            AccountService.AuthenticationData.NotLoggedIn -> {
-                // Do nothing.
+            else -> {
+                response(MetisModificationFailure.CREATE_REACTION)
             }
         }
     }
@@ -81,7 +113,7 @@ abstract class MetisViewModel(
     }
 
     private suspend fun deleteReaction(
-        reactionId: Int,
+        reactionId: Long,
         response: (MetisModificationFailure?) -> Unit
     ) {
         metisService.deleteReaction(
@@ -203,4 +235,8 @@ abstract class MetisViewModel(
     }
 
     protected abstract suspend fun getMetisContext(): MetisContext
+
+    fun requestReload() {
+        onRequestReload.tryEmit(Unit)
+    }
 }

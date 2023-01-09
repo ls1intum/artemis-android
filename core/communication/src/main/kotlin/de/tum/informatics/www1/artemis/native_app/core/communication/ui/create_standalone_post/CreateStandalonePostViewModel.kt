@@ -4,10 +4,12 @@ import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisModificationResponse
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisService
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisViewModel
+import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
+import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
@@ -22,8 +24,10 @@ class CreateStandalonePostViewModel(
     metisService: MetisService,
     metisStorageService: MetisStorageService,
     serverConfigurationService: ServerConfigurationService,
-    accountService: AccountService
-) : MetisViewModel(metisService, metisStorageService, serverConfigurationService, accountService) {
+    accountService: AccountService,
+    serverDataService: ServerDataService,
+    networkStatusProvider: NetworkStatusProvider
+) : MetisViewModel(metisService, metisStorageService, serverConfigurationService, accountService, serverDataService, networkStatusProvider) {
 
     companion object {
         private const val TAG_COURSE_WIDE_CONTEXT = "TAG_COURSE_WIDE_CONTEXT"

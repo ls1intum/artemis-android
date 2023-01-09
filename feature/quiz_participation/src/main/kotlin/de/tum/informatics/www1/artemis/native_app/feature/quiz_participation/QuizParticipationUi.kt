@@ -61,7 +61,6 @@ internal fun QuizParticipationUi(
         dataState = exerciseDataState,
         loadingText = stringResource(id = R.string.quiz_participation_loading),
         failureText = stringResource(id = R.string.quiz_participation_failure),
-        suspendedText = stringResource(id = R.string.quiz_participation_suspended),
         retryButtonText = stringResource(id = R.string.quiz_participation_retry),
         onClickRetry = viewModel::retryLoadExercise
     ) { quizExercise ->

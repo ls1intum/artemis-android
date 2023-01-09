@@ -37,8 +37,6 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItem
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.getEmojiForEmojiId
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
-import de.tum.informatics.www1.artemis.native_app.core.datastore.util.clientId
-import kotlinx.coroutines.flow.map
 import org.koin.androidx.compose.get
 
 @Composable
@@ -53,8 +51,7 @@ internal fun MetisStandalonePostList(
 
     var metisFailure: MetisModificationFailure? by remember { mutableStateOf(null) }
 
-    val accountService: AccountService = get()
-    val clientId by accountService.clientId.collectAsState(initial = -1)
+    val clientId: Long = viewModel.clientId.collectAsState().value.orElse(0L)
 
     Column(modifier = modifier) {
         MetisOutdatedBanner(

@@ -13,5 +13,5 @@ interface ServerDataService {
      */
     suspend fun getServerProfileInfo(serverUrl: String): NetworkResponse<ProfileInfo>
 
-    fun getAccountData(serverUrl: String, bearerToken: String): Flow<DataState<Account>>
+    suspend fun getAccountData(serverUrl: String, bearerToken: String): NetworkResponse<Account>
 }

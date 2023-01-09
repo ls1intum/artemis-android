@@ -11,7 +11,7 @@ class MetisUserEntity(
     @ColumnInfo(name = "server_id")
     val serverId: String,
     @ColumnInfo(name = "id")
-    val id: Int,
+    val id: Long,
     @ColumnInfo(name = "name")
     val displayName: String
 )

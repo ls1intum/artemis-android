@@ -43,7 +43,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -58,7 +57,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragA
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion.DropLocation
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.image.loadAsyncImageDrawable
-import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.QuizQuestionBodyText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.QuizQuestionHeader
@@ -350,7 +348,6 @@ private fun DragAndDropArea(
         dataState = resultData.dataState,
         loadingText = stringResource(id = R.string.quiz_participation_load_dnd_image_loading),
         failureText = stringResource(id = R.string.quiz_participation_load_dnd_image_failure),
-        suspendedText = "",
         retryButtonText = stringResource(id = R.string.quiz_participation_load_dnd_image_retry),
         onClickRetry = resultData.requestRetry
     ) { loadedDrawable ->

@@ -16,5 +16,5 @@ data class Account(
     val lastName: String = "",
     val langKey: String = "en",
     val imageUrl: String? = null,
-    val id: Int? = null
+    val id: Long = 0L
 )

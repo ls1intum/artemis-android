@@ -28,6 +28,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -36,11 +37,25 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
+import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMap
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
@@ -111,6 +126,35 @@ private fun SettingsScreen(
         initial = false
     )
 
+    val username = when (val authData = authenticationData) {
+        is AccountService.AuthenticationData.LoggedIn -> authData.username
+        else -> null
+    }
+
+    val serverDataService: ServerDataService = get()
+    val networkStatusProvider: NetworkStatusProvider = get()
+
+    val accountDataFlow: StateFlow<DataState<Account>?> = remember {
+        transformLatest(
+            serverConfigurationService.serverUrl,
+            accountService.authenticationData
+        ) { serverUrl, authData ->
+            when (authData) {
+                is AccountService.AuthenticationData.LoggedIn -> {
+                    emitAll(
+                        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                            serverDataService.getAccountData(serverUrl, authData.authToken)
+                        }
+                    )
+                }
+
+                AccountService.AuthenticationData.NotLoggedIn -> emit(null)
+            }
+        }
+            .stateIn(scope, SharingStarted.Eagerly, null)
+    }
+    val accountData: DataState<Account>? by accountDataFlow.collectAsState()
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -136,7 +180,8 @@ private fun SettingsScreen(
             if (isLoggedIn) {
                 UserInformationSection(
                     modifier = Modifier.fillMaxWidth(),
-                    authData = authenticationData,
+                    authData = accountData,
+                    username = username,
                     onRequestLogout = {
                         scope.launch {
                             accountService.logout()
@@ -187,7 +232,8 @@ private fun SettingsScreen(
 @Composable
 private fun UserInformationSection(
     modifier: Modifier,
-    authData: AccountService.AuthenticationData?,
+    username: String?,
+    authData: DataState<Account>?,
     onRequestLogout: () -> Unit
 ) {
     PreferenceSection(
@@ -196,11 +242,15 @@ private fun UserInformationSection(
     ) {
         val childModifier = Modifier.fillMaxWidth()
 
-        if (authData is AccountService.AuthenticationData.LoggedIn) {
+        if (authData != null && username != null) {
             EmptyDataStateUi(
-                dataState = authData.account,
+                dataState = authData,
                 otherwise = {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    )
                 }
             ) { account ->
                 PreferenceEntry(
@@ -216,7 +266,7 @@ private fun UserInformationSection(
                     modifier = childModifier,
                     text = stringResource(
                         id = R.string.settings_account_information_login,
-                        account.username.orEmpty()
+                        username
                     ),
                     onClick = {}
                 )
@@ -376,9 +426,4 @@ private fun PreferenceEntry(modifier: Modifier, text: String, onClick: () -> Uni
             )
         }
     }
-}
-
-private fun openLink(context: Context, link: String) {
-    val customTabs = CustomTabsIntent.Builder().build()
-    customTabs.launchUrl(context, Uri.parse(link))
 }

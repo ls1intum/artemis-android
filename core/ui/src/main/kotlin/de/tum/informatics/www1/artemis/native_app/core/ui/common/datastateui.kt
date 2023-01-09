@@ -23,24 +23,19 @@ fun <T> BasicDataStateUi(
     dataState: DataState<T>,
     loadingText: String,
     failureText: String,
-    suspendedText: String,
     retryButtonText: String,
     onClickRetry: () -> Unit,
-    successUi: @Composable BoxScope.(data: T) -> Unit
+    successUi: @Composable() (BoxScope.(data: T) -> Unit)
 ) {
     Box(modifier = modifier) {
         when (dataState) {
-            is DataState.Failure, is DataState.Suspended -> {
+            is DataState.Failure -> {
                 Column(
                     modifier = Modifier.align(Alignment.Center)
                 ) {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = when (dataState) {
-                            is DataState.Failure -> failureText
-                            is DataState.Suspended -> suspendedText
-                            else -> "" //Not reachable
-                        },
+                        text = failureText,
                         textAlign = TextAlign.Center,
                         fontSize = 18.sp
                     )

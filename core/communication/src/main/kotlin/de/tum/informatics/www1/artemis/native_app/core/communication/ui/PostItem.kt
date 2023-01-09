@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,11 +25,9 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.More
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material.icons.outlined.AddReaction
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
@@ -46,10 +43,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -107,7 +102,7 @@ internal fun PostItem(
     modifier: Modifier,
     post: Post?,
     postItemViewType: PostItemViewType,
-    clientId: Int,
+    clientId: Long,
     getUnicodeForEmojiId: @Composable (String) -> String,
     onReactWithEmoji: (emojiId: String) -> Unit,
     onClickOnPresentReaction: (emojiId: String) -> Unit
@@ -134,7 +129,7 @@ internal fun AnswerPostItem(
     modifier: Modifier,
     answerPost: AnswerPost,
     answerItem: PostItemViewType.AnswerItem,
-    clientId: Int,
+    clientId: Long,
     getUnicodeForEmojiId: @Composable (String) -> String,
     onReactWithEmoji: (emojiId: String) -> Unit,
     onClickOnPresentReaction: (emojiId: String) -> Unit
@@ -165,7 +160,7 @@ private fun PostItemBase(
     creationDate: Instant?,
     title: String?,
     content: String?,
-    clientId: Int,
+    clientId: Long,
     reactions: List<Post.Reaction>,
     postItemViewType: PostItemViewType,
     getUnicodeForEmojiId: @Composable (String) -> String,
@@ -294,7 +289,7 @@ private fun PostHeadline(
 private fun StandalonePostFooter(
     modifier: Modifier,
     isPlaceholder: Boolean,
-    clientId: Int,
+    clientId: Long,
     reactions: List<Post.Reaction>,
     postItemViewType: PostItemViewType,
     getUnicodeForEmojiId: @Composable (String) -> String,

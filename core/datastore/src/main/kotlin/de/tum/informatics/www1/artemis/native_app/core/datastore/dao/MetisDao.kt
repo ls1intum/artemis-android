@@ -167,7 +167,7 @@ interface MetisDao {
         courseId: Long,
         exerciseId: Long,
         lectureId: Long,
-        clientId: Int,
+        clientId: Long,
         metisFilter: List<MetisFilter>,
         metisSortingStrategy: MetisSortingStrategy,
         query: String?

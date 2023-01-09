@@ -7,6 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisC
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisViewModel
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -31,8 +32,9 @@ internal class MetisStandalonePostViewModel(
     private val metisService: MetisService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService
-) : MetisViewModel(metisService, metisStorageService, serverConfigurationService, accountService) {
+    private val accountService: AccountService,
+    serverDataService: ServerDataService
+) : MetisViewModel(metisService, metisStorageService, serverConfigurationService, accountService, serverDataService, networkStatusProvider) {
 
     private val collectMetisUpdates: Flow<MetisContextManager.CurrentDataAction> =
         metisContextManager.getContextDataActionFlow(metisContext)

@@ -42,7 +42,7 @@ data class AnswerPost constructor(
 
     data class BasePostingCache(
         @ColumnInfo(name = "author_id")
-        val authorId: Int,
+        val authorId: Long,
         @ColumnInfo(name = "creation_date")
         val creationDate: Instant,
         @ColumnInfo(name = "content")

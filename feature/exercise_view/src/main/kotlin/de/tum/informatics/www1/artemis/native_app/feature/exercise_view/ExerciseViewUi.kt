@@ -137,7 +137,6 @@ internal fun <T> ExerciseDataStateUi(
         dataState = value,
         loadingText = stringResource(id = R.string.exercise_view_loading),
         failureText = stringResource(id = R.string.exercise_view_failure),
-        suspendedText = stringResource(id = R.string.exercise_view_suspended),
         retryButtonText = stringResource(id = R.string.exercise_view_try_again),
         onClickRetry = { viewModel.requestReloadExercise() },
         successUi = onSuccess

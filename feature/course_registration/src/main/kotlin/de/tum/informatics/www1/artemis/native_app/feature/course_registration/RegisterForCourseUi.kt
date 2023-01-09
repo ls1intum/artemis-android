@@ -174,7 +174,6 @@ private fun RegisterForCourseContent(
         dataState = courses,
         loadingText = stringResource(id = R.string.course_registration_loading_courses_loading),
         failureText = stringResource(id = R.string.course_registration_loading_courses_failed),
-        suspendedText = stringResource(id = R.string.course_registration_loading_courses_suspended),
         retryButtonText = stringResource(id = R.string.course_registration_loading_courses_try_again),
         onClickRetry = reloadCourses
     ) { data ->

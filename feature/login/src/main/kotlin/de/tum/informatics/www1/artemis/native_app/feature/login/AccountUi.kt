@@ -242,7 +242,7 @@ private fun AccountScreen(
     onNavigateToInstanceSelection: () -> Unit,
     onLoggedIn: () -> Unit
 ) {
-    val serverProfileInfo by viewModel.serverProfileInfo.collectAsState(initial = DataState.Suspended())
+    val serverProfileInfo by viewModel.serverProfileInfo.collectAsState()
 
     AccountUi(
         modifier = modifier,
@@ -330,7 +330,6 @@ private fun RegisterLoginAccount(
                 dataState = currentServerProfileInfo,
                 loadingText = stringResource(id = R.string.account_load_server_profile_loading),
                 failureText = stringResource(id = R.string.account_load_server_profile_failure),
-                suspendedText = stringResource(id = R.string.account_load_server_profile_suspended),
                 retryButtonText = stringResource(id = R.string.account_load_server_profile_button_try_again),
                 onClickRetry = retryLoadServerProfileInfo
             ) { data ->
@@ -484,19 +483,6 @@ fun AccountUiPreviewFailedLoadingProfileInfo() {
     AccountUi(
         modifier = Modifier.fillMaxSize(),
         serverProfileInfo = DataState.Failure(IOException()),
-        retryLoadServerProfileInfo = {},
-        onNavigateToLoginScreen = {},
-        onNavigateToRegisterScreen = {},
-        onNavigateToInstanceSelection = {}
-    ) {}
-}
-
-@Composable
-@Preview(name = "SUSPENDED: profile info")
-fun AccountUiPreviewSuspendedLoadingProfileInfo() {
-    AccountUi(
-        modifier = Modifier.fillMaxSize(),
-        serverProfileInfo = DataState.Suspended(null),
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},

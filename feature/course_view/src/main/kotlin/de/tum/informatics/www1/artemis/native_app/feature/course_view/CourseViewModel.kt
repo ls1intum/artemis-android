@@ -2,11 +2,13 @@ package de.tum.informatics.www1.artemis.native_app.feature.course_view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
@@ -19,8 +21,8 @@ import java.util.Locale
 
 internal class CourseViewModel(
     private val courseId: Long,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
+    serverConfigurationService: ServerConfigurationService,
+    accountService: AccountService,
     private val courseService: CourseService,
     private val liveParticipationService: LiveParticipationService
 ) : ViewModel() {
@@ -28,26 +30,15 @@ internal class CourseViewModel(
     private val requestReloadCourse = MutableSharedFlow<Unit>()
 
     val course: Flow<DataState<Course>> =
-        combine(
+        transformLatest(
             serverConfigurationService.serverUrl,
-            accountService.authenticationData,
+            accountService.authToken,
             requestReloadCourse.onStart { emit(Unit) }
-        ) { serverUrl, authData, _ ->
-            serverUrl to authData
+        ) { serverUrl, authToken, _ ->
+            emitAll(
+                courseService.getCourse(courseId, serverUrl, authToken)
+            )
         }
-            .transformLatest { (serverUrl, authData) ->
-                when (authData) {
-                    is AccountService.AuthenticationData.LoggedIn -> {
-                        emitAll(
-                            courseService.getCourse(courseId, serverUrl, authData.authToken)
-                        )
-                    }
-
-                    AccountService.AuthenticationData.NotLoggedIn -> {
-                        emit(DataState.Suspended())
-                    }
-                }
-            }
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
     /**

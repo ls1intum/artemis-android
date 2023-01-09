@@ -109,7 +109,6 @@ internal fun CoursesOverview(
             dataState = coursesDataState,
             loadingText = stringResource(id = R.string.courses_loading_loading),
             failureText = stringResource(id = R.string.courses_loading_failure),
-            suspendedText = stringResource(id = R.string.courses_loading_suspended),
             retryButtonText = stringResource(id = R.string.courses_loading_try_again),
             onClickRetry = viewModel::requestReloadDashboard
         ) { dashboard: Dashboard ->
