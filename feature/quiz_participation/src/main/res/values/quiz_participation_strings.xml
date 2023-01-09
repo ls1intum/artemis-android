@@ -39,6 +39,7 @@
     <string name="quiz_participation_time_left_quiz_ended">Quiz has ended!</string>
     <string name="quiz_participation_last_saved">Saved: %1$s</string>
     <string name="quiz_participation_never_saved">Never saved!</string>
+    <string name="quiz_participation_practice_mode">Practice</string>
     <string name="quiz_participation_button_previous_question">Previous</string>
     <string name="quiz_participation_button_next_question">Next</string>
 

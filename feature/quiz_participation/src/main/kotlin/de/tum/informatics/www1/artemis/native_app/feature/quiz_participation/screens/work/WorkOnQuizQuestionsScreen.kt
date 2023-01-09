@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.QuizQuestionData
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.multiple_choice.MultipleChoiceQuizQuestionUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.ShortAnswerQuizQuestionUi
@@ -30,6 +31,7 @@ import kotlinx.datetime.Instant
 @Composable
 internal fun WorkOnQuizQuestionsScreen(
     modifier: Modifier,
+    quizType: QuizType,
     questionsWithData: List<QuizQuestionData<*>>,
     lastSubmissionTime: Instant?,
     endDate: Instant?,
@@ -74,6 +76,7 @@ internal fun WorkOnQuizQuestionsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
+            quizType = quizType,
             lastSubmissionTime = lastSubmissionTime,
             latestWebsocketSubmission = latestWebsocketSubmission,
             isConnected = isConnected,

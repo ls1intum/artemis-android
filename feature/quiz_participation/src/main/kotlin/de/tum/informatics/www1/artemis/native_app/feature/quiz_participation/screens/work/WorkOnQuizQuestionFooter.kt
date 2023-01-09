@@ -32,6 +32,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.ConnectionStatusUi
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.getFormattedRelativeToFutureTimeQuizStyle
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.Footer
@@ -49,6 +50,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 internal fun WorkOnQuizQuestionFooter(
     modifier: Modifier,
+    quizType: QuizType,
     lastSubmissionTime: Instant?,
     endDate: Instant?,
     isConnected: Boolean,
@@ -144,15 +146,20 @@ internal fun WorkOnQuizQuestionFooter(
                     )
                 }
 
-                val submissionText = if (lastSubmissionTime != null) {
-                    val relLastSubmissionTime =
-                        getRelativeTime(to = lastSubmissionTime, clock = clock)
-                    stringResource(
-                        id = R.string.quiz_participation_last_saved,
-                        relLastSubmissionTime
-                    )
-                } else {
-                    stringResource(id = R.string.quiz_participation_never_saved)
+                val submissionText = when(quizType) {
+                    QuizType.LIVE -> {
+                        if (lastSubmissionTime != null) {
+                            val relLastSubmissionTime =
+                                getRelativeTime(to = lastSubmissionTime, clock = clock)
+                            stringResource(
+                                id = R.string.quiz_participation_last_saved,
+                                relLastSubmissionTime
+                            )
+                        } else {
+                            stringResource(id = R.string.quiz_participation_never_saved)
+                        }
+                    }
+                    QuizType.PRACTICE -> stringResource(id = R.string.quiz_participation_practice_mode)
                 }
 
                 Text(

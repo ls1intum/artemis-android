@@ -75,7 +75,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class QuizParticipationViewModel(
     courseId: Long,
     private val exerciseId: Long,
-    private val quizType: QuizType,
+    val quizType: QuizType,
     private val quizExerciseService: QuizExerciseService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,

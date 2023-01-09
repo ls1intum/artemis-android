@@ -111,6 +111,7 @@ internal fun QuizParticipationUi(
 
             WorkOnQuizQuestionsScreen(
                 modifier = Modifier.fillMaxSize(),
+                quizType = viewModel.quizType,
                 questionsWithData = questionWithData,
                 lastSubmissionTime = lastSubmission.submissionDate,
                 endDate = endDate,
