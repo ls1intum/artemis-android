@@ -88,4 +88,9 @@
     <string name="login_error_accept_terms">Please accept terms.</string>
 
     <string name="artemis_instance_custom">Other</string>
+
+    <!--  Push notification settings  -->
+    <string name="push_notification_settings_title">Notification configuration</string>
+    <string name="push_notification_settings_fab_text_with_save">Save &amp; Continue</string>
+    <string name="push_notification_settings_fab_text_without_save">Continue</string>
 </resources>

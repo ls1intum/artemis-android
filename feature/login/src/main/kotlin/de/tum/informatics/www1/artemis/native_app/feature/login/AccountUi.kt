@@ -1,7 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.with
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
@@ -9,6 +13,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -55,125 +60,33 @@ fun NavController.navigateToLogin(builder: NavOptionsBuilder.() -> Unit) {
 }
 
 fun NavGraphBuilder.loginScreen(
-    onLoggedIn: () -> Unit,
+    onFinishedLoginFlow: () -> Unit,
     onRequestOpenSettings: () -> Unit
 ) {
     composable(LOGIN_DESTINATION) {
-        val nestedNavController = rememberNavController()
-        val serverConfigurationService: ServerConfigurationService = get()
+        var currentContent by rememberSaveable { mutableStateOf(LoginScreenContent.LOGIN) }
 
-        val hasSelectedInstance = serverConfigurationService
-            .hasUserSelectedInstance
-            .collectAsState(initial = null)
-            .value
-            ?: return@composable // Display nothing to avoid switching between destinations
-
-        val isCustomInstanceSelectionDestination =
-            nestedNavController.currentDestination?.route == NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION
-
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                TopAppBar(
-                    navigationIcon = {
-                        if (isCustomInstanceSelectionDestination) {
-                            IconButton(onClick = nestedNavController::navigateUp) {
-                                Icon(imageVector = Icons.Default.Close, contentDescription = null)
-                            }
-                        }
-                    },
-                    title = {
-                        if (isCustomInstanceSelectionDestination) {
-                            Text(text = stringResource(id = R.string.account_select_custom_instance_selection_title))
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = onRequestOpenSettings) {
-                            Icon(imageVector = Icons.Default.Settings, contentDescription = null)
-                        }
-                    }
-                )
+        AnimatedContent(
+            targetState = currentContent,
+            transitionSpec = {
+                // Animation is always the same
+                slideInHorizontally { width -> width } with
+                        slideOutHorizontally { width -> -width }
             }
-        ) { paddingValues ->
-            NavHost(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                navController = nestedNavController,
-                startDestination = if (hasSelectedInstance) NESTED_HOME_DESTINATION else NESTED_INSTANCE_SELECTION_DESTINATION
-            ) {
-                composable(NESTED_HOME_DESTINATION) {
-                    AccountScreen(
+        ) { content ->
+            when (content) {
+                LoginScreenContent.LOGIN -> {
+                    LoginUi(
                         modifier = Modifier.fillMaxSize(),
-                        onNavigateToLoginScreen = {
-                            nestedNavController.navigate(NESTED_LOGIN_DESTINATION)
-                        },
-                        onNavigateToRegisterScreen = {
-                            nestedNavController.navigate(NESTED_REGISTER_DESTINATION)
-                        },
-                        onNavigateToInstanceSelection = {
-                            nestedNavController.navigate(NESTED_INSTANCE_SELECTION_DESTINATION) {
-                                popUpTo(NESTED_HOME_DESTINATION) {
-                                    inclusive = true
-                                }
-                            }
-                        },
-                        onLoggedIn = onLoggedIn
+                        onLoggedIn = { currentContent = LoginScreenContent.NOTIFICATION_SETTINGS },
+                        onRequestOpenSettings = onRequestOpenSettings
                     )
                 }
 
-                composable(NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION) {
-                    CustomInstanceSelectionScreen(
+                LoginScreenContent.NOTIFICATION_SETTINGS -> {
+                    NotificationSettingsUi(
                         modifier = Modifier.fillMaxSize(),
-                        onRequestNavigateUp = nestedNavController::navigateUp,
-                        onSuccessfullySetCustomInstance = {
-                            nestedNavController.navigate(NESTED_HOME_DESTINATION) {
-                                popUpTo(NESTED_INSTANCE_SELECTION_DESTINATION) {
-                                    inclusive = true
-                                }
-                            }
-                        }
-                    )
-                }
-
-                composable(NESTED_LOGIN_DESTINATION) {
-                    LoginScreen(
-                        modifier = Modifier.fillMaxSize(),
-                        viewModel = getViewModel(),
-                        onLoggedIn = onLoggedIn
-                    )
-                }
-
-                composable(NESTED_REGISTER_DESTINATION) {
-//                RegisterUi(
-//                    modifier = Modifier.fillMaxSize(),
-//                    viewModel =
-//                )
-                }
-
-                composable(NESTED_INSTANCE_SELECTION_DESTINATION) {
-                    val scope = rememberCoroutineScope()
-
-                    InstanceSelectionScreen(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp),
-                        availableInstances = ArtemisInstances.instances,
-                        onSelectArtemisInstance = { serverUrl ->
-                            scope.launch {
-                                serverConfigurationService.updateServerUrl(serverUrl)
-                                nestedNavController.navigate(NESTED_HOME_DESTINATION) {
-                                    popUpTo(NESTED_INSTANCE_SELECTION_DESTINATION) {
-                                        inclusive = true
-                                    }
-                                }
-                            }
-                        },
-                        onRequestOpenCustomInstanceSelection = {
-                            nestedNavController.navigate(
-                                NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION
-                            )
-                        }
+                        onDone = onFinishedLoginFlow
                     )
                 }
             }
@@ -181,11 +94,147 @@ fun NavGraphBuilder.loginScreen(
     }
 }
 
+enum class LoginScreenContent {
+    LOGIN,
+    NOTIFICATION_SETTINGS
+}
+
+/**
+ * Manages UI directly responsible for logging the user in.
+ */
+@Composable
+private fun LoginUi(
+    modifier: Modifier,
+    onLoggedIn: () -> Unit,
+    onRequestOpenSettings: () -> Unit
+) {
+    val nestedNavController = rememberNavController()
+    val serverConfigurationService: ServerConfigurationService = get()
+
+    val hasSelectedInstance = serverConfigurationService
+        .hasUserSelectedInstance
+        .collectAsState(initial = null)
+        .value
+        ?: return // Display nothing to avoid switching between destinations
+
+    val isCustomInstanceSelectionDestination =
+        nestedNavController.currentDestination?.route == NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    if (isCustomInstanceSelectionDestination) {
+                        IconButton(onClick = nestedNavController::navigateUp) {
+                            Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                        }
+                    }
+                },
+                title = {
+                    if (isCustomInstanceSelectionDestination) {
+                        Text(text = stringResource(id = R.string.account_select_custom_instance_selection_title))
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onRequestOpenSettings) {
+                        Icon(imageVector = Icons.Default.Settings, contentDescription = null)
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        NavHost(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            navController = nestedNavController,
+            startDestination = if (hasSelectedInstance) NESTED_HOME_DESTINATION else NESTED_INSTANCE_SELECTION_DESTINATION
+        ) {
+            composable(NESTED_HOME_DESTINATION) {
+                AccountScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    onNavigateToLoginScreen = {
+                        nestedNavController.navigate(NESTED_LOGIN_DESTINATION)
+                    },
+                    onNavigateToRegisterScreen = {
+                        nestedNavController.navigate(NESTED_REGISTER_DESTINATION)
+                    },
+                    onNavigateToInstanceSelection = {
+                        nestedNavController.navigate(NESTED_INSTANCE_SELECTION_DESTINATION) {
+                            popUpTo(NESTED_HOME_DESTINATION) {
+                                inclusive = true
+                            }
+                        }
+                    },
+                    onLoggedIn = onLoggedIn
+                )
+            }
+
+            composable(NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION) {
+                CustomInstanceSelectionScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    onRequestNavigateUp = nestedNavController::navigateUp,
+                    onSuccessfullySetCustomInstance = {
+                        nestedNavController.navigate(NESTED_HOME_DESTINATION) {
+                            popUpTo(NESTED_INSTANCE_SELECTION_DESTINATION) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
+
+            composable(NESTED_LOGIN_DESTINATION) {
+                LoginScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    viewModel = getViewModel(),
+                    onLoggedIn = onLoggedIn
+                )
+            }
+
+            composable(NESTED_REGISTER_DESTINATION) {
+//                RegisterUi(
+//                    modifier = Modifier.fillMaxSize(),
+//                    viewModel =
+//                )
+            }
+
+            composable(NESTED_INSTANCE_SELECTION_DESTINATION) {
+                val scope = rememberCoroutineScope()
+
+                InstanceSelectionScreen(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    availableInstances = ArtemisInstances.instances,
+                    onSelectArtemisInstance = { serverUrl ->
+                        scope.launch {
+                            serverConfigurationService.updateServerUrl(serverUrl)
+                            nestedNavController.navigate(NESTED_HOME_DESTINATION) {
+                                popUpTo(NESTED_INSTANCE_SELECTION_DESTINATION) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    },
+                    onRequestOpenCustomInstanceSelection = {
+                        nestedNavController.navigate(
+                            NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+}
+
 /**
  * Displays the screen to login and register. Also allows to change the artemis instance.
  */
 @Composable
-internal fun AccountScreen(
+private fun AccountScreen(
     modifier: Modifier,
     viewModel: AccountViewModel = koinViewModel(),
     onNavigateToLoginScreen: () -> Unit,

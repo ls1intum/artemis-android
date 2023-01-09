@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.model.PushNotificationSetting
+import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -74,4 +75,28 @@ private fun ReceivePushNotificationsSwitch(
             Switch(checked = isChecked, onCheckedChange = onCheckedChange)
         }
     }
+}
+
+@Composable
+fun PushNotificationSyncChangesDialog(onDismissRequest: () -> Unit) {
+    TextAlertDialog(
+        title = stringResource(id = R.string.push_notification_settings_sync_dialog_title),
+        text = stringResource(id = R.string.push_notification_settings_sync_dialog_message),
+        confirmButtonText = null,
+        dismissButtonText = stringResource(id = R.string.push_notification_settings_sync_dialog_dismiss),
+        onPressPositiveButton = { },
+        onDismissRequest = onDismissRequest
+    )
+}
+
+@Composable
+fun PushNotificationSyncFailedDialog(onDismissRequest: () -> Unit) {
+    TextAlertDialog(
+        title = stringResource(id = R.string.push_notification_settings_sync_failed_dialog_title),
+        text = stringResource(id = R.string.push_notification_settings_sync_failed_dialog_message),
+        confirmButtonText = stringResource(id = R.string.push_notification_settings_sync_failed_dialog_positive),
+        dismissButtonText = null,
+        onPressPositiveButton = onDismissRequest,
+        onDismissRequest = onDismissRequest
+    )
 }

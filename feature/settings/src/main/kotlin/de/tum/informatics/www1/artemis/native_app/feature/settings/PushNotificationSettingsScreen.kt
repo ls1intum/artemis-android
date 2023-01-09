@@ -21,12 +21,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.PushNotificationSettingsUi
 import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.PushNotificationSettingsViewModel
+import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.PushNotificationSyncChangesDialog
+import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.PushNotificationSyncFailedDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import kotlinx.coroutines.Job
 import org.koin.androidx.compose.koinViewModel
@@ -38,7 +41,7 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
 
     // Set if currently syncing changes with server
     var syncChangesJob: Job? by remember { mutableStateOf(null) }
-    var displaySyncFailedDialog: Boolean by remember { mutableStateOf(false) }
+    var displaySyncFailedDialog: Boolean by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,
@@ -87,12 +90,7 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
         )
 
         if (syncChangesJob != null) {
-            TextAlertDialog(
-                title = stringResource(id = R.string.notification_settings_screen_sync_dialog_title),
-                text = stringResource(id = R.string.notification_settings_screen_sync_dialog_message),
-                confirmButtonText = null,
-                dismissButtonText = stringResource(id = R.string.notification_settings_screen_sync_dialog_dismiss),
-                onPressPositiveButton = { },
+            PushNotificationSyncChangesDialog(
                 onDismissRequest = {
                     syncChangesJob?.cancel()
                     syncChangesJob = null
@@ -101,14 +99,7 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
         }
 
         if (displaySyncFailedDialog) {
-            TextAlertDialog(
-                title = stringResource(id = R.string.notification_settings_screen_sync_failed_dialog_title),
-                text = stringResource(id = R.string.notification_settings_screen_sync_failed_dialog_message),
-                confirmButtonText = stringResource(id = R.string.notification_settings_screen_sync_failed_dialog_positive),
-                dismissButtonText = null,
-                onPressPositiveButton = { displaySyncFailedDialog = false },
-                onDismissRequest = { displaySyncFailedDialog = false }
-            )
+            PushNotificationSyncFailedDialog { displaySyncFailedDialog = false }
         }
     }
 }

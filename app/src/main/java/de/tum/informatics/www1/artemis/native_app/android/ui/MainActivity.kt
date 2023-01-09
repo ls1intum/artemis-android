@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                 // Use jetpack compose navigation for the navigation logic.
                 NavHost(navController = navController, startDestination = startDestination) {
                     loginScreen(
-                        onLoggedIn = onLoggedIn,
+                        onFinishedLoginFlow = onLoggedIn,
                         onRequestOpenSettings = {
                             navController.navigateToSettings { }
                         }

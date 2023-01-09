@@ -58,4 +58,12 @@
     <string name="push_notification_setting_setting_description_registrationTutorialGroupStudentDescription">Get notified when you were registered or deregistered from a tutorial group"</string>
     <string name="push_notification_setting_setting_description_tutorialGroupUpdateDeleteDescription">Get notified when a tutorial group for which you are registered or a tutor was updated or deleted"</string>
     <string name="push_notification_setting_setting_description_assignUnassignTutorialGroupDescription">Get notified when you were assigned or unassigned to lead a tutorial group"</string>
+
+    <string name="push_notification_settings_sync_dialog_title">Syncing</string>
+    <string name="push_notification_settings_sync_dialog_message">Uploading settings to server…</string>
+    <string name="push_notification_settings_sync_dialog_dismiss">@android:string/cancel</string>
+
+    <string name="push_notification_settings_sync_failed_dialog_title">Syncing failed!</string>
+    <string name="push_notification_settings_sync_failed_dialog_message">Something went wrong while syncing your settings.</string>
+    <string name="push_notification_settings_sync_failed_dialog_positive">@android:string/ok</string>
 </resources>

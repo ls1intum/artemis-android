@@ -23,12 +23,4 @@
     <string name="settings_build_version_name">Version name: %1$s</string>
 
     <string name="notification_settings_screen_title">Notification settings</string>
-
-    <string name="notification_settings_screen_sync_dialog_title">Syncing</string>
-    <string name="notification_settings_screen_sync_dialog_message">Uploading settings to server…</string>
-    <string name="notification_settings_screen_sync_dialog_dismiss">@android:string/cancel</string>
-
-    <string name="notification_settings_screen_sync_failed_dialog_title">Syncing failed!</string>
-    <string name="notification_settings_screen_sync_failed_dialog_message">Something went wrong while syncing your settings.</string>
-    <string name="notification_settings_screen_sync_failed_dialog_positive">@android:string/ok</string>
 </resources>
