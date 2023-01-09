@@ -65,3 +65,7 @@ dependencies {
     // Not needed yet.
     // implementation(libs.sentry.compose.android)
 }
+
+sentry {
+    autoInstallation.enabled.set(false)
+}
