@@ -29,9 +29,11 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
 
-        Sentry.init(
-            if (BuildConfig.DEBUG) "" else "https://8b4d69ac628d4462995ee6178365541f@sentry.ase.in.tum.de/3"
-        )
+        Sentry.init {
+            it.dsn = if (BuildConfig.DEBUG) "" else "https://8b4d69ac628d4462995ee6178365541f@sentry.ase.in.tum.de/3"
+            it.isEnableUserInteractionBreadcrumbs = false
+            it.isEnableUserInteractionTracing = false
+        }
 
         startKoin {
             androidContext(this@ArtemisApplication)

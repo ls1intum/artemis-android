@@ -62,8 +62,7 @@ dependencies {
     implementation(libs.androidx.browser)
 
     implementation(libs.sentry.android)
-    // Not needed yet.
-    // implementation(libs.sentry.compose.android)
+    implementation(libs.sentry.compose.android)
 }
 
 sentry {
