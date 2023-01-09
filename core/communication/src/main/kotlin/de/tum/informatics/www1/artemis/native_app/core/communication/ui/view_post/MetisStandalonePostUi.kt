@@ -5,11 +5,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +30,7 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -69,112 +75,116 @@ internal fun MetisStandalonePostUi(
 
     var metisFailure: MetisModificationFailure? by remember { mutableStateOf(null) }
 
-    Column(modifier = modifier) {
-        LazyColumn(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .weight(1f),
-            contentPadding = PaddingValues(top = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            item {
-                val asAffectedPost = post?.let {
-                    MetisService.AffectedPost.Standalone(
-                        postId = it.serverPostId
+    BoxWithConstraints(modifier = modifier) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .weight(1f),
+                contentPadding = PaddingValues(top = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item {
+                    val asAffectedPost = post?.let {
+                        MetisService.AffectedPost.Standalone(
+                            postId = it.serverPostId
+                        )
+                    }
+
+                    PostItem(
+                        modifier = Modifier.padding(top = 8.dp),
+                        post = post,
+                        postItemViewType = PostItemViewType.StandaloneView,
+                        getUnicodeForEmojiId = { getEmojiForEmojiId(emojiId = it) },
+                        onReactWithEmoji = { emojiId ->
+                            viewModel.createReaction(
+                                emojiId = emojiId,
+                                post = asAffectedPost ?: return@PostItem,
+                                response = { metisFailure = it }
+                            )
+                        },
+                        onClickOnPresentReaction = { emojiId ->
+                            viewModel.onClickReaction(
+                                emojiId = emojiId,
+                                post = asAffectedPost ?: return@PostItem,
+                                presentReactions = post.reactions,
+                                response = { metisFailure = it }
+                            )
+                        },
+                        clientId = clientId
                     )
                 }
 
-                PostItem(
-                    modifier = Modifier.padding(top = 8.dp),
-                    post = post,
-                    postItemViewType = PostItemViewType.StandaloneView,
-                    getUnicodeForEmojiId = { getEmojiForEmojiId(emojiId = it) },
-                    onReactWithEmoji = { emojiId ->
-                        viewModel.createReaction(
-                            emojiId = emojiId,
-                            post = asAffectedPost ?: return@PostItem,
-                            response = { metisFailure = it }
-                        )
-                    },
-                    onClickOnPresentReaction = { emojiId ->
-                        viewModel.onClickReaction(
-                            emojiId = emojiId,
-                            post = asAffectedPost ?: return@PostItem,
-                            presentReactions = post.reactions,
-                            response = { metisFailure = it }
-                        )
-                    },
-                    clientId = clientId
-                )
-            }
-
-            item {
-                Text(
-                    modifier = Modifier.padding(top = 8.dp),
-                    text = stringResource(id = R.string.standalone_screen_replies_title),
-                    style = MaterialTheme.typography.headlineMedium
-                )
-            }
-
-            items(post?.orderedAnswerPostings.orEmpty(), key = { it.postId }) { answerPost ->
-                AnswerPostItem(
-                    modifier = Modifier.fillMaxWidth(),
-                    answerPost = answerPost,
-                    getUnicodeForEmojiId = { getEmojiForEmojiId(emojiId = it) },
-                    onReactWithEmoji = { emojiId ->
-                        viewModel.createReactionForAnswer(
-                            emojiId = emojiId,
-                            clientSidePostId = answerPost.postId,
-                            onResponse = { metisFailure = it }
-                        )
-                    },
-                    onClickOnPresentReaction = { emojiId ->
-                        viewModel.onClickReactionOfAnswer(
-                            emojiId = emojiId,
-                            clientSidePostId = answerPost.postId,
-                            presentReactions = answerPost.reactions,
-                            onResponse = { metisFailure = it }
-                        )
-                    },
-                    answerItem = PostItemViewType.AnswerItem(
-                        // TODO: Implement this logic once logic has been moved to server
-                        canEdit = false,
-                        canDelete = false,
-                        onClickEdit = {},
-                        onClickDelete = {}
-                    ),
-                    clientId = clientId
-                )
-            }
-        }
-
-        var replyContent: String by rememberSaveable {
-            mutableStateOf("")
-        }
-
-        val scope = rememberCoroutineScope()
-        val replyState: ReplyState by remember {
-            val state = mutableStateOf<ReplyState>(ReplyState.HasSentReply)
-
-            state.value = createCanCreateReplyState(
-                scope,
-                viewModel,
-                updateReplyState = { state.value = it },
-                updateFailureState = { metisFailure = it },
-                clearReplyContent = {
-                    replyContent = ""
+                item {
+                    Text(
+                        modifier = Modifier.padding(top = 8.dp),
+                        text = stringResource(id = R.string.standalone_screen_replies_title),
+                        style = MaterialTheme.typography.headlineMedium
+                    )
                 }
+
+                items(post?.orderedAnswerPostings.orEmpty(), key = { it.postId }) { answerPost ->
+                    AnswerPostItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        answerPost = answerPost,
+                        getUnicodeForEmojiId = { getEmojiForEmojiId(emojiId = it) },
+                        onReactWithEmoji = { emojiId ->
+                            viewModel.createReactionForAnswer(
+                                emojiId = emojiId,
+                                clientSidePostId = answerPost.postId,
+                                onResponse = { metisFailure = it }
+                            )
+                        },
+                        onClickOnPresentReaction = { emojiId ->
+                            viewModel.onClickReactionOfAnswer(
+                                emojiId = emojiId,
+                                clientSidePostId = answerPost.postId,
+                                presentReactions = answerPost.reactions,
+                                onResponse = { metisFailure = it }
+                            )
+                        },
+                        answerItem = PostItemViewType.AnswerItem(
+                            // TODO: Implement this logic once logic has been moved to server
+                            canEdit = false,
+                            canDelete = false,
+                            onClickEdit = {},
+                            onClickDelete = {}
+                        ),
+                        clientId = clientId
+                    )
+                }
+            }
+
+            var replyContent: String by rememberSaveable {
+                mutableStateOf("")
+            }
+
+            val scope = rememberCoroutineScope()
+            val replyState: ReplyState by remember {
+                val state = mutableStateOf<ReplyState>(ReplyState.HasSentReply)
+
+                state.value = createCanCreateReplyState(
+                    scope,
+                    viewModel,
+                    updateReplyState = { state.value = it },
+                    updateFailureState = { metisFailure = it },
+                    clearReplyContent = {
+                        replyContent = ""
+                    }
+                )
+
+                state
+            }
+
+            ReplyUi(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
+                replyState = replyState,
+                replyContent = replyContent,
+                updateReplyContent = { replyContent = it }
             )
-
-            state
         }
-
-        ReplyUi(
-            modifier = Modifier.fillMaxWidth(),
-            replyState = replyState,
-            replyContent = replyContent,
-            updateReplyContent = { replyContent = it }
-        )
     }
 
     MetisModificationFailureDialog(metisModificationFailure = metisFailure) {
@@ -189,13 +199,15 @@ private fun ReplyUi(
     updateReplyContent: (String) -> Unit,
     replyState: ReplyState
 ) {
-    Box(modifier = modifier) {
+    Surface(
+        modifier = modifier.defaultMinSize(minHeight = 48.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        shape = RoundedCornerShape(5)
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .defaultMinSize(minHeight = 48.dp)
-                .clip(RoundedCornerShape(5))
-                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .height(IntrinsicSize.Max)
         ) {
             AnimatedContent(
                 modifier = Modifier
@@ -249,6 +261,8 @@ private fun ReplyUi(
                 }
             }
         }
+    }
+    Box(modifier = modifier) {
     }
 }
 

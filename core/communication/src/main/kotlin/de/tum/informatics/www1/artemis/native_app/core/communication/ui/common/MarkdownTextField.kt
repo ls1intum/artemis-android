@@ -1,10 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.core.communication.ui.common
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -35,19 +38,20 @@ internal fun MarkdownTextField(
     var hadFocus by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
-        TabRow(selectedTabIndex = selectedType.ordinal) {
-            Tab(
+        Row(modifier = Modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            InputChip(
                 selected = selectedType == ViewType.TEXT,
                 onClick = { selectedType = ViewType.TEXT },
-                text = {
+                label = {
                     Text(text = stringResource(id = R.string.markdown_textfield_tab_text))
                 }
             )
 
-            Tab(
+            InputChip(
                 selected = selectedType == ViewType.PREVIEW,
                 onClick = { selectedType = ViewType.PREVIEW },
-                text = {
+                enabled = text.isNotEmpty(),
+                label = {
                     Text(text = stringResource(id = R.string.markdown_textfield_tab_preview))
                 }
             )
