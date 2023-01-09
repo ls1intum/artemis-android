@@ -446,24 +446,29 @@ internal class QuizParticipationViewModel(
                 )
             }
 
-            QuizType.PRACTICE -> {}
+            QuizType.PRACTICE -> uploadedSubmission
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, QuizSubmission())
 
     val quizEndedStatus: Flow<Boolean> =
-        combine(
-            quizExercise.flatMapLatest { it.quizEnded },
-            quizBatch,
-            endDate.flatMapLatest { it.hasPassedFlow() },
-            latestParticipation,
-            latestSubmission
-        ) { quizEnded, batch, endDataHasPassed, latestParticipation, latestSubmission ->
-            (quizType == QuizType.LIVE && ((quizEnded) || (batch != null && batch.ended == true)))
-                    || endDataHasPassed
-                    || latestParticipation.initializationState == Participation.InitializationState.FINISHED
-                    || latestSubmission.submitted == true
+        when (quizType) {
+            QuizType.LIVE -> combine(
+                quizExercise.flatMapLatest { it.quizEnded },
+                quizBatch,
+                endDate.flatMapLatest { it.hasPassedFlow() },
+                latestParticipation,
+                latestSubmission
+            ) { quizEnded, batch, endDataHasPassed, latestParticipation, latestSubmission ->
+                ((quizEnded) || (batch != null && batch.ended == true))
+                        || endDataHasPassed
+                        || latestParticipation.initializationState == Participation.InitializationState.FINISHED
+                        || latestSubmission.submitted == true
+            }
+
+            QuizType.PRACTICE -> uploadedSubmission.map { it != null }
         }
+
 
     init {
         viewModelScope.launch {
@@ -671,10 +676,18 @@ internal class QuizParticipationViewModel(
                 is ShortAnswerQuizQuestion -> {
                     val data = shortAnswerData[question.id].orEmpty()
                     val submittedTexts: List<ShortAnswerSubmittedAnswer.ShortAnswerSubmittedText> =
-                        data.map { (spotId, text) ->
+                        data.map { (spotNr, text) ->
+                            val id = question
+                                .spots
+                                .firstOrNull { it.spotNr == spotNr }
+                                ?.id ?: 0L
+
                             ShortAnswerSubmittedAnswer.ShortAnswerSubmittedText(
                                 text = text,
-                                spot = ShortAnswerQuizQuestion.ShortAnswerSpot(spotNr = spotId)
+                                spot = ShortAnswerQuizQuestion.ShortAnswerSpot(
+                                    id = id,
+                                    spotNr = spotNr
+                                )
                             )
                         }
 

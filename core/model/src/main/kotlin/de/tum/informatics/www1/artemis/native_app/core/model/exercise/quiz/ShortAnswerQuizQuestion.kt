@@ -22,6 +22,7 @@ data class ShortAnswerQuizQuestion(
 ) : QuizQuestion() {
     @Serializable
     data class ShortAnswerSpot(
+        val id: Long? = null,
         val width: Int? = null,
         val spotNr: Int? = null,
         val invalid: Boolean = false

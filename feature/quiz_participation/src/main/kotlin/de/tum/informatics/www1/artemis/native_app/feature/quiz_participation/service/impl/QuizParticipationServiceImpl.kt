@@ -25,23 +25,7 @@ class QuizParticipationServiceImpl(
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Result> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.post(serverUrl) {
-                url {
-                    appendPathSegments(
-                        "api",
-                        "exercises",
-                        exerciseId.toString(),
-                        "submissions",
-                        "practice"
-                    )
-                }
-
-                contentType(ContentType.Application.Json)
-                bearerAuth(authToken)
-                setBody<Submission>(submission)
-            }.body()
-        }
+        return submitImpl(serverUrl, exerciseId, authToken, submission, "practice")
     }
 
     override suspend fun submitForLiveMode(
@@ -50,6 +34,16 @@ class QuizParticipationServiceImpl(
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Submission> {
+        return submitImpl(serverUrl, exerciseId, authToken, submission, "live")
+    }
+
+    private suspend inline fun <reified T> submitImpl(
+        serverUrl: String,
+        exerciseId: Long,
+        authToken: String,
+        submission: QuizSubmission,
+        endPoint: String
+    ): NetworkResponse<T> {
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
@@ -58,7 +52,7 @@ class QuizParticipationServiceImpl(
                         "exercises",
                         exerciseId.toString(),
                         "submissions",
-                        "live"
+                        endPoint
                     )
                 }
 
