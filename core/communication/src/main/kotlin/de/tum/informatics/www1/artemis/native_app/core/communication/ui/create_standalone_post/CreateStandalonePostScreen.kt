@@ -128,7 +128,7 @@ private fun CreateStandalonePostScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 8.dp),
             viewModel = viewModel
         )
 

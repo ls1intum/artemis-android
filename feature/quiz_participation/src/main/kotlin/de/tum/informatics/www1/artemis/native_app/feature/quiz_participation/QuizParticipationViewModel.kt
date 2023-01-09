@@ -40,9 +40,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
@@ -63,8 +63,6 @@ import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.serialization.Serializable
-import okhttp3.internal.wait
 import org.hildan.krossbow.stomp.LostReceiptException
 import org.hildan.krossbow.stomp.headers.StompSendHeaders
 import java.util.UUID
@@ -77,7 +75,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class QuizParticipationViewModel(
     courseId: Long,
     private val exerciseId: Long,
-    val quizType: QuizType,
+    private val quizType: QuizType,
     private val quizExerciseService: QuizExerciseService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
@@ -105,17 +103,6 @@ internal class QuizParticipationViewModel(
     val serverClock: Flow<ClockWithOffset> = serverTimeService
         .serverClock
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
-
-    private val submissionUpdater: Flow<SubmissionData> = when (quizType) {
-        QuizType.LIVE -> {
-            websocketProvider.subscribeMessage(
-                "user$submissionChannel",
-                SubmissionData.serializer()
-            ).shareIn(viewModelScope, SharingStarted.Eagerly)
-        }
-
-        QuizType.PRACTICE -> emptyFlow()
-    }
 
     private val participationUpdater: Flow<Participation> = when (quizType) {
         QuizType.LIVE -> {
@@ -151,24 +138,22 @@ internal class QuizParticipationViewModel(
     private val initialParticipationDataState: StateFlow<DataState<Participation>> =
         when (quizType) {
             QuizType.LIVE ->
-                retryLoadExercise
-                    .onStart { emit(Unit) }
-                    .flatMapLatest {
-                        transformLatest(
-                            serverConfigurationService.serverUrl,
-                            accountService.authToken
-                        ) { serverUrl, authToken ->
-                            emitAll(
-                                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                                    participationService.findParticipation(
-                                        exerciseId,
-                                        serverUrl,
-                                        authToken
-                                    )
-                                }
+                transformLatest(
+                    serverConfigurationService.serverUrl,
+                    accountService.authToken,
+                    retryLoadExercise.onStart { emit(Unit) }
+                ) { serverUrl, authToken, _ ->
+                    println("XX RELOAD")
+                    emitAll(
+                        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                            participationService.findParticipation(
+                                exerciseId,
+                                serverUrl,
+                                authToken
                             )
                         }
-                    }
+                    )
+                }
 
             QuizType.PRACTICE -> emptyFlow()
         }
@@ -491,7 +476,7 @@ internal class QuizParticipationViewModel(
                             delay(startTime - serverClock.now() + 1.seconds)
                         }.first()
 
-                        retryLoadExercise.emit(Unit)
+                        reloadUntilQuizQuestionsAreLoaded()
                     }
                 }
         }
@@ -501,8 +486,8 @@ internal class QuizParticipationViewModel(
         viewModelScope.launch {
             waitingForQuizStart.withPrevious().collectLatest { (previouslyWaiting, nowWaiting) ->
                 if (previouslyWaiting == true && !nowWaiting) {
-                    // Use tryEmit, if we are already reloading the quiz, do not trigger it again
-                    retryLoadExercise.tryEmit(Unit)
+
+                    reloadUntilQuizQuestionsAreLoaded()
                 }
             }
         }
@@ -511,11 +496,14 @@ internal class QuizParticipationViewModel(
         viewModelScope.launch {
             combine(
                 waitingForQuizStart,
-                websocketProvider.isConnected.withPrevious()
+                websocketProvider.connectionState
             ) { a, b -> a to b }
+                .distinctUntilChanged()
                 .collect { (isWaitingForQuizStart, connectionStatus) ->
-                    val (wasConnected, isConnected) = connectionStatus
-                    if (isWaitingForQuizStart && wasConnected == false && isConnected) {
+                    if (isWaitingForQuizStart
+                        && connectionStatus is WebsocketProvider.WebsocketConnectionState.WithSession
+                        && !connectionStatus.isConnected
+                    ) {
                         // we may have missed the exercise start, trigger reload now
                         retryLoadExercise.tryEmit(Unit)
                     }
@@ -528,6 +516,17 @@ internal class QuizParticipationViewModel(
             fillSavedStateHandleFromSubmission(initialSubmission)
 
             hasStoredInitialSubmission.value = true
+        }
+    }
+
+    private suspend fun reloadUntilQuizQuestionsAreLoaded() {
+        while (true) {
+            retryLoadExercise.tryEmit(Unit)
+            delay(1.seconds)
+
+            val questions = quizQuestions.first()
+            val hasEnded = quizEndedStatus.first()
+            if (questions.isNotEmpty() || hasEnded) return
         }
     }
 
@@ -707,8 +706,8 @@ internal class QuizParticipationViewModel(
         }
     }
 
-    fun joinBatch(passcode: String, onFailure: () -> Unit) {
-        viewModelScope.launch {
+    fun joinBatch(passcode: String, onDone: (successful: Boolean) -> Unit): Job {
+        return viewModelScope.launch {
             val serverUrl = serverConfigurationService.serverUrl.first()
             val authToken = accountService.authToken.first()
 
@@ -718,21 +717,21 @@ internal class QuizParticipationViewModel(
                 serverUrl = serverUrl,
                 authToken = authToken
             )) {
-                is NetworkResponse.Failure -> onFailure()
+                is NetworkResponse.Failure -> onDone(false)
                 is NetworkResponse.Response -> {
                     joinBatchFlow.emit(response.data)
 
                     if (response.data.started == true) {
                         retryLoadExercise.emit(Unit)
                     }
+                    onDone(true)
                 }
             }
-
         }
     }
 
-    fun startBatch(onFailure: () -> Unit) {
-        joinBatch("", onFailure)
+    fun startBatch(onDone: (successful: Boolean) -> Unit): Job {
+        return joinBatch("", onDone)
     }
 
     private fun constructQuizQuestionData(
@@ -905,9 +904,6 @@ internal class QuizParticipationViewModel(
             }
         }
     }
-
-    @Serializable
-    private data class SubmissionData(val error: String? = null)
 
     private sealed interface DragAndDropAction {
         /***

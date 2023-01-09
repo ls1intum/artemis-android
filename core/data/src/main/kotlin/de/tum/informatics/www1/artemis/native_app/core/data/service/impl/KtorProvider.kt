@@ -25,7 +25,7 @@ class KtorProvider(jsonProvider: JsonProvider) {
         install(HttpTimeout) {
             requestTimeoutMillis = 15.seconds.inWholeMilliseconds
             connectTimeoutMillis = 10.seconds.inWholeMilliseconds
-            socketTimeoutMillis = 3.seconds.inWholeMilliseconds
+            socketTimeoutMillis = 10.seconds.inWholeMilliseconds
         }
     }
 }

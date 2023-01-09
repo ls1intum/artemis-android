@@ -25,7 +25,7 @@ internal fun ExerciseListUi(
         ExerciseListItem(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 8.dp),
             exercise = exercise
         ) { onClickExercise(exercise.id ?: return@ExerciseListItem) }
     }

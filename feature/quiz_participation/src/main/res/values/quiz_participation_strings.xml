@@ -21,6 +21,11 @@
     <string name="quiz_participation_wait_for_start_start_batch_error_message">Could not start quiz batch.</string>
     <string name="quiz_participation_wait_for_start_batch_error_positive_button">@android:string/ok</string>
 
+    <string name="quiz_participation_wait_for_start_join_batch_dialog_message">Joining batch… Please wait.</string>
+    <string name="quiz_participation_wait_for_start_join_batch_dialog_negative">@android:string/cancel</string>
+    <string name="quiz_participation_wait_for_start_start_batch_dialog_message">Starting batch… Please wait.</string>
+    <string name="quiz_participation_wait_for_start_start_batch_dialog_negative">@android:string/cancel</string>
+
     <!--  Participation header  -->
     <string name="quiz_participation_submit_button">Submit</string>
 

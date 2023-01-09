@@ -220,7 +220,7 @@ class WebsocketProvider(
     }
 
     sealed interface WebsocketConnectionState {
-        abstract val isConnected: Boolean
+        val isConnected: Boolean
 
         object Empty : WebsocketConnectionState {
             override val isConnected: Boolean = false

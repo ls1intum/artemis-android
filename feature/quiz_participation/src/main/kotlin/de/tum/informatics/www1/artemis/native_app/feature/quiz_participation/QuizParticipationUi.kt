@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.QuizEndedScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.WaitForQuizStartScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.WorkOnQuizQuestionsScreen
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
@@ -56,6 +57,9 @@ internal fun QuizParticipationUi(
 
     var joinBatchError: JoinBatchErrorType? by rememberSaveable { mutableStateOf(null) }
 
+    var startBatchJob: Job? by remember { mutableStateOf(null) }
+    var joinBatchJob: Job? by remember { mutableStateOf(null) }
+
     BasicDataStateUi(
         modifier = modifier,
         dataState = exerciseDataState,
@@ -76,13 +80,19 @@ internal fun QuizParticipationUi(
                     viewModel.reconnectWebsocket()
                 },
                 onClickStartQuiz = {
-                    viewModel.startBatch {
-                        joinBatchError = JoinBatchErrorType.START
+                    startBatchJob = viewModel.startBatch { successful ->
+                        if (!successful) {
+                            joinBatchError = JoinBatchErrorType.START
+                        }
+                        startBatchJob = null
                     }
                 },
                 onClickJoinBatch = { passcode ->
-                    viewModel.joinBatch(passcode) {
-                        joinBatchError = JoinBatchErrorType.JOIN
+                    joinBatchJob = viewModel.joinBatch(passcode) { successful ->
+                        if (!successful) {
+                            joinBatchError = JoinBatchErrorType.JOIN
+                        }
+                        joinBatchJob = null
                     }
                 }
             )
@@ -136,8 +146,42 @@ internal fun QuizParticipationUi(
             }
         )
     }
+
+    if (joinBatchJob != null) {
+        BatchJobDialog(
+            message = stringResource(id = R.string.quiz_participation_wait_for_start_join_batch_dialog_message),
+            confirmText = stringResource(id = R.string.quiz_participation_wait_for_start_join_batch_dialog_negative),
+            onDismiss = {
+                joinBatchJob?.cancel()
+                joinBatchJob = null
+            }
+        )
+    }
+
+    if (startBatchJob != null) {
+        BatchJobDialog(
+            message = stringResource(id = R.string.quiz_participation_wait_for_start_start_batch_dialog_message),
+            confirmText = stringResource(id = R.string.quiz_participation_wait_for_start_start_batch_dialog_negative),
+            onDismiss = {
+                startBatchJob?.cancel()
+                startBatchJob = null
+            }
+        )
+    }
 }
 
+@Composable
+private fun BatchJobDialog(message: String, confirmText: String, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        text = { Text(text = message) },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = confirmText)
+            }
+        }
+    )
+}
 
 /**
  * Formats a time that is in the future in a relative style. Automatically updates when necessary.

@@ -193,7 +193,7 @@ private fun RegisterForCourseContent(
                     RegistrableCourse(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = 8.dp),
                         course = course,
                         serverUrl = serverUrl,
                         bearerToken = bearerToken,
