@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.course_view
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,10 +11,12 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.compose.composable
@@ -150,7 +153,7 @@ internal fun CourseUiScreen(
             failureText = stringResource(id = R.string.course_ui_loading_course_failed),
             retryButtonText = stringResource(id = R.string.course_ui_loading_course_try_again),
             onClickRetry = { viewModel.reloadCourse() }
-        ) {
+        ) { course ->
             AnimatedContent(
                 targetState = selectedTabIndex,
                 transitionSpec = {
@@ -187,17 +190,29 @@ internal fun CourseUiScreen(
                     }
 
                     2 -> {
-                        val metisContext = remember {
-                            MetisContext.Course(courseId = courseId)
-                        }
+                        val metisModifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 8.dp)
 
-                        SmartphoneMetisUi(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 8.dp),
-                            metisContext = metisContext,
-                            navController = navController
-                        )
+                        if (course.postsEnabled) {
+                            val metisContext = remember {
+                                MetisContext.Course(courseId = courseId)
+                            }
+                            SmartphoneMetisUi(
+                                modifier = metisModifier,
+                                metisContext = metisContext,
+                                navController = navController
+                            )
+                        } else {
+                            Box(modifier = metisModifier) {
+                                Text(
+                                    modifier = Modifier.align(Alignment.Center),
+                                    text = stringResource(id = R.string.course_ui_communication_disabled),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                        }
                     }
                 }
             }
