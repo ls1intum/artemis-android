@@ -296,7 +296,7 @@ private fun StandalonePostFooter(
     onReactWithEmoji: (emojiId: String) -> Unit,
     onClickReaction: (emojiId: String) -> Unit
 ) {
-    val reactionCount: Map<String, ReactionData> = remember(reactions) {
+    val reactionCount: Map<String, ReactionData> = remember(reactions, clientId) {
         reactions.groupBy { it.emojiId }.mapValues { groupedReactions ->
             ReactionData(
                 groupedReactions.value.size,

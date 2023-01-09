@@ -43,6 +43,7 @@ class MetisContextManager(
     /**
      * Tells you what to do with the displayed data from the given metis context.
      */
+    @OptIn(DelicateCoroutinesApi::class)
     fun getContextDataActionFlow(metisContext: MetisContext): Flow<CurrentDataAction> {
         return flow {
             emitAll(mutex.withLock {
@@ -64,6 +65,7 @@ class MetisContextManager(
                             }
                         }
                     }
+                        .shareIn(GlobalScope, SharingStarted.WhileSubscribed(stopTimeout = 1.seconds), replay = 1)
                 }
             })
         }
