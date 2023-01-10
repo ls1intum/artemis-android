@@ -40,6 +40,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.account.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.custom_instance_selection.CustomInstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginScreen
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNotificationStorageService
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getStateViewModel
@@ -64,6 +66,10 @@ fun NavGraphBuilder.loginScreen(
     onRequestOpenSettings: () -> Unit
 ) {
     composable(LOGIN_DESTINATION) {
+        val scope = rememberCoroutineScope()
+        val serverNotificationStorageService: ServerNotificationStorageService = get()
+        val serverConfigurationService: ServerConfigurationService = get()
+
         var currentContent by rememberSaveable { mutableStateOf(LoginScreenContent.LOGIN) }
 
         AnimatedContent(
@@ -78,7 +84,17 @@ fun NavGraphBuilder.loginScreen(
                 LoginScreenContent.LOGIN -> {
                     LoginUi(
                         modifier = Modifier.fillMaxSize(),
-                        onLoggedIn = { currentContent = LoginScreenContent.NOTIFICATION_SETTINGS },
+                        onLoggedIn = {
+                            // Only display notification settings on the first login for the server
+                            scope.launch {
+                                val serverUrl = serverConfigurationService.serverUrl.first()
+                                if (serverNotificationStorageService.hasDisplayedForServer(serverUrl)) {
+                                    onFinishedLoginFlow()
+                                } else {
+                                    currentContent = LoginScreenContent.NOTIFICATION_SETTINGS
+                                }
+                            }
+                        },
                         onRequestOpenSettings = onRequestOpenSettings
                     )
                 }
@@ -86,7 +102,14 @@ fun NavGraphBuilder.loginScreen(
                 LoginScreenContent.NOTIFICATION_SETTINGS -> {
                     NotificationSettingsUi(
                         modifier = Modifier.fillMaxSize(),
-                        onDone = onFinishedLoginFlow
+                        onDone = {
+                            scope.launch {
+                                serverNotificationStorageService.setHasDisplayed(
+                                    serverConfigurationService.serverUrl.first()
+                                )
+                                onFinishedLoginFlow()
+                            }
+                        }
                     )
                 }
             }

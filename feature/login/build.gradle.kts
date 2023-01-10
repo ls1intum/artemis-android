@@ -13,4 +13,6 @@ dependencies {
     implementation(project(":core:device"))
     implementation(project(":core:datastore"))
     implementation(project(":core:push_notification_settings"))
+
+    implementation(libs.androidx.dataStore.preferences)
 }
