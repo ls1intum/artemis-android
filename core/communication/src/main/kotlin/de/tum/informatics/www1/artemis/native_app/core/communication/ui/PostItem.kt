@@ -200,7 +200,13 @@ private fun PostItemBase(
                     .placeholder(isPlaceholder),
                 markdown = content ?: "W".repeat(40),
                 style = MaterialTheme.typography.bodyMedium,
-                maxLines = 5
+                maxLines = 5,
+                onClick = when (postItemViewType) {
+                    is PostItemViewType.AnswerItem, PostItemViewType.StandaloneView -> { {} }
+                    is PostItemViewType.StandaloneListItem -> {
+                        postItemViewType.onClickPost
+                    }
+                }
             )
 
             StandalonePostFooter(

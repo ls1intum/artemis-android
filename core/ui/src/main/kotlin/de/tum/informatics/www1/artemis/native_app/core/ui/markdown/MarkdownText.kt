@@ -1,7 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import android.content.Context
+import android.text.Spannable
+import android.text.method.LinkMovementMethod
+import android.text.method.MovementMethod
 import android.util.TypedValue
+import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.FontRes
@@ -92,9 +96,7 @@ fun MarkdownText(
         },
         update = { textView ->
             markdownRender.setMarkdown(textView, markdown)
-            if (disableLinkMovementMethod) {
-                textView.movementMethod = null
-            }
+            textView.movementMethod = LinkMovementMethod.getInstance()
         }
     )
 }
@@ -125,6 +127,7 @@ private fun createTextView(
         setTextColor(textColor.toArgb())
         setMaxLines(maxLines)
         setTextSize(TypedValue.COMPLEX_UNIT_DIP, mergedStyle.fontSize.value)
+        highlightColor = android.graphics.Color.TRANSPARENT
 
         viewId?.let { id = viewId }
         textAlign?.let { align ->
