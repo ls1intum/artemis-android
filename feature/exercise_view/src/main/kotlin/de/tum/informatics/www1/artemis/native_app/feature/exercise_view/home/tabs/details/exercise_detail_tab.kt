@@ -82,14 +82,16 @@ private fun ExerciseDetails(modifier: Modifier, exercise: Exercise, latestResult
         val exerciseDetailList = mutableListOf<ExerciseDetailItem>(ExerciseDetailItem.ExerciseType)
 
         val points = exercise.maxPoints
-        val currentUserPoints =
+        val currentUserScore =
             exercise.studentParticipations.orEmpty()
                 .firstOrNull()?.results?.maxBy { it.completionDate ?: Instant.fromEpochSeconds(0L) }
                 ?.score
 
-        if (points != null && currentUserPoints == null) {
+        if (points != null && currentUserScore == null) {
             exerciseDetailList += ExerciseDetailItem.PointsNoSubmission(points)
-        } else if (points != null && currentUserPoints != null) {
+        } else if (points != null && currentUserScore != null) {
+            val currentUserPoints = points * (currentUserScore / 100f)
+
             exerciseDetailList += ExerciseDetailItem.PointsWithSubmission(currentUserPoints, points)
         }
 
