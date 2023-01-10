@@ -26,7 +26,8 @@ internal fun Project.configureCompose(commonExtension: CommonExtension<*, *, *, 
                 "-opt-in=kotlin.RequiresOptIn",
                 "-opt-in=com.google.accompanist.pager.ExperimentalPagerApi",
                 "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
-                "-opt-in=androidx.compose.animation.ExperimentalAnimationApi"
+                "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
+                "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi"
             )
         }
 

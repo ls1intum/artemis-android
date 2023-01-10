@@ -38,11 +38,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.nav
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.quizParticipation
 import de.tum.informatics.www1.artemis.native_app.feature.settings.navigateToSettings
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsScreen
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+
+
 
 /**
  * Main and only activity used in the android app.
@@ -70,6 +72,8 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             AppTheme {
+                val windowSizeClass = calculateWindowSizeClass(activity = this)
+
                 val navController = rememberNavController()
 
                 // Listen for when the user get logged out (e.g. because their token has expired)
@@ -100,6 +104,7 @@ class MainActivity : AppCompatActivity() {
                 // Use jetpack compose navigation for the navigation logic.
                 NavHost(navController = navController, startDestination = startDestination) {
                     loginScreen(
+                        windowSizeClass = windowSizeClass,
                         onFinishedLoginFlow = onLoggedIn,
                         onRequestOpenSettings = {
                             navController.navigateToSettings { }
@@ -107,6 +112,7 @@ class MainActivity : AppCompatActivity() {
                     )
 
                     dashboard(
+                        windowSizeClass = windowSizeClass,
                         onOpenSettings = {
                             navController.navigateToSettings { }
                         },
@@ -119,6 +125,7 @@ class MainActivity : AppCompatActivity() {
                     )
 
                     courseRegistration(
+                        windowSizeClass = windowSizeClass,
                         onNavigateUp = navController::navigateUp,
                         onRegisteredInCourse = { courseId ->
                             navController.navigateUp()

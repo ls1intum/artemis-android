@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -62,6 +63,7 @@ fun NavController.navigateToLogin(builder: NavOptionsBuilder.() -> Unit) {
 }
 
 fun NavGraphBuilder.loginScreen(
+    windowSizeClass: WindowSizeClass,
     onFinishedLoginFlow: () -> Unit,
     onRequestOpenSettings: () -> Unit
 ) {
@@ -84,6 +86,7 @@ fun NavGraphBuilder.loginScreen(
                 LoginScreenContent.LOGIN -> {
                     LoginUi(
                         modifier = Modifier.fillMaxSize(),
+                        windowSizeClass = windowSizeClass,
                         onLoggedIn = {
                             // Only display notification settings on the first login for the server
                             scope.launch {
@@ -128,6 +131,7 @@ enum class LoginScreenContent {
 @Composable
 private fun LoginUi(
     modifier: Modifier,
+    windowSizeClass: WindowSizeClass,
     onLoggedIn: () -> Unit,
     onRequestOpenSettings: () -> Unit
 ) {
@@ -196,16 +200,14 @@ private fun LoginUi(
 
             composable(NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION) {
                 CustomInstanceSelectionScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    onRequestNavigateUp = nestedNavController::navigateUp,
-                    onSuccessfullySetCustomInstance = {
-                        nestedNavController.navigate(NESTED_HOME_DESTINATION) {
-                            popUpTo(NESTED_INSTANCE_SELECTION_DESTINATION) {
-                                inclusive = true
-                            }
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    nestedNavController.navigate(NESTED_HOME_DESTINATION) {
+                        popUpTo(NESTED_INSTANCE_SELECTION_DESTINATION) {
+                            inclusive = true
                         }
                     }
-                )
+                }
             }
 
             composable(NESTED_LOGIN_DESTINATION) {
@@ -230,6 +232,7 @@ private fun LoginUi(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp),
+                    windowSizeClass = windowSizeClass,
                     availableInstances = ArtemisInstances.instances,
                     onSelectArtemisInstance = { serverUrl ->
                         scope.launch {

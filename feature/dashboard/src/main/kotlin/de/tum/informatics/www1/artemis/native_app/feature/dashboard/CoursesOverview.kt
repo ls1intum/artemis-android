@@ -1,14 +1,15 @@
 package de.tum.informatics.www1.artemis.native_app.feature.dashboard
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,7 +30,10 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import java.text.DecimalFormat
 import java.text.NumberFormat
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseItemHeader
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseItemHeader
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseItemGrid
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.ExpandedCourseItemHeader
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseColumnCount
 import org.koin.androidx.compose.getViewModel
 
 const val DASHBOARD_DESTINATION = "dashboard"
@@ -39,6 +43,7 @@ fun NavController.navigateToDashboard(builder: NavOptionsBuilder.() -> Unit) {
 }
 
 fun NavGraphBuilder.dashboard(
+    windowSizeClass: WindowSizeClass,
     onOpenSettings: () -> Unit,
     onClickRegisterForCourse: () -> Unit,
     onViewCourse: (courseId: Long) -> Unit
@@ -46,6 +51,7 @@ fun NavGraphBuilder.dashboard(
     composable(DASHBOARD_DESTINATION) {
         CoursesOverview(
             modifier = Modifier.fillMaxSize(),
+            windowSizeClass = windowSizeClass,
             viewModel = getViewModel(),
             onOpenSettings = onOpenSettings,
             onClickRegisterForCourse = onClickRegisterForCourse,
@@ -61,6 +67,7 @@ fun NavGraphBuilder.dashboard(
 @Composable
 internal fun CoursesOverview(
     modifier: Modifier,
+    windowSizeClass: WindowSizeClass,
     viewModel: CourseOverviewViewModel,
     onOpenSettings: () -> Unit,
     onClickRegisterForCourse: () -> Unit,
@@ -72,8 +79,6 @@ internal fun CoursesOverview(
     val serverUrl by viewModel.serverUrl.collectAsState(initial = "")
     //The server wants an authorization token to send the course icon.
     val authorizationBearer by viewModel.authorizationBearerToken.collectAsState(initial = "")
-
-    val coursesListState = rememberLazyListState()
 
     val topAppBarState = rememberTopAppBarState()
 
@@ -122,11 +127,13 @@ internal fun CoursesOverview(
                     )
                 } else {
                     CourseList(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 8.dp),
+                        windowSizeClass = windowSizeClass,
                         courses = dashboard.courses,
                         serverUrl = serverUrl,
                         authorizationToken = authorizationBearer,
-                        listState = coursesListState,
                         onClickOnCourse = { course -> onViewCourse(course.id) }
                     )
                 }
@@ -141,29 +148,25 @@ internal fun CoursesOverview(
 @Composable
 private fun CourseList(
     modifier: Modifier,
+    windowSizeClass: WindowSizeClass,
     courses: List<Course>,
     serverUrl: String,
     authorizationToken: String,
-    listState: LazyListState,
     onClickOnCourse: (Course) -> Unit
 ) {
-    LazyColumn(
+    CourseItemGrid(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(bottom = 90.dp),
-        state = listState
-    ) {
-        items(courses) { course ->
-            CourseItem(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                course = course,
-                serverUrl = serverUrl,
-                authorizationToken = authorizationToken,
-                onClick = { onClickOnCourse(course) }
-            )
-        }
+        windowSizeClass = windowSizeClass,
+        courses = courses,
+    ) { course, courseItemModifier, isCompact ->
+        CourseItem(
+            modifier = courseItemModifier,
+            course = course,
+            serverUrl = serverUrl,
+            authorizationToken = authorizationToken,
+            onClick = { onClickOnCourse(course) },
+            isCompact = isCompact
+        )
     }
 }
 
@@ -173,56 +176,103 @@ private fun CourseList(
 @Composable
 fun CourseItem(
     modifier: Modifier,
+    isCompact: Boolean,
     course: Course,
     serverUrl: String,
     authorizationToken: String,
     onClick: () -> Unit
 ) {
-    CourseItemHeader(
-        modifier = modifier,
-        course = course,
-        serverUrl = serverUrl,
-        authorizationToken = authorizationToken,
-        onClick = onClick
-    ) {
-        Divider()
+    val content: @Composable ColumnScope.() -> Unit = @Composable {
+        val courseProgress = course.progress.coerceAtMost(1f)
+        if (isCompact) {
+            Divider()
 
-        val scoreNumberFormat = remember {
-            DecimalFormat("0").apply {
-                maximumFractionDigits = 1
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                LinearProgressIndicator(
+                    modifier = Modifier.weight(1f),
+                    progress = courseProgress,
+                    trackColor = MaterialTheme.colorScheme.onPrimary
+                )
+
+                CourseProgressText(
+                    modifier = Modifier,
+                    course = course
+                )
             }
-        }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    progress = courseProgress
+                )
 
-        val percentNumberFormat = remember {
-            NumberFormat.getPercentInstance().apply {
-                maximumFractionDigits = 0
+                CourseProgressText(
+                    modifier = Modifier,
+                    course = course
+                )
             }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp, horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            LinearProgressIndicator(
-                modifier = Modifier.weight(1f),
-                progress = course.progress.coerceAtMost(1f),
-                trackColor = MaterialTheme.colorScheme.onPrimary
-            )
-
-            Text(
-                text = stringResource(
-                    id = R.string.course_overview_course_progress,
-                    scoreNumberFormat.format(course.currentScore),
-                    scoreNumberFormat.format(course.maxPointsPossible),
-                    percentNumberFormat.format(course.progress)
-                ),
-                fontSize = 14.sp
-            )
         }
     }
+
+    if (isCompact) {
+        CompactCourseItemHeader(
+            modifier = modifier,
+            course = course,
+            serverUrl = serverUrl,
+            authorizationToken = authorizationToken,
+            onClick = onClick,
+            content = content
+        )
+    } else {
+        ExpandedCourseItemHeader(
+            modifier = modifier,
+            course = course,
+            serverUrl = serverUrl,
+            authorizationToken = authorizationToken,
+            onClick = onClick,
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun CourseProgressText(modifier: Modifier, course: Course) {
+    val scoreNumberFormat = remember {
+        DecimalFormat("0").apply {
+            maximumFractionDigits = 1
+        }
+    }
+
+    val percentNumberFormat = remember {
+        NumberFormat.getPercentInstance().apply {
+            maximumFractionDigits = 0
+        }
+    }
+
+    Text(
+        modifier = modifier,
+        text = stringResource(
+            id = R.string.course_overview_course_progress,
+            scoreNumberFormat.format(course.currentScore),
+            scoreNumberFormat.format(course.maxPointsPossible),
+            percentNumberFormat.format(course.progress)
+        ),
+        fontSize = 14.sp
+    )
 }
 
 @Composable

@@ -190,8 +190,8 @@ internal fun LoginUi(
 
         val loginModifier = Modifier
             .padding(16.dp)
-            .fillMaxWidth(0.8f)
             .widthIn(max = 600.dp)
+            .fillMaxWidth(0.8f)
             .align(Alignment.CenterHorizontally)
 
         if (!isPasswordLoginDisabled) {

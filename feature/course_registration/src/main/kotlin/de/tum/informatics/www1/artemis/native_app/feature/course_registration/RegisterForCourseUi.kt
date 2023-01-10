@@ -3,10 +3,16 @@ package de.tum.informatics.www1.artemis.native_app.feature.course_registration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -22,8 +28,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseItemHeader
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -35,12 +41,14 @@ fun NavController.navigateToCourseRegistration(builder: NavOptionsBuilder.() -> 
 }
 
 fun NavGraphBuilder.courseRegistration(
+    windowSizeClass: WindowSizeClass,
     onNavigateUp: () -> Unit,
     onRegisteredInCourse: (courseId: Long) -> Unit
 ) {
     composable(COURSE_REGISTRATION_DESTINATION) {
         RegisterForCourseScreen(
             modifier = Modifier.fillMaxSize(),
+            windowSizeClass = windowSizeClass,
             viewModel = getViewModel(),
             onNavigateUp = onNavigateUp,
             onRegisteredInCourse = onRegisteredInCourse
@@ -51,6 +59,7 @@ fun NavGraphBuilder.courseRegistration(
 @Composable
 internal fun RegisterForCourseScreen(
     modifier: Modifier,
+    windowSizeClass: WindowSizeClass,
     viewModel: RegisterForCourseViewModel = getViewModel(),
     onNavigateUp: () -> Unit,
     onRegisteredInCourse: (courseId: Long) -> Unit
@@ -99,8 +108,10 @@ internal fun RegisterForCourseScreen(
         RegisterForCourseContent(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .padding(horizontal = 8.dp),
             courses = courses,
+            windowSizeClass = windowSizeClass,
             serverUrl = properServerUrl,
             bearerToken = bearerToken,
             reloadCourses = viewModel::reloadRegistrableCourses,
@@ -164,6 +175,7 @@ internal fun RegisterForCourseScreen(
 private fun RegisterForCourseContent(
     modifier: Modifier,
     courses: DataState<List<RegisterForCourseViewModel.SemesterCourses>>,
+    windowSizeClass: WindowSizeClass,
     serverUrl: String,
     bearerToken: String,
     reloadCourses: () -> Unit,
@@ -177,12 +189,18 @@ private fun RegisterForCourseContent(
         retryButtonText = stringResource(id = R.string.course_registration_loading_courses_try_again),
         onClickRetry = reloadCourses
     ) { data ->
-        LazyColumn(
+        val columnCount = computeCourseColumnCount(windowSizeClass)
+        val isCompact = windowSizeClass.widthSizeClass <= WindowWidthSizeClass.Compact
+        val courseItemModifier = computeCourseItemModifier(isCompact = isCompact)
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(columnCount),
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             data.forEach { semesterCourses ->
-                stickyHeader {
+                item(span = { GridItemSpan(columnCount) }) {
                     SemesterHeader(
                         modifier = Modifier.fillMaxWidth(),
                         semester = semesterCourses.semester
@@ -191,13 +209,12 @@ private fun RegisterForCourseContent(
 
                 items(semesterCourses.courses) { course ->
                     RegistrableCourse(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
+                        modifier = courseItemModifier,
                         course = course,
                         serverUrl = serverUrl,
                         bearerToken = bearerToken,
-                        onClickSignup = { onClickSignup(course) }
+                        onClickSignup = { onClickSignup(course) },
+                        isCompact = isCompact
                     )
                 }
             }
@@ -211,20 +228,18 @@ private fun RegistrableCourse(
     course: Course,
     serverUrl: String,
     bearerToken: String,
+    isCompact: Boolean,
     onClickSignup: () -> Unit
 ) {
-    CourseItemHeader(
-        modifier = modifier,
-        course = course,
-        serverUrl = serverUrl,
-        authorizationToken = bearerToken
-    ) {
+    val content: @Composable ColumnScope.() -> Unit = @Composable {
         Divider()
 
         Row(
             modifier = Modifier
                 .padding(top = 4.dp)
-                .fillMaxWidth(), horizontalArrangement = Arrangement.End
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
                 modifier = Modifier.padding(bottom = 4.dp, end = 8.dp),
@@ -233,6 +248,24 @@ private fun RegistrableCourse(
                 Text(text = stringResource(id = R.string.course_registration_sign_up))
             }
         }
+    }
+
+    if (isCompact) {
+        CompactCourseItemHeader(
+            modifier = modifier,
+            course = course,
+            serverUrl = serverUrl,
+            authorizationToken = bearerToken,
+            content = content
+        )
+    } else {
+        ExpandedCourseItemHeader(
+            modifier = modifier,
+            course = course,
+            serverUrl = serverUrl,
+            authorizationToken = bearerToken,
+            content = content
+        )
     }
 }
 

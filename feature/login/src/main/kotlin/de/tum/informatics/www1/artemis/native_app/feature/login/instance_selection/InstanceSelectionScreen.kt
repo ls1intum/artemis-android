@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -17,8 +16,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +39,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.ArtemisHeader
 @Composable
 internal fun InstanceSelectionScreen(
     modifier: Modifier,
+    windowSizeClass: WindowSizeClass,
     availableInstances: List<ArtemisInstances.ArtemisInstance>,
     onSelectArtemisInstance: (String) -> Unit,
     onRequestOpenCustomInstanceSelection: () -> Unit
@@ -68,8 +69,14 @@ internal fun InstanceSelectionScreen(
             fontWeight = FontWeight.Bold
         )
 
+        val columnCount = when {
+            windowSizeClass.widthSizeClass > WindowWidthSizeClass.Expanded -> 6
+            windowSizeClass.widthSizeClass > WindowWidthSizeClass.Medium -> 4
+            else -> 2
+        }
+
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Fixed(columnCount),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(bottom = 16.dp)

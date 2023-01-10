@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Course(
-    val id: Long,
+    val id: Long = 0L,
     val title: String = "",
     val description: String = "",
     @SerialName("courseIcon") val courseIconPath: String? = null,
@@ -19,7 +19,8 @@ data class Course(
     val semester: String = "",
     val registrationConfirmationMessage: String = "",
     val accuracyOfScores: Float = 1f,
-    val postsEnabled: Boolean = false
+    val postsEnabled: Boolean = false,
+    val color: String? = null,
 ) {
     private val maxPointsPossibleHalves get() = exercises.sumOf { it.maxPointsHalves }
     private val currentScoreHalves get() = exercises.sumOf { it.currentScoreHalves }
