@@ -6,15 +6,18 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import de.tum.informatics.www1.artemis.native_app.android.BuildConfig
+import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.createStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.ViewType
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.navigateToStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.standalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.navigateToCourseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.course
@@ -35,7 +38,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.nav
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.quizParticipation
 import de.tum.informatics.www1.artemis.native_app.feature.settings.navigateToSettings
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsScreen
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 
@@ -50,7 +55,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //When the user is logged in, immediately display the course overview.
+        // When the user is logged in, immediately display the course overview.
         val startDestination = runBlocking {
             when (accountService.authenticationData.first()) {
                 is AccountService.AuthenticationData.LoggedIn -> DASHBOARD_DESTINATION
@@ -66,6 +71,22 @@ class MainActivity : AppCompatActivity() {
         setContent {
             AppTheme {
                 val navController = rememberNavController()
+
+                // Listen for when the user get logged out (e.g. because their token has expired)
+                // This only happens when the user has the app running for multiple days or the user logged out manually
+                LaunchedEffect(Unit) {
+                    accountService.authenticationData.withPrevious()
+                        .map { (prev, now) -> prev?.isLoggedIn to now.isLoggedIn }
+                        .collect { (wasLoggedIn, isLoggedIn) ->
+                            if (wasLoggedIn == true && !isLoggedIn) {
+                                navController.navigateToLogin {
+                                    popUpTo(DASHBOARD_DESTINATION) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                        }
+                }
 
                 val onLoggedIn = {
                     // Navigate to the course overview and remove the login screen from the navigation stack.
@@ -176,11 +197,7 @@ class MainActivity : AppCompatActivity() {
                         versionCode = BuildConfig.VERSION_CODE,
                         versionName = BuildConfig.VERSION_NAME,
                         onLoggedOut = {
-                            navController.navigateToLogin {
-                                popUpTo(DASHBOARD_DESTINATION) {
-                                    inclusive = true
-                                }
-                            }
+                            // Nothing to do here, automatically moved to login screen
                         },
                         onDisplayThirdPartyLicenses = {
                             val intent =

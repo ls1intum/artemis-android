@@ -5,23 +5,20 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.auth0.jwt.JWT
+import com.auth0.jwt.interfaces.DecodedJWT
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.LoginService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.toKotlinInstant
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 
 @OptIn(DelicateCoroutinesApi::class)
 internal class AccountServiceImpl(
@@ -49,13 +46,30 @@ internal class AccountServiceImpl(
             //The inMemoryJWT is always preferred
             (inMemoryJWT ?: storedJWT)
         }
-            .mapLatest { key ->
-                if (key != null && isKeyValid(key)) {
+            .transformLatest { key ->
+                val jwt = key?.let { JWT.decode(it) }
+
+                if (jwt != null && isKeyValid(jwt)) {
                     val username = JWT.decode(key).subject.orEmpty()
 
-                    AccountService.AuthenticationData.LoggedIn(authToken = key, username = username)
+                    emit(
+                        AccountService.AuthenticationData.LoggedIn(
+                            authToken = key,
+                            username = username
+                        )
+                    )
+
+                    // Wait till the expiration and the emit that the user is no longer logged in.
+                    val expirationInstant = jwt.expiresAtAsInstant?.toKotlinInstant()
+                    if (expirationInstant != null) {
+                        val withTolerance = expirationInstant - 1.hours
+                        val waitDuration: Duration = withTolerance - Clock.System.now()
+                        delay(waitDuration)
+
+                        emit(AccountService.AuthenticationData.NotLoggedIn)
+                    }
                 } else {
-                    AccountService.AuthenticationData.NotLoggedIn
+                    emit(AccountService.AuthenticationData.NotLoggedIn)
                 }
             }
             .shareIn(
@@ -100,9 +114,8 @@ internal class AccountServiceImpl(
         }
     }
 
-    private fun isKeyValid(key: String): Boolean {
-        val decodedKey = JWT.decode(key)
-        val expiresAt = decodedKey.expiresAtAsInstant?.toKotlinInstant() ?: return true
+    private fun isKeyValid(jwt: DecodedJWT): Boolean {
+        val expiresAt = jwt.expiresAtAsInstant?.toKotlinInstant() ?: return true
 
         val remainingValidDuration = expiresAt - Clock.System.now()
         return remainingValidDuration > 5.days

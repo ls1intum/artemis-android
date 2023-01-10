@@ -46,3 +46,6 @@ val AccountService.authToken: Flow<String>
             AccountService.AuthenticationData.NotLoggedIn -> ""
         }
     }.distinctUntilChanged()
+
+val AccountService.AuthenticationData.isLoggedIn: Boolean
+    get() = this is AccountService.AuthenticationData.LoggedIn
