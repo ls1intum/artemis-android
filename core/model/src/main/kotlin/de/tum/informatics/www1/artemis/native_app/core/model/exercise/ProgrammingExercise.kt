@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("programming")
 data class ProgrammingExercise(
-    override val id: Long? = null,
+    override val id: Long = 0L,
     override val title: String? = null,
     override val shortName: String? = null,
     override val maxPoints: Float? = null,

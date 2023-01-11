@@ -44,8 +44,6 @@ import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 
-
-
 /**
  * Main and only activity used in the android app.
  * Navigation is handled by decompose and jetpack compose.
@@ -149,6 +147,7 @@ class MainActivity : AppCompatActivity() {
 
                     exercise(
                         navController = navController,
+                        windowSizeClass = windowSizeClass,
                         onNavigateBack = navController::navigateUp,
                         onParticipateInQuiz = { courseId, exerciseId, isPractice ->
                             val quizType = if (isPractice) QuizType.PRACTICE else QuizType.LIVE

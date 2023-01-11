@@ -9,14 +9,29 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Downloading
+import androidx.compose.material.icons.filled.HelpCenter
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.ViewHeadline
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
@@ -27,14 +42,18 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SmartphoneMetisUi
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.tabs.details.ExerciseDetailsTab
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.tabs.overview.ExerciseOverviewTab
-import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
+import org.koin.androidx.compose.get
 
 /**
  * Display the exercise screen with tabs for the problem statement, the exercise info and the questions and answer.
@@ -49,6 +68,12 @@ internal fun ExerciseScreen(
     onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit,
     onParticipateInQuiz: (courseId: Long, isPractice: Boolean) -> Unit
 ) {
+    val serverConfigurationService: ServerConfigurationService = get()
+    val serverUrl: String by serverConfigurationService.serverUrl.collectAsState(initial = "")
+
+    val accountService: AccountService = get()
+    val authToken: String by accountService.authToken.collectAsState(initial = "")
+
     val exerciseDataState = viewModel.exercise.collectAsState(initial = DataState.Loading()).value
 
     val topAppBarState = rememberTopAppBarState()
@@ -125,7 +150,7 @@ internal fun ExerciseScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 val selectedTabIndexState = rememberSaveable { mutableStateOf(0) }
-                var selectedTabIndex by selectedTabIndexState
+                val selectedTabIndex by selectedTabIndexState
 
                 TabRow(
                     modifier = Modifier.fillMaxWidth(),
@@ -138,9 +163,7 @@ internal fun ExerciseScreen(
 
                 val tabModifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(
-                        rememberScrollState()
-                    )
+                    .verticalScroll(rememberScrollState())
 
                 when (selectedTabIndex) {
                     0 -> {
@@ -156,6 +179,9 @@ internal fun ExerciseScreen(
                         ) {
                             ExerciseOverviewTab(
                                 modifier = tabModifier,
+                                serverUrl = serverUrl,
+                                authToken = authToken,
+                                courseId = courseId,
                                 exercise = exercise,
                                 gradedParticipation = gradedParticipation,
                                 onViewResult = onViewResult,
@@ -192,7 +218,7 @@ internal fun ExerciseScreen(
                     2 -> {
                         // Maybe add a replacement ui
                         val courseId = exercise.course?.id ?: return@Column
-                        val exerciseId = exercise.id ?: return@Column
+                        val exerciseId = exercise.id
 
                         val metisContext = remember(courseId, exerciseId) {
                             MetisContext.Exercise(courseId = courseId, exerciseId)

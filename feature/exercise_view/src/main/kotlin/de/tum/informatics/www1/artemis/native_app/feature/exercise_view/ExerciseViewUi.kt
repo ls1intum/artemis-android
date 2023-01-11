@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.exercise_view
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -45,6 +46,7 @@ fun NavController.navigateToExercise(exerciseId: Long, builder: NavOptionsBuilde
 
 fun NavGraphBuilder.exercise(
     navController: NavController,
+    windowSizeClass: WindowSizeClass,
     onNavigateBack: () -> Unit,
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit
 ) {
