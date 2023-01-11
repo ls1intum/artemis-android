@@ -80,6 +80,7 @@ fun NavGraphBuilder.exercise(
                 ExerciseScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = exerciseViewModel,
+                    windowSizeClass = windowSizeClass,
                     onNavigateBack = onNavigateBack,
                     onViewResult = {
                         nestedNavController.navigate(NESTED_EXERCISE_RESULT_DESTINATION)

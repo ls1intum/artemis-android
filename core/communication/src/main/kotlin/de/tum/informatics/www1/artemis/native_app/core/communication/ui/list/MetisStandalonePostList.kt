@@ -8,7 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,17 +39,19 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisMod
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisOutdatedBanner
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItem
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItemViewType
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.navigateToCreateStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.getEmojiForEmojiId
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
-import org.koin.androidx.compose.get
 
 @Composable
 internal fun MetisStandalonePostList(
     modifier: Modifier,
     viewModel: MetisListViewModel,
+    listContentPadding: PaddingValues,
+    state: LazyListState = rememberLazyListState(),
     onClickViewPost: (clientPostId: String) -> Unit,
-    onClickViewReplies: (clientPostId: String) -> Unit
+    onClickViewReplies: (clientPostId: String) -> Unit,
+    onClickCreatePost: (() -> Unit)?
 ) {
     val posts: LazyPagingItems<Post> = viewModel.postPagingData.collectAsLazyPagingItems()
     val isDataOutdated = viewModel.isDataOutdated.collectAsState(initial = false).value
@@ -105,8 +112,22 @@ internal fun MetisStandalonePostList(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
+                        contentPadding = listContentPadding,
+                        state = state
                     ) {
+                        onClickCreatePost?.let {
+                            item {
+                                Button(onClick = it) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = null
+                                    )
+
+                                    Text(text = stringResource(id = R.string.communication_create_post_button))
+                                }
+                            }
+                        }
+
                         items(posts, key = { it.clientPostId }) { post ->
                             val asAffectedPost = post?.let {
                                 MetisService.AffectedPost.Standalone(it.serverPostId)

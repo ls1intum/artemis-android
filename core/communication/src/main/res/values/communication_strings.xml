@@ -5,6 +5,8 @@
         <item quantity="other">Show %1$d replies</item>
     </plurals>
 
+    <string name="communication_create_post_button">Create post</string>
+
     <string name="post_view_edit_post">Edit</string>
     <string name="post_view_delete_post">Delete</string>
 

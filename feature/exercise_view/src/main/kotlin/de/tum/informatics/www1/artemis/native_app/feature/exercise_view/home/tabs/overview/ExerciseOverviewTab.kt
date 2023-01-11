@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.tabs.overview
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -19,18 +20,15 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.LoadingState
 import com.google.accompanist.web.WebView
-import com.google.accompanist.web.rememberWebViewState
+import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
-import io.ktor.http.URLBuilder
-import io.ktor.http.appendPathSegments
 
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 internal fun ExerciseOverviewTab(
     modifier: Modifier,
-    serverUrl: String,
     authToken: String,
-    courseId: Long,
     exercise: Exercise,
     gradedParticipation: Participation?,
     onClickStartExercise: () -> Unit,
@@ -38,15 +36,16 @@ internal fun ExerciseOverviewTab(
     onClickPracticeQuiz: () -> Unit,
     onClickStartQuiz: () -> Unit,
     onClickOpenQuiz: () -> Unit,
-    onViewResult: () -> Unit
+    onViewResult: () -> Unit,
+    webViewState: WebViewState,
+    setWebView: (WebView) -> Unit,
+    webView: WebView?
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Spacer(modifier = Modifier)
 
         ParticipationStatusUi(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+            modifier = Modifier.fillMaxWidth(),
             exercise = exercise,
             gradedParticipation = gradedParticipation,
             onClickViewResult = onViewResult,
@@ -62,20 +61,6 @@ internal fun ExerciseOverviewTab(
             AuthWebClient(authToken)
         }
 
-        val url = remember(serverUrl, courseId, exercise.id) {
-            URLBuilder(serverUrl).apply {
-                appendPathSegments(
-                    "courses",
-                    courseId.toString(),
-                    "exercises",
-                    exercise.id.toString()
-                )
-            }
-                .buildString()
-        }
-
-        val webViewState = rememberWebViewState(url = url)
-
         Box(
             modifier = if (!webViewState.isLoading) Modifier.fillMaxWidth() else
                 Modifier
@@ -90,6 +75,15 @@ internal fun ExerciseOverviewTab(
                     it.settings.javaScriptEnabled = true
                     it.settings.domStorageEnabled = true
                     it.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+                },
+                factory = { context ->
+                    if (webView != null) {
+                        webView
+                    } else {
+                        val newWebView = WebView(context)
+                        setWebView(newWebView)
+                        newWebView
+                    }
                 }
             )
 

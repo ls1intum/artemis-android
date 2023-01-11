@@ -1,19 +1,25 @@
 package de.tum.informatics.www1.artemis.native_app.core.communication.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,7 +27,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -33,12 +42,104 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_s
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.filter_header.MetisFilterHeader
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.list.MetisStandalonePostList
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.MetisStandalonePostUi
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.MetisStandalonePostViewModel
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.ViewType
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.navigateToStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+
+/**
+ * Metis ui displayed on the right side of other content.
+ */
+@Composable
+fun SideBarMetisUi(
+    modifier: Modifier,
+    metisContext: MetisContext,
+    navController: NavController,
+    title: @Composable () -> Unit
+) {
+    val viewModel: MetisListViewModel = koinViewModel { parametersOf(metisContext) }
+
+    val selectedClientSidePostId: MutableState<String?> = rememberSaveable { mutableStateOf(null) }
+    val currentSelectedClientSidePostId = selectedClientSidePostId.value
+
+    val postListState = rememberLazyListState()
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = ButtonDefaults.MinHeight),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AnimatedVisibility(visible = currentSelectedClientSidePostId != null) {
+                IconButton(onClick = { selectedClientSidePostId.value = null }) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                }
+            }
+
+            title()
+        }
+
+        Crossfade(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            targetState = currentSelectedClientSidePostId
+        ) { clientSidePostId ->
+            if (clientSidePostId == null) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    ViewModelMetisFilterHeaderImpl(
+                        modifier = Modifier.fillMaxWidth(),
+                        metisContext = metisContext,
+                        viewModel = viewModel
+                    )
+
+                    MetisStandalonePostList(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        viewModel = viewModel,
+                        listContentPadding = PaddingValues(bottom = 8.dp),
+                        state = postListState,
+                        onClickViewPost = { clientPostId ->
+                            selectedClientSidePostId.value = clientPostId
+                        },
+                        onClickViewReplies = { clientPostId ->
+                            selectedClientSidePostId.value = clientPostId
+                        },
+                        onClickCreatePost = {
+                            navController.navigateToCreateStandalonePostScreen(
+                                metisContext
+                            ) {}
+                        }
+                    )
+                }
+
+            } else {
+                val standalonePostViewModel: MetisStandalonePostViewModel =
+                    koinViewModel(parameters = {
+                        parametersOf(
+                            currentSelectedClientSidePostId,
+                            metisContext,
+                            false
+                        )
+                    })
+
+                MetisStandalonePostUi(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 8.dp),
+                    viewModel = standalonePostViewModel,
+                    viewType = ViewType.POST
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun SmartphoneMetisUi(
@@ -47,14 +148,6 @@ fun SmartphoneMetisUi(
     navController: NavController
 ) {
     val viewModel: MetisListViewModel = koinViewModel { parametersOf(metisContext) }
-    val courseWideContext = viewModel.courseWideContext.collectAsState(initial = null).value
-    val metisFilter = viewModel.filter.collectAsState(initial = emptyList()).value
-    val sortingStrategy = viewModel
-        .sortingStrategy
-        .collectAsState(initial = MetisSortingStrategy.DATE_DESCENDING)
-        .value
-
-    val query: String = viewModel.query.collectAsState(initial = "").value
 
     Scaffold(
         modifier = modifier,
@@ -74,49 +167,77 @@ fun SmartphoneMetisUi(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            MetisFilterHeader(
+            ViewModelMetisFilterHeaderImpl(
                 modifier = Modifier.fillMaxWidth(),
-                context = metisContext,
-                courseWideContext = courseWideContext,
-                metisFilter = metisFilter,
-                metisSortingStrategy = sortingStrategy,
-                query = query,
-                selectCourseWideContext = viewModel::updateCourseWideContext,
-                onSelectFilter = { selectedFilter, isSelected ->
-                    if (isSelected) {
-                        viewModel.addMetisFilter(selectedFilter)
-                    } else {
-                        viewModel.removeMetisFilter(selectedFilter)
-                    }
-                },
-                onChangeMetisSortingStrategy = viewModel::updateSortingStrategy,
-                onUpdateQuery = viewModel::updateQuery
+                metisContext = metisContext,
+                viewModel = viewModel
             )
+
+            val navigateToStandalonePostScreen = { clientPostId: String, viewType: ViewType ->
+                navController.navigateToStandalonePostScreen(
+                    clientPostId = clientPostId,
+                    viewType = viewType,
+                    metisContext = metisContext
+                ) {}
+            }
 
             MetisStandalonePostList(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
+                listContentPadding = PaddingValues(top = 8.dp, bottom = 80.dp),
                 onClickViewPost = { clientPostId ->
-                    navController.navigateToStandalonePostScreen(
-                        clientPostId = clientPostId,
-                        viewType = ViewType.WRITE_COMMENT,
-                        metisContext = metisContext
-                    ) {}
+                    navigateToStandalonePostScreen(clientPostId, ViewType.POST)
                 },
                 onClickViewReplies = { clientPostId ->
-                    navController.navigateToStandalonePostScreen(
-                        clientPostId = clientPostId,
-                        viewType = ViewType.REPLIES,
-                        metisContext = metisContext
-                    ) {}
-                }
+                    navigateToStandalonePostScreen(clientPostId, ViewType.REPLIES)
+                },
+                onClickCreatePost = null
             )
         }
     }
 }
 
 @Composable
-internal fun ColumnScope.MetisOutdatedBanner(modifier: Modifier, isOutdated: Boolean, requestRefresh: () -> Unit) {
+private fun ViewModelMetisFilterHeaderImpl(
+    modifier: Modifier,
+    metisContext: MetisContext,
+    viewModel: MetisListViewModel
+) {
+    val query: String = viewModel.query.collectAsState(initial = "").value
+
+    val courseWideContext = viewModel.courseWideContext.collectAsState(initial = null).value
+    val metisFilter = viewModel.filter.collectAsState(initial = emptyList()).value
+    val sortingStrategy = viewModel
+        .sortingStrategy
+        .collectAsState(initial = MetisSortingStrategy.DATE_DESCENDING)
+        .value
+
+    MetisFilterHeader(
+        modifier = modifier,
+        context = metisContext,
+        courseWideContext = courseWideContext,
+        metisFilter = metisFilter,
+        metisSortingStrategy = sortingStrategy,
+        query = query,
+        selectCourseWideContext = viewModel::updateCourseWideContext,
+        onSelectFilter = { selectedFilter, isSelected ->
+            if (isSelected) {
+                viewModel.addMetisFilter(selectedFilter)
+            } else {
+                viewModel.removeMetisFilter(selectedFilter)
+            }
+        },
+        onChangeMetisSortingStrategy = viewModel::updateSortingStrategy,
+        onUpdateQuery = viewModel::updateQuery
+    )
+}
+
+@Composable
+internal fun ColumnScope.MetisOutdatedBanner(
+    modifier: Modifier,
+    isOutdated: Boolean,
+    requestRefresh: () -> Unit
+) {
     AnimatedVisibility(visible = isOutdated) {
         Box(
             modifier = modifier.then(
