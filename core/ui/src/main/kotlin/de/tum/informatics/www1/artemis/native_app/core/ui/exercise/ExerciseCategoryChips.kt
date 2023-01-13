@@ -35,6 +35,11 @@ fun ExerciseCategoryChipRow(modifier: Modifier, exercise: Exercise) {
         collectExerciseCategoryChips(context, exercise, quizStatus)
     }
 
+    ExerciseCategoryChipRow(modifier = modifier, chips = chips)
+}
+
+@Composable
+fun ExerciseCategoryChipRow(modifier: Modifier, chips: List<ExerciseCategoryChipData>) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -45,7 +50,7 @@ fun ExerciseCategoryChipRow(modifier: Modifier, exercise: Exercise) {
     }
 }
 
-private data class ExerciseCategoryChipData(val text: String, val color: Color)
+data class ExerciseCategoryChipData(val text: String, val color: Color)
 
 /**
  * Displays a colored rounded rectangle with the given text in it.

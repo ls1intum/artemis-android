@@ -1,19 +1,17 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.tabs.overview
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
+import com.google.accompanist.flowlayout.FlowMainAxisAlignment
+import com.google.accompanist.flowlayout.FlowRow
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
@@ -64,126 +62,147 @@ internal fun ParticipationStatusUi(
             ).collectAsState(initial = ResultTemplateStatus.NoResult).value
         }
 
-    Card(modifier = modifier) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = stringResource(id = R.string.exercise_participation_status_title),
-                style = MaterialTheme.typography.titleMedium
-            )
+    FlowRow(modifier = modifier, mainAxisSpacing = 8.dp, crossAxisAlignment = FlowCrossAxisAlignment.Center) {
+        ExerciseActionButtons(
+            modifier = Modifier,
+            exercise = exercise,
+            gradedParticipation = gradedParticipation,
+            onClickStartExercise = onClickStartExercise,
+            onClickPracticeQuiz = onClickPracticeQuiz,
+            onClickOpenQuiz = onClickOpenQuiz,
+            onClickStartQuiz = onClickStartQuiz,
+            templateStatus = templateStatus,
+            onClickOpenTextExercise = onClickOpenTextExercise,
+            showResult = showResult,
+            onClickViewResult = onClickViewResult
+        )
 
-            ParticipationStatusUi(
-                modifier = Modifier.fillMaxWidth(),
-                exercise = exercise,
-                getTemplateStatus = {
-                    checkNotNull(templateStatus) { "template status must not be null as participation status has a participation" }
-                    templateStatus
-                }
-            )
-
-            // TODO: Team mode is currently not supported. Therefore, the buttons are disabled in team mode exercises
-
-            val buttonModifier = Modifier.align(Alignment.End)
-            if (exercise is TextExercise) {
-                if (gradedParticipation == null && isStartExerciseAvailable(exercise)) {
-                    Button(
-                        modifier = buttonModifier,
-                        onClick = onClickStartExercise,
-                        enabled = !exercise.teamMode
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.exercise_participation_status_view_start_exercise_button)
-                        )
-                    }
-                }
+        ParticipationStatusUi(
+            modifier = Modifier,
+            exercise = exercise,
+            getTemplateStatus = {
+                checkNotNull(templateStatus) { "template status must not be null as participation status has a participation" }
+                templateStatus
             }
+        )
+    }
+}
 
-            if (exercise is QuizExercise) {
-                if (isStartPracticeAvailable(exercise = exercise)) {
-                    Button(
-                        modifier = buttonModifier,
-                        onClick = { onClickPracticeQuiz() }
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.exercise_participation_status_view_practice_quiz_button)
-                        )
-                    }
-                }
+/**
+ * This composable composes up to two buttons. The modifier parameter is applied to every button
+ * individually.
+ */
+@Composable
+private fun ExerciseActionButtons(
+    modifier: Modifier,
+    exercise: Exercise,
+    gradedParticipation: Participation?,
+    onClickStartExercise: () -> Unit,
+    onClickPracticeQuiz: () -> Unit,
+    onClickOpenQuiz: () -> Unit,
+    onClickStartQuiz: () -> Unit,
+    templateStatus: ResultTemplateStatus?,
+    onClickOpenTextExercise: (participationId: Long) -> Unit,
+    showResult: Boolean,
+    onClickViewResult: () -> Unit
+) {
+    // TODO: Team mode is currently not supported. Therefore, the buttons are disabled in team mode exercises
 
-                val openQuizAvailable =
-                    exercise.notStartedC || gradedParticipation?.initializationState == Participation.InitializationState.INITIALIZED
-                val startQuizAvailable = exercise.isUninitializedC
-
-                if (openQuizAvailable || startQuizAvailable) {
-                    Button(
-                        modifier = buttonModifier,
-                        onClick = {
-                            if (openQuizAvailable) onClickOpenQuiz()
-                            else onClickStartQuiz()
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(
-                                id = if (openQuizAvailable) R.string.exercise_participation_status_view_open_quiz_button
-                                else R.string.exercise_participation_status_view_start_quiz_button
-                            )
-                        )
-                    }
-                }
+    if (exercise is TextExercise) {
+        if (gradedParticipation == null && isStartExerciseAvailable(exercise)) {
+            Button(
+                modifier = modifier,
+                onClick = onClickStartExercise,
+                enabled = !exercise.teamMode
+            ) {
+                Text(
+                    text = stringResource(id = R.string.exercise_participation_status_view_start_exercise_button)
+                )
             }
+        }
+    }
 
-            if (templateStatus != null) {
-                if (exercise is TextExercise) {
-                    if (gradedParticipation?.initializationState == Participation.InitializationState.INITIALIZED) {
-                        Button(
-                            modifier = buttonModifier,
-                            onClick = {
-                                onClickOpenTextExercise(
-                                    gradedParticipation.id ?: return@Button
-                                )
-                            },
-                            enabled = !exercise.teamMode
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.exercise_participation_status_view_open_exercise_button)
-                            )
-                        }
-                    }
+    if (exercise is QuizExercise) {
+        if (isStartPracticeAvailable(exercise = exercise)) {
+            Button(
+                modifier = modifier,
+                onClick = { onClickPracticeQuiz() }
+            ) {
+                Text(
+                    text = stringResource(id = R.string.exercise_participation_status_view_practice_quiz_button)
+                )
+            }
+        }
 
-                    if (gradedParticipation?.initializationState == Participation.InitializationState.FINISHED &&
-                        (gradedParticipation.results.isNullOrEmpty() || !showResult)
-                    ) {
-                        Button(
-                            modifier = buttonModifier,
-                            onClick = {
-                                onClickOpenTextExercise(
-                                    gradedParticipation.id ?: return@Button
-                                )
-                            },
-                            enabled = !exercise.teamMode
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.exercise_participation_status_view_view_submission_button)
-                            )
-                        }
-                    }
+        val openQuizAvailable =
+            exercise.notStartedC || gradedParticipation?.initializationState == Participation.InitializationState.INITIALIZED
+        val startQuizAvailable = exercise.isUninitializedC
+
+        if (openQuizAvailable || startQuizAvailable) {
+            Button(
+                modifier = modifier,
+                onClick = {
+                    if (openQuizAvailable) onClickOpenQuiz()
+                    else onClickStartQuiz()
                 }
-
-                if (templateStatus is ResultTemplateStatus.WithResult && canShowResultDetails(
-                        null,
-                        templateStatus.result
+            ) {
+                Text(
+                    text = stringResource(
+                        id = if (openQuizAvailable) R.string.exercise_participation_status_view_open_quiz_button
+                        else R.string.exercise_participation_status_view_start_quiz_button
                     )
+                )
+            }
+        }
+    }
+
+    if (templateStatus != null) {
+        if (exercise is TextExercise) {
+            if (gradedParticipation?.initializationState == Participation.InitializationState.INITIALIZED) {
+                Button(
+                    modifier = modifier,
+                    onClick = {
+                        onClickOpenTextExercise(
+                            gradedParticipation.id ?: return@Button
+                        )
+                    },
+                    enabled = !exercise.teamMode
                 ) {
-                    Button(
-                        modifier = buttonModifier,
-                        onClick = onClickViewResult
-                    ) {
-                        Text(text = stringResource(id = R.string.exercise_participation_status_view_result_button))
-                    }
+                    Text(
+                        text = stringResource(id = R.string.exercise_participation_status_view_open_exercise_button)
+                    )
                 }
+            }
+
+            if (gradedParticipation?.initializationState == Participation.InitializationState.FINISHED &&
+                (gradedParticipation.results.isNullOrEmpty() || !showResult)
+            ) {
+                Button(
+                    modifier = modifier,
+                    onClick = {
+                        onClickOpenTextExercise(
+                            gradedParticipation.id ?: return@Button
+                        )
+                    },
+                    enabled = !exercise.teamMode
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.exercise_participation_status_view_view_submission_button)
+                    )
+                }
+            }
+        }
+
+        if (templateStatus is ResultTemplateStatus.WithResult && canShowResultDetails(
+                null,
+                templateStatus.result
+            )
+        ) {
+            Button(
+                modifier = modifier,
+                onClick = onClickViewResult
+            ) {
+                Text(text = stringResource(id = R.string.exercise_participation_status_view_result_button))
             }
         }
     }

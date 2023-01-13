@@ -37,7 +37,7 @@ private const val MIN_SCORE_GREEN = 80
 private const val MIN_SCORE_ORANGE = 40
 
 val ColorScheme.resultSuccess: Color
-    get() = Color.Green
+    get() = Color(0xFF4CAF50)
 val ColorScheme.resultMedium: Color
     get() = Color.Yellow
 val ColorScheme.resultBad: Color

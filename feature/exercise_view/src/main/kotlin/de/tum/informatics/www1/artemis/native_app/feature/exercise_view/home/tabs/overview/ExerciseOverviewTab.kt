@@ -56,7 +56,6 @@ internal fun ExerciseOverviewTab(
             onClickStartQuiz = onClickStartQuiz
         )
 
-
         val webViewClient = remember(authToken) {
             AuthWebClient(authToken)
         }

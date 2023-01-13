@@ -165,3 +165,15 @@ val Exercise.isStartExerciseAvailable: Flow<Boolean>
         return if (this !is ProgrammingExercise) flowOf(true)
         else dueDate?.isInFutureFlow() ?: flowOf(true)
     }
+
+private val Exercise.currentUserScore: Float?
+    get() = studentParticipations
+        .orEmpty()
+        .firstOrNull()?.results?.maxBy { it.completionDate ?: Instant.fromEpochSeconds(0L) }
+        ?.score
+
+val Exercise.currentUserPoints: Float? get() {
+    val maxPoints = maxPoints ?: return null
+    val currentUserScore = currentUserScore ?: return null
+    return maxPoints * (currentUserScore / 100f)
+}

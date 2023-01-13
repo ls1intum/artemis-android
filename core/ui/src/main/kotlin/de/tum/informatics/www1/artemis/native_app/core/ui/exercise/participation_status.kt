@@ -67,7 +67,7 @@ private fun getSubmissionResultStatusText(exercise: Exercise): String {
 
     val id = when {
         // TODO: Automatically update using a websocket.
-        exercise.teamMode == true && exercise.studentAssignedTeamIdComputed && exercise.studentAssignedTeamId != null -> {
+        exercise.teamMode && exercise.studentAssignedTeamIdComputed && exercise.studentAssignedTeamId != null -> {
             R.string.exercise_user_not_assigned_to_team
         }
         uninitialized -> R.string.exercise_user_not_started_exercise

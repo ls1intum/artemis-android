@@ -9,6 +9,10 @@
     <string name="exercise_view_tab_info">Information</string>
     <string name="exercise_view_tab_qna">Question and Answer</string>
 
+    <string name="exercise_view_overview_points_max">Points: %1$.1f</string>
+    <string name="exercise_view_overview_points_reached">Points: %1$.1f / %2$.1f</string>
+    <string name="exercise_view_overview_points_none">No points</string>
+
     <string name="exercise_participation_status_title">Your exercise status:</string>
     <string name="exercise_participation_status_view_result_button">View result</string>
     <string name="exercise_participation_status_view_start_exercise_button">Start exercise</string>

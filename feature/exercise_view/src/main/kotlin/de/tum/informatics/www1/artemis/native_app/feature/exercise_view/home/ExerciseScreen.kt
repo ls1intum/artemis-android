@@ -1,58 +1,32 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home
 
 import android.webkit.WebView
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Downloading
-import androidx.compose.material.icons.filled.HelpCenter
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.ViewHeadline
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.placeholder.material.placeholder
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshState
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.web.WebViewState
 import com.google.accompanist.web.rememberWebViewState
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SideBarMetisUi
@@ -63,7 +37,11 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.currentUserPoints
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCategoryChipData
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCategoryChipRow
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIcon
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseDataStateUi
@@ -71,8 +49,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.Exercise
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.tabs.details.ExerciseDetailsTab
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.tabs.overview.ExerciseOverviewTab
-import io.ktor.http.URLBuilder
-import io.ktor.http.appendPathSegments
+import io.ktor.http.*
+import me.onebone.toolbar.*
 import org.koin.androidx.compose.get
 
 private const val METIS_RATIO = 0.3f
@@ -99,9 +77,6 @@ internal fun ExerciseScreen(
 
     val exerciseDataState by viewModel.exercise.collectAsState(initial = DataState.Loading())
 
-    val topAppBarState = rememberTopAppBarState()
-
-
     val gradedParticipation by viewModel.gradedParticipation.collectAsState(initial = null)
 
     BoxWithConstraints(modifier = modifier) {
@@ -110,37 +85,55 @@ internal fun ExerciseScreen(
             windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Expanded
                     && (maxWidth * METIS_RATIO) >= 300.dp
 
-        val scrollBehavior = if (displayCommunicationOnSide) {
-            TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
-        } else TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
+        // Only collapse toolbar if otherwise too much of the screen would be occupied by it
+        val isToolbarCollapsible = windowSizeClass.heightSizeClass < WindowHeightSizeClass.Medium
 
-        Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            topBar = {
-                ExerciseScreenTopBar(
-                    displayCommunicationOnSide = displayCommunicationOnSide,
-                    exerciseDataState = exerciseDataState,
-                    onNavigateBack = onNavigateBack,
-                    scrollBehavior = scrollBehavior
+        val state = rememberCollapsingToolbarScaffoldState()
+        CollapsingToolbarScaffold(
+            modifier = Modifier.fillMaxSize(),
+            state = state,
+            toolbar = {
+                ExerciseScreenCollapsingTopBar(
+                    state = state,
+                    exercise = exerciseDataState,
+                    onNavigateBack = onNavigateBack
                 )
-            }
-        ) { padding ->
-            var triggeredRefreshManually by remember { mutableStateOf(false) }
-            val isRefreshing = triggeredRefreshManually && exerciseDataState is DataState.Loading
+            },
+            scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
+            body = ExerciseScreenBody(
+                viewModel,
+                exerciseDataState,
+                displayCommunicationOnSide,
+                serverUrl,
+                gradedParticipation,
+                authToken,
+                navController,
+                onViewTextExerciseParticipationScreen,
+                onParticipateInQuiz,
+                onViewResult
+            )
+        )
+    }
 
-            val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
+}
 
-            val triggerRefresh = {
-                triggeredRefreshManually = true
-                viewModel.requestReloadExercise()
-            }
-
+@Composable
+private fun ExerciseScreenBody(
+    viewModel: ExerciseViewModel,
+    exerciseDataState: DataState<Exercise>,
+    displayCommunicationOnSide: Boolean,
+    serverUrl: String,
+    gradedParticipation: Participation?,
+    authToken: String,
+    navController: NavController,
+    onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit,
+    onParticipateInQuiz: (courseId: Long, isPractice: Boolean) -> Unit,
+    onViewResult: () -> Unit
+): @Composable() (CollapsingToolbarScaffoldScope.() -> Unit) =
+    {
+        Surface(Modifier.fillMaxSize()) {
             ExerciseDataStateUi(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
+                modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
                 value = exerciseDataState
             ) { exercise ->
@@ -186,27 +179,25 @@ internal fun ExerciseScreen(
                         ScreenWithTabsUi(
                             modifier = modifier,
                             selectedTabIndex = selectedTabIndex,
+                            gradedParticipation = gradedParticipation,
                             displayCommunicationOnSide = displayCommunicationOnSide,
-                            swipeRefreshState = swipeRefreshState,
-                            triggerRefresh = triggerRefresh,
                             authToken = authToken,
                             exercise = exercise,
-                            onViewTextExerciseParticipationScreen = onViewTextExerciseParticipationScreen,
-                            onParticipateInQuiz = onParticipateInQuiz,
                             courseId = courseId,
-                            onViewResult = onViewResult,
                             webViewState = webViewState,
                             currentWebView = savedWebView,
                             metisContext = metisContext,
                             navController = navController,
-                            gradedParticipation = gradedParticipation,
                             onUpdateSelectedTabIndex = { selectedTabIndexState.value = it },
-                            setWebView = { savedWebView = it },
                             onClickStartExercise = {
                                 viewModel.startExercise(
                                     onViewTextExerciseParticipationScreen
                                 )
-                            }
+                            },
+                            onViewTextExerciseParticipationScreen = onViewTextExerciseParticipationScreen,
+                            onParticipateInQuiz = onParticipateInQuiz,
+                            setWebView = { savedWebView = it },
+                            onViewResult = onViewResult
                         )
                     }
 
@@ -238,15 +229,104 @@ internal fun ExerciseScreen(
                             )
                         }
                     } else {
-                        tabUi(
-                            Modifier.fillMaxSize()
-                        )
+                        tabUi(Modifier.fillMaxSize())
                     }
                 }
             }
         }
     }
 
+@Composable
+private fun CollapsingToolbarScope.ExerciseScreenCollapsingTopBar(
+    state: CollapsingToolbarScaffoldState,
+    exercise: DataState<Exercise>,
+    onNavigateBack: () -> Unit
+) {
+    TopAppBar(
+        modifier = Modifier.fillMaxWidth(),
+        title = {
+            TitleText(
+                modifier = Modifier.graphicsLayer { alpha = 1f - state.toolbarState.progress },
+                exerciseDataState = exercise
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onNavigateBack) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+            }
+        }
+    )
+
+    TopBarExerciseInformation(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 64.dp)
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(horizontal = 16.dp)
+            .parallax(0f),
+        state = state,
+        exercise = exercise
+    )
+}
+
+@Composable
+private fun TopBarExerciseInformation(
+    modifier: Modifier,
+    state: CollapsingToolbarScaffoldState,
+    exercise: DataState<Exercise>
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        TitleText(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer { alpha = state.toolbarState.progress },
+            exerciseDataState = exercise,
+            style = MaterialTheme.typography.headlineLarge
+        )
+
+        EmptyDataStateUi(
+            dataState = exercise,
+            otherwise = {
+                ExerciseCategoryChipRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .placeholder(true),
+                    chips = listOf(
+                        ExerciseCategoryChipData("WWWW", Color.Cyan),
+                        ExerciseCategoryChipData("WWWW", Color.Cyan),
+                        ExerciseCategoryChipData("WWWW", Color.Cyan)
+                    )
+                )
+            }
+        ) { loadedExercise ->
+            ExerciseCategoryChipRow(modifier = Modifier.fillMaxWidth(), exercise = loadedExercise)
+        }
+
+        val currentUserPoints = exercise.bind { it.currentUserPoints }.orElse(null)
+        val maxPoints = exercise.bind { it.maxPoints }.orElse(null)
+
+        val text = when {
+            currentUserPoints != null && maxPoints != null -> stringResource(
+                id = R.string.exercise_view_overview_points_reached,
+                currentUserPoints,
+                maxPoints
+            )
+            maxPoints != null -> stringResource(
+                id = R.string.exercise_view_overview_points_max,
+                maxPoints
+            )
+            else -> stringResource(id = R.string.exercise_view_overview_points_none)
+        }
+
+        Text(
+            modifier = Modifier.placeholder(exercise !is DataState.Success),
+            text = text,
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
 }
 
 @Composable
@@ -257,46 +337,7 @@ private fun ExerciseScreenTopBar(
     scrollBehavior: TopAppBarScrollBehavior
 ) {
     val title = @Composable {
-        val fontSize = LocalTextStyle.current.fontSize
-
-        val (titleText, inlineContent) = remember(exerciseDataState) {
-            val text = buildAnnotatedString {
-                appendInlineContent("icon")
-                append(" ")
-                append(
-                    exerciseDataState.bind { it.title }.orElse(null)
-                        ?: "Exercise name placeholder"
-                )
-            }
-
-            val inlineContent = mapOf(
-                "icon" to InlineTextContent(
-                    Placeholder(
-                        fontSize,
-                        fontSize,
-                        PlaceholderVerticalAlign.TextCenter
-                    )
-                ) {
-                    Icon(
-                        imageVector = exerciseDataState.bind {
-                            getExerciseTypeIcon(
-                                it
-                            )
-                        }
-                            .orElse(Icons.Default.Downloading),
-                        contentDescription = null
-                    )
-                }
-            )
-
-            text to inlineContent
-        }
-
-        Text(
-            text = titleText,
-            inlineContent = inlineContent,
-            modifier = Modifier.placeholder(exerciseDataState !is DataState.Success)
-        )
+        TitleText(Modifier, exerciseDataState)
     }
 
     val navigationIcon = @Composable {
@@ -321,12 +362,60 @@ private fun ExerciseScreenTopBar(
 }
 
 @Composable
+private fun TitleText(
+    modifier: Modifier,
+    exerciseDataState: DataState<Exercise>,
+    style: TextStyle = LocalTextStyle.current
+) {
+    val fontSize = style.fontSize
+
+    val (titleText, inlineContent) = remember(exerciseDataState) {
+        val text = buildAnnotatedString {
+            appendInlineContent("icon")
+            append(" ")
+            append(
+                exerciseDataState.bind { it.title }.orElse(null)
+                    ?: "Exercise name placeholder"
+            )
+        }
+
+        val inlineContent = mapOf(
+            "icon" to InlineTextContent(
+                Placeholder(
+                    fontSize,
+                    fontSize,
+                    PlaceholderVerticalAlign.TextCenter
+                )
+            ) {
+                Icon(
+                    imageVector = exerciseDataState.bind {
+                        getExerciseTypeIcon(
+                            it
+                        )
+                    }
+                        .orElse(Icons.Default.Downloading),
+                    contentDescription = null
+                )
+            }
+        )
+
+        text to inlineContent
+    }
+
+    Text(
+        text = titleText,
+        inlineContent = inlineContent,
+        modifier = modifier.placeholder(exerciseDataState !is DataState.Success),
+        style = style
+    )
+}
+
+@Composable
 private fun ScreenWithTabsUi(
     modifier: Modifier,
     selectedTabIndex: Int,
     gradedParticipation: Participation?,
     displayCommunicationOnSide: Boolean,
-    swipeRefreshState: SwipeRefreshState,
     authToken: String,
     exercise: Exercise,
     courseId: Long,
@@ -339,8 +428,7 @@ private fun ScreenWithTabsUi(
     onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit,
     onParticipateInQuiz: (courseId: Long, isPractice: Boolean) -> Unit,
     setWebView: (WebView) -> Unit,
-    onViewResult: () -> Unit,
-    triggerRefresh: () -> Unit
+    onViewResult: () -> Unit
 ) {
     Column(modifier = modifier) {
         TabRow(
@@ -380,45 +468,35 @@ private fun ScreenWithTabsUi(
 
         when (selectedTabIndex) {
             0 -> {
-                SwipeRefresh(
-                    state = swipeRefreshState,
-                    onRefresh = triggerRefresh
-                ) {
-                    ExerciseOverviewTab(
-                        modifier = scrollableTabModifier,
-                        authToken = authToken,
-                        exercise = exercise,
-                        gradedParticipation = gradedParticipation,
-                        onClickStartExercise = onClickStartExercise,
-                        onClickOpenTextExercise = onViewTextExerciseParticipationScreen,
-                        onClickPracticeQuiz = {
-                            onParticipateInQuiz(courseId, true)
-                        },
-                        onClickStartQuiz = {
-                            onParticipateInQuiz(courseId, false)
-                        },
-                        onClickOpenQuiz = {
-                            onParticipateInQuiz(courseId, false)
-                        },
-                        onViewResult = onViewResult,
-                        webViewState = webViewState,
-                        setWebView = setWebView,
-                        webView = currentWebView
-                    )
-                }
+                ExerciseOverviewTab(
+                    modifier = scrollableTabModifier,
+                    authToken = authToken,
+                    exercise = exercise,
+                    gradedParticipation = gradedParticipation,
+                    onClickStartExercise = onClickStartExercise,
+                    onClickOpenTextExercise = onViewTextExerciseParticipationScreen,
+                    onClickPracticeQuiz = {
+                        onParticipateInQuiz(courseId, true)
+                    },
+                    onClickStartQuiz = {
+                        onParticipateInQuiz(courseId, false)
+                    },
+                    onClickOpenQuiz = {
+                        onParticipateInQuiz(courseId, false)
+                    },
+                    onViewResult = onViewResult,
+                    webViewState = webViewState,
+                    setWebView = setWebView,
+                    webView = currentWebView
+                )
             }
 
             1 -> {
-                SwipeRefresh(
-                    state = swipeRefreshState,
-                    onRefresh = triggerRefresh
-                ) {
-                    ExerciseDetailsTab(
-                        modifier = scrollableTabModifier,
-                        exercise = exercise,
-                        latestResult = null
-                    )
-                }
+                ExerciseDetailsTab(
+                    modifier = scrollableTabModifier,
+                    exercise = exercise,
+                    latestResult = null
+                )
             }
 
             2 -> {

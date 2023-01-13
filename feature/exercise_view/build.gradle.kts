@@ -16,4 +16,8 @@ dependencies {
     implementation(libs.kotlinx.datetime)
     implementation(libs.accompanist.placeholder.material)
     implementation(libs.accompanist.swiperefresh)
+    implementation(libs.accompanist.flowlayout)
+
+    implementation("me.onebone:toolbar-compose:2.3.5")
+
 }
