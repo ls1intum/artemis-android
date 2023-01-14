@@ -37,7 +37,7 @@ import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.getStateViewModel
 import org.koin.core.parameter.parametersOf
 
-internal fun NavController.navigateToCreateStandalonePostScreen(
+fun NavController.navigateToCreateStandalonePostScreen(
     metisContext: MetisContext,
     builder: NavOptionsBuilder.() -> Unit
 ) {

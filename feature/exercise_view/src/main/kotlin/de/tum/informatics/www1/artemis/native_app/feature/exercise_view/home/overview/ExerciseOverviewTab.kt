@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.tabs.overview
+package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.overview
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap

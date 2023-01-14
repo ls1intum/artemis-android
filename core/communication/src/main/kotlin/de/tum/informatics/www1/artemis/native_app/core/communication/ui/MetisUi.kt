@@ -145,20 +145,23 @@ fun SideBarMetisUi(
 fun SmartphoneMetisUi(
     modifier: Modifier,
     metisContext: MetisContext,
-    navController: NavController
+    navController: NavController,
+    displayFab: Boolean = true
 ) {
     val viewModel: MetisListViewModel = koinViewModel { parametersOf(metisContext) }
 
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                navController.navigateToCreateStandalonePostScreen(metisContext) {}
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Create,
-                    contentDescription = null
-                )
+            if (displayFab) {
+                FloatingActionButton(onClick = {
+                    navController.navigateToCreateStandalonePostScreen(metisContext) {}
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Create,
+                        contentDescription = null
+                    )
+                }
             }
         }
     ) { padding ->

@@ -6,7 +6,6 @@
     <string name="exercise_view_try_again">Try again</string>
 
     <string name="exercise_view_tab_overview">Overview</string>
-    <string name="exercise_view_tab_info">Information</string>
     <string name="exercise_view_tab_qna">Question and Answer</string>
 
     <string name="exercise_view_overview_points_max">Points: %1$.1f</string>
