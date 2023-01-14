@@ -18,6 +18,6 @@ dependencies {
     implementation(libs.accompanist.swiperefresh)
     implementation(libs.accompanist.flowlayout)
 
-    implementation("me.onebone:toolbar-compose:2.3.5")
+    implementation(libs.toolbar.compose)
 
 }

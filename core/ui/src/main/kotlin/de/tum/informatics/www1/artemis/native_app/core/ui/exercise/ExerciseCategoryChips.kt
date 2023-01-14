@@ -2,9 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
 import android.content.Context
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,7 +43,7 @@ fun ExerciseCategoryChipRow(modifier: Modifier, chips: List<ExerciseCategoryChip
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         chips.forEach { chipData ->
-            ExerciseCategoryChip(modifier = Modifier, data = chipData)
+            ExerciseInfoChip(modifier = Modifier, data = chipData)
         }
     }
 }
@@ -57,18 +55,36 @@ data class ExerciseCategoryChipData(val text: String, val color: Color)
  * These are not material chips, as material chips indicate an action that can be performed.
  */
 @Composable
-private fun ExerciseCategoryChip(modifier: Modifier, data: ExerciseCategoryChipData) {
+fun ExerciseInfoChip(modifier: Modifier, data: ExerciseCategoryChipData) {
+    val color = data.color
+    val text = data.text
+    ExerciseInfoChip(modifier, color, text)
+}
+
+val ExerciseInfoChipTextHorizontalPadding = 8.dp
+val ExerciseInfoChipTextVerticalPadding = 4.dp
+val ExerciseInfoChipTextPaddingValues = PaddingValues(
+    horizontal = ExerciseInfoChipTextHorizontalPadding,
+    vertical = ExerciseInfoChipTextVerticalPadding
+)
+
+@Composable
+fun ExerciseInfoChip(
+    modifier: Modifier,
+    color: Color,
+    text: String
+) {
     Box(
         modifier = modifier.then(
             Modifier.background(
-                color = data.color,
+                color = color,
                 shape = RoundedCornerShape(25)
             )
         )
     ) {
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            text = data.text,
+            modifier = Modifier.padding(ExerciseInfoChipTextPaddingValues),
+            text = text,
             style = MaterialTheme.typography.labelLarge,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

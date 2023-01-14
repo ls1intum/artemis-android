@@ -54,21 +54,22 @@ internal fun ViewResultScreen(
                 .fillMaxSize()
                 .padding(padding),
             value = latestResultDataState,
-            viewModel = viewModel
-        ) { latestResult ->
-            if (exercise !is DataState.Success) return@ExerciseDataStateUi
+            onClickRetry = { viewModel.requestReloadExercise() },
+            onSuccess = { latestResult ->
+                if (exercise !is DataState.Success) return@ExerciseDataStateUi
 
-            ResultDetailUi(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp)
-                    .verticalScroll(rememberScrollState()),
-                exercise = exercise.data,
-                latestResult = latestResult ?: return@ExerciseDataStateUi,
-                feedbackItems = feedbackItems.orElse(emptyList()),
-                latestIndividualDueDate = latestIndividualDueDate.orElse(null),
-                buildLogs = buildLogs.orElse(emptyList())
-            )
-        }
+                ResultDetailUi(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp)
+                        .verticalScroll(rememberScrollState()),
+                    exercise = exercise.data,
+                    latestResult = latestResult ?: return@ExerciseDataStateUi,
+                    feedbackItems = feedbackItems.orElse(emptyList()),
+                    latestIndividualDueDate = latestIndividualDueDate.orElse(null),
+                    buildLogs = buildLogs.orElse(emptyList())
+                )
+            }
+        )
     }
 }

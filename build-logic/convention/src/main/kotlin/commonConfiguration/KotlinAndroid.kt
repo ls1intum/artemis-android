@@ -38,7 +38,6 @@ internal fun Project.configureKotlinAndroid(
                 "-opt-in=kotlin.Experimental",
             )
 
-            // Set JVM target to 1.8
             jvmTarget = JavaVersion.VERSION_11.toString()
         }
     }

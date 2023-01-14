@@ -132,8 +132,8 @@ fun NavGraphBuilder.exercise(
 internal fun <T> ExerciseDataStateUi(
     modifier: Modifier,
     value: DataState<T>,
-    viewModel: ExerciseViewModel,
-    onSuccess: @Composable BoxScope.(T) -> Unit
+    onSuccess: @Composable() (BoxScope.(T) -> Unit),
+    onClickRetry: () -> Unit
 ) {
     BasicDataStateUi(
         modifier = modifier,
@@ -141,7 +141,7 @@ internal fun <T> ExerciseDataStateUi(
         loadingText = stringResource(id = R.string.exercise_view_loading),
         failureText = stringResource(id = R.string.exercise_view_failure),
         retryButtonText = stringResource(id = R.string.exercise_view_try_again),
-        onClickRetry = { viewModel.requestReloadExercise() },
+        onClickRetry = onClickRetry,
         successUi = onSuccess
     )
 }

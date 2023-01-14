@@ -92,6 +92,7 @@ noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", 
 play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.0.0" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
 sentry-compose-android = { group = "io.sentry", name = "sentry-compose-android", version.ref = "sentry-android" }
+toolbar-compose = { group = "me.onebone", name = "toolbar-compose", version = "2.3.5" }
 
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
