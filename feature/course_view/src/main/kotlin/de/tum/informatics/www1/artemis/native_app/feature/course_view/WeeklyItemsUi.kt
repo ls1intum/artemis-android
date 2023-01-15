@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.course_view
 
+import android.os.Parcelable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.SaverScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +32,7 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.parcelize.Parcelize
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -43,16 +48,17 @@ internal fun <T> WeeklyItemsLazyColumn(
     getItemId: T.() -> Long,
     itemContent: @Composable (T) -> Unit
 ) {
-    val weeklyItemsSectionExpanded: MutableMap<GroupedByWeek<T>, Boolean> = remember(
-        weeklyItemGroups
+    val weeklyItemsSectionExpanded: MutableMap<String, Boolean> = rememberSaveable(
+        weeklyItemGroups,
+        saver = WeeklyItemsSectionExpandedSaver // When navigating do not lose the sections which have been expanded
     ) {
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
-        SnapshotStateMap<GroupedByWeek<T>, Boolean>().apply {
+        SnapshotStateMap<String, Boolean>().apply {
             putAll(
                 weeklyItemGroups
                     .map {
-                        it to when (it) {
+                        it.key to when (it) {
                             is GroupedByWeek.Unbound -> true
                             is GroupedByWeek.BoundToWeek -> {
                                 it.firstDayOfWeek.daysUntil(today) < 14
@@ -70,16 +76,16 @@ internal fun <T> WeeklyItemsLazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable(onClick = {
-                            weeklyItemsSectionExpanded[weeklyItems] =
-                                weeklyItemsSectionExpanded[weeklyItems] != true
+                            weeklyItemsSectionExpanded[weeklyItems.key] =
+                                weeklyItemsSectionExpanded[weeklyItems.key] != true
                         })
                         .padding(horizontal = 16.dp),
                     weeklyItems = weeklyItems,
-                    expanded = weeklyItemsSectionExpanded[weeklyItems] == true,
+                    expanded = weeklyItemsSectionExpanded[weeklyItems.key] == true,
                 )
             }
 
-            if (weeklyItemsSectionExpanded[weeklyItems] == true) {
+            if (weeklyItemsSectionExpanded[weeklyItems.key] == true) {
                 items(weeklyItems.items, key = getItemId) { item ->
                     itemContent(item)
                 }
@@ -98,7 +104,7 @@ internal fun <T> WeeklyItemsLazyColumn(
  * @param expanded if the item group this is showing is expanded
  */
 @Composable
-internal fun <T> WeeklyItemsSectionHeader(
+private fun <T> WeeklyItemsSectionHeader(
     modifier: Modifier,
     weeklyItems: GroupedByWeek<T>,
     expanded: Boolean
@@ -147,4 +153,20 @@ internal fun <T> WeeklyItemsSectionHeader(
 
         Icon(icon, contentDescription)
     }
+}
+
+private object WeeklyItemsSectionExpandedSaver :
+    Saver<SnapshotStateMap<String, Boolean>, WeeklyItemsSectionExpandedSaver.ParcelWrapper> {
+
+    @Parcelize
+    data class ParcelWrapper(val map: Map<String, Boolean>) : Parcelable
+
+    override fun restore(value: ParcelWrapper): SnapshotStateMap<String, Boolean> {
+        return SnapshotStateMap<String, Boolean>().apply {
+            putAll(value.map)
+        }
+    }
+
+    override fun SaverScope.save(value: SnapshotStateMap<String, Boolean>): ParcelWrapper =
+        ParcelWrapper(value)
 }
