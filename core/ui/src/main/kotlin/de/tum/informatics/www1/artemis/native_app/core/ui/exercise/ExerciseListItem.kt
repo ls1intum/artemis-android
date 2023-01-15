@@ -69,17 +69,12 @@ fun ExerciseListItem(
  */
 @Composable
 private fun ExerciseTypeIcon(modifier: Modifier, exercise: Exercise) {
-    Box(
-        modifier = modifier.then(
-            Modifier
-                .border(width = 1.dp, color = LocalContentColor.current, shape = CircleShape)
-        )
-    ) {
+    Box(modifier = modifier) {
         Icon(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(8.dp),
-            imageVector = getExerciseTypeIcon(exercise),
+            painter = getExerciseTypeIconPainter(exercise),
             contentDescription = null
         )
     }

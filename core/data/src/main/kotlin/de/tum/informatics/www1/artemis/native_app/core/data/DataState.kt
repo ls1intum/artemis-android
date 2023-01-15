@@ -26,7 +26,7 @@ sealed class DataState<T> {
         }
     }
 
-    fun <K> transform(op: (T) -> DataState<K>): DataState<K> {
+    inline fun <K> transform(op: (T) -> DataState<K>): DataState<K> {
         return when (this) {
             is Success -> op(data)
             is Failure -> Failure(throwable)
@@ -46,6 +46,13 @@ sealed class DataState<T> {
             is Success -> data
             else -> throw IllegalStateException("Data state is $this but Success was expected")
         }
+    }
+}
+
+fun <T> DataState<T>.orNull(): T? {
+    return when (this) {
+        is DataState.Success -> data
+        else -> null
     }
 }
 

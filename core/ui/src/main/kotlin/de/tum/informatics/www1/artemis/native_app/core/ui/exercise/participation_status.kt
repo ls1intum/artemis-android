@@ -33,7 +33,7 @@ fun ParticipationStatusUi(
     }
 ) {
     if (exercise.studentParticipations.orEmpty().isNotEmpty()) {
-        //Display dynamic updates component
+        // Display dynamic updates component
         val templateStatus = getTemplateStatus(exercise.studentParticipations!!.first())
 
         ExerciseResult(
@@ -43,7 +43,7 @@ fun ParticipationStatusUi(
             exercise = exercise
         )
     } else {
-        //Simply display text
+        // Simply display text
         Text(
             modifier = modifier,
             text = getSubmissionResultStatusText(exercise = exercise),

@@ -2,15 +2,30 @@ package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,17 +40,26 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.currentUserPoints
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.*
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCategoryChipData
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCategoryChipRow
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseInfoChip
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseInfoChipTextHorizontalPadding
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePointsDecimalFormat
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIconPainter
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 import kotlinx.datetime.Instant
 import me.onebone.toolbar.CollapsingToolbarScaffoldState
 import me.onebone.toolbar.CollapsingToolbarScope
 
+/**
+ * Display a collapsing top app bar with an incollapsible [TopAppBar] and [TopBarExerciseInformation] as the collapsible part in a column.
+ */
 @Composable
 internal fun CollapsingToolbarScope.ExerciseScreenCollapsingTopBar(
     modifier: Modifier,
@@ -130,8 +154,12 @@ internal fun TopBarExerciseInformation(
                 )
             }
 
-            val currentUserPoints = exercise.bind { it.currentUserPoints }.orElse(null)
-            val maxPoints = exercise.bind { it.maxPoints }.orElse(null)
+            val currentUserPoints = exercise.bind { exercise ->
+                exercise.currentUserPoints?.let(ExercisePointsDecimalFormat::format)
+            }.orElse(null)
+            val maxPoints = exercise.bind {exercise ->
+                exercise.maxPoints?.let(ExercisePointsDecimalFormat::format)
+            }.orElse(null)
 
             val pointsHintText = when {
                 currentUserPoints != null && maxPoints != null -> stringResource(
@@ -139,10 +167,12 @@ internal fun TopBarExerciseInformation(
                     currentUserPoints,
                     maxPoints
                 )
+
                 maxPoints != null -> stringResource(
                     id = R.string.exercise_view_overview_points_max,
                     maxPoints
                 )
+
                 else -> stringResource(id = R.string.exercise_view_overview_points_none)
             }
 
@@ -310,9 +340,7 @@ private fun TitleText(
                 )
             ) {
                 Icon(
-                    imageVector = exerciseDataState.bind { exercise ->
-                        getExerciseTypeIcon(exercise)
-                    }.orElse(Icons.Default.Downloading),
+                    painter = getExerciseTypeIconPainter(exerciseDataState.orNull()),
                     contentDescription = null
                 )
             }

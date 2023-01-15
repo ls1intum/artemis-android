@@ -112,7 +112,7 @@ fun computeTemplateStatus(
     val service: LiveParticipationService = get()
 
     val participationId = participation.id ?: 0
-    val exerciseId = exercise.id ?: 0
+    val exerciseId = exercise.id
 
     val isBuildingFlow = remember(participationId, exerciseId, personal, showUngradedResults) {
         service
