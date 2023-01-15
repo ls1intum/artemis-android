@@ -5,13 +5,13 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import java.io.File
 
 abstract class FetchAndPrepareEmojisTask : DefaultTask() {

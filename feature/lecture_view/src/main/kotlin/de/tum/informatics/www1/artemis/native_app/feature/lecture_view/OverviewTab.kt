@@ -13,20 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachment
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitOnline
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitUnknown
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitAttachmentUi
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitExerciseUi
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitHeader
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitOnlineUi
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitTextUi
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitVideoUi
+import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.*
 
 @Composable
 internal fun OverviewTab(

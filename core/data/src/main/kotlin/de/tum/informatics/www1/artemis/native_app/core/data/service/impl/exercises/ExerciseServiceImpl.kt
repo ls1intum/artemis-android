@@ -1,13 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.impl.exercises
 
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*

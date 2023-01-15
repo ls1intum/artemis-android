@@ -12,7 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.meti
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
-import java.util.UUID
+import java.util.*
 
 /**
  * This implementation only displays live created posts, but ignores them when counting the posts for the next page request.

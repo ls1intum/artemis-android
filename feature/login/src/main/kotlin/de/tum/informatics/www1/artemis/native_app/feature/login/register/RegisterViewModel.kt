@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.login.register
 import android.util.Patterns
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.Constants

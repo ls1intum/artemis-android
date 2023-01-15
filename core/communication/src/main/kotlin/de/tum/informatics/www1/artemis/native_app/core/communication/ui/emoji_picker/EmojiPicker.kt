@@ -1,14 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.communication.ui.emoji_picker
 
-import android.view.View
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
@@ -17,12 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
 import de.tum.informatics.www1.artemis.native_app.core.communication.emoji.EmojiService
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.common.EmojiView

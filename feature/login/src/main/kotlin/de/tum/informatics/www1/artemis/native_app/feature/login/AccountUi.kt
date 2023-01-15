@@ -1,11 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.with
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
@@ -30,21 +26,20 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
-import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
-import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
+import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.custom_instance_selection.CustomInstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginScreen
+import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNotificationStorageService
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
-import org.koin.androidx.compose.getStateViewModel
 import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.io.IOException
@@ -389,7 +384,7 @@ private fun RegisterLoginAccount(
                     } else {
                         LoginUi(
                             modifier = loginUiModifier,
-                            viewModel = getStateViewModel(),
+                            viewModel = koinViewModel(),
                             onLoggedIn = onLoggedIn
                         )
                     }

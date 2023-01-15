@@ -1,10 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.course_view
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.*
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseListItem
 
 /**

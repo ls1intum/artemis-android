@@ -4,7 +4,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
     id("com.google.android.gms.oss-licenses-plugin")
-    id("io.sentry.android.gradle") version "3.3.0"
+    id("io.sentry.android.gradle") version "3.4.0"
 }
 
 android {
@@ -27,6 +27,9 @@ android {
         }
     }
     buildTypes {
+        getByName("debug") {
+            isMinifyEnabled = false
+        }
         getByName("release") {
             isMinifyEnabled = false
         }

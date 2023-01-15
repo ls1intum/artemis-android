@@ -1,8 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.datastore
 
-import com.auth0.jwt.JWT
-import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
-import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService.AuthenticationData.LoggedIn
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService.AuthenticationData.NotLoggedIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map

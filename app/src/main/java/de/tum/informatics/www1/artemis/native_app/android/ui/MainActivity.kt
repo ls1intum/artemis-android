@@ -1,15 +1,17 @@
 package de.tum.informatics.www1.artemis.native_app.android.ui
 
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
@@ -21,6 +23,8 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_pos
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.standalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.WindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.navigateToCourseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.course
@@ -45,12 +49,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
-import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
-import de.tum.informatics.www1.artemis.native_app.core.ui.WindowSizeClassProvider
 
 /**
  * Main and only activity used in the android app.

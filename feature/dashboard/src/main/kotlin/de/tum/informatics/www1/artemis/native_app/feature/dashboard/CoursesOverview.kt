@@ -1,16 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.feature.dashboard
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -25,16 +23,14 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
-import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import java.text.DecimalFormat
-import java.text.NumberFormat
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseItemHeader
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseItemGrid
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.ExpandedCourseItemHeader
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseColumnCount
 import org.koin.androidx.compose.getViewModel
+import java.text.DecimalFormat
+import java.text.NumberFormat
 
 const val DASHBOARD_DESTINATION = "dashboard"
 

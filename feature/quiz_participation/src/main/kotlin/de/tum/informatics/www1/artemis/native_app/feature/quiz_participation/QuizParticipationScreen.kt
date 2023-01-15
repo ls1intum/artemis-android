@@ -6,22 +6,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -33,7 +20,7 @@ import androidx.navigation.navArgument
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.MarkdownTextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import kotlinx.coroutines.Job
-import org.koin.androidx.compose.getStateViewModel
+import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 private val submitButtonColor: Color
@@ -76,7 +63,7 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
         val quizType: QuizType = QuizType.valueOf(quizTypeString)
 
         val viewModel: QuizParticipationViewModel =
-            getStateViewModel { parametersOf(courseId, exerciseId, quizType) }
+            koinViewModel { parametersOf(courseId, exerciseId, quizType) }
 
         QuizParticipationScreen(
             modifier = Modifier.fillMaxSize(),

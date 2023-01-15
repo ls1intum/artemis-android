@@ -9,23 +9,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.hasEnded
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isStartExerciseAvailable
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.*
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.ProgrammingSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.isPreliminary
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ParticipationStatusUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ResultTemplateStatus
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.computeTemplateStatus
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.isUninitializedC
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.notStartedC
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.*
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 
 /**

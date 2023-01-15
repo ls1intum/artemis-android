@@ -1,11 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import android.content.Context
-import android.text.Spannable
 import android.text.method.LinkMovementMethod
-import android.text.method.MovementMethod
 import android.util.TypedValue
-import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.FontRes

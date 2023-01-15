@@ -1,16 +1,17 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.login
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**

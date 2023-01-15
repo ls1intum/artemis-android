@@ -1,9 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.core.communication.impl
 
 import android.content.Context
-import de.tum.informatics.www1.artemis.native_app.core.communication.emoji.EmojiService
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
 import de.tum.informatics.www1.artemis.native_app.core.communication.emoji.EmojiCategory
+import de.tum.informatics.www1.artemis.native_app.core.communication.emoji.EmojiService
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

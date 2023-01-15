@@ -1,15 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
-import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
 
 /**
  * Display the question text as a markdown text.

@@ -1,10 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material3.Button

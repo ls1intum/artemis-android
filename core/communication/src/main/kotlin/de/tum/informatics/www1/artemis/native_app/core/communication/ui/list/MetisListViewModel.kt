@@ -4,7 +4,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisService
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisContextManager
 import de.tum.informatics.www1.artemis.native_app.core.communication.impl.MetisRemoteMediator
@@ -14,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post

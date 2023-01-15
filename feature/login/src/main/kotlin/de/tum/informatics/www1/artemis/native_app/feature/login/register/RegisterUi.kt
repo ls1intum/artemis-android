@@ -4,24 +4,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.transformLatest
-import org.koin.androidx.compose.get
-import org.koin.androidx.compose.getViewModel
+import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
+import org.koin.androidx.compose.getViewModel
 
 
 /**

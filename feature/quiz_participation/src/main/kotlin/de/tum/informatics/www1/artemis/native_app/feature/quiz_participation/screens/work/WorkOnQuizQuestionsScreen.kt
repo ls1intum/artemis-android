@@ -22,9 +22,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
-import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.multiple_choice.MultipleChoiceQuizQuestionUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.ShortAnswerQuizQuestionUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.draganddrop.DragAndDropQuizQuestionUi
+import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.multiple_choice.MultipleChoiceQuizQuestionUi
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 

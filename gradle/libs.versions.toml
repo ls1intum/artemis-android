@@ -19,8 +19,8 @@ kotlin = "1.7.20"
 kotlinxCoroutines = "1.6.4"
 kotlinxDatetime = "0.4.0"
 kotlinxSerializationJson = "1.4.1"
-koin = "3.2.0"
-ktor = "2.1.1"
+koin = "3.3.2"
+ktor = "2.2.2"
 krossbow = "4.5.0"
 markwon = "4.6.2"
 room = "2.4.3"
@@ -61,6 +61,7 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+auth0-java-jwt = { group = "com.auth0", name = "java-jwt", version = "4.2.2" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
@@ -70,7 +71,7 @@ kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime",
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
-koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
+koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version = "3.4.1" }
 koin-android-compat = { group = "io.insert-koin", name = "koin-android-compat", version.ref = "koin" }
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-client-serialization = { group = "io.ktor", name = "ktor-client-serialization", version.ref = "ktor" }
@@ -104,3 +105,4 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version = "4.3.14" }
 google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "3.1.1" }
+github-benManes-versions = { id = "com.github.ben-manes.versions", version = "0.44.0" }

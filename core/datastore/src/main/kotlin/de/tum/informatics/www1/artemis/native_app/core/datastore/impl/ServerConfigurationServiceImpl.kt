@@ -1,23 +1,16 @@
 package de.tum.informatics.www1.artemis.native_app.core.datastore.impl
 
 import android.content.Context
-import android.provider.Settings.Global
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
 import io.ktor.http.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.*
 
 /**
  * Provides data about which instance of artemis is communicated with.

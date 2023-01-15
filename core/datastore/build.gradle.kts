@@ -29,5 +29,5 @@ dependencies {
 
     implementation(libs.kotlinx.datetime)
 
-    implementation("com.auth0:java-jwt:4.1.0")
+    implementation(libs.auth0.java.jwt)
 }

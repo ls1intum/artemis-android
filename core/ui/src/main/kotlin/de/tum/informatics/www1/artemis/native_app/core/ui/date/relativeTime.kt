@@ -2,15 +2,14 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.date
 
 import android.text.format.DateUtils
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlin.time.Duration.Companion.minutes
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
-import okhttp3.internal.wait
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 /**

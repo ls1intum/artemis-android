@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import org.hildan.krossbow.websocket.WebSocketClient
 import org.hildan.krossbow.websocket.WebSocketConnection
 import org.hildan.krossbow.websocket.WebSocketFrame
-import java.lang.Exception
 
 /**
  * Websocket client wrapper that calls onClose when anything goes wrong with the connection.

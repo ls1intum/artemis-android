@@ -1,14 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.impl.courses
 
-import de.tum.informatics.www1.artemis.native_app.core.model.Course
-import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.DashboardService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*

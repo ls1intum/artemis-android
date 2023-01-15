@@ -13,9 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.join
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R

@@ -20,7 +20,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.quizParticipationModule
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsModule
 import io.sentry.Sentry
-import io.sentry.SentryOptions
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 

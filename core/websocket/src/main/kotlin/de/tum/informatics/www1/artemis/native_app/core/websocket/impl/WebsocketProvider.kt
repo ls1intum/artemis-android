@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
 
 import android.util.Log
-import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -19,13 +18,13 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.DeserializationStrategy
 import org.hildan.krossbow.stomp.StompClient
 import org.hildan.krossbow.stomp.config.HeartBeat
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 import org.hildan.krossbow.stomp.conversions.kxserialization.*
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.stomp.headers.StompSubscribeHeaders
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 class WebsocketProvider(
     serverConfigurationService: ServerConfigurationService,

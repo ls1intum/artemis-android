@@ -5,7 +5,6 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.net.NetworkSpecifier
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope

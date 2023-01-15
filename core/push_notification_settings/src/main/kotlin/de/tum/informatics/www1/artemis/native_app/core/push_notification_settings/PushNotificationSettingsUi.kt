@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.model.PushNotificationSetting
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import org.koin.androidx.compose.koinViewModel
 

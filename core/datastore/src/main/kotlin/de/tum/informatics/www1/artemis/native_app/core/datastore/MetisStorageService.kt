@@ -1,10 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.core.datastore
 
 import androidx.paging.PagingSource
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import kotlinx.coroutines.flow.Flow
 

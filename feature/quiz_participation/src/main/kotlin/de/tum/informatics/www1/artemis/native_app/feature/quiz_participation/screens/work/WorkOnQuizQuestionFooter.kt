@@ -1,12 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
@@ -14,13 +9,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -36,16 +25,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.Qui
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.getFormattedRelativeToFutureTimeQuizStyle
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.Footer
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun WorkOnQuizQuestionFooter(

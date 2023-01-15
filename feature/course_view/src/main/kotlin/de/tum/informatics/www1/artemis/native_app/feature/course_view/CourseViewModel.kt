@@ -3,20 +3,20 @@ package de.tum.informatics.www1.artemis.native_app.feature.course_view
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
-import de.tum.informatics.www1.artemis.native_app.core.model.Course
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.datetime.*
+import kotlinx.datetime.TimeZone
 import java.time.temporal.WeekFields
-import java.util.Locale
+import java.util.*
 
 internal class CourseViewModel(
     private val courseId: Long,

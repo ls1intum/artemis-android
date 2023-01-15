@@ -27,17 +27,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Saml2Config
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.transformLatest
-import org.koin.androidx.compose.get
 
 /*
  * Autofill code is taken and inspired by https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui/integration-tests/ui-demos/src/main/java/androidx/compose/ui/demos/autofill/ExplicitAutofillTypesDemo.kt
