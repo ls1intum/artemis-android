@@ -43,7 +43,6 @@ fun NavController.navigateToDashboard(builder: NavOptionsBuilder.() -> Unit) {
 }
 
 fun NavGraphBuilder.dashboard(
-    windowSizeClass: WindowSizeClass,
     onOpenSettings: () -> Unit,
     onClickRegisterForCourse: () -> Unit,
     onViewCourse: (courseId: Long) -> Unit
@@ -51,7 +50,6 @@ fun NavGraphBuilder.dashboard(
     composable(DASHBOARD_DESTINATION) {
         CoursesOverview(
             modifier = Modifier.fillMaxSize(),
-            windowSizeClass = windowSizeClass,
             viewModel = getViewModel(),
             onOpenSettings = onOpenSettings,
             onClickRegisterForCourse = onClickRegisterForCourse,
@@ -67,7 +65,6 @@ fun NavGraphBuilder.dashboard(
 @Composable
 internal fun CoursesOverview(
     modifier: Modifier,
-    windowSizeClass: WindowSizeClass,
     viewModel: CourseOverviewViewModel,
     onOpenSettings: () -> Unit,
     onClickRegisterForCourse: () -> Unit,
@@ -130,7 +127,6 @@ internal fun CoursesOverview(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 8.dp),
-                        windowSizeClass = windowSizeClass,
                         courses = dashboard.courses,
                         serverUrl = serverUrl,
                         authorizationToken = authorizationBearer,
@@ -148,7 +144,6 @@ internal fun CoursesOverview(
 @Composable
 private fun CourseList(
     modifier: Modifier,
-    windowSizeClass: WindowSizeClass,
     courses: List<Course>,
     serverUrl: String,
     authorizationToken: String,
@@ -156,7 +151,6 @@ private fun CourseList(
 ) {
     CourseItemGrid(
         modifier = modifier,
-        windowSizeClass = windowSizeClass,
         courses = courses,
     ) { course, courseItemModifier, isCompact ->
         CourseItem(

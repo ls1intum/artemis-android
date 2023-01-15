@@ -35,6 +35,7 @@ import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
+import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 
 private val headerHeight = 80.dp
 
@@ -42,9 +43,9 @@ private val headerHeight = 80.dp
 fun CourseItemGrid(
     modifier: Modifier,
     courses: List<Course>,
-    windowSizeClass: WindowSizeClass,
     courseItem: @Composable LazyGridItemScope.(Course, Modifier, isCompact: Boolean) -> Unit
 ) {
+    val windowSizeClass = getWindowSizeClass()
     val columnCount = computeCourseColumnCount(windowSizeClass)
 
     val isCompact = windowSizeClass.widthSizeClass <= WindowWidthSizeClass.Compact

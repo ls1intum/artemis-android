@@ -11,21 +11,29 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -35,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
@@ -48,6 +57,7 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_pos
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.navigateToStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
+import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -81,7 +91,9 @@ fun SideBarMetisUi(
                 }
             }
 
-            title()
+            ProvideTextStyle(value = MaterialTheme.typography.titleLarge) {
+                title()
+            }
         }
 
         Crossfade(
@@ -118,7 +130,6 @@ fun SideBarMetisUi(
                         }
                     )
                 }
-
             } else {
                 val standalonePostViewModel: MetisStandalonePostViewModel =
                     koinViewModel(parameters = {
@@ -276,4 +287,19 @@ internal fun ColumnScope.MetisOutdatedBanner(
             }
         }
     }
+}
+
+/**
+ * If it is feasible to display metis on the side next to the main content of the screen.
+ * @param parentWidth the maximum width of the parent in which the metis ui should be displayed
+ * @param metisContentRatio the percentage of the screen width associated with metis
+ */
+@Composable
+fun canDisplayMetisOnDisplaySide(
+    windowSizeClass: WindowSizeClass = getWindowSizeClass(),
+    parentWidth: Dp,
+    metisContentRatio: Float
+): Boolean {
+    return (windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Expanded
+            && (parentWidth * metisContentRatio) >= 300.dp)
 }

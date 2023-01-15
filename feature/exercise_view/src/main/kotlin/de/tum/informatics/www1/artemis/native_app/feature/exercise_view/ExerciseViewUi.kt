@@ -46,7 +46,6 @@ fun NavController.navigateToExercise(exerciseId: Long, builder: NavOptionsBuilde
 
 fun NavGraphBuilder.exercise(
     navController: NavController,
-    windowSizeClass: WindowSizeClass,
     onNavigateBack: () -> Unit,
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit
 ) {
@@ -80,7 +79,6 @@ fun NavGraphBuilder.exercise(
                 ExerciseScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = exerciseViewModel,
-                    windowSizeClass = windowSizeClass,
                     onNavigateBack = onNavigateBack,
                     onViewResult = {
                         nestedNavController.navigate(NESTED_EXERCISE_RESULT_DESTINATION)

@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -43,6 +44,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.WindowSizeClassProvider
 
 /**
  * Main and only activity used in the android app.
@@ -70,8 +76,6 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             AppTheme {
-                val windowSizeClass = calculateWindowSizeClass(activity = this)
-
                 val navController = rememberNavController()
 
                 // Listen for when the user get logged out (e.g. because their token has expired)
@@ -99,120 +103,128 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                // Use jetpack compose navigation for the navigation logic.
-                NavHost(navController = navController, startDestination = startDestination) {
-                    loginScreen(
-                        windowSizeClass = windowSizeClass,
-                        onFinishedLoginFlow = onLoggedIn,
-                        onRequestOpenSettings = {
-                            navController.navigateToSettings { }
-                        }
-                    )
-
-                    dashboard(
-                        windowSizeClass = windowSizeClass,
-                        onOpenSettings = {
-                            navController.navigateToSettings { }
-                        },
-                        onClickRegisterForCourse = {
-                            navController.navigateToCourseRegistration { }
-                        },
-                        onViewCourse = { courseId ->
-                            navController.navigateToCourse(courseId) { }
-                        }
-                    )
-
-                    courseRegistration(
-                        windowSizeClass = windowSizeClass,
-                        onNavigateUp = navController::navigateUp,
-                        onRegisteredInCourse = { courseId ->
-                            navController.navigateUp()
-                            navController.navigateToCourse(courseId) { }
-                        }
-                    )
-
-                    course(
-                        onNavigateToExercise = { exerciseId ->
-                            navController.navigateToExercise(exerciseId) { }
-                        },
-                        onNavigateToLecture = { courseId, lectureId ->
-                            navController.navigateToLecture(
-                                courseId = courseId,
-                                lectureId = lectureId
-                            ) { }
-                        },
-                        onNavigateBack = navController::navigateUp,
-                        navController = navController
-                    )
-
-                    exercise(
-                        navController = navController,
-                        windowSizeClass = windowSizeClass,
-                        onNavigateBack = navController::navigateUp,
-                        onParticipateInQuiz = { courseId, exerciseId, isPractice ->
-                            val quizType = if (isPractice) QuizType.PRACTICE else QuizType.LIVE
-
-                            navController.navigateToQuizParticipation(
-                                courseId,
-                                exerciseId,
-                                quizType
+                val windowSizeClassProvider = remember {
+                    object : WindowSizeClassProvider {
+                        @Composable
+                        override fun provideWindowSizeClass(): WindowSizeClass =
+                            calculateWindowSizeClass(
+                                activity = this@MainActivity
                             )
-                        }
-                    )
+                    }
+                }
 
-                    lecture(
-                        navController = navController,
-                        onNavigateBack = navController::navigateUp,
-                        onRequestOpenLink = onRequestOpenLink,
-                        onViewExercise = { exerciseId ->
-                            navController.navigateToExercise(exerciseId) { }
-                        }
-                    )
+                CompositionLocalProvider(LocalWindowSizeClassProvider provides windowSizeClassProvider) {
+                    // Use jetpack compose navigation for the navigation logic.
+                    NavHost(navController = navController, startDestination = startDestination) {
+                        loginScreen(
+                            onFinishedLoginFlow = onLoggedIn,
+                            onRequestOpenSettings = {
+                                navController.navigateToSettings { }
+                            }
+                        )
 
-                    standalonePostScreen(
-                        onNavigateUp = navController::navigateUp
-                    )
+                        dashboard(
+                            onOpenSettings = {
+                                navController.navigateToSettings { }
+                            },
+                            onClickRegisterForCourse = {
+                                navController.navigateToCourseRegistration { }
+                            },
+                            onViewCourse = { courseId ->
+                                navController.navigateToCourse(courseId) { }
+                            }
+                        )
 
-                    createStandalonePostScreen(
-                        onNavigateUp = navController::navigateUp,
-                        onCreatedPost = { clientSidePostId, metisContext ->
-                            navController.navigateUp()
-                            navController.navigateToStandalonePostScreen(
-                                clientSidePostId,
-                                metisContext,
-                                ViewType.POST
-                            ) {}
-                        }
-                    )
+                        courseRegistration(
+                            onNavigateUp = navController::navigateUp,
+                            onRegisteredInCourse = { courseId ->
+                                navController.navigateUp()
+                                navController.navigateToCourse(courseId) { }
+                            }
+                        )
 
-                    quizParticipation(
-                        onLeaveQuiz = {
-                            val previousBackStackEntry = navController.previousBackStackEntry
-                            if (previousBackStackEntry?.destination?.route == ExerciseViewDestination.EXERCISE_VIEW_ROUTE) {
-                                previousBackStackEntry.savedStateHandle.set(
-                                    ExerciseViewDestination.REQUIRE_RELOAD_KEY,
-                                    true
+                        course(
+                            onNavigateToExercise = { exerciseId ->
+                                navController.navigateToExercise(exerciseId) { }
+                            },
+                            onNavigateToLecture = { courseId, lectureId ->
+                                navController.navigateToLecture(
+                                    courseId = courseId,
+                                    lectureId = lectureId
+                                ) { }
+                            },
+                            onNavigateBack = navController::navigateUp,
+                            navController = navController
+                        )
+
+                        exercise(
+                            navController = navController,
+                            onNavigateBack = navController::navigateUp,
+                            onParticipateInQuiz = { courseId, exerciseId, isPractice ->
+                                val quizType = if (isPractice) QuizType.PRACTICE else QuizType.LIVE
+
+                                navController.navigateToQuizParticipation(
+                                    courseId,
+                                    exerciseId,
+                                    quizType
                                 )
                             }
-                            navController.navigateUp()
-                        }
-                    )
+                        )
 
-                    settingsScreen(
-                        navController = navController,
-                        versionCode = BuildConfig.VERSION_CODE,
-                        versionName = BuildConfig.VERSION_NAME,
-                        onLoggedOut = {
-                            // Nothing to do here, automatically moved to login screen
-                        },
-                        onDisplayThirdPartyLicenses = {
-                            val intent =
-                                Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
-                            startActivity(intent)
-                        },
-                        onNavigateUp = navController::navigateUp,
-                        onRequestOpenLink = onRequestOpenLink
-                    )
+                        lecture(
+                            navController = navController,
+                            onNavigateBack = navController::navigateUp,
+                            onRequestOpenLink = onRequestOpenLink,
+                            onViewExercise = { exerciseId ->
+                                navController.navigateToExercise(exerciseId) { }
+                            }
+                        )
+
+                        standalonePostScreen(
+                            onNavigateUp = navController::navigateUp
+                        )
+
+                        createStandalonePostScreen(
+                            onNavigateUp = navController::navigateUp,
+                            onCreatedPost = { clientSidePostId, metisContext ->
+                                navController.navigateUp()
+                                navController.navigateToStandalonePostScreen(
+                                    clientSidePostId,
+                                    metisContext,
+                                    ViewType.POST
+                                ) {}
+                            }
+                        )
+
+                        quizParticipation(
+                            onLeaveQuiz = {
+                                val previousBackStackEntry = navController.previousBackStackEntry
+                                if (previousBackStackEntry?.destination?.route == ExerciseViewDestination.EXERCISE_VIEW_ROUTE) {
+                                    previousBackStackEntry.savedStateHandle.set(
+                                        ExerciseViewDestination.REQUIRE_RELOAD_KEY,
+                                        true
+                                    )
+                                }
+                                navController.navigateUp()
+                            }
+                        )
+
+                        settingsScreen(
+                            navController = navController,
+                            versionCode = BuildConfig.VERSION_CODE,
+                            versionName = BuildConfig.VERSION_NAME,
+                            onLoggedOut = {
+                                // Nothing to do here, automatically moved to login screen
+                            },
+                            onDisplayThirdPartyLicenses = {
+                                val intent =
+                                    Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
+                                startActivity(intent)
+                            },
+                            onNavigateUp = navController::navigateUp,
+                            onRequestOpenLink = onRequestOpenLink
+                        )
+                    }
                 }
             }
         }

@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.HelpCenter
 import androidx.compose.material.icons.filled.ViewHeadline
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -17,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.accompanist.web.rememberWebViewState
+import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SideBarMetisUi
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SmartphoneMetisUi
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.navigateToCreateStandalonePostScreen
@@ -29,7 +28,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.overview.ExerciseOverviewTab
-import io.ktor.http.*
 
 // Ratio of metis content in contrast to the actual exercise content
 const val METIS_RATIO = 0.3f
@@ -39,15 +37,18 @@ internal fun ExerciseScreenBody(
     modifier: Modifier,
     exerciseDataState: DataState<Exercise>,
     displayCommunicationOnSide: Boolean,
-    serverUrl: String,
     gradedParticipation: Participation?,
     authToken: String,
     navController: NavController,
+    metisContext: MetisContext?,
     onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit,
-    onParticipateInQuiz: (courseId: Long, isPractice: Boolean) -> Unit,
+    onParticipateInQuiz: (isPractice: Boolean) -> Unit,
     onViewResult: () -> Unit,
     onClickRetry: () -> Unit,
-    onClickStartExercise: () -> Unit
+    onClickStartExercise: () -> Unit,
+    webViewState: WebViewState?,
+    setWebView: (WebView) -> Unit,
+    webView: WebView?
 ) {
     ExerciseDataStateUi(
         modifier = modifier,
@@ -57,32 +58,6 @@ internal fun ExerciseScreenBody(
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                val courseId: Long = exercise.course?.id ?: return@Column
-
-                // Maybe add a replacement ui
-                val exerciseId = exercise.id
-
-                val metisContext = remember(courseId, exerciseId) {
-                    MetisContext.Exercise(courseId = courseId, exerciseId)
-                }
-
-                val url = remember(serverUrl, courseId, exercise.id) {
-                    URLBuilder(serverUrl).apply {
-                        appendPathSegments(
-                            "courses",
-                            courseId.toString(),
-                            "exercises",
-                            exercise.id.toString()
-                        )
-                    }
-                        .buildString()
-                }
-
-                val webViewState = rememberWebViewState(url = url)
-
-                // Retain web view instance to avoid reloading when switching between tabs
-                var savedWebView: WebView? by remember { mutableStateOf(null) }
-
                 val exerciseOverviewTab = remember {
                     movableContentOf { modifier: Modifier ->
                         ExerciseOverviewTab(
@@ -93,18 +68,18 @@ internal fun ExerciseScreenBody(
                             onClickStartExercise = onClickStartExercise,
                             onClickOpenTextExercise = onViewTextExerciseParticipationScreen,
                             onClickPracticeQuiz = {
-                                onParticipateInQuiz(courseId, true)
+                                onParticipateInQuiz(true)
                             },
                             onClickStartQuiz = {
-                                onParticipateInQuiz(courseId, false)
+                                onParticipateInQuiz(false)
                             },
                             onClickOpenQuiz = {
-                                onParticipateInQuiz(courseId, false)
+                                onParticipateInQuiz(false)
                             },
                             onViewResult = onViewResult,
                             webViewState = webViewState,
-                            setWebView = { savedWebView = it },
-                            webView = savedWebView
+                            setWebView = setWebView,
+                            webView = webView
                         )
                     }
                 }
@@ -123,19 +98,25 @@ internal fun ExerciseScreenBody(
                                 .verticalScroll(rememberScrollState())
                         )
 
-                        SideBarMetisUi(
-                            modifier = Modifier
-                                .weight(METIS_RATIO)
-                                .fillMaxHeight(),
-                            metisContext = metisContext,
-                            navController = navController,
-                            title = {
-                                Text(
-                                    text = stringResource(id = R.string.exercise_view_tab_qna),
-                                    style = MaterialTheme.typography.titleLarge
-                                )
-                            }
-                        )
+                        val sideBarMetisModifier = Modifier
+                            .weight(METIS_RATIO)
+                            .fillMaxHeight()
+
+                        if (metisContext != null) {
+                            SideBarMetisUi(
+                                modifier = sideBarMetisModifier,
+                                metisContext = metisContext,
+                                navController = navController,
+                                title = {
+                                    Text(
+                                        text = stringResource(id = R.string.exercise_view_tab_qna),
+                                    )
+                                }
+                            )
+                        } else {
+                            // Placeholder
+                            Box(modifier = sideBarMetisModifier)
+                        }
                     }
                 } else {
                     BodyWithTabs(
@@ -162,7 +143,7 @@ internal fun ExerciseScreenBody(
 @Composable
 private fun BodyWithTabs(
     modifier: Modifier,
-    metisContext: MetisContext.Exercise,
+    metisContext: MetisContext?,
     navController: NavController,
     exerciseOverviewTab: @Composable () -> Unit
 ) {
@@ -206,7 +187,9 @@ private fun BodyWithTabs(
                         icon = Icons.Default.Create,
                         contentDescription = null,
                         onClick = {
-                            navController.navigateToCreateStandalonePostScreen(metisContext) {}
+                            if (metisContext != null) {
+                                navController.navigateToCreateStandalonePostScreen(metisContext) {}
+                            }
                         }
                     )
 
@@ -215,14 +198,16 @@ private fun BodyWithTabs(
                     }
                 }
 
-                SmartphoneMetisUi(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 8.dp),
-                    metisContext = metisContext,
-                    navController = navController,
-                    displayFab = false // The FAB is displayed by the exercise screen itself.
-                )
+                if (metisContext != null) {
+                    SmartphoneMetisUi(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 8.dp),
+                        metisContext = metisContext,
+                        navController = navController,
+                        displayFab = false // The FAB is displayed by the exercise screen itself.
+                    )
+                }
             }
         }
     }

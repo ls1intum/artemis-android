@@ -10,5 +10,5 @@ import org.koin.androidx.compose.get
 fun getEmojiForEmojiId(emojiService: EmojiService = get(), emojiId: String): String {
     return flow {
         emit(emojiService.emojiIdToUnicode(emojiId))
-    }.collectAsState(initial = "\uD83D\uDDBE").value
+    }.collectAsState(initial = "").value
 }

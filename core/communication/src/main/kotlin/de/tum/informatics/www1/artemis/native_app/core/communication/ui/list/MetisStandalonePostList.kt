@@ -39,7 +39,6 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisMod
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisOutdatedBanner
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItem
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItemViewType
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.navigateToCreateStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.getEmojiForEmojiId
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 
@@ -78,12 +77,24 @@ internal fun MetisStandalonePostList(
             when {
                 posts.itemCount == 0 &&
                         (posts.loadState.refresh.endOfPaginationReached || posts.loadState.append.endOfPaginationReached) -> {
-                    Text(
-                        text = stringResource(id = R.string.metis_post_list_empty),
-                        modifier = informationModifier,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center
-                    )
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        onClickCreatePost?.let {
+                            CreatePostButton(modifier = Modifier, onClick = it)
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.metis_post_list_empty),
+                                modifier = informationModifier,
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
                 }
 
                 posts.loadState.refresh is LoadState.Loading -> {
@@ -117,14 +128,7 @@ internal fun MetisStandalonePostList(
                     ) {
                         onClickCreatePost?.let {
                             item {
-                                Button(onClick = it) {
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = null
-                                    )
-
-                                    Text(text = stringResource(id = R.string.communication_create_post_button))
-                                }
+                                CreatePostButton(modifier = Modifier, onClick = it)
                             }
                         }
 
@@ -201,6 +205,18 @@ internal fun MetisStandalonePostList(
 
     MetisModificationFailureDialog(metisModificationFailure = metisFailure) {
         metisFailure = null
+    }
+}
+
+@Composable
+private fun CreatePostButton(modifier: Modifier, onClick: () -> Unit) {
+    Button(modifier = modifier, onClick = onClick) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = null
+        )
+
+        Text(text = stringResource(id = R.string.communication_create_post_button))
     }
 }
 

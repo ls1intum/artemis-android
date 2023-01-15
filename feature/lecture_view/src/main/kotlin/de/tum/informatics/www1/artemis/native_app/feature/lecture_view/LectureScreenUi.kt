@@ -1,6 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lecture_view
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,6 +22,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,7 +38,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.google.accompanist.placeholder.material.placeholder
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SideBarMetisUi
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SmartphoneMetisUi
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.canDisplayMetisOnDisplaySide
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -49,6 +56,8 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getStateViewModel
 import org.koin.core.parameter.parametersOf
+
+const val METIS_RATIO = 0.3f
 
 fun NavController.navigateToLecture(
     lectureId: Long,
@@ -123,176 +132,225 @@ private fun LectureScreen(
 
     var displaySetCompletedFailureDialog: Boolean by remember { mutableStateOf(false) }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = lectureTitle ?: "Placeholder",
-                        modifier = Modifier.placeholder(lectureTitle == null)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+    val metisContext = remember {
+        MetisContext.Lecture(courseId = courseId, lectureId = lectureId)
+    }
+
+    BoxWithConstraints(modifier) {
+        val displayCommunicationOnSide = canDisplayMetisOnDisplaySide(
+            parentWidth = maxWidth,
+            metisContentRatio = METIS_RATIO
+        )
+
+        // The lecture UI with tabs
+        val contentBody = remember(displayCommunicationOnSide) {
+            movableContentOf { modifier: Modifier ->
+                val selectedTabIndexState = rememberSaveable {
+                    mutableStateOf(0)
+                }
+
+                val overviewTabIndex = 0
+                val attachmentsTabIndex = 1
+                val qnaTabIndex = 2
+
+                val selectedTabIndex =
+                    if (selectedTabIndexState.value == qnaTabIndex && displayCommunicationOnSide) {
+                        overviewTabIndex
+                    } else selectedTabIndexState.value
+
+
+                Column(modifier = modifier) {
+                    TabRow(selectedTabIndex = selectedTabIndex) {
+                        DefaultTab(
+                            index = overviewTabIndex,
+                            icon = Icons.Default.ViewHeadline,
+                            textRes = R.string.lecture_view_tab_overview,
+                            selectedTabIndex = selectedTabIndexState
+                        )
+
+                        DefaultTab(
+                            index = attachmentsTabIndex,
+                            icon = Icons.Default.Attachment,
+                            textRes = R.string.lecture_view_tab_attachments,
+                            selectedTabIndex = selectedTabIndexState
+                        )
+
+                        if (!displayCommunicationOnSide) {
+                            DefaultTab(
+                                index = qnaTabIndex,
+                                icon = Icons.Default.HelpCenter,
+                                textRes = R.string.lecture_view_tab_communication,
+                                selectedTabIndex = selectedTabIndexState
+                            )
+                        }
+                    }
+
+                    BasicDataStateUi(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        dataState = lectureDataState,
+                        loadingText = stringResource(id = R.string.lecture_view_lecture_loading),
+                        failureText = stringResource(id = R.string.lecture_view_lecture_loading_failure),
+                        retryButtonText = stringResource(id = R.string.lecture_view_lecture_loading_try_again),
+                        onClickRetry = viewModel::requestReloadLecture
+                    ) { lecture ->
+                        when (selectedTabIndex) {
+                            overviewTabIndex -> {
+                                val lectureUnits by viewModel.lectureUnits.collectAsState(
+                                    initial = emptyList()
+                                )
+
+                                OverviewTab(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp),
+                                    description = lecture.description,
+                                    lectureUnits = lectureUnits,
+                                    onViewExercise = onViewExercise,
+                                    onMarkAsCompleted = { lectureUnitId, isCompleted ->
+                                        viewModel.updateLectureUnitIsComplete(
+                                            lectureUnitId,
+                                            isCompleted
+                                        ) { isSuccessful ->
+                                            if (!isSuccessful) {
+                                                displaySetCompletedFailureDialog = true
+                                            }
+                                        }
+                                    },
+                                    onRequestViewLink = {
+                                        pendingOpenLink = it
+                                    },
+                                    onRequestOpenAttachment = { attachment ->
+                                        pendingOpenFileAttachment = attachment
+                                    }
+                                )
+                            }
+
+                            qnaTabIndex -> {
+                                SmartphoneMetisUi(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 8.dp),
+                                    metisContext = metisContext,
+                                    navController = navController
+                                )
+                            }
+
+                            attachmentsTabIndex -> {
+                                AttachmentsTab(
+                                    modifier = Modifier.fillMaxSize(),
+                                    attachments = lecture.attachments,
+                                    onClickFileAttachment = { fileAttachment ->
+                                        pendingOpenFileAttachment = fileAttachment
+                                    },
+                                    onClickOpenLinkAttachment = { attachment ->
+                                        pendingOpenFileAttachment = attachment
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
-            )
+            }
         }
-    ) { padding ->
-        val selectedTabIndexState = rememberSaveable {
-            mutableStateOf(0)
-        }
-        val selectedTabIndex by selectedTabIndexState
 
-        Column(
-            modifier = Modifier
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = lectureTitle ?: "Placeholder",
+                            modifier = Modifier.placeholder(lectureTitle == null)
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                        }
+                    }
+                )
+            }
+        ) { padding ->
+            val bodyModifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-        ) {
-            TabRow(selectedTabIndex = selectedTabIndex) {
-                DefaultTab(
-                    index = 0,
-                    icon = Icons.Default.ViewHeadline,
-                    textRes = R.string.lecture_view_tab_overview,
-                    selectedTabIndex = selectedTabIndexState
-                )
 
-                DefaultTab(
-                    index = 1,
-                    icon = Icons.Default.HelpCenter,
-                    textRes = R.string.lecture_view_tab_communication,
-                    selectedTabIndex = selectedTabIndexState
-                )
+            if (displayCommunicationOnSide) {
+                Row(
+                    modifier = bodyModifier,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    contentBody(
+                        Modifier
+                            .weight(1f - METIS_RATIO)
+                            .fillMaxHeight()
+                    )
 
-                DefaultTab(
-                    index = 2,
-                    icon = Icons.Default.Attachment,
-                    textRes = R.string.lecture_view_tab_attachments,
-                    selectedTabIndex = selectedTabIndexState
-                )
-            }
-
-            BasicDataStateUi(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                dataState = lectureDataState,
-                loadingText = stringResource(id = R.string.lecture_view_lecture_loading),
-                failureText = stringResource(id = R.string.lecture_view_lecture_loading_failure),
-                retryButtonText = stringResource(id = R.string.lecture_view_lecture_loading_try_again),
-                onClickRetry = viewModel::requestReloadLecture
-            ) { lecture ->
-                when (selectedTabIndex) {
-                    0 -> {
-                        val lectureUnits by viewModel.lectureUnits.collectAsState(
-                            initial = emptyList()
-                        )
-
-                        OverviewTab(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 8.dp),
-                            description = lecture.description,
-                            lectureUnits = lectureUnits,
-                            onViewExercise = onViewExercise,
-                            onMarkAsCompleted = { lectureUnitId, isCompleted ->
-                                viewModel.updateLectureUnitIsComplete(
-                                    lectureUnitId,
-                                    isCompleted
-                                ) { isSuccessful ->
-                                    if (!isSuccessful) {
-                                        displaySetCompletedFailureDialog = true
-                                    }
-                                }
-                            },
-                            onRequestViewLink = {
-                                pendingOpenLink = it
-                            },
-                            onRequestOpenAttachment = { attachment ->
-                                pendingOpenFileAttachment = attachment
-                            }
-                        )
-                    }
-
-                    1 -> {
-                        val metisContext = remember {
-                            MetisContext.Lecture(courseId = courseId, lectureId = lectureId)
-                        }
-
-                        SmartphoneMetisUi(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 8.dp),
-                            metisContext = metisContext,
-                            navController = navController
-                        )
-                    }
-
-                    2 -> {
-                        AttachmentsTab(
-                            modifier = Modifier.fillMaxSize(),
-                            attachments = lecture.attachments,
-                            onClickFileAttachment = { fileAttachment ->
-                                pendingOpenFileAttachment = fileAttachment
-                            },
-                            onClickOpenLinkAttachment = { attachment ->
-                                pendingOpenFileAttachment = attachment
-                            }
-                        )
-                    }
+                    SideBarMetisUi(
+                        modifier = Modifier
+                            .weight(METIS_RATIO)
+                            .fillMaxHeight(),
+                        metisContext = metisContext,
+                        navController = navController,
+                        title = { Text(text = stringResource(id = R.string.lecture_view_tab_communication)) }
+                    )
                 }
+            } else {
+                contentBody(
+                    bodyModifier
+                )
             }
-        }
 
-        if (pendingOpenFileAttachment != null) {
-            TextAlertDialog(
-                title = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_title),
-                text = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_message),
-                confirmButtonText = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_positive),
-                dismissButtonText = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_negative),
-                onPressPositiveButton = {
-                    scope.launch {
-                        val url = buildOpenAttachmentLink(
-                            serverUrl = serverConfigurationService.serverUrl.first(),
-                            authToken = accountService.authToken.first(),
-                            attachmentLink = pendingOpenFileAttachment?.link.orEmpty()
-                        )
-                        onRequestOpenLink(url)
-                        pendingOpenFileAttachment = null
-                    }
-                },
-                onDismissRequest = { pendingOpenFileAttachment = null }
-            )
-        }
+            if (pendingOpenFileAttachment != null) {
+                TextAlertDialog(
+                    title = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_title),
+                    text = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_message),
+                    confirmButtonText = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_positive),
+                    dismissButtonText = stringResource(id = R.string.lecture_view_open_file_attachment_dialog_negative),
+                    onPressPositiveButton = {
+                        scope.launch {
+                            val url = buildOpenAttachmentLink(
+                                serverUrl = serverConfigurationService.serverUrl.first(),
+                                authToken = accountService.authToken.first(),
+                                attachmentLink = pendingOpenFileAttachment?.link.orEmpty()
+                            )
+                            onRequestOpenLink(url)
+                            pendingOpenFileAttachment = null
+                        }
+                    },
+                    onDismissRequest = { pendingOpenFileAttachment = null }
+                )
+            }
 
-        if (pendingOpenLink != null) {
-            TextAlertDialog(
-                title = stringResource(id = R.string.lecture_view_open_link_dialog_title),
-                text = stringResource(
-                    id = R.string.lecture_view_open_link_dialog_message,
-                    pendingOpenLink.orEmpty()
-                ),
-                confirmButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_positive),
-                dismissButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_negative),
-                onPressPositiveButton = {
-                    onRequestOpenLink(pendingOpenLink.orEmpty())
-                    pendingOpenLink = null
-                },
-                onDismissRequest = { pendingOpenLink = null }
-            )
-        }
+            if (pendingOpenLink != null) {
+                TextAlertDialog(
+                    title = stringResource(id = R.string.lecture_view_open_link_dialog_title),
+                    text = stringResource(
+                        id = R.string.lecture_view_open_link_dialog_message,
+                        pendingOpenLink.orEmpty()
+                    ),
+                    confirmButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_positive),
+                    dismissButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_negative),
+                    onPressPositiveButton = {
+                        onRequestOpenLink(pendingOpenLink.orEmpty())
+                        pendingOpenLink = null
+                    },
+                    onDismissRequest = { pendingOpenLink = null }
+                )
+            }
 
-        if (displaySetCompletedFailureDialog) {
-            TextAlertDialog(
-                title = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_title),
-                text = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_message),
-                confirmButtonText = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_positive),
-                dismissButtonText = null,
-                onPressPositiveButton = { displaySetCompletedFailureDialog = false },
-                onDismissRequest = { displaySetCompletedFailureDialog = false }
-            )
+            if (displaySetCompletedFailureDialog) {
+                TextAlertDialog(
+                    title = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_title),
+                    text = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_message),
+                    confirmButtonText = stringResource(id = R.string.lecture_view_lecture_unit_set_completed_failed_dialog_positive),
+                    dismissButtonText = null,
+                    onPressPositiveButton = { displaySetCompletedFailureDialog = false },
+                    onDismissRequest = { displaySetCompletedFailureDialog = false }
+                )
+            }
         }
     }
 }

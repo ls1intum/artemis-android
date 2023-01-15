@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,13 +34,14 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.ArtemisHeader
 
 @Composable
 internal fun InstanceSelectionScreen(
     modifier: Modifier,
-    windowSizeClass: WindowSizeClass,
     availableInstances: List<ArtemisInstances.ArtemisInstance>,
     onSelectArtemisInstance: (String) -> Unit,
     onRequestOpenCustomInstanceSelection: () -> Unit
@@ -69,6 +71,7 @@ internal fun InstanceSelectionScreen(
             fontWeight = FontWeight.Bold
         )
 
+        val windowSizeClass = getWindowSizeClass()
         val columnCount = when {
             windowSizeClass.widthSizeClass > WindowWidthSizeClass.Expanded -> 6
             windowSizeClass.widthSizeClass > WindowWidthSizeClass.Medium -> 4

@@ -37,7 +37,7 @@ internal fun ExerciseOverviewTab(
     onClickStartQuiz: () -> Unit,
     onClickOpenQuiz: () -> Unit,
     onViewResult: () -> Unit,
-    webViewState: WebViewState,
+    webViewState: WebViewState?,
     setWebView: (WebView) -> Unit,
     webView: WebView?
 ) {
@@ -61,51 +61,44 @@ internal fun ExerciseOverviewTab(
         }
 
         Box(
-            modifier = if (!webViewState.isLoading) Modifier.fillMaxWidth() else
+            modifier = if (webViewState?.isLoading != true) Modifier.fillMaxWidth() else
                 Modifier
                     .fillMaxWidth()
                     .height(200.dp)
         ) {
-            WebView(
-                modifier = Modifier.fillMaxWidth(),
-                state = webViewState,
-                client = webViewClient,
-                onCreated = {
-                    it.settings.javaScriptEnabled = true
-                    it.settings.domStorageEnabled = true
-                    it.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
-                },
-                factory = { context ->
-                    if (webView != null) {
-                        webView
-                    } else {
-                        val newWebView = WebView(context)
-                        setWebView(newWebView)
-                        newWebView
+            if (webViewState != null) {
+                WebView(
+                    modifier = Modifier.fillMaxWidth(),
+                    state = webViewState,
+                    client = webViewClient,
+                    onCreated = {
+                        it.settings.javaScriptEnabled = true
+                        it.settings.domStorageEnabled = true
+                        it.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+                    },
+                    factory = { context ->
+                        if (webView != null) {
+                            webView
+                        } else {
+                            val newWebView = WebView(context)
+                            setWebView(newWebView)
+                            newWebView
+                        }
                     }
-                }
-            )
+                )
+            }
 
-            when (val loadingState = webViewState.loadingState) {
-                LoadingState.Initializing -> {
-
-                }
-
-                LoadingState.Finished -> {
-                }
-
-                is LoadingState.Loading -> {
-                    LinearProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                            .align(Alignment.Center),
-                        progress = loadingState.progress
-                    )
-                }
+            val loadingState = webViewState?.loadingState
+            if (loadingState is LoadingState.Loading) {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .align(Alignment.Center),
+                    progress = loadingState.progress
+                )
             }
         }
-
     }
 }
 
