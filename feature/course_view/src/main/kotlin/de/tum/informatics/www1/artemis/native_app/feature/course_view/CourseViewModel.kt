@@ -18,7 +18,6 @@ import kotlinx.datetime.*
 import java.time.temporal.WeekFields
 import java.util.Locale
 
-
 internal class CourseViewModel(
     private val courseId: Long,
     serverConfigurationService: ServerConfigurationService,
@@ -27,9 +26,9 @@ internal class CourseViewModel(
     private val liveParticipationService: LiveParticipationService
 ) : ViewModel() {
 
-    private val requestReloadCourse = MutableSharedFlow<Unit>()
+    private val requestReloadCourse = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    val course: Flow<DataState<Course>> =
+    val course: StateFlow<DataState<Course>> =
         transformLatest(
             serverConfigurationService.serverUrl,
             accountService.authToken,
@@ -85,7 +84,7 @@ internal class CourseViewModel(
                 }
             }
 
-    val exercisesGroupedByWeek: Flow<DataState<List<GroupedByWeek<Exercise>>>> =
+    val exercisesGroupedByWeek: StateFlow<DataState<List<GroupedByWeek<Exercise>>>> =
         exerciseWithParticipationStatusFlow.map { exercisesDataState ->
             exercisesDataState.bind { exercisesWithParticipationState ->
                 exercisesWithParticipationState
@@ -95,13 +94,14 @@ internal class CourseViewModel(
         }
             .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
 
-    val lecturesGroupedByWeek: Flow<DataState<List<GroupedByWeek<Lecture>>>> = course.map { courseDataState ->
+    val lecturesGroupedByWeek: StateFlow<DataState<List<GroupedByWeek<Lecture>>>> = course.map { courseDataState ->
         courseDataState.bind { course ->
             course
                 .lectures
                 .groupByWeek { startDate }
         }
     }
+        .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
 
     private fun <T> List<T>.groupByWeek(getSortDate: T.() -> Instant?): List<GroupedByWeek<T>> =
         // Group the items based on their start of the week day (most likely monday)
@@ -128,18 +128,7 @@ internal class CourseViewModel(
                 }
             }
 
-//    /**
-//     * The tabs that are displayed for this course.
-//     */
-//    val courseTabs: Flow<List<CourseTab>> = flowOf(
-//        (if (course.exercises.isNotEmpty()) listOf(CourseTab.Exercises(course.exercises)) else emptyList())
-//                + (if (course.lectures.isNotEmpty()) listOf(CourseTab.Lectures(course.lectures)) else emptyList())
-//                + listOf(CourseTab.Statistics, CourseTab.Communication)
-//    )
-
     fun reloadCourse() {
-        viewModelScope.launch {
-            requestReloadCourse.emit(Unit)
-        }
+        requestReloadCourse.tryEmit(Unit)
     }
 }

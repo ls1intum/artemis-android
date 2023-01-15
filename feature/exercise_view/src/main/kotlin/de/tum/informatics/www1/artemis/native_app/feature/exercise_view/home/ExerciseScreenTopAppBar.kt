@@ -135,89 +135,85 @@ internal fun TopBarExerciseInformation(
 
     // Prepare ui that is movable between long and short toolbars
 
-    val exerciseInfoUi = remember(exercise) {
-        movableContentOf {
-            EmptyDataStateUi(
-                dataState = exercise,
-                otherwise = {
-                    ExerciseCategoryChipRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .placeholder(true),
-                        chips = placeholderCategoryChips
-                    )
-                }
-            ) { loadedExercise ->
+    val exerciseInfoUi = @Composable {
+        EmptyDataStateUi(
+            dataState = exercise,
+            otherwise = {
                 ExerciseCategoryChipRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    exercise = loadedExercise
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .placeholder(true),
+                    chips = placeholderCategoryChips
                 )
             }
-
-            val currentUserPoints = exercise.bind { exercise ->
-                exercise.currentUserPoints?.let(ExercisePointsDecimalFormat::format)
-            }.orElse(null)
-            val maxPoints = exercise.bind {exercise ->
-                exercise.maxPoints?.let(ExercisePointsDecimalFormat::format)
-            }.orElse(null)
-
-            val pointsHintText = when {
-                currentUserPoints != null && maxPoints != null -> stringResource(
-                    id = R.string.exercise_view_overview_points_reached,
-                    currentUserPoints,
-                    maxPoints
-                )
-
-                maxPoints != null -> stringResource(
-                    id = R.string.exercise_view_overview_points_max,
-                    maxPoints
-                )
-
-                else -> stringResource(id = R.string.exercise_view_overview_points_none)
-            }
-
-            Text(
-                modifier = Modifier.placeholder(exercise !is DataState.Success),
-                text = pointsHintText,
-                style = MaterialTheme.typography.bodyLarge
+        ) { loadedExercise ->
+            ExerciseCategoryChipRow(
+                modifier = Modifier.fillMaxWidth(),
+                exercise = loadedExercise
             )
         }
+
+        val currentUserPoints = exercise.bind { exercise ->
+            exercise.currentUserPoints?.let(ExercisePointsDecimalFormat::format)
+        }.orElse(null)
+        val maxPoints = exercise.bind { exercise ->
+            exercise.maxPoints?.let(ExercisePointsDecimalFormat::format)
+        }.orElse(null)
+
+        val pointsHintText = when {
+            currentUserPoints != null && maxPoints != null -> stringResource(
+                id = R.string.exercise_view_overview_points_reached,
+                currentUserPoints,
+                maxPoints
+            )
+
+            maxPoints != null -> stringResource(
+                id = R.string.exercise_view_overview_points_max,
+                maxPoints
+            )
+
+            else -> stringResource(id = R.string.exercise_view_overview_points_none)
+        }
+
+        Text(
+            modifier = Modifier.placeholder(exercise !is DataState.Success),
+            text = pointsHintText,
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 
-    val dueDateColumnUi = remember(exercise) {
-        movableContentOf { modifier: Modifier ->
-            var maxWidth: Int by remember { mutableStateOf(0) }
-            val updateMaxWidth = { new: Int -> maxWidth = new }
+    val dueDateColumnUi = @Composable { modifier: Modifier ->
+        var maxWidth: Int by remember { mutableStateOf(0) }
+        val updateMaxWidth = { new: Int -> maxWidth = new }
 
-            Column(
-                modifier = modifier,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                val dueDateTopBarTextInformation =
-                    @Composable { date: Instant, hintRes: @receiver:StringRes Int ->
-                        TopBarTextInformation(
-                            modifier = Modifier.fillMaxWidth(),
-                            hintColumnWidth = maxWidth,
-                            hint = stringResource(id = hintRes),
-                            dataText = getRelativeTime(to = date).toString(),
-                            dataColor = getDueDateColor(date),
-                            updateHintColumnWidth = updateMaxWidth
-                        )
-                    }
-
-                dueDate?.let {
-                    dueDateTopBarTextInformation(
-                        it,
-                        R.string.exercise_view_overview_hint_submission_due_date
+        Column(
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val dueDateTopBarTextInformation =
+                @Composable { date: Instant, hintRes: @receiver:StringRes Int ->
+                    TopBarTextInformation(
+                        modifier = Modifier.fillMaxWidth(),
+                        hintColumnWidth = maxWidth,
+                        hint = stringResource(id = hintRes),
+                        dataText = getRelativeTime(to = date).toString(),
+                        dataColor = getDueDateColor(date),
+                        updateHintColumnWidth = updateMaxWidth
                     )
                 }
 
-                assessmentDueData?.let {
-                    dueDateTopBarTextInformation(
-                        it,
-                        R.string.exercise_view_overview_hint_assessment_due_date
-                    )
-                }
+            dueDate?.let {
+                dueDateTopBarTextInformation(
+                    it,
+                    R.string.exercise_view_overview_hint_submission_due_date
+                )
+            }
+
+            assessmentDueData?.let {
+                dueDateTopBarTextInformation(
+                    it,
+                    R.string.exercise_view_overview_hint_assessment_due_date
+                )
             }
         }
     }

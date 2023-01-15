@@ -9,20 +9,20 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseRegistrationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
-import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.authenticationStateFlow
+import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class RegisterForCourseViewModel(
     private val accountService: AccountService,
     private val courseRegistrationService: CourseRegistrationService,
-    private val networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService
 ) : ViewModel() {
 
     private val reloadRegistrableCourses = MutableSharedFlow<Unit>()
 
-    val registrableCourses: Flow<DataState<List<SemesterCourses>>> = transformLatest(
+    val registrableCourses: StateFlow<DataState<List<SemesterCourses>>> = transformLatest(
         accountService.authToken,
         serverConfigurationService.serverUrl,
         reloadRegistrableCourses.onStart { emit(Unit) }
@@ -42,6 +42,10 @@ class RegisterForCourseViewModel(
                     .map { (semester, courses) -> SemesterCourses(semester, courses) }
             }
         }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, initialValue = DataState.Loading())
+
+    val authenticationData: StateFlow<AccountService.AuthenticationData> = authenticationStateFlow(accountService)
+    val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
 
     fun reloadRegistrableCourses() {
         viewModelScope.launch {

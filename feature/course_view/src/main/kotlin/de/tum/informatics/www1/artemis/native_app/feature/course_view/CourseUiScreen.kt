@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.course_view
 
+import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,8 @@ fun NavGraphBuilder.course(
     composable("course/{courseId}", arguments = listOf(
         navArgument("courseId") { type = NavType.LongType; nullable = false }
     )) { backStackEntry ->
+        Log.e("FOO", backStackEntry.toString())
+
         val courseId =
             backStackEntry.arguments?.getLong("courseId")
         checkNotNull(courseId)
@@ -68,9 +71,9 @@ internal fun CourseUiScreen(
     onNavigateToLecture: (lectureId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    val courseDataState by viewModel.course.collectAsState(initial = DataState.Loading())
-    val weeklyExercisesDataState by viewModel.exercisesGroupedByWeek.collectAsState(initial = DataState.Loading())
-    val weeklyLecturesDataState by viewModel.lecturesGroupedByWeek.collectAsState(initial = DataState.Loading())
+    val courseDataState by viewModel.course.collectAsState()
+    val weeklyExercisesDataState by viewModel.exercisesGroupedByWeek.collectAsState()
+    val weeklyLecturesDataState by viewModel.lecturesGroupedByWeek.collectAsState()
 
     val topAppBarState = rememberTopAppBarState()
 

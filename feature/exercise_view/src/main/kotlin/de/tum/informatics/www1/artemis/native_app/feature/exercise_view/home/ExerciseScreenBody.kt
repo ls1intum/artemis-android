@@ -58,7 +58,7 @@ internal fun ExerciseScreenBody(
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                val exerciseOverviewTab = remember {
+                val exerciseOverviewTab = remember(webView) {
                     movableContentOf { modifier: Modifier ->
                         ExerciseOverviewTab(
                             modifier = modifier,
@@ -83,6 +83,30 @@ internal fun ExerciseScreenBody(
                         )
                     }
                 }
+
+//                val exerciseOverviewTab = @Composable { modifier: Modifier ->
+//                    ExerciseOverviewTab(
+//                        modifier = modifier,
+//                        authToken = authToken,
+//                        exercise = exercise,
+//                        gradedParticipation = gradedParticipation,
+//                        onClickStartExercise = onClickStartExercise,
+//                        onClickOpenTextExercise = onViewTextExerciseParticipationScreen,
+//                        onClickPracticeQuiz = {
+//                            onParticipateInQuiz(true)
+//                        },
+//                        onClickStartQuiz = {
+//                            onParticipateInQuiz(false)
+//                        },
+//                        onClickOpenQuiz = {
+//                            onParticipateInQuiz(false)
+//                        },
+//                        onViewResult = onViewResult,
+//                        webViewState = webViewState,
+//                        setWebView = setWebView,
+//                        webView = webView
+//                    )
+//                }
 
                 if (displayCommunicationOnSide) {
                     Row(

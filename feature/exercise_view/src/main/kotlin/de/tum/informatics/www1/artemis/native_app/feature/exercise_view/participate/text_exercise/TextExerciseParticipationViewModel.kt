@@ -26,9 +26,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
@@ -62,13 +65,15 @@ internal class TextExerciseParticipationViewModel(
         }
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
-    val initialParticipation: Flow<Participation> = initialParticipationDataState
+    val initialParticipation: StateFlow<Participation?> = initialParticipationDataState
         .filterSuccess()
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    private val initialSubmission: Flow<TextSubmission> = initialParticipation.mapNotNull {
-        it.submissions.orEmpty().firstOrNull() as? TextSubmission
-    }
+    private val initialSubmission: Flow<TextSubmission> = initialParticipation
+        .filterNotNull()
+        .mapNotNull {
+            it.submissions.orEmpty().firstOrNull() as? TextSubmission
+        }
 
     /**
      * The latest submission the server knows about
@@ -108,7 +113,7 @@ internal class TextExerciseParticipationViewModel(
         .onStart { emit(SyncState.Synced(initialSubmission.first())) }
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
-    val latestSubmission: Flow<TextSubmission> =
+    val latestSubmission: StateFlow<TextSubmission?> =
         flow { emit(initialSubmission.first()) }
             .onCompletion {
                 emitAll(
@@ -121,9 +126,12 @@ internal class TextExerciseParticipationViewModel(
                         }
                 )
             }
-            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+            .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    val latestResult: Flow<Result?> = latestSubmission.map { it.results.orEmpty().lastOrNull() }
+    val latestResult: StateFlow<Result?> = latestSubmission
+        .filterNotNull()
+        .map { it.results.orEmpty().lastOrNull() }
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     init {
         viewModelScope.launch {

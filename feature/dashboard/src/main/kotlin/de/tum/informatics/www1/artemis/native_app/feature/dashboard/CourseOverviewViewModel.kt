@@ -45,20 +45,20 @@ internal class CourseOverviewViewModel(
             )
         }
             //Store the loaded dashboard, so it is not loaded again when somebody collects this flow.
-            .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
+            .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
     /**
      * The client needs access to this url, to load the course icon.
      * The serverUrl comes without a trailing /
      */
-    val serverUrl = serverConfigurationService.serverUrl
+    val serverUrl: StateFlow<String> = serverConfigurationService.serverUrl
         .map { it.dropLast(1) } //Remove the /
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     /**
      * Emits the current authentication bearer in the form: "Bearer $token"
      */
-    val authorizationBearerToken = accountService.authenticationData.map { authenticationData ->
+    val authorizationBearerToken: StateFlow<String> = accountService.authenticationData.map { authenticationData ->
         when (authenticationData) {
             is AccountService.AuthenticationData.LoggedIn -> authenticationData.asBearer
             AccountService.AuthenticationData.NotLoggedIn -> ""

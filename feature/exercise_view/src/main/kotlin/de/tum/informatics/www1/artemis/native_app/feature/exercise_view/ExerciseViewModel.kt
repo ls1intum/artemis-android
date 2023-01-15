@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.BuildLogServ
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ResultService
+import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -25,6 +26,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participat
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.BuildLogEntry
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.ProgrammingSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
+import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -100,9 +103,9 @@ internal class ExerciseViewModel(
                     else -> emit(exercise)
                 }
             }
-            .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
+            .stateIn(viewModelScope, SharingStarted.Lazily)
 
-    val latestIndividualDueDate: Flow<DataState<Instant?>> =
+    val latestIndividualDueDate: StateFlow<DataState<Instant?>> =
         baseConfigurationFlow
             .flatMapLatest { (serverUrl, authToken) ->
                 exerciseService.getLatestDueDate(
@@ -111,12 +114,12 @@ internal class ExerciseViewModel(
                     authToken
                 )
             }
-            .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
+            .stateIn(viewModelScope, SharingStarted.Lazily)
 
     /**
      * The latest result for the exercise.
      */
-    val latestResult: Flow<DataState<Result?>> =
+    val latestResult: StateFlow<DataState<Result?>> =
         transformLatest(
             exercise,
             serverConfigurationService.serverUrl,
@@ -158,9 +161,9 @@ internal class ExerciseViewModel(
                     }
                 }
             }
-            .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
+            .stateIn(viewModelScope, SharingStarted.Lazily)
 
-    val feedbackItems: Flow<DataState<List<FeedbackItem>>> =
+    val feedbackItems: StateFlow<DataState<List<FeedbackItem>>> =
         combine(
             exercise,
             latestResult
@@ -175,19 +178,20 @@ internal class ExerciseViewModel(
                     }
                 } else exercise.bind { emptyList() }
             }
+            .stateIn(viewModelScope, SharingStarted.Lazily)
 
     /**
      * Fetch the build logs only if the exercise is loaded and the exercise is a programming exercise.
      * Furthermore, the loaded exercise must already have a submission.
      */
-    val buildLogs: Flow<DataState<List<BuildLogEntry>>> =
+    val buildLogs: StateFlow<DataState<List<BuildLogEntry>>> =
         exercise
             .map { exerciseDataState -> exerciseDataState.bind<Exercise?> { it }.orElse(null) }
             .filterNotNull()
             .filterIsInstance<ProgrammingExercise>()
-            .transformLatest { exercise ->
+            .flatMapLatest { exercise ->
                 val participationId = exercise.studentParticipations.orEmpty().firstOrNull()?.id
-                    ?: return@transformLatest
+                    ?: return@flatMapLatest emptyFlow()
 
                 latestResult
                     .filter {
@@ -214,12 +218,13 @@ internal class ExerciseViewModel(
                         )
                     }
             }
+            .stateIn(viewModelScope, SharingStarted.Lazily)
 
     /**
      * Emitted to when startExercise is successful
      */
     private val _gradedParticipation = MutableSharedFlow<Participation>()
-    val gradedParticipation: Flow<Participation?> = merge<Participation?>(
+    val gradedParticipation: StateFlow<Participation?> = merge<Participation?>(
         _gradedParticipation,
         exercise
             .filterSuccess()
@@ -232,6 +237,10 @@ internal class ExerciseViewModel(
             }
             .filterNotNull()
     )
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
+    val authToken: StateFlow<String> = authTokenStateFlow(accountService)
 
     fun requestReloadExercise() {
         requestReloadExercise.tryEmit(Unit)

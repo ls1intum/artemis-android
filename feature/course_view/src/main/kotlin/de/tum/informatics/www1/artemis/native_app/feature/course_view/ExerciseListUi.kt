@@ -20,13 +20,13 @@ internal fun ExerciseListUi(
     WeeklyItemsLazyColumn(
         modifier = modifier,
         weeklyItemGroups = weeklyExercises,
-        getItemId = { id ?: hashCode().toLong() }
+        getItemId = { id }
     ) { exercise ->
         ExerciseListItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp),
             exercise = exercise
-        ) { onClickExercise(exercise.id ?: return@ExerciseListItem) }
+        ) { onClickExercise(exercise.id) }
     }
 }

@@ -84,21 +84,16 @@ internal fun RegisterForCourseScreen(
     onNavigateUp: () -> Unit,
     onRegisteredInCourse: (courseId: Long) -> Unit
 ) {
-    val courses by viewModel.registrableCourses.collectAsState(initial = DataState.Loading())
-
-    val accountService: AccountService = get()
-    val serverConfigurationService: ServerConfigurationService = get()
+    val courses by viewModel.registrableCourses.collectAsState()
 
     var signUpCandidate: Course? by remember { mutableStateOf(null) }
     var displayRegistrationFailedDialog: Boolean by rememberSaveable { mutableStateOf(false) }
 
-    val authData = accountService.authenticationData.collectAsState(initial = null).value
-    val serverUrl = serverConfigurationService.serverUrl.collectAsState(initial = null).value
+    val authData = viewModel.authenticationData.collectAsState().value
+    val serverUrl by viewModel.serverUrl.collectAsState()
 
     //CourseHeader requires url without trailing /
-    val properServerUrl = remember(serverUrl) { serverUrl?.dropLast(1) }
-
-    if (properServerUrl == null || authData == null) return
+    val properServerUrl = remember(serverUrl) { serverUrl.dropLast(1) }
 
     val bearerToken = when (authData) {
         is AccountService.AuthenticationData.LoggedIn -> authData.asBearer

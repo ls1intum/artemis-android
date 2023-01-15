@@ -70,12 +70,12 @@ internal fun CoursesOverview(
     onClickRegisterForCourse: () -> Unit,
     onViewCourse: (courseId: Long) -> Unit
 ) {
-    val coursesDataState = viewModel.dashboard.collectAsState(initial = DataState.Loading()).value
+    val coursesDataState by viewModel.dashboard.collectAsState()
 
     //The course composable needs the serverUrl to build the correct url to fetch the course icon from.
-    val serverUrl by viewModel.serverUrl.collectAsState(initial = "")
+    val serverUrl by viewModel.serverUrl.collectAsState()
     //The server wants an authorization token to send the course icon.
-    val authorizationBearer by viewModel.authorizationBearerToken.collectAsState(initial = "")
+    val authorizationBearer by viewModel.authorizationBearerToken.collectAsState()
 
     val topAppBarState = rememberTopAppBarState()
 

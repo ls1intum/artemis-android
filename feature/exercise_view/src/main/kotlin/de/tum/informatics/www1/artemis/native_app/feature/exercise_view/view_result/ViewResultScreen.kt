@@ -9,10 +9,13 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.join
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
@@ -36,34 +39,29 @@ internal fun ViewResultScreen(
             )
         }
     ) { padding ->
-        val exercise = viewModel.exercise.collectAsState(initial = DataState.Loading()).value
+        val exerciseDataState = viewModel.exercise.collectAsState().value
 
-        val latestResultDataState =
-            viewModel.latestResult.collectAsState(initial = DataState.Loading()).value
+        val latestResultDataState by viewModel.latestResult.collectAsState()
 
-        val latestIndividualDueDate =
-            viewModel.latestIndividualDueDate.collectAsState(initial = DataState.Loading()).value
+        val latestIndividualDueDate by viewModel.latestIndividualDueDate.collectAsState()
 
-        val feedbackItems =
-            viewModel.feedbackItems.collectAsState(initial = DataState.Loading()).value
+        val feedbackItems by viewModel.feedbackItems.collectAsState()
 
-        val buildLogs = viewModel.buildLogs.collectAsState(initial = DataState.Loading()).value
+        val buildLogs by viewModel.buildLogs.collectAsState()
 
         ExerciseDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            value = latestResultDataState,
+            value = latestResultDataState join exerciseDataState,
             onClickRetry = { viewModel.requestReloadExercise() },
-            onSuccess = { latestResult ->
-                if (exercise !is DataState.Success) return@ExerciseDataStateUi
-
+            onSuccess = { (latestResult, exercise) ->
                 ResultDetailUi(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(8.dp)
                         .verticalScroll(rememberScrollState()),
-                    exercise = exercise.data,
+                    exercise = exercise,
                     latestResult = latestResult ?: return@ExerciseDataStateUi,
                     feedbackItems = feedbackItems.orElse(emptyList()),
                     latestIndividualDueDate = latestIndividualDueDate.orElse(null),

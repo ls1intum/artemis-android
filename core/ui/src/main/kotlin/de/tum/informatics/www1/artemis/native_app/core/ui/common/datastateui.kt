@@ -18,14 +18,14 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
  * For suspended and failure, text with a try again button.
  */
 @Composable
-fun <T> BasicDataStateUi(
+inline fun <T> BasicDataStateUi(
     modifier: Modifier,
-    dataState: DataState<T>,
+    dataState: DataState<T>?,
     loadingText: String,
     failureText: String,
     retryButtonText: String,
-    onClickRetry: () -> Unit,
-    successUi: @Composable() (BoxScope.(data: T) -> Unit)
+    noinline onClickRetry: () -> Unit,
+    crossinline successUi: @Composable (BoxScope.(data: T) -> Unit)
 ) {
     Box(modifier = modifier) {
         when (dataState) {
@@ -69,6 +69,7 @@ fun <T> BasicDataStateUi(
             is DataState.Success -> {
                 successUi(dataState.data)
             }
+            null -> {}
         }
     }
 }

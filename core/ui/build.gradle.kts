@@ -12,6 +12,7 @@ dependencies {
     api(project(":core:model"))
     api(project(":core:data"))
     api(project(":core:websocket"))
+    api(project(":core:datastore"))
 
     api(libs.androidx.compose.foundation)
     api(libs.androidx.compose.foundation.layout)

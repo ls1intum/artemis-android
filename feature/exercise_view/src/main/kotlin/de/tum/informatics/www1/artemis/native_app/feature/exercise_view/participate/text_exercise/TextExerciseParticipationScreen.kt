@@ -42,16 +42,14 @@ internal fun TextExerciseParticipationScreen(
     onNavigateUp: () -> Unit
 ) {
     EmptyDataStateUi(dataState = viewModel.exercise.collectAsState().value) { exercise ->
-        val exerciseId: Long = exercise.id ?: return@EmptyDataStateUi
+        val exerciseId: Long = exercise.id
 
         val participationViewModel: TextExerciseParticipationViewModel =
             koinViewModel { parametersOf(exerciseId, participationId) }
 
-        val latestResult = participationViewModel.latestResult.collectAsState(initial = null).value
-        val latestSubmission =
-            participationViewModel.latestSubmission.collectAsState(initial = null).value
-        val participation =
-            participationViewModel.initialParticipation.collectAsState(initial = null).value
+        val latestResult by participationViewModel.latestResult.collectAsState()
+        val latestSubmission by participationViewModel.latestSubmission.collectAsState()
+        val participation = participationViewModel.initialParticipation.collectAsState().value
 
         var displayDiscardChangesDialog by rememberSaveable { mutableStateOf(false) }
 

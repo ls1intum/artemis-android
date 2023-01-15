@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.data
 
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
@@ -56,6 +57,20 @@ fun <T> DataState<T>.orNull(): T? {
     }
 }
 
+/**
+ * @return a data state that is only a success if both datastates are a success
+ */
+infix fun <T, K> DataState<T>.join(other: DataState<K>): DataState<Pair<T, K>> {
+    return when {
+        this is DataState.Success && other is DataState.Success -> DataState.Success(this.data to other.data)
+        this is DataState.Failure && other is DataState.Failure -> DataState.Failure(this.throwable)
+        this is DataState.Failure -> DataState.Failure(this.throwable)
+        other is DataState.Failure -> DataState.Failure(other.throwable)
+        this is DataState.Loading || other is DataState.Loading -> DataState.Loading()
+        else -> DataState.Failure(IllegalStateException())
+    }
+}
+
 val <T> DataState<T>.isSuccess: Boolean
     get() = when (this) {
         is DataState.Success<T> -> true
@@ -68,6 +83,9 @@ fun <T> Flow<DataState<T>>.filterSuccess(): Flow<T> = transform {
         else -> {}
     }
 }
+
+fun <T> Flow<DataState<T>>.stateIn(scope: CoroutineScope, sharingStarted: SharingStarted): StateFlow<DataState<T>> =
+    stateIn(scope, sharingStarted, DataState.Loading())
 
 /**
  * Retries the given network call up to [maxRetries] times, after each attempt pausing using an exponential backoff
