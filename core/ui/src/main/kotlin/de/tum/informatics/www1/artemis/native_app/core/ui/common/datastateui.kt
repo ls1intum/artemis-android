@@ -27,7 +27,10 @@ inline fun <T> BasicDataStateUi(
     noinline onClickRetry: () -> Unit,
     crossinline successUi: @Composable (BoxScope.(data: T) -> Unit)
 ) {
-    Box(modifier = modifier) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
         when (dataState) {
             is DataState.Failure -> {
                 Column(
@@ -49,6 +52,7 @@ inline fun <T> BasicDataStateUi(
                     )
                 }
             }
+
             is DataState.Loading -> {
                 Column(modifier = Modifier.align(Alignment.Center)) {
                     Text(
@@ -66,9 +70,11 @@ inline fun <T> BasicDataStateUi(
                     )
                 }
             }
+
             is DataState.Success -> {
                 successUi(dataState.data)
             }
+
             null -> {}
         }
     }

@@ -5,6 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.LoginService
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
 
@@ -12,7 +13,7 @@ internal class LoginServiceImpl(
     private val ktorProvider: KtorProvider
 ) : LoginService {
 
-    override suspend fun login(
+    override suspend fun loginWithCredentials(
         username: String,
         password: String,
         rememberMe: Boolean,
@@ -30,6 +31,18 @@ internal class LoginServiceImpl(
                 }.body()
 
             body
+        }
+    }
+
+    override suspend fun loginSaml2(rememberMe: Boolean, serverUrl: String): NetworkResponse<HttpResponse> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments("api", "saml2")
+                }
+                setBody(rememberMe)
+                contentType(ContentType.Application.Json)
+            }
         }
     }
 

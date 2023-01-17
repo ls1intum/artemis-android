@@ -83,7 +83,7 @@ internal class AccountServiceImpl(
         password: String,
         rememberMe: Boolean
     ): AccountService.LoginResponse {
-        return when (val tokenResponse = loginService.login(
+        return when (val tokenResponse = loginService.loginWithCredentials(
             username,
             password,
             rememberMe,

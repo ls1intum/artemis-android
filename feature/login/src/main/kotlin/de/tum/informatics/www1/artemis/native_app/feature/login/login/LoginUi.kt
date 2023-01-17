@@ -39,7 +39,12 @@ import kotlinx.coroutines.Job
  * */
 
 @Composable
-internal fun LoginScreen(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Unit) {
+internal fun LoginScreen(
+    modifier: Modifier,
+    viewModel: LoginViewModel,
+    onLoggedIn: () -> Unit,
+    onClickSaml2Login: (rememberMe: Boolean) -> Unit
+) {
     Box(
         modifier = modifier
     ) {
@@ -48,19 +53,19 @@ internal fun LoginScreen(modifier: Modifier, viewModel: LoginViewModel, onLogged
                 .fillMaxWidth()
                 .align(Alignment.Center),
             viewModel = viewModel,
-            onLoggedIn = onLoggedIn
+            onLoggedIn = onLoggedIn,
+            onClickSaml2Login = onClickSaml2Login
         )
     }
 }
 
-private fun <T> fromProfileInfo(
-    dataState: DataState<ProfileInfo>,
-    default: T,
-    onSuccess: (ProfileInfo) -> T
-): T = dataState.bind(onSuccess).orElse(default)
-
 @Composable
-internal fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: () -> Unit) {
+internal fun LoginUi(
+    modifier: Modifier,
+    viewModel: LoginViewModel,
+    onLoggedIn: () -> Unit,
+    onClickSaml2Login: (rememberMe: Boolean) -> Unit
+) {
     val username by viewModel.username.collectAsState(initial = "")
     val password by viewModel.password.collectAsState(initial = "")
     val rememberMe by viewModel.rememberMe.collectAsState(initial = true)
@@ -110,7 +115,8 @@ internal fun LoginUi(modifier: Modifier, viewModel: LoginViewModel, onLoggedIn: 
         accountName = accountName,
         needsToAcceptTerms = needsToAcceptTerms,
         isPasswordLoginDisabled = isPasswordLoginDisabled,
-        saml2Config = saml2Config
+        saml2Config = saml2Config,
+        onClickSaml2Login = { onClickSaml2Login(rememberMe) }
     )
 
     if (displayPerformLoginDialog) {
@@ -160,17 +166,18 @@ internal fun LoginUi(
     username: String,
     password: String,
     rememberMe: Boolean,
+    accountName: String,
+    isLoginButtonEnabled: Boolean,
+    needsToAcceptTerms: Boolean,
     hasUserAcceptedTerms: Boolean,
+    saml2Config: Saml2Config?,
+    isPasswordLoginDisabled: Boolean,
     updateUsername: (String) -> Unit,
     updatePassword: (String) -> Unit,
     updateRememberMe: (Boolean) -> Unit,
     updateUserAcceptedTerms: (Boolean) -> Unit,
     onClickLogin: () -> Unit,
-    isLoginButtonEnabled: Boolean,
-    accountName: String,
-    needsToAcceptTerms: Boolean,
-    isPasswordLoginDisabled: Boolean,
-    saml2Config: Saml2Config?
+    onClickSaml2Login: () -> Unit
 ) {
     Column(modifier = modifier.then(Modifier.verticalScroll(rememberScrollState()))) {
         Text(
@@ -226,9 +233,7 @@ internal fun LoginUi(
                 hasUserAcceptedTerms = hasUserAcceptedTerms,
                 rememberMe = rememberMe,
                 updateRememberMe = updateRememberMe,
-                onLoginButtonClicked = {
-
-                }
+                onLoginButtonClicked = onClickSaml2Login
             )
         }
 
@@ -474,3 +479,9 @@ private fun Autofill(
         content(autofillNode)
     }
 }
+
+private fun <T> fromProfileInfo(
+    dataState: DataState<ProfileInfo>,
+    default: T,
+    onSuccess: (ProfileInfo) -> T
+): T = dataState.bind(onSuccess).orElse(default)

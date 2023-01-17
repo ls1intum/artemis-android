@@ -23,25 +23,32 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
+import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Saml2Config
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.custom_instance_selection.CustomInstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginUi
+import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginScreen
+import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNotificationStorageService
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 import java.io.IOException
 
 const val LOGIN_DESTINATION = "login"
@@ -51,6 +58,11 @@ private const val NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION = "custom_instanc
 private const val NESTED_HOME_DESTINATION = "nested_home"
 private const val NESTED_LOGIN_DESTINATION = "nested_login"
 private const val NESTED_REGISTER_DESTINATION = "nested_register"
+
+private const val ARG_REMEMBER_ME = "rememberMe"
+private const val NESTED_SAML2_LOGIN_ROUTE = "saml2_login"
+private const val NESTED_SAML2_LOGIN_DESTINATION = "$NESTED_SAML2_LOGIN_ROUTE/{$ARG_REMEMBER_ME}"
+
 
 fun NavController.navigateToLogin(builder: NavOptionsBuilder.() -> Unit) {
     navigate(LOGIN_DESTINATION, builder)
@@ -135,15 +147,25 @@ private fun LoginUiScreen(
         .value
         ?: return // Display nothing to avoid switching between destinations
 
+    // Force recomposition
+    nestedNavController.currentBackStackEntryAsState().value
+    val supportsBackNavigation = nestedNavController.previousBackStackEntry != null
+
     val isCustomInstanceSelectionDestination =
         nestedNavController.currentDestination?.route == NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION
+
+    val onClickSaml2Login: (rememberMe: Boolean) -> Unit = { rememberMe ->
+        nestedNavController.navigate(
+            createSaml2LoginRoute(rememberMe)
+        )
+    }
 
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    if (isCustomInstanceSelectionDestination) {
+                    if (supportsBackNavigation) {
                         IconButton(onClick = nestedNavController::navigateUp) {
                             Icon(imageVector = Icons.Default.Close, contentDescription = null)
                         }
@@ -185,7 +207,8 @@ private fun LoginUiScreen(
                             }
                         }
                     },
-                    onLoggedIn = onLoggedIn
+                    onLoggedIn = onLoggedIn,
+                    onClickSaml2Login = onClickSaml2Login
                 )
             }
 
@@ -205,6 +228,26 @@ private fun LoginUiScreen(
                 LoginScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = getViewModel(),
+                    onLoggedIn = onLoggedIn,
+                    onClickSaml2Login = onClickSaml2Login,
+                )
+            }
+
+            composable(
+                route = NESTED_SAML2_LOGIN_DESTINATION,
+                arguments = listOf(navArgument("rememberMe") {
+                    type = NavType.BoolType
+                })
+            ) { backStack ->
+                val rememberMe = backStack.arguments?.getBoolean(ARG_REMEMBER_ME)
+                checkNotNull(rememberMe)
+
+                val saml2LoginViewModel: Saml2LoginViewModel =
+                    koinViewModel { parametersOf(rememberMe) }
+
+                Saml2LoginScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    viewModel = saml2LoginViewModel,
                     onLoggedIn = onLoggedIn
                 )
             }
@@ -243,8 +286,10 @@ private fun LoginUiScreen(
             }
         }
     }
-
 }
+
+private fun createSaml2LoginRoute(rememberMe: Boolean): String =
+    NESTED_SAML2_LOGIN_DESTINATION.replace("{$ARG_REMEMBER_ME}", rememberMe.toString())
 
 /**
  * Displays the screen to login and register. Also allows to change the artemis instance.
@@ -256,7 +301,8 @@ private fun AccountScreen(
     onNavigateToLoginScreen: () -> Unit,
     onNavigateToRegisterScreen: () -> Unit,
     onNavigateToInstanceSelection: () -> Unit,
-    onLoggedIn: () -> Unit
+    onLoggedIn: () -> Unit,
+    onClickSaml2Login: (rememberMe: Boolean) -> Unit
 ) {
     val serverProfileInfo by viewModel.serverProfileInfo.collectAsState()
 
@@ -267,7 +313,8 @@ private fun AccountScreen(
         onNavigateToLoginScreen = onNavigateToLoginScreen,
         onNavigateToRegisterScreen = onNavigateToRegisterScreen,
         onNavigateToInstanceSelection = onNavigateToInstanceSelection,
-        onLoggedIn = onLoggedIn
+        onLoggedIn = onLoggedIn,
+        onClickSaml2Login = onClickSaml2Login
     )
 }
 
@@ -279,7 +326,8 @@ private fun AccountUi(
     onNavigateToLoginScreen: () -> Unit,
     onNavigateToRegisterScreen: () -> Unit,
     onNavigateToInstanceSelection: () -> Unit,
-    onLoggedIn: () -> Unit
+    onLoggedIn: () -> Unit,
+    onClickSaml2Login: (rememberMe: Boolean) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -306,7 +354,8 @@ private fun AccountUi(
             retryLoadServerProfileInfo = retryLoadServerProfileInfo,
             onLoggedIn = onLoggedIn,
             onNavigateToLoginScreen = onNavigateToLoginScreen,
-            onNavigateToRegisterScreen = onNavigateToRegisterScreen
+            onNavigateToRegisterScreen = onNavigateToRegisterScreen,
+            onClickSaml2Login = onClickSaml2Login
         )
 
         ClickableText(
@@ -333,7 +382,8 @@ private fun RegisterLoginAccount(
     retryLoadServerProfileInfo: () -> Unit,
     onNavigateToLoginScreen: () -> Unit,
     onNavigateToRegisterScreen: () -> Unit,
-    onLoggedIn: () -> Unit
+    onLoggedIn: () -> Unit,
+    onClickSaml2Login: (rememberMe: Boolean) -> Unit
 ) {
     Crossfade(
         modifier = modifier,
@@ -379,13 +429,15 @@ private fun RegisterLoginAccount(
                             accountName = "TUM",
                             needsToAcceptTerms = false,
                             isPasswordLoginDisabled = false,
-                            saml2Config = null
+                            saml2Config = null,
+                            onClickSaml2Login = { }
                         )
                     } else {
                         LoginUi(
                             modifier = loginUiModifier,
                             viewModel = koinViewModel(),
-                            onLoggedIn = onLoggedIn
+                            onLoggedIn = onLoggedIn,
+                            onClickSaml2Login = onClickSaml2Login
                         )
                     }
                 }
@@ -489,8 +541,10 @@ fun AccountUiPreviewLoadingProfileInfo() {
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
-        onNavigateToInstanceSelection = {}
-    ) {}
+        onNavigateToInstanceSelection = {},
+        onLoggedIn = {},
+        onClickSaml2Login = {}
+    )
 }
 
 @Composable
@@ -502,8 +556,10 @@ fun AccountUiPreviewFailedLoadingProfileInfo() {
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
-        onNavigateToInstanceSelection = {}
-    ) {}
+        onNavigateToInstanceSelection = {},
+        onLoggedIn = {},
+        onClickSaml2Login = {}
+    )
 }
 
 @Composable
@@ -519,8 +575,10 @@ fun AccountUiPreviewWithRegister() {
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
-        onNavigateToInstanceSelection = {}
-    ) {}
+        onNavigateToInstanceSelection = {},
+        onLoggedIn = {},
+        onClickSaml2Login = {}
+    )
 }
 
 @Composable
@@ -536,8 +594,10 @@ fun AccountUiPreviewWithoutRegister() {
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
-        onNavigateToInstanceSelection = {}
-    ) {}
+        onNavigateToInstanceSelection = {},
+        onLoggedIn = {},
+        onClickSaml2Login = {}
+    )
 }
 
 @Composable

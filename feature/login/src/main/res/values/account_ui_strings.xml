@@ -89,6 +89,15 @@
 
     <string name="artemis_instance_custom">Other</string>
 
+    <!--  SAML2 Login Screen -->
+    <string name="login_saml_screen_login_response_loading">Loading…</string>
+    <string name="login_saml_screen_login_response_failure">Something went wrong. Please try again.</string>
+    <string name="login_saml_screen_login_response_try_again">Try again</string>
+    <string name="login_saml_screen_login_response_forbidden">Forbidden: %1$s</string>
+    <string name="login_saml_screen_login_response_unexpected_error">An unexpected error occurred. Please try again or use a different login method.</string>
+    <string name="login_saml_screen_login_webview_loading">Loading authentication website…</string>
+    <string name="login_saml_screen_login_webview_try_again">Reload now</string>
+
     <!--  Push notification settings  -->
     <string name="push_notification_settings_title">Notification configuration</string>
     <string name="push_notification_settings_fab_text_with_save">Save &amp; Continue</string>
