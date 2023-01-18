@@ -106,6 +106,12 @@ internal class AccountServiceImpl(
         }
     }
 
+    override suspend fun storeAccessToken(jwt: String) {
+        context.accountSettingsStore.edit { data ->
+            data[JWT_KEY] = jwt
+        }
+    }
+
     override suspend fun logout() {
         inMemoryJWT.value = null
 

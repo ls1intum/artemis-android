@@ -30,6 +30,11 @@ interface AccountService {
 
     suspend fun login(username: String, password: String, rememberMe: Boolean): LoginResponse
 
+    /**
+     * Stores the given access token permanently
+     */
+    suspend fun storeAccessToken(jwt: String)
+
     data class LoginResponse(val isSuccessful: Boolean)
 
     /**

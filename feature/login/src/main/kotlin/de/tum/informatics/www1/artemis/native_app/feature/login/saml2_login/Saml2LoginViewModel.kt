@@ -7,6 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.LoginService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
@@ -15,12 +16,14 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 class Saml2LoginViewModel(
     private val rememberMe: Boolean,
     serverConfigurationService: ServerConfigurationService,
     networkStatusProvider: NetworkStatusProvider,
-    loginService: LoginService
+    loginService: LoginService,
+    private val accountService: AccountService
 ) : ViewModel() {
 
     private val retryPerformLogin = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -50,6 +53,13 @@ class Saml2LoginViewModel(
 
     fun retryPerformLogin() {
         retryPerformLogin.tryEmit(Unit)
+    }
+
+    fun saveAccessToken(token: String, onDone: () -> Unit) {
+        viewModelScope.launch {
+            accountService.storeAccessToken(token)
+            onDone()
+        }
     }
 
     sealed interface Saml2LoginResponse {

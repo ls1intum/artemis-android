@@ -26,12 +26,12 @@ import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewNavigator
 import com.google.accompanist.web.rememberWebViewState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Saml2Config
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
-import org.koin.androidx.compose.koinViewModel
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun Saml2LoginScreen(
@@ -71,7 +71,10 @@ internal fun Saml2LoginScreen(
                         // Display webview for the user to login
                         Saml2LoginWebView(
                             modifier = Modifier.fillMaxSize(),
-                            serverUrl = serverUrl
+                            serverUrl = serverUrl,
+                            onReceivedAccessToken = { jwt ->
+                                viewModel.saveAccessToken(jwt, onLoggedIn)
+                            }
                         )
                     }
 
@@ -122,28 +125,60 @@ private fun ErrorInfo(modifier: Modifier, errorText: String, onRequestTryAgain: 
     }
 }
 
+private val cookieJwtRegex = "jwt=\"(.*)\"\\w*;".toRegex()
+
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-private fun Saml2LoginWebView(modifier: Modifier, serverUrl: String) {
+private fun Saml2LoginWebView(
+    modifier: Modifier,
+    serverUrl: String,
+    onReceivedAccessToken: (String) -> Unit
+) {
     val url = remember(serverUrl) {
         URLBuilder(serverUrl)
             .appendPathSegments("saml2", "authenticate")
             .buildString()
     }
 
+    val cookieManager = remember {
+        CookieManager.getInstance().apply {
+            setAcceptCookie(true)
+            setCookie(serverUrl, "SAML2flow=true; max-age=120; SameSite=Lax;")
+        }
+    }
+
     val navigator = rememberWebViewNavigator()
 
     val state = rememberWebViewState(url = url)
     Box(modifier = modifier) {
+        LaunchedEffect(Unit) {
+            while (true) {
+                val currentCookie = cookieManager.getCookie(serverUrl)
+                cookieJwtRegex.matchEntire(currentCookie)?.let { result ->
+                    if (result.groups.size >= 2) {
+                        val jwt = result.groups[1]?.value.orEmpty()
+                        if (jwt.isNotBlank()) {
+                            onReceivedAccessToken(jwt)
+                            return@LaunchedEffect
+                        }
+                    }
+                }
+
+                delay(1.seconds)
+            }
+        }
+
         WebView(
             modifier = Modifier.fillMaxSize(),
             state = state,
             client = Saml2WebClient(),
             onCreated = {
                 it.settings.javaScriptEnabled = true
-                val cookieManager = CookieManager.getInstance()
                 cookieManager.setAcceptCookie(true)
                 cookieManager.setCookie(serverUrl, "SAML2flow=true; max-age=120; SameSite=Lax;")
+
+                val cookie = cookieManager.getCookie(serverUrl)
+                // wait for cookie with jwt=[] and then move forward.
             }
         )
 
