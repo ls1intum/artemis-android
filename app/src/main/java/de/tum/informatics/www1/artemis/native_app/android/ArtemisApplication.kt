@@ -8,7 +8,6 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.communicati
 import de.tum.informatics.www1.artemis.native_app.core.data.service.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.impl.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.pushNotificationModule
 import de.tum.informatics.www1.artemis.native_app.core.ui.uiModule
 import de.tum.informatics.www1.artemis.native_app.core.websocket.websocketModule
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistrationModule
@@ -17,10 +16,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboardMod
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exerciseViewModule
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lectureModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
+import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.quizParticipationModule
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsModule
 import io.sentry.Sentry
 import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin
 
 class ArtemisApplication : Application(), ImageLoaderFactory {
@@ -29,13 +30,15 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
         super.onCreate()
 
         Sentry.init {
-            it.dsn = if (BuildConfig.DEBUG) "" else "https://8b4d69ac628d4462995ee6178365541f@sentry.ase.in.tum.de/3"
+            it.dsn =
+                if (BuildConfig.DEBUG) "" else "https://8b4d69ac628d4462995ee6178365541f@sentry.ase.in.tum.de/3"
             it.isEnableUserInteractionBreadcrumbs = false
             it.isEnableUserInteractionTracing = false
         }
 
         startKoin {
             androidContext(this@ArtemisApplication)
+            workManagerFactory()
 
             modules(
                 dataModule,
@@ -43,7 +46,6 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
                 datastoreModule,
                 deviceModule,
                 websocketModule,
-                pushNotificationModule,
                 courseRegistrationModule,
                 courseViewModule,
                 dashboardModule,
@@ -52,7 +54,8 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
                 communicationModule,
                 quizParticipationModule,
                 settingsModule,
-                lectureModule
+                lectureModule,
+                pushModule
             )
         }
     }

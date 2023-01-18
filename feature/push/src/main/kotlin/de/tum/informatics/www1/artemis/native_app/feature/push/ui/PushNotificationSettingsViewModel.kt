@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.push_notification_settings
+package de.tum.informatics.www1.artemis.native_app.feature.push.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,19 +11,22 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.PushNotificatio
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.model.PushNotificationSetting
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.model.group
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.service.SettingsService
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.group
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class PushNotificationSettingsViewModel internal constructor(
-    private val settingsService: SettingsService,
+    private val settingsService: de.tum.informatics.www1.artemis.native_app.feature.push.service.SettingsService,
     networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
-    private val pushNotificationConfigurationService: PushNotificationConfigurationService
+    private val pushNotificationConfigurationService: PushNotificationConfigurationService,
+    private val pushNotificationJobService: PushNotificationJobService
 ) : ViewModel() {
 
     internal val arePushNotificationsEnabled: Flow<Boolean> =
@@ -114,10 +117,41 @@ class PushNotificationSettingsViewModel internal constructor(
         }
     }
 
-    internal fun updatePushNotificationEnabled(areEnabled: Boolean) {
-        // TODO: Sync with server
-        viewModelScope.launch {
-            pushNotificationConfigurationService.updateArePushNotificationEnabled(areEnabled)
+    internal fun updatePushNotificationEnabled(
+        areEnabled: Boolean,
+        onDone: (successful: Boolean) -> Unit
+    ): Job {
+        return viewModelScope.launch {
+            val serverUrl = serverConfigurationService.serverUrl.first()
+            val authToken = accountService.authToken.first()
+            val result: NetworkResponse<HttpStatusCode> = if (areEnabled) {
+                val newAesKey = pushNotificationConfigurationService.refreshAESKey()
+
+                val fireBaseToken = pushNotificationJobService.firebaseToken.first()
+                if (fireBaseToken == null) {
+                    onDone(false)
+                    return@launch
+                }
+
+                pushNotificationJobService.uploadPushNotificationDeviceConfigurationsToServer(
+                    serverUrl = serverUrl,
+                    authToken = authToken,
+                    aesKey = newAesKey,
+                    firebaseToken = fireBaseToken
+                )
+            } else {
+                pushNotificationJobService.unsubscribeFromNotifications(
+                    serverUrl = serverUrl,
+                    authToken = authToken
+                )
+            }
+
+            if (result is NetworkResponse.Response && result.data.isSuccess()) {
+                pushNotificationConfigurationService.updateArePushNotificationEnabled(areEnabled)
+                onDone(true)
+            } else {
+                onDone(false)
+            }
         }
     }
 
@@ -162,5 +196,8 @@ class PushNotificationSettingsViewModel internal constructor(
 
     private data class UpdatedSetting(val email: Boolean?, val webapp: Boolean?)
 
-    internal data class NotificationCategory(val categoryId: String, val settings: List<PushNotificationSetting>)
+    internal data class NotificationCategory(
+        val categoryId: String,
+        val settings: List<PushNotificationSetting>
+    )
 }

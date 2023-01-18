@@ -1,7 +1,11 @@
-package de.tum.informatics.www1.artemis.native_app.core.push_notification_settings
+package de.tum.informatics.www1.artemis.native_app.feature.push.ui
 
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
@@ -13,9 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.model.PushNotificationSetting
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.model.setting
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.feature.push.R
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.setting
 
 @Composable
 internal fun PushNotificationSettingCategoriesListUi(
@@ -46,7 +51,10 @@ private fun PushNotificationSettingsList(
     settingCategories: List<PushNotificationSettingsViewModel.NotificationCategory>,
     onUpdate: (PushNotificationSetting, webapp: Boolean?, email: Boolean?) -> Unit
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         settingCategories.forEach { category ->
             Column(
                 modifier = Modifier.fillMaxWidth(),

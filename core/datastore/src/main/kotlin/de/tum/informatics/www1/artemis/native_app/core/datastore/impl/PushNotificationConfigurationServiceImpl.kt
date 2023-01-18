@@ -1,11 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.core.datastore.impl
 
 import android.content.Context
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.security.crypto.MasterKey
-import androidx.security.crypto.MasterKeys
 import de.tum.informatics.www1.artemis.native_app.core.datastore.PushNotificationConfigurationService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -25,11 +25,7 @@ class PushNotificationConfigurationServiceImpl(
 
         private const val KEY_ALIAS = "pushNotificationKey"
 
-        private val aesKeyGenerator: KeyGenerator by lazy {
-            KeyGenerator.getInstance("AES").apply {
-                init(256)
-            }
-        }
+        private const val ANDROID_KEY_STORE = "AndroidKeyStore"
     }
 
     private val Context.pushNotificationsStore by preferencesDataStore("push_notifications_store")
@@ -45,15 +41,22 @@ class PushNotificationConfigurationServiceImpl(
         }
     }
 
-    override suspend fun refreshAESKey(username: String, serverId: String): SecretKey {
-        val aesKey = withContext(Dispatchers.Default) {
-            aesKeyGenerator.generateKey()
-        }
-
-        val entry = KeyStore.SecretKeyEntry(aesKey)
-        withContext(Dispatchers.IO) {
-            val keyStore = getAndroidKeystore()
-            keyStore.setEntry(KEY_ALIAS, entry, null)
+    override suspend fun refreshAESKey(): SecretKey {
+        val aesKey = withContext(Dispatchers.IO) {
+            val generator = KeyGenerator.getInstance(
+                KeyProperties.KEY_ALGORITHM_AES,
+                ANDROID_KEY_STORE
+            )
+            generator.init(
+                KeyGenParameterSpec
+                    .Builder(
+                        KEY_ALIAS,
+                        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+                    )
+                    .setRandomizedEncryptionRequired(true)
+                    .build()
+            )
+            generator.generateKey()
         }
 
         return aesKey
@@ -69,5 +72,11 @@ class PushNotificationConfigurationServiceImpl(
         }
     }
 
-    private fun getAndroidKeystore() = KeyStore.getInstance("AndroidKeyStore")
+    override suspend fun getOrCreateCurrentAESKey(): SecretKey {
+        return getCurrentAESKey() ?: refreshAESKey()
+    }
+
+    private fun getAndroidKeystore() = KeyStore.getInstance(ANDROID_KEY_STORE).apply {
+        load(null)
+    }
 }

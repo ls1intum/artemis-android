@@ -9,10 +9,12 @@ interface PushNotificationConfigurationService {
 
     suspend fun updateArePushNotificationEnabled(newIsEnabled: Boolean)
 
-    suspend fun refreshAESKey(username: String, serverId: String): SecretKey
+    suspend fun refreshAESKey(): SecretKey
 
     /**
      * @return the current aes key or null if no key has been set yet.
      */
     suspend fun getCurrentAESKey(): SecretKey?
+
+    suspend fun getOrCreateCurrentAESKey(): SecretKey
 }

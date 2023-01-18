@@ -16,16 +16,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.PushNotificationSettingsUi
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.PushNotificationSettingsViewModel
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.PushNotificationSyncChangesDialog
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.PushNotificationSyncFailedDialog
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncChangesDialog
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncFailedDialog
 import kotlinx.coroutines.Job
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: () -> Unit) {
-    val viewModel: PushNotificationSettingsViewModel = koinViewModel()
+    val viewModel: de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel = koinViewModel()
     val isDirty: Boolean by viewModel.isDirty.collectAsState(initial = false)
 
     // Set if currently syncing changes with server
@@ -69,7 +69,7 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
             }
         }
     ) { padding ->
-        PushNotificationSettingsUi(
+        de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
@@ -79,7 +79,7 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
         )
 
         if (syncChangesJob != null) {
-            PushNotificationSyncChangesDialog(
+            de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncChangesDialog(
                 onDismissRequest = {
                     syncChangesJob?.cancel()
                     syncChangesJob = null
@@ -88,7 +88,9 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
         }
 
         if (displaySyncFailedDialog) {
-            PushNotificationSyncFailedDialog { displaySyncFailedDialog = false }
+            de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncFailedDialog {
+                displaySyncFailedDialog = false
+            }
         }
     }
 }

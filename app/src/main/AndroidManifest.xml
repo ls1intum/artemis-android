@@ -15,10 +15,10 @@
         android:theme="@style/AppThemeActionBar">
         <activity
             android:name=".ui.MainActivity"
-            android:exported="true"
-            android:windowSoftInputMode="adjustResize"
             android:configChanges="smallestScreenSize|screenSize|screenLayout|orientation"
-            android:theme="@style/AppTheme">
+            android:exported="true"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -28,8 +28,22 @@
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
             android:theme="@style/AppThemeActionBar"
-            tools:replace="android:theme"/>
+            tools:replace="android:theme" />
 
-        <meta-data android:name="io.sentry.auto-init" android:value="false" />
+        <meta-data
+            android:name="io.sentry.auto-init"
+            android:value="false" />
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <!-- If you are using androidx.startup to initialize other components -->
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
     </application>
 </manifest>

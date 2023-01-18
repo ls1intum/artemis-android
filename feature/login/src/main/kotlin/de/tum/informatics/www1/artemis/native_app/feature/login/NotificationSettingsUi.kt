@@ -13,10 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.PushNotificationSettingsUi
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.PushNotificationSettingsViewModel
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.PushNotificationSyncChangesDialog
-import de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.PushNotificationSyncFailedDialog
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncChangesDialog
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncFailedDialog
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
 import kotlinx.coroutines.Job
 import org.koin.androidx.compose.koinViewModel
@@ -26,7 +26,7 @@ import org.koin.androidx.compose.koinViewModel
  */
 @Composable
 internal fun NotificationSettingsUi(modifier: Modifier, onDone: () -> Unit) {
-    val viewModel: PushNotificationSettingsViewModel = koinViewModel()
+    val viewModel: de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel = koinViewModel()
     val isDirty by viewModel.isDirty.collectAsState(initial = false)
 
     var saveJob: Job? by remember { mutableStateOf(null) }
@@ -87,7 +87,7 @@ internal fun NotificationSettingsUi(modifier: Modifier, onDone: () -> Unit) {
                 .padding(8.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            PushNotificationSettingsUi(
+            de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi(
                 modifier = Modifier.fillMaxWidth(),
                 viewModel = viewModel
             )
@@ -96,7 +96,7 @@ internal fun NotificationSettingsUi(modifier: Modifier, onDone: () -> Unit) {
         }
 
         if (saveJob != null) {
-            PushNotificationSyncChangesDialog(
+            de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncChangesDialog(
                 onDismissRequest = {
                     saveJob?.cancel()
                     saveJob = null
@@ -105,7 +105,9 @@ internal fun NotificationSettingsUi(modifier: Modifier, onDone: () -> Unit) {
         }
 
         if (displaySyncFailedDialog) {
-            PushNotificationSyncFailedDialog { displaySyncFailedDialog = false }
+            de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncFailedDialog {
+                displaySyncFailedDialog = false
+            }
         }
     }
 }

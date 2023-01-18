@@ -45,7 +45,6 @@ dependencies {
     implementation(project(":core:device"))
     implementation(project(":core:websocket"))
     implementation(project(":core:communication"))
-    implementation(project(":core:push_notification_settings"))
 
     implementation(project(":feature:course_registration"))
     implementation(project(":feature:course_view"))
@@ -55,6 +54,7 @@ dependencies {
     implementation(project(":feature:lecture_view"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:quiz_participation"))
+    implementation(project(":feature:push"))
 
     implementation(libs.play.services.oss.licences)
 
@@ -66,6 +66,9 @@ dependencies {
 
     implementation(libs.sentry.android)
     implementation(libs.sentry.compose.android)
+
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.koin.androidx.workmanager)
 }
 
 sentry {

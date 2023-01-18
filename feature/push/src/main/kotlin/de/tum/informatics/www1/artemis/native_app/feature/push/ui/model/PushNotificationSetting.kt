@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.push_notification_settings.model
+package de.tum.informatics.www1.artemis.native_app.feature.push.ui.model
 
 import kotlinx.serialization.Serializable
 

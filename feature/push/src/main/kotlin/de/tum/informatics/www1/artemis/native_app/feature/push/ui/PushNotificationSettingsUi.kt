@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.push_notification_settings
+package de.tum.informatics.www1.artemis.native_app.feature.push.ui
 
 import android.Manifest
 import android.os.Build
@@ -13,8 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -27,6 +27,8 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.feature.push.R
+import kotlinx.coroutines.Job
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -37,11 +39,23 @@ fun PushNotificationSettingsUi(
     val settingsByGroupDataStore: DataState<List<PushNotificationSettingsViewModel.NotificationCategory>> by viewModel.currentSettingsByGroup.collectAsState()
     val arePushNotificationEnabled by viewModel.arePushNotificationsEnabled.collectAsState(initial = false)
 
+    var updatePushNotificationEnabledJob: Job? by remember { mutableStateOf(null) }
+    var displayUpdatePushNotificationsFailed: Boolean by rememberSaveable { mutableStateOf(false) }
+
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         ReceivePushNotificationsSwitch(
             modifier = Modifier.fillMaxWidth(),
             isChecked = arePushNotificationEnabled,
-            onCheckedChange = viewModel::updatePushNotificationEnabled
+            onCheckedChange = { isEnabled ->
+                updatePushNotificationEnabledJob = viewModel
+                    .updatePushNotificationEnabled(isEnabled) { wasSuccessful ->
+                        updatePushNotificationEnabledJob = null
+
+                        if (!wasSuccessful) {
+                            displayUpdatePushNotificationsFailed = true
+                        }
+                    }
+            }
         )
 
         PushNotificationSettingCategoriesListUi(
@@ -56,6 +70,19 @@ fun PushNotificationSettingsUi(
             },
             onRequestReload = viewModel::requestReloadSettings
         )
+    }
+
+    if (updatePushNotificationEnabledJob != null) {
+        PushNotificationSyncChangesDialog {
+            updatePushNotificationEnabledJob?.cancel()
+            updatePushNotificationEnabledJob = null
+        }
+    }
+
+    if (displayUpdatePushNotificationsFailed) {
+        PushNotificationSyncFailedDialog {
+            displayUpdatePushNotificationsFailed = false
+        }
     }
 }
 
