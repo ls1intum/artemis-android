@@ -12,10 +12,12 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:data"))
 
+    implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
 
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)
+    implementation(libs.androidx.security.crypto)
 
     implementation(libs.ktor.client.core)
     implementation(libs.koin.core)

@@ -17,7 +17,7 @@ val loginModule = module {
     viewModelOf(::LoginViewModel)
     viewModelOf(::RegisterViewModel)
     viewModelOf(::CustomInstanceSelectionViewModel)
-    viewModel { params -> Saml2LoginViewModel(params.get(), get(), get(), get()) }
+    viewModel { params -> Saml2LoginViewModel(params.get(), get(), get(), get(), get()) }
 
     single<ServerNotificationStorageService> {
         PersistentServerNotificationStorageService(androidContext())

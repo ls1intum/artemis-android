@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":core:ui"))
 
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.accompanist.permissions)
 
     implementation(libs.koin.core)
 }

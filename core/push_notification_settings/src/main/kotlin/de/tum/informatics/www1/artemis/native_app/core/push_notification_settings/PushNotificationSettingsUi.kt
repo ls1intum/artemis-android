@@ -1,5 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.push_notification_settings
 
+import android.Manifest
+import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,12 +10,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import org.koin.androidx.compose.koinViewModel
@@ -48,12 +59,27 @@ fun PushNotificationSettingsUi(
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun ReceivePushNotificationsSwitch(
     modifier: Modifier,
     isChecked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    val notificationPermissionState: PermissionState? = if (Build.VERSION.SDK_INT >= 33) {
+        rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
+    } else null
+
+    var enableOnPermissionGranted: Boolean by rememberSaveable { mutableStateOf(false) }
+
+    // Effect that will automatically enable notifications once the permission has been granted
+    LaunchedEffect(enableOnPermissionGranted, notificationPermissionState?.status?.isGranted) {
+        if (enableOnPermissionGranted && notificationPermissionState?.status?.isGranted == true) {
+            enableOnPermissionGranted = false
+            onCheckedChange(true)
+        }
+    }
+
     Column(modifier = modifier) {
         Text(
             text = stringResource(id = R.string.push_notification_settings_receive_information),
@@ -71,7 +97,25 @@ private fun ReceivePushNotificationsSwitch(
                 style = MaterialTheme.typography.bodyLarge
             )
 
-            Switch(checked = isChecked, onCheckedChange = onCheckedChange)
+            Switch(
+                checked = isChecked,
+                onCheckedChange = { isChecked ->
+                    // Handle the cases where we need to ask thew user for permission
+                    val canShowPermissions =
+                        notificationPermissionState == null || notificationPermissionState.status.isGranted
+                    if (isChecked) {
+                        if (canShowPermissions) {
+                            onCheckedChange(true)
+                        } else {
+                            // When the user grants the permission, automatically enable notifications
+                            enableOnPermissionGranted = true
+
+                            // Ask for the permission
+                            notificationPermissionState?.launchPermissionRequest()
+                        }
+                    } else onCheckedChange(false)
+                }
+            )
         }
     }
 }
