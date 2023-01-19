@@ -6,7 +6,7 @@ import coil.ImageLoaderFactory
 import coil.memory.MemoryCache
 import de.tum.informatics.www1.artemis.native_app.core.communication.communicationModule
 import de.tum.informatics.www1.artemis.native_app.core.data.service.dataModule
-import de.tum.informatics.www1.artemis.native_app.core.datastore.impl.datastoreModule
+import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
 import de.tum.informatics.www1.artemis.native_app.core.ui.uiModule
 import de.tum.informatics.www1.artemis.native_app.core.websocket.websocketModule

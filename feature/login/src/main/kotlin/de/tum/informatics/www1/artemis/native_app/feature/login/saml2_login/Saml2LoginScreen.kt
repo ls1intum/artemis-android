@@ -176,9 +176,6 @@ private fun Saml2LoginWebView(
                 it.settings.javaScriptEnabled = true
                 cookieManager.setAcceptCookie(true)
                 cookieManager.setCookie(serverUrl, "SAML2flow=true; max-age=120; SameSite=Lax;")
-
-                val cookie = cookieManager.getCookie(serverUrl)
-                // wait for cookie with jwt=[] and then move forward.
             }
         )
 

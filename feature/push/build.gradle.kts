@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":core:ui"))
 
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.playServices)
     implementation(libs.accompanist.permissions)
 
     implementation(platform(libs.google.firebase.bom))

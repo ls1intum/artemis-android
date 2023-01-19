@@ -7,30 +7,44 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.group
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.isSuccess
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class PushNotificationSettingsViewModel internal constructor(
-    private val settingsService: de.tum.informatics.www1.artemis.native_app.feature.push.service.SettingsService,
+    private val notificationSettingsService: de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationSettingsService,
     networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
-    private val pushNotificationConfigurationService: PushNotificationConfigurationService,
-    private val pushNotificationJobService: PushNotificationJobService
+    private val pushNotificationConfigurationService: PushNotificationConfigurationService
 ) : ViewModel() {
 
     internal val arePushNotificationsEnabled: Flow<Boolean> =
-        pushNotificationConfigurationService.arePushNotificationEnabled
+        serverConfigurationService
+            .serverUrl
+            .flatMapLatest { serverUrl ->
+                pushNotificationConfigurationService.getArePushNotificationsEnabledFlow(serverUrl)
+            }
+            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+
 
     private val requestReloadSettings = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     private val loadedSettings: StateFlow<DataState<List<PushNotificationSetting>>> =
@@ -41,7 +55,7 @@ class PushNotificationSettingsViewModel internal constructor(
         ) { _, serverUrl, authToken ->
             emitAll(
                 retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                    settingsService.getNotificationSettings(
+                    notificationSettingsService.getNotificationSettings(
                         serverUrl,
                         authToken
                     )
@@ -124,34 +138,14 @@ class PushNotificationSettingsViewModel internal constructor(
         return viewModelScope.launch {
             val serverUrl = serverConfigurationService.serverUrl.first()
             val authToken = accountService.authToken.first()
-            val result: NetworkResponse<HttpStatusCode> = if (areEnabled) {
-                val newAesKey = pushNotificationConfigurationService.refreshAESKey()
 
-                val fireBaseToken = pushNotificationJobService.firebaseToken.first()
-                if (fireBaseToken == null) {
-                    onDone(false)
-                    return@launch
-                }
-
-                pushNotificationJobService.uploadPushNotificationDeviceConfigurationsToServer(
-                    serverUrl = serverUrl,
-                    authToken = authToken,
-                    aesKey = newAesKey,
-                    firebaseToken = fireBaseToken
-                )
-            } else {
-                pushNotificationJobService.unsubscribeFromNotifications(
+            onDone(
+                pushNotificationConfigurationService.updateArePushNotificationEnabled(
+                    newIsEnabled = areEnabled,
                     serverUrl = serverUrl,
                     authToken = authToken
                 )
-            }
-
-            if (result is NetworkResponse.Response && result.data.isSuccess()) {
-                pushNotificationConfigurationService.updateArePushNotificationEnabled(areEnabled)
-                onDone(true)
-            } else {
-                onDone(false)
-            }
+            )
         }
     }
 
@@ -167,7 +161,7 @@ class PushNotificationSettingsViewModel internal constructor(
                 return@launch
             }
 
-            val response = settingsService.updateNotificationSettings(
+            val response = notificationSettingsService.updateNotificationSettings(
                 settingsToSync.data,
                 serverConfigurationService.serverUrl.first(),
                 accountService.authToken.first()

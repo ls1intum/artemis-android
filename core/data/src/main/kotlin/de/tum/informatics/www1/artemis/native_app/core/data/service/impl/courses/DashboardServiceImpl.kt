@@ -8,9 +8,10 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorPro
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.call.body
+import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.get
+import io.ktor.http.appendPathSegments
 import kotlinx.coroutines.flow.Flow
 
 /**

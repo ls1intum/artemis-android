@@ -1,13 +1,32 @@
 package de.tum.informatics.www1.artemis.native_app.feature.settings
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -15,7 +34,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
+import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
@@ -24,10 +43,12 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
-import io.ktor.http.*
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
+import io.ktor.http.URLBuilder
+import io.ktor.http.appendPathSegments
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -85,6 +106,8 @@ private fun SettingsScreen(
     onRequestOpenLink: (String) -> Unit,
     onRequestOpenNotificationSettings: () -> Unit
 ) {
+    val pushNotificationJobService: PushNotificationJobService = get()
+
     val accountService: AccountService = get()
     val authenticationData: AccountService.AuthenticationData? by accountService.authenticationData.collectAsState(
         initial = null
@@ -94,7 +117,8 @@ private fun SettingsScreen(
 
     val scope = rememberCoroutineScope()
 
-    val isLoggedIn = authenticationData is AccountService.AuthenticationData.LoggedIn
+    // The auth token if logged in or null otherwise
+    val authToken: String? = (authenticationData as? AccountService.AuthenticationData.LoggedIn)?.authToken
     val hasUserSelectedInstance by serverConfigurationService.hasUserSelectedInstance.collectAsState(
         initial = false
     )
@@ -108,20 +132,18 @@ private fun SettingsScreen(
     val networkStatusProvider: NetworkStatusProvider = get()
 
     val accountDataFlow: StateFlow<DataState<Account>?> = remember {
-        transformLatest(
+        flatMapLatest(
             serverConfigurationService.serverUrl,
             accountService.authenticationData
         ) { serverUrl, authData ->
             when (authData) {
                 is AccountService.AuthenticationData.LoggedIn -> {
-                    emitAll(
-                        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                            serverDataService.getAccountData(serverUrl, authData.authToken)
-                        }
-                    )
+                    retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                        serverDataService.getAccountData(serverUrl, authData.authToken)
+                    }
                 }
 
-                AccountService.AuthenticationData.NotLoggedIn -> emit(null)
+                AccountService.AuthenticationData.NotLoggedIn -> flowOf(null)
             }
         }
             .stateIn(scope, SharingStarted.Eagerly, null)
@@ -150,14 +172,21 @@ private fun SettingsScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (isLoggedIn) {
+            if (authToken != null) {
                 UserInformationSection(
                     modifier = Modifier.fillMaxWidth(),
                     authData = accountData,
                     username = username,
                     onRequestLogout = {
                         scope.launch {
+                            // the user manually logs out. Therefore we need to tell the server asap.
+                            pushNotificationJobService.scheduleUnsubscribeFromNotifications(
+                                serverUrl = serverUrl,
+                                authToken = authToken
+                            )
+
                             accountService.logout()
+
                             onLoggedOut()
                         }
                     }

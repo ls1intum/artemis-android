@@ -25,11 +25,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.toJavaInstant
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.parcelize.Parcelize
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 /**
  * Displays a lazy column for each weekly items entry. For each entry, a section header is displayed.

@@ -3,13 +3,12 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import io.ktor.http.isSuccess
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 
 internal class UnsubscribeFromNotificationsWorker(
     appContext: Context,
     params: WorkerParameters,
-    private val pushNotificationJobService: WorkManagerPushNotificationJobService
+    private val pushNotificationConfigurationService: PushNotificationConfigurationService
 ) :
     CoroutineWorker(appContext, params) {
 
@@ -23,7 +22,7 @@ internal class UnsubscribeFromNotificationsWorker(
         val authToken = inputData.getString(AUTH_TOKEN_KEY)
         if (serverUrl == null || authToken == null) return Result.failure()
 
-        return pushNotificationJobService
+        return pushNotificationConfigurationService
             .unsubscribeFromNotifications(serverUrl, authToken)
             .toWorkerResult()
     }

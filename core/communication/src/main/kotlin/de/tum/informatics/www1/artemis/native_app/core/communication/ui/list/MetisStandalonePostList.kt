@@ -1,12 +1,22 @@
 package de.tum.informatics.www1.artemis.native_app.core.communication.ui.list
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,7 +35,11 @@ import androidx.paging.compose.items
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisService
 import de.tum.informatics.www1.artemis.native_app.core.communication.R
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.*
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisModificationFailureDialog
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.MetisOutdatedBanner
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItem
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.PostItemViewType
+import de.tum.informatics.www1.artemis.native_app.core.communication.ui.getEmojiForEmojiId
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 
 @Composable

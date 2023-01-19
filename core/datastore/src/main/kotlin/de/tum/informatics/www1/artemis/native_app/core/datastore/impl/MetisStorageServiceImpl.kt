@@ -8,11 +8,22 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
-import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.*
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.*
+import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.AnswerPostingEntity
+import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.BasePostingEntity
+import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.MetisPostContextEntity
+import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.MetisUserEntity
+import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.PostReactionEntity
+import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.StandalonePostTagEntity
+import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.StandalonePostingEntity
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.DisplayPriority
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
-import java.util.*
+import java.util.UUID
 
 /**
  * This implementation only displays live created posts, but ignores them when counting the posts for the next page request.

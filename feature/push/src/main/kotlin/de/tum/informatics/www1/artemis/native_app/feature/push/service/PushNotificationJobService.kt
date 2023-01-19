@@ -1,18 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.service
 
-import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.flow.Flow
-import javax.crypto.SecretKey
-
+/**
+ * Service that can schedule jobs related to the push notification synchronization with the server.
+ * These jobs need to be guaranteed to be completed because otherwise weird behaviour can occur (e.g. users receiving push notifications for accounts they have already logged out from.)
+ */
 interface PushNotificationJobService {
-
-    /**
-     * May return null if no firebase token has been set yet.
-     */
-    val firebaseToken: Flow<String?>
-
-    suspend fun storeFirebaseToken(token: String)
 
     /**
      * Schedule a job that will upload the firebase id token and the AES key to the server.
@@ -29,19 +21,4 @@ interface PushNotificationJobService {
      * push notifications.
      */
     fun scheduleUnsubscribeFromNotifications(serverUrl: String, authToken: String)
-
-    suspend fun uploadPushNotificationDeviceConfigurationsToServer(
-        serverUrl: String,
-        authToken: String,
-        aesKey: SecretKey,
-        firebaseToken: String
-    ): NetworkResponse<HttpStatusCode>
-
-    /**
-     * The auth token matters because push notifications are bound to the jwt
-     */
-    suspend fun unsubscribeFromNotifications(
-        serverUrl: String,
-        authToken: String
-    ): NetworkResponse<HttpStatusCode>
 }
