@@ -143,7 +143,6 @@ internal class QuizParticipationViewModel(
                     accountService.authToken,
                     retryLoadExercise.onStart { emit(Unit) }
                 ) { serverUrl, authToken, _ ->
-                    println("XX RELOAD")
                     emitAll(
                         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                             participationService.findParticipation(
@@ -350,7 +349,10 @@ internal class QuizParticipationViewModel(
 
     val waitingForQuizStart: Flow<Boolean> = when (quizType) {
         QuizType.LIVE -> {
-            combine(quizExercise.flatMapLatest { it.quizEnded }, quizBatch) { quizEnded, batch ->
+            combine(
+                quizExercise.flatMapLatest { it.quizEnded },
+                quizBatch
+            ) { quizEnded, batch ->
                 if (quizEnded) {
                     false
                 } else batch == null || batch.started == false

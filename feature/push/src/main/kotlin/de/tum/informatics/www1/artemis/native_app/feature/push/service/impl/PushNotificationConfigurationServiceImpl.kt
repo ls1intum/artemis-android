@@ -1,8 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl
 
 import android.content.Context
-import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import android.security.keystore.KeyProtection
 import android.util.Log
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.security.KeyStore
+import java.security.KeyStore.PasswordProtection
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
@@ -68,51 +69,65 @@ class PushNotificationConfigurationServiceImpl(
     ): Boolean {
         val firebaseMessaging = FirebaseMessaging.getInstance()
 
+        val prevIsAutoInitEnabled = firebaseMessaging.isAutoInitEnabled
+
         // Enable or disable generating of token which are automatically uploaded to Google.
         // This is persisted among app restarts
         firebaseMessaging.isAutoInitEnabled = newIsEnabled
 
-        val result: NetworkResponse<HttpStatusCode> = if (newIsEnabled) {
-            val newAesKey = refreshAESKey()
-
+        val isSuccess = if (newIsEnabled) {
             // First generate or get the current token.
             val fireBaseToken = try {
                 firebaseMessaging.token.await()
             } catch (e: Exception) {
                 Log.e(TAG, "Something went wrong while getting/generating firebase token", e)
+                firebaseMessaging.isAutoInitEnabled = prevIsAutoInitEnabled
                 return false
             }
 
             // Set the token.
             storeFirebaseToken(fireBaseToken)
 
-            uploadPushNotificationDeviceConfigurationsToServer(
-                serverUrl = serverUrl,
-                authToken = authToken,
-                aesKey = newAesKey,
-                firebaseToken = fireBaseToken
-            )
+            val secretKeyResponse =
+                uploadPushNotificationDeviceConfigurationsToServer(
+                    serverUrl = serverUrl,
+                    authToken = authToken,
+                    firebaseToken = fireBaseToken
+                )
+
+            when (secretKeyResponse) {
+                is NetworkResponse.Failure -> false
+                is NetworkResponse.Response -> {
+                    // Store decryption key
+                    storeAESKey(secretKeyResponse.data)
+                    true
+                }
+            }
         } else {
             try {
                 firebaseMessaging.deleteToken().await()
                 FirebaseInstallations.getInstance().delete().await()
             } catch (e: Exception) {
                 Log.e(TAG, "Something went wrong while deleting token and installation", e)
+                firebaseMessaging.isAutoInitEnabled = prevIsAutoInitEnabled
                 return false
             }
 
-            unsubscribeFromNotifications(
+            val unsubscribeResult = unsubscribeFromNotifications(
                 serverUrl = serverUrl,
                 authToken = authToken
             )
+
+            unsubscribeResult is NetworkResponse.Response && unsubscribeResult.data.isSuccess()
         }
 
-        return if (result is NetworkResponse.Response && result.data.isSuccess()) {
+        return if (isSuccess) {
             context.pushNotificationsStore.edit { data ->
                 data[getPushNotificationEnabledKeyForServer(serverUrl)] = newIsEnabled
             }
             true
         } else {
+            firebaseMessaging.isAutoInitEnabled = prevIsAutoInitEnabled
             false
         }
     }
@@ -121,27 +136,6 @@ class PushNotificationConfigurationServiceImpl(
         context.pushNotificationsStore.edit { data ->
             data[FIREBASE_TOKEN_KEY] = token
         }
-    }
-
-    override suspend fun refreshAESKey(): SecretKey {
-        val aesKey = withContext(Dispatchers.IO) {
-            val generator = KeyGenerator.getInstance(
-                KeyProperties.KEY_ALGORITHM_AES,
-                ANDROID_KEY_STORE
-            )
-            generator.init(
-                KeyGenParameterSpec
-                    .Builder(
-                        KEY_ALIAS,
-                        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-                    )
-                    .setRandomizedEncryptionRequired(true)
-                    .build()
-            )
-            generator.generateKey()
-        }
-
-        return aesKey
     }
 
     override suspend fun getCurrentAESKey(): SecretKey? {
@@ -154,8 +148,19 @@ class PushNotificationConfigurationServiceImpl(
         }
     }
 
-    override suspend fun getOrCreateCurrentAESKey(): SecretKey {
-        return getCurrentAESKey() ?: refreshAESKey()
+    override suspend fun storeAESKey(key: SecretKey) {
+        withContext(Dispatchers.IO) {
+            getAndroidKeystore()
+                .setEntry(
+                    KEY_ALIAS,
+                    KeyStore.SecretKeyEntry(key),
+                    KeyProtection.Builder(
+                        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+                    )
+                        .setRandomizedEncryptionRequired(true)
+                        .build()
+                )
+        }
     }
 
     private fun getAndroidKeystore() = KeyStore.getInstance(ANDROID_KEY_STORE).apply {
@@ -165,11 +170,19 @@ class PushNotificationConfigurationServiceImpl(
     override suspend fun uploadPushNotificationDeviceConfigurationsToServer(
         serverUrl: String,
         authToken: String,
-        aesKey: SecretKey,
         firebaseToken: String
-    ): NetworkResponse<HttpStatusCode> {
+    ): NetworkResponse<SecretKey> {
         // TODO("Not yet implemented")
-        return NetworkResponse.Response(HttpStatusCode.OK)
+
+        // Mock implementation
+        val secretKey: SecretKey =
+            withContext(Dispatchers.Main) {
+                KeyGenerator.getInstance("AES").apply {
+                    init(256)
+                }.generateKey()
+            }
+
+        return NetworkResponse.Response(secretKey)
     }
 
     override suspend fun unsubscribeFromNotifications(

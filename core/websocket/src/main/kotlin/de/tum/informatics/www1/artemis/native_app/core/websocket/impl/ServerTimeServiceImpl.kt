@@ -63,15 +63,12 @@ internal class ServerTimeServiceImpl(
                 val sortedResults = results.sortedBy { it.latencyInMs }
 
                 val median = sortedResults[results.size / 2]
-                print(median)
 
                 if (results.size >= 1) {
                     val stdDeviation = sqrt(results.sumOf {
                         val t = it.latencyInMs - median.latencyInMs
                         t * t
                     }.toFloat() / results.size.toFloat())
-
-                    print(stdDeviation)
 
                     // 0.01f rounding error tolerance.
                     val remainingPackets =

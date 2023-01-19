@@ -30,23 +30,23 @@ interface PushNotificationConfigurationService {
         authToken: String
     ): Boolean
 
-    suspend fun refreshAESKey(): SecretKey
-
     /**
      * @return the current aes key or null if no key has been set yet.
      */
     suspend fun getCurrentAESKey(): SecretKey?
 
-    suspend fun getOrCreateCurrentAESKey(): SecretKey
+    suspend fun storeAESKey(key: SecretKey)
 
     suspend fun storeFirebaseToken(token: String)
 
+    /**
+     * Registers this device to the server. If successful, a SecretKey (AES256) is returned
+     */
     suspend fun uploadPushNotificationDeviceConfigurationsToServer(
         serverUrl: String,
         authToken: String,
-        aesKey: SecretKey,
         firebaseToken: String
-    ): NetworkResponse<HttpStatusCode>
+    ): NetworkResponse<SecretKey>
 
     /**
      * The auth token matters because push notifications are bound to the jwt

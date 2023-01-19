@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.google.firebase.messaging.FirebaseMessaging
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
@@ -34,8 +35,6 @@ internal class UploadPushNotificationDeviceConfigurationWorker(
             return Result.failure()
         }
 
-        val aesKey = pushNotificationConfigurationService.getOrCreateCurrentAESKey()
-
         val authToken = when (val authData = accountService.authenticationData.first()) {
             is AccountService.AuthenticationData.LoggedIn -> authData.authToken
             AccountService.AuthenticationData.NotLoggedIn -> {
@@ -44,13 +43,20 @@ internal class UploadPushNotificationDeviceConfigurationWorker(
             }
         }
 
-        return pushNotificationConfigurationService
+        val secretKeyResponse = pushNotificationConfigurationService
             .uploadPushNotificationDeviceConfigurationsToServer(
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = authToken,
-                aesKey = aesKey,
                 firebaseToken = token
             )
-            .toWorkerResult()
+
+        return when (secretKeyResponse) {
+            // Network request failed, try again!
+            is NetworkResponse.Failure -> Result.retry()
+            is NetworkResponse.Response -> {
+                pushNotificationConfigurationService.storeAESKey(secretKeyResponse.data)
+                Result.success()
+            }
+        }
     }
 }
