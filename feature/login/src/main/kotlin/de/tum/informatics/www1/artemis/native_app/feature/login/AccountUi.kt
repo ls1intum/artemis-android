@@ -34,6 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.linkTextColor
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.custom_instance_selection.CustomInstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionScreen
@@ -362,7 +363,7 @@ private fun AccountUi(
                 .align(Alignment.CenterHorizontally)
                 .padding(bottom = 8.dp),
             text = AnnotatedString(stringResource(id = R.string.account_change_artemis_instance_label)),
-            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.tertiary),
+            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.linkTextColor),
             onClick = { onNavigateToInstanceSelection() }
         )
     }

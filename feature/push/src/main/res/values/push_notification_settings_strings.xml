@@ -2,6 +2,8 @@
 <resources>
     <string name="push_notification_settings_receive_label">Receive push notifications on this device?</string>
     <string name="push_notification_settings_receive_information">When push notifications are enabled, your device will communicate with third party services, such as Google. Push notifications are end-to-end encrypted. Therefore, third parties cannot read the content of the push notifications you receive. Push notifications are entirely optional.</string>
+    <string name="push_notification_settings_receive_information_expand">Click to read more…</string>
+
 
     <string name="push_notification_settings_loading">Loading settings…</string>
     <string name="push_notification_settings_failure">Something went wrong while loading your settings</string>

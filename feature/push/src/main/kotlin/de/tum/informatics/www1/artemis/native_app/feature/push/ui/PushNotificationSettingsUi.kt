@@ -6,9 +6,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,6 +19,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
@@ -27,6 +29,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.linkTextColor
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import kotlinx.coroutines.Job
 import org.koin.androidx.compose.koinViewModel
@@ -108,10 +111,26 @@ private fun ReceivePushNotificationsSwitch(
     }
 
     Column(modifier = modifier) {
+        var isInfoTextExpanded: Boolean by rememberSaveable { mutableStateOf(false) }
+        var hasOverflow: Boolean by rememberSaveable { mutableStateOf(false) }
+
         Text(
             text = stringResource(id = R.string.push_notification_settings_receive_information),
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = if (isInfoTextExpanded) Int.MAX_VALUE else 2,
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { result ->
+                hasOverflow = result.hasVisualOverflow
+            }
         )
+
+        if (hasOverflow) {
+            ClickableText(
+                onClick = { isInfoTextExpanded = true },
+                text = AnnotatedString(stringResource(id = R.string.push_notification_settings_receive_information_expand)),
+                style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.linkTextColor)
+            )
+        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
