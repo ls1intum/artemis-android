@@ -392,8 +392,11 @@ internal class QuizParticipationViewModel(
                 } else emittedFirst = true
             }
             .transformLatest {
-                // Wait for 1 seconds to avoid sending a submission on every keystroke.
-                delay(1.seconds)
+                // If the end date is very close do not wait but send immediately to avoid data loss.
+                if (endDate.first() - serverClock.first().now() >= 10.seconds) {
+                    // Wait for 1 seconds to avoid sending a submission on every keystroke.
+                    delay(1.seconds)
+                }
                 emit(it)
             }
             .map { (dragAndDropData, multipleChoiceData, shortAnswerData) ->
