@@ -2,18 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.common.course
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -60,7 +49,7 @@ fun CourseItemGrid(
     val columnCount = computeCourseColumnCount(windowSizeClass)
 
     val isCompact = windowSizeClass.widthSizeClass <= WindowWidthSizeClass.Compact
-    val courseItemModifier = computeCourseItemModifier(isCompact)
+    val courseItemModifier = Modifier.computeCourseItemModifier(isCompact)
 
     LazyVerticalGrid(
         modifier = modifier,
@@ -75,14 +64,11 @@ fun CourseItemGrid(
     }
 }
 
-@Composable
-fun computeCourseItemModifier(isCompact: Boolean): Modifier {
+fun Modifier.computeCourseItemModifier(isCompact: Boolean): Modifier {
     return if (isCompact) {
-        Modifier
-            .fillMaxWidth()
+        fillMaxWidth()
     } else {
-        Modifier
-            .fillMaxWidth()
+        fillMaxWidth()
             .aspectRatio(1f)
     }
 }
@@ -195,7 +181,8 @@ fun ExpandedCourseItemHeader(
     serverUrl: String,
     authorizationToken: String,
     onClick: () -> Unit = {},
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
+    rightHeaderContent: @Composable BoxScope.() -> Unit
 ) {
     val courseIconPainter = getCourseIconPainter(course, serverUrl, authorizationToken)
 
@@ -242,18 +229,11 @@ fun ExpandedCourseItemHeader(
                 fontSizeRange = FontSizeRange(14.sp, max = 18.sp)
             )
 
-            Box(modifier = courseIconModifier)
+            Box(
+                modifier = courseIconModifier,
+                content = rightHeaderContent
+            )
         }
-
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .weight(1f),
-            text = course.description,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.bodyMedium
-        )
 
         content()
     }

@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -204,7 +205,8 @@ private fun RegisterForCourseContent(
 
         val columnCount = computeCourseColumnCount(windowSizeClass)
         val isCompact = windowSizeClass.widthSizeClass <= WindowWidthSizeClass.Compact
-        val courseItemModifier = computeCourseItemModifier(isCompact = isCompact)
+        val courseItemModifier = Modifier
+            .computeCourseItemModifier(isCompact = isCompact)
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(columnCount),
@@ -277,7 +279,20 @@ private fun RegistrableCourse(
             course = course,
             serverUrl = serverUrl,
             authorizationToken = bearerToken,
-            content = content
+            content = {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .weight(1f),
+                    text = course.description,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                content()
+            },
+            rightHeaderContent = {}
         )
     }
 }

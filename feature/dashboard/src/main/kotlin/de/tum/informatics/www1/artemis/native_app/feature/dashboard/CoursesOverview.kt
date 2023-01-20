@@ -1,37 +1,26 @@
 package de.tum.informatics.www1.artemis.native_app.feature.dashboard
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -251,8 +240,80 @@ fun CourseItem(
             serverUrl = serverUrl,
             authorizationToken = authorizationToken,
             onClick = onClick,
-            content = content
+            content = {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .aspectRatio(1f)
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    CircularCourseProgress(
+                        modifier = Modifier
+                            .fillMaxSize(0.8f)
+                            .align(Alignment.Center),
+                        course = course
+                    )
+                }
+            },
+            rightHeaderContent = { }
         )
+    }
+}
+
+@Composable
+private fun CircularCourseProgress(modifier: Modifier, course: Course) {
+    BoxWithConstraints(modifier = modifier) {
+        val progress = 0.5f
+        val progressBarWidthDp = min(24.dp, maxWidth * 0.1f)
+        val progressBarWidth = with(LocalDensity.current) { progressBarWidthDp.toPx() }
+
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(progressBarWidthDp)
+        ) {
+            drawArc(
+                color = Color.Green,
+                startAngle = 180f,
+                sweepAngle = 360f * progress,
+                useCenter = false,
+                style = Stroke(width = progressBarWidth)
+            )
+
+            drawArc(
+                color = Color.Red,
+                startAngle = 180f + 360f * progress,
+                sweepAngle = 360f * (1f - progress),
+                useCenter = false,
+                style = Stroke(width = progressBarWidth)
+            )
+        }
+
+        val (percentFontSize, ptsFontSize) = with(LocalDensity.current) {
+            val availableSpace = maxHeight - progressBarWidthDp * 2
+            (availableSpace * 0.2f).toSp() to (availableSpace * 0.1f).toSp()
+        }
+
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "50%",
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                fontSize = percentFontSize,
+                fontWeight = FontWeight.Normal
+            )
+
+            Text(
+                "50 / 100 Pts",
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                fontSize = ptsFontSize,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 
