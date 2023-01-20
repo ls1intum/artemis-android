@@ -25,7 +25,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
  * @param onClickViewResult called when the user wants to view their latest result.
  */
 @Composable
-internal fun ParticipationStatusUi(
+internal fun  ParticipationStatusUi(
     modifier: Modifier,
     exercise: Exercise,
     gradedParticipation: Participation?,
@@ -181,11 +181,7 @@ private fun ExerciseActionButtons(
             }
         }
 
-        if (templateStatus is ResultTemplateStatus.WithResult && canShowResultDetails(
-                null,
-                templateStatus.result
-            )
-        ) {
+        if (templateStatus is ResultTemplateStatus.WithResult) {
             Button(
                 modifier = modifier,
                 onClick = onClickViewResult
@@ -194,17 +190,6 @@ private fun ExerciseActionButtons(
             }
         }
     }
-}
-
-@Composable
-private fun canShowResultDetails(
-    @Suppress("SameParameterValue") submission: Submission?,
-    result: Result
-): Boolean {
-    if (result.isPreliminary.collectAsState(initial = false).value) return true
-
-    if (result.submission != null && submission is ProgrammingSubmission && submission.buildFailed == true) return true
-    return result.hasFeedback == true
 }
 
 @Composable

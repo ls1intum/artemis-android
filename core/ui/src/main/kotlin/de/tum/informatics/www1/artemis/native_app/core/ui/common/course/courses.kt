@@ -238,8 +238,8 @@ fun ExpandedCourseItemHeader(
                 text = course.title,
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
-                maxLines = 1,
-                fontSizeRange = FontSizeRange(10.sp, max = 18.sp)
+                maxLines = 2,
+                fontSizeRange = FontSizeRange(14.sp, max = 18.sp)
             )
 
             Box(modifier = courseIconModifier)
@@ -252,7 +252,7 @@ fun ExpandedCourseItemHeader(
                 .weight(1f),
             text = course.description,
             overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.bodySmall
+            style = MaterialTheme.typography.bodyMedium
         )
 
         content()

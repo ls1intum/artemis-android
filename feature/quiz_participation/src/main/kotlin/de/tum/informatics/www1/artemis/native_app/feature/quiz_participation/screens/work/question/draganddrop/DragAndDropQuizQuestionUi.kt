@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.asImageBitmap
@@ -62,6 +63,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.scr
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.QuizQuestionHeader
 import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.screens.work.question.QuizQuestionInstructionText
 import io.ktor.http.HttpHeaders
+import androidx.compose.ui.layout.times
 
 
 @Composable
@@ -351,19 +353,31 @@ private fun DragAndDropArea(
         retryButtonText = stringResource(id = R.string.quiz_participation_load_dnd_image_retry),
         onClickRetry = resultData.requestRetry
     ) { loadedDrawable ->
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             val painter = remember { BitmapPainter(loadedDrawable.toBitmap().asImageBitmap()) }
             Image(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxSize(),
                 painter = painter,
                 contentDescription = null,
-                contentScale = ContentScale.FillWidth
+                contentScale = ContentScale.Fit
             )
 
-            val imageAspectRatio =
-                loadedDrawable.intrinsicHeight.toFloat() / loadedDrawable.intrinsicWidth.toFloat()
-            val imageWidth = with(LocalDensity.current) { maxWidth.toPx() }
-            val imageHeight = imageWidth * imageAspectRatio
+            val srcSize = Size(
+                loadedDrawable.intrinsicWidth.toFloat(),
+                loadedDrawable.intrinsicHeight.toFloat()
+            )
+
+            val dstSize = with(LocalDensity.current) {
+                Size(
+                    maxWidth.toPx(),
+                    maxHeight.toPx()
+                )
+            }
+
+            val scaleFactor = ContentScale.Fit.computeScaleFactor(srcSize, dstSize)
+            val actImageSize = srcSize * scaleFactor
+
+            val (imageWidth: Float, imageHeight: Float) = actImageSize
 
             dropLocations.forEach { dropLocation ->
                 val dragItem: DragItem? = dropLocationMapping[dropLocation]
@@ -377,8 +391,8 @@ private fun DragAndDropArea(
                     ImageDropLocation(
                         modifier = Modifier
                             .absoluteOffset(
-                                x = xPos.toDp(),
-                                y = yPos.toDp()
+                                x = maxWidth / 2 - actImageSize.width.toDp() / 2 + xPos.toDp(),
+                                y = maxHeight / 2 - actImageSize.height.toDp() / 2 + yPos.toDp()
                             )
                             .size(
                                 width = width.toDp(),
@@ -401,7 +415,6 @@ private fun DragAndDropArea(
             }
         }
     }
-
 }
 
 private val dropTargetColorNotDragging: Color
