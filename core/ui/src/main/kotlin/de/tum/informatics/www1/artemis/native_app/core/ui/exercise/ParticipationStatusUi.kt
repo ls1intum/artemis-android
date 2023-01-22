@@ -21,25 +21,13 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
 @Composable
 fun ParticipationStatusUi(
     modifier: Modifier,
-    exercise: Exercise,
-    getTemplateStatus: @Composable (Participation) -> ResultTemplateStatus = { participation ->
-        computeTemplateStatus(
-            exercise = exercise,
-            participation = participation,
-            result = null,
-            showUngradedResults = true,
-            personal = true
-        ).collectAsState(initial = ResultTemplateStatus.NoResult).value
-    }
+    exercise: Exercise
 ) {
     if (exercise.studentParticipations.orEmpty().isNotEmpty()) {
         // Display dynamic updates component
-        val templateStatus = getTemplateStatus(exercise.studentParticipations!!.first())
-
         ExerciseResult(
             modifier = modifier,
             showUngradedResults = true,
-            templateStatus = templateStatus,
             exercise = exercise
         )
     } else {

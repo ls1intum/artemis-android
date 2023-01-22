@@ -15,12 +15,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
+import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
+import org.koin.androidx.compose.get
 
 /**
  * Display a single exercise.
@@ -102,9 +105,11 @@ private fun ExerciseDataText(modifier: Modifier, exercise: Exercise) {
             style = MaterialTheme.typography.bodyMedium
         )
 
-        ParticipationStatusUi(
-            modifier = Modifier.fillMaxWidth(),
-            exercise = exercise,
-        )
+        ProvideDefaultExerciseTemplateStatus(exercise) {
+            ParticipationStatusUi(
+                modifier = Modifier.fillMaxWidth(),
+                exercise = exercise
+            )
+        }
     }
 }
