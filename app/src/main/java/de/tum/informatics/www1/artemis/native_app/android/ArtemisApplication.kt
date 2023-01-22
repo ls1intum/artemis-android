@@ -17,7 +17,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exercise
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lectureModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
-import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.quizParticipationModule
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.quizParticipationModule
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsModule
 import io.sentry.Sentry
 import org.koin.android.ext.koin.androidContext

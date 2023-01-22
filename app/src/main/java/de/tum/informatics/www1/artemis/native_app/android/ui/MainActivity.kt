@@ -41,9 +41,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.navigateT
 import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATION
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
-import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.QuizType
-import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.navigateToQuizParticipation
-import de.tum.informatics.www1.artemis.native_app.feature.quiz_participation.quizParticipation
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.navigateToQuizParticipation
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.quizParticipation
 import de.tum.informatics.www1.artemis.native_app.feature.settings.navigateToSettings
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsScreen
 import kotlinx.coroutines.flow.first

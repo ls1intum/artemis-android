@@ -53,7 +53,7 @@ dependencies {
     implementation(project(":feature:exercise_view"))
     implementation(project(":feature:lecture_view"))
     implementation(project(":feature:settings"))
-    implementation(project(":feature:quiz_participation"))
+    implementation(project(":feature:quiz"))
     implementation(project(":feature:push"))
 
     implementation(libs.play.services.oss.licences)
