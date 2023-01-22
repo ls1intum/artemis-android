@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz
 
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.DragAndDropSubmittedAnswer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -18,6 +19,7 @@ data class DragAndDropQuizQuestion(
     val backgroundFilePath: String? = null,
     val dropLocations: List<DropLocation> = emptyList(),
     val dragItems: List<DragItem> = emptyList(),
+    val correctMappings: List<DragAndDropSubmittedAnswer.DragAndDropMapping>? = null
 ) : QuizQuestion() {
 
     val dropLocationById: Map<Long, DropLocation> = dropLocations.associateBy { it.id }

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.participation
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -19,7 +19,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.DestructiveMarkdownTextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import kotlinx.coroutines.Job
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -32,9 +36,11 @@ private val submitButtonTextColor: Color
 fun NavController.navigateToQuizParticipation(
     courseId: Long,
     exerciseId: Long,
-    quizType: QuizType
+    quizType: QuizType.WorkableQuizType
 ) {
-    navigate("quiz-participation/$courseId/$exerciseId/$quizType")
+    val quizTypeAsString = Json.encodeToString(QuizType.WorkableQuizType.serializer(), quizType)
+
+    navigate("quiz-participation/$courseId/$exerciseId/$quizTypeAsString")
 }
 
 fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
@@ -60,7 +66,7 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
         checkNotNull(exerciseId)
         checkNotNull(quizTypeString)
 
-        val quizType: QuizType = QuizType.valueOf(quizTypeString)
+        val quizType: QuizType.WorkableQuizType = Json.decodeFromString(quizTypeString)
 
         val viewModel: QuizParticipationViewModel =
             koinViewModel { parametersOf(courseId, exerciseId, quizType) }

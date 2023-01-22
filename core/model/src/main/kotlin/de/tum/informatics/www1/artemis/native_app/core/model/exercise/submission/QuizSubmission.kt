@@ -19,6 +19,4 @@ data class QuizSubmission(
     override val submissionType: SubmissionType? = null,
     val scoreInPoints: Double? = null,
     val submittedAnswers: List<SubmittedAnswer> = emptyList()
-) : Submission() {
-
-}
+) : Submission()

@@ -18,9 +18,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.ConnectionStatusUi
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.ConnectionStatusUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.getFormattedRelativeToFutureTimeQuizStyle
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.getFormattedRelativeToFutureTimeQuizStyle
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.minutes

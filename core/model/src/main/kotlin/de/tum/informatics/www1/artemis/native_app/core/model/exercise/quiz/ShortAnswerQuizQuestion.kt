@@ -17,6 +17,7 @@ data class ShortAnswerQuizQuestion(
     override val invalid: Boolean = false,
     val spots: List<ShortAnswerSpot> = emptyList(),
     val solutions: List<ShortAnswerSolution> = emptyList(),
+    val correctMappings: List<ShortAnswerMapping>? = null,
     val matchLetterCase: Boolean = false,
     val similarityValue: Int = 85
 ) : QuizQuestion() {
@@ -33,5 +34,14 @@ data class ShortAnswerQuizQuestion(
         val id: Long? = null,
         val text: String? = null,
         val invalid: Boolean = false
+    )
+
+    @Serializable
+    data class ShortAnswerMapping(
+        val id: Long? = null,
+        val shortAnswerSpotIndex: Long? = null,
+        val shortAnswerSolutionIndex: Long? = null,
+        val solution: ShortAnswerSolution? = null,
+        val spot: ShortAnswerSpot? = null
     )
 }

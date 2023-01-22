@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.participation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizEndedScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.WaitForQuizStartScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.WorkOnQuizQuestionsScreen
