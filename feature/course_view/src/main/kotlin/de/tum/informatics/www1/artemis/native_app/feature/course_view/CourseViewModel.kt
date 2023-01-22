@@ -4,40 +4,31 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.transformLatest
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.plus
-import kotlinx.datetime.toJavaLocalDate
-import kotlinx.datetime.toKotlinLocalDate
-import kotlinx.datetime.toLocalDateTime
 import java.time.temporal.WeekFields
-import java.util.Locale
+import java.util.*
 
 internal class CourseViewModel(
     private val courseId: Long,
-    serverConfigurationService: ServerConfigurationService,
-    accountService: AccountService,
+    private val serverConfigurationService: ServerConfigurationService,
+    private val accountService: AccountService,
     private val courseService: CourseService,
-    private val liveParticipationService: LiveParticipationService
+    private val liveParticipationService: LiveParticipationService,
+    private val courseExerciseService: CourseExerciseService
 ) : ViewModel() {
 
     private val requestReloadCourse = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -55,6 +46,11 @@ internal class CourseViewModel(
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
     /**
+     * Emitted to when the user has started an exercise.
+     */
+    private val startedExerciseFlow = MutableSharedFlow<NewParticipationData>()
+
+    /**
      * Holds a flow of the latest exercises. Updated by the websocket.
      */
     private val exerciseWithParticipationStatusFlow: Flow<DataState<List<Exercise>>> =
@@ -68,30 +64,39 @@ internal class CourseViewModel(
 
                         val participationStatusMap =
                             exercises
-                                .associateBy { exercise -> (exercise.id ?: 0) }
+                                .associateBy { exercise -> exercise.id }
                                 .toMutableMap()
 
                         emit(DataState.Success(participationStatusMap.values.toList()))
 
-                        liveParticipationService
-                            .personalSubmissionUpdater
-                            .collect { latestSubmission ->
-                                //Find the associated exercise, so that the submissions can be updated.
-                                val participation = latestSubmission.participation
+                        merge(
+                            liveParticipationService
+                                .personalSubmissionUpdater
+                                .mapNotNull {
+                                    NewParticipationData(
+                                        exerciseId = it.participation?.exercise?.id
+                                            ?: return@mapNotNull null,
+                                        newParticipation = it.participation
+                                            ?: return@mapNotNull null
+                                    )
+                                },
+                            startedExerciseFlow
+                        ).collect { newParticipationData ->
+                            //Find the associated exercise, so that the submissions can be updated.
+                            val participation = newParticipationData.newParticipation
 
-                                val associatedExerciseId =
-                                    participation?.exercise?.id ?: return@collect
-                                val associatedExercise =
-                                    exercisesById[associatedExerciseId] ?: return@collect
+                            val associatedExerciseId = newParticipationData.exerciseId
+                            val associatedExercise =
+                                exercisesById[associatedExerciseId] ?: return@collect
 
-                                //Replace the exercise
-                                val newExercise =
-                                    associatedExercise.withUpdatedParticipation(participation)
-                                exercisesById[associatedExerciseId] = newExercise
+                            //Replace the exercise
+                            val newExercise =
+                                associatedExercise.withUpdatedParticipation(participation)
+                            exercisesById[associatedExerciseId] = newExercise
 
-                                participationStatusMap[associatedExerciseId] = newExercise
-                                emit(DataState.Success(participationStatusMap.values.toList()))
-                            }
+                            participationStatusMap[associatedExerciseId] = newExercise
+                            emit(DataState.Success(participationStatusMap.values.toList()))
+                        }
                     }
 
                     else -> emit(exercisesDataState.bind { emptyList() })
@@ -108,14 +113,15 @@ internal class CourseViewModel(
         }
             .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
 
-    val lecturesGroupedByWeek: StateFlow<DataState<List<GroupedByWeek<Lecture>>>> = course.map { courseDataState ->
-        courseDataState.bind { course ->
-            course
-                .lectures
-                .groupByWeek { startDate }
+    val lecturesGroupedByWeek: StateFlow<DataState<List<GroupedByWeek<Lecture>>>> =
+        course.map { courseDataState ->
+            courseDataState.bind { course ->
+                course
+                    .lectures
+                    .groupByWeek { startDate }
+            }
         }
-    }
-        .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
+            .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
 
     private fun <T> List<T>.groupByWeek(getSortDate: T.() -> Instant?): List<GroupedByWeek<T>> =
         // Group the items based on their start of the week day (most likely monday)
@@ -145,4 +151,28 @@ internal class CourseViewModel(
     fun reloadCourse() {
         requestReloadCourse.tryEmit(Unit)
     }
+
+    fun startExercise(exerciseId: Long, onStartedSuccessfully: (participationId: Long) -> Unit) {
+        viewModelScope.launch {
+            val serverUrl = serverConfigurationService.serverUrl.first()
+            val authToken = accountService.authToken.first()
+
+            when (val response =
+                courseExerciseService.startExercise(exerciseId, serverUrl, authToken)) {
+                is NetworkResponse.Response -> {
+                    startedExerciseFlow.emit(NewParticipationData(exerciseId, response.data))
+
+                    onStartedSuccessfully(
+                        response.data.id ?: return@launch
+                    )
+                }
+                is NetworkResponse.Failure -> {}
+            }
+        }
+    }
+
+    private data class NewParticipationData(
+        val exerciseId: Long,
+        val newParticipation: Participation
+    )
 }

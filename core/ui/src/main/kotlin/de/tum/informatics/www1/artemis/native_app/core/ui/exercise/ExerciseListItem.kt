@@ -14,16 +14,16 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
-import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
-import org.koin.androidx.compose.get
 
 /**
  * Display a single exercise.
@@ -33,8 +33,12 @@ import org.koin.androidx.compose.get
 fun ExerciseListItem(
     modifier: Modifier,
     exercise: Exercise,
-    onClickExercise: () -> Unit
+    displayActionButtons: Boolean =
+        LocalWindowSizeClassProvider.current.provideWindowSizeClass().widthSizeClass >= WindowWidthSizeClass.Expanded,
+    onClickExercise: () -> Unit,
+    exerciseActions: ExerciseActions
 ) {
+
     Card(modifier = modifier, onClick = onClickExercise) {
         Column(
             modifier = Modifier
@@ -49,7 +53,9 @@ fun ExerciseListItem(
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 16.dp),
-                    exercise = exercise
+                    exercise = exercise,
+                    displayActionButtons = displayActionButtons,
+                    exerciseActions = exerciseActions
                 )
             }
 
@@ -84,7 +90,12 @@ private fun ExerciseTypeIcon(modifier: Modifier, exercise: Exercise) {
  * Displays the exercise title, the due data and the participation info. The participation info is automatically updated.
  */
 @Composable
-private fun ExerciseDataText(modifier: Modifier, exercise: Exercise) {
+private fun ExerciseDataText(
+    modifier: Modifier,
+    exercise: Exercise,
+    displayActionButtons: Boolean,
+    exerciseActions: ExerciseActions
+) {
     // Format a relative time if the distant is
     val dueDate = exercise.dueDate
     val formattedDueDate = if (dueDate != null) {
@@ -106,10 +117,27 @@ private fun ExerciseDataText(modifier: Modifier, exercise: Exercise) {
         )
 
         ProvideDefaultExerciseTemplateStatus(exercise) {
-            ParticipationStatusUi(
-                modifier = Modifier.fillMaxWidth(),
-                exercise = exercise
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ParticipationStatusUi(
+                    modifier = Modifier,
+                    exercise = exercise
+                )
+
+                if (displayActionButtons) {
+                    ExerciseActionButtons(
+                        modifier = Modifier,
+                        exercise = exercise,
+                        showResult = true,
+                        actions = exerciseActions
+                    )
+                }
+            }
         }
     }
 }

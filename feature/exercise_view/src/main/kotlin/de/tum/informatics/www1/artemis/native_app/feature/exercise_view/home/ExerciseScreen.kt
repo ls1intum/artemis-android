@@ -45,8 +45,6 @@ internal fun ExerciseScreen(
 
     val exerciseDataState by viewModel.exercise.collectAsState()
 
-    val gradedParticipation by viewModel.gradedParticipation.collectAsState()
-
     val courseId: Long? by remember(exerciseDataState) {
         derivedStateOf {
             exerciseDataState.bind { it.course?.id }.orNull()
@@ -115,28 +113,37 @@ internal fun ExerciseScreen(
 
         // Keep state when device configuration changes
         val body = @Composable { modifier: Modifier ->
+            val onParticipateInQuizDelegate = { isPractice: Boolean ->
+                courseId?.let {
+                    onParticipateInQuiz(it, isPractice)
+                }
+            }
+
+            val actions = remember {
+                ExerciseActions(
+                    onClickStartTextExercise = {
+                        viewModel.startExercise(onViewTextExerciseParticipationScreen)
+                    },
+                    onClickPracticeQuiz = { onParticipateInQuizDelegate(true) },
+                    onClickOpenQuiz = { onParticipateInQuizDelegate(false) },
+                    onClickStartQuiz = { onParticipateInQuizDelegate(false) },
+                    onClickViewResult = onViewResult,
+                    onClickOpenTextExercise = onViewTextExerciseParticipationScreen
+                )
+            }
+
             ExerciseScreenBody(
                 modifier = modifier,
                 exerciseDataState = exerciseDataState,
                 displayCommunicationOnSide = displayCommunicationOnSide,
-                gradedParticipation = gradedParticipation,
                 authToken = authToken,
                 navController = navController,
-                onViewTextExerciseParticipationScreen = onViewTextExerciseParticipationScreen,
-                onParticipateInQuiz = { isPractice ->
-                    courseId?.let { onParticipateInQuiz(it, isPractice) }
-                },
-                onViewResult = onViewResult,
-                onClickStartExercise = {
-                    viewModel.startExercise(
-                        onViewTextExerciseParticipationScreen
-                    )
-                },
-                onClickRetry = viewModel::requestReloadExercise,
                 metisContext = metisContext,
+                actions = actions,
                 webViewState = webViewState,
                 setWebView = { savedWebView = it },
-                webView = savedWebView
+                webView = savedWebView,
+                onClickRetry = viewModel::requestReloadExercise
             )
         }
 

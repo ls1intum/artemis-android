@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view
 
+import android.net.UrlQuerySanitizer
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -19,11 +20,18 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.ExerciseScreen
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise.TextExerciseParticipationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.view_result.ViewResultScreen
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import java.net.URLDecoder
+import java.net.URLEncoder
+import java.nio.charset.Charset
 
 object ExerciseViewDestination {
-    const val EXERCISE_VIEW_ROUTE = "exercise?{exerciseId}"
+    const val EXERCISE_VIEW_ROUTE = "exercise/{exerciseId}/{viewMode}"
 
     /**
      * Set this to true to on the backStackEntry and the exercise will be reloaded
@@ -44,8 +52,15 @@ private const val NESTED_EXERCISE_RESULT_DESTINATION = "view_result"
 private const val NESTED_PARTICIPATE_TEXT_EXERCISE_DESTINATION =
     "participate/text_exercise/{participationId}"
 
-fun NavController.navigateToExercise(exerciseId: Long, builder: NavOptionsBuilder.() -> Unit) {
-    navigate("exercise?$exerciseId", builder)
+fun NavController.navigateToExercise(
+    exerciseId: Long,
+    viewMode: ExerciseViewMode,
+    builder: NavOptionsBuilder.() -> Unit
+) {
+    val viewModeAsString =
+        URLEncoder.encode(Json.encodeToString(ExerciseViewMode.serializer(), viewMode), "UTF-8")
+
+    navigate("exercise/$exerciseId/$viewModeAsString", builder)
 }
 
 fun NavGraphBuilder.exercise(
@@ -59,12 +74,20 @@ fun NavGraphBuilder.exercise(
             navArgument("exerciseId") {
                 type = NavType.LongType
                 nullable = false
+            },
+            navArgument("viewMode") {
+                type = NavType.StringType
+                nullable = false
             }
         )
     ) { backStackEntry ->
         val exerciseId =
             backStackEntry.arguments?.getLong("exerciseId")
         checkNotNull(exerciseId)
+
+        val viewMode: ExerciseViewMode = backStackEntry.arguments?.getString("viewMode")?.let {
+            Json.decodeFromString(URLDecoder.decode(it, "UTF-8"))
+        } ?: ExerciseViewMode.Overview
 
         val exerciseViewModel = koinViewModel<ExerciseViewModel> { parametersOf(exerciseId) }
 
@@ -79,18 +102,32 @@ fun NavGraphBuilder.exercise(
             }
         }
 
-        NavHost(navController = nestedNavController, startDestination = NESTED_HOME_DESTINATION) {
+        val startDestination = when (viewMode) {
+            ExerciseViewMode.Overview -> NESTED_HOME_DESTINATION
+            is ExerciseViewMode.TextParticipation -> NESTED_PARTICIPATE_TEXT_EXERCISE_DESTINATION
+            ExerciseViewMode.ViewResult -> NESTED_EXERCISE_RESULT_DESTINATION
+        }
+
+        val nestedNavigateUp: () -> Unit = {
+            if (nestedNavController.previousBackStackEntry != null) {
+                nestedNavController.navigateUp()
+            } else {
+                onNavigateBack()
+            }
+        }
+
+        NavHost(navController = nestedNavController, startDestination = startDestination) {
             composable(NESTED_HOME_DESTINATION) {
                 ExerciseScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = exerciseViewModel,
-                    onNavigateBack = onNavigateBack,
+                    onNavigateBack = nestedNavigateUp,
                     onViewResult = {
                         nestedNavController.navigate(NESTED_EXERCISE_RESULT_DESTINATION)
                     },
                     navController = navController,
                     onViewTextExerciseParticipationScreen = { participationId ->
-                        nestedNavController.navigate("participate/text_exercise/$participationId")
+                        nestedNavController.navigate(createTextParticipationRoute(participationId))
                     },
                     onParticipateInQuiz = { courseId, isPractice ->
                         onParticipateInQuiz(courseId, exerciseId, isPractice)
@@ -102,7 +139,7 @@ fun NavGraphBuilder.exercise(
                 ViewResultScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = exerciseViewModel,
-                    onCloseResult = nestedNavController::navigateUp
+                    onCloseResult = nestedNavigateUp
                 )
             }
 
@@ -113,7 +150,9 @@ fun NavGraphBuilder.exercise(
                         "participationId"
                     ) {
                         type = NavType.LongType
-                        nullable = false
+                        if (viewMode is ExerciseViewMode.TextParticipation) {
+                            defaultValue = viewMode.participationId
+                        } else nullable = false
                     }
                 )
             ) { backStackEntry ->
@@ -124,12 +163,15 @@ fun NavGraphBuilder.exercise(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = exerciseViewModel,
                     participationId = participationId,
-                    onNavigateUp = nestedNavController::navigateUp
+                    onNavigateUp = nestedNavigateUp
                 )
             }
         }
     }
 }
+
+private fun createTextParticipationRoute(participationId: Long) =
+    "participate/text_exercise/$participationId"
 
 @Composable
 internal fun <T> ExerciseDataStateUi(
@@ -147,4 +189,19 @@ internal fun <T> ExerciseDataStateUi(
         onClickRetry = onClickRetry,
         successUi = onSuccess
     )
+}
+
+@Serializable
+sealed interface ExerciseViewMode {
+    @Serializable
+    @SerialName("overview")
+    object Overview : ExerciseViewMode
+
+    @Serializable
+    @SerialName("text_participation")
+    data class TextParticipation(val participationId: Long) : ExerciseViewMode
+
+    @Serializable
+    @SerialName("view_result")
+    object ViewResult : ExerciseViewMode
 }

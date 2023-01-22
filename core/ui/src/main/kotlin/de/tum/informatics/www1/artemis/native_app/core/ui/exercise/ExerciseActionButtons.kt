@@ -19,23 +19,19 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
 fun ExerciseActionButtons(
     modifier: Modifier,
     exercise: Exercise,
-    gradedParticipation: Participation?,
-    onClickStartExercise: () -> Unit,
-    onClickPracticeQuiz: () -> Unit,
-    onClickOpenQuiz: () -> Unit,
-    onClickStartQuiz: () -> Unit,
     templateStatus: ResultTemplateStatus? = LocalTemplateStatusProvider.current(),
-    onClickOpenTextExercise: (participationId: Long) -> Unit,
     showResult: Boolean,
-    onClickViewResult: () -> Unit
+    actions: ExerciseActions
 ) {
     // TODO: Team mode is currently not supported. Therefore, the buttons are disabled in team mode exercises
 
+    val latestParticipation = exercise.latestParticipation
+
     if (exercise is TextExercise) {
-        if (gradedParticipation == null && isStartExerciseAvailable(exercise)) {
+        if (latestParticipation == null && isStartExerciseAvailable(exercise)) {
             Button(
                 modifier = modifier,
-                onClick = onClickStartExercise,
+                onClick = actions.onClickStartTextExercise,
                 enabled = !exercise.teamMode
             ) {
                 Text(
@@ -49,7 +45,7 @@ fun ExerciseActionButtons(
         if (isStartPracticeAvailable(exercise = exercise)) {
             Button(
                 modifier = modifier,
-                onClick = { onClickPracticeQuiz() }
+                onClick = actions.onClickPracticeQuiz
             ) {
                 Text(
                     text = stringResource(id = R.string.exercise_actions_practice_quiz_button)
@@ -58,15 +54,15 @@ fun ExerciseActionButtons(
         }
 
         val openQuizAvailable =
-            exercise.notStartedC || gradedParticipation?.initializationState == Participation.InitializationState.INITIALIZED
+            exercise.notStartedC || latestParticipation?.initializationState == Participation.InitializationState.INITIALIZED
         val startQuizAvailable = exercise.isUninitializedC
 
         if (openQuizAvailable || startQuizAvailable) {
             Button(
                 modifier = modifier,
                 onClick = {
-                    if (openQuizAvailable) onClickOpenQuiz()
-                    else onClickStartQuiz()
+                    if (openQuizAvailable) actions.onClickOpenQuiz()
+                    else actions.onClickStartQuiz()
                 }
             ) {
                 Text(
@@ -81,12 +77,12 @@ fun ExerciseActionButtons(
 
     if (templateStatus != null) {
         if (exercise is TextExercise) {
-            if (gradedParticipation?.initializationState == Participation.InitializationState.INITIALIZED) {
+            if (latestParticipation?.initializationState == Participation.InitializationState.INITIALIZED) {
                 Button(
                     modifier = modifier,
                     onClick = {
-                        onClickOpenTextExercise(
-                            gradedParticipation.id ?: return@Button
+                        actions.onClickOpenTextExercise(
+                            latestParticipation.id ?: return@Button
                         )
                     },
                     enabled = !exercise.teamMode
@@ -97,14 +93,14 @@ fun ExerciseActionButtons(
                 }
             }
 
-            if (gradedParticipation?.initializationState == Participation.InitializationState.FINISHED &&
-                (gradedParticipation.results.isNullOrEmpty() || !showResult)
+            if (latestParticipation?.initializationState == Participation.InitializationState.FINISHED &&
+                (latestParticipation.results.isNullOrEmpty() || !showResult)
             ) {
                 Button(
                     modifier = modifier,
                     onClick = {
-                        onClickOpenTextExercise(
-                            gradedParticipation.id ?: return@Button
+                        actions.onClickOpenTextExercise(
+                            latestParticipation.id ?: return@Button
                         )
                     },
                     enabled = !exercise.teamMode
@@ -119,7 +115,7 @@ fun ExerciseActionButtons(
         if (templateStatus is ResultTemplateStatus.WithResult) {
             Button(
                 modifier = modifier,
-                onClick = onClickViewResult
+                onClick = actions.onClickViewResult
             ) {
                 Text(text = stringResource(id = R.string.exercise_actions_view_result_button))
             }
@@ -156,3 +152,12 @@ private fun isStartPracticeAvailable(exercise: Exercise): Boolean {
 @Composable
 private fun hasQuizEnded(quizExercise: QuizExercise): Boolean =
     quizExercise.hasEnded.collectAsState(initial = false).value
+
+data class ExerciseActions(
+    val onClickStartTextExercise: () -> Unit,
+    val onClickPracticeQuiz: () -> Unit,
+    val onClickOpenQuiz: () -> Unit,
+    val onClickStartQuiz: () -> Unit,
+    val onClickOpenTextExercise: (participationId: Long) -> Unit,
+    val onClickViewResult: () -> Unit
+)

@@ -33,6 +33,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.DASHBOARD_DE
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboard
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.navigateToDashboard
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewDestination
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewMode
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exercise
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.navigateToExercise
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture
@@ -113,6 +114,29 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
+                val onNavigateToTextExerciseParticipation =
+                    { exerciseId: Long, participationId: Long ->
+                        navController.navigateToExercise(
+                            exerciseId,
+                            ExerciseViewMode.TextParticipation(participationId)
+                        ) {}
+                    }
+
+                val onNavigateToExerciseResultView = { exerciseId: Long ->
+                    navController.navigateToExercise(
+                        exerciseId,
+                        ExerciseViewMode.ViewResult
+                    ) {}
+                }
+
+                val onParticipateInQuiz = { courseId: Long, exerciseId: Long, isPractice: Boolean ->
+                    navController.navigateToQuizParticipation(
+                        courseId,
+                        exerciseId,
+                        if (isPractice) QuizType.PRACTICE else QuizType.LIVE
+                    )
+                }
+
                 CompositionLocalProvider(LocalWindowSizeClassProvider provides windowSizeClassProvider) {
                     // Use jetpack compose navigation for the navigation logic.
                     NavHost(navController = navController, startDestination = startDestination) {
@@ -145,8 +169,14 @@ class MainActivity : AppCompatActivity() {
 
                         course(
                             onNavigateToExercise = { exerciseId ->
-                                navController.navigateToExercise(exerciseId) { }
+                                navController.navigateToExercise(
+                                    exerciseId,
+                                    ExerciseViewMode.Overview
+                                ) { }
                             },
+                            onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
+                            onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+                            onParticipateInQuiz = onParticipateInQuiz,
                             onNavigateToLecture = { courseId, lectureId ->
                                 navController.navigateToLecture(
                                     courseId = courseId,
@@ -160,15 +190,7 @@ class MainActivity : AppCompatActivity() {
                         exercise(
                             navController = navController,
                             onNavigateBack = navController::navigateUp,
-                            onParticipateInQuiz = { courseId, exerciseId, isPractice ->
-                                val quizType = if (isPractice) QuizType.PRACTICE else QuizType.LIVE
-
-                                navController.navigateToQuizParticipation(
-                                    courseId,
-                                    exerciseId,
-                                    quizType
-                                )
-                            }
+                            onParticipateInQuiz = onParticipateInQuiz
                         )
 
                         lecture(
@@ -176,7 +198,10 @@ class MainActivity : AppCompatActivity() {
                             onNavigateBack = navController::navigateUp,
                             onRequestOpenLink = onRequestOpenLink,
                             onViewExercise = { exerciseId ->
-                                navController.navigateToExercise(exerciseId) { }
+                                navController.navigateToExercise(
+                                    exerciseId,
+                                    ExerciseViewMode.Overview
+                                ) { }
                             }
                         )
 

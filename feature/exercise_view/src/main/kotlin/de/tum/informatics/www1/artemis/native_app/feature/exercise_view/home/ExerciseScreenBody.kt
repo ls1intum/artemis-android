@@ -36,7 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_s
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
@@ -50,18 +50,14 @@ internal fun ExerciseScreenBody(
     modifier: Modifier,
     exerciseDataState: DataState<Exercise>,
     displayCommunicationOnSide: Boolean,
-    gradedParticipation: Participation?,
     authToken: String,
     navController: NavController,
     metisContext: MetisContext?,
-    onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit,
-    onParticipateInQuiz: (isPractice: Boolean) -> Unit,
-    onViewResult: () -> Unit,
-    onClickRetry: () -> Unit,
-    onClickStartExercise: () -> Unit,
+    actions: ExerciseActions,
     webViewState: WebViewState?,
     setWebView: (WebView) -> Unit,
-    webView: WebView?
+    webView: WebView?,
+    onClickRetry: () -> Unit
 ) {
     ExerciseDataStateUi(
         modifier = modifier,
@@ -77,49 +73,13 @@ internal fun ExerciseScreenBody(
                             modifier = modifier,
                             authToken = authToken,
                             exercise = exercise,
-                            gradedParticipation = gradedParticipation,
-                            onClickStartExercise = onClickStartExercise,
-                            onClickOpenTextExercise = onViewTextExerciseParticipationScreen,
-                            onClickPracticeQuiz = {
-                                onParticipateInQuiz(true)
-                            },
-                            onClickStartQuiz = {
-                                onParticipateInQuiz(false)
-                            },
-                            onClickOpenQuiz = {
-                                onParticipateInQuiz(false)
-                            },
-                            onViewResult = onViewResult,
+                            actions = actions,
                             webViewState = webViewState,
                             setWebView = setWebView,
                             webView = webView
                         )
                     }
                 }
-
-//                val exerciseOverviewTab = @Composable { modifier: Modifier ->
-//                    ExerciseOverviewTab(
-//                        modifier = modifier,
-//                        authToken = authToken,
-//                        exercise = exercise,
-//                        gradedParticipation = gradedParticipation,
-//                        onClickStartExercise = onClickStartExercise,
-//                        onClickOpenTextExercise = onViewTextExerciseParticipationScreen,
-//                        onClickPracticeQuiz = {
-//                            onParticipateInQuiz(true)
-//                        },
-//                        onClickStartQuiz = {
-//                            onParticipateInQuiz(false)
-//                        },
-//                        onClickOpenQuiz = {
-//                            onParticipateInQuiz(false)
-//                        },
-//                        onViewResult = onViewResult,
-//                        webViewState = webViewState,
-//                        setWebView = setWebView,
-//                        webView = webView
-//                    )
-//                }
 
                 if (displayCommunicationOnSide) {
                     Row(

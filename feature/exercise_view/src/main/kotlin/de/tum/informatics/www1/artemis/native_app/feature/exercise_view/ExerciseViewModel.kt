@@ -70,6 +70,11 @@ internal class ExerciseViewModel(
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
     /**
+     * Emitted to when startExercise is successful
+     */
+    private val _gradedParticipation = MutableSharedFlow<Participation>()
+
+    /**
      * Emits the exercise updated with the latest participations and results
      */
     val exercise: StateFlow<DataState<Exercise>> =
@@ -90,7 +95,8 @@ internal class ExerciseViewModel(
                             )
 
                         newParticipationsFlow.collect { participation ->
-                            currentExercise = currentExercise.withUpdatedParticipation(participation)
+                            currentExercise =
+                                currentExercise.withUpdatedParticipation(participation)
 
                             emit(DataState.Success(currentExercise))
                         }
@@ -99,7 +105,7 @@ internal class ExerciseViewModel(
                     else -> emit(exercise)
                 }
             }
-            .stateIn(viewModelScope, SharingStarted.Lazily)
+            .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     val latestIndividualDueDate: StateFlow<DataState<Instant?>> =
         baseConfigurationFlow
@@ -121,42 +127,42 @@ internal class ExerciseViewModel(
             serverConfigurationService.serverUrl,
             accountService.authToken
         ) { exerciseData, serverUrl, authToken ->
-                when (exerciseData) {
-                    is DataState.Success -> {
-                        val participation =
-                            exerciseData.data.studentParticipations.orEmpty().firstOrNull()
-                        val participationId = participation?.id
-                        val latestResult = participation?.results.orEmpty().firstOrNull()
+            when (exerciseData) {
+                is DataState.Success -> {
+                    val participation =
+                        exerciseData.data.studentParticipations.orEmpty().firstOrNull()
+                    val participationId = participation?.id
+                    val latestResult = participation?.results.orEmpty().firstOrNull()
 
-                        if (latestResult == null || latestResult.feedbacks.orEmpty().isNotEmpty()) {
-                            emit(DataState.Success(latestResult))
-                        } else {
-                            //Feedback is missing, fetch from server
-                            val resultId = latestResult.id
-                            if (participationId != null && resultId != null) {
-                                emitAll(
-                                    resultService
-                                        .getFeedbackDetailsForResult(
-                                            participationId,
-                                            resultId,
-                                            serverUrl,
-                                            authToken
-                                        )
-                                        .map { feedbackListDataState ->
-                                            feedbackListDataState.bind<Result?> { loadedFeedbacksList ->
-                                                latestResult.copy(feedbacks = loadedFeedbacksList)
-                                            }
+                    if (latestResult == null || latestResult.feedbacks.orEmpty().isNotEmpty()) {
+                        emit(DataState.Success(latestResult))
+                    } else {
+                        //Feedback is missing, fetch from server
+                        val resultId = latestResult.id
+                        if (participationId != null && resultId != null) {
+                            emitAll(
+                                resultService
+                                    .getFeedbackDetailsForResult(
+                                        participationId,
+                                        resultId,
+                                        serverUrl,
+                                        authToken
+                                    )
+                                    .map { feedbackListDataState ->
+                                        feedbackListDataState.bind<Result?> { loadedFeedbacksList ->
+                                            latestResult.copy(feedbacks = loadedFeedbacksList)
                                         }
-                                )
-                            }
+                                    }
+                            )
                         }
                     }
+                }
 
-                    else -> {
-                        emit(exerciseData.bind<Result?> { null })
-                    }
+                else -> {
+                    emit(exerciseData.bind<Result?> { null })
                 }
             }
+        }
             .stateIn(viewModelScope, SharingStarted.Lazily)
 
     val feedbackItems: StateFlow<DataState<List<FeedbackItem>>> =
@@ -215,25 +221,6 @@ internal class ExerciseViewModel(
                     }
             }
             .stateIn(viewModelScope, SharingStarted.Lazily)
-
-    /**
-     * Emitted to when startExercise is successful
-     */
-    private val _gradedParticipation = MutableSharedFlow<Participation>()
-    val gradedParticipation: StateFlow<Participation?> = merge<Participation?>(
-        _gradedParticipation,
-        exercise
-            .filterSuccess()
-            .map { exercise ->
-                exercise
-                    .studentParticipations
-                    .orEmpty()
-                    .filterIsInstance<StudentParticipation>()
-                    .firstOrNull()
-            }
-            .filterNotNull()
-    )
-        .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
     val authToken: StateFlow<String> = authTokenStateFlow(accountService)
@@ -403,26 +390,22 @@ internal class ExerciseViewModel(
     fun startExercise(onStartedSuccessfully: (participationId: Long) -> Unit) {
         viewModelScope.launch {
             val serverUrl = serverConfigurationService.serverUrl.first()
-            when (val authData = accountService.authenticationData.first()) {
-                is AccountService.AuthenticationData.LoggedIn -> {
-                    val response = courseExerciseService.startExercise(
-                        exerciseId,
-                        serverUrl,
-                        authData.authToken
-                    )
+            val authToken = accountService.authToken.first()
 
-                    when (response) {
-                        is NetworkResponse.Response -> {
-                            val participation = response.data
+            val response = courseExerciseService.startExercise(
+                exerciseId,
+                serverUrl,
+                authToken
+            )
 
-                            _gradedParticipation.emit(participation)
-                            onStartedSuccessfully(participation.id ?: return@launch)
-                        }
-                        is NetworkResponse.Failure -> {}
-                    }
+            when (response) {
+                is NetworkResponse.Response -> {
+                    val participation = response.data
+
+                    _gradedParticipation.emit(participation)
+                    onStartedSuccessfully(participation.id ?: return@launch)
                 }
-
-                AccountService.AuthenticationData.NotLoggedIn -> {}
+                is NetworkResponse.Failure -> {}
             }
         }
     }

@@ -11,6 +11,10 @@ import org.koin.androidx.compose.get
 val LocalTemplateStatusProvider: ProvidableCompositionLocal<@Composable () -> ResultTemplateStatus?> =
     compositionLocalOf { { throw RuntimeException("No template status provider set") } }
 
+/**
+ * Computing the template status is an expensive operation, therefore it should be shared among composables
+ * that require it. For this purpose a local composition provider is used to simply the sharing logic.
+ */
 @Composable
 fun ProvideDefaultExerciseTemplateStatus(exercise: Exercise, content: @Composable () -> Unit) {
     val scope = rememberCoroutineScope()

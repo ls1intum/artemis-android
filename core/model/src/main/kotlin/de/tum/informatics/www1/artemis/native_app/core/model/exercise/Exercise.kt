@@ -172,8 +172,12 @@ private val Exercise.currentUserScore: Float?
         .firstOrNull()?.results?.maxBy { it.completionDate ?: Instant.fromEpochSeconds(0L) }
         ?.score
 
-val Exercise.currentUserPoints: Float? get() {
-    val maxPoints = maxPoints ?: return null
-    val currentUserScore = currentUserScore ?: return null
-    return maxPoints * (currentUserScore / 100f)
-}
+val Exercise.currentUserPoints: Float?
+    get() {
+        val maxPoints = maxPoints ?: return null
+        val currentUserScore = currentUserScore ?: return null
+        return maxPoints * (currentUserScore / 100f)
+    }
+
+val Exercise.latestParticipation: Participation?
+    get() = studentParticipations.orEmpty().firstOrNull()

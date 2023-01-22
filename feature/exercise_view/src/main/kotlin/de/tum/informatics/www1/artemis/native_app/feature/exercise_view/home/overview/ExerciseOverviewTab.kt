@@ -16,7 +16,7 @@ import com.google.accompanist.web.LoadingState
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -24,16 +24,10 @@ internal fun ExerciseOverviewTab(
     modifier: Modifier,
     authToken: String,
     exercise: Exercise,
-    gradedParticipation: Participation?,
-    onClickStartExercise: () -> Unit,
-    onClickOpenTextExercise: (participationId: Long) -> Unit,
-    onClickPracticeQuiz: () -> Unit,
-    onClickStartQuiz: () -> Unit,
-    onClickOpenQuiz: () -> Unit,
-    onViewResult: () -> Unit,
     webViewState: WebViewState?,
     setWebView: (WebView) -> Unit,
-    webView: WebView?
+    webView: WebView?,
+    actions: ExerciseActions
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Spacer(modifier = Modifier)
@@ -41,13 +35,7 @@ internal fun ExerciseOverviewTab(
         ParticipationStatusUi(
             modifier = Modifier.fillMaxWidth(),
             exercise = exercise,
-            gradedParticipation = gradedParticipation,
-            onClickViewResult = onViewResult,
-            onClickStartExercise = onClickStartExercise,
-            onClickOpenTextExercise = onClickOpenTextExercise,
-            onClickOpenQuiz = onClickOpenQuiz,
-            onClickPracticeQuiz = onClickPracticeQuiz,
-            onClickStartQuiz = onClickStartQuiz
+            actions = actions
         )
 
         val webViewClient = remember(authToken) {

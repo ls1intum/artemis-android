@@ -32,6 +32,9 @@ fun NavController.navigateToCourse(courseId: Long, builder: NavOptionsBuilder.()
 fun NavGraphBuilder.course(
     navController: NavController,
     onNavigateToExercise: (exerciseId: Long) -> Unit,
+    onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
+    onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
+    onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
     onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -49,7 +52,10 @@ fun NavGraphBuilder.course(
             onNavigateToExercise = onNavigateToExercise,
             courseId = courseId,
             navController = navController,
-            onNavigateToLecture = { lectureId -> onNavigateToLecture(courseId, lectureId) }
+            onNavigateToLecture = { lectureId -> onNavigateToLecture(courseId, lectureId) },
+            onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
+            onParticipateInQuiz = { exerciseId, isPractice -> onParticipateInQuiz(courseId, exerciseId, isPractice) },
+            onNavigateToExerciseResultView = onNavigateToExerciseResultView
         )
     }
 }
@@ -61,6 +67,9 @@ internal fun CourseUiScreen(
     courseId: Long,
     navController: NavController,
     onNavigateToExercise: (exerciseId: Long) -> Unit,
+    onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
+    onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
+    onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
     onNavigateToLecture: (lectureId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -129,13 +138,6 @@ internal fun CourseUiScreen(
                         stringResource(id = R.string.course_ui_tab_communication),
                         Icons.Default.Chat
                     )
-//                    CourseTab(
-//                        3,
-////                        stringResource(id = R.string.course_ui_tab_other),
-//                        "Coming soon",
-//                        Icons.Default.MoreHoriz
-//                    )
-
                 }
             }
         }
@@ -170,7 +172,26 @@ internal fun CourseUiScreen(
                             ExerciseListUi(
                                 modifier = Modifier.fillMaxSize(),
                                 weeklyExercises = weeklyExercises,
-                                onClickExercise = onNavigateToExercise
+                                onClickExercise = onNavigateToExercise,
+                                onClickStartTextExercise = { exerciseId ->
+                                    viewModel.startExercise(exerciseId) { participationId ->
+                                        onNavigateToTextExerciseParticipation(
+                                            exerciseId,
+                                            participationId
+                                        )
+                                    }
+                                },
+                                onClickOpenQuiz = { exerciseId ->
+                                    onParticipateInQuiz(exerciseId, false)
+                                },
+                                onClickPracticeQuiz = { exerciseId ->
+                                    onParticipateInQuiz(exerciseId, true)
+                                },
+                                onClickStartQuiz = { exerciseId ->
+                                    onParticipateInQuiz(exerciseId, false)
+                                },
+                                onClickOpenTextExercise = onNavigateToTextExerciseParticipation,
+                                onClickViewResult = onNavigateToExerciseResultView
                             )
                         }
                     }

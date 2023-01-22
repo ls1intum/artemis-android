@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseListItem
 
 @Composable
@@ -16,7 +17,15 @@ internal fun LectureUnitExerciseUi(
         ExerciseListItem(
             modifier = modifier,
             exercise = exercise,
-            onClickExercise = { onClickExercise(exercise.id ?: return@ExerciseListItem) }
+            onClickExercise = { onClickExercise(exercise.id) },
+            exerciseActions = ExerciseActions(
+                onClickOpenTextExercise = {},
+                onClickStartQuiz = {},
+                onClickPracticeQuiz = {},
+                onClickOpenQuiz = {},
+                onClickStartTextExercise = {},
+                onClickViewResult = {}
+            )
         )
     }
 }
