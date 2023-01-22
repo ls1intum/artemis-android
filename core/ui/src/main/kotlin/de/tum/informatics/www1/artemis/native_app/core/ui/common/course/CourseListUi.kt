@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -24,6 +25,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,6 +36,7 @@ import androidx.core.graphics.toColorInt
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
@@ -82,6 +86,7 @@ fun CompactCourseItemHeader(
     course: Course,
     serverUrl: String,
     authorizationToken: String,
+    compactCourseHeaderViewMode: CompactCourseHeaderViewMode,
     onClick: () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -118,17 +123,29 @@ fun CompactCourseItemHeader(
                         maxLines = 2
                     )
 
-                    Text(
-                        text = course.description,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        color = MaterialTheme.colorScheme.secondary,
-                        fontSize = 12.sp,
-                        overflow = TextOverflow.Ellipsis,
-                        lineHeight = 14.sp,
-                        maxLines = 3
-                    )
+                    when (compactCourseHeaderViewMode) {
+                        CompactCourseHeaderViewMode.DESCRIPTION -> {
+                            Text(
+                                text = course.description,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f),
+                                color = MaterialTheme.colorScheme.secondary,
+                                fontSize = 12.sp,
+                                overflow = TextOverflow.Ellipsis,
+                                lineHeight = 14.sp,
+                                maxLines = 3
+                            )
+                        }
+                        CompactCourseHeaderViewMode.EXERCISE_AND_LECTURE_COUNT -> {
+                            CourseExerciseAndLectureCount(
+                                modifier = Modifier.fillMaxWidth(),
+                                exerciseCount = course.exercises.size,
+                                lectureCount = course.lectures.size,
+                                textStyle = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
                 }
             }
 
@@ -198,35 +215,40 @@ fun ExpandedCourseItemHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(48.dp)
                 .let {
                     if (courseColor != null) {
                         it.background(courseColor)
                     } else it
                 }
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 8.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             val courseIconModifier = Modifier
-                .fillMaxWidth(0.2f)
-                .aspectRatio(1f)
+                .weight(2f)
+
             if (course.courseIconPath != null) {
-                Image(
-                    modifier = courseIconModifier.clip(CircleShape),
-                    painter = courseIconPainter,
-                    contentDescription = null
-                )
+                Box(modifier = courseIconModifier) {
+                    Image(
+                        modifier = Modifier
+                            .aspectRatio(1f)
+                            .clip(CircleShape),
+                        painter = courseIconPainter,
+                        contentDescription = null
+                    )
+                }
             } else {
                 Box(modifier = courseIconModifier)
             }
 
             AutoResizeText(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(6f),
                 text = course.title,
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
-                fontSizeRange = FontSizeRange(14.sp, max = 18.sp)
+                fontSizeRange = FontSizeRange(min = 14.sp, max = 18.sp)
             )
 
             Box(
@@ -239,8 +261,47 @@ fun ExpandedCourseItemHeader(
     }
 }
 
+/**
+ * Text about the amount of exercises and lectures the course has.
+ */
+@Composable
+fun CourseExerciseAndLectureCount(
+    modifier: Modifier,
+    textStyle: TextStyle,
+    exerciseCount: Int,
+    lectureCount: Int,
+    alignment: Alignment.Horizontal = Alignment.Start
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(0.dp),
+        horizontalAlignment = alignment
+    ) {
+        ProvideTextStyle(value = textStyle) {
+            Text(
+                text = stringResource(
+                    id = R.string.course_header_exercise_count,
+                    exerciseCount
+                )
+            )
+
+            Text(
+                text = stringResource(
+                    id = R.string.course_header_lecture_count,
+                    lectureCount
+                )
+            )
+        }
+    }
+}
+
 fun computeCourseColumnCount(windowSizeClass: WindowSizeClass): Int = when {
-    windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Expanded -> 4
+    windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Expanded -> 3
     windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Medium -> 2
     else -> 1
+}
+
+enum class CompactCourseHeaderViewMode {
+    DESCRIPTION,
+    EXERCISE_AND_LECTURE_COUNT
 }

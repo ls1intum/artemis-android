@@ -48,10 +48,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseItemHeader
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.ExpandedCourseItemHeader
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseColumnCount
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseItemModifier
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import org.koin.androidx.compose.getViewModel
@@ -271,7 +268,8 @@ private fun RegistrableCourse(
             course = course,
             serverUrl = serverUrl,
             authorizationToken = bearerToken,
-            content = content
+            content = content,
+            compactCourseHeaderViewMode = CompactCourseHeaderViewMode.DESCRIPTION
         )
     } else {
         ExpandedCourseItemHeader(

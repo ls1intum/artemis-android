@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.dashboard
 
+import android.graphics.Paint.Align
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -17,6 +18,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -31,12 +33,10 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseItemHeader
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseItemGrid
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.ExpandedCourseItemHeader
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.*
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.CoursePointsDecimalFormat
 import org.koin.androidx.compose.getViewModel
 import java.text.DecimalFormat
-import java.text.NumberFormat
 
 const val DASHBOARD_DESTINATION = "dashboard"
 
@@ -178,50 +178,20 @@ fun CourseItem(
     authorizationToken: String,
     onClick: () -> Unit
 ) {
-    val content: @Composable ColumnScope.() -> Unit = @Composable {
-        val courseProgress = course.progress.coerceAtMost(1f)
-        if (isCompact) {
-            Divider()
+    val currentPoints = 67
+    val maxPoints = 100
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                LinearProgressIndicator(
-                    modifier = Modifier.weight(1f),
-                    progress = courseProgress,
-                    trackColor = MaterialTheme.colorScheme.onPrimary
-                )
+    val currentPointsFormatted = remember(currentPoints) {
+        CoursePointsDecimalFormat.format(currentPoints)
+    }
+    val maxPointsFormatted = remember(maxPoints) {
+        CoursePointsDecimalFormat.format(maxPoints)
+    }
 
-                CourseProgressText(
-                    modifier = Modifier,
-                    course = course
-                )
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    progress = courseProgress
-                )
+    val progress = currentPoints.toFloat() / maxPoints.toFloat()
 
-                CourseProgressText(
-                    modifier = Modifier,
-                    course = course
-                )
-            }
-        }
+    val progressPercentFormatted = remember(progress) {
+        DecimalFormat.getPercentInstance().format(progress)
     }
 
     if (isCompact) {
@@ -231,7 +201,32 @@ fun CourseItem(
             serverUrl = serverUrl,
             authorizationToken = authorizationToken,
             onClick = onClick,
-            content = content
+            compactCourseHeaderViewMode = CompactCourseHeaderViewMode.EXERCISE_AND_LECTURE_COUNT,
+            content = {
+                val courseProgress = currentPoints.toFloat() / maxPoints.toFloat()
+                Divider()
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp, horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.weight(1f),
+                        progress = courseProgress,
+                        trackColor = MaterialTheme.colorScheme.onPrimary
+                    )
+
+                    CourseProgressText(
+                        modifier = Modifier,
+                        currentPointsFormatted = currentPointsFormatted,
+                        maxPointsFormatted = maxPointsFormatted,
+                        progressPercentFormatted = progressPercentFormatted
+                    )
+                }
+            }
         )
     } else {
         ExpandedCourseItemHeader(
@@ -251,9 +246,22 @@ fun CourseItem(
                         modifier = Modifier
                             .fillMaxSize(0.8f)
                             .align(Alignment.Center),
-                        course = course
+                        progress = progress,
+                        currentPointsFormatted = currentPointsFormatted,
+                        maxPointsFormatted = maxPointsFormatted,
+                        progressPercentFormatted = progressPercentFormatted
                     )
                 }
+
+                CourseExerciseAndLectureCount(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(vertical = 8.dp),
+                    exerciseCount = course.exercises.size,
+                    lectureCount = course.lectures.size,
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center),
+                    alignment = Alignment.CenterHorizontally
+                )
             },
             rightHeaderContent = { }
         )
@@ -261,9 +269,14 @@ fun CourseItem(
 }
 
 @Composable
-private fun CircularCourseProgress(modifier: Modifier, course: Course) {
+private fun CircularCourseProgress(
+    modifier: Modifier,
+    progress: Float,
+    currentPointsFormatted: String,
+    maxPointsFormatted: String,
+    progressPercentFormatted: String
+) {
     BoxWithConstraints(modifier = modifier) {
-        val progress = 0.5f
         val progressBarWidthDp = min(24.dp, maxWidth * 0.1f)
         val progressBarWidth = with(LocalDensity.current) { progressBarWidthDp.toPx() }
 
@@ -299,7 +312,10 @@ private fun CircularCourseProgress(modifier: Modifier, course: Course) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "50%",
+                text = stringResource(
+                    id = R.string.course_overview_course_progress_percentage,
+                    progressPercentFormatted
+                ),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 fontSize = percentFontSize,
@@ -307,7 +323,11 @@ private fun CircularCourseProgress(modifier: Modifier, course: Course) {
             )
 
             Text(
-                "50 / 100 Pts",
+                text = stringResource(
+                    id = R.string.course_overview_course_progress_pts,
+                    currentPointsFormatted,
+                    maxPointsFormatted
+                ),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 fontSize = ptsFontSize,
@@ -318,26 +338,19 @@ private fun CircularCourseProgress(modifier: Modifier, course: Course) {
 }
 
 @Composable
-private fun CourseProgressText(modifier: Modifier, course: Course) {
-    val scoreNumberFormat = remember {
-        DecimalFormat("0").apply {
-            maximumFractionDigits = 1
-        }
-    }
-
-    val percentNumberFormat = remember {
-        NumberFormat.getPercentInstance().apply {
-            maximumFractionDigits = 0
-        }
-    }
-
+private fun CourseProgressText(
+    modifier: Modifier,
+    currentPointsFormatted: String,
+    maxPointsFormatted: String,
+    progressPercentFormatted: String
+) {
     Text(
         modifier = modifier,
         text = stringResource(
             id = R.string.course_overview_course_progress,
-            scoreNumberFormat.format(course.currentScore),
-            scoreNumberFormat.format(course.maxPointsPossible),
-            percentNumberFormat.format(course.progress)
+            currentPointsFormatted,
+            maxPointsFormatted,
+            progressPercentFormatted
         ),
         fontSize = 14.sp
     )
