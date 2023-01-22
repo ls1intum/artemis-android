@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -13,20 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachment
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitOnline
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitUnknown
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.*
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitAttachmentUi
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitExerciseUi
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitHeader
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitOnlineUi
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitTextUi
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitVideoUi
+import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.*
 
 @Composable
 internal fun OverviewTab(
@@ -36,9 +27,15 @@ internal fun OverviewTab(
     onViewExercise: (exerciseId: Long) -> Unit,
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onRequestViewLink: (String) -> Unit,
-    onRequestOpenAttachment: (Attachment) -> Unit
+    onRequestOpenAttachment: (Attachment) -> Unit,
+    exerciseActions: BoundExerciseActions,
+    state: LazyListState
 ) {
-    LazyColumn(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        state = state
+    ) {
         if (description != null) {
             item {
                 DescriptionSection(
@@ -55,7 +52,8 @@ internal fun OverviewTab(
                 onViewExercise = onViewExercise,
                 onMarkAsCompleted = onMarkAsCompleted,
                 onRequestViewLink = onRequestViewLink,
-                onRequestOpenAttachment = onRequestOpenAttachment
+                onRequestOpenAttachment = onRequestOpenAttachment,
+                exerciseActions = exerciseActions
             )
         }
     }
@@ -84,7 +82,8 @@ private fun LazyListScope.lectureUnitSection(
     onViewExercise: (exerciseId: Long) -> Unit,
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onRequestViewLink: (String) -> Unit,
-    onRequestOpenAttachment: (Attachment) -> Unit
+    onRequestOpenAttachment: (Attachment) -> Unit,
+    exerciseActions: BoundExerciseActions
 ) {
     item {
         Text(
@@ -104,7 +103,8 @@ private fun LazyListScope.lectureUnitSection(
                     onMarkAsCompleted(lectureUnit.id, isCompleted)
                 },
                 onRequestViewLink = onRequestViewLink,
-                onRequestOpenAttachment = onRequestOpenAttachment
+                onRequestOpenAttachment = onRequestOpenAttachment,
+                exerciseActions = exerciseActions
             )
         }
 
@@ -123,7 +123,8 @@ private fun LectureUnitListItem(
     onMarkAsCompleted: (isCompleted: Boolean) -> Unit,
     onViewExercise: (exerciseId: Long) -> Unit,
     onRequestViewLink: (String) -> Unit,
-    onRequestOpenAttachment: (Attachment) -> Unit
+    onRequestOpenAttachment: (Attachment) -> Unit,
+    exerciseActions: BoundExerciseActions
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         val childModifier = Modifier.fillMaxWidth()
@@ -151,7 +152,8 @@ private fun LectureUnitListItem(
                 LectureUnitExerciseUi(
                     modifier = childModifier,
                     lectureUnit = lectureUnit,
-                    onClickExercise = onViewExercise
+                    onClickExercise = onViewExercise,
+                    exerciseActions = exerciseActions
                 )
             }
 

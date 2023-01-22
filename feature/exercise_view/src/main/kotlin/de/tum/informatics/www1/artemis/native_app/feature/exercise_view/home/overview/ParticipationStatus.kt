@@ -1,12 +1,15 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.overview
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.*
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.*
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActionButtons
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ParticipationStatusUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ProvideDefaultExerciseTemplateStatus
 
 /**
  * Display the default participation status ui in combination with enhancing options.

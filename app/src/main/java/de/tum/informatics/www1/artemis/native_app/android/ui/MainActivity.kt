@@ -202,7 +202,10 @@ class MainActivity : AppCompatActivity() {
                                     exerciseId,
                                     ExerciseViewMode.Overview
                                 ) { }
-                            }
+                            },
+                            onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
+                            onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+                            onParticipateInQuiz = onParticipateInQuiz
                         )
 
                         standalonePostScreen(

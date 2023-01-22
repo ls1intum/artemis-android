@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.service
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import kotlinx.coroutines.flow.Flow
 import javax.crypto.SecretKey
 

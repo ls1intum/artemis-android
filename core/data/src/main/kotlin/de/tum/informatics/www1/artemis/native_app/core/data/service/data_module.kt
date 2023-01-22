@@ -1,13 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service
 
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.BuildLogServiceImpl
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.CourseExerciseServiceImpl
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.LoginServiceImpl
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ParticipationServiceImpl
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ResultServiceImpl
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ServerDataServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.*
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.courses.CourseRegistrationServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.courses.CourseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.courses.DashboardServiceImpl

@@ -2,8 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl
 
 import androidx.work.ListenableWorker
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.isSuccess
+import io.ktor.http.*
 
 fun NetworkResponse<HttpStatusCode>.toWorkerResult(): ListenableWorker.Result {
     return when (this) {

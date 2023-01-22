@@ -1,10 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.course_view
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
@@ -12,11 +10,10 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BaseExerciseListViewModel
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone
 import java.time.temporal.WeekFields
@@ -24,12 +21,12 @@ import java.util.*
 
 internal class CourseViewModel(
     private val courseId: Long,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
     private val courseService: CourseService,
     private val liveParticipationService: LiveParticipationService,
-    private val courseExerciseService: CourseExerciseService
-) : ViewModel() {
+    serverConfigurationService: ServerConfigurationService,
+    accountService: AccountService,
+    courseExerciseService: CourseExerciseService
+) : BaseExerciseListViewModel(serverConfigurationService, accountService, courseExerciseService) {
 
     private val requestReloadCourse = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
@@ -44,11 +41,6 @@ internal class CourseViewModel(
             )
         }
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
-
-    /**
-     * Emitted to when the user has started an exercise.
-     */
-    private val startedExerciseFlow = MutableSharedFlow<NewParticipationData>()
 
     /**
      * Holds a flow of the latest exercises. Updated by the websocket.
@@ -72,14 +64,7 @@ internal class CourseViewModel(
                         merge(
                             liveParticipationService
                                 .personalSubmissionUpdater
-                                .mapNotNull {
-                                    NewParticipationData(
-                                        exerciseId = it.participation?.exercise?.id
-                                            ?: return@mapNotNull null,
-                                        newParticipation = it.participation
-                                            ?: return@mapNotNull null
-                                    )
-                                },
+                                .mapFilterToNewParticipationData(),
                             startedExerciseFlow
                         ).collect { newParticipationData ->
                             //Find the associated exercise, so that the submissions can be updated.
@@ -151,28 +136,4 @@ internal class CourseViewModel(
     fun reloadCourse() {
         requestReloadCourse.tryEmit(Unit)
     }
-
-    fun startExercise(exerciseId: Long, onStartedSuccessfully: (participationId: Long) -> Unit) {
-        viewModelScope.launch {
-            val serverUrl = serverConfigurationService.serverUrl.first()
-            val authToken = accountService.authToken.first()
-
-            when (val response =
-                courseExerciseService.startExercise(exerciseId, serverUrl, authToken)) {
-                is NetworkResponse.Response -> {
-                    startedExerciseFlow.emit(NewParticipationData(exerciseId, response.data))
-
-                    onStartedSuccessfully(
-                        response.data.id ?: return@launch
-                    )
-                }
-                is NetworkResponse.Failure -> {}
-            }
-        }
-    }
-
-    private data class NewParticipationData(
-        val exerciseId: Long,
-        val newParticipation: Participation
-    )
 }

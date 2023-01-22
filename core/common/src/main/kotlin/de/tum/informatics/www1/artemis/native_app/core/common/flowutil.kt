@@ -1,10 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.common
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.flow.*
 
 fun <T> Flow<T>.withPrevious(): Flow<Pair<T?, T>> = FlowWithPreviousElement(this)
 

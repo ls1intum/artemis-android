@@ -1,42 +1,20 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lecture_view
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.HelpCenter
 import androidx.compose.material.icons.filled.ViewHeadline
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.NavType
+import androidx.navigation.*
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SideBarMetisUi
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SmartphoneMetisUi
@@ -48,9 +26,9 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
-import io.ktor.http.URLBuilder
-import io.ktor.http.appendPathSegments
+import io.ktor.http.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -71,7 +49,10 @@ fun NavGraphBuilder.lecture(
     navController: NavController,
     onNavigateBack: () -> Unit,
     onRequestOpenLink: (String) -> Unit,
-    onViewExercise: (exerciseId: Long) -> Unit
+    onViewExercise: (exerciseId: Long) -> Unit,
+    onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
+    onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
+    onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
 ) {
     composable(
         route = "lecture/{lectureId}/{courseId}",
@@ -102,7 +83,16 @@ fun NavGraphBuilder.lecture(
             navController = navController,
             onNavigateBack = onNavigateBack,
             onRequestOpenLink = onRequestOpenLink,
-            onViewExercise = onViewExercise
+            onViewExercise = onViewExercise,
+            onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
+            onParticipateInQuiz = { exerciseId, isPractice ->
+                onParticipateInQuiz(
+                    courseId,
+                    exerciseId,
+                    isPractice
+                )
+            },
+            onNavigateToExerciseResultView = onNavigateToExerciseResultView
         )
     }
 }
@@ -116,7 +106,10 @@ private fun LectureScreen(
     navController: NavController,
     onNavigateBack: () -> Unit,
     onRequestOpenLink: (String) -> Unit,
-    onViewExercise: (exerciseId: Long) -> Unit
+    onViewExercise: (exerciseId: Long) -> Unit,
+    onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
+    onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
+    onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
 ) {
     val serverConfigurationService: ServerConfigurationService = get()
     val accountService: AccountService = get()
@@ -132,127 +125,148 @@ private fun LectureScreen(
 
     var displaySetCompletedFailureDialog: Boolean by remember { mutableStateOf(false) }
 
-    val metisContext = remember {
+    val metisContext = remember(courseId, lectureId) {
         MetisContext.Lecture(courseId = courseId, lectureId = lectureId)
     }
 
-    BoxWithConstraints(modifier) {
+    val overviewListState = rememberLazyListState()
+
+    BoxWithConstraints(modifier = modifier) {
         val displayCommunicationOnSide = canDisplayMetisOnDisplaySide(
             parentWidth = maxWidth,
             metisContentRatio = METIS_RATIO
         )
 
         // The lecture UI with tabs
-        val contentBody = remember(displayCommunicationOnSide) {
-            movableContentOf { modifier: Modifier ->
-                val selectedTabIndexState = rememberSaveable {
-                    mutableStateOf(0)
+        val contentBody = @Composable { modifier: Modifier ->
+            val selectedTabIndexState = rememberSaveable {
+                mutableStateOf(0)
+            }
+
+            val overviewTabIndex = 0
+            val attachmentsTabIndex = 1
+            val qnaTabIndex = 2
+
+            val selectedTabIndex =
+                if (selectedTabIndexState.value == qnaTabIndex && displayCommunicationOnSide) {
+                    overviewTabIndex
+                } else selectedTabIndexState.value
+
+
+            Column(modifier = modifier) {
+                TabRow(selectedTabIndex = selectedTabIndex) {
+                    DefaultTab(
+                        index = overviewTabIndex,
+                        icon = Icons.Default.ViewHeadline,
+                        textRes = R.string.lecture_view_tab_overview,
+                        selectedTabIndex = selectedTabIndexState
+                    )
+
+                    DefaultTab(
+                        index = attachmentsTabIndex,
+                        icon = Icons.Default.Attachment,
+                        textRes = R.string.lecture_view_tab_attachments,
+                        selectedTabIndex = selectedTabIndexState
+                    )
+
+                    if (!displayCommunicationOnSide) {
+                        DefaultTab(
+                            index = qnaTabIndex,
+                            icon = Icons.Default.HelpCenter,
+                            textRes = R.string.lecture_view_tab_communication,
+                            selectedTabIndex = selectedTabIndexState
+                        )
+                    }
                 }
 
-                val overviewTabIndex = 0
-                val attachmentsTabIndex = 1
-                val qnaTabIndex = 2
+                BasicDataStateUi(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    dataState = lectureDataState,
+                    loadingText = stringResource(id = R.string.lecture_view_lecture_loading),
+                    failureText = stringResource(id = R.string.lecture_view_lecture_loading_failure),
+                    retryButtonText = stringResource(id = R.string.lecture_view_lecture_loading_try_again),
+                    onClickRetry = viewModel::requestReloadLecture
+                ) { lecture ->
+                    when (selectedTabIndex) {
+                        overviewTabIndex -> {
+                            val lectureUnits by viewModel.lectureUnits.collectAsState()
 
-                val selectedTabIndex =
-                    if (selectedTabIndexState.value == qnaTabIndex && displayCommunicationOnSide) {
-                        overviewTabIndex
-                    } else selectedTabIndexState.value
-
-
-                Column(modifier = modifier) {
-                    TabRow(selectedTabIndex = selectedTabIndex) {
-                        DefaultTab(
-                            index = overviewTabIndex,
-                            icon = Icons.Default.ViewHeadline,
-                            textRes = R.string.lecture_view_tab_overview,
-                            selectedTabIndex = selectedTabIndexState
-                        )
-
-                        DefaultTab(
-                            index = attachmentsTabIndex,
-                            icon = Icons.Default.Attachment,
-                            textRes = R.string.lecture_view_tab_attachments,
-                            selectedTabIndex = selectedTabIndexState
-                        )
-
-                        if (!displayCommunicationOnSide) {
-                            DefaultTab(
-                                index = qnaTabIndex,
-                                icon = Icons.Default.HelpCenter,
-                                textRes = R.string.lecture_view_tab_communication,
-                                selectedTabIndex = selectedTabIndexState
-                            )
-                        }
-                    }
-
-                    BasicDataStateUi(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        dataState = lectureDataState,
-                        loadingText = stringResource(id = R.string.lecture_view_lecture_loading),
-                        failureText = stringResource(id = R.string.lecture_view_lecture_loading_failure),
-                        retryButtonText = stringResource(id = R.string.lecture_view_lecture_loading_try_again),
-                        onClickRetry = viewModel::requestReloadLecture
-                    ) { lecture ->
-                        when (selectedTabIndex) {
-                            overviewTabIndex -> {
-                                val lectureUnits by viewModel.lectureUnits.collectAsState(
-                                    initial = emptyList()
-                                )
-
-                                OverviewTab(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 8.dp),
-                                    description = lecture.description,
-                                    lectureUnits = lectureUnits,
-                                    onViewExercise = onViewExercise,
-                                    onMarkAsCompleted = { lectureUnitId, isCompleted ->
-                                        viewModel.updateLectureUnitIsComplete(
-                                            lectureUnitId,
-                                            isCompleted
-                                        ) { isSuccessful ->
-                                            if (!isSuccessful) {
-                                                displaySetCompletedFailureDialog = true
-                                            }
+                            OverviewTab(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp),
+                                description = lecture.description,
+                                lectureUnits = lectureUnits,
+                                onViewExercise = onViewExercise,
+                                onMarkAsCompleted = { lectureUnitId, isCompleted ->
+                                    viewModel.updateLectureUnitIsComplete(
+                                        lectureUnitId,
+                                        isCompleted
+                                    ) { isSuccessful ->
+                                        if (!isSuccessful) {
+                                            displaySetCompletedFailureDialog = true
+                                        }
+                                    }
+                                },
+                                onRequestViewLink = {
+                                    pendingOpenLink = it
+                                },
+                                onRequestOpenAttachment = { attachment ->
+                                    pendingOpenFileAttachment = attachment
+                                },
+                                exerciseActions = BoundExerciseActions(
+                                    onClickStartTextExercise = { exerciseId ->
+                                        viewModel.startExercise(exerciseId) { participationId ->
+                                            onNavigateToTextExerciseParticipation(
+                                                exerciseId,
+                                                participationId
+                                            )
                                         }
                                     },
-                                    onRequestViewLink = {
-                                        pendingOpenLink = it
+                                    onClickOpenQuiz = { exerciseId ->
+                                        onParticipateInQuiz(exerciseId, false)
                                     },
-                                    onRequestOpenAttachment = { attachment ->
-                                        pendingOpenFileAttachment = attachment
-                                    }
-                                )
-                            }
-
-                            qnaTabIndex -> {
-                                SmartphoneMetisUi(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(horizontal = 8.dp),
-                                    metisContext = metisContext,
-                                    navController = navController
-                                )
-                            }
-
-                            attachmentsTabIndex -> {
-                                AttachmentsTab(
-                                    modifier = Modifier.fillMaxSize(),
-                                    attachments = lecture.attachments,
-                                    onClickFileAttachment = { fileAttachment ->
-                                        pendingOpenFileAttachment = fileAttachment
+                                    onClickPracticeQuiz = { exerciseId ->
+                                        onParticipateInQuiz(exerciseId, true)
                                     },
-                                    onClickOpenLinkAttachment = { attachment ->
-                                        pendingOpenFileAttachment = attachment
-                                    }
-                                )
-                            }
+                                    onClickStartQuiz = { exerciseId ->
+                                        onParticipateInQuiz(exerciseId, false)
+                                    },
+                                    onClickOpenTextExercise = onNavigateToTextExerciseParticipation,
+                                    onClickViewResult = onNavigateToExerciseResultView
+                                ),
+                                state = overviewListState
+                            )
+                        }
+
+                        qnaTabIndex -> {
+                            SmartphoneMetisUi(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 8.dp),
+                                metisContext = metisContext,
+                                navController = navController
+                            )
+                        }
+
+                        attachmentsTabIndex -> {
+                            AttachmentsTab(
+                                modifier = Modifier.fillMaxSize(),
+                                attachments = lecture.attachments,
+                                onClickFileAttachment = { fileAttachment ->
+                                    pendingOpenFileAttachment = fileAttachment
+                                },
+                                onClickOpenLinkAttachment = { attachment ->
+                                    pendingOpenFileAttachment = attachment
+                                }
+                            )
                         }
                     }
                 }
             }
+
         }
 
         Scaffold(

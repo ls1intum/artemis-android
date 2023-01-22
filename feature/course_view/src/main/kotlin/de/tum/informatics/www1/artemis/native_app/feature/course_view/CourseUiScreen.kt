@@ -22,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -173,25 +174,27 @@ internal fun CourseUiScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 weeklyExercises = weeklyExercises,
                                 onClickExercise = onNavigateToExercise,
-                                onClickStartTextExercise = { exerciseId ->
-                                    viewModel.startExercise(exerciseId) { participationId ->
-                                        onNavigateToTextExerciseParticipation(
-                                            exerciseId,
-                                            participationId
-                                        )
-                                    }
-                                },
-                                onClickOpenQuiz = { exerciseId ->
-                                    onParticipateInQuiz(exerciseId, false)
-                                },
-                                onClickPracticeQuiz = { exerciseId ->
-                                    onParticipateInQuiz(exerciseId, true)
-                                },
-                                onClickStartQuiz = { exerciseId ->
-                                    onParticipateInQuiz(exerciseId, false)
-                                },
-                                onClickOpenTextExercise = onNavigateToTextExerciseParticipation,
-                                onClickViewResult = onNavigateToExerciseResultView
+                                actions = BoundExerciseActions(
+                                    onClickStartTextExercise = { exerciseId ->
+                                        viewModel.startExercise(exerciseId) { participationId ->
+                                            onNavigateToTextExerciseParticipation(
+                                                exerciseId,
+                                                participationId
+                                            )
+                                        }
+                                    },
+                                    onClickOpenQuiz = { exerciseId ->
+                                        onParticipateInQuiz(exerciseId, false)
+                                    },
+                                    onClickPracticeQuiz = { exerciseId ->
+                                        onParticipateInQuiz(exerciseId, true)
+                                    },
+                                    onClickStartQuiz = { exerciseId ->
+                                        onParticipateInQuiz(exerciseId, false)
+                                    },
+                                    onClickOpenTextExercise = onNavigateToTextExerciseParticipation,
+                                    onClickViewResult = onNavigateToExerciseResultView
+                                )
                             )
                         }
                     }
