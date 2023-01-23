@@ -368,6 +368,7 @@ internal class QuizParticipationViewModel(
         }
 
 
+
     init {
         viewModelScope.launch {
             combine(waitingForQuizStart, quizBatch) { a, b -> a to b }

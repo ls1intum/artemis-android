@@ -13,4 +13,12 @@
     <string name="quiz_result_mc_correct">Correct</string>
     <string name="quiz_result_mc_wrong">Wrong</string>
 
+    <!--  Short answer  -->
+    <string name="quiz_result_sa_show_sample_solution">Show sample solution</string>
+    <string name="quiz_result_sa_hide_sample_solution">Hide sample solution</string>
+
+    <!--  Drag and drop  -->
+    <string name="quiz_result_dnd_show_sample_solution">Show sample solution</string>
+    <string name="quiz_result_dnd_hide_sample_solution">Hide sample solution</string>
+
 </resources>

@@ -4,8 +4,10 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -25,10 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.zIndex
 import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
@@ -39,6 +38,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragA
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion.DropLocation
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.image.loadAsyncImageDrawable
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultMedium
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultSuccess
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionBodyText
@@ -58,6 +59,8 @@ internal fun DragAndDropQuizQuestionUi(
     authToken: String,
     onRequestDisplayHint: () -> Unit,
 ) {
+    var isSampleSolutionDisplayed by rememberSaveable { mutableStateOf(false) }
+
     Column(modifier = modifier) {
         QuizQuestionHeader(
             modifier = Modifier.fillMaxWidth(),
@@ -74,9 +77,7 @@ internal fun DragAndDropQuizQuestionUi(
         var currentDropTarget: DropTarget by remember { mutableStateOf(DropTarget.Nothing) }
 
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             QuizQuestionBodyText(
@@ -142,12 +143,30 @@ internal fun DragAndDropQuizQuestionUi(
                             .buildString()
                     }
 
+                    // Correct mappings as sent from the server. Not relevant for participation mode.
+                    val correctMappings = remember(question.correctMappings) {
+                        question.correctMappings
+                            .orEmpty()
+                            .mapNotNull { correctMapping ->
+                                val dropLocation =
+                                    correctMapping.dropLocation ?: return@mapNotNull null
+                                val dragItem = correctMapping.dragItem ?: return@mapNotNull null
+
+                                dropLocation to dragItem
+                            }
+                            .toMap()
+                    }
+
+                    val dropLocationMapping = if (isSampleSolutionDisplayed) {
+                        correctMappings
+                    } else data.dropLocationMapping
+
                     DragAndDropArea(
                         modifier = Modifier
                             .fillMaxWidth()
                             .zIndex(if (isDraggingFromArea) 20f else 1f),
                         questionId = question.id,
-                        dropLocationMapping = data.dropLocationMapping,
+                        dropLocationMapping = dropLocationMapping,
                         imageUrl = imageUrl,
                         dropLocations = question.dropLocations,
                         serverUrl = serverUrl,
@@ -191,9 +210,25 @@ internal fun DragAndDropQuizQuestionUi(
                                     }
                                 )
                             }
-                            is QuizQuestionData.DragAndDropData.Result -> DragAndDropAreaType.ViewOnly
+                            is QuizQuestionData.DragAndDropData.Result -> DragAndDropAreaType.ViewOnly(
+                                isSampleSolution = isSampleSolutionDisplayed,
+                                correctMappings = correctMappings
+                            )
                         }
                     )
+
+                    if (data is QuizQuestionData.DragAndDropData.Result) {
+                        val buttonText = if (isSampleSolutionDisplayed) {
+                            R.string.quiz_result_dnd_hide_sample_solution
+                        } else R.string.quiz_result_dnd_show_sample_solution
+
+                        OutlinedButton(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            onClick = { isSampleSolutionDisplayed = !isSampleSolutionDisplayed }
+                        ) {
+                            Text(text = stringResource(id = buttonText))
+                        }
+                    }
                 }
             }
         }
@@ -333,7 +368,10 @@ private fun DragItemUiElementContent(
 }
 
 private sealed interface DragAndDropAreaType {
-    object ViewOnly : DragAndDropAreaType
+    data class ViewOnly(
+        val isSampleSolution: Boolean,
+        val correctMappings: Map<DropLocation, DragItem>
+    ) : DragAndDropAreaType
 
     data class Editable(
         val onUpdateIsCurrentDropTarget: (dropLocation: DropLocation, isCurrentDropTarget: Boolean) -> Unit,
@@ -376,10 +414,16 @@ private fun DragAndDropArea(
         retryButtonText = stringResource(id = R.string.quiz_participation_load_dnd_image_retry),
         onClickRetry = resultData.requestRetry
     ) { loadedDrawable ->
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            var composableSize by remember { mutableStateOf(IntSize.Zero) }
+
             val painter = remember { BitmapPainter(loadedDrawable.toBitmap().asImageBitmap()) }
             Image(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned {
+                        composableSize = it.size
+                    },
                 painter = painter,
                 contentDescription = null,
                 contentScale = ContentScale.Fit
@@ -411,11 +455,14 @@ private fun DragAndDropArea(
                     val width = imageWidth * (dropLocation.width ?: 0.0).toFloat() / 2f / 100f
                     val height = imageHeight * (dropLocation.height ?: 0.0).toFloat() / 2f / 100f
 
+                    val composableWidth = composableSize.width.toDp()
+                    val composableHeight = composableSize.height.toDp()
+
                     ImageDropLocation(
                         modifier = Modifier
                             .absoluteOffset(
-                                x = maxWidth / 2 - actImageSize.width.toDp() / 2 + xPos.toDp(),
-                                y = maxHeight / 2 - actImageSize.height.toDp() / 2 + yPos.toDp()
+                                x = composableWidth / 2 - actImageSize.width.toDp() / 2 + xPos.toDp(),
+                                y = composableHeight / 2 - actImageSize.height.toDp() / 2 + yPos.toDp()
                             )
                             .size(
                                 width = width.toDp(),
@@ -438,7 +485,14 @@ private fun DragAndDropArea(
                                     }
                                 )
                             }
-                            DragAndDropAreaType.ViewOnly -> ImageDropLocationType.ViewOnly
+                            is DragAndDropAreaType.ViewOnly -> {
+                                val isCorrect =
+                                    type.correctMappings[dropLocation] == dropLocationMapping[dropLocation]
+                                ImageDropLocationType.ViewOnly(
+                                    isCorrect = isCorrect,
+                                    isDisplayingSampleSolution = type.isSampleSolution
+                                )
+                            }
                         }
                     )
                 }
@@ -457,7 +511,8 @@ private val dropTargetColorDropTarget: Color
     @Composable get() = Color.Green
 
 private sealed interface ImageDropLocationType {
-    object ViewOnly : ImageDropLocationType
+    data class ViewOnly(val isCorrect: Boolean, val isDisplayingSampleSolution: Boolean) :
+        ImageDropLocationType
 
     data class Editable(
         val onUpdateIsCurrentDragTarget: (isCurrentDragTarget: Boolean) -> Unit,
@@ -498,11 +553,32 @@ private fun ImageDropLocation(
         )
     }
 
-    val outlineColor = dragItemOutlineColor
-    val backgroundColor = when {
-        isCurrentDropTarget -> dropTargetColorDropTarget
-        targetInfo is DragTargetInfo.Dragging -> dropTargetColorDragging
-        else -> dropTargetColorNotDragging
+    val outlineColor = when (type) {
+        is ImageDropLocationType.Editable -> dragItemOutlineColor
+        is ImageDropLocationType.ViewOnly -> {
+            if (type.isDisplayingSampleSolution) {
+                dragItemOutlineColor
+            } else {
+                if (type.isCorrect) resultSuccess
+                else resultMedium
+            }
+        }
+    }
+    
+    val backgroundColor: Color = when (type) {
+        is ImageDropLocationType.Editable -> when {
+            isCurrentDropTarget -> dropTargetColorDropTarget
+            targetInfo is DragTargetInfo.Dragging -> dropTargetColorDragging
+            else -> dropTargetColorNotDragging
+        }
+        is ImageDropLocationType.ViewOnly -> {
+            if (type.isDisplayingSampleSolution) {
+                dropTargetColorNotDragging
+            } else {
+                if (type.isCorrect) resultSuccess.copy(alpha = 0.2f)
+                else resultMedium.copy(alpha = 0.2f)
+            }
+        }
     }
 
     val isDraggingDragChild =
@@ -572,7 +648,7 @@ private fun ImageDropLocation(
                         }
                     }
                 }
-                ImageDropLocationType.ViewOnly -> {
+                is ImageDropLocationType.ViewOnly -> {
                     nonDraggedElementContent()
                 }
             }

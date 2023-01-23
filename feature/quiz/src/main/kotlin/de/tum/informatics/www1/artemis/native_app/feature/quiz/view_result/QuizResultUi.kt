@@ -32,7 +32,10 @@ internal fun QuizResultUi(
 
     val selectedQuestionIndex by remember { derivedStateOf { lazyListState.firstVisibleItemIndex } }
 
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         QuizResultHeader(
             modifier = Modifier.fillMaxWidth(),
             quizQuestions = quizQuestions,

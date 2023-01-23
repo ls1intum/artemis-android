@@ -11,12 +11,13 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 
 private val spotRegExpo = "\\[-spot\\s*([0-9]+)]".toRegex()
 
@@ -35,6 +37,8 @@ internal fun ShortAnswerQuizQuestionUi(
     data: QuizQuestionData.ShortAnswerData,
     onRequestDisplayHint: () -> Unit
 ) {
+    var isSampleSolutionDisplayed by remember { mutableStateOf(false) }
+
     val question = data.question
 
     val annotatedString = remember(question.text) {
@@ -46,7 +50,19 @@ internal fun ShortAnswerQuizQuestionUi(
         is QuizQuestionData.ShortAnswerData.Result -> false
     }
 
-    val inlineContentMap = remember(question.spots, data.solutionTexts) {
+    val solutionTexts = if (isSampleSolutionDisplayed) {
+        remember(data.question.correctMappings) {
+            data.question.correctMappings
+                .orEmpty()
+                .mapNotNull { correctMapping ->
+                    val spotNr = correctMapping.spot?.spotNr ?: return@mapNotNull null
+                    spotNr to correctMapping.solution?.text.orEmpty()
+                }
+                .toMap()
+        }
+    } else data.solutionTexts
+
+    val inlineContentMap = remember(question.spots, solutionTexts) {
         question.spots.associate { spot ->
             val spotNr = spot.spotNr ?: 0
             val key = spotNr.toString()
@@ -67,7 +83,7 @@ internal fun ShortAnswerQuizQuestionUi(
                                 color = MaterialTheme.colorScheme.outline
                             )
                             .padding(horizontal = 2.dp),
-                        value = data.solutionTexts[spotNr].orEmpty(),
+                        value = solutionTexts[spotNr].orEmpty(),
                         enabled = areTextFieldsEnabled,
                         onValueChange = { newText ->
                             if (data is QuizQuestionData.ShortAnswerData.Editable) {
@@ -99,6 +115,19 @@ internal fun ShortAnswerQuizQuestionUi(
             text = annotatedString,
             inlineContent = inlineContentMap
         )
+
+        if (data is QuizQuestionData.ShortAnswerData.Result) {
+            val buttonText = if (isSampleSolutionDisplayed) {
+                R.string.quiz_result_sa_hide_sample_solution
+            } else R.string.quiz_result_sa_show_sample_solution
+
+            OutlinedButton(
+                modifier = Modifier.padding(vertical = 8.dp),
+                onClick = { isSampleSolutionDisplayed = !isSampleSolutionDisplayed }
+            ) {
+                Text(text = stringResource(id = buttonText))
+            }
+        }
     }
 }
 

@@ -16,7 +16,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 @Composable
 internal fun QuizEndedScreen(modifier: Modifier, onRequestLeave: () -> Unit) {
     Box(modifier = modifier) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
