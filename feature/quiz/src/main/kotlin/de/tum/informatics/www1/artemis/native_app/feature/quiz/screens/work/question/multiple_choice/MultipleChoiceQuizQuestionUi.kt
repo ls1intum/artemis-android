@@ -10,9 +10,12 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.*
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.ExplanationText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionBodyText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionHeader
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionInstructionText
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.toQuizQuestionHeaderType
 
 @Composable
 internal fun MultipleChoiceQuizQuestionUi(
@@ -27,7 +30,8 @@ internal fun MultipleChoiceQuizQuestionUi(
             modifier = Modifier.fillMaxWidth(),
             questionIndex = questionIndex,
             onRequestDisplayHint = onRequestDisplayHint,
-            question = data.question
+            question = data.question,
+            type = data.toQuizQuestionHeaderType()
         )
 
         QuizQuestionBodyText(
@@ -46,6 +50,14 @@ internal fun MultipleChoiceQuizQuestionUi(
             )
         )
 
+        val questionExplanation = data.question.explanation
+        if (data is QuizQuestionData.MultipleChoiceData.Result && questionExplanation != null) {
+            ExplanationText(
+                modifier = Modifier.fillMaxWidth(),
+                explanation = questionExplanation
+            )
+        }
+
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -56,11 +68,11 @@ internal fun MultipleChoiceQuizQuestionUi(
                 ChoiceItem(
                     modifier = Modifier.fillMaxWidth(),
                     text = option.text.orEmpty(),
-                    hasHint = option.hint != null,
                     isSelected = isCurrentlySelected,
                     isSingleChoice = data.question.singleChoice,
                     type = when (data) {
                         is QuizQuestionData.MultipleChoiceData.Editable -> ChoiceItemType.Editable(
+                            hasHelp = option.hint != null,
                             onRequestSelect = { isSelected ->
                                 data.onRequestChangeAnswerOptionSelectionState(
                                     option.id,
@@ -68,7 +80,11 @@ internal fun MultipleChoiceQuizQuestionUi(
                                 )
                             }
                         )
-                        is QuizQuestionData.MultipleChoiceData.Result -> ChoiceItemType.ViewResult
+                        is QuizQuestionData.MultipleChoiceData.Result -> ChoiceItemType.ViewResult(
+                            explanation = option.explanation,
+                            help = option.hint,
+                            isCorrectChoice = option.isCorrect
+                        )
                     },
                     onRequestDisplayHint = { onRequestDisplayAnswerOptionHint(option) }
                 )

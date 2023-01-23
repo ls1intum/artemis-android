@@ -5,8 +5,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQ
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@SerialName("drag-and-drop")
 @Serializable
+@SerialName("drag-and-drop")
 class DragAndDropSubmittedAnswer(
     override val id: Long? = null,
     override val scoreInPoints: Double? = null,
@@ -19,7 +19,7 @@ class DragAndDropSubmittedAnswer(
         val dragItemIndex: Long? = null,
         val dropLocationIndex: Long? = null,
         val invalid: Boolean = false,
-        val dragItem: DragAndDropQuizQuestion.DragItem?,
-        val dropLocation: DragAndDropQuizQuestion.DropLocation?
+        val dragItem: DragAndDropQuizQuestion.DragItem? = null,
+        val dropLocation: DragAndDropQuizQuestion.DropLocation? = null
     )
 }

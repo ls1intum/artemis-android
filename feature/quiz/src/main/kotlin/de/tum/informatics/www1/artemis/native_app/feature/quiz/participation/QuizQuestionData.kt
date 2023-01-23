@@ -6,6 +6,13 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQ
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.ShortAnswerQuizQuestion
 
 sealed class QuizQuestionData<T : QuizQuestion>(val question: T) {
+
+    sealed interface EditableData
+
+    sealed interface ResultData {
+        val achievedPoints: Double
+    }
+
     sealed class ShortAnswerData(
         question: ShortAnswerQuizQuestion,
         val solutionTexts: Map<Int, String>,
@@ -14,13 +21,13 @@ sealed class QuizQuestionData<T : QuizQuestion>(val question: T) {
             question: ShortAnswerQuizQuestion,
             solutionTexts: Map<Int, String>,
             val onUpdateSolutionText: (spotId: Int, newSolutionText: String) -> Unit
-        ) : ShortAnswerData(question, solutionTexts)
+        ) : ShortAnswerData(question, solutionTexts), EditableData
 
         class Result(
             question: ShortAnswerQuizQuestion,
             solutionTexts: Map<Int, String>,
-            val score: Double
-        ) : ShortAnswerData(question, solutionTexts)
+            override val achievedPoints: Double
+        ) : ShortAnswerData(question, solutionTexts), ResultData
     }
 
     sealed class MultipleChoiceData(
@@ -31,13 +38,13 @@ sealed class QuizQuestionData<T : QuizQuestion>(val question: T) {
             question: MultipleChoiceQuizQuestion,
             optionSelectionMapping: Map<Long, Boolean>,
             val onRequestChangeAnswerOptionSelectionState: (Long, Boolean) -> Unit
-        ) : MultipleChoiceData(question, optionSelectionMapping)
+        ) : MultipleChoiceData(question, optionSelectionMapping), EditableData
 
         class Result(
             question: MultipleChoiceQuizQuestion,
             optionSelectionMapping: Map<Long, Boolean>,
-            val score: Double
-        ) : MultipleChoiceData(question, optionSelectionMapping)
+            override val achievedPoints: Double
+        ) : MultipleChoiceData(question, optionSelectionMapping), ResultData
     }
 
     /**
@@ -58,15 +65,15 @@ sealed class QuizQuestionData<T : QuizQuestion>(val question: T) {
             val onClearDropLocation: (dropId: Long) -> Unit
         ) : DragAndDropData(
             question, availableDragItems, dropLocationMapping
-        )
+        ), EditableData
 
         class Result(
             question: DragAndDropQuizQuestion,
             availableDragItems: List<DragAndDropQuizQuestion.DragItem>,
             dropLocationMapping: Map<DragAndDropQuizQuestion.DropLocation, DragAndDropQuizQuestion.DragItem>,
-            val score: Double
+            override val achievedPoints: Double
         ) : DragAndDropData(
             question, availableDragItems, dropLocationMapping
-        )
+        ), ResultData
     }
 }

@@ -90,7 +90,8 @@ internal fun ShortAnswerQuizQuestionUi(
             modifier = Modifier.fillMaxWidth(),
             questionIndex = questionIndex,
             onRequestDisplayHint = onRequestDisplayHint,
-            question = question
+            question = question,
+            type = data.toQuizQuestionHeaderType()
         )
 
         Text(

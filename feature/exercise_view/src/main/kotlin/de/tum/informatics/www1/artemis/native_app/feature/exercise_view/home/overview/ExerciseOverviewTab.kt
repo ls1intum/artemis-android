@@ -19,7 +19,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActio
 @Composable
 internal fun ExerciseOverviewTab(
     modifier: Modifier,
-    authToken: String,
     exercise: Exercise,
     webViewState: WebViewState?,
     setWebView: (WebView) -> Unit,

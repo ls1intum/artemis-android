@@ -115,7 +115,7 @@ fun ExerciseActionButtons(
         if (templateStatus is ResultTemplateStatus.WithResult) {
             Button(
                 modifier = modifier,
-                onClick = actions.onClickViewResult
+                onClick = if (exercise is QuizExercise) actions.onClickViewQuizResults else actions.onClickViewResult
             ) {
                 Text(text = stringResource(id = R.string.exercise_actions_view_result_button))
             }

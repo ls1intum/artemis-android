@@ -30,7 +30,7 @@ private const val MIN_SCORE_ORANGE = 40
 val resultSuccess: Color
     get() = Color(0xFF4CAF50)
 val resultMedium: Color
-    get() = Color.Yellow
+    get() = Color(0xFFB18502)
 val resultBad: Color
     get() = Color.Red
 

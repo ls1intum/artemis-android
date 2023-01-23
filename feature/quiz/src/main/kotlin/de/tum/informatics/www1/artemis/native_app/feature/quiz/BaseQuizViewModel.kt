@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.quiz
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
@@ -23,7 +24,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerc
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-internal abstract class BaseQuizViewModel<ShortAnswerStorageDataT : ShortAnswerStorageData,
+internal abstract class BaseQuizViewModel<
+        ShortAnswerStorageDataT : ShortAnswerStorageData,
         DragAndDropStorageDataT : DragAndDropStorageData,
         MultipleChoiceStorageDataT : MultipleChoiceStorageData>(
     private val exerciseId: Long,
@@ -43,20 +45,18 @@ internal abstract class BaseQuizViewModel<ShortAnswerStorageDataT : ShortAnswerS
     protected val initialParticipationDataState: StateFlow<DataState<Participation>> =
         when (quizType) {
             QuizType.Live, QuizType.ViewResults ->
-                transformLatest(
+                flatMapLatest(
                     serverConfigurationService.serverUrl,
                     accountService.authToken,
                     retryLoadExercise.onStart { emit(Unit) }
                 ) { serverUrl, authToken, _ ->
-                    emitAll(
-                        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                            participationService.findParticipation(
-                                exerciseId,
-                                serverUrl,
-                                authToken
-                            )
-                        }
-                    )
+                    retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                        participationService.findParticipation(
+                            exerciseId,
+                            serverUrl,
+                            authToken
+                        )
+                    }
                 }
 
             QuizType.Practice, is QuizType.PracticeResults -> emptyFlow()
@@ -157,7 +157,7 @@ internal abstract class BaseQuizViewModel<ShortAnswerStorageDataT : ShortAnswerS
             }
         )
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .stateIn(viewModelScope, SharingStarted.Lazily)
 
     fun retryLoadExercise() {
         viewModelScope.launch {

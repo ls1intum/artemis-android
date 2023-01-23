@@ -58,12 +58,11 @@ internal fun ExerciseScreenBody(
                     movableContentOf { modifier: Modifier ->
                         ExerciseOverviewTab(
                             modifier = modifier,
-                            authToken = authToken,
                             exercise = exercise,
-                            actions = actions,
                             webViewState = webViewState,
                             setWebView = setWebView,
-                            webView = webView
+                            webView = webView,
+                            actions = actions
                         )
                     }
                 }

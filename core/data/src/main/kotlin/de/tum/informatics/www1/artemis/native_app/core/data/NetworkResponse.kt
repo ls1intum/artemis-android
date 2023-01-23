@@ -42,6 +42,7 @@ suspend inline fun <T> performNetworkCall(
         throw e
     } catch (e: Exception) {
         Log.d(TAG, "performNetworkCall threw", e)
+        e.printStackTrace()
         NetworkResponse.Failure(e)
     }
 }

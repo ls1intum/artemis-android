@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -84,6 +85,9 @@ internal fun ViewQuizResultScreen(
     val quizQuestions by viewModel.quizQuestionsWithData.collectAsState()
     val maxPoints by viewModel.maxPoints.collectAsState()
 
+    val serverUrl by viewModel.serverUrl.collectAsState()
+    val authToken by viewModel.authToken.collectAsState()
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -122,9 +126,19 @@ internal fun ViewQuizResultScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 QuizScoreResultOverview(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
                     achievedPoints = data.submission.scoreInPoints ?: 0.0,
                     maxPoints = data.maxPoints
+                )
+
+                QuizResultUi(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    quizQuestions = data.quizExercise.quizQuestions,
+                    quizQuestionsWithData = data.quizQuestions,
+                    serverUrl = serverUrl,
+                    authToken = authToken
                 )
             }
         }

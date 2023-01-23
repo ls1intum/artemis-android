@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="quiz_result_score_result">You completed the quit with %1$s out of %2$s points (%3$s).</string>
+    <string name="quiz_result_score_result">You completed the quiz with %1$s out of %2$s points (%3$s).</string>
 
     <string name="quiz_result_loading">Loading quiz results…</string>
     <string name="quiz_result_failure">Something went wrong while loading the quiz results.</string>
     <string name="quiz_result_try_again">Try again</string>
+
+    <!--  Header  -->
+    <string name="quiz_result_question_header_points">Your score: %1$s/%2$s</string>
+
+    <!--  Multiple choice  -->
+    <string name="quiz_result_mc_correct">Correct</string>
+    <string name="quiz_result_mc_wrong">Wrong</string>
+
 </resources>

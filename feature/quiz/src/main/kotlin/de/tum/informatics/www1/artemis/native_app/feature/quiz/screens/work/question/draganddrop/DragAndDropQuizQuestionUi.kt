@@ -44,6 +44,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.Qui
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionBodyText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionHeader
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionInstructionText
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.toQuizQuestionHeaderType
 import io.ktor.http.*
 
 
@@ -62,7 +63,8 @@ internal fun DragAndDropQuizQuestionUi(
             modifier = Modifier.fillMaxWidth(),
             questionIndex = questionIndex,
             onRequestDisplayHint = onRequestDisplayHint,
-            question = question
+            question = question,
+            type = data.toQuizQuestionHeaderType()
         )
 
         val currentDragTargetInfo = remember { DragInfo() }
@@ -134,13 +136,19 @@ internal fun DragAndDropQuizQuestionUi(
                         }
                     )
 
+                    val imageUrl = remember(serverUrl, backgroundFilePath) {
+                        URLBuilder(serverUrl)
+                            .appendPathSegments(backgroundFilePath)
+                            .buildString()
+                    }
+
                     DragAndDropArea(
                         modifier = Modifier
                             .fillMaxWidth()
                             .zIndex(if (isDraggingFromArea) 20f else 1f),
                         questionId = question.id,
                         dropLocationMapping = data.dropLocationMapping,
-                        imageUrl = serverUrl + backgroundFilePath,
+                        imageUrl = imageUrl,
                         dropLocations = question.dropLocations,
                         serverUrl = serverUrl,
                         authToken = authToken,
@@ -354,7 +362,7 @@ private fun DragAndDropArea(
         ImageRequest.Builder(context)
             .data(imageUrl)
             .memoryCacheKey("QQ_$questionId")
-            .addHeader(HttpHeaders.Authorization, "Bearer $authToken")
+            .addHeader(HttpHeaders.Cookie, "jwt=$authToken")
             .build()
     }
 
