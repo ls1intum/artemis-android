@@ -36,6 +36,7 @@ fun NavGraphBuilder.course(
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
+    onViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -55,7 +56,14 @@ fun NavGraphBuilder.course(
             navController = navController,
             onNavigateToLecture = { lectureId -> onNavigateToLecture(courseId, lectureId) },
             onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
-            onParticipateInQuiz = { exerciseId, isPractice -> onParticipateInQuiz(courseId, exerciseId, isPractice) },
+            onParticipateInQuiz = { exerciseId, isPractice ->
+                onParticipateInQuiz(
+                    courseId,
+                    exerciseId,
+                    isPractice
+                )
+            },
+            onClickViewQuizResults = onViewQuizResults,
             onNavigateToExerciseResultView = onNavigateToExerciseResultView
         )
     }
@@ -71,6 +79,7 @@ internal fun CourseUiScreen(
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
+    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onNavigateToLecture: (lectureId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -193,7 +202,13 @@ internal fun CourseUiScreen(
                                         onParticipateInQuiz(exerciseId, false)
                                     },
                                     onClickOpenTextExercise = onNavigateToTextExerciseParticipation,
-                                    onClickViewResult = onNavigateToExerciseResultView
+                                    onClickViewResult = onNavigateToExerciseResultView,
+                                    onClickViewQuizResults = { exerciseId ->
+                                        onClickViewQuizResults(
+                                            courseId,
+                                            exerciseId
+                                        )
+                                    }
                                 )
                             )
                         }

@@ -31,7 +31,7 @@ import kotlinx.datetime.Instant
 @Composable
 internal fun WorkOnQuizQuestionsScreen(
     modifier: Modifier,
-    quizType: QuizType,
+    quizType: QuizType.WorkableQuizType,
     questionsWithData: List<QuizQuestionData<*>>,
     lastSubmissionTime: Instant?,
     endDate: Instant?,
@@ -112,37 +112,27 @@ private fun WorkOnQuizBody(
             modifier = modifier,
             questionIndex = questionIndex,
             question = quizQuestionData.question,
-            availableDragItems = quizQuestionData.availableDragItems,
+            data = quizQuestionData,
             serverUrl = serverUrl,
             authToken = authToken,
-            dropLocationMapping = quizQuestionData.dropLocationMapping,
-            onDragItemIntoDropLocation = quizQuestionData.onDragItemIntoDropLocation,
-            onClearDropLocation = quizQuestionData.onClearDropLocation,
-            onSwapDropLocations = quizQuestionData.onSwapDropLocations,
             onRequestDisplayHint = onRequestDisplayHint
         )
 
         is QuizQuestionData.MultipleChoiceData -> MultipleChoiceQuizQuestionUi(
             modifier = modifier,
             questionIndex = questionIndex,
-            question = quizQuestionData.question,
-            optionSelectionMapping = quizQuestionData.optionSelectionMapping,
             onRequestDisplayHint = onRequestDisplayHint,
-            onRequestChangeAnswerOptionSelectionState = { option, isSelected ->
-                quizQuestionData.onRequestChangeAnswerOptionSelectionState(option.id, isSelected)
-            },
             onRequestDisplayAnswerOptionHint = { option ->
                 displayAnswerOptionHint = option.hint.orEmpty()
-            }
+            },
+            data = quizQuestionData
         )
 
         is QuizQuestionData.ShortAnswerData -> ShortAnswerQuizQuestionUi(
             modifier = modifier,
             questionIndex = questionIndex,
-            question = quizQuestionData.question,
+            data = quizQuestionData,
             onRequestDisplayHint = onRequestDisplayHint,
-            solutionTexts = quizQuestionData.solutionTexts,
-            onUpdateSolutionText = quizQuestionData.onUpdateSolutionText
         )
     }
 

@@ -9,40 +9,36 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionBodyText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionHeader
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionInstructionText
 
-/**
- * @param optionSelectionMapping map the option id to its selection state. Default selection state is false
- */
 @Composable
 internal fun MultipleChoiceQuizQuestionUi(
     modifier: Modifier,
     questionIndex: Int,
-    question: MultipleChoiceQuizQuestion,
-    optionSelectionMapping: Map<Long, Boolean>,
     onRequestDisplayHint: () -> Unit,
     onRequestDisplayAnswerOptionHint: (MultipleChoiceQuizQuestion.AnswerOption) -> Unit,
-    onRequestChangeAnswerOptionSelectionState: (MultipleChoiceQuizQuestion.AnswerOption, isSelected: Boolean) -> Unit
+    data: QuizQuestionData.MultipleChoiceData
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         QuizQuestionHeader(
             modifier = Modifier.fillMaxWidth(),
             questionIndex = questionIndex,
             onRequestDisplayHint = onRequestDisplayHint,
-            question = question
+            question = data.question
         )
 
         QuizQuestionBodyText(
             modifier = Modifier.fillMaxWidth(),
-            question = question
+            question = data.question
         )
 
         QuizQuestionInstructionText(
             modifier = Modifier.fillMaxWidth(),
             instructionText = stringResource(
-                id = if (question.singleChoice) {
+                id = if (data.question.singleChoice) {
                     R.string.quiz_participation_single_choice_instruction
                 } else {
                     R.string.quiz_participation_multiple_choice_instruction
@@ -54,19 +50,27 @@ internal fun MultipleChoiceQuizQuestionUi(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            question.answerOptions.forEach { option ->
-                val isCurrentlySelected = optionSelectionMapping[option.id] ?: false
+            data.question.answerOptions.forEach { option ->
+                val isCurrentlySelected = data.optionSelectionMapping[option.id] ?: false
 
                 ChoiceItem(
                     modifier = Modifier.fillMaxWidth(),
                     text = option.text.orEmpty(),
                     hasHint = option.hint != null,
                     isSelected = isCurrentlySelected,
-                    isSingleChoice = question.singleChoice,
-                    onRequestDisplayHint = { onRequestDisplayAnswerOptionHint(option) },
-                    onRequestSelect = { isSelected ->
-                        onRequestChangeAnswerOptionSelectionState(option, isSelected)
-                    }
+                    isSingleChoice = data.question.singleChoice,
+                    type = when (data) {
+                        is QuizQuestionData.MultipleChoiceData.Editable -> ChoiceItemType.Editable(
+                            onRequestSelect = { isSelected ->
+                                data.onRequestChangeAnswerOptionSelectionState(
+                                    option.id,
+                                    isSelected
+                                )
+                            }
+                        )
+                        is QuizQuestionData.MultipleChoiceData.Result -> ChoiceItemType.ViewResult
+                    },
+                    onRequestDisplayHint = { onRequestDisplayAnswerOptionHint(option) }
                 )
             }
         }

@@ -24,7 +24,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.ShortAnswerQuizQuestion
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 
 private val spotRegExpo = "\\[-spot\\s*([0-9]+)]".toRegex()
 
@@ -32,16 +32,21 @@ private val spotRegExpo = "\\[-spot\\s*([0-9]+)]".toRegex()
 internal fun ShortAnswerQuizQuestionUi(
     modifier: Modifier,
     questionIndex: Int,
-    question: ShortAnswerQuizQuestion,
-    solutionTexts: Map<Int, String>,
-    onUpdateSolutionText: (spotId: Int, newSolutionText: String) -> Unit,
+    data: QuizQuestionData.ShortAnswerData,
     onRequestDisplayHint: () -> Unit
 ) {
+    val question = data.question
+
     val annotatedString = remember(question.text) {
         shortAnswerBuildAnnotatedString(question.text.orEmpty())
     }
 
-    val inlineContentMap = remember(question.spots, solutionTexts) {
+    val areTextFieldsEnabled = when (data) {
+        is QuizQuestionData.ShortAnswerData.Editable -> true
+        is QuizQuestionData.ShortAnswerData.Result -> false
+    }
+
+    val inlineContentMap = remember(question.spots, data.solutionTexts) {
         question.spots.associate { spot ->
             val spotNr = spot.spotNr ?: 0
             val key = spotNr.toString()
@@ -52,7 +57,7 @@ internal fun ShortAnswerQuizQuestionUi(
                     PlaceholderVerticalAlign.Center
                 ),
                 children = {
-                    val textColor = if(isSystemInDarkTheme()) Color.White else Color.Black
+                    val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
 
                     BasicTextField(
                         modifier = Modifier
@@ -62,9 +67,12 @@ internal fun ShortAnswerQuizQuestionUi(
                                 color = MaterialTheme.colorScheme.outline
                             )
                             .padding(horizontal = 2.dp),
-                        value = solutionTexts[spotNr].orEmpty(),
+                        value = data.solutionTexts[spotNr].orEmpty(),
+                        enabled = areTextFieldsEnabled,
                         onValueChange = { newText ->
-                            onUpdateSolutionText(spotNr, newText)
+                            if (data is QuizQuestionData.ShortAnswerData.Editable) {
+                                data.onUpdateSolutionText(spotNr, newText)
+                            }
                         },
                         maxLines = 1,
                         textStyle = LocalTextStyle.current.copy(color = textColor),

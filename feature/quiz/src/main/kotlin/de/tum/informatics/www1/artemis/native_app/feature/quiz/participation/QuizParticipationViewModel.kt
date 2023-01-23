@@ -148,7 +148,7 @@ internal class QuizParticipationViewModel(
         )
 
     private val answeredQuestionCount: Flow<Int> = combine(
-        quizQuestions,
+        quizQuestionsRandomOrder,
         shortAnswerData,
         dragAndDropData,
         multipleChoiceData,
@@ -156,7 +156,7 @@ internal class QuizParticipationViewModel(
     )
 
     val haveAllQuestionsBeenAnswered: Flow<Boolean> =
-        combine(answeredQuestionCount, quizQuestions) { answeredQuestionCount, quizQuestions ->
+        combine(answeredQuestionCount, quizQuestionsRandomOrder) { answeredQuestionCount, quizQuestions ->
             answeredQuestionCount == quizQuestions.size
         }
 
@@ -297,7 +297,7 @@ internal class QuizParticipationViewModel(
             }
             .map { (dragAndDropData, multipleChoiceData, shortAnswerData) ->
                 val submission = buildAndUploadSubmission(
-                    questions = quizQuestions.first(),
+                    questions = quizQuestionsRandomOrder.first(),
                     isFinalSubmission = false,
                     dragAndDropData = dragAndDropData,
                     multipleChoiceData = multipleChoiceData,
@@ -430,7 +430,7 @@ internal class QuizParticipationViewModel(
             retryLoadExercise.tryEmit(Unit)
             delay(1.seconds)
 
-            val questions = quizQuestions.first()
+            val questions = quizQuestionsRandomOrder.first()
             val hasEnded = quizEndedStatus.first()
             if (questions.isNotEmpty() || hasEnded) return
         }
@@ -439,7 +439,7 @@ internal class QuizParticipationViewModel(
     fun submit(onResponse: (successful: Boolean) -> Unit): Job {
         return viewModelScope.launch {
             val submission = buildAndUploadSubmission(
-                questions = quizQuestions.first(),
+                questions = quizQuestionsRandomOrder.first(),
                 isFinalSubmission = true,
                 shortAnswerData = shortAnswerData.first(),
                 dragAndDropData = dragAndDropData.first(),
@@ -685,12 +685,52 @@ internal class QuizParticipationViewModel(
         )
     }
 
-    override fun constructMultipleChoiceData(): QuizQuestionData.MultipleChoiceData {
-        TODO("Not yet implemented")
+    override fun constructMultipleChoiceData(
+        questionId: Long,
+        question: MultipleChoiceQuizQuestion,
+        storageData: DirectMultipleChoiceStorageData?,
+        multipleChoiceData: Map<Long, DirectMultipleChoiceStorageData>,
+        optionSelectionMapping: Map<AnswerOptionId, Boolean>
+    ): QuizQuestionData.MultipleChoiceData {
+        return QuizQuestionData.MultipleChoiceData.Editable(
+            question = question,
+            optionSelectionMapping = optionSelectionMapping,
+            onRequestChangeAnswerOptionSelectionState = { optionId, isSelected ->
+                // if the mode is single choice, only one option can be selected at a time
+                val newOptionSelectionMapping =
+                    if (question.singleChoice) mutableMapOf()
+                    else optionSelectionMapping.toMutableMap()
+
+                newOptionSelectionMapping[optionId] = isSelected
+
+                val newMultipleChoiceData = multipleChoiceData.toMutableMap()
+                newMultipleChoiceData[questionId] = DirectMultipleChoiceStorageData(newOptionSelectionMapping)
+
+                savedStateHandle[TAG_MULTIPLE_CHOICE_DATA] = newMultipleChoiceData
+            }
+        )
     }
 
-    override fun constructShortAnswerData(): QuizQuestionData.ShortAnswerData {
-        TODO("Not yet implemented")
+    override fun constructShortAnswerData(
+        questionId: Long,
+        question: ShortAnswerQuizQuestion,
+        storageData: DirectShortAnswerStorageData?,
+        shortAnswerData: Map<Long, DirectShortAnswerStorageData>,
+        solutionTexts: Map<Int, String>
+    ): QuizQuestionData.ShortAnswerData {
+        return QuizQuestionData.ShortAnswerData.Editable(
+            question = question,
+            solutionTexts = solutionTexts,
+            onUpdateSolutionText = { spotId, newSolutionText ->
+                val newSolutionTexts = solutionTexts.toMutableMap()
+                newSolutionTexts[spotId] = newSolutionText
+
+                val newShortAnswerStorageData = shortAnswerData.toMutableMap()
+                newShortAnswerStorageData[questionId] = DirectShortAnswerStorageData(newSolutionTexts)
+
+                savedStateHandle[TAG_SHORT_ANSWER_DATA] = newShortAnswerStorageData
+            }
+        )
     }
 
     /**

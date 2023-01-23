@@ -60,7 +60,8 @@ fun NavController.navigateToExercise(
 fun NavGraphBuilder.exercise(
     navController: NavController,
     onNavigateBack: () -> Unit,
-    onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit
+    onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
+    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit
 ) {
     composable(
         route = ExerciseViewDestination.EXERCISE_VIEW_ROUTE,
@@ -125,6 +126,9 @@ fun NavGraphBuilder.exercise(
                     },
                     onParticipateInQuiz = { courseId, isPractice ->
                         onParticipateInQuiz(courseId, exerciseId, isPractice)
+                    },
+                    onClickViewQuizResults = { courseId ->
+                        onClickViewQuizResults(courseId, exerciseId)
                     }
                 )
             }

@@ -1,9 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz
 
+import android.provider.ContactsContract.Data
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ParticipationService
@@ -17,7 +19,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragA
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.ShortAnswerQuizQuestion
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
 import kotlinx.coroutines.flow.*
@@ -103,7 +104,18 @@ internal abstract class BaseQuizViewModel<ShortAnswerStorageDataT : ShortAnswerS
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
-    protected val quizQuestions: Flow<List<QuizQuestion>> = quizExerciseDataState
+    /**
+     * The maximum of points achievable
+     */
+    val maxPoints: StateFlow<DataState<Int>> = quizExerciseDataState
+        .map { quizExerciseDataState ->
+            quizExerciseDataState.bind { quizExercise ->
+                quizExercise.quizQuestions.sumOf { it.points ?: 0 }
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Eagerly)
+
+    protected val quizQuestionsRandomOrder: Flow<List<QuizQuestion>> = quizExerciseDataState
         .filterSuccess()
         .map { quizExercise ->
             if (quizExercise.randomizeQuestionOrder == true) {
@@ -126,18 +138,27 @@ internal abstract class BaseQuizViewModel<ShortAnswerStorageDataT : ShortAnswerS
     /*
      * Construct the question data from the questions and the flows (which are itself coming from the saved state handle)
      */
-    val quizQuestionsWithData: Flow<List<QuizQuestionData<*>>> = flow {
+    val quizQuestionsWithData: StateFlow<DataState<List<QuizQuestionData<*>>>> = flow {
         // Wrap in flow to avoid compiler warning as properties are abstract
         emitAll(
             combine(
-                quizQuestions,
+                quizExerciseDataState.map { quizExercise -> quizExercise.bind { it.quizQuestions } },
                 shortAnswerData,
                 dragAndDropData,
-                multipleChoiceData,
-                ::constructQuizQuestionData
-            )
+                multipleChoiceData
+            ) { questionDataState, shortAnswerData, dragAndDropData, multipleChoiceData ->
+                questionDataState.bind { questions ->
+                    constructQuizQuestionData(
+                        questions = questions,
+                        shortAnswerData = shortAnswerData,
+                        dragAndDropAnswerData = dragAndDropData,
+                        multipleChoiceData = multipleChoiceData
+                    )
+                }
+            }
         )
     }
+        .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     fun retryLoadExercise() {
         viewModelScope.launch {
@@ -152,7 +173,7 @@ internal abstract class BaseQuizViewModel<ShortAnswerStorageDataT : ShortAnswerS
         multipleChoiceData: Map<Long, MultipleChoiceStorageDataT>
     ): List<QuizQuestionData<*>> {
         return questions.map { question ->
-            val questionId = question.id ?: 0
+            val questionId = question.id
 
             when (question) {
                 is DragAndDropQuizQuestion -> {
@@ -187,50 +208,29 @@ internal abstract class BaseQuizViewModel<ShortAnswerStorageDataT : ShortAnswerS
 
                 is MultipleChoiceQuizQuestion -> {
                     val storageData: MultipleChoiceStorageDataT? = multipleChoiceData[questionId]
-                    val optionSelectionMapping = multipleChoiceData[questionId]?.value.orEmpty()
+                    val optionSelectionMapping: Map<AnswerOptionId, Boolean> =
+                        storageData?.value.orEmpty()
 
-                    constructMultipleChoiceData()
-
-//                    QuizQuestionData.MultipleChoiceData(
-//                        question = question,
-//                        optionSelectionMapping = optionSelectionMapping,
-//                        onRequestChangeAnswerOptionSelectionState = { optionId, isSelected ->
-//                            // if the mode is single choice, only one option can be selected at a time
-//                            val newOptionSelectionMapping =
-//                                if (question.singleChoice) mutableMapOf()
-//                                else optionSelectionMapping.toMutableMap()
-//
-//                            newOptionSelectionMapping[optionId] = isSelected
-//
-//                            val newMultipleChoiceData = multipleChoiceData.toMutableMap()
-//                            newMultipleChoiceData[questionId] = newOptionSelectionMapping
-//
-//                            savedStateHandle[QuizParticipationViewModel.TAG_MULTIPLE_CHOICE_DATA] =
-//                                newMultipleChoiceData
-//                        }
-//                    )
+                    constructMultipleChoiceData(
+                        questionId = questionId,
+                        question = question,
+                        storageData = storageData,
+                        multipleChoiceData = multipleChoiceData,
+                        optionSelectionMapping = optionSelectionMapping
+                    )
                 }
 
                 is ShortAnswerQuizQuestion -> {
                     val storageData: ShortAnswerStorageDataT? = shortAnswerData[questionId]
                     val solutionTexts: Map<Int, String> = storageData?.value.orEmpty()
 
-                    constructShortAnswerData()
-
-//                    QuizQuestionData.ShortAnswerData(
-//                        question = question,
-//                        solutionTexts = solutionTexts,
-//                        onUpdateSolutionText = { spotId, newSolutionText ->
-//                            val newSolutionTexts = solutionTexts.toMutableMap()
-//                            newSolutionTexts[spotId] = newSolutionText
-//
-//                            val newShortAnswerStorageData = shortAnswerData.toMutableMap()
-//                            newShortAnswerStorageData[questionId] = newSolutionTexts
-//
-//                            savedStateHandle[QuizParticipationViewModel.TAG_SHORT_ANSWER_DATA] =
-//                                newShortAnswerStorageData
-//                        }
-//                    )
+                    constructShortAnswerData(
+                        questionId = questionId,
+                        question = question,
+                        storageData = storageData,
+                        shortAnswerData = shortAnswerData,
+                        solutionTexts = solutionTexts
+                    )
                 }
             }
         }
@@ -244,7 +244,19 @@ internal abstract class BaseQuizViewModel<ShortAnswerStorageDataT : ShortAnswerS
         dropLocationMapping: Map<DragAndDropQuizQuestion.DropLocation, DragAndDropQuizQuestion.DragItem>
     ): QuizQuestionData.DragAndDropData
 
-    abstract fun constructMultipleChoiceData(): QuizQuestionData.MultipleChoiceData
+    abstract fun constructMultipleChoiceData(
+        questionId: Long,
+        question: MultipleChoiceQuizQuestion,
+        storageData: MultipleChoiceStorageDataT?,
+        multipleChoiceData: Map<Long, MultipleChoiceStorageDataT>,
+        optionSelectionMapping: Map<AnswerOptionId, Boolean>
+    ): QuizQuestionData.MultipleChoiceData
 
-    abstract fun constructShortAnswerData(): QuizQuestionData.ShortAnswerData
+    abstract fun constructShortAnswerData(
+        questionId: Long,
+        question: ShortAnswerQuizQuestion,
+        storageData: ShortAnswerStorageDataT?,
+        shortAnswerData: Map<Long, ShortAnswerStorageDataT>,
+        solutionTexts: Map<Int, String>
+    ): QuizQuestionData.ShortAnswerData
 }

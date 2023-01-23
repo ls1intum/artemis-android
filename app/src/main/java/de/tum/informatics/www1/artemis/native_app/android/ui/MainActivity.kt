@@ -44,6 +44,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.navigateToQuizParticipation
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.quizParticipation
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.navigateToQuizResult
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.quizResults
 import de.tum.informatics.www1.artemis.native_app.feature.settings.navigateToSettings
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsScreen
 import kotlinx.coroutines.flow.first
@@ -133,8 +135,12 @@ class MainActivity : AppCompatActivity() {
                     navController.navigateToQuizParticipation(
                         courseId,
                         exerciseId,
-                        if (isPractice) QuizType.PRACTICE else QuizType.LIVE
+                        if (isPractice) QuizType.Practice else QuizType.Live
                     )
+                }
+
+                val onClickViewQuizResults = { courseId: Long, exerciseId: Long ->
+                    navController.navigateToQuizResult(courseId, exerciseId)
                 }
 
                 CompositionLocalProvider(LocalWindowSizeClassProvider provides windowSizeClassProvider) {
@@ -184,13 +190,15 @@ class MainActivity : AppCompatActivity() {
                                 ) { }
                             },
                             onNavigateBack = navController::navigateUp,
-                            navController = navController
+                            navController = navController,
+                            onViewQuizResults = onClickViewQuizResults
                         )
 
                         exercise(
                             navController = navController,
                             onNavigateBack = navController::navigateUp,
-                            onParticipateInQuiz = onParticipateInQuiz
+                            onParticipateInQuiz = onParticipateInQuiz,
+                            onClickViewQuizResults = onClickViewQuizResults
                         )
 
                         lecture(
@@ -205,7 +213,8 @@ class MainActivity : AppCompatActivity() {
                             },
                             onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
                             onNavigateToExerciseResultView = onNavigateToExerciseResultView,
-                            onParticipateInQuiz = onParticipateInQuiz
+                            onParticipateInQuiz = onParticipateInQuiz,
+                            onClickViewQuizResults = onClickViewQuizResults
                         )
 
                         standalonePostScreen(
@@ -228,13 +237,15 @@ class MainActivity : AppCompatActivity() {
                             onLeaveQuiz = {
                                 val previousBackStackEntry = navController.previousBackStackEntry
                                 if (previousBackStackEntry?.destination?.route == ExerciseViewDestination.EXERCISE_VIEW_ROUTE) {
-                                    previousBackStackEntry.savedStateHandle.set(
-                                        ExerciseViewDestination.REQUIRE_RELOAD_KEY,
+                                    previousBackStackEntry.savedStateHandle[ExerciseViewDestination.REQUIRE_RELOAD_KEY] =
                                         true
-                                    )
                                 }
                                 navController.navigateUp()
                             }
+                        )
+
+                        quizResults(
+                            onRequestLeaveQuizResults = navController::navigateUp
                         )
 
                         settingsScreen(

@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class QuizQuestion {
-    abstract val id: Long?
+    abstract val id: Long
     abstract val title: String?
     abstract val text: String?
     abstract val hint: String?

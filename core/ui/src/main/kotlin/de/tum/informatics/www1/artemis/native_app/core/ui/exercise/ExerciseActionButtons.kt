@@ -159,7 +159,8 @@ data class ExerciseActions(
     val onClickOpenQuiz: () -> Unit,
     val onClickStartQuiz: () -> Unit,
     val onClickOpenTextExercise: (participationId: Long) -> Unit,
-    val onClickViewResult: () -> Unit
+    val onClickViewResult: () -> Unit,
+    val onClickViewQuizResults: () -> Unit,
 )
 
 class BoundExerciseActions(
@@ -168,7 +169,8 @@ class BoundExerciseActions(
     val onClickOpenQuiz: (exerciseId: Long) -> Unit,
     val onClickStartQuiz: (exerciseId: Long) -> Unit,
     val onClickOpenTextExercise: (exerciseId: Long, participationId: Long) -> Unit,
-    val onClickViewResult: (exerciseId: Long) -> Unit
+    val onClickViewResult: (exerciseId: Long) -> Unit,
+    val onClickViewQuizResults: (exerciseId: Long) -> Unit,
 ) {
     fun getUnbound(exerciseId: Long): ExerciseActions = ExerciseActions(
         onClickStartTextExercise = { onClickStartTextExercise(exerciseId) },
@@ -177,5 +179,6 @@ class BoundExerciseActions(
         onClickStartQuiz = { onClickStartQuiz(exerciseId) },
         onClickOpenTextExercise = { onClickOpenTextExercise(exerciseId, it) },
         onClickViewResult = { onClickViewResult(exerciseId) },
+        onClickViewQuizResults = { onClickViewQuizResults(exerciseId) }
     )
 }

@@ -53,6 +53,7 @@ fun NavGraphBuilder.lecture(
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
+    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
 ) {
     composable(
         route = "lecture/{lectureId}/{courseId}",
@@ -92,7 +93,8 @@ fun NavGraphBuilder.lecture(
                     isPractice
                 )
             },
-            onNavigateToExerciseResultView = onNavigateToExerciseResultView
+            onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+            onClickViewQuizResults = onClickViewQuizResults
         )
     }
 }
@@ -110,6 +112,7 @@ private fun LectureScreen(
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
+    onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit
 ) {
     val serverConfigurationService: ServerConfigurationService = get()
     val accountService: AccountService = get()
@@ -235,7 +238,8 @@ private fun LectureScreen(
                                         onParticipateInQuiz(exerciseId, false)
                                     },
                                     onClickOpenTextExercise = onNavigateToTextExerciseParticipation,
-                                    onClickViewResult = onNavigateToExerciseResultView
+                                    onClickViewResult = onNavigateToExerciseResultView,
+                                    onClickViewQuizResults = { exerciseId -> onClickViewQuizResults(courseId, exerciseId) }
                                 ),
                                 state = overviewListState
                             )

@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizEndedScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.WaitForQuizStartScreen
@@ -98,27 +99,32 @@ internal fun QuizParticipationUi(
                 onRequestLeave = onNavigateUp
             )
         } else {
-            val questionWithData by viewModel.quizQuestionsWithData.collectAsState(initial = emptyList())
+            val questionWithDataDataState by viewModel.quizQuestionsWithData.collectAsState()
             val lastSubmission by viewModel.latestSubmission.collectAsState()
             val endDate by viewModel.endDate.collectAsState(initial = null)
             val overallPoints by viewModel.overallPoints.collectAsState(initial = 0)
             val latestWebsocketSubmission by viewModel
                 .latestWebsocketSubmission.collectAsState(initial = null)
 
-            WorkOnQuizQuestionsScreen(
-                modifier = Modifier.fillMaxSize(),
-                quizType = viewModel.quizType,
-                questionsWithData = questionWithData,
-                lastSubmissionTime = lastSubmission.submissionDate,
-                endDate = endDate,
-                authToken = authToken,
-                serverUrl = serverUrl,
-                isConnected = isConnected,
-                overallPoints = overallPoints,
-                latestWebsocketSubmission = latestWebsocketSubmission,
-                clock = serverClock,
-                onRequestRetrySave = viewModel::requestSaveSubmissionThroughWebsocket
-            )
+            EmptyDataStateUi(
+                dataState = questionWithDataDataState
+            ) { questionsWithData ->
+
+                WorkOnQuizQuestionsScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    quizType = viewModel.quizType,
+                    questionsWithData = questionsWithData,
+                    lastSubmissionTime = lastSubmission.submissionDate,
+                    endDate = endDate,
+                    authToken = authToken,
+                    serverUrl = serverUrl,
+                    isConnected = isConnected,
+                    overallPoints = overallPoints,
+                    latestWebsocketSubmission = latestWebsocketSubmission,
+                    clock = serverClock,
+                    onRequestRetrySave = viewModel::requestSaveSubmissionThroughWebsocket
+                )
+            }
         }
     }
 

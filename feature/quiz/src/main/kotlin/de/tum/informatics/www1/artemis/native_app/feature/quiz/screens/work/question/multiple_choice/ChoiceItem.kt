@@ -16,6 +16,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 
+sealed interface ChoiceItemType {
+    object ViewResult : ChoiceItemType
+
+    data class Editable(
+        val onRequestSelect: (isSelected: Boolean) -> Unit
+    ) : ChoiceItemType
+}
+
 @Composable
 internal fun ChoiceItem(
     modifier: Modifier,
@@ -24,15 +32,21 @@ internal fun ChoiceItem(
     isSelected: Boolean,
     isSingleChoice: Boolean,
     onRequestDisplayHint: () -> Unit,
-    onRequestSelect: (isSelected: Boolean) -> Unit
+    type: ChoiceItemType
 ) {
     Box(
         modifier = modifier
             .border(width = 1.dp, color = MaterialTheme.colorScheme.outline)
-            .clickable(onClick = {
-                val newIsSelected = if (isSingleChoice) true else !isSelected
-                onRequestSelect(newIsSelected)
-            })
+            .let {
+                if (type is ChoiceItemType.Editable) {
+                    it.clickable(
+                        onClick = {
+                            val newIsSelected = if (isSingleChoice) true else !isSelected
+                            type.onRequestSelect(newIsSelected)
+                        }
+                    )
+                } else it
+            }
     ) {
         Row(
             modifier = Modifier
@@ -55,10 +69,32 @@ internal fun ChoiceItem(
                 }
             }
 
+            val areButtonsEnabled = when (type) {
+                is ChoiceItemType.Editable -> true
+                ChoiceItemType.ViewResult -> false
+            }
+
             if (isSingleChoice) {
-                RadioButton(selected = isSelected, onClick = { onRequestSelect(true) })
+                RadioButton(
+                    selected = isSelected,
+                    onClick = {
+                        if (type is ChoiceItemType.Editable) {
+                            type.onRequestSelect(true)
+                        }
+                    },
+                    enabled = areButtonsEnabled
+                )
             } else {
-                Checkbox(checked = isSelected, onCheckedChange = onRequestSelect)
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = when (type) {
+                        is ChoiceItemType.Editable -> type.onRequestSelect
+                        ChoiceItemType.ViewResult -> {
+                            {}
+                        }
+                    },
+                    enabled = areButtonsEnabled
+                )
             }
         }
     }

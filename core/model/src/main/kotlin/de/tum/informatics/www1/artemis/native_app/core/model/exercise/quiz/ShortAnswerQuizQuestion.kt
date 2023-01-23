@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("short-answer")
 data class ShortAnswerQuizQuestion(
-    override val id: Long? = null,
+    override val id: Long = 0,
     override val title: String? = null,
     override val text: String? = null,
     override val hint: String? = null,

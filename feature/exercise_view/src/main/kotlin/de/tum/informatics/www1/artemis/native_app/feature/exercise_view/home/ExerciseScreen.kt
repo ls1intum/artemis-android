@@ -38,7 +38,8 @@ internal fun ExerciseScreen(
     onNavigateBack: () -> Unit,
     onViewResult: () -> Unit,
     onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit,
-    onParticipateInQuiz: (courseId: Long, isPractice: Boolean) -> Unit
+    onParticipateInQuiz: (courseId: Long, isPractice: Boolean) -> Unit,
+    onClickViewQuizResults: (courseId: Long) -> Unit
 ) {
     val serverUrl: String by viewModel.serverUrl.collectAsState()
     val authToken: String by viewModel.authToken.collectAsState()
@@ -128,7 +129,12 @@ internal fun ExerciseScreen(
                     onClickOpenQuiz = { onParticipateInQuizDelegate(false) },
                     onClickStartQuiz = { onParticipateInQuizDelegate(false) },
                     onClickViewResult = onViewResult,
-                    onClickOpenTextExercise = onViewTextExerciseParticipationScreen
+                    onClickOpenTextExercise = onViewTextExerciseParticipationScreen,
+                    onClickViewQuizResults = {
+                        courseId?.let {
+                            onClickViewQuizResults(it)
+                        }
+                    }
                 )
             }
 

@@ -31,7 +31,7 @@ import kotlinx.datetime.Instant
 @Composable
 internal fun WorkOnQuizQuestionFooter(
     modifier: Modifier,
-    quizType: QuizType,
+    quizType: QuizType.WorkableQuizType,
     lastSubmissionTime: Instant?,
     endDate: Instant?,
     isConnected: Boolean,
@@ -128,7 +128,7 @@ internal fun WorkOnQuizQuestionFooter(
                 }
 
                 val submissionText = when(quizType) {
-                    QuizType.LIVE -> {
+                    QuizType.Live -> {
                         if (lastSubmissionTime != null) {
                             val relLastSubmissionTime =
                                 getRelativeTime(to = lastSubmissionTime, clock = clock)
@@ -140,7 +140,7 @@ internal fun WorkOnQuizQuestionFooter(
                             stringResource(id = R.string.quiz_participation_never_saved)
                         }
                     }
-                    QuizType.PRACTICE -> stringResource(id = R.string.quiz_participation_practice_mode)
+                    QuizType.Practice -> stringResource(id = R.string.quiz_participation_practice_mode)
                 }
 
                 Text(

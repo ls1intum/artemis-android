@@ -40,6 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragA
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.image.loadAsyncImageDrawable
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionBodyText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionHeader
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionInstructionText
@@ -51,14 +52,10 @@ internal fun DragAndDropQuizQuestionUi(
     modifier: Modifier,
     questionIndex: Int,
     question: DragAndDropQuizQuestion,
-    availableDragItems: List<DragItem>,
+    data: QuizQuestionData.DragAndDropData,
     serverUrl: String,
     authToken: String,
-    dropLocationMapping: Map<DropLocation, DragItem>,
     onRequestDisplayHint: () -> Unit,
-    onDragItemIntoDropLocation: (itemId: Long, dropId: Long) -> Unit,
-    onSwapDropLocations: (oldDropLocationId: Long, newDropLocationId: Long) -> Unit,
-    onClearDropLocation: (dropLocationId: Long) -> Unit
 ) {
     Column(modifier = modifier) {
         QuizQuestionHeader(
@@ -93,7 +90,7 @@ internal fun DragAndDropQuizQuestionUi(
                     val targetInfo = currentDragTargetInfo.currentDragTargetInfo
                     val isDraggingFromArea = remember(targetInfo) {
                         targetInfo is DragTargetInfo.Dragging
-                                && targetInfo.dragItem !in availableDragItems
+                                && targetInfo.dragItem !in data.availableDragItems
                     }
 
                     QuizQuestionInstructionText(
@@ -117,18 +114,23 @@ internal fun DragAndDropQuizQuestionUi(
                                     currentDropTarget = DropTarget.AvailableItemsRow
                                 }
                             },
-                        dragItems = availableDragItems,
+                        dragItems = data.availableDragItems,
                         authToken = authToken,
                         serverUrl = serverUrl,
-                        onDragRelease = { dragItem ->
-                            val currentlySelectedDropTarget = currentDropTarget
+                        type = when (data) {
+                            is QuizQuestionData.DragAndDropData.Editable -> DragAndDropDragItemsRowType.Editable(
+                                onDragRelease = { dragItem ->
+                                    val currentlySelectedDropTarget = currentDropTarget
 
-                            if (currentlySelectedDropTarget is DropTarget.DropLocationTarget) {
-                                onDragItemIntoDropLocation(
-                                    dragItem.id,
-                                    currentlySelectedDropTarget.dropLocationTarget.id
-                                )
-                            }
+                                    if (currentlySelectedDropTarget is DropTarget.DropLocationTarget) {
+                                        data.onDragItemIntoDropLocation(
+                                            dragItem.id,
+                                            currentlySelectedDropTarget.dropLocationTarget.id
+                                        )
+                                    }
+                                }
+                            )
+                            is QuizQuestionData.DragAndDropData.Result -> DragAndDropDragItemsRowType.ViewOnly
                         }
                     )
 
@@ -137,43 +139,51 @@ internal fun DragAndDropQuizQuestionUi(
                             .fillMaxWidth()
                             .zIndex(if (isDraggingFromArea) 20f else 1f),
                         questionId = question.id,
-                        dropLocationMapping = dropLocationMapping,
+                        dropLocationMapping = data.dropLocationMapping,
                         imageUrl = serverUrl + backgroundFilePath,
                         dropLocations = question.dropLocations,
                         serverUrl = serverUrl,
                         authToken = authToken,
-                        onUpdateIsCurrentDropTarget = { dropLocation, isCurrentDropTarget ->
-                            val currentlySetDropTarget = currentDropTarget
+                        type = when (data) {
+                            is QuizQuestionData.DragAndDropData.Editable -> {
+                                DragAndDropAreaType.Editable(
+                                    onUpdateIsCurrentDropTarget = { dropLocation, isCurrentDropTarget ->
+                                        val currentlySetDropTarget = currentDropTarget
 
-                            // Set drop location to nothing if it is currently set to this drop location target.
-                            // If it is the current drop target, set it.
-                            if (
-                                !isCurrentDropTarget && currentlySetDropTarget is DropTarget.DropLocationTarget
-                                && currentlySetDropTarget.dropLocationTarget == dropLocation
-                            ) {
-                                currentDropTarget = DropTarget.Nothing
-                            } else if (isCurrentDropTarget) {
-                                currentDropTarget = DropTarget.DropLocationTarget(dropLocation)
+                                        // Set drop location to nothing if it is currently set to this drop location target.
+                                        // If it is the current drop target, set it.
+                                        if (
+                                            !isCurrentDropTarget && currentlySetDropTarget is DropTarget.DropLocationTarget
+                                            && currentlySetDropTarget.dropLocationTarget == dropLocation
+                                        ) {
+                                            currentDropTarget = DropTarget.Nothing
+                                        } else if (isCurrentDropTarget) {
+                                            currentDropTarget =
+                                                DropTarget.DropLocationTarget(dropLocation)
+                                        }
+                                    },
+                                    onDragRelease = { originalDropLocation ->
+                                        when (val currentlySelectedDropTarget = currentDropTarget) {
+                                            is DropTarget.DropLocationTarget -> {
+                                                // trigger swap
+                                                data.onSwapDropLocations(
+                                                    originalDropLocation.id,
+                                                    currentlySelectedDropTarget.dropLocationTarget.id
+                                                )
+                                            }
+
+                                            DropTarget.AvailableItemsRow -> {
+                                                // trigger clear
+                                                data.onClearDropLocation(originalDropLocation.id)
+                                            }
+
+                                            // Do nothing here.
+                                            DropTarget.Nothing -> {}
+                                        }
+                                    }
+                                )
                             }
-                        },
-                        onDragRelease = { originalDropLocation ->
-                            when (val currentlySelectedDropTarget = currentDropTarget) {
-                                is DropTarget.DropLocationTarget -> {
-                                    // trigger swap
-                                    onSwapDropLocations(
-                                        originalDropLocation.id,
-                                        currentlySelectedDropTarget.dropLocationTarget.id
-                                    )
-                                }
-
-                                DropTarget.AvailableItemsRow -> {
-                                    // trigger clear
-                                    onClearDropLocation(originalDropLocation.id)
-                                }
-
-                                // Do nothing here.
-                                DropTarget.Nothing -> {}
-                            }
+                            is QuizQuestionData.DragAndDropData.Result -> DragAndDropAreaType.ViewOnly
                         }
                     )
                 }
@@ -194,13 +204,19 @@ private val dragItemOutlineColor: Color
 private val dragItemTextColor: Color
     @Composable get() = if (isSystemInDarkTheme()) Color.White else Color.Black
 
+sealed interface DragAndDropDragItemsRowType {
+    object ViewOnly : DragAndDropDragItemsRowType
+
+    data class Editable(val onDragRelease: (DragItem) -> Unit) : DragAndDropDragItemsRowType
+}
+
 @Composable
 private fun DragAndDropDragItemsRow(
     modifier: Modifier,
     dragItems: List<DragItem>,
     serverUrl: String,
     authToken: String,
-    onDragRelease: (DragItem) -> Unit
+    type: DragAndDropDragItemsRowType
 ) {
     Box(
         modifier = modifier
@@ -216,17 +232,28 @@ private fun DragAndDropDragItemsRow(
             crossAxisSpacing = 8.dp
         ) {
             dragItems.forEach { dragItem ->
-                DragItemDraggableContainer(
-                    modifier = Modifier.zIndex(10f),
-                    dragItem = dragItem,
-                    onDragRelease = { onDragRelease(dragItem) }
-                ) {
+                val dragItemUiElement = @Composable {
                     DragItemUiElement(
                         modifier = Modifier,
                         text = dragItem.text,
                         pictureFilePath = dragItem.backgroundPictureServerUrl(serverUrl),
                         authToken = authToken
                     )
+                }
+
+                when (type) {
+                    is DragAndDropDragItemsRowType.Editable -> {
+                        DragItemDraggableContainer(
+                            modifier = Modifier.zIndex(10f),
+                            dragItem = dragItem,
+                            onDragRelease = { type.onDragRelease(dragItem) }
+                        ) {
+                            dragItemUiElement()
+                        }
+                    }
+                    DragAndDropDragItemsRowType.ViewOnly -> {
+                        dragItemUiElement()
+                    }
                 }
             }
         }
@@ -297,6 +324,15 @@ private fun DragItemUiElementContent(
     }
 }
 
+private sealed interface DragAndDropAreaType {
+    object ViewOnly : DragAndDropAreaType
+
+    data class Editable(
+        val onUpdateIsCurrentDropTarget: (dropLocation: DropLocation, isCurrentDropTarget: Boolean) -> Unit,
+        val onDragRelease: (originalDropLocation: DropLocation) -> Unit
+    ) : DragAndDropAreaType
+}
+
 /**
  * Load and display the background image. Renders the drop locations onto the image and reports
  * drag events about drag items already placed in the drop locations.
@@ -310,8 +346,7 @@ private fun DragAndDropArea(
     dropLocations: List<DropLocation>,
     serverUrl: String,
     authToken: String,
-    onUpdateIsCurrentDropTarget: (dropLocation: DropLocation, isCurrentDropTarget: Boolean) -> Unit,
-    onDragRelease: (originalDropLocation: DropLocation) -> Unit
+    type: DragAndDropAreaType
 ) {
     val context = LocalContext.current
 
@@ -381,14 +416,21 @@ private fun DragAndDropArea(
                         dragItem = dragItem,
                         serverUrl = serverUrl,
                         authToken = authToken,
-                        onUpdateIsCurrentDragTarget = { isCurrentDropTarget ->
-                            onUpdateIsCurrentDropTarget(
-                                dropLocation,
-                                isCurrentDropTarget
-                            )
-                        },
-                        onDragRelease = {
-                            if (dragItem != null) onDragRelease(dropLocation)
+                        type = when (type) {
+                            is DragAndDropAreaType.Editable -> {
+                                ImageDropLocationType.Editable(
+                                    onUpdateIsCurrentDragTarget = { isCurrentDropTarget ->
+                                        type.onUpdateIsCurrentDropTarget(
+                                            dropLocation,
+                                            isCurrentDropTarget
+                                        )
+                                    },
+                                    onDragRelease = {
+                                        if (dragItem != null) type.onDragRelease(dropLocation)
+                                    }
+                                )
+                            }
+                            DragAndDropAreaType.ViewOnly -> ImageDropLocationType.ViewOnly
                         }
                     )
                 }
@@ -406,6 +448,15 @@ private val dropTargetColorDragging: Color
 private val dropTargetColorDropTarget: Color
     @Composable get() = Color.Green
 
+private sealed interface ImageDropLocationType {
+    object ViewOnly : ImageDropLocationType
+
+    data class Editable(
+        val onUpdateIsCurrentDragTarget: (isCurrentDragTarget: Boolean) -> Unit,
+        val onDragRelease: () -> Unit
+    ) : ImageDropLocationType
+}
+
 /**
  * The drop location inside the background image.
  * Draws an outline and a background color into the image. If the drop location holds a drag item,
@@ -417,8 +468,7 @@ private fun ImageDropLocation(
     dragItem: DragItem?,
     serverUrl: String,
     authToken: String,
-    onUpdateIsCurrentDragTarget: (isCurrentDragTarget: Boolean) -> Unit,
-    onDragRelease: () -> Unit
+    type: ImageDropLocationType
 ) {
     val targetInfo = LocalDragTargetInfo.current.currentDragTargetInfo
     val dragPosition = targetInfo.dragPosition
@@ -452,19 +502,27 @@ private fun ImageDropLocation(
 
     Box(
         modifier = modifier
-            .onGloballyPositioned {
-                val bounds = it.boundsInWindow()
-                val wasCurrentDropTarget = isCurrentDropTarget
+            .let {
+                // Only needed in edit mode
+                if (type is ImageDropLocationType.Editable) {
+                    it
+                        .onGloballyPositioned { layoutCoordinates ->
+                            val bounds = layoutCoordinates.boundsInWindow()
+                            val wasCurrentDropTarget = isCurrentDropTarget
 
-                isCurrentDropTarget =
-                    targetInfo is DragTargetInfo.Dragging && bounds.contains(dragPosition + dragOffset)
+                            isCurrentDropTarget =
+                                targetInfo is DragTargetInfo.Dragging && bounds.contains(
+                                    dragPosition + dragOffset
+                                )
 
-                // Update either when it is the current drag target or it previously was and no longer is now.
-                if (isCurrentDropTarget || wasCurrentDropTarget) {
-                    onUpdateIsCurrentDragTarget(isCurrentDropTarget)
-                }
+                            // Update either when it is the current drag target or it previously was and no longer is now.
+                            if (isCurrentDropTarget || wasCurrentDropTarget) {
+                                type.onUpdateIsCurrentDragTarget(isCurrentDropTarget)
+                            }
+                        }
+                        .zIndex(if (isDraggingDragChild) 20f else 0f)
+                } else it
             }
-            .zIndex(if (isDraggingDragChild) 20f else 0f)
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawRect(backgroundColor)
@@ -477,26 +535,37 @@ private fun ImageDropLocation(
         if (dragItem != null) {
             val pictureFilePath = dragItem.backgroundPictureServerUrl(serverUrl)
 
-            DragItemDraggableContainer(
-                modifier = Modifier.fillMaxSize(),
-                dragItem = dragItem,
-                onDragRelease = onDragRelease
-            ) {
-                if (isDraggingDragChild) {
-                    DragItemUiElement(
-                        modifier = Modifier.zIndex(20f),
-                        text = dragItem.text,
-                        pictureFilePath = pictureFilePath,
-                        authToken = authToken
-                    )
-                } else {
-                    DragItemUiElementContent(
+            val nonDraggedElementContent = @Composable {
+                DragItemUiElementContent(
+                    modifier = Modifier.fillMaxSize(),
+                    text = dragItem.text,
+                    pictureFilePath = pictureFilePath,
+                    authToken = authToken,
+                    fontColor = Color.Black
+                )
+            }
+
+            when (type) {
+                is ImageDropLocationType.Editable -> {
+                    DragItemDraggableContainer(
                         modifier = Modifier.fillMaxSize(),
-                        text = dragItem.text,
-                        pictureFilePath = pictureFilePath,
-                        authToken = authToken,
-                        fontColor = Color.Black
-                    )
+                        dragItem = dragItem,
+                        onDragRelease = type.onDragRelease
+                    ) {
+                        if (isDraggingDragChild) {
+                            DragItemUiElement(
+                                modifier = Modifier.zIndex(20f),
+                                text = dragItem.text,
+                                pictureFilePath = pictureFilePath,
+                                authToken = authToken
+                            )
+                        } else {
+                            nonDraggedElementContent()
+                        }
+                    }
+                }
+                ImageDropLocationType.ViewOnly -> {
+                    nonDraggedElementContent()
                 }
             }
         }

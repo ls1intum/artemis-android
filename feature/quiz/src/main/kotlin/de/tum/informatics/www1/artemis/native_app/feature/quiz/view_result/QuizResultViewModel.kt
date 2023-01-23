@@ -12,9 +12,15 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.ShortAnswerQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.DragAndDropSubmittedAnswer
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.MultipleChoiceSubmittedAnswer
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.SubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.*
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.BaseQuizViewModel
@@ -76,36 +82,110 @@ internal class QuizResultViewModel(
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly)
 
+    private val submissionAndQuizExerciseDataState: Flow<DataState<Pair<QuizSubmission, List<QuizQuestion>>>> =
+        combine(submission, quizExerciseDataState) { submission, quizExercise ->
+            submission join quizExercise.bind { it.quizQuestions }
+        }
+
     override val dragAndDropData: Flow<Map<Long, ResultDragAndDropStorageData>> =
-        submission.map { submissionDataState ->
-            submissionDataState
-                .bind { submission ->
+        submissionAndQuizExerciseDataState
+            .map { dataState ->
+                dataState
+                    .bind { (submission, quizQuestions) ->
+                        submission
+                            .submittedAnswers
+                            .filterIsInstance<DragAndDropSubmittedAnswer>()
+                            .mapNotNull { submittedAnswer ->
+                                val question =
+                                    quizQuestions.firstOrNull { it.id == submittedAnswer.quizQuestion?.id } as? DragAndDropQuizQuestion
+                                        ?: return@mapNotNull null
+
+                                val value = submittedAnswer
+                                    .mappings
+                                    .mapNotNull innerMappings@{
+                                        val dropLocationId =
+                                            it.dropLocation?.id ?: return@innerMappings null
+                                        val dragItemId =
+                                            it.dragItem?.id ?: return@innerMappings null
+                                        dropLocationId to dragItemId
+                                    }
+                                    .toMap()
+
+                                val data = ResultDragAndDropStorageData(
+                                    value = value,
+                                    score = submittedAnswer.scoreInPoints ?: 0.0
+                                )
+
+                                question.id to data
+                            }
+                            .toMap()
+                    }
+            }
+            .filterSuccess()
+            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+
+    override val multipleChoiceData: Flow<Map<Long, ResultMultipleChoiceStorageData>> =
+        submissionAndQuizExerciseDataState
+            .map { dataState ->
+                dataState.bind { (submission, quizQuestions) ->
                     submission
                         .submittedAnswers
-                        .filterIsInstance<DragAndDropSubmittedAnswer>()
-                        .filter { it.quizQuestion is DragAndDropQuizQuestion }
-                        .associate { submittedAnswer ->
-                            val question = submittedAnswer.quizQuestion as DragAndDropQuizQuestion
+                        .filterIsInstance<MultipleChoiceSubmittedAnswer>()
+                        .mapNotNull { submittedAnswer ->
+                            val question =
+                                quizQuestions.firstOrNull { it.id == submittedAnswer.quizQuestion?.id } as? MultipleChoiceQuizQuestion
+                                    ?: return@mapNotNull null
 
                             val value = submittedAnswer
-                                .mappings
-                                .mapNotNull {
-                                    val dropLocationId =
-                                        it.dropLocation?.id ?: return@mapNotNull null
-                                    val dragItemId = it.dragItem?.id ?: return@mapNotNull null
-                                    dropLocationId to dragItemId
+                                .selectedOptions
+                                .associate {
+                                    it.id to true
                                 }
-                                .toMap()
 
-                            val data = ResultDragAndDropStorageData(
+                            val data = ResultMultipleChoiceStorageData(
                                 value = value,
                                 score = submittedAnswer.scoreInPoints ?: 0.0
                             )
 
                             question.id to data
                         }
+                        .toMap()
                 }
-        }
+            }
+            .filterSuccess()
+            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+
+    override val shortAnswerData: Flow<Map<Long, ResultShortAnswerStorageData>> =
+        submissionAndQuizExerciseDataState
+            .map { dataState ->
+                dataState.bind { (submission, quizQuestions) ->
+                    submission
+                        .submittedAnswers
+                        .filterIsInstance<ShortAnswerSubmittedAnswer>()
+                        .mapNotNull { submittedAnswer ->
+                            val question =
+                                quizQuestions.firstOrNull { it.id == submittedAnswer.quizQuestion?.id } as? ShortAnswerQuizQuestion
+                                    ?: return@mapNotNull null
+
+                            val value = submittedAnswer
+                                .submittedTexts
+                                .mapNotNull innerMapping@{
+                                    val spotId = it.spot?.spotNr ?: return@innerMapping null
+
+                                    spotId to it.text.orEmpty()
+                                }
+                                .toMap()
+
+                            val data = ResultShortAnswerStorageData(
+                                value = value,
+                                score = submittedAnswer.scoreInPoints ?: 0.0
+                            )
+
+                            question.id to data
+                        }
+                        .toMap()
+                }
+            }
             .filterSuccess()
             .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
@@ -120,6 +200,34 @@ internal class QuizResultViewModel(
             question = question,
             availableDragItems = availableDragItems,
             dropLocationMapping = dropLocationMapping,
+            score = storageData?.score ?: 0.0
+        )
+    }
+
+    override fun constructMultipleChoiceData(
+        questionId: Long,
+        question: MultipleChoiceQuizQuestion,
+        storageData: ResultMultipleChoiceStorageData?,
+        multipleChoiceData: Map<Long, ResultMultipleChoiceStorageData>,
+        optionSelectionMapping: Map<AnswerOptionId, Boolean>
+    ): QuizQuestionData.MultipleChoiceData {
+        return QuizQuestionData.MultipleChoiceData.Result(
+            question = question,
+            optionSelectionMapping = optionSelectionMapping,
+            score = storageData?.score ?: 0.0
+        )
+    }
+
+    override fun constructShortAnswerData(
+        questionId: Long,
+        question: ShortAnswerQuizQuestion,
+        storageData: ResultShortAnswerStorageData?,
+        shortAnswerData: Map<Long, ResultShortAnswerStorageData>,
+        solutionTexts: Map<Int, String>
+    ): QuizQuestionData.ShortAnswerData {
+        return QuizQuestionData.ShortAnswerData.Result(
+            question = question,
+            solutionTexts = solutionTexts,
             score = storageData?.score ?: 0.0
         )
     }
