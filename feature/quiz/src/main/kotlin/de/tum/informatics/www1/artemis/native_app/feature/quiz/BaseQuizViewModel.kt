@@ -1,14 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz
 
-import android.provider.ContactsContract.Data
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ParticipationService
+import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken

@@ -1,9 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.impl.courses
 
-import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.*
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
@@ -30,7 +27,7 @@ internal class CourseRegistrationServiceImpl(
                             appendPathSegments("api", "courses", "for-registration")
                         }
 
-                        bearerAuth(authToken)
+                        cookieAuth(authToken)
                         contentType(ContentType.Application.Json)
                     }
                     .body()
@@ -50,7 +47,7 @@ internal class CourseRegistrationServiceImpl(
                         appendPathSegments("api", courseId.toString(), "register")
                     }
 
-                    bearerAuth(authToken)
+                    cookieAuth(authToken)
                 }.body()
 
             // TODO: sync groups

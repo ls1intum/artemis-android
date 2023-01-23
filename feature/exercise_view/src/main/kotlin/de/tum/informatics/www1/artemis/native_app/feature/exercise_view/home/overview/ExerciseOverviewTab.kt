@@ -1,17 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.overview
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.LoadingState
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
@@ -38,10 +35,6 @@ internal fun ExerciseOverviewTab(
             actions = actions
         )
 
-        val webViewClient = remember(authToken) {
-            AuthWebClient(authToken)
-        }
-
         Box(
             modifier = if (webViewState?.isLoading != true) Modifier.fillMaxWidth() else
                 Modifier
@@ -52,7 +45,6 @@ internal fun ExerciseOverviewTab(
                 WebView(
                     modifier = Modifier.fillMaxWidth(),
                     state = webViewState,
-                    client = webViewClient,
                     onCreated = {
                         it.settings.javaScriptEnabled = true
                         it.settings.domStorageEnabled = true
@@ -81,34 +73,5 @@ internal fun ExerciseOverviewTab(
                 )
             }
         }
-    }
-}
-
-private class AuthWebClient(
-    private val authToken: String
-) : AccompanistWebViewClient() {
-    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-        if (view != null) {
-            setLocalStorage(view)
-        }
-
-        super.onPageStarted(view, url, favicon)
-    }
-
-
-    private fun setLocalStorage(view: WebView) {
-        view.evaluateJavascript(
-            """
-                localStorage.setItem('jhi-authenticationtoken', JSON.stringify('$authToken'));
-            """.trimIndent(), null
-        )
-    }
-
-    override fun onPageFinished(view: WebView?, url: String?) {
-        if (view != null) {
-            setLocalStorage(view)
-        }
-
-        super.onPageFinished(view, url)
     }
 }

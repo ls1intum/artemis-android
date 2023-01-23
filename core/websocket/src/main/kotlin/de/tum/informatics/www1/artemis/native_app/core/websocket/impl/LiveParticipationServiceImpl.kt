@@ -180,7 +180,7 @@ internal class LiveParticipationServiceImpl(
 //                                        }
 //
 //                                        contentType(ContentType.Any)
-//                                        bearerAuth(authData.authToken)
+//                                        cookieAuth(authData.authToken)
 //                                    }.bodyAsText()
 //
 //                                    if (bodyText.isNotEmpty()) {

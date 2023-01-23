@@ -75,7 +75,7 @@ internal fun CoursesOverview(
     //The course composable needs the serverUrl to build the correct url to fetch the course icon from.
     val serverUrl by viewModel.serverUrl.collectAsState()
     //The server wants an authorization token to send the course icon.
-    val authorizationBearer by viewModel.authorizationBearerToken.collectAsState()
+    val authToken by viewModel.authToken.collectAsState()
 
     val topAppBarState = rememberTopAppBarState()
 
@@ -129,7 +129,7 @@ internal fun CoursesOverview(
                             .padding(horizontal = 8.dp),
                         courses = dashboard.courses,
                         serverUrl = serverUrl,
-                        authorizationToken = authorizationBearer,
+                        authorizationToken = authToken,
                         onClickOnCourse = { course -> onViewCourse(course.id) }
                     )
                 }

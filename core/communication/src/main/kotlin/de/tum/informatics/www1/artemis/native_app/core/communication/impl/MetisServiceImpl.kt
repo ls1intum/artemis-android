@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.communication.impl
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisPostDTO
 import de.tum.informatics.www1.artemis.native_app.core.communication.MetisService
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
@@ -110,7 +111,7 @@ class MetisServiceImpl(
                 parameter("page", pageNum)
                 parameter("pageSize", pageSize)
 
-                bearerAuth(authToken)
+                cookieAuth(authToken)
             }.body()
         }
     }
@@ -179,7 +180,7 @@ class MetisServiceImpl(
                 contentType(ContentType.Application.Json)
 
                 setBody(post)
-                bearerAuth(authToken)
+                cookieAuth(authToken)
             }.body()
         }
     }
@@ -200,7 +201,7 @@ class MetisServiceImpl(
                 contentType(ContentType.Application.Json)
 
                 setBody(post)
-                bearerAuth(authToken)
+                cookieAuth(authToken)
             }.body()
         }
     }
@@ -220,7 +221,7 @@ class MetisServiceImpl(
                 }
 
                 setBody(post)
-                bearerAuth(authToken)
+                cookieAuth(authToken)
             }.body()
         }
     }
@@ -240,7 +241,7 @@ class MetisServiceImpl(
                 }
 
                 setBody(post)
-                bearerAuth(authToken)
+                cookieAuth(authToken)
             }.body()
         }
     }
@@ -280,7 +281,7 @@ class MetisServiceImpl(
                 }
 
                 setBody(reaction)
-                bearerAuth(authToken)
+                cookieAuth(authToken)
                 contentType(ContentType.Application.Json)
             }.body()
         }
@@ -304,7 +305,7 @@ class MetisServiceImpl(
                     )
                 }
 
-                bearerAuth(authToken)
+                cookieAuth(authToken)
                 contentType(ContentType.Application.Json)
             }
 

@@ -20,9 +20,9 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.ConnectionStatusUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.ConnectionStatusUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.getFormattedRelativeToFutureTimeQuizStyle
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.Footer
 import kotlinx.datetime.Clock

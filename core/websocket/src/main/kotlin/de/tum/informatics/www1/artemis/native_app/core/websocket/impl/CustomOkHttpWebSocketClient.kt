@@ -1,7 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
 
 import android.util.Log
+import io.ktor.http.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.*
@@ -20,11 +22,17 @@ private const val TAG = "WebSocketClient"
 
 class CustomOkHttpWebSocketClient(
     private val client: OkHttpClient = OkHttpClient(),
+    private val authTokenFlow: Flow<String>,
     private val onError: () -> Unit
 ) : WebSocketClient {
 
     override suspend fun connect(url: String): WebSocketConnection {
-        val request = Request.Builder().url(url).build()
+        val authToken = authTokenFlow.first()
+
+        val request = Request.Builder()
+            .url(url)
+            .header(HttpHeaders.Cookie, "jwt=$authToken")
+            .build()
         val channelListener = WebSocketListenerFlowAdapter()
 
         return suspendCancellableCoroutine { continuation ->

@@ -19,9 +19,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.ShortAnswerQuizQuestionUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.DragAndDropQuizQuestionUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.multiple_choice.MultipleChoiceQuizQuestionUi

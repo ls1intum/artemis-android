@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
+import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
 import kotlinx.coroutines.flow.*
 
 /**
@@ -57,12 +58,7 @@ internal class CourseOverviewViewModel(
     /**
      * Emits the current authentication bearer in the form: "Bearer $token"
      */
-    val authorizationBearerToken: StateFlow<String> = accountService.authenticationData.map { authenticationData ->
-        when (authenticationData) {
-            is AccountService.AuthenticationData.LoggedIn -> authenticationData.asBearer
-            AccountService.AuthenticationData.NotLoggedIn -> ""
-        }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
+    val authToken: StateFlow<String> = authTokenStateFlow(accountService)
 
     /**
      * Request a reload of the dashboard.

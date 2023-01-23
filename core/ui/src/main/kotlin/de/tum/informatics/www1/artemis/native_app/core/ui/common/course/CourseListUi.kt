@@ -40,6 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
+import io.ktor.http.*
 
 private val headerHeight = 80.dp
 
@@ -178,14 +179,18 @@ private fun getCourseIconRequest(
     course: Course,
     authorizationToken: String
 ): ImageRequest {
-    val courseIconUrl = "$serverUrl${course.courseIconPath}"
+    val courseIconUrl = remember {
+        URLBuilder(serverUrl)
+            .appendPathSegments(course.courseIconPath.orEmpty())
+            .buildString()
+    }
 
     val context = LocalContext.current
 
     //Authorization needed
     return remember {
         ImageRequest.Builder(context)
-            .addHeader("Authorization", authorizationToken)
+            .addHeader(HttpHeaders.Cookie, "jwt=$authorizationToken")
             .data(courseIconUrl)
             .build()
     }

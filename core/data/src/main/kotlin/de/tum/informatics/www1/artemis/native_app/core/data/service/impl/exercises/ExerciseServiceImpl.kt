@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.impl.exercises
 
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
@@ -35,7 +36,7 @@ internal class ExerciseServiceImpl(
                     }
 
                     contentType(ContentType.Application.Json)
-                    bearerAuth(authToken)
+                    cookieAuth(authToken)
                 }.body()
             }
         }
@@ -59,7 +60,7 @@ internal class ExerciseServiceImpl(
                     }
 
                     contentType(ContentType.Application.Json)
-                    bearerAuth(authToken)
+                    cookieAuth(authToken)
                 }.bodyAsText()
 
                 return@performNetworkCall try {

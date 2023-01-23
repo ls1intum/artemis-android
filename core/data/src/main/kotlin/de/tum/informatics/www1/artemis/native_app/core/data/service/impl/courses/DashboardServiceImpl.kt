@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.impl.courses
 
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.DashboardService
@@ -32,7 +33,7 @@ internal class DashboardServiceImpl(
                     url {
                         appendPathSegments("api", "courses", "for-dashboard")
                     }
-                    bearerAuth(authToken)
+                    cookieAuth(authToken)
                 }.body() //Decode JSON to List<Course>
 
                 Dashboard(courses)

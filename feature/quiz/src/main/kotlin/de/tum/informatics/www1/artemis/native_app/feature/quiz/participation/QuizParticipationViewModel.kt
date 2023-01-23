@@ -28,9 +28,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.websocket.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.*
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.BaseQuizViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.DragAndDropStorageData
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.ShortAnswerStorageData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizParticipationService
 import kotlinx.coroutines.Job

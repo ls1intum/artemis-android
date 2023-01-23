@@ -1,13 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result
 
-import android.provider.ContactsContract.Data
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.join
-import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ParticipationService
+import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
@@ -17,13 +15,10 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQ
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.ShortAnswerQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.DragAndDropSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.MultipleChoiceSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.SubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.*
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.BaseQuizViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
 import kotlinx.coroutines.flow.*

@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz.service.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
@@ -53,7 +54,7 @@ class QuizParticipationServiceImpl(
                 }
 
                 contentType(ContentType.Application.Json)
-                bearerAuth(authToken)
+                cookieAuth(authToken)
                 setBody<Submission>(submission)
             }.body()
         }

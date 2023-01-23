@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.core.data.service.impl
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.LoginService
-import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -20,21 +19,27 @@ internal class LoginServiceImpl(
         serverUrl: String
     ): NetworkResponse<LoginService.LoginResponse> {
         return performNetworkCall {
-            val body: LoginService.LoginResponse =
-                ktorProvider.ktorClient.post(serverUrl) {
-                    url {
-                        appendPathSegments("api", "authenticate")
-                    }
+            val response = ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments("api", "authenticate")
+                }
 
-                    contentType(ContentType.Application.Json)
-                    setBody(LoginBody(username, password, rememberMe))
-                }.body()
+                contentType(ContentType.Application.Json)
+                setBody(LoginBody(username, password, rememberMe))
+            }
 
-            body
+            val jwt = response.setCookie().firstOrNull { it.name == "jwt" }?.value
+
+            if (response.status.isSuccess() && jwt != null) {
+                LoginService.LoginResponse(jwt)
+            } else throw RuntimeException("Login not successful")
         }
     }
 
-    override suspend fun loginSaml2(rememberMe: Boolean, serverUrl: String): NetworkResponse<HttpResponse> {
+    override suspend fun loginSaml2(
+        rememberMe: Boolean,
+        serverUrl: String
+    ): NetworkResponse<HttpResponse> {
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {

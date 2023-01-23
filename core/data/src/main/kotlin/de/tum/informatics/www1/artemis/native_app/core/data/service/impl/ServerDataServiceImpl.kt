@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
@@ -34,7 +35,7 @@ internal class ServerDataServiceImpl(private val ktorProvider: KtorProvider) : S
                     }
 
                     contentType(ContentType.Application.Json)
-                    bearerAuth(bearerToken)
+                    cookieAuth(bearerToken)
                 }.body()
         }
     }

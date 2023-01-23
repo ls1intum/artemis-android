@@ -4,9 +4,11 @@ import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.device.awaitInternetConnection
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider.WebsocketData.Message
+import io.ktor.http.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -43,6 +45,7 @@ class WebsocketProvider(
 
     private val webSocketClient =
         CustomOkHttpWebSocketClient(
+            authTokenFlow = accountService.authToken,
             onError = {
                 Log.d(TAG, "Websocket on error. Emitting to try reconnect")
                 val hasEmitted = onWebsocketError.tryEmit(Unit)
@@ -65,25 +68,18 @@ class WebsocketProvider(
     val session: Flow<StompSessionWithKxSerialization> =
         combine(
             serverConfigurationService.host,
-            accountService.authenticationData,
+            accountService.authToken,
             onWebsocketError.onStart { emit(Unit) },
             onRequestReconnect.onStart { emit(Unit) }
         ) { a, b, _, _ -> a to b }
-            .transformLatest { (host, authenticationData) ->
+            .transformLatest { (host, authToken) ->
                 emitAll(
                     channelFlow {
                         Log.d(TAG, "Websocket: Init")
-                        val url =
-                            "wss://$host/websocket/tracker/websocket" + when (authenticationData) {
-                                is AccountService.AuthenticationData.LoggedIn -> {
-                                    "?access_token=${authenticationData.authToken}"
-                                }
-
-                                AccountService.AuthenticationData.NotLoggedIn -> ""
-                            }
+                        val url = "wss://$host/websocket/websocket"
 
                         val session = client
-                            .connect(url)
+                            .connect(url = url)
                             .withJsonConversions(jsonProvider.networkJsonConfiguration)
 
                         send(session)
@@ -105,7 +101,7 @@ class WebsocketProvider(
                         .retryWhen { e, attempt ->
                             // Never retry on cancellation
                             if (e !is CancellationException) {
-                                Log.d(TAG, "Websocket connection failure (attempt $attempt): $e.")
+                                Log.d(TAG, "Websocket connection failure (attempt $attempt)", e)
                                 // Either we wait the specified time, or we immediately try again when we have internet
                                 withTimeoutOrNull(1.seconds * attempt.toInt()) {
                                     networkStatusProvider.awaitInternetConnection()

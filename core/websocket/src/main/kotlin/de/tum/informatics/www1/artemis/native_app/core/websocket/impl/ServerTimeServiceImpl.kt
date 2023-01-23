@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
 import de.tum.informatics.www1.artemis.native_app.core.common.ClockWithOffset
 import de.tum.informatics.www1.artemis.native_app.core.common.offsetBy
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.retryNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
@@ -128,7 +129,7 @@ internal class ServerTimeServiceImpl(
                     }
 
                     contentType(ContentType.Application.Json)
-                    bearerAuth(authToken)
+                    cookieAuth(authToken)
                 }.body<Instant>()
             }
                 .bind { serverTime ->

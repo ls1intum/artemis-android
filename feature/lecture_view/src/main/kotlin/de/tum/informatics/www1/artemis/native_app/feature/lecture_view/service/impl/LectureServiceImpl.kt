@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lecture_view.service.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
@@ -22,7 +23,7 @@ class LectureServiceImpl(private val ktorProvider: KtorProvider) : LectureServic
                 }
 
                 contentType(ContentType.Application.Json)
-                bearerAuth(authToken)
+                cookieAuth(authToken)
             }.body()
         }
     }
@@ -50,7 +51,7 @@ class LectureServiceImpl(private val ktorProvider: KtorProvider) : LectureServic
                 }
 
                 contentType(ContentType.Application.Json)
-                bearerAuth(authToken)
+                cookieAuth(authToken)
             }
         }
     }

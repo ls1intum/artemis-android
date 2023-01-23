@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home
 
+import android.webkit.CookieManager
 import android.webkit.WebView
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.filled.*
@@ -91,6 +92,10 @@ internal fun ExerciseScreen(
                 WebViewState(WebContent.Url(url = currentUrl))
             } else null
         }
+    }
+
+    LaunchedEffect(serverUrl, authToken) {
+        CookieManager.getInstance().setCookie(serverUrl, "jwt=$authToken")
     }
 
     // Retain web view instance to avoid reloading when switching between tabs

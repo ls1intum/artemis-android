@@ -69,8 +69,8 @@ internal fun RegisterForCourseScreen(
     //CourseHeader requires url without trailing /
     val properServerUrl = remember(serverUrl) { serverUrl.dropLast(1) }
 
-    val bearerToken = when (authData) {
-        is AccountService.AuthenticationData.LoggedIn -> authData.asBearer
+    val authToken = when (authData) {
+        is AccountService.AuthenticationData.LoggedIn -> authData.authToken
         AccountService.AuthenticationData.NotLoggedIn -> ""
     }
 
@@ -101,7 +101,7 @@ internal fun RegisterForCourseScreen(
                 .padding(horizontal = 8.dp),
             courses = courses,
             serverUrl = properServerUrl,
-            bearerToken = bearerToken,
+            authToken = authToken,
             reloadCourses = viewModel::reloadRegistrableCourses,
             onClickSignup = { course ->
                 signUpCandidate = course
@@ -164,7 +164,7 @@ private fun RegisterForCourseContent(
     modifier: Modifier,
     courses: DataState<List<RegisterForCourseViewModel.SemesterCourses>>,
     serverUrl: String,
-    bearerToken: String,
+    authToken: String,
     reloadCourses: () -> Unit,
     onClickSignup: (Course) -> Unit
 ) {
@@ -202,7 +202,7 @@ private fun RegisterForCourseContent(
                         modifier = courseItemModifier,
                         course = course,
                         serverUrl = serverUrl,
-                        bearerToken = bearerToken,
+                        authToken = authToken,
                         onClickSignup = { onClickSignup(course) },
                         isCompact = isCompact
                     )
@@ -217,7 +217,7 @@ private fun RegistrableCourse(
     modifier: Modifier,
     course: Course,
     serverUrl: String,
-    bearerToken: String,
+    authToken: String,
     isCompact: Boolean,
     onClickSignup: () -> Unit
 ) {
@@ -245,7 +245,7 @@ private fun RegistrableCourse(
             modifier = modifier,
             course = course,
             serverUrl = serverUrl,
-            authorizationToken = bearerToken,
+            authorizationToken = authToken,
             content = content,
             compactCourseHeaderViewMode = CompactCourseHeaderViewMode.DESCRIPTION
         )
@@ -254,7 +254,7 @@ private fun RegistrableCourse(
             modifier = modifier,
             course = course,
             serverUrl = serverUrl,
-            authorizationToken = bearerToken,
+            authorizationToken = authToken,
             content = {
                 Text(
                     modifier = Modifier

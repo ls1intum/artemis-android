@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.service.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
@@ -26,7 +27,7 @@ class TextSubmissionServiceImpl(
                 }
                 contentType(ContentType.Application.Json)
                 setBody(textSubmission)
-                bearerAuth(authToken)
+                cookieAuth(authToken)
             }.body()
         }
     }
@@ -44,7 +45,7 @@ class TextSubmissionServiceImpl(
                 }
                 contentType(ContentType.Application.Json)
                 setBody<Submission>(textSubmission)
-                bearerAuth(authToken)
+                cookieAuth(authToken)
             }.body()
         }
     }

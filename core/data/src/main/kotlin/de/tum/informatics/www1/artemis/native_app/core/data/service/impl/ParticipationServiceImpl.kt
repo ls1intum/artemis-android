@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ParticipationService
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
@@ -21,7 +22,7 @@ internal class ParticipationServiceImpl(private val ktorProvider: KtorProvider) 
                 }
 
                 contentType(ContentType.Application.Json)
-                bearerAuth(authToken)
+                cookieAuth(authToken)
             }.body()
         }
     }
