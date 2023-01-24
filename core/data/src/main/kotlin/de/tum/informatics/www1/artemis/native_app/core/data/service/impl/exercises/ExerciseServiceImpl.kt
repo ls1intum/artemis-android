@@ -64,7 +64,7 @@ internal class ExerciseServiceImpl(
                 }.bodyAsText()
 
                 return@performNetworkCall try {
-                    jsonProvider.networkJsonConfiguration.decodeFromString<Instant>(timeString)
+                    jsonProvider.applicationJsonConfiguration.decodeFromString<Instant>(timeString)
                 } catch (e: SerializationException) {
                     null
                 }

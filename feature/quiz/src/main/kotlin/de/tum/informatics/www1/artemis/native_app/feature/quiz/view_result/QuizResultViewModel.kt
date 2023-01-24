@@ -44,7 +44,10 @@ internal class QuizResultViewModel(
 ) {
 
     val submission: StateFlow<DataState<QuizSubmission>> = when (quizType) {
-        is QuizType.PracticeResults -> emptyFlow()
+        is QuizType.PracticeResults -> if (quizType.result.submission as? QuizSubmission != null) {
+            flowOf(DataState.Success(quizType.result.submission as QuizSubmission))
+        } else flowOf(DataState.Failure(RuntimeException("No submission provide")))
+
         QuizType.ViewResults -> initialParticipationDataState
             .mapNotNull { initialParticipationDataState ->
                 initialParticipationDataState.transform { initialParticipation ->

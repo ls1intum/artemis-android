@@ -18,7 +18,7 @@ class KtorProvider(jsonProvider: JsonProvider) {
      */
     val ktorClient = HttpClient {
         install(ContentNegotiation) {
-            json(jsonProvider.networkJsonConfiguration)
+            json(jsonProvider.applicationJsonConfiguration)
         }
         install(WebSockets)
 

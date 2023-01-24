@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,13 +18,17 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.DestructiveMarkdownTextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.ViewQuizResultScreen
 import kotlinx.coroutines.Job
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -68,14 +73,35 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
 
         val quizType: QuizType.WorkableQuizType = Json.decodeFromString(quizTypeString)
 
-        val viewModel: QuizParticipationViewModel =
-            koinViewModel { parametersOf(courseId, exerciseId, quizType) }
+        val jsonProvider: JsonProvider = get()
 
-        QuizParticipationScreen(
-            modifier = Modifier.fillMaxSize(),
-            viewModel = viewModel,
-            onNavigateUp = onLeaveQuiz
-        )
+        var loadedViewableQuizType: QuizType.ViewableQuizType? by rememberSaveable(
+            stateSaver = Saver(save = {
+                jsonProvider.applicationJsonConfiguration.encodeToString(it)
+            }, restore = {
+                jsonProvider.applicationJsonConfiguration.decodeFromString(it)
+            })
+        ) { mutableStateOf(null) }
+
+        val currentViewableQuizType = loadedViewableQuizType
+        if (currentViewableQuizType == null) {
+            val viewModel: QuizParticipationViewModel =
+                koinViewModel { parametersOf(courseId, exerciseId, quizType) }
+
+            QuizParticipationScreen(
+                modifier = Modifier.fillMaxSize(),
+                viewModel = viewModel,
+                onNavigateUp = onLeaveQuiz,
+                onNavigateToInspectResult = { loadedViewableQuizType = it }
+            )
+        } else {
+            ViewQuizResultScreen(
+                modifier = Modifier.fillMaxSize(),
+                exerciseId = exerciseId,
+                quizType = currentViewableQuizType,
+                onNavigateUp = onLeaveQuiz
+            )
+        }
     }
 }
 
@@ -83,6 +109,7 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
 private fun QuizParticipationScreen(
     modifier: Modifier,
     viewModel: QuizParticipationViewModel,
+    onNavigateToInspectResult: (QuizType.ViewableQuizType) -> Unit,
     onNavigateUp: () -> Unit
 ) {
     val exerciseDataState = viewModel.quizExerciseDataState.collectAsState().value
@@ -165,6 +192,7 @@ private fun QuizParticipationScreen(
                 .fillMaxSize()
                 .padding(padding),
             viewModel = viewModel,
+            onNavigateToInspectResult = onNavigateToInspectResult,
             onNavigateUp = onNavigateUp
         )
 

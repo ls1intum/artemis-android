@@ -62,7 +62,6 @@ fun NavGraphBuilder.quizResults(onRequestLeaveQuizResults: () -> Unit) {
 
         ViewQuizResultScreen(
             modifier = Modifier.fillMaxSize(),
-            courseId = courseId,
             exerciseId = exerciseId,
             quizType = QuizType.ViewResults,
             onNavigateUp = onRequestLeaveQuizResults
@@ -73,7 +72,6 @@ fun NavGraphBuilder.quizResults(onRequestLeaveQuizResults: () -> Unit) {
 @Composable
 internal fun ViewQuizResultScreen(
     modifier: Modifier,
-    courseId: Long,
     exerciseId: Long,
     quizType: QuizType.ViewableQuizType,
     onNavigateUp: () -> Unit

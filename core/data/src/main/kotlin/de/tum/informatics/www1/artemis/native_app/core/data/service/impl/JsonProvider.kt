@@ -14,7 +14,7 @@ class JsonProvider {
     /**
      * The response json configuration.
      */
-    val networkJsonConfiguration = Json {
+    val applicationJsonConfiguration = Json {
         //Ignore unknown keys. If set to false, parsing JSON will throw an error when a new key is introduced.
         ignoreUnknownKeys = true
 

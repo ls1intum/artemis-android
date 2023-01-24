@@ -40,6 +40,7 @@ import org.hildan.krossbow.stomp.LostReceiptException
 import org.hildan.krossbow.stomp.headers.StompSendHeaders
 import java.util.*
 import kotlin.time.Duration.Companion.seconds
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result as SubmissionResult
 
 /**
  * This class persists the answers/solutions of the user in the saved state handle.
@@ -153,7 +154,10 @@ internal class QuizParticipationViewModel(
     )
 
     val haveAllQuestionsBeenAnswered: Flow<Boolean> =
-        combine(answeredQuestionCount, quizQuestionsRandomOrder) { answeredQuestionCount, quizQuestions ->
+        combine(
+            answeredQuestionCount,
+            quizQuestionsRandomOrder
+        ) { answeredQuestionCount, quizQuestions ->
             answeredQuestionCount == quizQuestions.size
         }
 
@@ -367,7 +371,13 @@ internal class QuizParticipationViewModel(
             QuizType.Practice -> uploadedSubmission.map { it != null }
         }
 
-
+    private val resultFromSubmission = MutableSharedFlow<SubmissionResult>()
+    val result: StateFlow<SubmissionResult?> =
+        merge(
+            latestParticipation.map { it.results.orEmpty().firstOrNull() },
+            resultFromSubmission
+        )
+            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     init {
         viewModelScope.launch {
@@ -453,9 +463,17 @@ internal class QuizParticipationViewModel(
                     submission, exerciseId, serverUrl, authToken
                 )
 
-                QuizType.Practice -> quizParticipationService.submitForPractice(
-                    submission, exerciseId, serverUrl, authToken
-                )
+                QuizType.Practice -> {
+                    val resultResponse = quizParticipationService.submitForPractice(
+                        submission, exerciseId, serverUrl, authToken
+                    )
+
+                    if (resultResponse is NetworkResponse.Response) {
+                        resultFromSubmission.emit(resultResponse.data)
+                    }
+
+                    resultResponse
+                }
             } is NetworkResponse.Response
 
             if (successful) {
@@ -702,7 +720,8 @@ internal class QuizParticipationViewModel(
                 newOptionSelectionMapping[optionId] = isSelected
 
                 val newMultipleChoiceData = multipleChoiceData.toMutableMap()
-                newMultipleChoiceData[questionId] = DirectMultipleChoiceStorageData(newOptionSelectionMapping)
+                newMultipleChoiceData[questionId] =
+                    DirectMultipleChoiceStorageData(newOptionSelectionMapping)
 
                 savedStateHandle[TAG_MULTIPLE_CHOICE_DATA] = newMultipleChoiceData
             }
@@ -724,7 +743,8 @@ internal class QuizParticipationViewModel(
                 newSolutionTexts[spotId] = newSolutionText
 
                 val newShortAnswerStorageData = shortAnswerData.toMutableMap()
-                newShortAnswerStorageData[questionId] = DirectShortAnswerStorageData(newSolutionTexts)
+                newShortAnswerStorageData[questionId] =
+                    DirectShortAnswerStorageData(newSolutionTexts)
 
                 savedStateHandle[TAG_SHORT_ANSWER_DATA] = newShortAnswerStorageData
             }

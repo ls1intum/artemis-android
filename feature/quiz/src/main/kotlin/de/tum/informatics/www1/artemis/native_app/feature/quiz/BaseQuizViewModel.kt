@@ -99,7 +99,7 @@ internal abstract class BaseQuizViewModel<
             }
         }
 
-        is QuizType.PracticeResults -> emptyFlow()
+        is QuizType.PracticeResults -> flowOf(DataState.Success(quizType.quizExercise))
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 

@@ -80,7 +80,7 @@ class WebsocketProvider(
 
                         val session = client
                             .connect(url = url)
-                            .withJsonConversions(jsonProvider.networkJsonConfiguration)
+                            .withJsonConversions(jsonProvider.applicationJsonConfiguration)
 
                         send(session)
 

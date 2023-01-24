@@ -9,11 +9,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizEndedScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.WaitForQuizStartScreen
@@ -35,6 +38,7 @@ import kotlin.time.Duration.Companion.seconds
 internal fun QuizParticipationUi(
     modifier: Modifier,
     viewModel: QuizParticipationViewModel,
+    onNavigateToInspectResult: (QuizType.ViewableQuizType) -> Unit,
     onNavigateUp: () -> Unit
 ) {
     val accountService: AccountService = get()
@@ -52,10 +56,30 @@ internal fun QuizParticipationUi(
 
     val serverClock by viewModel.serverClock.collectAsState(initial = Clock.System)
 
+    val result: Result? by viewModel.result.collectAsState()
+
     var joinBatchError: JoinBatchErrorType? by rememberSaveable { mutableStateOf(null) }
 
     var startBatchJob: Job? by remember { mutableStateOf(null) }
     var joinBatchJob: Job? by remember { mutableStateOf(null) }
+
+    LaunchedEffect(result, exerciseDataState) {
+        val currentResult = result
+        val currentQuestionData = exerciseDataState
+        if (currentResult != null) {
+            when (viewModel.quizType) {
+                QuizType.Live -> onNavigateToInspectResult(QuizType.ViewResults)
+                QuizType.Practice -> if (currentQuestionData is DataState.Success) {
+                    onNavigateToInspectResult(
+                        QuizType.PracticeResults(
+                            currentQuestionData.data,
+                            currentResult
+                        )
+                    )
+                }
+            }
+        }
+    }
 
     BasicDataStateUi(
         modifier = modifier,
