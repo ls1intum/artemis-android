@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.question
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -25,8 +25,10 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.header.QuizQuestionHeader
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.header.toQuizQuestionHeaderType
 
 private val spotRegExpo = "\\[-spot\\s*([0-9]+)]".toRegex()
 
@@ -104,10 +106,11 @@ internal fun ShortAnswerQuizQuestionUi(
     Column(modifier = modifier) {
         QuizQuestionHeader(
             modifier = Modifier.fillMaxWidth(),
-            questionIndex = questionIndex,
-            onRequestDisplayHint = onRequestDisplayHint,
             question = question,
-            type = data.toQuizQuestionHeaderType()
+            questionIndex = questionIndex,
+            type = data.toQuizQuestionHeaderType(
+                onRequestDisplayHint
+            )
         )
 
         Text(

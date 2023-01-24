@@ -1,15 +1,17 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionBodyText
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionHeader
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body.DragAndDropQuizQuestionBody
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.toQuizQuestionHeaderType
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.QuizQuestionBodyText
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.DragAndDropQuizQuestionBody
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.header.QuizQuestionHeader
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.header.toQuizQuestionHeaderType
 
 /**
  * Draw the header and the body of the drag and drop quiz question
@@ -27,10 +29,11 @@ internal fun DragAndDropQuizQuestionUi(
     Column(modifier = modifier) {
         QuizQuestionHeader(
             modifier = Modifier.fillMaxWidth(),
-            questionIndex = questionIndex,
-            onRequestDisplayHint = onRequestDisplayHint,
             question = question,
-            type = data.toQuizQuestionHeaderType()
+            questionIndex = questionIndex,
+            type = data.toQuizQuestionHeaderType(
+                onRequestDisplayHint = onRequestDisplayHint
+            )
         )
 
         Column(

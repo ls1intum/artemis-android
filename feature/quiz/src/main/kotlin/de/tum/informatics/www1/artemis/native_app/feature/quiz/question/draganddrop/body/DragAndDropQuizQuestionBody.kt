@@ -1,29 +1,26 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body
 
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionInstructionText
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.*
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body.work_area.DragAndDropAreaType
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body.work_area.DragAndDropWorkArea
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.QuizQuestionInstructionText
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.*
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.work_area.DragAndDropAreaType
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.work_area.DragAndDropWorkArea
 import io.ktor.http.*
 
 @Composable

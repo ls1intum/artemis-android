@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop
 
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 

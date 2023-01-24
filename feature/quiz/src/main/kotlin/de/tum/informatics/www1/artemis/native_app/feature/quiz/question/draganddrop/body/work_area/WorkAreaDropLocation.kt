@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body.work_area
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.work_area
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -16,16 +16,11 @@ import androidx.compose.ui.zIndex
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultMedium
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultSuccess
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.DragTargetInfo
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.LocalDragTargetInfo
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body.*
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body.DragItemDraggableContainer
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body.DragItemUiElement
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body.DragItemUiElementContent
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body.backgroundPictureServerUrl
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body.dragItemOutlineColor
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.dragOffset
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.dragPosition
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.DragTargetInfo
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.LocalDragTargetInfo
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.*
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragOffset
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragPosition
 
 private val dropTargetColorNotDragging: Color
     @Composable get() = Color.White

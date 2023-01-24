@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body.work_area
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.work_area
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints

@@ -75,6 +75,7 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
 
         val jsonProvider: JsonProvider = get()
 
+        // When this is set, instead of participating a result screen is displayed
         var loadedViewableQuizType: QuizType.ViewableQuizType? by rememberSaveable(
             stateSaver = Saver(save = {
                 jsonProvider.applicationJsonConfiguration.encodeToString(it)

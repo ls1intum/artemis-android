@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme

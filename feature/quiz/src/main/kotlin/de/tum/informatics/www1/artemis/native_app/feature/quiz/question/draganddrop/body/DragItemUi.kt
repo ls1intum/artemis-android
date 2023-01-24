@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.body
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,8 +25,8 @@ import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.DragTargetInfo
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.LocalDragTargetInfo
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.DragTargetInfo
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.LocalDragTargetInfo
 import io.ktor.http.*
 
 private val dragItemBackgroundColor: Color

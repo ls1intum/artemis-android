@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.question
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -49,7 +49,11 @@ private fun TextImpl(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Icon(imageVector = icon, contentDescription = null)
+        Icon(
+            modifier = Modifier.align(Alignment.Top),
+            imageVector = icon,
+            contentDescription = null
+        )
 
         MarkdownText(markdown = text, style = style)
     }

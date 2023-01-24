@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.question
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text

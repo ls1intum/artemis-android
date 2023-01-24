@@ -13,9 +13,9 @@ import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.ShortAnswerQuizQuestionUi
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.draganddrop.DragAndDropQuizQuestionUi
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.multiple_choice.MultipleChoiceQuizQuestionUi
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.ShortAnswerQuizQuestionUi
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.DragAndDropQuizQuestionUi
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.multiple_choice.MultipleChoiceQuizQuestionUi
 
 @Composable
 internal fun QuizQuestionBody(

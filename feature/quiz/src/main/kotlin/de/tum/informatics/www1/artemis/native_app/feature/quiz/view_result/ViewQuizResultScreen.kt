@@ -1,8 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -11,11 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -27,13 +22,11 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExerci
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePointsDecimalFormat
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import java.text.DecimalFormat
 
 fun NavController.navigateToQuizResult(
     courseId: Long,
@@ -121,55 +114,18 @@ internal fun ViewQuizResultScreen(
             retryButtonText = stringResource(id = R.string.quiz_result_try_again),
             onClickRetry = viewModel::retryLoadExercise
         ) { data ->
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                QuizScoreResultOverview(
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
-                    achievedPoints = data.submission.scoreInPoints ?: 0.0,
-                    maxPoints = data.maxPoints
-                )
-
-                QuizResultUi(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    quizQuestions = data.quizExercise.quizQuestions,
-                    quizQuestionsWithData = data.quizQuestions,
-                    serverUrl = serverUrl,
-                    authToken = authToken
-                )
-            }
+            QuizResultUi(
+                modifier = Modifier.fillMaxSize(),
+                quizQuestions = data.quizExercise.quizQuestions,
+                quizQuestionsWithData = data.quizQuestions,
+                serverUrl = serverUrl,
+                authToken = authToken,
+                achievedPoints = data.submission.scoreInPoints ?: 0.0,
+                maxPoints = data.maxPoints,
+                quizTitle = data.quizExercise.title.orEmpty()
+            )
         }
     }
-}
-
-@Composable
-private fun QuizScoreResultOverview(modifier: Modifier, achievedPoints: Double, maxPoints: Int) {
-    val achievedPointsFormatted = remember(achievedPoints) {
-        ExercisePointsDecimalFormat.format(achievedPoints)
-    }
-
-    val maxPointsFormatted = remember(maxPoints) {
-        ExercisePointsDecimalFormat.format(maxPoints)
-    }
-
-    val percentFormatted = remember(achievedPoints, maxPoints) {
-        val percent = achievedPoints.toFloat() / maxPoints.toFloat()
-        DecimalFormat.getPercentInstance().format(percent)
-    }
-
-    Text(
-        modifier = modifier,
-        text = stringResource(
-            id = R.string.quiz_result_score_result,
-            achievedPointsFormatted,
-            maxPointsFormatted,
-            percentFormatted
-        ),
-        style = MaterialTheme.typography.bodyLarge,
-        fontWeight = FontWeight.Bold
-    )
 }
 
 private fun <A, B, C, D, E, F> joinMultiple(

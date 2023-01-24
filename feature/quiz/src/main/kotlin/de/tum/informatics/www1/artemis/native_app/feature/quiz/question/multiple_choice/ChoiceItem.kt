@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.multiple_choice
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.question.multiple_choice
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -7,7 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -16,8 +16,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultBad
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultMedium
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultSuccess
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.ExplanationText
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.HelpText
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.ExplanationText
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.HelpText
 
 sealed interface ChoiceItemType {
     data class ViewResult(

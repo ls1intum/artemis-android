@@ -14,9 +14,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizQuestionBody
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizQuestionBody
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 

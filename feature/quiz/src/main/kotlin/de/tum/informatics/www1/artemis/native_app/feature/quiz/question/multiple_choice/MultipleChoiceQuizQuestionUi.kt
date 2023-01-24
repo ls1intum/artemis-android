@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.multiple_choice
+package de.tum.informatics.www1.artemis.native_app.feature.quiz.question.multiple_choice
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,12 +10,11 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.*
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.ExplanationText
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionBodyText
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionHeader
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.QuizQuestionInstructionText
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.question.toQuizQuestionHeaderType
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.ExplanationText
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.QuizQuestionBodyText
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.QuizQuestionInstructionText
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.header.QuizQuestionHeader
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.header.toQuizQuestionHeaderType
 
 @Composable
 internal fun MultipleChoiceQuizQuestionUi(
@@ -28,10 +27,11 @@ internal fun MultipleChoiceQuizQuestionUi(
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         QuizQuestionHeader(
             modifier = Modifier.fillMaxWidth(),
-            questionIndex = questionIndex,
-            onRequestDisplayHint = onRequestDisplayHint,
             question = data.question,
-            type = data.toQuizQuestionHeaderType()
+            questionIndex = questionIndex,
+            type = data.toQuizQuestionHeaderType(
+                onRequestDisplayHint = onRequestDisplayHint
+            )
         )
 
         QuizQuestionBodyText(
