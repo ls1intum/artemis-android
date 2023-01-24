@@ -84,7 +84,7 @@ internal fun ViewQuizResultScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(text = "Results") },
+                title = { Text(text = stringResource(id = R.string.quiz_results_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
                         Icon(

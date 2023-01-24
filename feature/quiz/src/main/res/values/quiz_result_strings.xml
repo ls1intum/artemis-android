@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="quiz_results_title">View quiz results</string>
+
     <string name="quiz_result_score_result">You completed the quiz with %1$s out of %2$s points (%3$s).</string>
 
     <string name="quiz_result_loading">Loading quiz results…</string>

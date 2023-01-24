@@ -19,6 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateU
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizEndedScreen
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizEndedScreenType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.WaitForQuizStartScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.WorkOnQuizQuestionsScreen
 import kotlinx.coroutines.Job
@@ -118,9 +119,23 @@ internal fun QuizParticipationUi(
                 }
             )
         } else if (hasQuizEnded) {
+            var submittingJob: Job? by remember { mutableStateOf(null) }
+
             QuizEndedScreen(
                 modifier = Modifier.fillMaxSize(),
-                onRequestLeave = onNavigateUp
+                type = when (viewModel.quizType) {
+                    QuizType.Live -> QuizEndedScreenType.Live(
+                        onRequestLeave = onNavigateUp
+                    )
+                    QuizType.Practice -> QuizEndedScreenType.Practice(
+                        onRequestSubmit = {
+                            submittingJob = viewModel.submit {
+                                submittingJob = null
+                            }
+                        },
+                        isSubmitting = submittingJob != null
+                    )
+                }
             )
         } else {
             val questionWithDataDataState by viewModel.quizQuestionsWithData.collectAsState()

@@ -38,7 +38,11 @@ internal fun QuizResultUi(
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
 
-    val selectedQuestionIndex by remember { derivedStateOf { lazyListState.firstVisibleItemIndex } }
+    val selectedQuestionIndex by remember {
+        derivedStateOf {
+            (lazyListState.firstVisibleItemIndex - 1).coerceAtLeast(0)
+        }
+    }
 
     Column(
         modifier = modifier,
@@ -82,7 +86,6 @@ internal fun QuizResultUi(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(max = 800.dp)
                             .border(
                                 width = 1.dp,
                                 color = if (isCorrect) resultSuccess else resultMedium

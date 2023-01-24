@@ -1,9 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,8 +11,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 
+sealed interface QuizEndedScreenType {
+    data class Live(val onRequestLeave: () -> Unit) : QuizEndedScreenType
+
+    data class Practice(
+        val onRequestSubmit: () -> Unit,
+        val isSubmitting: Boolean
+    ) : QuizEndedScreenType
+}
+
 @Composable
-internal fun QuizEndedScreen(modifier: Modifier, onRequestLeave: () -> Unit) {
+internal fun QuizEndedScreen(modifier: Modifier, type: QuizEndedScreenType) {
     Box(modifier = modifier) {
         Column(
             modifier = Modifier
@@ -24,19 +31,36 @@ internal fun QuizEndedScreen(modifier: Modifier, onRequestLeave: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val (text, buttonText) = when (type) {
+                is QuizEndedScreenType.Live ->
+                    R.string.quiz_participation_quiz_ended_live_text to R.string.quiz_participation_quiz_ended_leave_button
+                is QuizEndedScreenType.Practice ->
+                    R.string.quiz_participation_quiz_ended_practice_text to R.string.quiz_participation_quiz_ended_submit_button
+            }
+
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.quiz_participation_quiz_ended_text),
+                text = stringResource(id = text),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
 
+            val isSubmitting = type is QuizEndedScreenType.Practice && type.isSubmitting
+
             Button(
                 modifier = Modifier,
-                onClick = onRequestLeave
+                enabled = !isSubmitting,
+                onClick = when (type) {
+                    is QuizEndedScreenType.Live -> type.onRequestLeave
+                    is QuizEndedScreenType.Practice -> type.onRequestSubmit
+                }
             ) {
-                Text(text = stringResource(id = R.string.quiz_participation_quiz_ended_leave_button))
+                Text(text = stringResource(id = buttonText))
+            }
+
+            if (isSubmitting) {
+                CircularProgressIndicator()
             }
         }
     }

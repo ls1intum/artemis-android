@@ -52,11 +52,11 @@ internal class QuizParticipationViewModel(
     val quizType: QuizType.WorkableQuizType,
     private val savedStateHandle: SavedStateHandle,
     private val quizExerciseService: QuizExerciseService,
-    private val networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val quizParticipationService: QuizParticipationService,
     private val websocketProvider: WebsocketProvider,
+    networkStatusProvider: NetworkStatusProvider,
     participationService: ParticipationService,
     serverTimeService: ServerTimeService
 ) : BaseQuizViewModel<QuizParticipationViewModel.DirectShortAnswerStorageData, QuizParticipationViewModel.DirectDragAndDropStorageData, QuizParticipationViewModel.DirectMultipleChoiceStorageData>(
@@ -368,7 +368,11 @@ internal class QuizParticipationViewModel(
                         || latestSubmission.submitted == true
             }
 
-            QuizType.Practice -> uploadedSubmission.map { it != null }
+            QuizType.Practice ->
+                merge(
+                    uploadedSubmission.map { it != null },
+                    endDate.flatMapLatest { it.hasPassedFlow() }
+                )
         }
 
     private val resultFromSubmission = MutableSharedFlow<SubmissionResult>()
@@ -430,6 +434,16 @@ internal class QuizParticipationViewModel(
             fillSavedStateHandleFromSubmission(initialSubmission)
 
             hasStoredInitialSubmission.value = true
+        }
+
+        if (quizType is QuizType.Practice) {
+            viewModelScope.launch {
+                // Wait for the quiz to end
+                quizEndedStatus.first { it }
+
+                // Submit to display results. The ui handles displaying the results automatically
+                submit { }
+            }
         }
     }
 
