@@ -6,7 +6,6 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +24,8 @@ import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.DragTargetInfo
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.LocalDragTargetInfo
 import io.ktor.http.*
@@ -91,8 +92,7 @@ internal fun DragItemUiElementContent(
                 modifier = Modifier,
                 text = text,
                 style = MaterialTheme.typography.bodySmall,
-                color = fontColor,
-                fontSize = fontSize
+                color = fontColor
             )
         }
     }
@@ -169,23 +169,15 @@ private fun AutosizeText(
     modifier: Modifier,
     text: String,
     style: TextStyle,
-    fontSize: TextUnit,
     maxLines: Int = Int.MAX_VALUE,
     color: Color = Color.Unspecified
 ) {
-    var textSize by remember { mutableStateOf(fontSize) }
-
-    Text(
+    AutoResizeText(
         modifier = modifier,
         text = text,
-        style = style,
-        maxLines = maxLines,
+        fontSizeRange = FontSizeRange(min = 8.sp, max = 24.sp, step = 1.sp),
         color = color,
-        fontSize = textSize,
-        onTextLayout = { result ->
-            if (result.isLineEllipsized(result.lineCount - 1)) {
-                textSize *= 0.9
-            }
-        }
+        style = style,
+        maxLines = maxLines
     )
 }

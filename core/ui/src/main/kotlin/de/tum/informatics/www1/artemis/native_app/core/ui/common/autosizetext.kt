@@ -1,5 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.common
 
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -37,42 +40,45 @@ fun AutoResizeText(
     maxLines: Int = Int.MAX_VALUE,
     style: TextStyle = LocalTextStyle.current,
 ) {
-    var fontSizeValue by remember { mutableStateOf(fontSizeRange.max.value) }
-    var readyToDraw by remember { mutableStateOf(false) }
+    BoxWithConstraints(modifier) {
+        var fontSizeValue by remember(maxWidth, maxHeight) { mutableStateOf(fontSizeRange.max.value) }
+        var readyToDraw by remember(maxWidth, maxHeight) { mutableStateOf(false) }
 
-    Text(
-        text = text,
-        color = color,
-        maxLines = maxLines,
-        fontStyle = fontStyle,
-        fontWeight = fontWeight,
-        fontFamily = fontFamily,
-        letterSpacing = letterSpacing,
-        textDecoration = textDecoration,
-        textAlign = textAlign,
-        lineHeight = lineHeight,
-        overflow = overflow,
-        softWrap = softWrap,
-        style = style,
-        fontSize = fontSizeValue.sp,
-        onTextLayout = {
-            if (it.didOverflowHeight && !readyToDraw) {
-                val nextFontSizeValue = fontSizeValue - fontSizeRange.step.value
-                if (nextFontSizeValue <= fontSizeRange.min.value) {
-                    // Reached minimum, set minimum font size and it's readToDraw
-                    fontSizeValue = fontSizeRange.min.value
-                    readyToDraw = true
+        Text(
+            text = text,
+            color = color,
+            maxLines = maxLines,
+            fontStyle = fontStyle,
+            fontWeight = fontWeight,
+            fontFamily = fontFamily,
+            letterSpacing = letterSpacing,
+            textDecoration = textDecoration,
+            textAlign = textAlign,
+            lineHeight = lineHeight,
+            overflow = overflow,
+            softWrap = softWrap,
+            style = style,
+            fontSize = fontSizeValue.sp,
+            onTextLayout = {
+                if (it.didOverflowHeight && !readyToDraw) {
+                    val nextFontSizeValue = fontSizeValue - fontSizeRange.step.value
+                    if (nextFontSizeValue <= fontSizeRange.min.value) {
+                        // Reached minimum, set minimum font size and it's readToDraw
+                        fontSizeValue = fontSizeRange.min.value
+                        readyToDraw = true
+                    } else {
+                        // Text doesn't fit yet and haven't reached minimum text range, keep decreasing
+                        fontSizeValue = nextFontSizeValue
+                    }
                 } else {
-                    // Text doesn't fit yet and haven't reached minimum text range, keep decreasing
-                    fontSizeValue = nextFontSizeValue
+                    // Text fits before reaching the minimum, it's readyToDraw
+                    readyToDraw = true
                 }
-            } else {
-                // Text fits before reaching the minimum, it's readyToDraw
-                readyToDraw = true
-            }
-        },
-        modifier = modifier.drawWithContent { if (readyToDraw) drawContent() }
-    )
+            },
+            modifier = Modifier.drawWithContent { if (readyToDraw) drawContent() }
+        )
+    }
+
 }
 
 data class FontSizeRange(
