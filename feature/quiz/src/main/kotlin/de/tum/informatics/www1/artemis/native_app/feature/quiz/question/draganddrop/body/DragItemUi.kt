@@ -128,6 +128,11 @@ internal fun DragItemDraggableContainer(
         currentDragTargetInfo.currentDragTargetInfo = DragTargetInfo.NotDragging
     }
 
+    // We need to wrap the onDragRelease in a wrapper so that pointInput can always access the latest one
+    // We cannot put onDragRelease as a restart parameter of pointer input, as then the drag and drop no longer works
+    val onDragReleaseWrapper = remember { mutableStateOf(onDragRelease) }
+    onDragReleaseWrapper.value = onDragRelease
+
     Box(
         modifier = modifier
             .onGloballyPositioned {
@@ -144,7 +149,7 @@ internal fun DragItemDraggableContainer(
                         selfTargetInfo.dragOffset += Offset(dragAmount.x, dragAmount.y)
                     }, onDragEnd = {
                         onDragDone()
-                        onDragRelease()
+                        onDragReleaseWrapper.value.invoke()
                     }, onDragCancel = {
                         onDragDone()
                     }
