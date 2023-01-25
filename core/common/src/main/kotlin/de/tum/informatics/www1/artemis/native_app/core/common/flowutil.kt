@@ -53,3 +53,16 @@ fun <A, B, C, D> flatMapLatest(
     return combine(flow1, flow2, flow3) { a, b, c -> Triple(a, b, c) }
         .flatMapLatest { (a, b, c) -> transform(a, b, c) }
 }
+
+fun <A, B, C, D, E> flatMapLatest(
+    flow1: Flow<A>,
+    flow2: Flow<B>,
+    flow3: Flow<C>,
+    flow4: Flow<D>,
+    transform: suspend (A, B, C, D) -> Flow<E>
+): Flow<E> {
+    return combine(flow1, flow2, flow3, flow4, ::Quadruple)
+        .flatMapLatest { (a, b, c, d) -> transform(a, b, c, d) }
+}
+
+private data class Quadruple<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)

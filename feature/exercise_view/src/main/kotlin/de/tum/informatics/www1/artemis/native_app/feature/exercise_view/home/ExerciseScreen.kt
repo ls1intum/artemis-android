@@ -46,7 +46,7 @@ internal fun ExerciseScreen(
     val serverUrl: String by viewModel.serverUrl.collectAsState()
     val authToken: String by viewModel.authToken.collectAsState()
 
-    val exerciseDataState by viewModel.exercise.collectAsState()
+    val exerciseDataState by viewModel.exerciseDataState.collectAsState()
 
     val courseId: Long? = exerciseDataState.courseId
 

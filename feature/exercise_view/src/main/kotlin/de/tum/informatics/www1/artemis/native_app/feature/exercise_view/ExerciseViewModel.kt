@@ -5,7 +5,7 @@ import android.content.Context
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
+import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.*
 import de.tum.informatics.www1.artemis.native_app.core.data.service.BuildLogService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseExerciseService
@@ -14,9 +14,11 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.ResultServic
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.feedback.Feedback
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.BuildLogEntry
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.ProgrammingSubmission
@@ -39,6 +41,7 @@ internal class ExerciseViewModel(
     private val resultService: ResultService,
     private val buildLogService: BuildLogService,
     private val courseExerciseService: CourseExerciseService,
+    private val networkStatusProvider: NetworkStatusProvider,
     private val context: Context
 ) : ViewModel() {
 
@@ -60,11 +63,13 @@ internal class ExerciseViewModel(
     private val fetchedExercise: Flow<DataState<Exercise>> =
         baseConfigurationFlow
             .flatMapLatest { (serverUrl, authToken) ->
-                exerciseService.getExerciseDetails(
-                    exerciseId,
-                    serverUrl,
-                    authToken
-                )
+                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                    exerciseService.getExerciseDetails(
+                        exerciseId,
+                        serverUrl,
+                        authToken
+                    )
+                }
             }
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
@@ -76,7 +81,7 @@ internal class ExerciseViewModel(
     /**
      * Emits the exercise updated with the latest participations and results
      */
-    val exercise: StateFlow<DataState<Exercise>> =
+    val exerciseDataState: StateFlow<DataState<Exercise>> =
         fetchedExercise
             .transformLatest { exercise ->
                 when (exercise) {
@@ -109,76 +114,81 @@ internal class ExerciseViewModel(
     val latestIndividualDueDate: StateFlow<DataState<Instant?>> =
         baseConfigurationFlow
             .flatMapLatest { (serverUrl, authToken) ->
-                exerciseService.getLatestDueDate(
-                    exerciseId,
-                    serverUrl,
-                    authToken
-                )
+                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                    exerciseService.getLatestDueDate(
+                        exerciseId,
+                        serverUrl,
+                        authToken
+                    )
+                }
             }
             .stateIn(viewModelScope, SharingStarted.Lazily)
 
     /**
      * The latest result for the exercise.
      */
-    val latestResult: StateFlow<DataState<Result?>> =
-        transformLatest(
-            exercise,
-            serverConfigurationService.serverUrl,
-            accountService.authToken
-        ) { exerciseData, serverUrl, authToken ->
-            when (exerciseData) {
-                is DataState.Success -> {
-                    val participation =
-                        exerciseData.data.studentParticipations.orEmpty().firstOrNull()
-                    val participationId = participation?.id
-                    val latestResult = participation?.results.orEmpty().firstOrNull()
+    val latestResultDataState: StateFlow<DataState<Result?>> =
+        exerciseDataState.map { exerciseData ->
+            exerciseData.bind { exercise ->
+                val participation =
+                    exercise.studentParticipations.orEmpty().firstOrNull()
 
-                    if (latestResult == null || latestResult.feedbacks.orEmpty().isNotEmpty()) {
-                        emit(DataState.Success(latestResult))
-                    } else {
-                        //Feedback is missing, fetch from server
-                        val resultId = latestResult.id
-                        if (participationId != null && resultId != null) {
-                            emitAll(
-                                resultService
-                                    .getFeedbackDetailsForResult(
-                                        participationId,
-                                        resultId,
-                                        serverUrl,
-                                        authToken
-                                    )
-                                    .map { feedbackListDataState ->
-                                        feedbackListDataState.bind<Result?> { loadedFeedbacksList ->
-                                            latestResult.copy(feedbacks = loadedFeedbacksList)
-                                        }
-                                    }
-                            )
-                        }
-                    }
-                }
-
-                else -> {
-                    emit(exerciseData.bind<Result?> { null })
-                }
+                participation?.results.orEmpty().sortedByDescending { it.completionDate }
+                    .firstOrNull()
             }
         }
             .stateIn(viewModelScope, SharingStarted.Lazily)
 
     val feedbackItems: StateFlow<DataState<List<FeedbackItem>>> =
-        combine(
-            exercise,
-            latestResult
-        ) { a, b -> a to b }
-            .map { (exercise, latestResultDataState) ->
-                if (exercise.isSuccess) {
-                    latestResultDataState.bind {
-                        createFeedbackItems(
-                            exercise.orThrow(),
-                            it?.feedbacks.orEmpty()
-                        )
-                    }
-                } else exercise.bind { emptyList() }
+        flatMapLatest(
+            exerciseDataState,
+            latestResultDataState,
+            serverConfigurationService.serverUrl,
+            accountService.authToken
+        ) { exerciseDataState, latestResultDataState, serverUrl, authToken ->
+            when (val joinedDataState = exerciseDataState join latestResultDataState) {
+                is DataState.Success -> {
+                    val (exercise, latestResult) = joinedDataState.data
+                    if (latestResult != null) {
+                        val feedbacks = latestResult.feedbacks
+                        if (feedbacks == null) {
+                            // Load feedback
+
+                            val participation =
+                                exercise.studentParticipations.orEmpty().firstOrNull()
+
+                            retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                                resultService.getFeedbackDetailsForResult(
+                                    latestResult.participation?.id ?: participation?.id ?: 0,
+                                    resultId = latestResult.id ?: 0,
+                                    serverUrl = serverUrl,
+                                    authToken = authToken
+                                )
+                            }
+                                .map { feedbackDataState ->
+                                    feedbackDataState.bind { feedback ->
+                                        createFeedbackItems(exercise, feedback)
+                                    }
+                                }
+                        } else {
+                            flowOf(
+                                DataState.Success(
+                                    createFeedbackItems(
+                                        exercise,
+                                        feedbacks
+                                    )
+                                )
+
+                            )
+                        }
+                    } else emptyFlow()
+
+                }
+                else -> {
+                    flowOf(joinedDataState.bind { emptyList<FeedbackItem>() })
+                }
             }
+        }
             .stateIn(viewModelScope, SharingStarted.Lazily)
 
     /**
@@ -186,7 +196,7 @@ internal class ExerciseViewModel(
      * Furthermore, the loaded exercise must already have a submission.
      */
     val buildLogs: StateFlow<DataState<List<BuildLogEntry>>> =
-        exercise
+        exerciseDataState
             .map { exerciseDataState -> exerciseDataState.bind<Exercise?> { it }.orElse(null) }
             .filterNotNull()
             .filterIsInstance<ProgrammingExercise>()
@@ -194,7 +204,7 @@ internal class ExerciseViewModel(
                 val participationId = exercise.studentParticipations.orEmpty().firstOrNull()?.id
                     ?: return@flatMapLatest emptyFlow()
 
-                latestResult
+                latestResultDataState
                     .filter {
                         if (it !is DataState.Success) return@filter false
                         val submission = it.data?.submission

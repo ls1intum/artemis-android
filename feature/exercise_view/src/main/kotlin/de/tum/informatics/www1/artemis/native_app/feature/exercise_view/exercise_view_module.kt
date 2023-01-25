@@ -20,6 +20,7 @@ val exerciseViewModule = module {
             get(),
             get(),
             get(),
+            get(),
             androidContext()
         )
     }

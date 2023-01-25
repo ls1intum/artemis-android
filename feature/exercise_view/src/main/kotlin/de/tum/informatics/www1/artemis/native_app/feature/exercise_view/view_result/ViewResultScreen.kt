@@ -37,9 +37,9 @@ internal fun ViewResultScreen(
             )
         }
     ) { padding ->
-        val exerciseDataState = viewModel.exercise.collectAsState().value
+        val exerciseDataState = viewModel.exerciseDataState.collectAsState().value
 
-        val latestResultDataState by viewModel.latestResult.collectAsState()
+        val latestResultDataState by viewModel.latestResultDataState.collectAsState()
 
         val latestIndividualDueDate by viewModel.latestIndividualDueDate.collectAsState()
 

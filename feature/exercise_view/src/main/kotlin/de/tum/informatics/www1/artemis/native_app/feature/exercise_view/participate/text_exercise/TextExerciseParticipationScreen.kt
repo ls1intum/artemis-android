@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material3.*
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -22,11 +21,9 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.isInitializationAfterDueDate
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
-import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.isInFuture
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.*
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ProblemStatementWebView
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
@@ -42,7 +39,7 @@ internal fun TextExerciseParticipationScreen(
     participationId: Long,
     onNavigateUp: () -> Unit
 ) {
-    val exerciseDataState by viewModel.exercise.collectAsState()
+    val exerciseDataState by viewModel.exerciseDataState.collectAsState()
     val courseId: Long? = exerciseDataState.courseId
 
     EmptyDataStateUi(dataState = exerciseDataState) { exercise ->

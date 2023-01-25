@@ -23,9 +23,13 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Programmin
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.BuildLogEntry
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.isPreliminary
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.isInFuture
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePointsDecimalFormat
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultBad
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultMedium
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultSuccess
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import java.text.DecimalFormat
@@ -42,15 +46,12 @@ internal fun ResultDetailUi(
     latestIndividualDueDate: Instant?,
     buildLogs: List<BuildLogEntry>
 ) {
-    val showMissingAutomaticFeedbackInformation = remember(latestIndividualDueDate) {
-        if (latestIndividualDueDate == null) {
-            false
-        } else {
-            Clock.System.now() < latestIndividualDueDate
-        }
-    }
+    val showMissingAutomaticFeedbackInformation = latestIndividualDueDate?.isInFuture() ?: false
 
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         if (showMissingAutomaticFeedbackInformation) {
             MissingFeedbackInformation(
                 modifier = Modifier.fillMaxWidth(),
@@ -168,14 +169,6 @@ private fun ScoreSection(
     exercise: Exercise,
     latestResult: Result
 ) {
-    val pointDecimalFormat = remember {
-        DecimalFormat("#.##")
-    }
-
-    val scoreDecimalFormat = remember {
-        DecimalFormat.getPercentInstance()
-    }
-
     Column(modifier = modifier) {
         Text(
             text = stringResource(id = R.string.result_view_score_section_title),
@@ -184,19 +177,20 @@ private fun ScoreSection(
 
         val userScore = latestResult.score
         val achievableScore = exercise.maxPoints
+        val achievedPoints = userScore?.let { userScore / 100f * (achievableScore ?: 0f) }
 
         if (userScore != null && achievableScore != null) {
-            val formattedAchievedPoints = remember(userScore) {
-                pointDecimalFormat.format(userScore)
+            val formattedAchievedPoints = remember(achievedPoints) {
+                ExercisePointsDecimalFormat.format(achievedPoints)
             }
 
             val formattedAchievablePoints = remember(achievableScore) {
-                pointDecimalFormat.format(achievableScore)
+                ExercisePointsDecimalFormat.format(achievableScore)
             }
 
             val formattedAchievedPercent = remember(userScore, achievableScore) {
-                val percent = userScore / achievableScore
-                scoreDecimalFormat.format(percent)
+                val percent = userScore / 100f
+                DecimalFormat.getPercentInstance().format(percent)
             }
 
             Text(
@@ -292,9 +286,9 @@ private fun ScoreResultsCard(
                 }
             }
 
-            Bar(chartValues.positivePointsPercentage.toFloat(), Color.Green)
-            Bar(chartValues.warningPointsPercentage.toFloat(), Color.Yellow)
-            Bar(chartValues.errorPointsPercentage.toFloat(), Color.Red)
+            Bar(chartValues.positivePointsPercentage.toFloat(), resultSuccess)
+            Bar(chartValues.warningPointsPercentage.toFloat(), resultMedium)
+            Bar(chartValues.errorPointsPercentage.toFloat(), resultBad)
             Bar(chartValues.nothingPercentage.toFloat(), Color.Gray)
         }
 
@@ -328,7 +322,6 @@ private fun ScoreResultsCard(
 
 }
 
-private val pointDecimalFormat = DecimalFormat("00.00")
 private val percentageFormat = DecimalFormat.getPercentInstance()
 
 @Composable
@@ -340,7 +333,7 @@ private fun ScoreResult(
     colors: CardColors
 ) {
     val pointText = remember(points) {
-        pointDecimalFormat.format(points)
+        ExercisePointsDecimalFormat.format(points)
     }
 
     val percentageText = remember(percentage) {
