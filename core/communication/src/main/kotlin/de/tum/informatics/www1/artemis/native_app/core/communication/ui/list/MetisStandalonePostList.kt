@@ -106,81 +106,79 @@ internal fun MetisStandalonePostList(
                 }
 
                 else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = listContentPadding,
-                        state = state
-                    ) {
-                        onClickCreatePost?.let {
-                            item {
-                                CreatePostButton(modifier = Modifier, onClick = it)
-                            }
-                        }
-
-                        items(posts, key = { it.clientPostId }) { post ->
-                            val asAffectedPost = post?.let {
-                                MetisService.AffectedPost.Standalone(it.serverPostId)
-                            }
-                            PostItem(
-                                modifier = Modifier.fillMaxWidth(),
-                                post = post,
-                                clientId = clientId,
-                                postItemViewType = PostItemViewType.StandaloneListItem(
-                                    answerPosts = post?.answerPostings.orEmpty(),
-                                    onClickReply = {
-                                        if (post != null) {
-                                            onClickViewPost(post.clientPostId)
-                                        }
-                                    },
-                                    onClickViewReplies = {
-                                        if (post != null) {
-                                            onClickViewReplies(post.clientPostId)
-                                        }
-                                    },
-                                    onClickPost = {
-                                        if (post != null) {
-                                            onClickViewPost(post.clientPostId)
-                                        }
-                                    },
-                                    // TODO: Implement permission rights once refactored on server side
-                                    canEdit = false,
-                                    canDelete = false,
-                                    onClickDelete = {},
-                                    onClickEdit = {}
-                                ),
-                                getUnicodeForEmojiId = {
-                                    val emoji = getEmojiForEmojiId(emojiId = it)
-                                    emoji
-                                },
-                                onReactWithEmoji = { emojiId ->
-                                    viewModel.createReaction(
-                                        emojiId = emojiId,
-                                        post = asAffectedPost ?: return@PostItem
-                                    ) { metisFailure = it }
-                                },
-                                onClickOnPresentReaction = { emojiId ->
-                                    viewModel.onClickReaction(
-                                        emojiId = emojiId,
-                                        post = asAffectedPost ?: return@PostItem,
-                                        presentReactions = post.reactions,
-                                    ) { metisFailure = it }
+                    ProvideEmojis {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = listContentPadding,
+                            state = state
+                        ) {
+                            onClickCreatePost?.let {
+                                item {
+                                    CreatePostButton(modifier = Modifier, onClick = it)
                                 }
-                            )
-                        }
-
-                        if (posts.loadState.append is LoadState.Loading) {
-                            item {
-                                LinearProgressIndicator(modifier = Modifier.fillMaxWidth(0.4f))
                             }
-                        }
 
-                        if (posts.loadState.append is LoadState.Error) {
-                            item {
-                                PageStateError(
+                            items(posts, key = { it.clientPostId }) { post ->
+                                val asAffectedPost = post?.let {
+                                    MetisService.AffectedPost.Standalone(it.serverPostId)
+                                }
+                                PostItem(
                                     modifier = Modifier.fillMaxWidth(),
-                                    retry = posts::retry
+                                    post = post,
+                                    clientId = clientId,
+                                    postItemViewType = PostItemViewType.StandaloneListItem(
+                                        answerPosts = post?.answerPostings.orEmpty(),
+                                        onClickReply = {
+                                            if (post != null) {
+                                                onClickViewPost(post.clientPostId)
+                                            }
+                                        },
+                                        onClickViewReplies = {
+                                            if (post != null) {
+                                                onClickViewReplies(post.clientPostId)
+                                            }
+                                        },
+                                        onClickPost = {
+                                            if (post != null) {
+                                                onClickViewPost(post.clientPostId)
+                                            }
+                                        },
+                                        // TODO: Implement permission rights once refactored on server side
+                                        canEdit = false,
+                                        canDelete = false,
+                                        onClickDelete = {},
+                                        onClickEdit = {}
+                                    ),
+                                    onReactWithEmoji = { emojiId ->
+                                        viewModel.createReaction(
+                                            emojiId = emojiId,
+                                            post = asAffectedPost ?: return@PostItem
+                                        ) { metisFailure = it }
+                                    },
+                                    onClickOnPresentReaction = { emojiId ->
+                                        viewModel.onClickReaction(
+                                            emojiId = emojiId,
+                                            post = asAffectedPost ?: return@PostItem,
+                                            presentReactions = post.reactions,
+                                        ) { metisFailure = it }
+                                    }
                                 )
+                            }
+
+                            if (posts.loadState.append is LoadState.Loading) {
+                                item {
+                                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth(0.4f))
+                                }
+                            }
+
+                            if (posts.loadState.append is LoadState.Error) {
+                                item {
+                                    PageStateError(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        retry = posts::retry
+                                    )
+                                }
                             }
                         }
                     }

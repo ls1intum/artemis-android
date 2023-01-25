@@ -52,115 +52,115 @@ internal fun MetisStandalonePostUi(
 
     var metisFailure: MetisModificationFailure? by remember { mutableStateOf(null) }
 
-    BoxWithConstraints(modifier = modifier) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f),
-                contentPadding = PaddingValues(vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item {
-                    val asAffectedPost = post?.let {
-                        MetisService.AffectedPost.Standalone(
-                            postId = it.serverPostId
+    ProvideEmojis {
+        BoxWithConstraints(modifier = modifier) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .weight(1f),
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        val asAffectedPost = post?.let {
+                            MetisService.AffectedPost.Standalone(
+                                postId = it.serverPostId
+                            )
+                        }
+
+                        PostItem(
+                            modifier = Modifier.padding(top = 8.dp),
+                            post = post,
+                            postItemViewType = PostItemViewType.StandaloneView,
+                            onReactWithEmoji = { emojiId ->
+                                viewModel.createReaction(
+                                    emojiId = emojiId,
+                                    post = asAffectedPost ?: return@PostItem,
+                                    response = { metisFailure = it }
+                                )
+                            },
+                            onClickOnPresentReaction = { emojiId ->
+                                viewModel.onClickReaction(
+                                    emojiId = emojiId,
+                                    post = asAffectedPost ?: return@PostItem,
+                                    presentReactions = post.reactions,
+                                    response = { metisFailure = it }
+                                )
+                            },
+                            clientId = clientId
                         )
                     }
 
-                    PostItem(
-                        modifier = Modifier.padding(top = 8.dp),
-                        post = post,
-                        postItemViewType = PostItemViewType.StandaloneView,
-                        getUnicodeForEmojiId = { getEmojiForEmojiId(emojiId = it) },
-                        onReactWithEmoji = { emojiId ->
-                            viewModel.createReaction(
-                                emojiId = emojiId,
-                                post = asAffectedPost ?: return@PostItem,
-                                response = { metisFailure = it }
-                            )
-                        },
-                        onClickOnPresentReaction = { emojiId ->
-                            viewModel.onClickReaction(
-                                emojiId = emojiId,
-                                post = asAffectedPost ?: return@PostItem,
-                                presentReactions = post.reactions,
-                                response = { metisFailure = it }
-                            )
-                        },
-                        clientId = clientId
-                    )
-                }
-
-                item {
-                    Text(
-                        modifier = Modifier.padding(top = 8.dp),
-                        text = stringResource(id = R.string.standalone_screen_replies_title),
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                }
-
-                items(post?.orderedAnswerPostings.orEmpty(), key = { it.postId }) { answerPost ->
-                    AnswerPostItem(
-                        modifier = Modifier.fillMaxWidth(),
-                        answerPost = answerPost,
-                        getUnicodeForEmojiId = { getEmojiForEmojiId(emojiId = it) },
-                        onReactWithEmoji = { emojiId ->
-                            viewModel.createReactionForAnswer(
-                                emojiId = emojiId,
-                                clientSidePostId = answerPost.postId,
-                                onResponse = { metisFailure = it }
-                            )
-                        },
-                        onClickOnPresentReaction = { emojiId ->
-                            viewModel.onClickReactionOfAnswer(
-                                emojiId = emojiId,
-                                clientSidePostId = answerPost.postId,
-                                presentReactions = answerPost.reactions,
-                                onResponse = { metisFailure = it }
-                            )
-                        },
-                        answerItem = PostItemViewType.AnswerItem(
-                            // TODO: Implement this logic once logic has been moved to server
-                            canEdit = false,
-                            canDelete = false,
-                            onClickEdit = {},
-                            onClickDelete = {}
-                        ),
-                        clientId = clientId
-                    )
-                }
-            }
-
-            var replyContent: String by rememberSaveable {
-                mutableStateOf("")
-            }
-
-            val scope = rememberCoroutineScope()
-            val replyState: ReplyState by remember {
-                val state = mutableStateOf<ReplyState>(ReplyState.HasSentReply)
-
-                state.value = createCanCreateReplyState(
-                    scope,
-                    viewModel,
-                    updateReplyState = { state.value = it },
-                    updateFailureState = { metisFailure = it },
-                    clearReplyContent = {
-                        replyContent = ""
+                    item {
+                        Text(
+                            modifier = Modifier.padding(top = 8.dp),
+                            text = stringResource(id = R.string.standalone_screen_replies_title),
+                            style = MaterialTheme.typography.headlineMedium
+                        )
                     }
+
+                    items(post?.orderedAnswerPostings.orEmpty(), key = { it.postId }) { answerPost ->
+                        AnswerPostItem(
+                            modifier = Modifier.fillMaxWidth(),
+                            answerPost = answerPost,
+                            onReactWithEmoji = { emojiId ->
+                                viewModel.createReactionForAnswer(
+                                    emojiId = emojiId,
+                                    clientSidePostId = answerPost.postId,
+                                    onResponse = { metisFailure = it }
+                                )
+                            },
+                            onClickOnPresentReaction = { emojiId ->
+                                viewModel.onClickReactionOfAnswer(
+                                    emojiId = emojiId,
+                                    clientSidePostId = answerPost.postId,
+                                    presentReactions = answerPost.reactions,
+                                    onResponse = { metisFailure = it }
+                                )
+                            },
+                            answerItem = PostItemViewType.AnswerItem(
+                                // TODO: Implement this logic once logic has been moved to server
+                                canEdit = false,
+                                canDelete = false,
+                                onClickEdit = {},
+                                onClickDelete = {}
+                            ),
+                            clientId = clientId
+                        )
+                    }
+                }
+
+                var replyContent: String by rememberSaveable {
+                    mutableStateOf("")
+                }
+
+                val scope = rememberCoroutineScope()
+                val replyState: ReplyState by remember {
+                    val state = mutableStateOf<ReplyState>(ReplyState.HasSentReply)
+
+                    state.value = createCanCreateReplyState(
+                        scope,
+                        viewModel,
+                        updateReplyState = { state.value = it },
+                        updateFailureState = { metisFailure = it },
+                        clearReplyContent = {
+                            replyContent = ""
+                        }
+                    )
+
+                    state
+                }
+
+                ReplyUi(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
+                    replyState = replyState,
+                    replyContent = replyContent,
+                    updateReplyContent = { replyContent = it }
                 )
-
-                state
             }
-
-            ReplyUi(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
-                replyState = replyState,
-                replyContent = replyContent,
-                updateReplyContent = { replyContent = it }
-            )
         }
     }
 
@@ -257,7 +257,9 @@ private fun CreateReplyUi(
             val focusRequest = remember { FocusRequester() }
 
             MarkdownTextField(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 8.dp),
                 text = replyContent,
                 onTextChanged = updateReplyContent,
                 focusRequester = focusRequest,

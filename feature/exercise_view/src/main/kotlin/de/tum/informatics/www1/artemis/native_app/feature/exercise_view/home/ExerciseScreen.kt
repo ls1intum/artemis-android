@@ -76,7 +76,7 @@ internal fun ExerciseScreen(
     }
 
     // Retain web view instance to avoid reloading when switching between tabs
-    var savedWebView: WebView? by remember {
+    var savedWebView: WebView? by remember(exerciseDataState) {
         mutableStateOf(null)
     }
 
@@ -102,7 +102,13 @@ internal fun ExerciseScreen(
                 }
             }
 
-            val actions = remember {
+            val actions = remember(
+                courseId,
+                onViewTextExerciseParticipationScreen,
+                onParticipateInQuizDelegate,
+                onViewResult,
+                viewModel
+            ) {
                 ExerciseActions(
                     onClickStartTextExercise = {
                         viewModel.startExercise(onViewTextExerciseParticipationScreen)
@@ -213,7 +219,6 @@ internal fun ExerciseScreen(
                 }
             }
         }
-
     }
 }
 

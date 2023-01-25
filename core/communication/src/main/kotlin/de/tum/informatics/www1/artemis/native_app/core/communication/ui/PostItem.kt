@@ -78,7 +78,6 @@ internal fun PostItem(
     post: Post?,
     postItemViewType: PostItemViewType,
     clientId: Long,
-    getUnicodeForEmojiId: @Composable (String) -> String,
     onReactWithEmoji: (emojiId: String) -> Unit,
     onClickOnPresentReaction: (emojiId: String) -> Unit
 ) {
@@ -92,7 +91,6 @@ internal fun PostItem(
         content = post?.content,
         reactions = post?.reactions.orEmpty(),
         postItemViewType = postItemViewType,
-        getUnicodeForEmojiId = getUnicodeForEmojiId,
         onReactWithEmoji = onReactWithEmoji,
         onClickOnPresentReaction = onClickOnPresentReaction,
         clientId = clientId
@@ -105,7 +103,6 @@ internal fun AnswerPostItem(
     answerPost: AnswerPost,
     answerItem: PostItemViewType.AnswerItem,
     clientId: Long,
-    getUnicodeForEmojiId: @Composable (String) -> String,
     onReactWithEmoji: (emojiId: String) -> Unit,
     onClickOnPresentReaction: (emojiId: String) -> Unit
 ) {
@@ -119,7 +116,6 @@ internal fun AnswerPostItem(
         content = answerPost.content,
         reactions = answerPost.reactions,
         postItemViewType = answerItem,
-        getUnicodeForEmojiId = getUnicodeForEmojiId,
         onReactWithEmoji = onReactWithEmoji,
         onClickOnPresentReaction = onClickOnPresentReaction,
         clientId = clientId
@@ -138,7 +134,6 @@ private fun PostItemBase(
     clientId: Long,
     reactions: List<Post.Reaction>,
     postItemViewType: PostItemViewType,
-    getUnicodeForEmojiId: @Composable (String) -> String,
     onReactWithEmoji: (emojiId: String) -> Unit,
     onClickOnPresentReaction: (emojiId: String) -> Unit
 ) {
@@ -189,7 +184,6 @@ private fun PostItemBase(
                 isPlaceholder = isPlaceholder,
                 reactions = reactions,
                 postItemViewType = postItemViewType,
-                getUnicodeForEmojiId = getUnicodeForEmojiId,
                 onReactWithEmoji = onReactWithEmoji,
                 onClickReaction = onClickOnPresentReaction,
                 clientId = clientId
@@ -273,7 +267,6 @@ private fun StandalonePostFooter(
     clientId: Long,
     reactions: List<Post.Reaction>,
     postItemViewType: PostItemViewType,
-    getUnicodeForEmojiId: @Composable (String) -> String,
     onReactWithEmoji: (emojiId: String) -> Unit,
     onClickReaction: (emojiId: String) -> Unit
 ) {
@@ -301,7 +294,7 @@ private fun StandalonePostFooter(
                     leadingIcon = {
                         EmojiView(
                             modifier = Modifier,
-                            emojiUnicode = getUnicodeForEmojiId(emoji),
+                            emojiUnicode = getUnicodeForEmojiId(emojiId = emoji),
                             emojiFontSize = 16.sp
                         )
                     },
@@ -483,22 +476,23 @@ private class PostPreviewProvider : PreviewParameterProvider<Post?> {
 private fun PostPreview(
     @PreviewParameter(provider = PostPreviewProvider::class) post: Post?
 ) {
-    PostItem(
-        modifier = Modifier.fillMaxWidth(),
-        post = post,
-        postItemViewType = PostItemViewType.StandaloneListItem(
-            answerPosts = post?.answerPostings.orEmpty(),
-            onClickPost = {},
-            onClickReply = {},
-            onClickViewReplies = {},
-            canEdit = true,
-            canDelete = true,
-            onClickEdit = {},
-            onClickDelete = {}
-        ),
-        getUnicodeForEmojiId = { "\uD83D\uDE80" },
-        onReactWithEmoji = {},
-        onClickOnPresentReaction = {},
-        clientId = 0
-    )
+    ProvideEmojis {
+        PostItem(
+            modifier = Modifier.fillMaxWidth(),
+            post = post,
+            postItemViewType = PostItemViewType.StandaloneListItem(
+                answerPosts = post?.answerPostings.orEmpty(),
+                onClickPost = {},
+                onClickReply = {},
+                onClickViewReplies = {},
+                canEdit = true,
+                canDelete = true,
+                onClickEdit = {},
+                onClickDelete = {}
+            ),
+            onReactWithEmoji = {},
+            onClickOnPresentReaction = {},
+            clientId = 0
+        )
+    }
 }
