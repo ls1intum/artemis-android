@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz.participation
 
+import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.ClockWithOffset
@@ -36,6 +37,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.parcelize.Parcelize
 import org.hildan.krossbow.stomp.LostReceiptException
 import org.hildan.krossbow.stomp.headers.StompSendHeaders
 import java.util.*
@@ -862,15 +864,18 @@ internal class QuizParticipationViewModel(
         ) : DragAndDropAction
     }
 
+    @Parcelize
     @JvmInline
     value class DirectDragAndDropStorageData(override val value: Map<DropLocationId, DragItemId>) :
-        DragAndDropStorageData
+        DragAndDropStorageData, Parcelable
 
+    @Parcelize
     @JvmInline
     value class DirectMultipleChoiceStorageData(override val value: Map<AnswerOptionId, Boolean>) :
-        MultipleChoiceStorageData
+        MultipleChoiceStorageData, Parcelable
 
+    @Parcelize
     @JvmInline
     value class DirectShortAnswerStorageData(override val value: Map<Int, String>) :
-        ShortAnswerStorageData
+        ShortAnswerStorageData, Parcelable
 }
