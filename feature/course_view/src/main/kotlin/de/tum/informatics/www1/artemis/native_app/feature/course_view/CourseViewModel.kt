@@ -37,7 +37,7 @@ internal class CourseViewModel(
             requestReloadCourse.onStart { emit(Unit) }
         ) { serverUrl, authToken, _ ->
             emitAll(
-                courseService.getCourse(37, serverUrl, authToken)
+                courseService.getCourse(courseId, serverUrl, authToken)
             )
         }
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
