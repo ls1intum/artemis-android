@@ -2,8 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.exercise_view
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.*
@@ -11,6 +10,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.orNull
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.ExerciseScreen
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise.TextExerciseParticipationScreen
@@ -203,3 +204,10 @@ sealed interface ExerciseViewMode {
     @SerialName("view_result")
     object ViewResult : ExerciseViewMode
 }
+
+internal val DataState<Exercise>.courseId: Long?
+    @Composable get() = remember(this) {
+        derivedStateOf {
+            bind { it.course?.id }.orNull()
+        }
+    }.value

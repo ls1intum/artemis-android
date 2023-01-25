@@ -37,7 +37,6 @@ internal fun ExerciseScreenBody(
     modifier: Modifier,
     exerciseDataState: DataState<Exercise>,
     displayCommunicationOnSide: Boolean,
-    authToken: String,
     navController: NavController,
     metisContext: MetisContext?,
     actions: ExerciseActions,

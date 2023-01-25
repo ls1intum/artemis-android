@@ -108,6 +108,5 @@ private fun SyncStateUi(modifier: Modifier, syncState: SyncState) {
                 color = fontColor
             )
         }
-
     }
 }

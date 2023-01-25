@@ -12,7 +12,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
-import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.communication.ui.canDisplayMetisOnDisplaySide
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
@@ -21,6 +20,8 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.courseId
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.getProblemStatementWebViewState
 import io.ktor.http.*
 import me.onebone.toolbar.*
 
@@ -47,11 +48,7 @@ internal fun ExerciseScreen(
 
     val exerciseDataState by viewModel.exercise.collectAsState()
 
-    val courseId: Long? by remember(exerciseDataState) {
-        derivedStateOf {
-            exerciseDataState.bind { it.course?.id }.orNull()
-        }
-    }
+    val courseId: Long? = exerciseDataState.courseId
 
     val exerciseId by remember(exerciseDataState) {
         derivedStateOf {
@@ -61,38 +58,18 @@ internal fun ExerciseScreen(
 
     val metisContext by remember(courseId, exerciseId) {
         derivedStateOf {
-            val currentCourseId = courseId
             val currentExerciseId = exerciseId
-            if (currentCourseId != null && currentExerciseId != null) {
-                MetisContext.Exercise(courseId = currentCourseId, exerciseId = currentExerciseId)
+            if (courseId != null && currentExerciseId != null) {
+                MetisContext.Exercise(courseId = courseId, exerciseId = currentExerciseId)
             } else null
         }
     }
 
-    val url by remember(serverUrl, courseId, exerciseId) {
-        derivedStateOf {
-            if (courseId != null && exerciseId != null) {
-                URLBuilder(serverUrl).apply {
-                    appendPathSegments(
-                        "courses",
-                        courseId.toString(),
-                        "exercises",
-                        exerciseId.toString()
-                    )
-                }
-                    .buildString()
-            } else null
-        }
-    }
-
-    val webViewState by remember(url) {
-        derivedStateOf {
-            val currentUrl = url
-            if (currentUrl != null) {
-                WebViewState(WebContent.Url(url = currentUrl))
-            } else null
-        }
-    }
+    val webViewState: WebViewState? = getProblemStatementWebViewState(
+        serverUrl = serverUrl,
+        courseId = courseId,
+        exerciseId = exerciseId
+    )
 
     LaunchedEffect(serverUrl, authToken) {
         CookieManager.getInstance().setCookie(serverUrl, "jwt=$authToken")
@@ -147,7 +124,6 @@ internal fun ExerciseScreen(
                 modifier = modifier,
                 exerciseDataState = exerciseDataState,
                 displayCommunicationOnSide = displayCommunicationOnSide,
-                authToken = authToken,
                 navController = navController,
                 metisContext = metisContext,
                 actions = actions,

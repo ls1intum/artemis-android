@@ -14,6 +14,7 @@ import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ProblemStatementWebView
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -41,23 +42,11 @@ internal fun ExerciseOverviewTab(
                     .height(200.dp)
         ) {
             if (webViewState != null) {
-                WebView(
+                ProblemStatementWebView(
                     modifier = Modifier.fillMaxWidth(),
-                    state = webViewState,
-                    onCreated = {
-                        it.settings.javaScriptEnabled = true
-                        it.settings.domStorageEnabled = true
-                        it.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
-                    },
-                    factory = { context ->
-                        if (webView != null) {
-                            webView
-                        } else {
-                            val newWebView = WebView(context)
-                            setWebView(newWebView)
-                            newWebView
-                        }
-                    }
+                    webViewState = webViewState,
+                    webView = webView,
+                    setWebView = setWebView
                 )
             }
 

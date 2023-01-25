@@ -7,6 +7,9 @@
 
     <string name="participate_text_exercise_submit_button">Submit</string>
 
+    <string name="participate_text_exercise_tab_submission">Submission</string>
+    <string name="participate_text_exercise_tab_problem_statement">Problem statement</string>
+
     <string name="participate_text_exercise_discard_dialog_title">Discard changes?</string>
     <string name="participate_text_exercise_discard_dialog_message">You have unsaved changes. If you close this screen your changes will be lost. Do you want to discard your changes and leave this screen?</string>
     <string name="participate_text_exercise_discard_dialog_positive">Discard</string>

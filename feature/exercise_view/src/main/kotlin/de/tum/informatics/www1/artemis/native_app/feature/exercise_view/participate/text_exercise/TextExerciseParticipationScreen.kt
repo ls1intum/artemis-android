@@ -1,25 +1,37 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import android.webkit.WebView
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.isInitializationAfterDueDate
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.isInFuture
+import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.*
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ProblemStatementWebView
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.courseId
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.getProblemStatementWebViewState
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -30,7 +42,10 @@ internal fun TextExerciseParticipationScreen(
     participationId: Long,
     onNavigateUp: () -> Unit
 ) {
-    EmptyDataStateUi(dataState = viewModel.exercise.collectAsState().value) { exercise ->
+    val exerciseDataState by viewModel.exercise.collectAsState()
+    val courseId: Long? = exerciseDataState.courseId
+
+    EmptyDataStateUi(dataState = exerciseDataState) { exercise ->
         val exerciseId: Long = exercise.id
 
         val participationViewModel: TextExerciseParticipationViewModel =
@@ -41,6 +56,17 @@ internal fun TextExerciseParticipationScreen(
         val participation = participationViewModel.initialParticipation.collectAsState().value
 
         var displayDiscardChangesDialog by rememberSaveable { mutableStateOf(false) }
+
+        val displayProblemStatementOnSide = getWindowSizeClass()
+            .widthSizeClass >= WindowWidthSizeClass.Medium
+
+        val webViewState: WebViewState? = getProblemStatementWebViewState(
+            serverUrl = viewModel.serverUrl.collectAsState().value,
+            courseId = courseId,
+            exerciseId = exerciseId
+        )
+
+        var webView: WebView? by remember { mutableStateOf(null) }
 
         Scaffold(
             modifier = modifier,
@@ -70,23 +96,76 @@ internal fun TextExerciseParticipationScreen(
                     )
                 }
             } else {
-                TextExerciseParticipationUi(
+                val participationUi = @Composable { modifier: Modifier ->
+                    TextExerciseParticipationUi(
+                        modifier = modifier,
+                        text = participationViewModel.text.collectAsState("").value,
+                        syncState = participationViewModel.syncState.collectAsState(SyncState.Syncing).value,
+                        isActive = isActive(
+                            exercise = exercise,
+                            latestResult = latestResult,
+                            participation = participation
+                        ),
+                        onUpdateText = participationViewModel::updateText,
+                        submission = latestSubmission,
+                        requestSubmit = participationViewModel::retrySync
+                    )
+                }
+
+                val problemStatementUi = @Composable { modifier: Modifier ->
+                    if (webViewState != null) {
+                        ProblemStatementWebView(
+                            modifier = modifier,
+                            webViewState = webViewState,
+                            webView = webView,
+                            setWebView = { webView = it }
+                        )
+                    } else {
+                        Box(modifier = modifier)
+                    }
+                }
+
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
-                        .padding(horizontal = 8.dp)
-                        .padding(bottom = 8.dp),
-                    text = participationViewModel.text.collectAsState("").value,
-                    syncState = participationViewModel.syncState.collectAsState(SyncState.Syncing).value,
-                    isActive = isActive(
-                        exercise = exercise,
-                        latestResult = latestResult,
-                        participation = participation
-                    ),
-                    onUpdateText = participationViewModel::updateText,
-                    submission = latestSubmission,
-                    requestSubmit = participationViewModel::retrySync
-                )
+                ) {
+                    if (displayProblemStatementOnSide) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            participationUi(
+                                Modifier
+                                    .fillMaxHeight()
+                                    .weight(1f)
+                            )
+
+                            problemStatementUi(
+                                Modifier
+                                    .fillMaxHeight()
+                                    .weight(1f)
+                            )
+                        }
+                    } else {
+                        val childModifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 8.dp)
+                            .padding(bottom = 8.dp)
+
+                        TabView(
+                            modifier = Modifier.fillMaxSize(),
+                            submissionContent = {
+                                participationUi(childModifier)
+                            },
+                            problemStatementContent = {
+                                problemStatementUi(childModifier)
+                            }
+                        )
+                    }
+                }
             }
         }
 
@@ -97,6 +176,38 @@ internal fun TextExerciseParticipationScreen(
             )
         }
     }
+}
+
+@Composable
+private fun TabView(
+    modifier: Modifier,
+    submissionContent: @Composable () -> Unit,
+    problemStatementContent: @Composable () -> Unit
+) {
+    var selectedTab: Tab by rememberSaveable { mutableStateOf(Tab.SUBMISSION) }
+
+    Column(modifier = modifier) {
+        TabRow(selectedTabIndex = selectedTab.index) {
+            Tab.values().forEach { tab ->
+                Tab(
+                    text = { Text(text = stringResource(id = tab.title)) },
+                    icon = { Icon(imageVector = tab.icon, contentDescription = null) },
+                    selected = selectedTab == tab,
+                    onClick = { selectedTab = tab }
+                )
+            }
+        }
+
+        when (selectedTab) {
+            Tab.SUBMISSION -> submissionContent()
+            Tab.PROBLEM_STATEMENT -> problemStatementContent()
+        }
+    }
+}
+
+private enum class Tab(@StringRes val title: Int, val icon: ImageVector, val index: Int) {
+    SUBMISSION(R.string.participate_text_exercise_tab_submission, Icons.Default.EditNote, 0),
+    PROBLEM_STATEMENT(R.string.participate_text_exercise_tab_problem_statement, Icons.Default.ListAlt, 1)
 }
 
 private fun isAlwaysActive(
