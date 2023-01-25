@@ -44,6 +44,8 @@ class EmojiServiceImpl(context: Context) : EmojiService {
         return map[emojiId] ?: "\uD83D\uDDBE"
     }
 
+    override suspend fun getEmojiToUnicodeMap(): Map<String, String> = entries.first()
+
     override suspend fun getEmojiCategories(): List<EmojiCategory> {
         return input.first().categories
     }
