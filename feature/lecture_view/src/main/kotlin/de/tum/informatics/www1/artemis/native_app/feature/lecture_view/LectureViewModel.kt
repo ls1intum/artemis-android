@@ -12,7 +12,9 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BaseExerciseListViewModel
+import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import de.tum.informatics.www1.artemis.native_app.core.websocket.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.service.LectureService
@@ -60,7 +62,7 @@ internal class LectureViewModel(
     /**
      * The lecture with updated participations as they arrive.
      */
-    val latestLectureDataState: StateFlow<DataState<Lecture>> =
+    private val latestLectureDataState: StateFlow<DataState<Lecture>> =
         lectureDataState.transformLatest { lectureDataState ->
             when (lectureDataState) {
                 is DataState.Success -> {
@@ -153,6 +155,9 @@ internal class LectureViewModel(
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
+    val authToken: StateFlow<String> = authTokenStateFlow(accountService)
 
     init {
         viewModelScope.launch {

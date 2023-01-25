@@ -41,4 +41,6 @@
     <string name="lecture_view_lecture_unit_set_completed_failed_dialog_title">Error!</string>
     <string name="lecture_view_lecture_unit_set_completed_failed_dialog_message">Something went wrong while setting the lecture unit as completed.</string>
     <string name="lecture_view_lecture_unit_set_completed_failed_dialog_positive">@android:string/ok</string>
+
+    <string name="lecture_view_download_attachment_failed">Something went wrong while trying to download the attachment.</string>
 </resources>
