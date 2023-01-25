@@ -100,7 +100,6 @@ fun CompactCourseItemHeader(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(headerHeight)
             ) {
                 Image(
                     modifier = Modifier
