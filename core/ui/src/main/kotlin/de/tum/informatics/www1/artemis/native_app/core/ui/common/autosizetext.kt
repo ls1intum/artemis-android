@@ -21,6 +21,10 @@ import androidx.compose.ui.unit.sp
 
 /**
  * From: https://stackoverflow.com/a/69780826/5608927
+ * By: Rahul Sainani; Adapted from Brian who pasted his answer here: https://stackoverflow.com/a/66090448/5608927
+ * Further adapted by Tim Ortel
+ *
+ * Posted on StackOverflow under this license: https://creativecommons.org/licenses/by-sa/4.0/
  */
 @Composable
 fun AutoResizeText(
@@ -40,6 +44,8 @@ fun AutoResizeText(
     maxLines: Int = Int.MAX_VALUE,
     style: TextStyle = LocalTextStyle.current,
 ) {
+    // Changes by Tim Ortel: use a box with constraints to automatically start a reevaluation when the bounding
+    // box of this text changes.
     BoxWithConstraints(modifier) {
         var fontSizeValue by remember(maxWidth, maxHeight) { mutableStateOf(fontSizeRange.max.value) }
         var readyToDraw by remember(maxWidth, maxHeight) { mutableStateOf(false) }
