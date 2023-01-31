@@ -1,6 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.common
 
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.DropdownMenu
@@ -10,6 +13,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 
 /**
  * Display a clickable text with button that shows a dialog on click.
@@ -25,12 +30,17 @@ fun DropdownButton(
         mutableStateOf(false)
     }
 
-    OutlinedButton(modifier = modifier, onClick = { displayDialog = true }) {
+    OutlinedButton(
+        modifier = modifier,
+        onClick = { displayDialog = true }
+    ) {
         var displayText by remember { mutableStateOf(true) }
 
         if (displayText) {
             Text(
+                modifier = Modifier.weight(1f, false),
                 text = text,
+                overflow = TextOverflow.Ellipsis,
                 onTextLayout = {
                     displayText = !it.hasVisualOverflow
                 },
@@ -40,7 +50,11 @@ fun DropdownButton(
             Icon(imageVector = icon, contentDescription = null)
         }
 
-        Icon(imageVector = Icons.Default.ExpandMore, contentDescription = null)
+        Icon(
+            modifier = Modifier,
+            imageVector = Icons.Default.ExpandMore,
+            contentDescription = null
+        )
 
         DropdownMenu(expanded = displayDialog, onDismissRequest = { displayDialog = false }) {
             dialogContent { displayDialog = false }
