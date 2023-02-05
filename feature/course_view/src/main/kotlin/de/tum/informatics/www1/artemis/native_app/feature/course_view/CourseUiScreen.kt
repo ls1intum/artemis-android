@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.compose.composable
 import com.google.accompanist.placeholder.material.placeholder
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SmartphoneMetisUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SmartphoneMetisUi
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi

@@ -6,8 +6,6 @@ import android.net.Uri
 import android.os.Environment
 import android.webkit.MimeTypeMap
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -21,14 +19,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.compose.composable
 import com.google.accompanist.placeholder.material.placeholder
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SideBarMetisUi
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.canDisplayMetisOnDisplaySide
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SideBarMetisUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import io.ktor.http.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 

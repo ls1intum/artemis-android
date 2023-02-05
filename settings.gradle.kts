@@ -19,7 +19,6 @@ dependencyResolutionManagement {
 rootProject.name = "artemis_android"
 include(":app")
 include(":core:common")
-include(":core:communication")
 include(":core:data")
 include(":core:datastore")
 include(":core:model")
@@ -35,3 +34,4 @@ include(":feature:lecture_view")
 include(":feature:quiz")
 include(":feature:settings")
 include(":feature:push")
+include(":feature:metis")

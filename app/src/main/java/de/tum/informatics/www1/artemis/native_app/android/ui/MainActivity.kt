@@ -17,10 +17,10 @@ import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import de.tum.informatics.www1.artemis.native_app.android.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.createStandalonePostScreen
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.ViewType
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.navigateToStandalonePostScreen
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.view_post.standalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.create_standalone_post.createStandalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ViewType
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.standalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider

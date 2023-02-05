@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 import com.google.accompanist.web.WebViewState
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.canDisplayMetisOnDisplaySide
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext

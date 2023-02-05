@@ -44,7 +44,6 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:device"))
     implementation(project(":core:websocket"))
-    implementation(project(":core:communication"))
 
     implementation(project(":feature:course_registration"))
     implementation(project(":feature:course_view"))
@@ -55,6 +54,7 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:quiz"))
     implementation(project(":feature:push"))
+    implementation(project(":feature:metis"))
 
     implementation(libs.play.services.oss.licences)
 

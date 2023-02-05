@@ -17,9 +17,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.web.WebViewState
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SideBarMetisUi
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.SmartphoneMetisUi
-import de.tum.informatics.www1.artemis.native_app.core.communication.ui.create_standalone_post.navigateToCreateStandalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SideBarMetisUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SmartphoneMetisUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.create_standalone_post.navigateToCreateStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
