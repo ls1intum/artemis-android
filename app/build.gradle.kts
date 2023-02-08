@@ -12,8 +12,8 @@ android {
 
     defaultConfig {
         applicationId = "de.tum.informatics.www1.artemis.native_app.android"
-        versionCode = 6
-        versionName = "0.4.0"
+        versionCode = 7
+        versionName = "0.4.1"
 
         javaCompileOptions {
             annotationProcessorOptions {
