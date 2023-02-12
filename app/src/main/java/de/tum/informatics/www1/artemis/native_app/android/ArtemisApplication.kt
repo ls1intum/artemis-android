@@ -1,6 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.android
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
+import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.memory.MemoryCache
@@ -15,6 +19,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboardMod
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exerciseViewModule
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lectureModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
+import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
+import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.quizParticipationModule
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsModule
@@ -22,6 +28,7 @@ import io.sentry.Sentry
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin
+import de.tum.informatics.www1.artemis.native_app.feature.push.R
 
 class ArtemisApplication : Application(), ImageLoaderFactory {
 
@@ -50,12 +57,24 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
                 dashboardModule,
                 loginModule,
                 exerciseViewModule,
-                de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule,
+                communicationModule,
                 quizParticipationModule,
                 settingsModule,
                 lectureModule,
                 pushModule
             )
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = getString(R.string.push_notification_channel_name)
+            val description = getString(R.string.push_notification_channel_descriptions)
+
+            val channel = NotificationChannel(ArtemisNotificationChannel.id, name, NotificationManager.IMPORTANCE_DEFAULT)
+            channel.description = description
+
+            NotificationManagerCompat
+                .from(this)
+                .createNotificationChannel(channel)
         }
     }
 
