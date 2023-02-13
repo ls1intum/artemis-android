@@ -29,7 +29,7 @@ import javax.crypto.spec.IvParameterSpec
 class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
 
     companion object {
-        private const val Algorithm = "AES/CBC/PKCS5Padding"
+        private const val Algorithm = "AES/CBC/PKCS7Padding"
 
         private val cipher: Cipher? = try {
             Cipher.getInstance(Algorithm)
@@ -48,10 +48,6 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
     private val jsonProvider: JsonProvider = get()
 
     private val Context.notificationDataStore by preferencesDataStore("push_notification_ids")
-
-    private val latestPushNotificationId: Flow<Int> = notificationDataStore
-        .data
-        .map { data -> data[LatestPushNotificationId] ?: 0 }
 
     /**
      * Whenever this functions is called we need to synchronize the new token with the server.
@@ -99,11 +95,12 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
             .apply {
                 if (title != null) setContentTitle(title)
                 if (body != null) setContentText(title)
+                setSmallIcon(R.drawable.push_notification_icon)
             }
             .build()
 
         val notificationId = runBlocking {
-            val id = latestPushNotificationId.first() + 1
+            val id = notificationDataStore.data.map { it[LatestPushNotificationId] ?: 0 }.first() + 1
 
             notificationDataStore.edit { data ->
                 data[LatestPushNotificationId] = id

@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.data.service
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import io.ktor.http.*
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -15,5 +16,5 @@ interface CourseRegistrationService {
      */
     suspend fun fetchRegistrableCourses(serverUrl: String, authToken: String): Flow<DataState<List<Course>>>
 
-    suspend fun registerInCourse(serverUrl: String, authToken: String, courseId: Long): NetworkResponse<Unit>
+    suspend fun registerInCourse(serverUrl: String, authToken: String, courseId: Long): NetworkResponse<HttpStatusCode>
 }

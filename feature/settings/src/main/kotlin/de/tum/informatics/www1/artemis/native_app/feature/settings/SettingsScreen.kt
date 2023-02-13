@@ -24,10 +24,12 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import io.ktor.http.*
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -87,6 +89,7 @@ private fun SettingsScreen(
     onRequestOpenNotificationSettings: () -> Unit
 ) {
     val pushNotificationJobService: PushNotificationJobService = get()
+    val pushNotificationConfigurationService: PushNotificationConfigurationService = get()
 
     val accountService: AccountService = get()
     val authenticationData: AccountService.AuthenticationData? by accountService.authenticationData.collectAsState(
@@ -98,7 +101,8 @@ private fun SettingsScreen(
     val scope = rememberCoroutineScope()
 
     // The auth token if logged in or null otherwise
-    val authToken: String? = (authenticationData as? AccountService.AuthenticationData.LoggedIn)?.authToken
+    val authToken: String? =
+        (authenticationData as? AccountService.AuthenticationData.LoggedIn)?.authToken
     val hasUserSelectedInstance by serverConfigurationService.hasUserSelectedInstance.collectAsState(
         initial = false
     )
@@ -162,7 +166,10 @@ private fun SettingsScreen(
                             // the user manually logs out. Therefore we need to tell the server asap.
                             pushNotificationJobService.scheduleUnsubscribeFromNotifications(
                                 serverUrl = serverUrl,
-                                authToken = authToken
+                                authToken = authToken,
+                                firebaseToken = pushNotificationConfigurationService
+                                    .firebaseToken
+                                    .first() ?: return@launch
                             )
 
                             accountService.logout()
@@ -261,14 +268,14 @@ private fun UserInformationSection(
                     ),
                     onClick = {}
                 )
-
-                PreferenceEntry(
-                    modifier = childModifier,
-                    text = stringResource(id = R.string.settings_account_logout),
-                    onClick = onRequestLogout
-                )
             }
         }
+
+        PreferenceEntry(
+            modifier = childModifier,
+            text = stringResource(id = R.string.settings_account_logout),
+            onClick = onRequestLogout
+        )
     }
 }
 

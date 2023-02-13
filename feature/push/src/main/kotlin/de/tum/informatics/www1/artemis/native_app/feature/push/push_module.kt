@@ -21,7 +21,7 @@ val pushModule = module {
     }
 
     single<PushNotificationConfigurationService> {
-        PushNotificationConfigurationServiceImpl(androidContext())
+        PushNotificationConfigurationServiceImpl(androidContext(), get())
     }
 
     workerOf(::UploadPushNotificationDeviceConfigurationWorker)

@@ -37,7 +37,7 @@ interface PushNotificationConfigurationService {
 
     suspend fun storeAESKey(key: SecretKey)
 
-    suspend fun storeFirebaseToken(token: String)
+    suspend fun storeFirebaseToken(token: String?)
 
     /**
      * Registers this device to the server. If successful, a SecretKey (AES256) is returned
@@ -53,6 +53,7 @@ interface PushNotificationConfigurationService {
      */
     suspend fun unsubscribeFromNotifications(
         serverUrl: String,
-        authToken: String
+        authToken: String,
+        firebaseToken: String
     ): NetworkResponse<HttpStatusCode>
 }

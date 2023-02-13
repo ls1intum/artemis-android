@@ -19,7 +19,7 @@ internal class CourseRegistrationServiceImpl(
         serverUrl: String,
         authToken: String
     ): Flow<DataState<List<Course>>> {
-        return retryOnInternet(networkStatusProvider.currentNetworkStatus){
+        return retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             performNetworkCall {
                 ktorProvider.ktorClient
                     .get(serverUrl) {
@@ -39,17 +39,16 @@ internal class CourseRegistrationServiceImpl(
         serverUrl: String,
         authToken: String,
         courseId: Long
-    ): NetworkResponse<Unit> {
+    ): NetworkResponse<HttpStatusCode> {
         return performNetworkCall {
-            val user: Account = ktorProvider.ktorClient
+            ktorProvider.ktorClient
                 .post(serverUrl) {
                     url {
-                        appendPathSegments("api", courseId.toString(), "register")
+                        appendPathSegments("api", "courses", courseId.toString(), "register")
                     }
 
                     cookieAuth(authToken)
-                }.body()
-
+                }.status
             // TODO: sync groups
         }
     }

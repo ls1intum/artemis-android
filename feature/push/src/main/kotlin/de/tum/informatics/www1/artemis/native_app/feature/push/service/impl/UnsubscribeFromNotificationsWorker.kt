@@ -15,15 +15,17 @@ internal class UnsubscribeFromNotificationsWorker(
     internal companion object {
         const val SERVER_URL_KEY = "server_url"
         const val AUTH_TOKEN_KEY = "auth_token"
+        const val FIREBASE_TOKEN_KEY = "auth_token"
     }
 
     override suspend fun doWork(): Result {
         val serverUrl = inputData.getString(SERVER_URL_KEY)
         val authToken = inputData.getString(AUTH_TOKEN_KEY)
-        if (serverUrl == null || authToken == null) return Result.failure()
+        val firebaseToken = inputData.getString(FIREBASE_TOKEN_KEY)
+        if (serverUrl == null || authToken == null || firebaseToken == null) return Result.failure()
 
         return pushNotificationConfigurationService
-            .unsubscribeFromNotifications(serverUrl, authToken)
+            .unsubscribeFromNotifications(serverUrl, authToken, firebaseToken)
             .toWorkerResult()
     }
 }

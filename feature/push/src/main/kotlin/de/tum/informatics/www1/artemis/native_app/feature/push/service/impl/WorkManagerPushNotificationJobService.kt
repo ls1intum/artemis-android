@@ -19,7 +19,12 @@ internal class WorkManagerPushNotificationJobService(
     private val workManager: WorkManager get() = WorkManager.getInstance(context)
 
     override fun scheduleUploadPushNotificationDeviceConfigurationToServer() {
-        val request = defaultInternetWorkRequest<UploadPushNotificationDeviceConfigurationWorker>()
+        val request = defaultInternetWorkRequest<UploadPushNotificationDeviceConfigurationWorker>(
+            Data
+                .Builder()
+
+                .build()
+        )
 
         workManager
             .beginUniqueWork(
@@ -36,8 +41,19 @@ internal class WorkManagerPushNotificationJobService(
             .await()
     }
 
-    override fun scheduleUnsubscribeFromNotifications(serverUrl: String, authToken: String) {
-        val request = defaultInternetWorkRequest<UnsubscribeFromNotificationsWorker>()
+    override fun scheduleUnsubscribeFromNotifications(
+        serverUrl: String,
+        authToken: String,
+        firebaseToken: String
+    ) {
+        val request = defaultInternetWorkRequest<UnsubscribeFromNotificationsWorker>(
+            Data
+                .Builder()
+                .putString(UnsubscribeFromNotificationsWorker.SERVER_URL_KEY, serverUrl)
+                .putString(UnsubscribeFromNotificationsWorker.AUTH_TOKEN_KEY, authToken)
+                .putString(UnsubscribeFromNotificationsWorker.FIREBASE_TOKEN_KEY, firebaseToken)
+                .build()
+        )
 
         workManager
             .beginUniqueWork(
@@ -48,7 +64,7 @@ internal class WorkManagerPushNotificationJobService(
             .enqueue()
     }
 
-    private inline fun <reified T : ListenableWorker> defaultInternetWorkRequest(): OneTimeWorkRequest {
+    private inline fun <reified T : ListenableWorker> defaultInternetWorkRequest(inputData: Data): OneTimeWorkRequest {
         return OneTimeWorkRequestBuilder<T>()
             // Only run when the device is connected to the internet.
             .setConstraints(

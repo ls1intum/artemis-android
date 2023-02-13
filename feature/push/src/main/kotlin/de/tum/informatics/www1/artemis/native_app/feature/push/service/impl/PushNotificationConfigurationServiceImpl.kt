@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl
 import android.content.Context
 import android.security.keystore.KeyProperties
 import android.security.keystore.KeyProtection
+import android.util.Base64
 import android.util.Log
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -11,24 +12,34 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessaging
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
+import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
+import io.ktor.client.call.body
+import io.ktor.client.request.delete
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import java.security.KeyStore
-import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
+import javax.crypto.spec.SecretKeySpec
 
 @OptIn(DelicateCoroutinesApi::class)
 class PushNotificationConfigurationServiceImpl(
-    private val context: Context
+    private val context: Context,
+    private val ktorProvider: KtorProvider
 ) : PushNotificationConfigurationService {
 
     companion object {
@@ -102,21 +113,28 @@ class PushNotificationConfigurationServiceImpl(
                 }
             }
         } else {
-            try {
-                firebaseMessaging.deleteToken().await()
-                FirebaseInstallations.getInstance().delete().await()
-            } catch (e: Exception) {
-                Log.e(TAG, "Something went wrong while deleting token and installation", e)
-                firebaseMessaging.isAutoInitEnabled = prevIsAutoInitEnabled
-                return false
-            }
+            val currentToken = firebaseToken.first()
+            if (currentToken != null) {
+                try {
+                    firebaseMessaging.deleteToken().await()
+                    FirebaseInstallations.getInstance().delete().await()
 
-            val unsubscribeResult = unsubscribeFromNotifications(
-                serverUrl = serverUrl,
-                authToken = authToken
-            )
+                    storeFirebaseToken(null)
 
-            unsubscribeResult is NetworkResponse.Response && unsubscribeResult.data.isSuccess()
+                    // The result does not matter. This device does no longer receive notifications
+                    unsubscribeFromNotifications(
+                        serverUrl = serverUrl,
+                        authToken = authToken,
+                        firebaseToken = currentToken
+                    )
+
+                    true
+                } catch (e: Exception) {
+                    Log.e(TAG, "Something went wrong while deleting token and installation", e)
+                    firebaseMessaging.isAutoInitEnabled = prevIsAutoInitEnabled
+                    false
+                }
+            } else true
         }
 
         return if (isSuccess) {
@@ -130,9 +148,13 @@ class PushNotificationConfigurationServiceImpl(
         }
     }
 
-    override suspend fun storeFirebaseToken(token: String) {
+    override suspend fun storeFirebaseToken(token: String?) {
         context.pushNotificationsStore.edit { data ->
-            data[FIREBASE_TOKEN_KEY] = token
+            if (token != null) {
+                data[FIREBASE_TOKEN_KEY] = token
+            } else {
+                data.remove(FIREBASE_TOKEN_KEY)
+            }
         }
     }
 
@@ -155,6 +177,8 @@ class PushNotificationConfigurationServiceImpl(
                     KeyProtection.Builder(
                         KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
                     )
+                        .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
                         .setRandomizedEncryptionRequired(true)
                         .build()
                 )
@@ -170,27 +194,63 @@ class PushNotificationConfigurationServiceImpl(
         authToken: String,
         firebaseToken: String
     ): NetworkResponse<SecretKey> {
-        // TODO("Not yet implemented")
+        return performNetworkCall {
+            val response: RegisterResponseBody = ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments("api", "push_notification", "register")
+                }
 
-        // Mock implementation
-        val secretKey: SecretKey =
-            withContext(Dispatchers.Main) {
-                KeyGenerator.getInstance("AES").apply {
-                    init(256)
-                }.generateKey()
-            }
+                cookieAuth(authToken)
 
-        return NetworkResponse.Response(secretKey)
+                contentType(ContentType.Application.Json)
+                setBody(RegisterRequestBody(token = firebaseToken))
+            }.body()
+
+            val keyBytes = Base64.decode(
+                response.secretKey.toByteArray(Charsets.ISO_8859_1),
+                Base64.DEFAULT
+            )
+
+            SecretKeySpec(keyBytes, "AES")
+        }
     }
 
     override suspend fun unsubscribeFromNotifications(
         serverUrl: String,
-        authToken: String
+        authToken: String,
+        firebaseToken: String
     ): NetworkResponse<HttpStatusCode> {
-        // TODO("Not yet implemented")
-        return NetworkResponse.Response(HttpStatusCode.OK)
+        return performNetworkCall {
+            ktorProvider.ktorClient.delete(serverUrl) {
+                url {
+                    appendPathSegments("api", "push_notification", "unregister")
+                }
+
+                cookieAuth(authToken)
+                setBody(UnregisterRequestBody(firebaseToken))
+                contentType(ContentType.Application.Json)
+            }.status
+        }
     }
 
     private fun getPushNotificationEnabledKeyForServer(serverUrl: String) =
         booleanPreferencesKey("push_enabled_$serverUrl")
+
+    @Serializable
+    private data class RegisterRequestBody(
+        val token: String,
+        val deviceType: String = "FIREBASE"
+    )
+
+    @Serializable
+    private data class RegisterResponseBody(
+        val secretKey: String,
+        val algorithm: String
+    )
+
+    @Serializable
+    private data class UnregisterRequestBody(
+        val token: String,
+        val deviceType: String = "FIREBASE"
+    )
 }
