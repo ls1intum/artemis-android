@@ -7,7 +7,8 @@ data class PushNotificationSetting(
     val id: Long = 0L,
     val settingId: String = "",
     val webapp: Boolean? = null,
-    val email: Boolean? = null
+    val email: Boolean? = null,
+    val push: Boolean? = null
 )
 
 val PushNotificationSetting.group: String

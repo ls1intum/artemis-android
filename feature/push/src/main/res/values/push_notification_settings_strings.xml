@@ -12,6 +12,7 @@
 
     <string name="push_notification_settings_label_email">Email</string>
     <string name="push_notification_settings_label_webapp">Webapp</string>
+    <string name="push_notification_settings_label_push">Push</string>
 
     <string name="push_notification_settings_group_weeklySummary">Weekly Summary</string>
     <string name="push_notification_settings_group_exerciseNotifications">Exercise Notifications</string>

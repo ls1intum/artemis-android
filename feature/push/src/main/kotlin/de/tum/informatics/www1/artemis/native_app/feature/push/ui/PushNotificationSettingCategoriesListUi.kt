@@ -22,7 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.setting
 internal fun PushNotificationSettingCategoriesListUi(
     modifier: Modifier,
     settingsByGroupDataStore: DataState<List<PushNotificationSettingsViewModel.NotificationCategory>>,
-    onUpdate: (PushNotificationSetting, webapp: Boolean?, email: Boolean?) -> Unit,
+    onUpdate: (PushNotificationSetting, webapp: Boolean?, email: Boolean?, push: Boolean?) -> Unit,
     onRequestReload: () -> Unit
 ) {
     BasicDataStateUi(
@@ -45,7 +45,7 @@ internal fun PushNotificationSettingCategoriesListUi(
 private fun PushNotificationSettingsList(
     modifier: Modifier,
     settingCategories: List<PushNotificationSettingsViewModel.NotificationCategory>,
-    onUpdate: (PushNotificationSetting, webapp: Boolean?, email: Boolean?) -> Unit
+    onUpdate: (PushNotificationSetting, webapp: Boolean?, email: Boolean?, push: Boolean?) -> Unit
 ) {
     Column(
         modifier = modifier,
@@ -65,11 +65,12 @@ private fun PushNotificationSettingsList(
                     PushNotificationSettingEntry(
                         modifier = Modifier.fillMaxWidth(),
                         setting = pushNotificationSetting,
-                        onUpdate = { webapp, email ->
+                        onUpdate = { webapp, email, push ->
                             onUpdate(
                                 pushNotificationSetting,
                                 webapp,
-                                email
+                                email,
+                                push
                             )
                         }
                     )
@@ -87,7 +88,7 @@ private fun PushNotificationSettingsList(
 private fun PushNotificationSettingEntry(
     modifier: Modifier,
     setting: PushNotificationSetting,
-    onUpdate: (webapp: Boolean?, email: Boolean?) -> Unit
+    onUpdate: (webapp: Boolean?, email: Boolean?, push: Boolean?) -> Unit
 ) {
     Column(modifier = modifier) {
         Text(
@@ -115,7 +116,7 @@ private fun PushNotificationSettingEntry(
                     modifier = Modifier,
                     isChecked = setting.webapp,
                     text = stringResource(id = R.string.push_notification_settings_label_webapp),
-                    onCheckedChanged = { onUpdate(it, setting.email) }
+                    onCheckedChanged = { onUpdate(it, setting.email, setting.push) }
                 )
             }
 
@@ -124,7 +125,16 @@ private fun PushNotificationSettingEntry(
                     modifier = Modifier,
                     isChecked = setting.email,
                     text = stringResource(id = R.string.push_notification_settings_label_email),
-                    onCheckedChanged = { onUpdate(setting.webapp, it) }
+                    onCheckedChanged = { onUpdate(setting.webapp, it, setting.push) }
+                )
+            }
+
+            if (setting.push != null) {
+                TextCheckBox(
+                    modifier = Modifier,
+                    isChecked = setting.push,
+                    text = stringResource(id = R.string.push_notification_settings_label_push),
+                    onCheckedChanged = { onUpdate(setting.webapp, setting.email, it) }
                 )
             }
         }

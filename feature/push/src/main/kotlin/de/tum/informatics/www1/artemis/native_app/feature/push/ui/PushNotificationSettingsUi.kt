@@ -57,11 +57,12 @@ fun PushNotificationSettingsUi(
         PushNotificationSettingCategoriesListUi(
             modifier = Modifier.fillMaxWidth(),
             settingsByGroupDataStore = settingsByGroupDataStore,
-            onUpdate = { setting, webapp, email ->
+            onUpdate = { setting, webapp, email, push ->
                 viewModel.updateSettingsEntry(
                     setting.settingId,
                     email,
-                    webapp
+                    webapp,
+                    push
                 )
             },
             onRequestReload = viewModel::requestReloadSettings

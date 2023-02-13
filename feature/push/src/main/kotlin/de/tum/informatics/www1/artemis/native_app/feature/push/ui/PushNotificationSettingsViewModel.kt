@@ -94,8 +94,13 @@ class PushNotificationSettingsViewModel internal constructor(
      */
     val isDirty: Flow<Boolean> = updatedSettings.map { it.isNotEmpty() }
 
-    internal fun updateSettingsEntry(settingsId: String, email: Boolean?, webapp: Boolean?) {
-        val newSettings = UpdatedSetting(email = email, webapp = webapp)
+    internal fun updateSettingsEntry(
+        settingsId: String,
+        email: Boolean?,
+        webapp: Boolean?,
+        push: Boolean?
+    ) {
+        val newSettings = UpdatedSetting(email = email, webapp = webapp, push = push)
         val loadedSettings = loadedSettings.value
 
         if (loadedSettings is DataState.Success) {
@@ -104,8 +109,8 @@ class PushNotificationSettingsViewModel internal constructor(
             // The values set in the synced state
             val syncedSettingsValues =
                 syncedSettings.firstOrNull { it.settingId == settingsId }?.let {
-                    UpdatedSetting(email = it.email, webapp = it.webapp)
-                } ?: UpdatedSetting(null, null)
+                    UpdatedSetting(email = it.email, webapp = it.webapp, push = it.push)
+                } ?: UpdatedSetting(null, null, null)
 
             val newUpdatedSettings = updatedSettings.value.toMutableMap()
             if (syncedSettingsValues != newSettings) {
@@ -171,12 +176,13 @@ class PushNotificationSettingsViewModel internal constructor(
             val updatedSettingsEntry = changes[setting.settingId] ?: return@map setting
             setting.copy(
                 webapp = updatedSettingsEntry.webapp,
-                email = updatedSettingsEntry.email
+                email = updatedSettingsEntry.email,
+                push = updatedSettingsEntry.push
             )
         }
     }
 
-    private data class UpdatedSetting(val email: Boolean?, val webapp: Boolean?)
+    private data class UpdatedSetting(val email: Boolean?, val webapp: Boolean?, val push: Boolean?)
 
     internal data class NotificationCategory(
         val categoryId: String,
