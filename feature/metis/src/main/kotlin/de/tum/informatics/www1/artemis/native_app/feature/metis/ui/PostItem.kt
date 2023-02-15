@@ -28,14 +28,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.google.accompanist.placeholder.material.placeholder
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.EmojiView
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.emoji_picker.EmojiPicker
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
-import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.BasePostingEntity
-import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
-import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.minutes
@@ -126,7 +126,7 @@ internal fun AnswerPostItem(
 private fun PostItemBase(
     modifier: Modifier,
     isPlaceholder: Boolean,
-    authorRole: BasePostingEntity.UserRole?,
+    authorRole: UserRole?,
     authorName: String?,
     creationDate: Instant?,
     title: String?,
@@ -214,7 +214,7 @@ private fun PostItemBase(
 private fun PostHeadline(
     modifier: Modifier,
     isPlaceholder: Boolean,
-    authorRole: BasePostingEntity.UserRole?,
+    authorRole: UserRole?,
     authorName: String?,
     creationDate: Instant?
 ) {
@@ -222,9 +222,9 @@ private fun PostHeadline(
         modifier = modifier
     ) {
         val icon = when (authorRole) {
-            BasePostingEntity.UserRole.INSTRUCTOR -> Icons.Default.School
-            BasePostingEntity.UserRole.TUTOR -> Icons.Default.SupervisorAccount
-            BasePostingEntity.UserRole.USER -> Icons.Default.Person
+            UserRole.INSTRUCTOR -> Icons.Default.School
+            UserRole.TUTOR -> Icons.Default.SupervisorAccount
+            UserRole.USER -> Icons.Default.Person
             null -> Icons.Default.Person
         }
 
@@ -433,7 +433,7 @@ private fun AnimatedCounter(currentCount: Int) {
 private class PostPreviewProvider : PreviewParameterProvider<Post?> {
     override val values: Sequence<Post?>
         get() {
-            val baseReaction = Post.Reaction("rocket", 0, "I reacted", 0)
+            val baseReaction = Post.Reaction("rocket", 0, "I reacted", 0, Clock.System.now())
 
             val basePost = Post(
                 clientPostId = "",
@@ -441,11 +441,11 @@ private class PostPreviewProvider : PreviewParameterProvider<Post?> {
                 title = "Example title",
                 content = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.",
                 authorName = "Max Mustermann",
-                authorRole = BasePostingEntity.UserRole.USER,
+                authorRole = UserRole.USER,
                 creationDate = Clock.System.now().minus(5.minutes),
                 resolved = false,
                 tags = listOf("Very", "Important"),
-                answerPostings = emptyList(),
+                answers = emptyList(),
                 reactions = listOf(
                     baseReaction
                 ),
@@ -481,7 +481,7 @@ private fun PostPreview(
             modifier = Modifier.fillMaxWidth(),
             post = post,
             postItemViewType = PostItemViewType.StandaloneListItem(
-                answerPosts = post?.answerPostings.orEmpty(),
+                answerPosts = post?.answers.orEmpty(),
                 onClickPost = {},
                 onClickReply = {},
                 onClickViewReplies = {},

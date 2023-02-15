@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post
 
+import android.view.View
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,40 +40,78 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
         route = "metisStandalonePost/{clientPostId}&{viewType}&{metisContext}",
         arguments = listOf(
             navArgument("clientPostId") {
-                nullable = false
+                nullable = true
+                type = NavType.StringType
+            },
+            navArgument("serverPostId") {
+                nullable = true
                 type = NavType.StringType
             },
             navArgument("viewType") {
-                nullable = false
+                nullable = true
                 type = NavType.StringType
             },
             navArgument("metisContext") {
-                nullable = false
+                nullable = true
+                type = NavType.StringType
+            },
+            navArgument("courseId") {
+                nullable = true
+                type = NavType.StringType
+            },
+            navArgument("exerciseId") {
+                nullable = true
+                type = NavType.StringType
+            },
+            navArgument("lectureId") {
+                nullable = true
                 type = NavType.StringType
             }
         ),
         deepLinks = listOf(
             navDeepLink {
-                uriPattern = "artemis://metisStandalonePost"
+                uriPattern =
+                    "artemis://metisStandalonePost/{serverPostId}/{courseId}/{exerciseId}/{lectureId}"
             }
         )
     ) { backStackEntry ->
         val clientPostId =
             backStackEntry.arguments?.getString("clientPostId")
-        checkNotNull(clientPostId)
 
-        val viewType = ViewType.valueOf(
-            backStackEntry.arguments?.getString("viewType")
-                ?: throw IllegalArgumentException("navType must not be null")
-        )
+        val serverPostId =
+            backStackEntry.arguments?.getString("serverPostId")?.toLongOrNull()
 
-        val metisContext: MetisContext = Json.decodeFromString(
-            backStackEntry.arguments?.getString("metisContext")
-                ?: throw IllegalArgumentException("metisContext must not be null")
-        )
+        check(clientPostId != null || serverPostId != null)
+
+        val postId = if (clientPostId != null) {
+            StandalonePostId.ClientSideId(clientPostId)
+        } else {
+            // !! checked by check before
+            StandalonePostId.ServerSideId(serverPostId!!)
+        }
+
+        val viewTypeString = backStackEntry.arguments?.getString("viewType")
+        val viewType = viewTypeString?.let { ViewType.valueOf(it) } ?: ViewType.POST
+
+        val metisContextArg = backStackEntry.arguments?.getString("metisContext")
+        val metisContext: MetisContext = if (metisContextArg != null) {
+            Json.decodeFromString(metisContextArg)
+        } else {
+            val courseId = backStackEntry.arguments?.getString("courseId")?.toLongOrNull()
+            if (courseId != null) {
+                val exerciseId = backStackEntry.arguments?.getString("exerciseId")?.toLongOrNull()
+                val lectureId = backStackEntry.arguments?.getString("lectureId")?.toLongOrNull()
+
+                when {
+                    exerciseId != null -> MetisContext.Exercise(courseId, exerciseId)
+                    lectureId != null -> MetisContext.Lecture(courseId, lectureId)
+                    else -> MetisContext.Course(courseId)
+                }
+            } else null
+        } ?: return@composable // Invalid input, not sure how to handle therefore display nothing
 
         MetisStandalonePostScreen(
-            clientPostId = clientPostId,
+            standalonePostId = postId,
             viewType = viewType,
             onNavigateUp = onNavigateUp,
             metisContext = metisContext
@@ -82,13 +121,13 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
 
 @Composable
 private fun MetisStandalonePostScreen(
-    clientPostId: String,
+    standalonePostId: StandalonePostId,
     metisContext: MetisContext,
     viewType: ViewType,
     onNavigateUp: () -> Unit
 ) {
     val viewModel: MetisStandalonePostViewModel =
-        koinViewModel(parameters = { parametersOf(clientPostId, metisContext, true) })
+        koinViewModel(parameters = { parametersOf(standalonePostId, metisContext, true) })
 
     val isDataOutdated by viewModel.isDataOutdated.collectAsState(initial = false)
 

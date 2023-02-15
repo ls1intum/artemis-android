@@ -19,7 +19,7 @@ sealed class DataState<T> {
 
     data class Success<T>(val data: T) : DataState<T>()
 
-    inline fun <K> bind(crossinline op: (T) -> K): DataState<K> {
+    inline fun <K> bind(op: (T) -> K): DataState<K> {
         return when (this) {
             is Success -> Success(op(data))
             is Failure -> Failure(throwable)

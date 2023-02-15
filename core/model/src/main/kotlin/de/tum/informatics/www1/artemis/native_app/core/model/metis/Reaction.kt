@@ -9,9 +9,11 @@ import kotlinx.serialization.Serializable
 class Reaction(
     val id: Int? = null,
     val user: User? = null,
-    val creationDate: Instant? = null,
-    val emojiId: String? = null,
+    override val creationDate: Instant? = null,
+    override val emojiId: String = "",
     @SerialName("post")
     val standalonePost: StandalonePost? = null,
     val answerPost: AnswerPost? = null,
-)
+) : IReaction {
+    override val creatorId: Long? = user?.id
+}

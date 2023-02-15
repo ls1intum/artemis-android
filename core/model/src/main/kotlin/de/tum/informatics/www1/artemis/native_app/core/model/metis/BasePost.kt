@@ -5,11 +5,14 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class BasePost {
+sealed class BasePost : IBasePost {
     abstract val id: Long?
     abstract val author: User?
-    abstract val authorRole: UserRole?
-    abstract val creationDate: Instant?
-    abstract val content: String?
-    abstract val reactions: List<Reaction>?
+    abstract override val authorRole: UserRole?
+    abstract override val creationDate: Instant?
+    abstract override val content: String?
+    abstract override val reactions: List<Reaction>?
+
+    override val authorName: String?
+        get() = author?.name
 }

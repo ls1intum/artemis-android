@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.*
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 
@@ -33,18 +34,12 @@ interface MetisDao {
             client_post_id 
         from metis_post_context 
         where 
-            server_id = :serverId and 
-            course_id = :courseId and
-            exercise_id = :exerciseId and
-            lecture_id = :lectureId and
+            server_id = :serverId and
             server_post_id = :postId
     """
     )
     suspend fun queryClientPostId(
         serverId: String,
-        courseId: Long,
-        exerciseId: Long,
-        lectureId: Long,
         postId: Long
     ): String?
 
@@ -295,7 +290,7 @@ interface MetisDao {
     ): Int
 
     @Query("select author_role from postings where id = :clientPostId")
-    suspend fun queryPostAuthorRole(clientPostId: String): BasePostingEntity.UserRole
+    suspend fun queryPostAuthorRole(clientPostId: String): UserRole
 
 //    @Query(
 //        """

@@ -32,6 +32,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data android:scheme="artemis" android:host="courses" />
+                <data android:scheme="artemis" android:host="metisStandalonePost" />
             </intent-filter>
         </activity>
 

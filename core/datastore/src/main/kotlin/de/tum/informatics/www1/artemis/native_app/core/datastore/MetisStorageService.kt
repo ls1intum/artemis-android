@@ -65,4 +65,6 @@ interface MetisStorageService {
     suspend fun getCachedPostCount(host: String, metisContext: MetisContext): Int
 
     suspend fun getServerSidePostId(host: String, clientSidePostId: String): Long
+
+    suspend fun getClientSidePostId(host: String, serverSidePostId: Long): String?
 }

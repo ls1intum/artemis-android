@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.model.metis
 
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import kotlinx.datetime.Instant
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,6 +13,7 @@ data class AnswerPost(
     override val creationDate: Instant? = null,
     override val content: String? = null,
     override val reactions: List<Reaction>? = null,
-    val resolvedPost: Boolean = false,
+    @SerialName("resolvedPost")
+    override val resolvesPost: Boolean = false,
     val post: StandalonePost? = null
-) : BasePost()
+) : BasePost(), IAnswerPost

@@ -127,7 +127,7 @@ internal fun MetisStandalonePostList(
                                     post = post,
                                     clientId = clientId,
                                     postItemViewType = PostItemViewType.StandaloneListItem(
-                                        answerPosts = post?.answerPostings.orEmpty(),
+                                        answerPosts = post?.answers.orEmpty(),
                                         onClickReply = {
                                             if (post != null) {
                                                 onClickViewPost(post.clientPostId)

@@ -9,16 +9,16 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class StandalonePost(
-    override val id: Long? = null,
+    override val id: Long = 0L,
     override val author: User? = null,
     override val authorRole: UserRole? = null,
     override val creationDate: Instant? = null,
     override val content: String? = null,
     override val reactions: List<Reaction>? = null,
-    val title: String? = null,
+    override val title: String? = null,
     val visibleForStudents: Boolean = true,
-    val answers: List<AnswerPost>? = null,
-    val tags: List<String>? = null,
+    override val answers: List<AnswerPost>? = null,
+    override val tags: List<String>? = null,
     val exercise: Exercise? = null,
     val lecture: Lecture? = null,
     val course: Course? = null,
@@ -26,5 +26,7 @@ data class StandalonePost(
 //    val conversation: Conversation? = null,
     val courseWideContext: CourseWideContext? = null,
     val displayPriority: DisplayPriority? = null,
-    val resolved: Boolean? = null
-) : BasePost()
+    override val resolved: Boolean? = null
+) : BasePost(), IStandalonePost {
+    override val serverPostId: Long = id
+}

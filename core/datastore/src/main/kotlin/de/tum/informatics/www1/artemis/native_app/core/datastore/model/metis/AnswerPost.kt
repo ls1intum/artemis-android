@@ -6,6 +6,8 @@ import androidx.room.Relation
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.MetisUserEntity
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.PostReactionEntity
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.IAnswerPost
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
 import kotlinx.datetime.Instant
 
 data class AnswerPost constructor(
@@ -14,7 +16,7 @@ data class AnswerPost constructor(
     @ColumnInfo(name = "post_id")
     val postId: String,
     @ColumnInfo(name = "resolves_post")
-    val resolvesPost: Boolean,
+    override val resolvesPost: Boolean,
     @Relation(
         entity = BasePostingEntity::class,
         entityColumn = "id",
@@ -28,16 +30,16 @@ data class AnswerPost constructor(
         parentColumn = "post_id",
         projection = ["author_id", "emoji", "id"]
     )
-    val reactions: List<Post.Reaction>
-) {
+    override val reactions: List<Post.Reaction>
+) : IAnswerPost {
     @Ignore
-    val creationDate: Instant = basePostingCache.creationDate
+    override val creationDate: Instant = basePostingCache.creationDate
     @Ignore
-    val content: String? = basePostingCache.content
+    override val content: String? = basePostingCache.content
     @Ignore
-    val authorRole: BasePostingEntity.UserRole = basePostingCache.authorRole
+    override val authorRole: UserRole = basePostingCache.authorRole
     @Ignore
-    val authorName: String = basePostingCache.authorName
+    override val authorName: String = basePostingCache.authorName
 
     data class BasePostingCache(
         @ColumnInfo(name = "author_id")
@@ -47,7 +49,7 @@ data class AnswerPost constructor(
         @ColumnInfo(name = "content")
         val content: String?,
         @ColumnInfo(name = "author_role")
-        val authorRole: BasePostingEntity.UserRole,
+        val authorRole: UserRole,
         @Relation(
             entity = MetisUserEntity::class,
             entityColumn = "id",

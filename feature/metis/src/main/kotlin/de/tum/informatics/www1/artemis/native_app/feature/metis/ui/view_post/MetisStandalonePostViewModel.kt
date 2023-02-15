@@ -1,14 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post
 
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisContextManager
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisViewModel
-import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
+import de.tum.informatics.www1.artemis.native_app.core.data.*
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
@@ -17,13 +16,15 @@ import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePos
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
 internal class MetisStandalonePostViewModel(
-    private val clientSidePostId: String,
+    private val postId: StandalonePostId,
     private val metisContext: MetisContext,
     subscribeToLiveUpdateService: Boolean,
     private val websocketProvider: WebsocketProvider,
@@ -34,16 +35,86 @@ internal class MetisStandalonePostViewModel(
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     serverDataService: ServerDataService
-) : MetisViewModel(metisService, metisStorageService, serverConfigurationService, accountService, serverDataService, networkStatusProvider) {
+) : MetisViewModel(
+    metisService,
+    metisStorageService,
+    serverConfigurationService,
+    accountService,
+    serverDataService,
+    networkStatusProvider
+) {
+
+    companion object {
+        fun Flow<Post?>.asDataStateFlow(): Flow<DataState<Post>> = map { post ->
+            if (post != null) {
+                DataState.Success(post)
+            } else DataState.Failure(RuntimeException("Post not found"))
+        }
+    }
 
     private val collectMetisUpdates: Flow<MetisContextManager.CurrentDataAction> =
-        metisContextManager.getContextDataActionFlow(metisContext)
+        metisContextManager
+            .getContextDataActionFlow(metisContext)
             .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
-    val post: Flow<Post?> =
-        metisStorageService
-            .getStandalonePost(clientSidePostId)
-            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+    val post: StateFlow<DataState<Post>> = when (postId) {
+        is StandalonePostId.ClientSideId -> metisStorageService
+            .getStandalonePost(postId.clientSideId)
+            .asDataStateFlow()
+
+        is StandalonePostId.ServerSideId -> flatMapLatest(
+            serverConfigurationService.serverUrl,
+            accountService.authToken,
+            onRequestReload.onStart { emit(Unit) }
+        ) { serverUrl, authToken, _ ->
+            retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                metisService.getPost(
+                    metisContext,
+                    serverSidePostId = postId.serverSidePostId,
+                    serverUrl = serverUrl,
+                    authToken = authToken
+                )
+            }
+        }
+            .flatMapLatest { standalonePostDataState ->
+                val failureFlow: Flow<DataState<Post>> =
+                    flowOf(DataState.Failure(RuntimeException("Something went wrong while loading the post.")))
+
+                when (standalonePostDataState) {
+                    is DataState.Success -> {
+                        val post = standalonePostDataState.data
+
+                        val host = serverConfigurationService.host.first()
+                        metisStorageService.insertOrUpdatePosts(
+                            host = host,
+                            metisContext = metisContext,
+                            posts = listOf(post),
+                            clearPreviousPosts = false
+                        )
+
+                        val clientSidePostId = metisStorageService.getClientSidePostId(
+                            host = host,
+                            serverSidePostId = post.id
+                        )
+
+                        if (clientSidePostId != null) {
+                            metisStorageService
+                                .getStandalonePost(clientSidePostId)
+                                .onEach { post ->
+                                    println(post?.reactions)
+                                }
+                                .asDataStateFlow()
+                        } else failureFlow
+                    }
+                    is DataState.Failure -> flowOf(DataState.Failure(standalonePostDataState.throwable))
+                    is DataState.Loading -> flowOf(DataState.Loading())
+                }
+            }
+            .onStart { emit(DataState.Loading()) }
+    }
+        .map { dataState -> dataState.bind { it } } // Type check adaption
+        .stateIn(viewModelScope, SharingStarted.Eagerly)
+
 
     val isDataOutdated: Flow<Boolean> = collectMetisUpdates.map {
         when (it) {
@@ -68,7 +139,13 @@ internal class MetisStandalonePostViewModel(
                 collectMetisUpdates
                     .filter { it == MetisContextManager.CurrentDataAction.Refresh }
                     .collect {
-                        val serverSidePostId = post.filterNotNull().first().serverPostId
+                        val serverSidePostId = when (postId) {
+                            is StandalonePostId.ClientSideId -> {
+                                post.filterSuccess().filterNotNull().first().serverPostId
+                            }
+                            is StandalonePostId.ServerSideId -> postId.serverSidePostId
+                        }
+
                         val serverUrl = serverConfigurationService.serverUrl.first()
                         val host = serverConfigurationService.host.first()
                         val authToken = when (val authData =
@@ -77,8 +154,8 @@ internal class MetisStandalonePostViewModel(
                             AccountService.AuthenticationData.NotLoggedIn -> return@collect
                         }
 
-                        retryOnInternet(
-                            networkStatusProvider.currentNetworkStatus
+                        retryOnInternetIndefinetly(
+                            networkStatusProvider.currentNetworkStatus,
                         ) {
                             metisService.getPost(
                                 metisContext,
@@ -86,15 +163,15 @@ internal class MetisStandalonePostViewModel(
                                 serverUrl,
                                 authToken
                             )
-                        }.collect { dataState ->
-                            if (dataState is DataState.Success) {
+                        }
+                            .filterSuccess()
+                            .collect { post ->
                                 metisStorageService.updatePost(
                                     host,
                                     metisContext,
-                                    dataState.data
+                                    post
                                 )
                             }
-                        }
                     }
             }
         }
@@ -158,10 +235,13 @@ internal class MetisStandalonePostViewModel(
                 creationDate = Clock.System.now(),
                 content = replyText,
                 post = StandalonePost(
-                    id = metisStorageService.getServerSidePostId(
-                        serverConfigurationService.host.first(),
-                        clientSidePostId
-                    )
+                    id = when (postId) {
+                        is StandalonePostId.ClientSideId -> metisStorageService.getServerSidePostId(
+                            serverConfigurationService.host.first(),
+                            postId.clientSideId
+                        )
+                        is StandalonePostId.ServerSideId -> postId.serverSidePostId
+                    }
                 )
             )
 

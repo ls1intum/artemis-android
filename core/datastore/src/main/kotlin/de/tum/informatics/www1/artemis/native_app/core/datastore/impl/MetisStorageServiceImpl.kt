@@ -22,18 +22,18 @@ class MetisStorageServiceImpl(
 ) : MetisStorageService {
 
     companion object {
-        private val BasePostingEntity.UserRole.asNetwork: UserRole
+        private val UserRole.asNetwork: UserRole
             get() = when (this) {
-                BasePostingEntity.UserRole.INSTRUCTOR -> UserRole.INSTRUCTOR
-                BasePostingEntity.UserRole.TUTOR -> UserRole.TUTOR
-                BasePostingEntity.UserRole.USER -> UserRole.USER
+                UserRole.INSTRUCTOR -> UserRole.INSTRUCTOR
+                UserRole.TUTOR -> UserRole.TUTOR
+                UserRole.USER -> UserRole.USER
             }
 
-        private val UserRole.asDb: BasePostingEntity.UserRole
+        private val UserRole.asDb: UserRole
             get() = when (this) {
-                UserRole.INSTRUCTOR -> BasePostingEntity.UserRole.INSTRUCTOR
-                UserRole.TUTOR -> BasePostingEntity.UserRole.TUTOR
-                UserRole.USER -> BasePostingEntity.UserRole.USER
+                UserRole.INSTRUCTOR -> UserRole.INSTRUCTOR
+                UserRole.TUTOR -> UserRole.TUTOR
+                UserRole.USER -> UserRole.USER
             }
 
         private val CourseWideContext.asDb: BasePostingEntity.CourseWideContext
@@ -63,7 +63,7 @@ class MetisStorageServiceImpl(
                 authorId = author?.id ?: return null,
                 creationDate = creationDate ?: Instant.fromEpochSeconds(0),
                 content = content,
-                authorRole = authorRole?.asDb ?: BasePostingEntity.UserRole.USER
+                authorRole = authorRole?.asDb ?: UserRole.USER
             )
 
             val standalone = StandalonePostingEntity(
@@ -90,13 +90,13 @@ class MetisStorageServiceImpl(
                 authorId = author?.id ?: return null,
                 creationDate = creationDate ?: Instant.fromEpochSeconds(0),
                 content = content,
-                authorRole = authorRole?.asDb ?: BasePostingEntity.UserRole.USER
+                authorRole = authorRole?.asDb ?: UserRole.USER
             )
 
             val answer = AnswerPostingEntity(
                 postId = clientSidePostId,
                 parentPostId = parentClientSidePostId,
-                resolvesPost = resolvedPost
+                resolvesPost = resolvesPost
             )
 
             val user = MetisUserEntity(
@@ -152,21 +152,20 @@ class MetisStorageServiceImpl(
         val metisDao = databaseProvider.database.metisDao()
 
         databaseProvider.database.withTransaction {
-            metisDao.clearAll(
-                host,
-                metisContext.courseId,
-                metisContext.lectureId,
-                metisContext.exerciseId
-            )
+            if (clearPreviousPosts) {
+                metisDao.clearAll(
+                    host,
+                    metisContext.courseId,
+                    metisContext.lectureId,
+                    metisContext.exerciseId
+                )
+            }
 
-            //Extract the db entities from the network entities. With the schema invalid entities are discarded.
+            // Extract the db entities from the network entities. With the schema invalid entities are discarded.
             for (sp in posts) {
                 val queryClientPostId = metisDao.queryClientPostId(
                     serverId = host,
-                    courseId = metisContext.courseId,
-                    exerciseId = metisContext.exerciseId,
-                    lectureId = metisContext.lectureId,
-                    postId = sp.id ?: continue
+                    postId = sp.id
                 )
 
                 insertOrUpdatePost(
@@ -190,19 +189,12 @@ class MetisStorageServiceImpl(
         databaseProvider.database.withTransaction {
             val clientSidePostId = metisDao.queryClientPostId(
                 host,
-                metisContext.courseId,
-                metisContext.exerciseId,
-                metisContext.lectureId,
                 post.id ?: return@withTransaction
             ) ?: return@withTransaction
 
             //The author role seems to be omitted when sending an update. Therefore, we just load the one still cached.
             val actPost = if (post.authorRole == null) {
-                val storedRole = when (metisDao.queryPostAuthorRole(clientSidePostId)) {
-                    BasePostingEntity.UserRole.INSTRUCTOR -> UserRole.INSTRUCTOR
-                    BasePostingEntity.UserRole.TUTOR -> UserRole.TUTOR
-                    BasePostingEntity.UserRole.USER -> UserRole.USER
-                }
+                val storedRole = metisDao.queryPostAuthorRole(clientSidePostId)
                 post.copy(authorRole = storedRole)
             } else post
 
@@ -228,10 +220,7 @@ class MetisStorageServiceImpl(
             // If the post already exists, do nothing
             metisDao.queryClientPostId(
                 host,
-                metisContext.courseId,
-                metisContext.exerciseId,
-                metisContext.lectureId,
-                post.id ?: return@withTransaction null
+                post.id
             ) ?: insertOrUpdatePost(metisDao, host, metisContext, null, post, true)
         }
     }
@@ -306,9 +295,6 @@ class MetisStorageServiceImpl(
         for (ap in sp.answers.orEmpty()) {
             val queryClientPostIdAnswer = metisDao.queryClientPostId(
                 serverId = host,
-                courseId = metisContext.courseId,
-                exerciseId = metisContext.exerciseId,
-                lectureId = metisContext.lectureId,
                 postId = ap.id ?: return null
             )
             val answerClientSidePostId =
@@ -415,5 +401,10 @@ class MetisStorageServiceImpl(
 
     override suspend fun getServerSidePostId(host: String, clientSidePostId: String): Long {
         return databaseProvider.database.metisDao().queryServerSidePostId(host, clientSidePostId)
+    }
+
+    override suspend fun getClientSidePostId(host: String, serverSidePostId: Long): String? {
+        return databaseProvider.database.metisDao()
+            .queryClientPostId(serverId = host, postId = serverSidePostId)
     }
 }

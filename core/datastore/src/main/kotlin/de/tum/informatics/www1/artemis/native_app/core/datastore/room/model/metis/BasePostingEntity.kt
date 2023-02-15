@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.met
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
 import kotlinx.datetime.Instant
 
 @Entity(
@@ -63,16 +64,5 @@ data class BasePostingEntity(
         STANDALONE,
         @ColumnInfo(name = "answer")
         ANSWER
-    }
-
-    enum class UserRole {
-        @ColumnInfo(name = "instructor")
-        INSTRUCTOR,
-
-        @ColumnInfo(name = "tutor")
-        TUTOR,
-
-        @ColumnInfo(name = "user")
-        USER
     }
 }
