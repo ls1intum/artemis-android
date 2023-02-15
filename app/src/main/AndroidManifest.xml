@@ -10,10 +10,10 @@
         android:name=".ArtemisApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppThemeActionBar">
+        android:theme="@style/AppThemeActionBar"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".ui.MainActivity"
             android:configChanges="smallestScreenSize|screenSize|screenLayout|orientation"
@@ -23,6 +23,15 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!--     Begin deep links       -->
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="artemis" android:host="courses" />
             </intent-filter>
         </activity>
 

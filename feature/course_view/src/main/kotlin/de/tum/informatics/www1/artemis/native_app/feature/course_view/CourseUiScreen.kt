@@ -40,9 +40,17 @@ fun NavGraphBuilder.course(
     onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    composable("course/{courseId}", arguments = listOf(
-        navArgument("courseId") { type = NavType.LongType; nullable = false }
-    )) { backStackEntry ->
+    composable(
+        route = "course/{courseId}",
+        arguments = listOf(
+            navArgument("courseId") { type = NavType.LongType; nullable = false }
+        ),
+        deepLinks = listOf(
+            navDeepLink {
+                uriPattern = "artemis://courses/{courseId}"
+            }
+        )
+    ) { backStackEntry ->
         val courseId =
             backStackEntry.arguments?.getLong("courseId")
         checkNotNull(courseId)

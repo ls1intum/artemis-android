@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -38,18 +39,16 @@ abstract class MetisViewModel(
 
     protected val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    val clientId: StateFlow<DataState<Long>> = transformLatest(
+    val clientId: StateFlow<DataState<Long>> = flatMapLatest(
         serverConfigurationService.serverUrl,
         accountService.authToken,
         onRequestReload.onStart { emit(Unit) }
     ) { serverUrl, authToken, _ ->
-        emitAll(
-            retryOnInternetIndefinetly(
-                networkStatusProvider.currentNetworkStatus
-            ) {
-                serverDataService.getAccountData(serverUrl, authToken).bind { it.id }
-            }
-        )
+        retryOnInternetIndefinetly(
+            networkStatusProvider.currentNetworkStatus
+        ) {
+            serverDataService.getAccountData(serverUrl, authToken).bind { it.id }
+        }
     }
         .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
 

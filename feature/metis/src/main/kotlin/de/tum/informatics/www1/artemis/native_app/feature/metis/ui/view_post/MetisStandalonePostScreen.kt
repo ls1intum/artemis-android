@@ -36,7 +36,7 @@ fun NavController.navigateToStandalonePostScreen(
 
 fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
     composable(
-        "metisStandalonePost/{clientPostId}&{viewType}&{metisContext}",
+        route = "metisStandalonePost/{clientPostId}&{viewType}&{metisContext}",
         arguments = listOf(
             navArgument("clientPostId") {
                 nullable = false
@@ -49,6 +49,11 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
             navArgument("metisContext") {
                 nullable = false
                 type = NavType.StringType
+            }
+        ),
+        deepLinks = listOf(
+            navDeepLink {
+                uriPattern = "artemis://metisStandalonePost"
             }
         )
     ) { backStackEntry ->
@@ -107,7 +112,11 @@ private fun MetisStandalonePostScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            MetisOutdatedBanner(modifier = Modifier.fillMaxWidth(), isOutdated = isDataOutdated, requestRefresh = viewModel::requestWebsocketReload)
+            MetisOutdatedBanner(
+                modifier = Modifier.fillMaxWidth(),
+                isOutdated = isDataOutdated,
+                requestRefresh = viewModel::requestWebsocketReload
+            )
 
             MetisStandalonePostUi(
                 modifier = Modifier

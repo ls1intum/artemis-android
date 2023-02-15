@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
 
+import android.net.Uri
 import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
@@ -67,16 +68,27 @@ class WebsocketProvider(
     @OptIn(DelicateCoroutinesApi::class)
     val session: Flow<StompSessionWithKxSerialization> =
         combine(
+            serverConfigurationService.serverUrl,
             serverConfigurationService.host,
-            accountService.authToken,
             onWebsocketError.onStart { emit(Unit) },
             onRequestReconnect.onStart { emit(Unit) }
         ) { a, b, _, _ -> a to b }
-            .transformLatest { (host, authToken) ->
+            .transformLatest { (serverUrl, host) ->
                 emitAll(
                     channelFlow {
                         Log.d(TAG, "Websocket: Init")
-                        val url = "wss://$host/websocket/websocket"
+
+                        val uri = Uri.parse(serverUrl)
+
+                        val protocol = if (uri.scheme == "http") URLProtocol.WS else URLProtocol.WSS
+                        val port = if (uri.port == -1) 80 else uri.port
+
+                        val url = URLBuilder(
+                            protocol = protocol,
+                            host = host,
+                            port = port,
+                            pathSegments = listOf("websocket", "websocket")
+                        ).buildString()
 
                         val session = client
                             .connect(url = url)

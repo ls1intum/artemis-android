@@ -1,9 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push
 
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.util.Base64
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.TaskStackBuilder
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -11,6 +14,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import kotlinx.coroutines.flow.Flow
@@ -100,7 +104,8 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
             .build()
 
         val notificationId = runBlocking {
-            val id = notificationDataStore.data.map { it[LatestPushNotificationId] ?: 0 }.first() + 1
+            val id =
+                notificationDataStore.data.map { it[LatestPushNotificationId] ?: 0 }.first() + 1
 
             notificationDataStore.edit { data ->
                 data[LatestPushNotificationId] = id
@@ -126,6 +131,27 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
             null
         }
     }
+
+//    private fun buildOnClickIntent(type: String, target: String): Intent {
+//        val mainActivity =
+//            Class.forName("de.tum.informatics.www1.artemis.native_app.android.ui.MainActivity")
+//
+//        val openAppIntent = TaskStackBuilder.create(this).run {
+//            addNextIntentWithParentStack(Intent(this@ArtemisFirebaseMessagingService, mainActivity))
+//            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+//        }
+//
+//        try {
+//            val notificationType = NotificationType.valueOf(type)
+//            when (notificationType) {
+//                else -> null
+//            }
+//
+//            return PendingIntent.
+//        } catch (e: Exception) {
+//            return openAppIntent
+//        }
+//    }
 
     @Serializable
     private data class MessagePayload(
