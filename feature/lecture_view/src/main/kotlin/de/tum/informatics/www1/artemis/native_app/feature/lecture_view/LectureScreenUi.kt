@@ -32,10 +32,9 @@ const val METIS_RATIO = 0.3f
 
 fun NavController.navigateToLecture(
     lectureId: Long,
-    courseId: Long,
     builder: NavOptionsBuilder.() -> Unit
 ) {
-    navigate("lecture/$lectureId/$courseId", builder)
+    navigate("lecture/$lectureId", builder)
 }
 
 fun NavGraphBuilder.lecture(
@@ -49,30 +48,33 @@ fun NavGraphBuilder.lecture(
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
 ) {
     composable(
-        route = "lecture/{lectureId}/{courseId}",
+        route = "lecture/{lectureId}",
         arguments = listOf(
             navArgument("lectureId") {
                 type = NavType.LongType
                 nullable = false
-            },
-            navArgument("courseId") {
-                type = NavType.LongType
-                nullable = false
+            }
+        ),
+        deepLinks = listOf(
+            navDeepLink {
+                uriPattern = "artemis://lectures/{lectureId}"
             }
         )
     ) { backStackEntry ->
         val lectureId =
             backStackEntry.arguments?.getLong("lectureId")
-        val courseId =
-            backStackEntry.arguments?.getLong("courseId")
         checkNotNull(lectureId)
-        checkNotNull(courseId)
 
         val viewModel: LectureViewModel = koinViewModel { parametersOf(lectureId) }
+        val lectureDataState by viewModel.lectureDataState.collectAsState()
+        val courseId by remember(lectureDataState) {
+            derivedStateOf { lectureDataState.bind { it.course?.id ?: 0 }.orElse(0) }
+        }
+
         LectureScreen(
             modifier = Modifier.fillMaxSize(),
-            courseId = courseId,
             lectureId = lectureId,
+            courseId = courseId,
             viewModel = viewModel,
             navController = navController,
             onNavigateBack = onNavigateBack,

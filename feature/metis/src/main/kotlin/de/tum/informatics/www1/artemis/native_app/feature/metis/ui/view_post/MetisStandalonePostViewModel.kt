@@ -100,9 +100,6 @@ internal class MetisStandalonePostViewModel(
                         if (clientSidePostId != null) {
                             metisStorageService
                                 .getStandalonePost(clientSidePostId)
-                                .onEach { post ->
-                                    println(post?.reactions)
-                                }
                                 .asDataStateFlow()
                         } else failureFlow
                     }

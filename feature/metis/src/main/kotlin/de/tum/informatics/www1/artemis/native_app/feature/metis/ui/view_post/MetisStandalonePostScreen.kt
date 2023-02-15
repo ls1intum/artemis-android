@@ -71,7 +71,7 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
         deepLinks = listOf(
             navDeepLink {
                 uriPattern =
-                    "artemis://metisStandalonePost/{serverPostId}/{courseId}/{exerciseId}/{lectureId}"
+                    "artemis://metis_standalone_post/{serverPostId}/{courseId}/{exerciseId}/{lectureId}"
             }
         )
     ) { backStackEntry ->

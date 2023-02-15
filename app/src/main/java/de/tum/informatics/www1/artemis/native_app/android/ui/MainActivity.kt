@@ -185,7 +185,6 @@ class MainActivity : AppCompatActivity() {
                             onParticipateInQuiz = onParticipateInQuiz,
                             onNavigateToLecture = { courseId, lectureId ->
                                 navController.navigateToLecture(
-                                    courseId = courseId,
                                     lectureId = lectureId
                                 ) { }
                             },
