@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.push
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Base64
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -14,6 +15,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CoursePostTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
@@ -100,6 +102,10 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
                 if (title != null) setContentTitle(title)
                 if (body != null) setContentText(title)
                 setSmallIcon(R.drawable.push_notification_icon)
+                if (payload.type != null && payload.target != null) {
+                    setContentIntent(buildOnClickIntent(payload.type, payload.target))
+                }
+                setAutoCancel(true)
             }
             .build()
 
@@ -132,26 +138,43 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-//    private fun buildOnClickIntent(type: String, target: String): Intent {
-//        val mainActivity =
-//            Class.forName("de.tum.informatics.www1.artemis.native_app.android.ui.MainActivity")
-//
-//        val openAppIntent = TaskStackBuilder.create(this).run {
-//            addNextIntentWithParentStack(Intent(this@ArtemisFirebaseMessagingService, mainActivity))
-//            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-//        }
-//
-//        try {
-//            val notificationType = NotificationType.valueOf(type)
-//            when (notificationType) {
-//                else -> null
-//            }
-//
-//            return PendingIntent.
-//        } catch (e: Exception) {
-//            return openAppIntent
-//        }
-//    }
+    private fun buildOnClickIntent(type: String, target: String): PendingIntent {
+        val mainActivity =
+            Class.forName("de.tum.informatics.www1.artemis.native_app.android.ui.MainActivity")
+
+        val openAppIntent = PendingIntent.getActivity(
+            this,
+            0,
+            Intent(this@ArtemisFirebaseMessagingService, mainActivity),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val json = jsonProvider.applicationJsonConfiguration
+
+        try {
+            val uriString: String? = when (NotificationType.valueOf(type)) {
+                NotificationType.NEW_REPLY_FOR_COURSE_POST -> {
+                    val data: CoursePostTarget = json.decodeFromString(target)
+                    "artemis://metis_standalone_post/${data.postId}/${data.courseId}/null/null"
+                }
+                else -> null
+            }
+
+            return if (uriString != null) {
+                PendingIntent.getActivity(
+                    this,
+                    0,
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(uriString)
+                    ),
+                    PendingIntent.FLAG_IMMUTABLE
+                )
+            } else openAppIntent
+        } catch (e: Exception) {
+            return openAppIntent
+        }
+    }
 
     @Serializable
     private data class MessagePayload(
