@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.MarkdownTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.getHumanReadableTextForCourseWideContext
@@ -23,6 +24,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.DropdownButton
 
 @Composable
 internal fun CreateStandalonePostUi(modifier: Modifier, viewModel: CreateStandalonePostViewModel) {
+    val isCoursePost = viewModel.metisContext is MetisContext.Course
+
     Box(modifier = modifier) {
         CreateStandalonePostUiImpl(
             modifier = Modifier
@@ -32,6 +35,7 @@ internal fun CreateStandalonePostUi(modifier: Modifier, viewModel: CreateStandal
             title = viewModel.title.collectAsState(initial = "").value,
             content = viewModel.content.collectAsState(initial = "").value,
             tags = viewModel.tags.collectAsState(initial = "").value,
+            isCoursePost = isCoursePost,
             updateContext = viewModel::updateContext,
             updateTitle = viewModel::updateTitle,
             updateContent = viewModel::updateContent,
@@ -47,6 +51,7 @@ private fun CreateStandalonePostUiImpl(
     title: String,
     content: String,
     tags: String,
+    isCoursePost: Boolean,
     updateContext: (CourseWideContext) -> Unit,
     updateTitle: (String) -> Unit,
     updateContent: (String) -> Unit,
@@ -57,11 +62,13 @@ private fun CreateStandalonePostUiImpl(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        SelectContext(
-            modifier = inputModifier,
-            currentContext = context,
-            updateContext = updateContext
-        )
+        if (isCoursePost) {
+            SelectContext(
+                modifier = inputModifier,
+                currentContext = context,
+                updateContext = updateContext
+            )
+        }
 
         TitleInput(modifier = inputModifier, title = title, updateTitle = updateTitle)
 
@@ -269,6 +276,7 @@ private fun CreateMetisStandalonePostUiPreview() {
             title = title,
             content = content,
             tags = tags,
+            isCoursePost = true,
             updateContext = { context = it },
             updateTitle = { title = it },
             updateContent = { content = it },
