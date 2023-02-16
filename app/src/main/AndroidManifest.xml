@@ -35,6 +35,7 @@
                 <data android:scheme="artemis" android:host="metis_standalone_post" />
                 <data android:scheme="artemis" android:host="exercises" />
                 <data android:scheme="artemis" android:host="lectures" />
+                <data android:scheme="artemis" android:host="quiz_participation" />
             </intent-filter>
         </activity>
 

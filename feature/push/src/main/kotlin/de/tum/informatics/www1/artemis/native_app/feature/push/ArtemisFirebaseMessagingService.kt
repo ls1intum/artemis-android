@@ -14,10 +14,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CoursePostTarget
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ExercisePostTarget
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.LecturePostTarget
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.*
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import kotlinx.coroutines.flow.first
@@ -164,6 +161,10 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
                 NotificationType.NEW_EXERCISE_POST, NotificationType.NEW_REPLY_FOR_EXERCISE_POST -> {
                     val data: ExercisePostTarget = json.decodeFromString(target)
                     "artemis://metis_standalone_post/${data.postId}/${data.courseId}/${data.exerciseId}/null"
+                }
+                NotificationType.QUIZ_EXERCISE_STARTED -> {
+                    val data: ExerciseTarget = json.decodeFromString(target)
+                    "artemis://quiz_participation/${data.courseId}/${data.exerciseId}"
                 }
                 else -> null
             }

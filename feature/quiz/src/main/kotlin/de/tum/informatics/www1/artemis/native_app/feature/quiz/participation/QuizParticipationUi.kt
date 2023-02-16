@@ -67,7 +67,7 @@ internal fun QuizParticipationUi(
     LaunchedEffect(result, exerciseDataState) {
         val currentResult = result
         val currentQuestionData = exerciseDataState
-        if (currentResult != null) {
+        if (currentResult?.id != null) {
             when (viewModel.quizType) {
                 QuizType.Live -> onNavigateToInspectResult(QuizType.ViewResults)
                 QuizType.Practice -> if (currentQuestionData is DataState.Success) {

@@ -4,11 +4,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LecturePostTarget(
+data class ExerciseTarget(
     @SerialName("id")
-    val postId: Long,
+    val exerciseId: Long,
     @SerialName("course")
-    val courseId: Long,
-    @SerialName("lectureId")
-    val lectureId: Long
+    val courseId: Long
 )

@@ -13,11 +13,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
+import androidx.navigation.*
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.DestructiveMarkdownTextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
@@ -50,7 +47,7 @@ fun NavController.navigateToQuizParticipation(
 
 fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
     composable(
-        "quiz-participation/{courseId}/{exerciseId}/{quizType}",
+        route = "quiz-participation/{courseId}/{exerciseId}/{quizType}",
         arguments = listOf(
             navArgument("courseId") {
                 type = NavType.LongType
@@ -60,6 +57,12 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
             },
             navArgument("quizType") {
                 type = NavType.StringType
+                defaultValue = Json.encodeToString(QuizType.WorkableQuizType.serializer(), QuizType.Live)
+            }
+        ),
+        deepLinks = listOf(
+            navDeepLink {
+                uriPattern = "artemis://quiz_participation/{courseId}/{exerciseId}"
             }
         )
     ) { backStackEntry ->
