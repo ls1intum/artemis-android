@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(project(":core:device"))
     implementation(project(":core:ui"))
+    implementation(project(":feature:metis"))
 
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.playServices)

@@ -1,27 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push
 
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.util.Base64
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.*
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import org.koin.android.ext.android.get
 import java.security.NoSuchAlgorithmException
 import javax.crypto.Cipher
@@ -41,16 +27,11 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
         } catch (e: NoSuchPaddingException) {
             null
         }
-
-        private val LatestPushNotificationId = intPreferencesKey("latestPushNotificationId")
     }
 
     private val pushNotificationJobService: PushNotificationJobService = get()
     private val pushNotificationConfigurationService: PushNotificationConfigurationService = get()
     private val serverConfigurationService: ServerConfigurationService = get()
-    private val jsonProvider: JsonProvider = get()
-
-    private val Context.notificationDataStore by preferencesDataStore("push_notification_ids")
 
     /**
      * Whenever this functions is called we need to synchronize the new token with the server.
@@ -79,47 +60,25 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
         val payloadCiphertext = message.data["payload"] ?: return
         val iv = message.data["iv"] ?: return
 
-        val payload: MessagePayload = runBlocking {
+        val payload: String = runBlocking {
             val key =
                 pushNotificationConfigurationService.getCurrentAESKey() ?: return@runBlocking null
             val cipher = cipher ?: return@runBlocking null
 
             val ivAsBytes = Base64.decode(iv.toByteArray(Charsets.ISO_8859_1), Base64.DEFAULT)
 
-            val payloadText =
-                cipher.decrypt(payloadCiphertext, key, ivAsBytes) ?: return@runBlocking null
-            jsonProvider.applicationJsonConfiguration.decodeFromString(payloadText)
+
+            cipher.decrypt(payloadCiphertext, key, ivAsBytes) ?: return@runBlocking null
         } ?: return
 
-        val title = payload.title
-        val body = payload.body
+        val notificationId =
+            runBlocking { ArtemisNotificationManager.getNextNotificationId(this@ArtemisFirebaseMessagingService) }
 
-        val notification = NotificationCompat.Builder(this, ArtemisNotificationChannel.id)
-            .apply {
-                if (title != null) setContentTitle(title)
-                if (body != null) setContentText(title)
-                setSmallIcon(R.drawable.push_notification_icon)
-                if (payload.type != null && payload.target != null) {
-                    setContentIntent(buildOnClickIntent(payload.type, payload.target))
-                }
-                setAutoCancel(true)
-            }
-            .build()
-
-        val notificationId = runBlocking {
-            val id =
-                notificationDataStore.data.map { it[LatestPushNotificationId] ?: 0 }.first() + 1
-
-            notificationDataStore.edit { data ->
-                data[LatestPushNotificationId] = id
-            }
-
-            id
-        }
-
-        NotificationManagerCompat
-            .from(this)
-            .notify(notificationId, notification)
+        ArtemisNotificationManager.popNotification(
+            context = this,
+            payload = payload,
+            notificationId = notificationId
+        )
     }
 
     private fun Cipher.decrypt(ciphertext: String, key: SecretKey, iv: ByteArray): String? {
@@ -134,62 +93,4 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
             null
         }
     }
-
-    private fun buildOnClickIntent(type: String, target: String): PendingIntent {
-        val mainActivity =
-            Class.forName("de.tum.informatics.www1.artemis.native_app.android.ui.MainActivity")
-
-        val openAppIntent = PendingIntent.getActivity(
-            this,
-            0,
-            Intent(this@ArtemisFirebaseMessagingService, mainActivity),
-            PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val json = jsonProvider.applicationJsonConfiguration
-
-        try {
-            val uriString: String? = when (NotificationType.valueOf(type)) {
-                NotificationType.NEW_REPLY_FOR_COURSE_POST, NotificationType.NEW_COURSE_POST, NotificationType.NEW_ANNOUNCEMENT_POST -> {
-                    val data: CoursePostTarget = json.decodeFromString(target)
-                    "artemis://metis_standalone_post/${data.postId}/${data.courseId}/null/null"
-                }
-                NotificationType.NEW_LECTURE_POST, NotificationType.NEW_REPLY_FOR_LECTURE_POST -> {
-                    val data: LecturePostTarget = json.decodeFromString(target)
-                    "artemis://metis_standalone_post/${data.postId}/${data.courseId}/null/${data.lectureId}"
-                }
-                NotificationType.NEW_EXERCISE_POST, NotificationType.NEW_REPLY_FOR_EXERCISE_POST -> {
-                    val data: ExercisePostTarget = json.decodeFromString(target)
-                    "artemis://metis_standalone_post/${data.postId}/${data.courseId}/${data.exerciseId}/null"
-                }
-                NotificationType.QUIZ_EXERCISE_STARTED -> {
-                    val data: ExerciseTarget = json.decodeFromString(target)
-                    "artemis://quiz_participation/${data.courseId}/${data.exerciseId}"
-                }
-                else -> null
-            }
-
-            return if (uriString != null) {
-                PendingIntent.getActivity(
-                    this,
-                    0,
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(uriString)
-                    ),
-                    PendingIntent.FLAG_IMMUTABLE
-                )
-            } else openAppIntent
-        } catch (e: Exception) {
-            return openAppIntent
-        }
-    }
-
-    @Serializable
-    private data class MessagePayload(
-        val title: String? = null,
-        val body: String? = null,
-        val target: String? = null,
-        val type: String? = null
-    )
 }

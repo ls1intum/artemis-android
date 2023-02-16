@@ -9,4 +9,4 @@ data class ExerciseTarget(
     val exerciseId: Long,
     @SerialName("course")
     val courseId: Long
-)
+) : NotificationTarget

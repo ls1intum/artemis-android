@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl
 import android.content.Context
 import androidx.work.*
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.feature.push.defaultInternetWorkRequest
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import java.util.concurrent.TimeUnit
 
@@ -62,22 +63,5 @@ internal class WorkManagerPushNotificationJobService(
                 request
             )
             .enqueue()
-    }
-
-    private inline fun <reified T : ListenableWorker> defaultInternetWorkRequest(inputData: Data): OneTimeWorkRequest {
-        return OneTimeWorkRequestBuilder<T>()
-            // Only run when the device is connected to the internet.
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
-            )
-            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            .setBackoffCriteria(
-                BackoffPolicy.LINEAR,
-                OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
-                TimeUnit.MILLISECONDS
-            )
-            .build()
     }
 }
