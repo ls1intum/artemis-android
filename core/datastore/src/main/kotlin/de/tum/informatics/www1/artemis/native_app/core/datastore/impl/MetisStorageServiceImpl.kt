@@ -165,7 +165,7 @@ class MetisStorageServiceImpl(
             for (sp in posts) {
                 val queryClientPostId = metisDao.queryClientPostId(
                     serverId = host,
-                    postId = sp.id
+                    postId = sp.id ?: continue
                 )
 
                 insertOrUpdatePost(
@@ -220,7 +220,7 @@ class MetisStorageServiceImpl(
             // If the post already exists, do nothing
             metisDao.queryClientPostId(
                 host,
-                post.id
+                post.id ?: 0L
             ) ?: insertOrUpdatePost(metisDao, host, metisContext, null, post, true)
         }
     }
@@ -268,7 +268,24 @@ class MetisStorageServiceImpl(
         metisDao.insertUsers(standalonePostReactionsUsers)
 
         metisDao.insertOrUpdateUser(postingAuthor)
+
+        val postMetisContext =
+            metisContext.toPostMetisContext(host, clientSidePostId, sp.id ?: return null)
+
         if (queryClientPostId != null) {
+            if (!metisDao.isPostPresentInContext(
+                    queryClientPostId,
+                    sp.id ?: 0L,
+                    courseId = postMetisContext.courseId,
+                    exerciseId = postMetisContext.exerciseId,
+                    lectureId = postMetisContext.lectureId
+                )
+            ) {
+                metisDao.insertPostMetisContext(
+                    postMetisContext
+                )
+            }
+
             metisDao.updateBasePost(standaloneBasePosting)
             metisDao.updatePost(standalonePosting)
 
@@ -287,8 +304,9 @@ class MetisStorageServiceImpl(
             metisDao.insertReactions(standalonePostReactions)
             metisDao.insertTags(tags)
 
+
             metisDao.insertPostMetisContext(
-                metisContext.toPostMetisContext(host, clientSidePostId, sp.id ?: return null)
+                postMetisContext
             )
         }
 

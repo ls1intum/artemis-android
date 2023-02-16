@@ -7,7 +7,6 @@ import android.net.Uri
 import android.util.Base64
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.TaskStackBuilder
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -16,10 +15,11 @@ import com.google.firebase.messaging.RemoteMessage
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CoursePostTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ExercisePostTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.LecturePostTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
@@ -153,9 +153,17 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
 
         try {
             val uriString: String? = when (NotificationType.valueOf(type)) {
-                NotificationType.NEW_REPLY_FOR_COURSE_POST -> {
+                NotificationType.NEW_REPLY_FOR_COURSE_POST, NotificationType.NEW_COURSE_POST, NotificationType.NEW_ANNOUNCEMENT_POST -> {
                     val data: CoursePostTarget = json.decodeFromString(target)
                     "artemis://metis_standalone_post/${data.postId}/${data.courseId}/null/null"
+                }
+                NotificationType.NEW_LECTURE_POST, NotificationType.NEW_REPLY_FOR_LECTURE_POST -> {
+                    val data: LecturePostTarget = json.decodeFromString(target)
+                    "artemis://metis_standalone_post/${data.postId}/${data.courseId}/null/${data.lectureId}"
+                }
+                NotificationType.NEW_EXERCISE_POST, NotificationType.NEW_REPLY_FOR_EXERCISE_POST -> {
+                    val data: ExercisePostTarget = json.decodeFromString(target)
+                    "artemis://metis_standalone_post/${data.postId}/${data.courseId}/${data.exerciseId}/null"
                 }
                 else -> null
             }

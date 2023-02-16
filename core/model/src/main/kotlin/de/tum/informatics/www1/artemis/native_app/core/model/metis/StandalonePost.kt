@@ -6,10 +6,11 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class StandalonePost(
-    override val id: Long = 0L,
+    override val id: Long?,
     override val author: User? = null,
     override val authorRole: UserRole? = null,
     override val creationDate: Instant? = null,
@@ -28,5 +29,7 @@ data class StandalonePost(
     val displayPriority: DisplayPriority? = null,
     override val resolved: Boolean? = null
 ) : BasePost(), IStandalonePost {
-    override val serverPostId: Long = id
+
+    @Transient
+    override val serverPostId: Long = id ?: 0L
 }

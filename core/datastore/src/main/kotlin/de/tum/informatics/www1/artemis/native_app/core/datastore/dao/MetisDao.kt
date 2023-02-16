@@ -46,6 +46,15 @@ interface MetisDao {
     @Insert
     suspend fun insertPostMetisContext(postMetisContext: MetisPostContextEntity)
 
+    @Query("select exists(select * from metis_post_context where client_post_id = :clientPostId and server_post_id = :serverPostId and course_id = :courseId and exercise_id = :exerciseId and lecture_id = :lectureId)")
+    suspend fun isPostPresentInContext(
+        clientPostId: String,
+        serverPostId: Long,
+        courseId: Long,
+        exerciseId: Long,
+        lectureId: Long
+    ): Boolean
+
     @Update
     suspend fun updateBasePost(post: BasePostingEntity)
 
@@ -246,7 +255,11 @@ interface MetisDao {
             )
                     + (if (MetisFilter.CREATED_BY_CLIENT in metisFilter) arrayOf(clientId) else emptyArray())
                     + (if (bindServerPostId) arrayOf(queryServerPostId) else emptyArray())
-                    + if (!bindServerPostId && query != null) arrayOf(likeQueryLiteral, likeQueryLiteral, likeQueryLiteral) else emptyArray()
+                    + if (!bindServerPostId && query != null) arrayOf(
+                likeQueryLiteral,
+                likeQueryLiteral,
+                likeQueryLiteral
+            ) else emptyArray()
         )
 
         return queryCoursePosts(constructedQuery)

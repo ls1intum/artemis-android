@@ -94,7 +94,7 @@ internal class MetisStandalonePostViewModel(
 
                         val clientSidePostId = metisStorageService.getClientSidePostId(
                             host = host,
-                            serverSidePostId = post.id
+                            serverSidePostId = post.id ?: 0L
                         )
 
                         if (clientSidePostId != null) {
