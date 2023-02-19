@@ -17,7 +17,13 @@ import kotlinx.datetime.Clock
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
-class ReplyJob(
+/**
+ * Worker that sends a reply to a Metis posting to the server.
+ * If the input is invalid, the worker fails.
+ * If the input is valid, but the reply could not be uploaded, the worker will schedule a retry.
+ * If the upload failed 5 times, the worker will fail and pop a notification to notify the user about the failure.
+ */
+class ReplyWorker(
     appContext: Context,
     params: WorkerParameters,
     private val metisService: MetisService,

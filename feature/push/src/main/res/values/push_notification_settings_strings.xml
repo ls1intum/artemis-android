@@ -41,6 +41,7 @@
     <string name="push_notification_settings_setting_registrationTutorialGroup">Registration and Deregistration for Tutorial Group</string>
     <string name="push_notification_settings_setting_tutorialGroupUpdateDelete">Update and Delete of Tutorial Groups</string>
     <string name="push_notification_settings_setting_assignUnassignTutorialGroup">Assign and Unassign of Tutorial Groups</string>
+    <string name="push_notification_settings_setting_quizStartReminder">Quiz start</string>
 
     <string name="push_notification_setting_setting_description_basicWeeklySummaryDescription">Receive a basic weekly summary every Friday at 5pm (e.g. what new exercises have been released this week and are still open)"</string>
     <string name="push_notification_setting_setting_description_exerciseReleasedDescription">Get notified when a new exercise has been released"</string>
@@ -61,6 +62,7 @@
     <string name="push_notification_setting_setting_description_registrationTutorialGroupStudentDescription">Get notified when you were registered or deregistered from a tutorial group"</string>
     <string name="push_notification_setting_setting_description_tutorialGroupUpdateDeleteDescription">Get notified when a tutorial group for which you are registered or a tutor was updated or deleted"</string>
     <string name="push_notification_setting_setting_description_assignUnassignTutorialGroupDescription">Get notified when you were assigned or unassigned to lead a tutorial group"</string>
+    <string name="push_notification_setting_setting_description_quizStartReminder">Get notified when a quiz has just started or if a quiz is about to start.</string>
 
     <string name="push_notification_settings_sync_dialog_title">Syncing</string>
     <string name="push_notification_settings_sync_dialog_message">Uploading settings to server…</string>

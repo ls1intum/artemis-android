@@ -26,7 +26,7 @@ val pushModule = module {
 
     workerOf(::UploadPushNotificationDeviceConfigurationWorker)
     workerOf(::UnsubscribeFromNotificationsWorker)
-    workerOf(::ReplyJob)
+    workerOf(::ReplyWorker)
 
     single<de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationSettingsService> {
         de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.NotificationSettingsServiceImpl(

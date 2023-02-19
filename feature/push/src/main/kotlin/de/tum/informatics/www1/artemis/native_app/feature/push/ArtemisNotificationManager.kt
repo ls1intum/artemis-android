@@ -20,6 +20,10 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+/**
+ * Handles the notifications.
+ * To get the next notification id use getNextNotificationId.
+ */
 object ArtemisNotificationManager {
 
     private val LatestPushNotificationId = intPreferencesKey("latestPushNotificationId")
@@ -37,6 +41,9 @@ object ArtemisNotificationManager {
         return id
     }
 
+    /**
+     * Pop a notification based on the decrypted payload received from the server.
+     */
     fun popNotification(context: Context, payload: String, notificationId: Int) {
         val messagePayload: MessagePayload = Json.decodeFromString(payload)
         val title = messagePayload.title
@@ -53,7 +60,7 @@ object ArtemisNotificationManager {
         val notification = NotificationCompat.Builder(context, ArtemisNotificationChannel.id)
             .apply {
                 if (title != null) setContentTitle(title)
-                if (body != null) setContentText(title)
+                if (body != null) setContentText(body)
 
                 setSmallIcon(R.drawable.push_notification_icon)
                 setContentIntent(buildOnClickIntent(context, target, type))

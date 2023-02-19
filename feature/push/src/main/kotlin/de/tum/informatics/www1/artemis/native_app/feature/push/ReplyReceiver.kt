@@ -7,10 +7,11 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
 import androidx.work.Data
 import androidx.work.WorkManager
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 
+/**
+ * onReceive will be called by the reply action of the notification.
+ * This receiver schedules a reply job to upload the reply.
+ */
 class ReplyReceiver : BroadcastReceiver() {
 
     companion object {
@@ -44,11 +45,11 @@ class ReplyReceiver : BroadcastReceiver() {
                     )
 
 
-                val workRequest = defaultInternetWorkRequest<ReplyJob>(
+                val workRequest = defaultInternetWorkRequest<ReplyWorker>(
                     Data.Builder()
-                        .putString(ReplyJob.KEY_METIS_CONTEXT, metisContextString)
-                        .putLong(ReplyJob.KEY_POST_ID, postId)
-                        .putString(ReplyJob.KEY_REPLY_CONTENT, response)
+                        .putString(ReplyWorker.KEY_METIS_CONTEXT, metisContextString)
+                        .putLong(ReplyWorker.KEY_POST_ID, postId)
+                        .putString(ReplyWorker.KEY_REPLY_CONTENT, response)
                         .build()
                 )
 

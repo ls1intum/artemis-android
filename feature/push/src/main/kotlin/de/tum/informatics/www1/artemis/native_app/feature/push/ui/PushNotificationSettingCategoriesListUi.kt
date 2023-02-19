@@ -111,23 +111,24 @@ private fun PushNotificationSettingEntry(
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
         ) {
-            if (setting.webapp != null) {
-                TextCheckBox(
-                    modifier = Modifier,
-                    isChecked = setting.webapp,
-                    text = stringResource(id = R.string.push_notification_settings_label_webapp),
-                    onCheckedChanged = { onUpdate(it, setting.email, setting.push) }
-                )
-            }
-
-            if (setting.email != null) {
-                TextCheckBox(
-                    modifier = Modifier,
-                    isChecked = setting.email,
-                    text = stringResource(id = R.string.push_notification_settings_label_email),
-                    onCheckedChanged = { onUpdate(setting.webapp, it, setting.push) }
-                )
-            }
+            // This is commented out because currently we only want to display push settings.
+//            if (setting.webapp != null) {
+//                TextCheckBox(
+//                    modifier = Modifier,
+//                    isChecked = setting.webapp,
+//                    text = stringResource(id = R.string.push_notification_settings_label_webapp),
+//                    onCheckedChanged = { onUpdate(it, setting.email, setting.push) }
+//                )
+//            }
+//
+//            if (setting.email != null) {
+//                TextCheckBox(
+//                    modifier = Modifier,
+//                    isChecked = setting.email,
+//                    text = stringResource(id = R.string.push_notification_settings_label_email),
+//                    onCheckedChanged = { onUpdate(setting.webapp, it, setting.push) }
+//                )
+//            }
 
             if (setting.push != null) {
                 TextCheckBox(
@@ -199,6 +200,7 @@ private fun getLocalizedNotificationSettingName(settingName: String): String {
         "tutorial-group-registration" -> R.string.push_notification_settings_setting_registrationTutorialGroup
         "tutorial-group-delete-update" -> R.string.push_notification_settings_setting_tutorialGroupUpdateDelete
         "tutorial-group-assign-unassign" -> R.string.push_notification_settings_setting_assignUnassignTutorialGroup
+        "quiz_start_reminder" -> R.string.push_notification_settings_setting_quizStartReminder
         else -> null
     }
 
@@ -226,6 +228,7 @@ private fun getLocalizedNotificationSettingDescription(settingName: String): Str
         "tutorial-group-registration" -> R.string.push_notification_setting_setting_description_registrationTutorialGroupStudentDescription
         "tutorial-group-delete-update" -> R.string.push_notification_setting_setting_description_tutorialGroupUpdateDeleteDescription
         "tutorial-group-assign-unassign" -> R.string.push_notification_setting_setting_description_assignUnassignTutorialGroupDescription
+        "quiz_start_reminder" -> R.string.push_notification_setting_setting_description_quizStartReminder
         else -> null
     }
 
