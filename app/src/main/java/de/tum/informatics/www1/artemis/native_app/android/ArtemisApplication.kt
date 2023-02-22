@@ -38,8 +38,6 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
         Sentry.init {
             it.dsn =
                 if (BuildConfig.DEBUG) "" else "https://8b4d69ac628d4462995ee6178365541f@sentry.ase.in.tum.de/3"
-            it.isEnableUserInteractionBreadcrumbs = false
-            it.isEnableUserInteractionTracing = false
         }
 
         startKoin {
@@ -69,7 +67,11 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
             val name = getString(R.string.push_notification_channel_name)
             val description = getString(R.string.push_notification_channel_descriptions)
 
-            val channel = NotificationChannel(ArtemisNotificationChannel.id, name, NotificationManager.IMPORTANCE_DEFAULT)
+            val channel = NotificationChannel(
+                ArtemisNotificationChannel.id,
+                name,
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
             channel.description = description
 
             NotificationManagerCompat

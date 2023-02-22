@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.ui
 
 import android.Manifest
 import android.os.Build
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,7 +34,7 @@ fun PushNotificationSettingsUi(
     viewModel: PushNotificationSettingsViewModel = koinViewModel()
 ) {
     val settingsByGroupDataStore: DataState<List<PushNotificationSettingsViewModel.NotificationCategory>> by viewModel.currentSettingsByGroup.collectAsState()
-    val arePushNotificationEnabled by viewModel.arePushNotificationsEnabled.collectAsState(initial = false)
+    val arePushNotificationEnabled by viewModel.arePushNotificationsEnabled.collectAsState()
 
     var updatePushNotificationEnabledJob: Job? by remember { mutableStateOf(null) }
     var displayUpdatePushNotificationsFailed: Boolean by rememberSaveable { mutableStateOf(false) }
@@ -54,19 +55,21 @@ fun PushNotificationSettingsUi(
             }
         )
 
-        PushNotificationSettingCategoriesListUi(
-            modifier = Modifier.fillMaxWidth(),
-            settingsByGroupDataStore = settingsByGroupDataStore,
-            onUpdate = { setting, webapp, email, push ->
-                viewModel.updateSettingsEntry(
-                    setting.settingId,
-                    email,
-                    webapp,
-                    push
-                )
-            },
-            onRequestReload = viewModel::requestReloadSettings
-        )
+        AnimatedVisibility(visible = arePushNotificationEnabled) {
+            PushNotificationSettingCategoriesListUi(
+                modifier = Modifier.fillMaxWidth(),
+                settingsByGroupDataStore = settingsByGroupDataStore,
+                onUpdate = { setting, webapp, email, push ->
+                    viewModel.updateSettingsEntry(
+                        setting.settingId,
+                        email,
+                        webapp,
+                        push
+                    )
+                },
+                onRequestReload = viewModel::requestReloadSettings
+            )
+        }
     }
 
     if (updatePushNotificationEnabledJob != null) {

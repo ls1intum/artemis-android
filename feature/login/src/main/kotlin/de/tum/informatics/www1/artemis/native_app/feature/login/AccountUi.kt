@@ -210,7 +210,9 @@ private fun LoginUiScreen(
 
             composable(NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION) {
                 CustomInstanceSelectionScreen(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp)
                 ) {
                     nestedNavController.navigate(NESTED_HOME_DESTINATION) {
                         popUpTo(NESTED_INSTANCE_SELECTION_DESTINATION) {

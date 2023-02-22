@@ -25,13 +25,13 @@ class PushNotificationSettingsViewModel internal constructor(
     private val pushNotificationConfigurationService: PushNotificationConfigurationService
 ) : ViewModel() {
 
-    internal val arePushNotificationsEnabled: Flow<Boolean> =
+    internal val arePushNotificationsEnabled: StateFlow<Boolean> =
         serverConfigurationService
             .serverUrl
             .flatMapLatest { serverUrl ->
                 pushNotificationConfigurationService.getArePushNotificationsEnabledFlow(serverUrl)
             }
-            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
 
     private val requestReloadSettings = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
