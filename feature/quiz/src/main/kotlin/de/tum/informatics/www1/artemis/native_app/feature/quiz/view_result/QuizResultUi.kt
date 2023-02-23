@@ -55,7 +55,7 @@ internal fun QuizResultUi(
             selectedQuestionIndex = selectedQuestionIndex,
             onClickQuestion = {
                 scope.launch {
-                    lazyListState.scrollToItem(it)
+                    lazyListState.scrollToItem(it + 1)
                 }
             }
         )
