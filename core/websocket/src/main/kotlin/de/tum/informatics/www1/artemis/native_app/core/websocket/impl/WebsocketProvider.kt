@@ -81,7 +81,11 @@ class WebsocketProvider(
                         val uri = Uri.parse(serverUrl)
 
                         val protocol = if (uri.scheme == "http") URLProtocol.WS else URLProtocol.WSS
-                        val port = if (uri.port == -1) 80 else uri.port
+                        val port = when  {
+                            uri.port == -1 && protocol == URLProtocol.WS -> 80
+                            uri.port == -1 && protocol == URLProtocol.WSS -> 443
+                            else -> uri.port
+                        }
 
                         val url = URLBuilder(
                             protocol = protocol,
