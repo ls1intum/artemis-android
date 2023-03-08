@@ -18,6 +18,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import de.tum.informatics.www1.artemis.native_app.core.websocket.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.service.LectureService
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -177,8 +178,8 @@ internal class LectureViewModel(
         lectureUnitId: Long,
         isCompleted: Boolean,
         onResponse: (isSuccessful: Boolean) -> Unit
-    ) {
-        viewModelScope.launch {
+    ): Job {
+        return viewModelScope.launch {
             val isSuccessful = lectureService.completeLectureUnit(
                 lectureUnitId = lectureUnitId,
                 lectureId = lectureId,

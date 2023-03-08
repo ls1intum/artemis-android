@@ -1,14 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,10 +16,14 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.*
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.R
 
+/**
+ * @param isUploadingMarkedAsCompleted if we are currently uploading this a change the user has requested
+ */
 @Composable
 internal fun LectureUnitHeader(
     modifier: Modifier,
     lectureUnit: LectureUnit,
+    isUploadingMarkedAsCompleted: Boolean,
     onMarkAsCompleted: (isCompleted: Boolean) -> Unit
 ) {
     val (icon, text) = when (lectureUnit) {
@@ -50,7 +53,15 @@ internal fun LectureUnitHeader(
         )
 
         if (lectureUnit !is LectureUnitExercise) {
-            Checkbox(checked = lectureUnit.completed, onCheckedChange = onMarkAsCompleted)
+            Crossfade(targetState = isUploadingMarkedAsCompleted) { isUploadingState ->
+                if (isUploadingState) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(48.dp)
+                    )
+                } else {
+                    Checkbox(checked = lectureUnit.completed, onCheckedChange = onMarkAsCompleted)
+                }
+            }
         }
     }
 }
