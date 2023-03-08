@@ -46,10 +46,10 @@ interface AccountService {
 val AccountService.authToken: Flow<String>
     get() = authenticationData.map {
         when (it) {
-            is AccountService.AuthenticationData.LoggedIn -> it.authToken
-            AccountService.AuthenticationData.NotLoggedIn -> ""
+            is LoggedIn -> it.authToken
+            NotLoggedIn -> ""
         }
     }.distinctUntilChanged()
 
 val AccountService.AuthenticationData.isLoggedIn: Boolean
-    get() = this is AccountService.AuthenticationData.LoggedIn
+    get() = this is LoggedIn

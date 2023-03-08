@@ -90,7 +90,7 @@ internal fun QuizOverviewRow(
         contentPadding = PaddingValues(horizontal = 8.dp),
         state = listState
     ) {
-        itemsIndexed(questions, key = { _, q -> q.id ?: 0 }) { index, question ->
+        itemsIndexed(questions, key = { _, q -> q.id }) { index, question ->
             val isSelected = index == selectedQuestionIndex
 
             QuizQuestionRowItem(

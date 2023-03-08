@@ -129,7 +129,7 @@ class WebsocketProvider(
                 )
             }
             .shareIn(
-                scope = GlobalScope, //We share this is the app container
+                scope = GlobalScope, // We share this is the app container
                 started = SharingStarted.WhileSubscribed(
                     stopTimeout = 1.seconds, replayExpiration = Duration.ZERO
                 ),

@@ -5,6 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Met
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
+import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import kotlinx.coroutines.flow.Flow
 
@@ -66,5 +67,9 @@ interface MetisStorageService {
 
     suspend fun getServerSidePostId(host: String, clientSidePostId: String): Long
 
-    suspend fun getClientSidePostId(host: String, serverSidePostId: Long): String?
+    suspend fun getClientSidePostId(
+        host: String,
+        serverSidePostId: Long,
+        postingType: BasePostingEntity.PostingType
+    ): String?
 }

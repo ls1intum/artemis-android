@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.impl
 import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisPostAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisPostDTO
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -79,22 +80,22 @@ class MetisContextManager(
             if (websocketData is WebsocketProvider.WebsocketData.Message) {
                 val dto = websocketData.message
                 when (dto.action) {
-                    de.tum.informatics.www1.artemis.native_app.feature.metis.MetisPostAction.CREATE -> {
+                    MetisPostAction.CREATE -> {
                         metisStorageService.insertLiveCreatedPost(host, context, dto.post)
                     }
 
-                    de.tum.informatics.www1.artemis.native_app.feature.metis.MetisPostAction.UPDATE -> {
+                    MetisPostAction.UPDATE -> {
                         metisStorageService.updatePost(host, context, dto.post)
                     }
 
-                    de.tum.informatics.www1.artemis.native_app.feature.metis.MetisPostAction.DELETE -> {
+                    MetisPostAction.DELETE -> {
                         metisStorageService.deletePosts(
                             host,
                             listOf(dto.post.id ?: return@collect)
                         )
                     }
 
-                    de.tum.informatics.www1.artemis.native_app.feature.metis.MetisPostAction.READ_CONVERSATION -> {
+                    MetisPostAction.READ_CONVERSATION -> {
 
                     }
                 }

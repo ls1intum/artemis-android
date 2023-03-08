@@ -94,7 +94,7 @@ private fun LazyListScope.lectureUnitSection(
     }
 
     lectureUnits.forEachIndexed { index, lectureUnit ->
-        item() {
+        item {
             LectureUnitListItem(
                 modifier = modifier,
                 lectureUnit = lectureUnit,

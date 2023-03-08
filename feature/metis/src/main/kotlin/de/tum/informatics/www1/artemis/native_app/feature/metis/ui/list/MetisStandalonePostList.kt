@@ -25,6 +25,7 @@ import androidx.paging.compose.items
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.*
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
 
 @Composable
@@ -120,7 +121,7 @@ internal fun MetisStandalonePostList(
 
                             items(posts, key = { it.clientPostId }) { post ->
                                 val asAffectedPost = post?.let {
-                                    MetisService.AffectedPost.Standalone(it.serverPostId)
+                                    MetisModificationService.AffectedPost.Standalone(it.serverPostId)
                                 }
                                 PostItem(
                                     modifier = Modifier.fillMaxWidth(),

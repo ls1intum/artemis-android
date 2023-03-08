@@ -195,6 +195,4 @@ private fun Saml2LoginWebView(
     }
 }
 
-private class Saml2WebClient : AccompanistWebViewClient() {
-
-}
+private class Saml2WebClient : AccompanistWebViewClient()

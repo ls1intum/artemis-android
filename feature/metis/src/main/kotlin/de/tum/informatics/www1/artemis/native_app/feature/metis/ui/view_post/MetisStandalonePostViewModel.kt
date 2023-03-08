@@ -10,11 +10,13 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
+import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisViewModel
@@ -31,12 +33,14 @@ internal class MetisStandalonePostViewModel(
     private val metisStorageService: MetisStorageService,
     metisContextManager: MetisContextManager,
     private val metisService: MetisService,
+    metisModificationService: MetisModificationService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     serverDataService: ServerDataService
 ) : MetisViewModel(
     metisService,
+    metisModificationService,
     metisStorageService,
     serverConfigurationService,
     accountService,
@@ -94,7 +98,8 @@ internal class MetisStandalonePostViewModel(
 
                         val clientSidePostId = metisStorageService.getClientSidePostId(
                             host = host,
-                            serverSidePostId = post.id ?: 0L
+                            serverSidePostId = post.id ?: 0L,
+                            postingType = BasePostingEntity.PostingType.STANDALONE
                         )
 
                         if (clientSidePostId != null) {
@@ -196,7 +201,7 @@ internal class MetisStandalonePostViewModel(
 
             createReactionImpl(
                 emojiId = emojiId,
-                post = MetisService.AffectedPost.Answer(postId = serverSidePostId),
+                post = MetisModificationService.AffectedPost.Answer(postId = serverSidePostId),
                 response = onResponse
             )
         }
@@ -216,7 +221,7 @@ internal class MetisStandalonePostViewModel(
 
             onClickReactionImpl(
                 emojiId = emojiId,
-                post = MetisService.AffectedPost.Answer(postId = serverSidePostId),
+                post = MetisModificationService.AffectedPost.Answer(postId = serverSidePostId),
                 presentReactions = presentReactions,
                 response = onResponse
             )

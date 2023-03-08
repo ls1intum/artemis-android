@@ -2,14 +2,11 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl
 
 import android.content.Context
 import androidx.work.*
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.defaultInternetWorkRequest
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
-import java.util.concurrent.TimeUnit
 
 internal class WorkManagerPushNotificationJobService(
-    private val context: Context,
-    private val ktorProvider: KtorProvider
+    private val context: Context
 ) : PushNotificationJobService {
 
     private companion object {
@@ -21,10 +18,7 @@ internal class WorkManagerPushNotificationJobService(
 
     override fun scheduleUploadPushNotificationDeviceConfigurationToServer() {
         val request = defaultInternetWorkRequest<UploadPushNotificationDeviceConfigurationWorker>(
-            Data
-                .Builder()
-
-                .build()
+            Data.Builder().build()
         )
 
         workManager

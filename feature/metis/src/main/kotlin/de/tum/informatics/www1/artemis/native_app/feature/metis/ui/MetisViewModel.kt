@@ -20,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationResponse
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -30,6 +31,7 @@ import kotlinx.coroutines.launch
  */
 abstract class MetisViewModel(
     private val metisService: MetisService,
+    private val metisModificationService: MetisModificationService,
     private val metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
@@ -58,7 +60,7 @@ abstract class MetisViewModel(
      */
     fun onClickReaction(
         emojiId: String,
-        post: MetisService.AffectedPost,
+        post: MetisModificationService.AffectedPost,
         presentReactions: List<Post.Reaction>,
         response: (MetisModificationFailure?) -> Unit
     ) {
@@ -69,7 +71,7 @@ abstract class MetisViewModel(
 
     protected suspend fun onClickReactionImpl(
         emojiId: String,
-        post: MetisService.AffectedPost,
+        post: MetisModificationService.AffectedPost,
         presentReactions: List<Post.Reaction>,
         response: (MetisModificationFailure?) -> Unit
     ) {
@@ -96,7 +98,7 @@ abstract class MetisViewModel(
 
     fun createReaction(
         emojiId: String,
-        post: MetisService.AffectedPost,
+        post: MetisModificationService.AffectedPost,
         response: (MetisModificationFailure?) -> Unit
     ) {
         viewModelScope.launch {
@@ -108,7 +110,7 @@ abstract class MetisViewModel(
         reactionId: Long,
         response: (MetisModificationFailure?) -> Unit
     ) {
-        metisService.deleteReaction(
+        metisModificationService.deleteReaction(
             context = getMetisContext(),
             reactionId = reactionId,
             serverUrl = serverConfigurationService.serverUrl.first(),
@@ -124,10 +126,10 @@ abstract class MetisViewModel(
 
     protected suspend fun createReactionImpl(
         emojiId: String,
-        post: MetisService.AffectedPost,
+        post: MetisModificationService.AffectedPost,
         response: (MetisModificationFailure?) -> Unit
     ) {
-        val networkResponse: NetworkResponse<Reaction> = metisService.createReaction(
+        val networkResponse: NetworkResponse<Reaction> = metisModificationService.createReaction(
             context = getMetisContext(),
             post = post,
             emojiId = emojiId,
@@ -165,7 +167,7 @@ abstract class MetisViewModel(
 
         return viewModelScope.launch {
             val metisContext = getMetisContext()
-            val response = metisService.createPost(
+            val response = metisModificationService.createPost(
                 context = metisContext,
                 post = post,
                 serverUrl = serverConfigurationService.serverUrl.first(),
@@ -203,7 +205,7 @@ abstract class MetisViewModel(
         post: AnswerPost,
         onResponse: (MetisModificationFailure?) -> Unit
     ) {
-        val response = metisService.createAnswerPost(
+        val response = metisModificationService.createAnswerPost(
             context = getMetisContext(),
             post = post,
             serverUrl = serverConfigurationService.serverUrl.first(),

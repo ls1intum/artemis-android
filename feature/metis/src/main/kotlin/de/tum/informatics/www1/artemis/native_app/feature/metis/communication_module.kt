@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.emoji.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.EmojiServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisModificationServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.create_standalone_post.CreateStandalonePostViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.list.MetisListViewModel
@@ -14,6 +15,7 @@ import org.koin.dsl.module
 
 val communicationModule = module {
     single<MetisService> { MetisServiceImpl(get(), get()) }
+    single<MetisModificationService> { MetisModificationServiceImpl(get()) }
     single<EmojiService> {
         EmojiServiceImpl(
             androidContext()
@@ -23,6 +25,7 @@ val communicationModule = module {
     viewModel { params ->
         MetisListViewModel(
             metisContext = params.get(),
+            get(),
             get(),
             get(),
             get(),
@@ -46,6 +49,7 @@ val communicationModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
@@ -53,6 +57,7 @@ val communicationModule = module {
     viewModel { params ->
         CreateStandalonePostViewModel(
             params.get(),
+            get(),
             get(),
             get(),
             get(),

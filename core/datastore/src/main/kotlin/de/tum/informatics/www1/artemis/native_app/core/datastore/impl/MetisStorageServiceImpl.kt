@@ -115,7 +115,7 @@ class MetisStorageServiceImpl(
             return PostReactionEntity(
                 serverId = serverId,
                 postId = clientSidePostId,
-                emojiId = emojiId ?: return null,
+                emojiId = emojiId,
                 authorId = user?.id ?: return null,
                 id = id ?: return null
             ) to MetisUserEntity(
@@ -128,15 +128,17 @@ class MetisStorageServiceImpl(
         private fun MetisContext.toPostMetisContext(
             serverId: String,
             clientSidePostId: String,
-            serverSidePostId: Long
-        ) =
+            serverSidePostId: Long,
+            postingType: BasePostingEntity.PostingType
+        ): MetisPostContextEntity =
             MetisPostContextEntity(
-                serverId,
-                courseId,
-                exerciseId,
-                lectureId,
-                serverSidePostId,
-                clientSidePostId
+                serverId = serverId,
+                courseId = courseId,
+                exerciseId = exerciseId,
+                lectureId = lectureId,
+                serverPostId = serverSidePostId,
+                clientPostId = clientSidePostId,
+                postingType = postingType
             )
 
         private val MetisContext.lectureId: Long get() = if (this is MetisContext.Lecture) lectureId else -1
@@ -154,10 +156,7 @@ class MetisStorageServiceImpl(
         databaseProvider.database.withTransaction {
             if (clearPreviousPosts) {
                 metisDao.clearAll(
-                    host,
-                    metisContext.courseId,
-                    metisContext.lectureId,
-                    metisContext.exerciseId
+                    host
                 )
             }
 
@@ -165,7 +164,8 @@ class MetisStorageServiceImpl(
             for (sp in posts) {
                 val queryClientPostId = metisDao.queryClientPostId(
                     serverId = host,
-                    postId = sp.id ?: continue
+                    postId = sp.id ?: continue,
+                    postingType = BasePostingEntity.PostingType.STANDALONE
                 )
 
                 insertOrUpdatePost(
@@ -188,8 +188,9 @@ class MetisStorageServiceImpl(
         val metisDao = databaseProvider.database.metisDao()
         databaseProvider.database.withTransaction {
             val clientSidePostId = metisDao.queryClientPostId(
-                host,
-                post.id ?: return@withTransaction
+                serverId = host,
+                postId = post.id ?: return@withTransaction,
+                postingType = BasePostingEntity.PostingType.STANDALONE
             ) ?: return@withTransaction
 
             //The author role seems to be omitted when sending an update. Therefore, we just load the one still cached.
@@ -219,8 +220,9 @@ class MetisStorageServiceImpl(
             // First check, if by any chance there is a client side post id for this already.
             // If the post already exists, do nothing
             metisDao.queryClientPostId(
-                host,
-                post.id ?: 0L
+                serverId = host,
+                postId = post.id ?: 0L,
+                postingType = BasePostingEntity.PostingType.STANDALONE
             ) ?: insertOrUpdatePost(metisDao, host, metisContext, null, post, true)
         }
     }
@@ -270,7 +272,12 @@ class MetisStorageServiceImpl(
         metisDao.insertOrUpdateUser(postingAuthor)
 
         val postMetisContext =
-            metisContext.toPostMetisContext(host, clientSidePostId, sp.id ?: return null)
+            metisContext.toPostMetisContext(
+                serverId = host,
+                clientSidePostId = clientSidePostId,
+                serverSidePostId = sp.id ?: return null,
+                postingType = BasePostingEntity.PostingType.STANDALONE
+            )
 
         if (queryClientPostId != null) {
             if (!metisDao.isPostPresentInContext(
@@ -313,7 +320,8 @@ class MetisStorageServiceImpl(
         for (ap in sp.answers.orEmpty()) {
             val queryClientPostIdAnswer = metisDao.queryClientPostId(
                 serverId = host,
-                postId = ap.id ?: return null
+                postId = ap.id ?: return null,
+                postingType = BasePostingEntity.PostingType.ANSWER
             )
             val answerClientSidePostId =
                 queryClientPostIdAnswer ?: UUID.randomUUID().toString()
@@ -350,9 +358,10 @@ class MetisStorageServiceImpl(
                 metisDao.insertReactions(answerPostReactions)
                 metisDao.insertPostMetisContext(
                     metisContext.toPostMetisContext(
-                        host,
-                        answerClientSidePostId,
-                        ap.id ?: return null
+                        serverId = host,
+                        clientSidePostId = answerClientSidePostId,
+                        serverSidePostId = ap.id ?: return null,
+                        postingType = BasePostingEntity.PostingType.ANSWER
                     )
                 )
             }
@@ -421,8 +430,16 @@ class MetisStorageServiceImpl(
         return databaseProvider.database.metisDao().queryServerSidePostId(host, clientSidePostId)
     }
 
-    override suspend fun getClientSidePostId(host: String, serverSidePostId: Long): String? {
+    override suspend fun getClientSidePostId(
+        host: String,
+        serverSidePostId: Long,
+        postingType: BasePostingEntity.PostingType
+    ): String? {
         return databaseProvider.database.metisDao()
-            .queryClientPostId(serverId = host, postId = serverSidePostId)
+            .queryClientPostId(
+                serverId = host,
+                postId = serverSidePostId,
+                postingType = postingType
+            )
     }
 }

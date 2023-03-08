@@ -37,6 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.Markdo
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -129,7 +130,7 @@ private fun PostAndRepliesList(
     ) {
         item {
             val asAffectedPost = post.let {
-                MetisService.AffectedPost.Standalone(
+                MetisModificationService.AffectedPost.Standalone(
                     postId = it.serverPostId
                 )
             }

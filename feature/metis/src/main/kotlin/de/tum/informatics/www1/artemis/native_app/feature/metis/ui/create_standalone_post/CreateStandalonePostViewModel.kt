@@ -20,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.metis.DisplayPriori
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationResponse
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -27,11 +28,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import java.lang.reflect.Modifier
 
 class CreateStandalonePostViewModel(
     val metisContext: MetisContext,
     private val savedStateHandle: SavedStateHandle,
     metisService: MetisService,
+    metisModificationService: MetisModificationService,
     metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
@@ -40,6 +43,7 @@ class CreateStandalonePostViewModel(
     private val exerciseService: ExerciseService
 ) : MetisViewModel(
     metisService,
+    metisModificationService,
     metisStorageService,
     serverConfigurationService,
     accountService,

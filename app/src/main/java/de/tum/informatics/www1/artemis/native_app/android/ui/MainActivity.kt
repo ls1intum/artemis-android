@@ -183,7 +183,7 @@ class MainActivity : AppCompatActivity() {
                             onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
                             onNavigateToExerciseResultView = onNavigateToExerciseResultView,
                             onParticipateInQuiz = onParticipateInQuiz,
-                            onNavigateToLecture = { courseId, lectureId ->
+                            onNavigateToLecture = { _, lectureId ->
                                 navController.navigateToLecture(
                                     lectureId = lectureId
                                 ) { }

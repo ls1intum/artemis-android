@@ -11,6 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Clock
@@ -26,7 +27,7 @@ import kotlinx.serialization.json.Json
 class ReplyWorker(
     appContext: Context,
     params: WorkerParameters,
-    private val metisService: MetisService,
+    private val metisModificationService: MetisModificationService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService
 ) :
@@ -50,7 +51,7 @@ class ReplyWorker(
 
         return when (val authData = accountService.authenticationData.first()) {
             is AccountService.AuthenticationData.LoggedIn -> {
-                val response = metisService.createAnswerPost(
+                val response = metisModificationService.createAnswerPost(
                     metisContext,
                     AnswerPost(
                         content = replyContent,

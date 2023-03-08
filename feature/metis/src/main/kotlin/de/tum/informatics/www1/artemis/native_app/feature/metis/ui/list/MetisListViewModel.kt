@@ -19,6 +19,8 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Pos
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService.StandalonePostsContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -29,7 +31,8 @@ import kotlin.time.Duration.Companion.milliseconds
 internal class MetisListViewModel(
     val metisContext: MetisContext,
     private val websocketProvider: WebsocketProvider,
-    private val metisService: de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService,
+    private val metisService: MetisService,
+    private val metisModificationService: MetisModificationService,
     private val metisStorageService: MetisStorageService,
     accountService: AccountService,
     private val serverConfigurationService: ServerConfigurationService,
@@ -38,6 +41,7 @@ internal class MetisListViewModel(
     networkStatusProvider: NetworkStatusProvider
 ) : MetisViewModel(
     metisService,
+    metisModificationService,
     metisStorageService,
     serverConfigurationService,
     accountService,

@@ -14,7 +14,7 @@ import kotlinx.datetime.Instant
             entity = MetisUserEntity::class,
             parentColumns = ["server_id", "id"],
             childColumns = ["server_id", "author_id"],
-            onDelete = ForeignKey.RESTRICT
+            onDelete = ForeignKey.CASCADE
         )
     ]
 )
@@ -62,6 +62,7 @@ data class BasePostingEntity(
     enum class PostingType {
         @ColumnInfo(name = "standalone")
         STANDALONE,
+
         @ColumnInfo(name = "answer")
         ANSWER
     }

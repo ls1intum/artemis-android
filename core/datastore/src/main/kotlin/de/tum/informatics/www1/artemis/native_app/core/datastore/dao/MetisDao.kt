@@ -20,13 +20,14 @@ interface MetisDao {
      */
     @Query(
         """
-        delete from metis_post_context where server_id = :serverId and course_id = :courseId and lecture_id = :lectureId and exercise_id = :exerciseId
-    """
+            delete from postings where server_id = :serverId
+        """
     )
-    suspend fun clearAll(serverId: String, courseId: Long, lectureId: Long, exerciseId: Long)
+    suspend fun clearAll(serverId: String)
 
     /**
      * Query the client side post if for the given metis context. Returns null if the given post is not yet stored.
+     * Note: Standalone posts and answer posts may have the same ids.
      */
     @Query(
         """
@@ -35,12 +36,14 @@ interface MetisDao {
         from metis_post_context 
         where 
             server_id = :serverId and
-            server_post_id = :postId
+            server_post_id = :postId and
+            type = :postingType
     """
     )
     suspend fun queryClientPostId(
         serverId: String,
-        postId: Long
+        postId: Long,
+        postingType: BasePostingEntity.PostingType
     ): String?
 
     @Insert
@@ -109,12 +112,14 @@ interface MetisDao {
         """
         delete from metis_post_context where 
         server_id = :host and
-        server_post_id in (:serverPostIds)
+        server_post_id in (:serverPostIds) and
+        type = :postingType
     """
     )
     suspend fun deletePostingsWithServerIds(
         host: String,
-        serverPostIds: List<Long>
+        serverPostIds: List<Long>,
+        postingType: BasePostingEntity.PostingType = BasePostingEntity.PostingType.STANDALONE
     )
 
     @Query(
@@ -272,7 +277,8 @@ interface MetisDao {
             AnswerPostingEntity::class,
             PostReactionEntity::class,
             StandalonePostTagEntity::class,
-            MetisUserEntity::class
+            MetisUserEntity::class,
+            MetisPostContextEntity::class
         ]
     )
     fun queryCoursePosts(query: SupportSQLiteQuery): PagingSource<Int, Post>

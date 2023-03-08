@@ -12,7 +12,7 @@ import androidx.room.Index
  */
 @Entity(
     tableName = "metis_post_context",
-    primaryKeys = ["client_post_id", "server_post_id", "course_id", "exercise_id", "lecture_id"],
+    primaryKeys = ["client_post_id", "server_post_id", "course_id", "exercise_id", "lecture_id", "type"],
     foreignKeys = [
         ForeignKey(
             entity = BasePostingEntity::class,
@@ -32,8 +32,10 @@ data class MetisPostContextEntity(
     val exerciseId: Long,
     @ColumnInfo(name = "lecture_id")
     val lectureId: Long,
-    @ColumnInfo(name = "server_post_id")
+    @ColumnInfo(name = "server_post_id") // a standalone post and a reply may have the same id
     val serverPostId: Long,
     @ColumnInfo(name = "client_post_id")
-    val clientPostId: String
+    val clientPostId: String,
+    @ColumnInfo(name = "type")
+    val postingType: BasePostingEntity.PostingType
 )
