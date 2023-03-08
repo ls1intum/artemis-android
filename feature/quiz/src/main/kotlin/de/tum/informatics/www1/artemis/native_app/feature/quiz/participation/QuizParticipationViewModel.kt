@@ -317,7 +317,7 @@ internal class QuizParticipationViewModel(
                         body = submission,
                         serializer = Submission.serializer()
                     )
-                } catch (exception: LostReceiptException) {
+                } catch (e: Exception) {
                     null
                 }
 
@@ -350,7 +350,7 @@ internal class QuizParticipationViewModel(
                 )
             }
 
-            QuizType.Practice -> uploadedSubmission
+            QuizType.Practice -> emitAll(uploadedSubmission.filterNotNull())
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, QuizSubmission())

@@ -22,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificatio
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -93,7 +94,7 @@ class CreateStandalonePostViewModel(
     /**
      * @param onResponse contains the client side post id
      */
-    fun createPost(onResponse: (MetisModificationResponse<String>) -> Unit) {
+    fun createPost(onResponse: (MetisModificationResponse<String>) -> Unit): Job {
         val actualTags = savedStateHandle.get<String>(TAG_TAGS)
             .orEmpty()
             .split(',')
@@ -109,7 +110,7 @@ class CreateStandalonePostViewModel(
             else -> Course(id = metisContext.courseId)
         }
 
-        viewModelScope.launch {
+        return viewModelScope.launch {
             val post = StandalonePost(
                 id = null,
                 title = title,
@@ -151,7 +152,7 @@ class CreateStandalonePostViewModel(
                 displayPriority = DisplayPriority.NONE
             )
 
-            createStandalonePost(post, onResponse)
+            onResponse(createStandalonePostImpl(post))
         }
     }
 

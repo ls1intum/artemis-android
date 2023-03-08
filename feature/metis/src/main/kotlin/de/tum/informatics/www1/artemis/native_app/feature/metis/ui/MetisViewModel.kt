@@ -152,50 +152,39 @@ abstract class MetisViewModel(
     }
 
     /**
-     * @param onResponse contains the client side post id on success
+     * @return the client side post id on success
      */
-    protected fun createStandalonePost(
-        post: StandalonePost,
-        onResponse: (MetisModificationResponse<String>) -> Unit
-    ): Job {
-        val onFailure = {
-            onResponse(
-                MetisModificationResponse.Failure(
-                    MetisModificationFailure.CREATE_POST)
-            )
-        }
+    protected suspend fun createStandalonePostImpl(post: StandalonePost): MetisModificationResponse<String> {
+        val failure = MetisModificationResponse.Failure<String>(
+            MetisModificationFailure.CREATE_POST
+        )
 
-        return viewModelScope.launch {
-            val metisContext = getMetisContext()
-            val response = metisModificationService.createPost(
-                context = metisContext,
-                post = post,
-                serverUrl = serverConfigurationService.serverUrl.first(),
-                authToken = when (val authData = accountService.authenticationData.first()) {
-                    is AccountService.AuthenticationData.LoggedIn -> authData.authToken
-                    AccountService.AuthenticationData.NotLoggedIn -> {
-                        onFailure()
-                        return@launch
-                    }
+        val metisContext = getMetisContext()
+        val response = metisModificationService.createPost(
+            context = metisContext,
+            post = post,
+            serverUrl = serverConfigurationService.serverUrl.first(),
+            authToken = when (val authData = accountService.authenticationData.first()) {
+                is AccountService.AuthenticationData.LoggedIn -> authData.authToken
+                AccountService.AuthenticationData.NotLoggedIn -> {
+                    return failure
                 }
-            )
+            }
+        )
 
-            when (response) {
-                is NetworkResponse.Failure -> onFailure()
-                is NetworkResponse.Response -> {
-                    val clientSidePostId = metisStorageService.insertLiveCreatedPost(
-                        serverConfigurationService.host.first(),
-                        metisContext,
-                        response.data
-                    )
+        return when (response) {
+            is NetworkResponse.Failure -> failure
+            is NetworkResponse.Response -> {
+                val clientSidePostId = metisStorageService.insertLiveCreatedPost(
+                    serverConfigurationService.host.first(),
+                    metisContext,
+                    response.data
+                )
 
-                    if (clientSidePostId == null) {
-                        onFailure()
-                    } else {
-                        onResponse(
-                            MetisModificationResponse.Response(clientSidePostId)
-                        )
-                    }
+                if (clientSidePostId == null) {
+                    failure
+                } else {
+                    MetisModificationResponse.Response(clientSidePostId)
                 }
             }
         }

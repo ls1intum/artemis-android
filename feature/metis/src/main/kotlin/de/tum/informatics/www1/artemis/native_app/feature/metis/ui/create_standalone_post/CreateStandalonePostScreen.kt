@@ -15,9 +15,11 @@ import androidx.navigation.compose.composable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisModificationFailureDialog
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
+import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationResponse.Failure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationResponse.Response
+import kotlinx.coroutines.Job
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -72,6 +74,14 @@ private fun CreateStandalonePostScreen(
 
     var modificationFailure: MetisModificationFailure? by remember { mutableStateOf(null) }
 
+    var createPostJob: Job? by remember { mutableStateOf(null) }
+
+    LaunchedEffect(key1 = createPostJob) {
+        createPostJob?.let {
+            it.join()
+            createPostJob = null
+        }
+    }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -92,11 +102,13 @@ private fun CreateStandalonePostScreen(
             )
         },
         floatingActionButton = {
-            if (canSave) {
+            if (canSave || createPostJob != null) {
                 ExtendedFloatingActionButton(
                     onClick = {
-                        viewModel.createPost { response ->
-                            when(response) {
+                        createPostJob?.cancel()
+
+                        createPostJob = viewModel.createPost { response ->
+                            when (response) {
                                 is Failure -> modificationFailure = response.failure
                                 is Response -> {
                                     onCreatedPost(response.data)
@@ -104,9 +116,15 @@ private fun CreateStandalonePostScreen(
                             }
                         }
                     },
-                    icon = { Icon(imageVector = Icons.Default.Create, contentDescription = null) },
+                    icon = {
+                        if (createPostJob == null) {
+                            Icon(imageVector = Icons.Default.Create, contentDescription = null)
+                        } else {
+                            CircularProgressIndicator()
+                        }
+                    },
                     text = { Text(text = stringResource(id = R.string.create_standalone_post_fab_create)) },
-                    expanded = true
+                    expanded = createPostJob == null
                 )
             }
         }
