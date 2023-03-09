@@ -1,11 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.server_config
 
+import kotlinx.serialization.Serializable
+
 /**
  * TODO: Why are some properties nullable?
  *
  * From: https://github.com/ls1intum/Artemis/blob/6edbff8a7fac2748e130d9c26f260eb6ad5e81e7/src/main/webapp/app/shared/layouts/profiles/profile-info.model.ts
  */
-@kotlinx.serialization.Serializable
+@Serializable
 data class ProfileInfo(
     val activeProfiles: List<String> = emptyList(),
     val inProduction: Boolean = false,
@@ -18,8 +20,8 @@ data class ProfileInfo(
     val allowedLdapUsernamePattern: String? = null,
     val allowedCourseRegistrationUsernamePattern: String? = null,
     val accountName: String? = null,
-    val externalCredentialProvider: String = "",
-    val externalPasswordResetLinkMap: Map<String, String> = emptyMap(),
+    val externalCredentialProvider: String? = null,
+    val externalPasswordResetLinkMap: Map<String, String>? = emptyMap(),
     /**
      * Set if the server allows a saml2 based login. If not set, it is also not supported.
      */
