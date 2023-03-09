@@ -18,7 +18,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncChangesDialog
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncFailedDialog
 import kotlinx.coroutines.Job
 import org.koin.androidx.compose.koinViewModel
@@ -31,6 +30,13 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
     // Set if currently syncing changes with server
     var syncChangesJob: Job? by remember { mutableStateOf(null) }
     var displaySyncFailedDialog: Boolean by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = syncChangesJob) {
+        syncChangesJob?.let {
+            it.join()
+            syncChangesJob = null
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -56,6 +62,8 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
             ) {
                 FloatingActionButton(
                     onClick = {
+                        syncChangesJob?.cancel()
+
                         syncChangesJob = viewModel.saveSettings { isSuccessful ->
                             syncChangesJob = null
                             if (!isSuccessful) {
@@ -64,7 +72,11 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
                         }
                     }
                 ) {
-                    Icon(imageVector = Icons.Default.Save, contentDescription = null)
+                    if (syncChangesJob == null) {
+                        Icon(imageVector = Icons.Default.Save, contentDescription = null)
+                    } else {
+                        CircularProgressIndicator()
+                    }
                 }
             }
         }
@@ -77,15 +89,6 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
                 .verticalScroll(rememberScrollState()),
             viewModel = viewModel
         )
-
-        if (syncChangesJob != null) {
-            PushNotificationSyncChangesDialog(
-                onDismissRequest = {
-                    syncChangesJob?.cancel()
-                    syncChangesJob = null
-                }
-            )
-        }
 
         if (displaySyncFailedDialog) {
             PushNotificationSyncFailedDialog {
