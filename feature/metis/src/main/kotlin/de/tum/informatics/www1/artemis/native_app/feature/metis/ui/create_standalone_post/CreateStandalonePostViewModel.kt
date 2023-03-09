@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import java.lang.reflect.Modifier
 
 class CreateStandalonePostViewModel(
     val metisContext: MetisContext,
@@ -43,7 +42,6 @@ class CreateStandalonePostViewModel(
     networkStatusProvider: NetworkStatusProvider,
     private val exerciseService: ExerciseService
 ) : MetisViewModel(
-    metisService,
     metisModificationService,
     metisStorageService,
     serverConfigurationService,

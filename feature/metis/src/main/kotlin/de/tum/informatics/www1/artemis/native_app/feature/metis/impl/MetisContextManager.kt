@@ -30,41 +30,6 @@ class MetisContextManager(
 
     private val metisUpdateListenerMap: MutableMap<MetisContext, Flow<WebsocketProvider.WebsocketData<MetisPostDTO>>> =
         ConcurrentHashMap()
-
-    private val updateListener: MutableMap<MetisContext, Flow<CurrentDataAction>> =
-        ConcurrentHashMap()
-
-    /**
-     * Tells you what to do with the displayed data from the given metis context.
-     */
-    @OptIn(DelicateCoroutinesApi::class)
-    fun getContextDataActionFlow(metisContext: MetisContext): Flow<CurrentDataAction> {
-        return flow {
-            emitAll(mutex.withLock {
-                val metisUpdateListener = getMetisUpdateListenerFlow(metisContext)
-
-                updateListener.getOrPut(metisContext) {
-                    metisUpdateListener.transform { websocketData ->
-                        when (websocketData) {
-                            is WebsocketProvider.WebsocketData.Disconnect -> {
-                                emit(CurrentDataAction.Outdated)
-                            }
-
-                            is WebsocketProvider.WebsocketData.Message -> {
-                            }
-
-                            is WebsocketProvider.WebsocketData.Subscribe -> {
-                                emit(CurrentDataAction.Refresh)
-                                emit(CurrentDataAction.Keep)
-                            }
-                        }
-                    }
-                        .shareIn(GlobalScope, SharingStarted.WhileSubscribed(stopTimeout = 1.seconds), replay = 1)
-                }
-            })
-        }
-    }
-
     /**
      * Collect updates from the STOMP service and update the database accordingly.
      */
@@ -114,25 +79,4 @@ class MetisContextManager(
                         replay = 1
                     )
             }
-
-    /**
-     * Signal what to do with the currently cached data.
-     */
-    sealed interface CurrentDataAction {
-        /**
-         * Keep the current data. But it is outdated.
-         */
-        object Outdated : CurrentDataAction
-
-        /**
-         * Clear current data and request new data.
-         */
-        object Refresh : CurrentDataAction
-
-        /**
-         * No action is required.
-         */
-        object Keep : CurrentDataAction
-    }
-
 }

@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
-import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndefinetly
@@ -18,11 +17,10 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -30,7 +28,6 @@ import kotlinx.coroutines.launch
  * Base view model which handles logic such as creating posts and reactions.
  */
 abstract class MetisViewModel(
-    private val metisService: MetisService,
     private val metisModificationService: MetisModificationService,
     private val metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
@@ -220,7 +217,7 @@ abstract class MetisViewModel(
 
     protected abstract suspend fun getMetisContext(): MetisContext
 
-    fun requestReload() {
+    open fun requestReload() {
         onRequestReload.tryEmit(Unit)
     }
 }

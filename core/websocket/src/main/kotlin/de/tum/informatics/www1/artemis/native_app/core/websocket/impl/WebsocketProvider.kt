@@ -233,6 +233,9 @@ class WebsocketProvider(
     sealed interface WebsocketConnectionState {
         val isConnected: Boolean
 
+        /**
+         * This is the start, no connection has been established yet
+         */
         object Empty : WebsocketConnectionState {
             override val isConnected: Boolean = false
         }

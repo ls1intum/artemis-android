@@ -19,6 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificatio
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisContentViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -38,8 +39,8 @@ internal class MetisStandalonePostViewModel(
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     serverDataService: ServerDataService
-) : MetisViewModel(
-    metisService,
+) : MetisContentViewModel(
+    websocketProvider,
     metisModificationService,
     metisStorageService,
     serverConfigurationService,
@@ -55,11 +56,6 @@ internal class MetisStandalonePostViewModel(
             } else DataState.Failure(RuntimeException("Post not found"))
         }
     }
-
-    private val collectMetisUpdates: Flow<MetisContextManager.CurrentDataAction> =
-        metisContextManager
-            .getContextDataActionFlow(metisContext)
-            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
     val post: StateFlow<DataState<Post>> = when (postId) {
         is StandalonePostId.ClientSideId -> metisStorageService
@@ -117,15 +113,6 @@ internal class MetisStandalonePostViewModel(
         .map { dataState -> dataState.bind { it } } // Type check adaption
         .stateIn(viewModelScope, SharingStarted.Eagerly)
 
-
-    val isDataOutdated: Flow<Boolean> = collectMetisUpdates.map {
-        when (it) {
-            MetisContextManager.CurrentDataAction.Keep -> false
-            MetisContextManager.CurrentDataAction.Outdated -> true
-            MetisContextManager.CurrentDataAction.Refresh -> false
-        }
-    }
-
     /**
      * Wait for the metis context manager to request a refresh. Then load the post from the server.
      */
@@ -138,8 +125,7 @@ internal class MetisStandalonePostViewModel(
             }
 
             viewModelScope.launch {
-                collectMetisUpdates
-                    .filter { it == MetisContextManager.CurrentDataAction.Refresh }
+                onRequestReload
                     .collect {
                         val serverSidePostId = when (postId) {
                             is StandalonePostId.ClientSideId -> {

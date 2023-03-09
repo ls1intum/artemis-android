@@ -49,7 +49,7 @@ internal fun MetisStandalonePostList(
         MetisOutdatedBanner(
             modifier = Modifier.fillMaxWidth(),
             isOutdated = isDataOutdated,
-            requestRefresh = viewModel::requestRefreshWebsocket
+            requestRefresh = viewModel::requestReload
         )
 
         Box(
