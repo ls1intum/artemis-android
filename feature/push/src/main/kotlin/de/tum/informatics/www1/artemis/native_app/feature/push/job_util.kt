@@ -14,7 +14,6 @@ inline fun <reified T : ListenableWorker> defaultInternetWorkRequest(
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
         )
-        .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
         .setBackoffCriteria(
             BackoffPolicy.LINEAR,
             OneTimeWorkRequest.MIN_BACKOFF_MILLIS,

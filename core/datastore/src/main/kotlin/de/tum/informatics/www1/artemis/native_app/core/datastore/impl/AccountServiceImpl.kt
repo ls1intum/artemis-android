@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.auth0.jwt.JWT
-import com.auth0.jwt.interfaces.DecodedJWT
+import com.auth0.android.jwt.DecodeException
+import com.auth0.android.jwt.JWT
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.LoginService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
@@ -47,10 +47,14 @@ internal class AccountServiceImpl(
             (inMemoryJWT ?: storedJWT)
         }
             .transformLatest { key ->
-                val jwt = key?.let { JWT.decode(it) }
+                val jwt = try {
+                    key?.let { JWT(it) }
+                } catch (e: DecodeException) {
+                    null
+                }
 
-                if (jwt != null && isKeyValid(jwt)) {
-                    val username = JWT.decode(key).subject.orEmpty()
+                if (key != null && jwt != null && isKeyValid(jwt)) {
+                    val username = jwt.subject.orEmpty()
 
                     emit(
                         AccountService.AuthenticationData.LoggedIn(
@@ -60,7 +64,7 @@ internal class AccountServiceImpl(
                     )
 
                     // Wait till the expiration and the emit that the user is no longer logged in.
-                    val expirationInstant = jwt.expiresAtAsInstant?.toKotlinInstant()
+                    val expirationInstant = jwt.expiresAt?.toInstant()?.toKotlinInstant()
                     if (expirationInstant != null) {
                         val withTolerance = expirationInstant - 1.hours
                         val waitDuration: Duration = withTolerance - Clock.System.now()
@@ -120,8 +124,8 @@ internal class AccountServiceImpl(
         }
     }
 
-    private fun isKeyValid(jwt: DecodedJWT): Boolean {
-        val expiresAt = jwt.expiresAtAsInstant?.toKotlinInstant() ?: return true
+    private fun isKeyValid(jwt: JWT): Boolean {
+        val expiresAt = jwt.expiresAt?.toInstant()?.toKotlinInstant() ?: return true
 
         val remainingValidDuration = expiresAt - Clock.System.now()
         return remainingValidDuration > 5.days
