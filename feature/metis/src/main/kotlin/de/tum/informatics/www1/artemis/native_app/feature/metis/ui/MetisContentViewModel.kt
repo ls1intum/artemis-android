@@ -12,7 +12,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 /**
- * Common viewModel for metis viewModels that display live metis content
+ * Common viewModel for metis viewModels that display live metis content.
+ * Live metis content is content that is being permanently updated by websockets.
  */
 abstract class MetisContentViewModel(
     private val websocketProvider: WebsocketProvider,
@@ -58,7 +59,9 @@ abstract class MetisContentViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-
+    /**
+     * Emits to onRequestReload. If the websocket is currently not connected, requests a reconnect to the websocket
+     */
     override fun requestReload() {
         super.requestReload()
         viewModelScope.launch {

@@ -48,7 +48,7 @@ internal class MetisListViewModel(
 ) {
 
     private val _filter = MutableStateFlow<List<MetisFilter>>(emptyList())
-    val filter: Flow<List<MetisFilter>> = _filter
+    val filter: StateFlow<List<MetisFilter>> = _filter
 
     private val _query = MutableStateFlow<String?>(null)
     val query: Flow<String> = _query.map(String?::orEmpty)
@@ -65,10 +65,10 @@ internal class MetisListViewModel(
     }
 
     private val _sortingStrategy = MutableStateFlow(MetisSortingStrategy.DATE_DESCENDING)
-    val sortingStrategy: Flow<MetisSortingStrategy> = _sortingStrategy
+    val sortingStrategy: StateFlow<MetisSortingStrategy> = _sortingStrategy
 
     private val _courseWideContext = MutableStateFlow<CourseWideContext?>(null)
-    val courseWideContext: Flow<CourseWideContext?> = _courseWideContext
+    val courseWideContext: StateFlow<CourseWideContext?> = _courseWideContext
 
     private val standaloneMetisContext: Flow<StandalonePostsContext> = combine(
         _filter,

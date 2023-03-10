@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post
 
-import android.view.View
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,9 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.*
 import androidx.navigation.compose.composable
+import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisOutdatedBanner
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -119,6 +118,9 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
     }
 }
 
+/**
+ * Display the post and its replied. If metis may be outdated, a banner will be displayed to the user.
+ */
 @Composable
 private fun MetisStandalonePostScreen(
     standalonePostId: StandalonePostId,
@@ -129,7 +131,7 @@ private fun MetisStandalonePostScreen(
     val viewModel: MetisStandalonePostViewModel =
         koinViewModel(parameters = { parametersOf(standalonePostId, metisContext, true) })
 
-    val isDataOutdated by viewModel.isDataOutdated.collectAsState(initial = false)
+    val isDataOutdated by viewModel.isDataOutdated.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -154,7 +156,7 @@ private fun MetisStandalonePostScreen(
             MetisOutdatedBanner(
                 modifier = Modifier.fillMaxWidth(),
                 isOutdated = isDataOutdated,
-                requestRefresh = viewModel::requestWebsocketReload
+                requestRefresh = viewModel::requestReload
             )
 
             MetisStandalonePostUi(

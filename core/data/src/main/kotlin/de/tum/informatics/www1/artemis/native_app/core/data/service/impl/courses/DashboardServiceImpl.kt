@@ -39,6 +39,5 @@ internal class DashboardServiceImpl(
                 Dashboard(courses)
             }
         }
-
     }
 }

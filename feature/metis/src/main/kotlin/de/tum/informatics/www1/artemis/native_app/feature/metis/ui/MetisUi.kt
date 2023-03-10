@@ -13,10 +13,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -196,14 +193,11 @@ private fun ViewModelMetisFilterHeaderImpl(
     metisContext: MetisContext,
     viewModel: MetisListViewModel
 ) {
-    val query: String = viewModel.query.collectAsState(initial = "").value
+    val query: String by viewModel.query.collectAsState(initial = "")
 
-    val courseWideContext = viewModel.courseWideContext.collectAsState(initial = null).value
-    val metisFilter = viewModel.filter.collectAsState(initial = emptyList()).value
-    val sortingStrategy = viewModel
-        .sortingStrategy
-        .collectAsState(initial = MetisSortingStrategy.DATE_DESCENDING)
-        .value
+    val courseWideContext by viewModel.courseWideContext.collectAsState()
+    val metisFilter by viewModel.filter.collectAsState()
+    val sortingStrategy by viewModel.sortingStrategy.collectAsState()
 
     MetisFilterHeader(
         modifier = modifier,
@@ -225,6 +219,10 @@ private fun ViewModelMetisFilterHeaderImpl(
     )
 }
 
+/**
+ * A banner that tells the user that the data they view may be outdated.
+ * Gives the user the option to reload the data, which calls [requestRefresh].
+ */
 @Composable
 internal fun ColumnScope.MetisOutdatedBanner(
     modifier: Modifier,

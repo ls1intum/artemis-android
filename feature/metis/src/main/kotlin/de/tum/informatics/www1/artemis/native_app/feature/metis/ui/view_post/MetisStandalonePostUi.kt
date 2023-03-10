@@ -44,11 +44,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Displays a single post with its replies.
+ * @param viewType is currently unused, but should be used to scroll to the requested content in the future.
+ */
 @Composable
 internal fun MetisStandalonePostUi(
     modifier: Modifier,
     viewModel: MetisStandalonePostViewModel,
-    viewType: ViewType
+    @Suppress("UNUSED_PARAMETER") viewType: ViewType
 ) {
     val postDataState: DataState<Post> by viewModel.post.collectAsState()
     val clientId: Long = viewModel.clientId.collectAsState().value.orElse(0L)

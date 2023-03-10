@@ -26,6 +26,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
+/**
+ * ViewModel for the standalone view of communication posts. Handles loading of the singular post by the given post id.
+ */
 internal class MetisStandalonePostViewModel(
     private val postId: StandalonePostId,
     private val metisContext: MetisContext,
@@ -57,6 +60,9 @@ internal class MetisStandalonePostViewModel(
         }
     }
 
+    /**
+     * The post data state flow as loading from the server.
+     */
     val post: StateFlow<DataState<Post>> = when (postId) {
         is StandalonePostId.ClientSideId -> metisStorageService
             .getStandalonePost(postId.clientSideId)
@@ -162,12 +168,6 @@ internal class MetisStandalonePostViewModel(
                             }
                     }
             }
-        }
-    }
-
-    fun requestWebsocketReload() {
-        viewModelScope.launch {
-            websocketProvider.requestTryReconnect()
         }
     }
 

@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push
 
 import android.util.Base64
+import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -18,6 +19,8 @@ import javax.crypto.spec.IvParameterSpec
 class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
 
     companion object {
+        private const val TAG = "ArtemisFirebaseMessagingService"
+
         private const val Algorithm = "AES/CBC/PKCS7Padding"
 
         private val cipher: Cipher? = try {
@@ -57,6 +60,8 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
+        Log.d(TAG, "New push notification received")
+
         val payloadCiphertext = message.data["payload"] ?: return
         val iv = message.data["iv"] ?: return
 
@@ -66,7 +71,6 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
             val cipher = cipher ?: return@runBlocking null
 
             val ivAsBytes = Base64.decode(iv.toByteArray(Charsets.ISO_8859_1), Base64.DEFAULT)
-
 
             cipher.decrypt(payloadCiphertext, key, ivAsBytes) ?: return@runBlocking null
         } ?: return

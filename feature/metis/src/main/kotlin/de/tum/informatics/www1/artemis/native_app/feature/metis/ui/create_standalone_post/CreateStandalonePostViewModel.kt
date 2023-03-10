@@ -21,7 +21,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePos
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -33,7 +32,6 @@ import kotlinx.datetime.Clock
 class CreateStandalonePostViewModel(
     val metisContext: MetisContext,
     private val savedStateHandle: SavedStateHandle,
-    metisService: MetisService,
     metisModificationService: MetisModificationService,
     metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
