@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.overview
 
 import android.annotation.SuppressLint
-import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.LinearProgressIndicator
@@ -10,7 +9,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.LoadingState
-import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions

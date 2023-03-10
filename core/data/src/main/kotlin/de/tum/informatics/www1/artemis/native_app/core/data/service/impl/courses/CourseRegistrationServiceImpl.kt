@@ -4,7 +4,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.*
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
-import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*

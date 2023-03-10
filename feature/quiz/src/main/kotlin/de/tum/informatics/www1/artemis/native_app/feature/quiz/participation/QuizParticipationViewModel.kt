@@ -38,10 +38,19 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.parcelize.Parcelize
-import org.hildan.krossbow.stomp.LostReceiptException
 import org.hildan.krossbow.stomp.headers.StompSendHeaders
 import java.util.*
+import kotlin.Boolean
+import kotlin.Exception
+import kotlin.Int
+import kotlin.Long
+import kotlin.Result
+import kotlin.RuntimeException
+import kotlin.String
+import kotlin.Triple
+import kotlin.Unit
 import kotlin.time.Duration.Companion.seconds
+import kotlin.to
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result as SubmissionResult
 
 /**

@@ -24,11 +24,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.isInFuture
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ProblemStatementWebView
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.*
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
-import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.courseId
-import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.getProblemStatementWebViewState
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 

@@ -11,7 +11,6 @@ import androidx.core.app.RemoteInput
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map

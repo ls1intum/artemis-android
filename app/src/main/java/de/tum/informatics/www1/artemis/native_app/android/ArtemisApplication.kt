@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lectureMo
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
+import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.quizParticipationModule
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsModule
@@ -28,7 +29,6 @@ import io.sentry.Sentry
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin
-import de.tum.informatics.www1.artemis.native_app.feature.push.R
 
 class ArtemisApplication : Application(), ImageLoaderFactory {
 

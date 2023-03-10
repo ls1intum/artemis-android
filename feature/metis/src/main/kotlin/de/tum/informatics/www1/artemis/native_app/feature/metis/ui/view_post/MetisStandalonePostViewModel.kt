@@ -20,7 +20,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificatio
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisContentViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

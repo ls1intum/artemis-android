@@ -15,12 +15,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.DropdownButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.MarkdownTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.getHumanReadableTextForCourseWideContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.getIconForCourseWideContext
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.DropdownButton
 
 @Composable
 internal fun CreateStandalonePostUi(modifier: Modifier, viewModel: CreateStandalonePostViewModel) {

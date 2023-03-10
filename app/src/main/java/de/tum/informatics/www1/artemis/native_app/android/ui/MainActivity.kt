@@ -17,10 +17,6 @@ import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import de.tum.informatics.www1.artemis.native_app.android.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.create_standalone_post.createStandalonePostScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ViewType
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.standalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
@@ -41,6 +37,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.navigateT
 import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATION
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.create_standalone_post.createStandalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ViewType
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.standalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.navigateToQuizParticipation
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.quizParticipation
