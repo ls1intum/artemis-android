@@ -414,21 +414,14 @@ private fun RegisterLoginAccount(
                         //Just for the preview.
                         LoginUi(
                             modifier = loginUiModifier,
-                            username = "",
-                            password = "",
-                            hasUserAcceptedTerms = false,
-                            rememberMe = false,
-                            updateUsername = {},
-                            updatePassword = {},
-                            updateRememberMe = {},
-                            updateUserAcceptedTerms = {},
-                            onClickLogin = {},
-                            isLoginButtonEnabled = false,
-                            accountName = "TUM",
-                            needsToAcceptTerms = false,
-                            isPasswordLoginDisabled = false,
+                            accountName = "TUm",
+                            needsToAcceptTerms = true,
+                            hasUserAcceptedTerms = true,
                             saml2Config = null,
-                            onClickSaml2Login = { }
+                            isPasswordLoginDisabled = false,
+                            updateUserAcceptedTerms = {},
+                            passwordBasedLoginContent = {},
+                            saml2BasedLoginContent = { _, _ -> }
                         )
                     } else {
                         LoginUi(

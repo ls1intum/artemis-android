@@ -23,6 +23,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
@@ -47,22 +48,19 @@ fun NavGraphBuilder.settingsScreen(
     versionName: String,
     onNavigateUp: () -> Unit,
     onLoggedOut: () -> Unit,
-    onDisplayThirdPartyLicenses: () -> Unit,
-    onRequestOpenLink: (String) -> Unit
+    onDisplayThirdPartyLicenses: () -> Unit
 ) {
     composable(SETTINGS_DESTINATION) {
         SettingsScreen(
             modifier = Modifier.fillMaxSize(),
             versionCode = versionCode,
             versionName = versionName,
-            onLoggedOut = onLoggedOut,
-            onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses,
             onNavigateUp = onNavigateUp,
-            onRequestOpenLink = onRequestOpenLink,
-            onRequestOpenNotificationSettings = {
-                navController.navigate(PUSH_NOTIFICATION_SETTINGS_DESTINATION)
-            }
-        )
+            onLoggedOut = onLoggedOut,
+            onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses
+        ) {
+            navController.navigate(PUSH_NOTIFICATION_SETTINGS_DESTINATION)
+        }
     }
 
     composable(PUSH_NOTIFICATION_SETTINGS_DESTINATION) {
@@ -85,9 +83,10 @@ private fun SettingsScreen(
     onNavigateUp: () -> Unit,
     onLoggedOut: () -> Unit,
     onDisplayThirdPartyLicenses: () -> Unit,
-    onRequestOpenLink: (String) -> Unit,
     onRequestOpenNotificationSettings: () -> Unit
 ) {
+    val linkOpener = LocalLinkOpener.current
+
     val pushNotificationJobService: PushNotificationJobService = get()
     val pushNotificationConfigurationService: PushNotificationConfigurationService = get()
 
@@ -188,11 +187,11 @@ private fun SettingsScreen(
                 onOpenPrivacyPolicy = {
                     val link = URLBuilder(serverUrl).appendPathSegments("privacy").buildString()
 
-                    onRequestOpenLink(link)
+                    linkOpener.openLink(link)
                 },
                 onOpenImprint = {
                     val link = URLBuilder(serverUrl).appendPathSegments("imprint").buildString()
-                    onRequestOpenLink(link)
+                    linkOpener.openLink(link)
                 },
                 onOpenThirdPartyLicenses = onDisplayThirdPartyLicenses,
                 // it can only be unselected, if the user has navigated to the settings from the instance selection screen.

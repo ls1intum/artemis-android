@@ -2,35 +2,25 @@ package de.tum.informatics.www1.artemis.native_app.feature.login.login
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillNode
-import androidx.compose.ui.autofill.AutofillType
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalAutofill
-import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Saml2Config
+import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitJobCompletion
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
+import de.tum.informatics.www1.artemis.native_app.feature.login.login.login_options.PasswordBasedLogin
+import de.tum.informatics.www1.artemis.native_app.feature.login.login.login_options.Saml2BasedLogin
+import io.ktor.http.*
 import kotlinx.coroutines.Job
 
 /*
@@ -66,14 +56,17 @@ internal fun LoginUi(
     onLoggedIn: () -> Unit,
     onClickSaml2Login: (rememberMe: Boolean) -> Unit
 ) {
-    val username by viewModel.username.collectAsState(initial = "")
-    val password by viewModel.password.collectAsState(initial = "")
-    val rememberMe by viewModel.rememberMe.collectAsState(initial = true)
-    val hasUserAcceptedTerms by viewModel.hasUserAcceptedTerms.collectAsState(initial = false)
-    val isLoginButtonEnabled by viewModel.loginButtonEnabled.collectAsState(initial = false)
+    val linkOpener = LocalLinkOpener.current
+
+    val username by viewModel.username.collectAsState()
+    val password by viewModel.password.collectAsState()
+    val rememberMe by viewModel.rememberMe.collectAsState()
+    val hasUserAcceptedTerms by viewModel.hasUserAcceptedTerms.collectAsState()
+    val isLoginButtonEnabled by viewModel.loginButtonEnabled.collectAsState()
+
+    val serverUrl: String by viewModel.serverUrl.collectAsState()
 
     var displayLoginFailedDialog by rememberSaveable { mutableStateOf(false) }
-    var displayPerformLoginDialog by rememberSaveable { mutableStateOf(false) }
 
     val profileInfo = viewModel.serverProfileInfo.collectAsState().value
 
@@ -87,54 +80,61 @@ internal fun LoginUi(
 
     var loginJob: Job? by remember { mutableStateOf(null) }
 
+    AwaitJobCompletion(job = loginJob) {
+        loginJob = null
+    }
+
     LoginUi(
         modifier = modifier,
-        username = username,
-        password = password,
-        rememberMe = rememberMe,
+        accountName = accountName,
+        needsToAcceptTerms = needsToAcceptTerms,
         hasUserAcceptedTerms = hasUserAcceptedTerms,
-        updateUsername = viewModel::updateUsername,
-        updatePassword = viewModel::updatePassword,
-        updateRememberMe = viewModel::updateRememberMe,
+        saml2Config = saml2Config,
+        isPasswordLoginDisabled = isPasswordLoginDisabled,
         updateUserAcceptedTerms = viewModel::updateUserAcceptedTerms,
-        onClickLogin = {
-            displayPerformLoginDialog = true
-
-            loginJob = viewModel.login(
-                onSuccess = {
-                    displayPerformLoginDialog = false
-                    onLoggedIn()
+        passwordBasedLoginContent = { loginModifier ->
+            PasswordBasedLogin(
+                modifier = loginModifier,
+                username = username,
+                password = password,
+                rememberMe = rememberMe,
+                isLoggingIn = loginJob != null,
+                updateUsername = viewModel::updateUsername,
+                updatePassword = viewModel::updatePassword,
+                updateRememberMe = viewModel::updateRememberMe,
+                isLoginButtonEnabled = isLoginButtonEnabled,
+                onClickLogin = {
+                    loginJob = viewModel.login(
+                        onSuccess = {
+                            onLoggedIn()
+                        },
+                        onFailure = {
+                            displayLoginFailedDialog = true
+                        }
+                    )
                 },
-                onFailure = {
-                    displayPerformLoginDialog = false
-                    displayLoginFailedDialog = true
+                onClickForgotPassword = {
+                    val link = URLBuilder(serverUrl)
+                        .appendPathSegments("account", "reset", "request")
+                        .buildString()
+
+                    linkOpener.openLink(link)
                 }
             )
         },
-        isLoginButtonEnabled = isLoginButtonEnabled,
-        accountName = accountName,
-        needsToAcceptTerms = needsToAcceptTerms,
-        isPasswordLoginDisabled = isPasswordLoginDisabled,
-        saml2Config = saml2Config,
-        onClickSaml2Login = { onClickSaml2Login(rememberMe) }
+        saml2BasedLoginContent = { loginModifier, providedSaml2Config ->
+            Saml2BasedLogin(
+                modifier = loginModifier,
+                saml2Config = providedSaml2Config,
+                passwordLoginDisabled = isPasswordLoginDisabled,
+                needsToAcceptTerms = needsToAcceptTerms,
+                hasUserAcceptedTerms = hasUserAcceptedTerms,
+                rememberMe = rememberMe,
+                updateRememberMe = viewModel::updateRememberMe,
+                onLoginButtonClicked = { onClickSaml2Login(rememberMe) }
+            )
+        }
     )
-
-    if (displayPerformLoginDialog) {
-        AlertDialog(
-            title = {
-                Text(text = stringResource(id = R.string.login_dialog_perform_login_title))
-            },
-            onDismissRequest = {
-                try {
-                    loginJob?.cancel()
-                    loginJob = null
-                    displayPerformLoginDialog = false
-                } catch (_: Exception) {
-                }
-            },
-            confirmButton = {}
-        )
-    }
 
     if (displayLoginFailedDialog) {
         AlertDialog(
@@ -154,30 +154,21 @@ internal fun LoginUi(
  * Displays the username and password text field and the remember me checkbox.
  * The user can trigger .
  *
- * @param accountName the account name from [de.tum.informatics.www1.artemis.native_app.core.server_config.ProfileInfo.accountName]
- * @param onClickLogin called when the user clicks the login button.
- * @param isLoginButtonEnabled if the button that sends the login request is enabled.
- * @param isPasswordLoginDisabled see [de.tum.informatics.www1.artemis.native_app.core.server_config.ProfileInfo.isPasswordLoginDisabled]
- * @param saml2Config see [de.tum.informatics.www1.artemis.native_app.core.server_config.ProfileInfo.saml2]
+ * @param accountName the account name from [ProfileInfo.accountName]
+ * @param isPasswordLoginDisabled see [ProfileInfo.isPasswordLoginDisabled]
+ * @param saml2Config see [ProfileInfo.saml2]
  */
 @Composable
 internal fun LoginUi(
     modifier: Modifier,
-    username: String,
-    password: String,
-    rememberMe: Boolean,
     accountName: String,
-    isLoginButtonEnabled: Boolean,
     needsToAcceptTerms: Boolean,
     hasUserAcceptedTerms: Boolean,
     saml2Config: Saml2Config?,
     isPasswordLoginDisabled: Boolean,
-    updateUsername: (String) -> Unit,
-    updatePassword: (String) -> Unit,
-    updateRememberMe: (Boolean) -> Unit,
     updateUserAcceptedTerms: (Boolean) -> Unit,
-    onClickLogin: () -> Unit,
-    onClickSaml2Login: () -> Unit
+    passwordBasedLoginContent: @Composable (modifier: Modifier) -> Unit,
+    saml2BasedLoginContent: @Composable (modifier: Modifier, config: Saml2Config) -> Unit
 ) {
     Column(modifier = modifier.then(Modifier.verticalScroll(rememberScrollState()))) {
         Text(
@@ -196,17 +187,7 @@ internal fun LoginUi(
             .align(Alignment.CenterHorizontally)
 
         if (!isPasswordLoginDisabled) {
-            PasswordBasedLogin(
-                modifier = loginModifier,
-                username = username,
-                updateUsername = updateUsername,
-                password = password,
-                updatePassword = updatePassword,
-                rememberMe = rememberMe,
-                updateRememberMe = updateRememberMe,
-                isLoginButtonEnabled = isLoginButtonEnabled,
-                onClickLogin = onClickLogin
-            )
+            passwordBasedLoginContent(loginModifier)
         }
 
         if (!isPasswordLoginDisabled && saml2Config != null) {
@@ -225,16 +206,7 @@ internal fun LoginUi(
         }
 
         if (saml2Config != null) {
-            Saml2BasedLogin(
-                modifier = loginModifier,
-                saml2Config = saml2Config,
-                passwordLoginDisabled = isPasswordLoginDisabled,
-                needsToAcceptTerms = needsToAcceptTerms,
-                hasUserAcceptedTerms = hasUserAcceptedTerms,
-                rememberMe = rememberMe,
-                updateRememberMe = updateRememberMe,
-                onLoginButtonClicked = onClickSaml2Login
-            )
+            saml2BasedLoginContent(loginModifier, saml2Config)
         }
 
         if (needsToAcceptTerms) {
@@ -245,238 +217,6 @@ internal fun LoginUi(
                 onCheckedChanged = updateUserAcceptedTerms
             )
         }
-    }
-}
-
-@Composable
-private fun PasswordBasedLogin(
-    modifier: Modifier,
-    username: String,
-    password: String,
-    rememberMe: Boolean,
-    updateUsername: (String) -> Unit,
-    updatePassword: (String) -> Unit,
-    updateRememberMe: (Boolean) -> Unit,
-    isLoginButtonEnabled: Boolean,
-    onClickLogin: () -> Unit
-) {
-    var showPasswordPlaintext by rememberSaveable { mutableStateOf(false) }
-    val visualTransformation = remember(showPasswordPlaintext) {
-        if (showPasswordPlaintext) {
-            VisualTransformation.None
-        } else PasswordVisualTransformation()
-    }
-
-    val autofill = LocalAutofill.current
-    val createAutofillModifier = { autofillNode: AutofillNode ->
-        Modifier.onFocusChanged { focusState ->
-            if (autofill != null) {
-                if (focusState.isFocused) {
-                    autofill.requestAutofillForNode(autofillNode)
-                } else {
-                    autofill.cancelAutofillForNode(autofillNode)
-                }
-            }
-        }
-    }
-
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Autofill(
-            autofillTypes = listOf(AutofillType.Username),
-            onFill = updateUsername
-        ) { autofillNode ->
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .then(createAutofillModifier(autofillNode)),
-                value = username,
-                onValueChange = updateUsername,
-                label = { Text(text = stringResource(id = R.string.login_username_label)) }
-            )
-        }
-
-        Autofill(
-            autofillTypes = listOf(AutofillType.Password),
-            onFill = updatePassword
-        ) { autofillNode ->
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .then(createAutofillModifier(autofillNode)),
-                value = password,
-                onValueChange = updatePassword,
-                label = { Text(text = stringResource(id = R.string.login_password_label)) },
-                visualTransformation = visualTransformation,
-                trailingIcon = {
-                    IconButton(onClick = { showPasswordPlaintext = !showPasswordPlaintext }) {
-                        Icon(
-                            imageVector = if (!showPasswordPlaintext) Icons.Default.VisibilityOff
-                            else Icons.Default.Visibility,
-                            contentDescription = null
-                        )
-                    }
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    autoCorrect = false
-                )
-            )
-        }
-
-        RememberLoginCheckBox(
-            modifier = Modifier.fillMaxWidth(),
-            rememberMe = rememberMe,
-            updateRememberMe = updateRememberMe
-        )
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = onClickLogin,
-            enabled = isLoginButtonEnabled
-        ) {
-            Text(text = stringResource(id = R.string.login_perform_login_button_text))
-        }
-    }
-}
-
-@Composable
-private fun Saml2BasedLogin(
-    modifier: Modifier,
-    saml2Config: Saml2Config,
-    passwordLoginDisabled: Boolean,
-    needsToAcceptTerms: Boolean,
-    hasUserAcceptedTerms: Boolean,
-    rememberMe: Boolean,
-    updateRememberMe: (Boolean) -> Unit,
-    onLoginButtonClicked: () -> Unit
-) {
-    val elementModifier = Modifier.fillMaxWidth()
-
-    Column(modifier = modifier) {
-        val identityProviderName = saml2Config.identityProviderName
-        val pleaseSignInText = if (identityProviderName != null) {
-            stringResource(
-                id = R.string.login_saml_please_sign_in_provider,
-                identityProviderName
-            )
-        } else stringResource(id = R.string.login_saml_please_sign_in)
-
-        if (!passwordLoginDisabled) {
-            Text(
-                modifier = elementModifier,
-                text = pleaseSignInText,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-
-        RememberLoginCheckBox(
-            modifier = elementModifier,
-            rememberMe = rememberMe,
-            updateRememberMe = updateRememberMe
-        )
-
-        Button(
-            modifier = elementModifier,
-            onClick = onLoginButtonClicked,
-            enabled = !needsToAcceptTerms || hasUserAcceptedTerms,
-            content = {
-                Text(
-                    text = saml2Config.buttonLabel
-                        ?: stringResource(id = R.string.login_saml_button_label)
-                )
-            }
-        )
-
-        if (needsToAcceptTerms && !hasUserAcceptedTerms) {
-            Text(
-                modifier = elementModifier,
-                text = stringResource(id = R.string.login_error_accept_terms),
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
-private fun RememberLoginCheckBox(
-    modifier: Modifier,
-    rememberMe: Boolean,
-    updateRememberMe: (Boolean) -> Unit
-) {
-    CheckboxWithText(
-        modifier = modifier,
-        isChecked = rememberMe,
-        text = stringResource(id = R.string.login_remember_me_label),
-        onCheckedChanged = updateRememberMe
-    )
-}
-
-@Composable
-private fun CheckboxWithText(
-    modifier: Modifier,
-    isChecked: Boolean,
-    text: String,
-    onCheckedChanged: (Boolean) -> Unit
-) {
-    Row(modifier = modifier) {
-        Checkbox(
-            modifier = Modifier,
-            checked = isChecked,
-            onCheckedChange = onCheckedChanged,
-        )
-
-        Text(
-            modifier = Modifier
-                .weight(1f)
-                .align(Alignment.CenterVertically),
-            text = text
-        )
-    }
-}
-
-@Composable
-private fun DividerWithText(modifier: Modifier, text: @Composable (Modifier) -> Unit) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        Divider(
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp)
-        )
-
-        text(Modifier)
-
-        Divider(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp)
-        )
-    }
-}
-
-@ExperimentalComposeUiApi
-@Composable
-private fun Autofill(
-    autofillTypes: List<AutofillType>,
-    onFill: ((String) -> Unit),
-    content: @Composable (AutofillNode) -> Unit
-) {
-    val autofillNode = AutofillNode(onFill = onFill, autofillTypes = autofillTypes)
-
-    val autofillTree = LocalAutofillTree.current
-    autofillTree += autofillNode
-
-    Box(
-        Modifier.onGloballyPositioned {
-            autofillNode.boundingBox = it.boundsInWindow()
-        }
-    ) {
-        content(autofillNode)
     }
 }
 

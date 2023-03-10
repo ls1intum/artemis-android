@@ -31,15 +31,15 @@ import kotlinx.datetime.Clock
 internal class MetisStandalonePostViewModel(
     private val postId: StandalonePostId,
     private val metisContext: MetisContext,
-    subscribeToLiveUpdateService: Boolean,
-    private val websocketProvider: WebsocketProvider,
     private val metisStorageService: MetisStorageService,
-    metisContextManager: MetisContextManager,
     private val metisService: MetisService,
-    metisModificationService: MetisModificationService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
+    subscribeToLiveUpdateService: Boolean,
+    websocketProvider: WebsocketProvider,
+    metisContextManager: MetisContextManager,
+    metisModificationService: MetisModificationService,
     serverDataService: ServerDataService
 ) : MetisContentViewModel(
     websocketProvider,

@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.android.ui
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -19,6 +20,8 @@ import de.tum.informatics.www1.artemis.native_app.android.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn
+import de.tum.informatics.www1.artemis.native_app.core.ui.LinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.WindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistration
@@ -70,11 +73,6 @@ class MainActivity : AppCompatActivity() {
                 is AccountService.AuthenticationData.LoggedIn -> DASHBOARD_DESTINATION
                 AccountService.AuthenticationData.NotLoggedIn -> LOGIN_DESTINATION
             }
-        }
-
-        val onRequestOpenLink = { link: String ->
-            CustomTabsIntent.Builder().build()
-                .launchUrl(this@MainActivity, Uri.parse(link))
         }
 
         setContent {
@@ -143,7 +141,14 @@ class MainActivity : AppCompatActivity() {
                     navController.navigateToQuizResult(courseId, exerciseId)
                 }
 
-                CompositionLocalProvider(LocalWindowSizeClassProvider provides windowSizeClassProvider) {
+                val linkOpener = remember {
+                    CustomTabsLinkOpener(this@MainActivity)
+                }
+
+                CompositionLocalProvider(
+                    LocalWindowSizeClassProvider provides windowSizeClassProvider,
+                    LocalLinkOpener provides linkOpener
+                ) {
                     // Use jetpack compose navigation for the navigation logic.
                     NavHost(navController = navController, startDestination = startDestination) {
                         loginScreen(
@@ -203,15 +208,14 @@ class MainActivity : AppCompatActivity() {
                         lecture(
                             navController = navController,
                             onNavigateBack = navController::navigateUp,
-                            onRequestOpenLink = onRequestOpenLink,
                             onViewExercise = { exerciseId ->
                                 navController.navigateToExercise(
                                     exerciseId,
                                     ExerciseViewMode.Overview
                                 ) { }
                             },
-                            onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
                             onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+                            onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
                             onParticipateInQuiz = onParticipateInQuiz,
                             onClickViewQuizResults = onClickViewQuizResults
                         )
@@ -251,20 +255,25 @@ class MainActivity : AppCompatActivity() {
                             navController = navController,
                             versionCode = BuildConfig.VERSION_CODE,
                             versionName = BuildConfig.VERSION_NAME,
+                            onNavigateUp = navController::navigateUp,
                             onLoggedOut = {
                                 // Nothing to do here, automatically moved to login screen
-                            },
-                            onDisplayThirdPartyLicenses = {
-                                val intent =
-                                    Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
-                                startActivity(intent)
-                            },
-                            onNavigateUp = navController::navigateUp,
-                            onRequestOpenLink = onRequestOpenLink
-                        )
+                            }
+                        ) {
+                            val intent =
+                                Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
+                            startActivity(intent)
+                        }
                     }
                 }
             }
+        }
+    }
+
+    private class CustomTabsLinkOpener(private val context: Context) : LinkOpener {
+        override fun openLink(url: String) {
+            CustomTabsIntent.Builder().build()
+                .launchUrl(context, Uri.parse(url))
         }
     }
 }

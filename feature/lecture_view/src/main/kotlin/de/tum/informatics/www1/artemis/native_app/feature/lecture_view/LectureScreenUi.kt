@@ -21,6 +21,7 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SideBarMetisUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
@@ -40,7 +41,6 @@ fun NavController.navigateToLecture(
 fun NavGraphBuilder.lecture(
     navController: NavController,
     onNavigateBack: () -> Unit,
-    onRequestOpenLink: (String) -> Unit,
     onViewExercise: (exerciseId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
@@ -73,13 +73,13 @@ fun NavGraphBuilder.lecture(
 
         LectureScreen(
             modifier = Modifier.fillMaxSize(),
-            lectureId = lectureId,
             courseId = courseId,
+            lectureId = lectureId,
             viewModel = viewModel,
             navController = navController,
             onNavigateBack = onNavigateBack,
-            onRequestOpenLink = onRequestOpenLink,
             onViewExercise = onViewExercise,
+            onNavigateToExerciseResultView = onNavigateToExerciseResultView,
             onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
             onParticipateInQuiz = { exerciseId, isPractice ->
                 onParticipateInQuiz(
@@ -88,7 +88,6 @@ fun NavGraphBuilder.lecture(
                     isPractice
                 )
             },
-            onNavigateToExerciseResultView = onNavigateToExerciseResultView,
             onClickViewQuizResults = onClickViewQuizResults
         )
     }
@@ -102,13 +101,14 @@ private fun LectureScreen(
     viewModel: LectureViewModel,
     navController: NavController,
     onNavigateBack: () -> Unit,
-    onRequestOpenLink: (String) -> Unit,
     onViewExercise: (exerciseId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit
 ) {
+    val linkOpener = LocalLinkOpener.current
+
     val lectureDataState by viewModel.lectureDataState.collectAsState()
 
     val lectureTitle = lectureDataState.bind<String?> { it.title }.orElse(null)
@@ -237,7 +237,7 @@ private fun LectureScreen(
                     confirmButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_positive),
                     dismissButtonText = stringResource(id = R.string.lecture_view_open_link_dialog_negative),
                     onPressPositiveButton = {
-                        onRequestOpenLink(pendingOpenLink.orEmpty())
+                        linkOpener.openLink(pendingOpenLink.orEmpty())
                         pendingOpenLink = null
                     },
                     onDismissRequest = { pendingOpenLink = null }

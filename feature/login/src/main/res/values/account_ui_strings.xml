@@ -67,8 +67,6 @@
     <string name="register_error_text_confirmation_password_long">Your confirmation password cannot be longer than %d characters.</string>
 
     <!-- Login ui -->
-    <string name="login_dialog_perform_login_title">Please wait…</string>
-
     <string name="login_dialog_login_failed_title">Login failed.</string>
     <string name="login_dialog_login_failed_message">Something went wrong while logging you in. Please try again.</string>
     <string name="login_dialog_login_failed_confirm">@android:string/ok</string>
@@ -79,7 +77,8 @@
     <string name="login_username_label">Login</string>
     <string name="login_password_label">Password</string>
     <string name="login_remember_me_label">Automatic login</string>
-    <string name="login_perform_login_button_text">Login</string>
+    <string name="login_perform_login_button_text">Sign in</string>
+    <string name="login_password_forgot">Did you forget your password?</string>
 
     <string name="login_saml_please_sign_in_provider">Please sign in with %1$s</string>
     <string name="login_saml_please_sign_in">Please sign in using Single Sign-on.</string>

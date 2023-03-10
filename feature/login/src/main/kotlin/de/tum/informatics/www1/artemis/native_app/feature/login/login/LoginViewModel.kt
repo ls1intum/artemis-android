@@ -7,11 +7,10 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataSe
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 /**
@@ -20,9 +19,9 @@ import kotlinx.coroutines.launch
 class LoginViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val accountService: AccountService,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val serverDataService: ServerDataService,
-    private val networkStatusProvider: NetworkStatusProvider
+    serverConfigurationService: ServerConfigurationService,
+    serverDataService: ServerDataService,
+    networkStatusProvider: NetworkStatusProvider
 ) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverDataService) {
 
     companion object {
@@ -32,16 +31,16 @@ class LoginViewModel(
         private const val USER_ACCEPTED_TERMS_KEY = "rememberMe"
     }
 
-    val username: Flow<String> = savedStateHandle.getStateFlow(USERNAME_KEY, "")
+    val username: StateFlow<String> = savedStateHandle.getStateFlow(USERNAME_KEY, "")
 
-    val password: Flow<String> = savedStateHandle.getStateFlow(PASSWORD_KEY, "")
+    val password: StateFlow<String> = savedStateHandle.getStateFlow(PASSWORD_KEY, "")
 
-    val rememberMe: Flow<Boolean> = savedStateHandle.getStateFlow(REMEMBER_ME_KEY, true)
+    val rememberMe: StateFlow<Boolean> = savedStateHandle.getStateFlow(REMEMBER_ME_KEY, true)
 
-    val hasUserAcceptedTerms: Flow<Boolean> =
+    val hasUserAcceptedTerms: StateFlow<Boolean> =
         savedStateHandle.getStateFlow(USER_ACCEPTED_TERMS_KEY, false)
 
-    val loginButtonEnabled: Flow<Boolean> =
+    val loginButtonEnabled: StateFlow<Boolean> =
         combine(
             username,
             password,
@@ -54,6 +53,9 @@ class LoginViewModel(
             }
             username.isNotBlank() && password.isNotBlank() && (!needsToAcceptTerms || userAcceptedTerms)
         }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
 
     fun updateUsername(newUsername: String) {
         savedStateHandle[USERNAME_KEY] = newUsername

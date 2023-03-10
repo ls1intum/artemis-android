@@ -161,12 +161,12 @@ internal fun TopBarExerciseInformation(
         )
     }
 
-    val dueDateColumnUi = @Composable { modifier: Modifier ->
+    val dueDateColumnUi = @Composable { contentModifier: Modifier ->
         var maxWidth: Int by remember { mutableStateOf(0) }
         val updateMaxWidth = { new: Int -> maxWidth = new }
 
         Column(
-            modifier = modifier,
+            modifier = contentModifier,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             val dueDateTopBarTextInformation =
