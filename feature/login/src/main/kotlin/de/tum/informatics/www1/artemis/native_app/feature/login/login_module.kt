@@ -4,8 +4,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.custom_instance_
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.RegisterViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.RegisterService
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNotificationStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.PersistentServerNotificationStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.RegisterServiceImpl
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 
@@ -22,4 +24,6 @@ val loginModule = module {
     single<ServerNotificationStorageService> {
         PersistentServerNotificationStorageService(androidContext())
     }
+
+    single<RegisterService> { RegisterServiceImpl(get()) }
 }

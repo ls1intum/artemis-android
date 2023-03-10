@@ -3,21 +3,30 @@ package de.tum.informatics.www1.artemis.native_app.feature.login.register
 import android.util.Patterns
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.Constants
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.RegisterService
+import io.ktor.http.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import java.util.*
 
 /**
  * Handle the registration ui.
  */
-class RegisterViewModel(
+internal class RegisterViewModel(
     private val savedStateHandle: SavedStateHandle,
-    serverConfigurationService: ServerConfigurationService,
+    private val registerService: RegisterService,
+    private val serverConfigurationService: ServerConfigurationService,
     serverDataService: ServerDataService,
     networkStatusProvider: NetworkStatusProvider
 ) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverDataService) {
@@ -33,7 +42,7 @@ class RegisterViewModel(
         private const val CONFIRM_PASSWORD_KEY = "confirm_password"
     }
 
-    val firstName: Flow<String> = savedStateHandle.getStateFlow(FIRST_NAME_KEY, "")
+    val firstName: StateFlow<String> = savedStateHandle.getStateFlow(FIRST_NAME_KEY, "")
 
     val firstNameStatus: Flow<FirstNameStatus> = firstName.map { firstName ->
         when {
@@ -43,7 +52,7 @@ class RegisterViewModel(
         }
     }
 
-    val lastName: Flow<String> = savedStateHandle.getStateFlow(LAST_NAME_KEY, "")
+    val lastName: StateFlow<String> = savedStateHandle.getStateFlow(LAST_NAME_KEY, "")
 
     val lastNameStatus: Flow<LastNameStatus> = lastName.map { lastName ->
         when {
@@ -53,7 +62,7 @@ class RegisterViewModel(
         }
     }
 
-    val username: Flow<String> = savedStateHandle.getStateFlow(USERNAME_KEY, "")
+    val username: StateFlow<String> = savedStateHandle.getStateFlow(USERNAME_KEY, "")
 
     val usernameStatus: Flow<UsernameStatus> =
         username.map { username ->
@@ -66,17 +75,22 @@ class RegisterViewModel(
             }
         }
 
-    val email: Flow<String> = savedStateHandle.getStateFlow(EMAIL_KEY, "")
+    val email: StateFlow<String> = savedStateHandle.getStateFlow(EMAIL_KEY, "")
 
-    val emailStatus: Flow<EmailStatus> = email.map { email ->
-        when {
-            email.isEmpty() -> EmailStatus.NOT_PRESENT
-            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> EmailStatus.INVALID
-            else -> EmailStatus.OK
+    val emailStatus: Flow<EmailStatus> =
+        combine(email, serverProfileInfo.filterSuccess()) { email, serverProfileInfo ->
+            val matchesAllowedEmailPattern =
+                serverProfileInfo.allowedEmailPattern?.toPattern()?.matcher(email)?.matches() ?: true
+
+            when {
+                email.isEmpty() -> EmailStatus.NOT_PRESENT
+                !Patterns.EMAIL_ADDRESS.matcher(email)
+                    .matches() || !matchesAllowedEmailPattern -> EmailStatus.INVALID
+                else -> EmailStatus.OK
+            }
         }
-    }
 
-    val password: Flow<String> = savedStateHandle.getStateFlow(PASSWORD_KEY, "")
+    val password: StateFlow<String> = savedStateHandle.getStateFlow(PASSWORD_KEY, "")
 
     val passwordStatus: Flow<PasswordStatus> = password.map { password ->
         when {
@@ -87,7 +101,7 @@ class RegisterViewModel(
         }
     }
 
-    val confirmPassword: Flow<String> = savedStateHandle.getStateFlow(CONFIRM_PASSWORD_KEY, "")
+    val confirmPassword: StateFlow<String> = savedStateHandle.getStateFlow(CONFIRM_PASSWORD_KEY, "")
 
     val confirmPasswordStatus: Flow<ConfirmationPasswordStatus> =
         confirmPassword.map { confirmPassword ->
@@ -98,6 +112,20 @@ class RegisterViewModel(
                 else -> ConfirmationPasswordStatus.OK
             }
         }
+
+    val isRegistrationAvailable: StateFlow<Boolean> = combine(
+        firstNameStatus,
+        lastNameStatus,
+        usernameStatus,
+        emailStatus,
+        passwordStatus,
+        confirmPasswordStatus
+    ) { statusArray ->
+        statusArray
+            .map { it.errorText == null }
+            .fold(true, Boolean::and)
+    }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     fun updateUsername(newUsername: String) {
         savedStateHandle[USERNAME_KEY] = newUsername
@@ -123,9 +151,41 @@ class RegisterViewModel(
         savedStateHandle[CONFIRM_PASSWORD_KEY] = newConfirmPassword
     }
 
+    fun register(
+        onPasswordMismatch: () -> Unit,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ): Job {
+        return viewModelScope.launch {
+            if (password.value != confirmPassword.value) {
+                onPasswordMismatch()
+                return@launch
+            }
+
+            val response = registerService.register(
+                account = User(
+                    firstName = firstName.value,
+                    lastName = lastName.value,
+                    username = username.value,
+                    email = email.value,
+                    password = password.value,
+                    langKey = Locale.getDefault().toLanguageTag()
+                ),
+                serverUrl = serverConfigurationService.serverUrl.first()
+            )
+
+            if (response is NetworkResponse.Response && response.data.isSuccess()) {
+                onSuccess()
+            } else {
+                onFailure()
+            }
+        }
+    }
+
     interface Status {
         /**
          * String resource id of the string that should be displayed on an erroneous status.
+         * If no error text is provided, it is assumed that this is a success state
          */
         val errorText: Int?
     }

@@ -34,12 +34,13 @@
     <string name="account_register_button">Register</string>
 
     <!--  Registration ui  -->
+    <string name="register_title">Register</string>
     <string name="register_label_first_name">First name</string>
     <string name="register_label_last_name">Last name</string>
     <string name="register_label_username">Login name</string>
     <string name="register_label_email">Email</string>
-    <string name="register_label_password">Password</string>
-    <string name="register_label_confirm_password">Confirm password</string>
+    <string name="register_label_password">New password</string>
+    <string name="register_label_confirm_password">New password confirmation</string>
 
     <string name="register_email_pattern">Please use an email with the following pattern: %1$s</string>
 
@@ -66,7 +67,16 @@
     <string name="register_error_text_confirmation_password_short">Your confirmation password is required to be at least %d characters.</string>
     <string name="register_error_text_confirmation_password_long">Your confirmation password cannot be longer than %d characters.</string>
 
+    <string name="register_button_register">Register</string>
+    
+    <string name="register_password_mismatch_dialog_message">The password and its confirmation do not match!</string>
+    <string name="register_password_mismatch_dialog_positive">@android:string/ok</string>
+
+    <string name="register_failed_dialog_message">Something went wrong while registering you. Please try again.</string>
+    <string name="register_failed_dialog_positive">@android:string/ok</string>
+
     <!-- Login ui -->
+    <string name="login_title">Login</string>
     <string name="login_dialog_login_failed_title">Login failed.</string>
     <string name="login_dialog_login_failed_message">Something went wrong while logging you in. Please try again.</string>
     <string name="login_dialog_login_failed_confirm">@android:string/ok</string>

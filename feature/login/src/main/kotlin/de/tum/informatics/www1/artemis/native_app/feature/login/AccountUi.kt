@@ -3,7 +3,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.login
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
@@ -29,6 +31,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.linkTextColor
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
@@ -36,6 +39,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.custom_instance_
 import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginUi
+import de.tum.informatics.www1.artemis.native_app.feature.login.register.RegisterUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNotificationStorageService
@@ -48,16 +52,29 @@ import org.koin.core.parameter.parametersOf
 import java.io.IOException
 
 const val LOGIN_DESTINATION = "login"
-
-private const val NESTED_INSTANCE_SELECTION_DESTINATION = "instance_selection"
-private const val NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION = "custom_instance_selection"
-private const val NESTED_HOME_DESTINATION = "nested_home"
-private const val NESTED_LOGIN_DESTINATION = "nested_login"
-private const val NESTED_REGISTER_DESTINATION = "nested_register"
-
 private const val ARG_REMEMBER_ME = "rememberMe"
 private const val NESTED_SAML2_LOGIN_ROUTE = "saml2_login"
-private const val NESTED_SAML2_LOGIN_DESTINATION = "$NESTED_SAML2_LOGIN_ROUTE/{$ARG_REMEMBER_ME}"
+
+private enum class NestedDestination(val destination: String) {
+    INSTANCE_SELECTION("instance_selection"),
+    CUSTOM_INSTANCE_SELECTION("custom_instance_selection"),
+    HOME("nested_home"),
+    LOGIN("nested_login"),
+    REGISTER("nested_register"),
+    SAML2_LOGIN("$NESTED_SAML2_LOGIN_ROUTE/{$ARG_REMEMBER_ME}");
+
+    companion object {
+        fun getByRoute(route: String?): NestedDestination? = when (route) {
+            INSTANCE_SELECTION.destination -> INSTANCE_SELECTION
+            CUSTOM_INSTANCE_SELECTION.destination -> CUSTOM_INSTANCE_SELECTION
+            HOME.destination -> HOME
+            LOGIN.destination -> LOGIN
+            REGISTER.destination -> REGISTER
+            NESTED_SAML2_LOGIN_ROUTE -> SAML2_LOGIN
+            else -> null
+        }
+    }
+}
 
 
 fun NavController.navigateToLogin(builder: NavOptionsBuilder.() -> Unit) {
@@ -147,8 +164,8 @@ private fun LoginUiScreen(
     nestedNavController.currentBackStackEntryAsState().value
     val supportsBackNavigation = nestedNavController.previousBackStackEntry != null
 
-    val isCustomInstanceSelectionDestination =
-        nestedNavController.currentDestination?.route == NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION
+    val selectedDestination: NestedDestination? =
+        NestedDestination.getByRoute(nestedNavController.currentDestination?.route)
 
     val onClickSaml2Login: (rememberMe: Boolean) -> Unit = { rememberMe ->
         nestedNavController.navigate(
@@ -168,8 +185,15 @@ private fun LoginUiScreen(
                     }
                 },
                 title = {
-                    if (isCustomInstanceSelectionDestination) {
-                        Text(text = stringResource(id = R.string.account_select_custom_instance_selection_title))
+                    val titleText: Int? = when (selectedDestination) {
+                        NestedDestination.CUSTOM_INSTANCE_SELECTION -> R.string.account_select_custom_instance_selection_title
+                        NestedDestination.LOGIN -> R.string.login_title
+                        NestedDestination.REGISTER -> R.string.register_title
+                        else -> null
+                    }
+
+                    if (titleText != null) {
+                        Text(text = stringResource(id = titleText))
                     }
                 },
                 actions = {
@@ -185,20 +209,20 @@ private fun LoginUiScreen(
                 .fillMaxSize()
                 .padding(paddingValues),
             navController = nestedNavController,
-            startDestination = if (hasSelectedInstance) NESTED_HOME_DESTINATION else NESTED_INSTANCE_SELECTION_DESTINATION
+            startDestination = if (hasSelectedInstance) NestedDestination.HOME.destination else NestedDestination.CUSTOM_INSTANCE_SELECTION.destination
         ) {
-            composable(NESTED_HOME_DESTINATION) {
+            composable(NestedDestination.HOME.destination) {
                 AccountScreen(
                     modifier = Modifier.fillMaxSize(),
                     onNavigateToLoginScreen = {
-                        nestedNavController.navigate(NESTED_LOGIN_DESTINATION)
+                        nestedNavController.navigate(NestedDestination.LOGIN.destination)
                     },
                     onNavigateToRegisterScreen = {
-                        nestedNavController.navigate(NESTED_REGISTER_DESTINATION)
+                        nestedNavController.navigate(NestedDestination.REGISTER.destination)
                     },
                     onNavigateToInstanceSelection = {
-                        nestedNavController.navigate(NESTED_INSTANCE_SELECTION_DESTINATION) {
-                            popUpTo(NESTED_HOME_DESTINATION) {
+                        nestedNavController.navigate(NestedDestination.INSTANCE_SELECTION.destination) {
+                            popUpTo(NestedDestination.HOME.destination) {
                                 inclusive = true
                             }
                         }
@@ -208,21 +232,21 @@ private fun LoginUiScreen(
                 )
             }
 
-            composable(NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION) {
+            composable(NestedDestination.CUSTOM_INSTANCE_SELECTION.destination) {
                 CustomInstanceSelectionScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
                 ) {
-                    nestedNavController.navigate(NESTED_HOME_DESTINATION) {
-                        popUpTo(NESTED_INSTANCE_SELECTION_DESTINATION) {
+                    nestedNavController.navigate(NestedDestination.HOME.destination) {
+                        popUpTo(NestedDestination.INSTANCE_SELECTION.destination) {
                             inclusive = true
                         }
                     }
                 }
             }
 
-            composable(NESTED_LOGIN_DESTINATION) {
+            composable(NestedDestination.LOGIN.destination) {
                 LoginScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = getViewModel(),
@@ -232,7 +256,7 @@ private fun LoginUiScreen(
             }
 
             composable(
-                route = NESTED_SAML2_LOGIN_DESTINATION,
+                route = NestedDestination.SAML2_LOGIN.destination,
                 arguments = listOf(navArgument("rememberMe") {
                     type = NavType.BoolType
                 })
@@ -250,26 +274,33 @@ private fun LoginUiScreen(
                 )
             }
 
-            composable(NESTED_REGISTER_DESTINATION) {
-//                RegisterUi(
-//                    modifier = Modifier.fillMaxSize(),
-//                    viewModel =
-//                )
+            composable(NestedDestination.REGISTER.destination) {
+                RegisterUi(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                    viewModel = koinViewModel(),
+                    onRegistered = {
+                        nestedNavController.popBackStack()
+                        nestedNavController.navigate(NestedDestination.LOGIN.destination)
+                    }
+                )
             }
 
-            composable(NESTED_INSTANCE_SELECTION_DESTINATION) {
+            composable(NestedDestination.INSTANCE_SELECTION.destination) {
                 val scope = rememberCoroutineScope()
 
                 InstanceSelectionScreen(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = Spacings.ScreenHorizontalSpacing),
                     availableInstances = ArtemisInstances.instances,
                     onSelectArtemisInstance = { serverUrl ->
                         scope.launch {
                             serverConfigurationService.updateServerUrl(serverUrl)
-                            nestedNavController.navigate(NESTED_HOME_DESTINATION) {
-                                popUpTo(NESTED_INSTANCE_SELECTION_DESTINATION) {
+                            nestedNavController.navigate(NestedDestination.HOME.destination) {
+                                popUpTo(NestedDestination.INSTANCE_SELECTION.destination) {
                                     inclusive = true
                                 }
                             }
@@ -277,7 +308,7 @@ private fun LoginUiScreen(
                     },
                     onRequestOpenCustomInstanceSelection = {
                         nestedNavController.navigate(
-                            NESTED_CUSTOM_INSTANCE_SELECTION_DESTINATION
+                            NestedDestination.CUSTOM_INSTANCE_SELECTION.destination
                         )
                     }
                 )
@@ -287,7 +318,7 @@ private fun LoginUiScreen(
 }
 
 private fun createSaml2LoginRoute(rememberMe: Boolean): String =
-    NESTED_SAML2_LOGIN_DESTINATION.replace("{$ARG_REMEMBER_ME}", rememberMe.toString())
+    NestedDestination.SAML2_LOGIN.destination.replace("{$ARG_REMEMBER_ME}", rememberMe.toString())
 
 /**
  * Displays the screen to login and register. Also allows to change the artemis instance.
@@ -397,7 +428,6 @@ private fun RegisterLoginAccount(
                 retryButtonText = stringResource(id = R.string.account_load_server_profile_button_try_again),
                 onClickRetry = retryLoadServerProfileInfo
             ) { data ->
-
                 if (data.registrationEnabled == true) {
                     LoginOrRegister(
                         modifier = Modifier.fillMaxSize(),

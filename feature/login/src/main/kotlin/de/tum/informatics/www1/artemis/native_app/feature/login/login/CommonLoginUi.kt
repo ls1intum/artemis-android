@@ -2,15 +2,59 @@ package de.tum.informatics.www1.artemis.native_app.feature.login.login
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.account.R
+
+@Composable
+fun PasswordTextField(
+    modifier: Modifier,
+    password: String,
+    label: String,
+    updatePassword: (String) -> Unit,
+    isError: Boolean = false
+) {
+    var showPasswordPlaintext by rememberSaveable { mutableStateOf(false) }
+    val visualTransformation = remember(showPasswordPlaintext) {
+        if (showPasswordPlaintext) {
+            VisualTransformation.None
+        } else PasswordVisualTransformation()
+    }
+
+    TextField(
+        modifier = modifier,
+        value = password,
+        onValueChange = updatePassword,
+        label = { Text(text = label) },
+        visualTransformation = visualTransformation,
+        trailingIcon = {
+            IconButton(onClick = { showPasswordPlaintext = !showPasswordPlaintext }) {
+                Icon(
+                    imageVector = if (!showPasswordPlaintext) Icons.Default.VisibilityOff
+                    else Icons.Default.Visibility,
+                    contentDescription = null
+                )
+            }
+        },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            autoCorrect = false
+        ),
+        isError = isError
+    )
+}
 
 @Composable
 internal fun RememberLoginCheckBox(
