@@ -153,6 +153,9 @@ private fun Saml2LoginWebView(
                     if (result.groups.size >= 2) {
                         val jwt = result.groups[1]?.value.orEmpty()
                         if (jwt.isNotBlank()) {
+                            // Reset cookie
+                            cookieManager.setCookie(serverUrl, "")
+
                             onReceivedAccessToken(jwt)
                             return@LaunchedEffect
                         }
