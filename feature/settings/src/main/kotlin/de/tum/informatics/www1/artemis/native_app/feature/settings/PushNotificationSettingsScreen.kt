@@ -16,6 +16,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitJobCompletion
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncFailedDialog
@@ -31,12 +32,7 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
     var syncChangesJob: Job? by remember { mutableStateOf(null) }
     var displaySyncFailedDialog: Boolean by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(key1 = syncChangesJob) {
-        syncChangesJob?.let {
-            it.join()
-            syncChangesJob = null
-        }
-    }
+    AwaitJobCompletion(syncChangesJob) { syncChangesJob = null }
 
     Scaffold(
         modifier = modifier,

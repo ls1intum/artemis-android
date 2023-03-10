@@ -73,6 +73,10 @@ fun NavGraphBuilder.settingsScreen(
     }
 }
 
+/**
+ * Display the settings screen.
+ * Contains account settings, push settings and general info such as imprint and privacy policy.
+ */
 @Composable
 private fun SettingsScreen(
     modifier: Modifier,
@@ -153,9 +157,8 @@ private fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (authToken != null) {
-                UserInformationSection(
-                    modifier = Modifier.fillMaxWidth(),
-                    authData = accountData,
+                LoggedInSettings(
+                    accountData = accountData,
                     username = username,
                     onRequestLogout = {
                         scope.launch {
@@ -172,14 +175,8 @@ private fun SettingsScreen(
 
                             onLoggedOut()
                         }
-                    }
-                )
-
-                Divider()
-
-                NotificationSection(
-                    modifier = Modifier.fillMaxWidth(),
-                    onOpenNotificationSettings = onRequestOpenNotificationSettings
+                    },
+                    onRequestOpenNotificationSettings = onRequestOpenNotificationSettings
                 )
 
                 Divider()
@@ -212,6 +209,28 @@ private fun SettingsScreen(
             )
         }
     }
+}
+
+@Composable
+private fun LoggedInSettings(
+    accountData: DataState<Account>?,
+    username: String?,
+    onRequestLogout: () -> Unit,
+    onRequestOpenNotificationSettings: () -> Unit
+) {
+    UserInformationSection(
+        modifier = Modifier.fillMaxWidth(),
+        authData = accountData,
+        username = username,
+        onRequestLogout = onRequestLogout
+    )
+
+    Divider()
+
+    NotificationSection(
+        modifier = Modifier.fillMaxWidth(),
+        onOpenNotificationSettings = onRequestOpenNotificationSettings
+    )
 }
 
 @Composable
