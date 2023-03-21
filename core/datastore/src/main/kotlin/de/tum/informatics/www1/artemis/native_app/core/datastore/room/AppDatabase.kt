@@ -17,7 +17,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.meti
         MetisPostContextEntity::class
     ],
     exportSchema = true,
-    version = 4
+    version = 5
 )
 @TypeConverters(RoomTypeConverters::class)
 abstract class AppDatabase : RoomDatabase() {
