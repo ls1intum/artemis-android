@@ -44,7 +44,5 @@ tasks.register("fetchAndPrepareEmojis", emoji.FetchAndPrepareEmojisTask::class) 
 }
 
 project.afterEvaluate {
-    tasks.withType(KotlinCompile::class).toList().forEach { kotlinCompile ->
-        kotlinCompile.dependsOn(tasks.getByName("fetchAndPrepareEmojis"))
-    }
+    tasks.getByName("preBuild").dependsOn(tasks.getByName("fetchAndPrepareEmojis"))
 }
