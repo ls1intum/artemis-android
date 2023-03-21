@@ -17,5 +17,5 @@ class User(
     override val langKey: String = "en",
     override val imageUrl: String? = null,
     override val id: Long = 0L,
-    val password: String
+    val password: String = ""
 ) : BaseAccount

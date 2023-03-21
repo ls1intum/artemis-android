@@ -41,7 +41,7 @@ val communicationModule = module {
         MetisStandalonePostViewModel(
             params[0],
             params[1],
-            params[2],
+            get(),
             get(),
             get(),
             get(),
