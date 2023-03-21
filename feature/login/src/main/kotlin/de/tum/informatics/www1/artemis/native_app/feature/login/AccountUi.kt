@@ -209,7 +209,7 @@ private fun LoginUiScreen(
                 .fillMaxSize()
                 .padding(paddingValues),
             navController = nestedNavController,
-            startDestination = if (hasSelectedInstance) NestedDestination.HOME.destination else NestedDestination.CUSTOM_INSTANCE_SELECTION.destination
+            startDestination = if (hasSelectedInstance) NestedDestination.HOME.destination else NestedDestination.INSTANCE_SELECTION.destination
         ) {
             composable(NestedDestination.HOME.destination) {
                 AccountScreen(
