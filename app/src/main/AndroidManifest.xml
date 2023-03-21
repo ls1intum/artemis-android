@@ -20,6 +20,7 @@
             android:exported="true"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize">
+            <tools:validation testUrl="https://artemis.ase.in.tum.de/courses/39" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -31,11 +32,32 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:scheme="artemis" android:host="courses" />
-                <data android:scheme="artemis" android:host="metis_standalone_post" />
-                <data android:scheme="artemis" android:host="exercises" />
-                <data android:scheme="artemis" android:host="lectures" />
-                <data android:scheme="artemis" android:host="quiz_participation" />
+                <data
+                    android:scheme="artemis"
+                    android:host="courses" />
+                <data
+                    android:scheme="artemis"
+                    android:host="metis_standalone_post" />
+                <data
+                    android:scheme="artemis"
+                    android:host="exercises" />
+                <data
+                    android:scheme="artemis"
+                    android:host="lectures" />
+                <data
+                    android:scheme="artemis"
+                    android:host="quiz_participation" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="artemis.ase.in.tum.de"
+                    android:pathAdvancedPattern="/courses/[0-9]+" />
             </intent-filter>
         </activity>
 
