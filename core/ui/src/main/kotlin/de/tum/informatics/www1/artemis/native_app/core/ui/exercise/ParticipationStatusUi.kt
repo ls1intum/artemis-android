@@ -56,7 +56,7 @@ private fun getSubmissionResultStatusText(
     exercise: Exercise
 ): String {
     val isAfterDueDate = exercise.dueDate?.hasPassed() ?: false
-    val exerciseMissedDeadline = isAfterDueDate && exercise.latestParticipation != null
+    val exerciseMissedDeadline = isAfterDueDate && exercise.latestParticipation == null
 
     val uninitialized =
         if (exercise is QuizExercise) exercise.isUninitializedC else !isAfterDueDate && participation == null

@@ -157,7 +157,13 @@ private val Exercise.notSubmittedOrFinished: Boolean
 
 val Exercise.notEndedSubmittedOrFinished: Flow<Boolean>
     get() = hasEnded.map { hasEnded ->
-        !hasEnded && notSubmittedOrFinished
+        val latestParticipation = latestParticipation
+
+        !hasEnded && (
+                latestParticipation?.initializationState == null ||
+                        !(latestParticipation.initializationState == InitializationState.INITIALIZED
+                                || latestParticipation.initializationState == InitializationState.FINISHED)
+                )
     }
 
 val Exercise.isStartExerciseAvailable: Flow<Boolean>

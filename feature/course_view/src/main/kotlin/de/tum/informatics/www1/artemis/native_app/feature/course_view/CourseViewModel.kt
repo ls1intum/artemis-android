@@ -108,7 +108,7 @@ internal class CourseViewModel(
             exercisesDataState.bind { exercisesWithParticipationState ->
                 exercisesWithParticipationState
                     .filter { it.visibleToStudents != false }
-                    .groupByWeek { dueDate }
+                    .groupByWeek(compareBy(Exercise::dueDate)) { dueDate }
             }
         }
             .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
@@ -118,12 +118,15 @@ internal class CourseViewModel(
             courseDataState.bind { course ->
                 course
                     .lectures
-                    .groupByWeek { startDate }
+                    .groupByWeek(compareBy(Lecture::title)) { startDate }
             }
         }
             .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
 
-    private fun <T> List<T>.groupByWeek(getSortDate: T.() -> Instant?): List<GroupedByWeek<T>> =
+    private fun <T> List<T>.groupByWeek(
+        comparator: Comparator<T>,
+        getSortDate: T.() -> Instant?
+    ): List<GroupedByWeek<T>> =
         // Group the items based on their start of the week day (most likely monday)
         groupBy { item ->
             val sortDate = getSortDate(item) ?: return@groupBy null
@@ -136,10 +139,12 @@ internal class CourseViewModel(
                 .toKotlinLocalDate()
         }
             .map { (firstDayOfWeek, items) ->
+                val sortedItems = items.sortedWith(comparator)
+
                 if (firstDayOfWeek != null) {
                     val lastDayOfWeek = firstDayOfWeek.plus(6, DateTimeUnit.DAY)
-                    GroupedByWeek.BoundToWeek(firstDayOfWeek, lastDayOfWeek, items)
-                } else GroupedByWeek.Unbound(items)
+                    GroupedByWeek.BoundToWeek(firstDayOfWeek, lastDayOfWeek, sortedItems)
+                } else GroupedByWeek.Unbound(sortedItems)
             }
             .sortedBy { itemsBoundByWeek ->
                 when (itemsBoundByWeek) {
