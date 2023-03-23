@@ -48,7 +48,7 @@
                     android:scheme="artemis"
                     android:host="quiz_participation" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -96,6 +96,8 @@
         <meta-data
             android:name="firebase_analytics_collection_enabled"
             android:value="false" />
+
+        <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
 
         <receiver android:name="de.tum.informatics.www1.artemis.native_app.feature.push.ReplyReceiver" />
     </application>
