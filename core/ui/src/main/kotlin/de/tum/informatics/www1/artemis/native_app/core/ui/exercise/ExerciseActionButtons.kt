@@ -6,7 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.*
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.hasEnded
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isStartExerciseAvailable
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed

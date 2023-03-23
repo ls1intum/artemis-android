@@ -11,7 +11,14 @@ import androidx.core.app.RemoteInput
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.*
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CoursePostTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ExercisePostTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ExerciseTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.LecturePostTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MetisTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.UnknownNotificationTarget
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable

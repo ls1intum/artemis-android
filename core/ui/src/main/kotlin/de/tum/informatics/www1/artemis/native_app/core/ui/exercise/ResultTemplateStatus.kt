@@ -1,6 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.*
+import de.tum.informatics.www1.artemis.native_app.core.common.hasPassedFlow
+import de.tum.informatics.www1.artemis.native_app.core.common.isInFutureFlow
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.FileUploadExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ModelingExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.isInDueTime
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.InstructorSubmission
@@ -8,11 +15,19 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TestSubmission
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+
+enum class MissingResultInformation {
+    NONE,
+    FAILED_PROGRAMMING_SUBMISSION_ONLINE_IDE,
+    FAILED_PROGRAMMING_SUBMISSION_OFFLINE_IDE
+}
 
 /**
  * Enumeration object representing the possible options that
@@ -100,6 +115,7 @@ fun computeTemplateStatus(
                                 || submission is TestSubmission
                                 || submissionDate < dueDate
                     }
+
                     is LiveParticipationService.ProgrammingSubmissionStateData.FailedSubmission,
                     is LiveParticipationService.ProgrammingSubmissionStateData.NoPendingSubmission,
                     null -> true
@@ -121,18 +137,26 @@ fun computeTemplateStatus(
                 .maxByOrNull { it.completionDate ?: Instant.fromEpochSeconds(0L) }
 
 
-    return isBuildingFlow.map { isBuilding ->
+    return isBuildingFlow.flatMapLatest { isBuilding ->
         evaluateTemplateStatus(participation, exercise, chosenResult, isBuilding)
     }
 }
 
+/**
+ * TODO: Implement MissingResultInformation
+ */
 private fun evaluateTemplateStatus(
     participation: Participation,
     exercise: Exercise,
     result: Result?,
-    isBuilding: Boolean
-): ResultTemplateStatus {
-    val now = Clock.System.now()
+    isBuilding: Boolean,
+    missingResultInfo: MissingResultInformation = MissingResultInformation.NONE
+): Flow<ResultTemplateStatus> {
+
+    // If there is a problem, it has priority, and we show that instead
+    if (missingResultInfo !== MissingResultInformation.NONE) {
+        return flowOf(ResultTemplateStatus.Missing);
+    }
 
     // Evaluate status for modeling, text and file-upload exercises
     if (exercise is ModelingExercise || exercise is TextExercise || exercise is FileUploadExercise) {
@@ -140,44 +164,57 @@ private fun evaluateTemplateStatus(
         val dueDate = exercise.getDueDate(participation)
         val assessmentDueDate = exercise.assessmentDueDate
 
-        if (inDueTime && result?.score != null) {
-            // Submission is in due time of exercise and has a result with score
-            return if (assessmentDueDate == null || assessmentDueDate < now) {
-                ResultTemplateStatus.HasResult(result)
+        val isAssessmentDueDateInPast = assessmentDueDate?.hasPassedFlow() ?: flowOf(false)
+        val isAssessmentDueDateInFuture = (assessmentDueDate?.isInFutureFlow() ?: flowOf(false))
+
+        return isAssessmentDueDateInPast.flatMapLatest { isAssessmentDueDateInPast ->
+            if (inDueTime && result?.score != null) {
+                // Submission is in due time of exercise and has a result with score
+                if (assessmentDueDate != null || isAssessmentDueDateInPast) {
+                    flowOf(ResultTemplateStatus.HasResult(result))
+                } else {
+                    // the assessment period is still active
+                    flowOf(ResultTemplateStatus.SubmittedWaitingForGrading)
+                }
+            } else if (inDueTime) {
+                // Submission is in due time of exercise and doesn't have a result with score.
+                combine(
+                    (dueDate?.isInFutureFlow() ?: flowOf(false)),
+                    isAssessmentDueDateInFuture
+                ) { isDueDateInFuture, isAssessmentDueDateInFuture ->
+                    if (dueDate == null || isDueDateInFuture) ResultTemplateStatus.Submitted
+                    else if (assessmentDueDate == null || isAssessmentDueDateInFuture) {
+                        // the due date is in the future (or there is none) => the exercise is still ongoing
+                        ResultTemplateStatus.SubmittedWaitingForGrading
+                    } else {
+                        // the due date is over, further submissions are no longer possible, no result after assessment due date
+                        // TODO why is this distinct from the case above? The submission can still be graded and often is.
+                        ResultTemplateStatus.NoResult
+                    }
+                }
+            } else if (result?.score != null && (assessmentDueDate == null || isAssessmentDueDateInPast)) {
+                // Submission is not in due time of exercise, has a result with score and there is no assessmentDueDate for the exercise or it lies in the past.
+                // TODO handle external submissions with new status "External"
+                flowOf(ResultTemplateStatus.Late(result))
             } else {
-                // the assessment period is still active
-                ResultTemplateStatus.SubmittedWaitingForGrading
+                // Submission is not in due time of exercise and there is actually no feedback for the submission or the feedback should not be displayed yet.
+                flowOf(ResultTemplateStatus.LateNoFeedback)
             }
-        } else if (inDueTime) {
-            // Submission is in due time of exercise and doesn't have a result with score.
-            return if (dueDate == null || dueDate >= now) ResultTemplateStatus.Submitted
-            else if (assessmentDueDate == null || assessmentDueDate >= now)
-            // the due date is in the future (or there is none) => the exercise is still ongoing
-                ResultTemplateStatus.SubmittedWaitingForGrading
-            else
-            // the due date is over, further submissions are no longer possible, no result after assessment due date
-            // TODO why is this distinct from the case above? The submission can still be graded and often is.
-                ResultTemplateStatus.NoResult
-        } else if (result?.score != null && (assessmentDueDate == null || assessmentDueDate < now)) {
-            // Submission is not in due time of exercise, has a result with score and there is no assessmentDueDate for the exercise or it lies in the past.
-            // TODO handle external submissions with new status "External"
-            return ResultTemplateStatus.Late(result)
-        } else {
-            // Submission is not in due time of exercise and there is actually no feedback for the submission or the feedback should not be displayed yet.
-            return ResultTemplateStatus.LateNoFeedback
         }
     }
 
     // Evaluate status for programming and quiz exercises
     if (exercise is ProgrammingExercise || exercise is QuizExercise) {
-        return if (isBuilding) {
-            ResultTemplateStatus.IsBuilding
-        } else if (result?.score != null) {
-            ResultTemplateStatus.HasResult(result)
-        } else {
-            ResultTemplateStatus.NoResult
-        }
+        return flowOf(
+            if (isBuilding) {
+                ResultTemplateStatus.IsBuilding
+            } else if (result?.score != null) {
+                ResultTemplateStatus.HasResult(result)
+            } else {
+                ResultTemplateStatus.NoResult
+            }
+        )
     }
 
-    return ResultTemplateStatus.NoResult
+    return flowOf(ResultTemplateStatus.NoResult)
 }

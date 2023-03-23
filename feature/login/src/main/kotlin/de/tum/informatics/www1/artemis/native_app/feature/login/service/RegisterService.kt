@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.login.service
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 
 /**
  * Allows the user to register

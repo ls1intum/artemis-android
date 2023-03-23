@@ -5,8 +5,13 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInWindow
@@ -18,10 +23,16 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragA
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.QuizQuestionInstructionText
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.*
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.DragInfo
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.DragTargetInfo
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.DropTarget
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.LocalDragTargetInfo
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.work_area.DragAndDropAreaType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.work_area.DragAndDropWorkArea
-import io.ktor.http.*
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragOffset
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragPosition
+import io.ktor.http.URLBuilder
+import io.ktor.http.appendPathSegments
 
 @Composable
 internal fun DragAndDropQuizQuestionBody(

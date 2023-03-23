@@ -1,15 +1,23 @@
 package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
 
 import android.util.Log
-import io.ktor.http.*
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
-import okhttp3.*
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import org.hildan.krossbow.websocket.*
+import org.hildan.krossbow.websocket.WebSocketClient
+import org.hildan.krossbow.websocket.WebSocketConnection
+import org.hildan.krossbow.websocket.WebSocketConnectionException
+import org.hildan.krossbow.websocket.WebSocketFrame
+import org.hildan.krossbow.websocket.WebSocketListenerFlowAdapter
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException

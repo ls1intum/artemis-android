@@ -9,15 +9,31 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.*
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachment
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitOnline
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitUnknown
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.*
+import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitAttachmentUi
+import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitExerciseUi
+import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitHeader
+import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitOnlineUi
+import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitTextUi
+import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitVideoUi
 import kotlinx.coroutines.Job
 
 @Composable

@@ -7,7 +7,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.*
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.FileUploadExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ModelingExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 
 @Composable

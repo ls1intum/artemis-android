@@ -12,9 +12,10 @@ import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePos
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisPostDTO
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.http.appendPathSegments
 import kotlinx.coroutines.flow.Flow
 
 internal class MetisServiceImpl(

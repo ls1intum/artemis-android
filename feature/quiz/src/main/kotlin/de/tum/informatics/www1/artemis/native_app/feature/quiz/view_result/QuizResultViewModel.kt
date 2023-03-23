@@ -20,10 +20,24 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.*
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.AnswerOptionId
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.BaseQuizViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.DragAndDropStorageData
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.DragItemId
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.DropLocationId
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.MultipleChoiceStorageData
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.ShortAnswerStorageData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.shareIn
 
 internal class QuizResultViewModel(
     exerciseId: Long,

@@ -1,6 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push
 
-import androidx.work.*
+import androidx.work.BackoffPolicy
+import androidx.work.Constraints
+import androidx.work.Data
+import androidx.work.ListenableWorker
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
 import java.util.concurrent.TimeUnit
 
 inline fun <reified T : ListenableWorker> defaultInternetWorkRequest(

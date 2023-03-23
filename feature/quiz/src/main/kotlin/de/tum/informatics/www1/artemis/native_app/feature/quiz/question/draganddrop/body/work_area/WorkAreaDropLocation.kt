@@ -3,7 +3,11 @@ package de.tum.informatics.www1.artemis.native_app.feature.quiz.question.dragand
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
@@ -18,7 +22,11 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultMedium
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultSuccess
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.DragTargetInfo
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.LocalDragTargetInfo
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.*
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.DragItemDraggableContainer
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.DragItemUiElement
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.DragItemUiElementContent
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.backgroundPictureServerUrl
+import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.dragItemOutlineColor
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragOffset
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragPosition
 
