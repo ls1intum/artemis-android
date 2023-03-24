@@ -136,8 +136,10 @@ internal fun CoursesOverview(
             retryButtonText = stringResource(id = R.string.courses_loading_try_again),
             onClickRetry = viewModel::requestReloadDashboard
         ) { dashboard: Dashboard ->
-            val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = false)
+            // TODO: Replace this once pull to refresh is available in material 3 https://issuetracker.google.com/issues/261760718
+            @Suppress("DEPRECATION") val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = false)
 
+            @Suppress("DEPRECATION")
             SwipeRefresh(state = swipeRefreshState, onRefresh = viewModel::requestReloadDashboard) {
                 if (dashboard.courses.isEmpty()) {
                     DashboardEmpty(
