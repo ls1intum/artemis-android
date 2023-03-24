@@ -140,6 +140,7 @@ interface MetisDao {
         answerServerIds: List<Long>
     )
 
+    @Transaction
     @Query(
         """
         select

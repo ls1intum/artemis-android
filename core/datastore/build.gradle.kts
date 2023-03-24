@@ -6,6 +6,14 @@ plugins {
 
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.core.datastore"
+
+    defaultConfig {
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments["room.schemaLocation"] = "$projectDir/schemas"
+            }
+        }
+    }
 }
 
 dependencies {

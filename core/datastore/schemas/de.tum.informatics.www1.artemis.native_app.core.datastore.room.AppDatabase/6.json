@@ -1,0 +1,459 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 6,
+    "identityHash": "cb466e0c47e395a963560ac86cb5a07b",
+    "entities": [
+      {
+        "tableName": "users",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`server_id` TEXT NOT NULL, `id` INTEGER NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`server_id`, `id`))",
+        "fields": [
+          {
+            "fieldPath": "serverId",
+            "columnName": "server_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "server_id",
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "postings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `server_id` TEXT NOT NULL, `type` TEXT NOT NULL, `author_id` INTEGER NOT NULL, `creation_date` INTEGER NOT NULL, `content` TEXT, `author_role` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`server_id`, `author_id`) REFERENCES `users`(`server_id`, `id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "postId",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serverId",
+            "columnName": "server_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "postingType",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authorId",
+            "columnName": "author_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "creationDate",
+            "columnName": "creation_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "authorRole",
+            "columnName": "author_role",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "sa_index",
+            "unique": false,
+            "columnNames": [
+              "server_id",
+              "author_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `sa_index` ON `${TABLE_NAME}` (`server_id`, `author_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "users",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "server_id",
+              "author_id"
+            ],
+            "referencedColumns": [
+              "server_id",
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "answer_postings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`post_id` TEXT NOT NULL, `parent_post_id` TEXT NOT NULL, `resolves_post` INTEGER NOT NULL, PRIMARY KEY(`post_id`), FOREIGN KEY(`post_id`) REFERENCES `postings`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`parent_post_id`) REFERENCES `postings`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "postId",
+            "columnName": "post_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "parentPostId",
+            "columnName": "parent_post_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resolvesPost",
+            "columnName": "resolves_post",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "post_id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "ppi_index",
+            "unique": false,
+            "columnNames": [
+              "parent_post_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `ppi_index` ON `${TABLE_NAME}` (`parent_post_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "postings",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "post_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "postings",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "parent_post_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "standalone_postings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`post_id` TEXT NOT NULL, `title` TEXT, `context` TEXT, `display_priority` TEXT, `resolved` INTEGER NOT NULL, `live_created` INTEGER NOT NULL, PRIMARY KEY(`post_id`), FOREIGN KEY(`post_id`) REFERENCES `postings`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "postId",
+            "columnName": "post_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "context",
+            "columnName": "context",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "displayPriority",
+            "columnName": "display_priority",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "resolved",
+            "columnName": "resolved",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "liveCreated",
+            "columnName": "live_created",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "post_id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "postings",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "post_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "post_tags",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`post_id` TEXT NOT NULL, `tag` TEXT NOT NULL, PRIMARY KEY(`post_id`, `tag`), FOREIGN KEY(`post_id`) REFERENCES `postings`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "postId",
+            "columnName": "post_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tag",
+            "columnName": "tag",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "post_id",
+            "tag"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "postings",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "post_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "reactions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`server_id` TEXT NOT NULL, `post_id` TEXT NOT NULL, `emoji` TEXT NOT NULL, `author_id` INTEGER NOT NULL, `id` INTEGER NOT NULL, PRIMARY KEY(`post_id`, `emoji`, `author_id`), FOREIGN KEY(`post_id`) REFERENCES `postings`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`server_id`, `author_id`) REFERENCES `users`(`server_id`, `id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "serverId",
+            "columnName": "server_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "postId",
+            "columnName": "post_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "emojiId",
+            "columnName": "emoji",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authorId",
+            "columnName": "author_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "post_id",
+            "emoji",
+            "author_id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "server_id_author_id_index",
+            "unique": false,
+            "columnNames": [
+              "server_id",
+              "author_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `server_id_author_id_index` ON `${TABLE_NAME}` (`server_id`, `author_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "postings",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "post_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "users",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "server_id",
+              "author_id"
+            ],
+            "referencedColumns": [
+              "server_id",
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "metis_post_context",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`server_id` TEXT NOT NULL, `course_id` INTEGER NOT NULL, `exercise_id` INTEGER NOT NULL, `lecture_id` INTEGER NOT NULL, `server_post_id` INTEGER NOT NULL, `client_post_id` TEXT NOT NULL, `type` TEXT NOT NULL, PRIMARY KEY(`client_post_id`, `server_post_id`, `course_id`, `exercise_id`, `lecture_id`, `type`), FOREIGN KEY(`client_post_id`) REFERENCES `postings`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "serverId",
+            "columnName": "server_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseId",
+            "columnName": "course_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exerciseId",
+            "columnName": "exercise_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lectureId",
+            "columnName": "lecture_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serverPostId",
+            "columnName": "server_post_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientPostId",
+            "columnName": "client_post_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "postingType",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "client_post_id",
+            "server_post_id",
+            "course_id",
+            "exercise_id",
+            "lecture_id",
+            "type"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_metis_post_context_server_post_id",
+            "unique": false,
+            "columnNames": [
+              "server_post_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_metis_post_context_server_post_id` ON `${TABLE_NAME}` (`server_post_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "postings",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "client_post_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cb466e0c47e395a963560ac86cb5a07b')"
+    ]
+  }
+}

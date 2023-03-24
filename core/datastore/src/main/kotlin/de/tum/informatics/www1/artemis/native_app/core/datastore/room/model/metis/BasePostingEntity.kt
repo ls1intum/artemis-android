@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.met
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
 import kotlinx.datetime.Instant
 
@@ -16,7 +17,8 @@ import kotlinx.datetime.Instant
             childColumns = ["server_id", "author_id"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index("server_id", "author_id", name = "sa_index")]
 )
 data class BasePostingEntity(
     @ColumnInfo(name = "id")

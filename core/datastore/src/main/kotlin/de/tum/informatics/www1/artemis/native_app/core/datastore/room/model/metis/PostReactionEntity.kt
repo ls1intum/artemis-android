@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.met
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 
 @Entity(
     tableName = "reactions",
@@ -19,7 +20,8 @@ import androidx.room.ForeignKey
             parentColumns = ["server_id", "id"],
             childColumns = ["server_id", "author_id"]
         )
-    ]
+    ],
+    indices = [Index("server_id", "author_id", name = "server_id_author_id_index")]
 )
 data class PostReactionEntity(
     @ColumnInfo(name = "server_id")

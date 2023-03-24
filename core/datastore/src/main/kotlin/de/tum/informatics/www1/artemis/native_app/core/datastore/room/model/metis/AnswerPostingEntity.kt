@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.met
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 
 @Entity(
     tableName = "answer_postings",
@@ -22,7 +23,8 @@ import androidx.room.ForeignKey
             childColumns = ["parent_post_id"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index("parent_post_id", name = "ppi_index")]
 )
 data class AnswerPostingEntity(
     @ColumnInfo(name = "post_id")

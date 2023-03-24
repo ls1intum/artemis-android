@@ -1,8 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonClassDiscriminator("type")
 sealed class QuizQuestion {
