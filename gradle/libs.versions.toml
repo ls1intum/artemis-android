@@ -1,12 +1,12 @@
 [versions]
-accompanist = "0.28.0"
-androidDesugarJdkLibs = "1.2.0"
-androidxActivity = "1.6.1"
-androidxAppCompat = "1.5.1"
-androidxComposeBom = "2023.01.00"
-androidxComposeCompiler = "1.3.2"
+accompanist = "0.30.0"
+androidDesugarJdkLibs = "2.0.2"
+androidxActivity = "1.7.0"
+androidxAppCompat = "1.6.1"
+androidxComposeBom = "2023.03.00"
+androidxComposeCompiler = "1.4.4"
 androidxCore = "1.9.0"
-androidxLifecycle = "2.5.1"
+androidxLifecycle = "2.6.1"
 androidxNavigation = "2.5.3"
 androidGradlePlugin = "7.4.0"
 androidxDataStore = "1.0.0"
@@ -15,16 +15,16 @@ androidxPagingCompose = "1.0.0-alpha17"
 androidxWork = "2.7.1"
 coil = "2.2.2"
 emoji2 = "1.2.0"
-kotlin = "1.7.20"
+kotlin = "1.8.10"
 kotlinxCoroutines = "1.6.4"
 kotlinxDatetime = "0.4.0"
-kotlinxSerializationJson = "1.4.1"
-koin = "3.3.2"
-ktor = "2.2.2"
-krossbow = "4.5.0"
+kotlinxSerializationJson = "1.5.0"
+koin = "3.3.3"
+ktor = "2.2.4"
+krossbow = "5.1.0"
 markwon = "4.6.2"
 room = "2.4.3"
-sentry-android = "6.11.0"
+sentry-android = "6.16.0"
 work = "2.7.1"
 
 [libraries]
@@ -63,11 +63,11 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version = "1.1.0-alpha04" }
+androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version = "1.1.0-alpha05" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 auth0-java-jwt = { group = "com.auth0.android", name = "jwtdecode", version = "2.0.2" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "31.1.1" }
+google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "31.2.3" }
 google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
@@ -78,7 +78,7 @@ kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime",
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
-koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version = "3.4.1" }
+koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version = "3.4.2" }
 koin-androidx-workmanager = { group = "io.insert-koin", name = "koin-androidx-workmanager", version.ref = "koin" }
 koin-android-compat = { group = "io.insert-koin", name = "koin-android-compat", version.ref = "koin" }
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
@@ -111,6 +111,6 @@ android-application = { id = "com.android.application", version.ref = "androidGr
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-google-services = { id = "com.google.gms.google-services", version = "4.3.14" }
-google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "3.1.1" }
-github-benManes-versions = { id = "com.github.ben-manes.versions", version = "0.44.0" }
+google-services = { id = "com.google.gms.google-services", version = "4.3.15" }
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.0.0" }
+github-benManes-versions = { id = "com.github.ben-manes.versions", version = "0.46.0" }

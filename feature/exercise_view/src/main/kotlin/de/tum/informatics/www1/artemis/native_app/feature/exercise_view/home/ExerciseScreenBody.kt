@@ -66,17 +66,15 @@ internal fun ExerciseScreenBody(
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                val exerciseOverviewTab = remember(webView) {
-                    movableContentOf { modifier: Modifier ->
-                        ExerciseOverviewTab(
-                            modifier = modifier,
-                            exercise = exercise,
-                            webViewState = webViewState,
-                            setWebView = setWebView,
-                            webView = webView,
-                            actions = actions
-                        )
-                    }
+                val exerciseOverviewTab: @Composable (Modifier) -> Unit = { modifier: Modifier ->
+                    ExerciseOverviewTab(
+                        modifier = modifier,
+                        exercise = exercise,
+                        webViewState = webViewState,
+                        setWebView = setWebView,
+                        webView = webView,
+                        actions = actions
+                    )
                 }
 
                 if (displayCommunicationOnSide) {

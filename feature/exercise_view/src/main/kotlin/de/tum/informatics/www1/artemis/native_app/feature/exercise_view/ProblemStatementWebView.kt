@@ -1,6 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.view.ViewGroup
 import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.compose.runtime.Composable
@@ -63,12 +65,25 @@ internal fun ProblemStatementWebView(
         },
         factory = { context ->
             if (webView != null) {
+                (webView.parent as? ViewGroup)?.removeView(webView)
                 webView
             } else {
-                val newWebView = WebView(context)
+                val newWebView = ProblemStatementWebViewImpl(context)
                 setWebView(newWebView)
                 newWebView
             }
         }
     )
+}
+
+private class ProblemStatementWebViewImpl(context: Context) : WebView(context) {
+
+    private var prevLoadedUrl: String? = null
+
+    override fun loadUrl(url: String, additionalHttpHeaders: MutableMap<String, String>) {
+        if (prevLoadedUrl != url) {
+            prevLoadedUrl = url
+            super.loadUrl(url, additionalHttpHeaders)
+        }
+    }
 }

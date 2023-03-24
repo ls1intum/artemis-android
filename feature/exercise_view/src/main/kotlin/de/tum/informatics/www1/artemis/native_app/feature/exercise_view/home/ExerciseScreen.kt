@@ -11,6 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
@@ -80,12 +82,12 @@ internal fun ExerciseScreen(
         mutableStateOf(null)
     }
 
-    BoxWithConstraints(modifier = modifier) {
+    Box(modifier = modifier) {
         val windowSizeClass = getWindowSizeClass()
         // If true, the communication is not displayed in a tab but in a window on the right
         val displayCommunicationOnSide = canDisplayMetisOnDisplaySide(
             windowSizeClass = windowSizeClass,
-            parentWidth = maxWidth,
+            parentWidth = LocalConfiguration.current.screenWidthDp.dp,
             metisContentRatio = METIS_RATIO
         )
 

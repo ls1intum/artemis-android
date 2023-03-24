@@ -7,6 +7,7 @@ import androidx.work.ListenableWorker
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkRequest
 import java.util.concurrent.TimeUnit
 
 inline fun <reified T : ListenableWorker> defaultInternetWorkRequest(
@@ -22,7 +23,7 @@ inline fun <reified T : ListenableWorker> defaultInternetWorkRequest(
         )
         .setBackoffCriteria(
             BackoffPolicy.LINEAR,
-            OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
+            WorkRequest.MIN_BACKOFF_MILLIS,
             TimeUnit.MILLISECONDS
         )
         .setInputData(inputData)
