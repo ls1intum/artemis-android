@@ -123,8 +123,6 @@ private fun ScoreInfo(
     points: Int,
     type: QuizQuestionHeaderType
 ) {
-    var displayGradingInfo by rememberSaveable { mutableStateOf(false) }
-
     val (scoreText, scoreTextColor) = when (type) {
         is QuizQuestionHeaderType.NoResult -> {
             stringResource(

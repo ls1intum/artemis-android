@@ -19,8 +19,8 @@ internal fun QuizQuestionBodyText(modifier: Modifier, question: QuizQuestion) {
 @Composable
 private fun QuizQuestionBodyText(modifier: Modifier, text: String) {
     MarkdownText(
-        modifier = modifier,
         markdown = text,
+        modifier = modifier,
         style = MaterialTheme.typography.bodyMedium
     )
 }

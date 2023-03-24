@@ -85,8 +85,8 @@ internal fun MarkdownTextField(
 
                 ViewType.PREVIEW -> {
                     MarkdownText(
-                        modifier = textModifier,
-                        markdown = text
+                        markdown = text,
+                        modifier = textModifier
                     )
                 }
             }

@@ -98,8 +98,8 @@ internal fun CustomInstanceSelectionScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         MarkdownText(
-            modifier = Modifier.fillMaxWidth(),
-            markdown = stringResource(id = R.string.account_select_custom_instance_selection_instruction)
+            markdown = stringResource(id = R.string.account_select_custom_instance_selection_instruction),
+            modifier = Modifier.fillMaxWidth()
         )
 
         TextField(

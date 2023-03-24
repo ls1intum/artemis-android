@@ -67,9 +67,6 @@ fun MarkdownText(
     style: TextStyle = LocalTextStyle.current,
     @IdRes viewId: Int? = null,
     onClick: (() -> Unit)? = null,
-    // this option will disable all clicks on links, inside the markdown text
-    // it also enable the parent view to receive the click event
-    disableLinkMovementMethod: Boolean = false,
     imageLoader: ImageLoader? = null,
 ) {
     val defaultColor: Color = LocalContentColor.current

@@ -156,6 +156,7 @@ internal class LiveParticipationServiceImpl(
      *
      * @param participationId
      */
+    @Suppress("UNUSED_PARAMETER")
     private fun fetchLatestPendingSubmissionByParticipationId(participationId: Long): Flow<Submission> {
         //TODO: This is currently broken, the call returns a html site instead.
         return emptyFlow()
@@ -236,7 +237,7 @@ internal class LiveParticipationServiceImpl(
             JsonContentPolymorphicSerializer<WebsocketProgrammingSubmissionMessage>(
                 WebsocketProgrammingSubmissionMessage::class
             ) {
-            override fun selectDeserializer(element: JsonElement): DeserializationStrategy<out WebsocketProgrammingSubmissionMessage> {
+            override fun selectDeserializer(element: JsonElement): DeserializationStrategy<WebsocketProgrammingSubmissionMessage> {
                 return when {
                     "error" in element.jsonObject -> Error.serializer()
                     else -> ReceivedSubmission.serializer()

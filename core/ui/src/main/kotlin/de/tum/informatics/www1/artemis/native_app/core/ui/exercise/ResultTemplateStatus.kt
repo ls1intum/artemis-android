@@ -167,10 +167,10 @@ private fun evaluateTemplateStatus(
         val isAssessmentDueDateInPast = assessmentDueDate?.hasPassedFlow() ?: flowOf(false)
         val isAssessmentDueDateInFuture = (assessmentDueDate?.isInFutureFlow() ?: flowOf(false))
 
-        return isAssessmentDueDateInPast.flatMapLatest { isAssessmentDueDateInPast ->
+        return isAssessmentDueDateInPast.flatMapLatest { isAssessmentDueDateInPastValue ->
             if (inDueTime && result?.score != null) {
                 // Submission is in due time of exercise and has a result with score
-                if (assessmentDueDate != null || isAssessmentDueDateInPast) {
+                if (assessmentDueDate != null || isAssessmentDueDateInPastValue) {
                     flowOf(ResultTemplateStatus.HasResult(result))
                 } else {
                     // the assessment period is still active
@@ -192,7 +192,7 @@ private fun evaluateTemplateStatus(
                         ResultTemplateStatus.NoResult
                     }
                 }
-            } else if (result?.score != null && (assessmentDueDate == null || isAssessmentDueDateInPast)) {
+            } else if (result?.score != null && (assessmentDueDate == null || isAssessmentDueDateInPastValue)) {
                 // Submission is not in due time of exercise, has a result with score and there is no assessmentDueDate for the exercise or it lies in the past.
                 // TODO handle external submissions with new status "External"
                 flowOf(ResultTemplateStatus.Late(result))

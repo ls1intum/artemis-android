@@ -190,12 +190,12 @@ private fun PostItemBase(
             }
 
             MarkdownText(
+                markdown = content ?: "W".repeat(40),
                 modifier = Modifier
                     .fillMaxWidth()
                     .placeholder(isPlaceholder),
-                markdown = content ?: "W".repeat(40),
-                style = MaterialTheme.typography.bodyMedium,
                 maxLines = 5,
+                style = MaterialTheme.typography.bodyMedium,
                 onClick = when (postItemViewType) {
                     is PostItemViewType.AnswerItem, PostItemViewType.StandaloneView -> { {} }
                     is PostItemViewType.StandaloneListItem -> {

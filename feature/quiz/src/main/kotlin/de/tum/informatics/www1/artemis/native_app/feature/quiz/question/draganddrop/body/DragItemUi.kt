@@ -25,7 +25,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -49,8 +48,7 @@ internal fun DragItemUiElement(
     modifier: Modifier,
     text: String?,
     pictureFilePath: String?,
-    authToken: String,
-    fontSize: TextUnit = 18.sp
+    authToken: String
 ) {
     Box(
         modifier = modifier
@@ -62,8 +60,7 @@ internal fun DragItemUiElement(
             modifier = Modifier.padding(4.dp),
             text = text,
             pictureFilePath = pictureFilePath,
-            authToken = authToken,
-            fontSize = fontSize
+            authToken = authToken
         )
     }
 }
@@ -74,8 +71,7 @@ internal fun DragItemUiElementContent(
     text: String?,
     pictureFilePath: String?,
     authToken: String,
-    fontColor: Color = dragItemTextColor,
-    fontSize: TextUnit = TextUnit.Unspecified
+    fontColor: Color = dragItemTextColor
 ) {
     Box(
         modifier = modifier,
