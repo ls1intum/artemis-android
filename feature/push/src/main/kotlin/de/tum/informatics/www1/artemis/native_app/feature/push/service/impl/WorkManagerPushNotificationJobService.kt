@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
-import androidx.work.await
 import de.tum.informatics.www1.artemis.native_app.feature.push.defaultInternetWorkRequest
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
+import kotlinx.coroutines.guava.await
 
 internal class WorkManagerPushNotificationJobService(
     private val context: Context

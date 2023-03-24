@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
@@ -31,6 +32,8 @@ import kotlinx.serialization.json.Json
  * To get the next notification id use getNextNotificationId.
  */
 object ArtemisNotificationManager {
+
+    private const val TAG = "ArtemisNotificationManager"
 
     private val LatestPushNotificationId = intPreferencesKey("latestPushNotificationId")
 
@@ -75,9 +78,13 @@ object ArtemisNotificationManager {
             }
             .build()
 
-        NotificationManagerCompat
-            .from(context)
-            .notify(notificationId, notification)
+        try {
+            NotificationManagerCompat
+                .from(context)
+                .notify(notificationId, notification)
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Could not push notification due to missing permission.")
+        }
     }
 
     private fun getNotificationTarget(type: NotificationType, target: String): NotificationTarget {
@@ -85,15 +92,19 @@ object ArtemisNotificationManager {
             NotificationType.NEW_REPLY_FOR_COURSE_POST, NotificationType.NEW_COURSE_POST, NotificationType.NEW_ANNOUNCEMENT_POST -> {
                 Json.decodeFromString<CoursePostTarget>(target)
             }
+
             NotificationType.NEW_LECTURE_POST, NotificationType.NEW_REPLY_FOR_LECTURE_POST -> {
                 Json.decodeFromString<LecturePostTarget>(target)
             }
+
             NotificationType.NEW_EXERCISE_POST, NotificationType.NEW_REPLY_FOR_EXERCISE_POST -> {
                 Json.decodeFromString<ExercisePostTarget>(target)
             }
+
             NotificationType.QUIZ_EXERCISE_STARTED -> {
                 Json.decodeFromString<ExerciseTarget>(target)
             }
+
             else -> UnknownNotificationTarget
         }
     }
@@ -118,17 +129,21 @@ object ArtemisNotificationManager {
                 is CoursePostTarget -> {
                     "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/null/null"
                 }
+
                 is LecturePostTarget -> {
                     "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/null/${notificationTarget.lectureId}"
                 }
+
                 is ExercisePostTarget -> {
                     "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/${notificationTarget.exerciseId}/null"
                 }
+
                 is ExerciseTarget -> {
                     if (type == NotificationType.QUIZ_EXERCISE_STARTED) {
                         "artemis://quiz_participation/${notificationTarget.courseId}/${notificationTarget.exerciseId}"
                     } else null
                 }
+
                 else -> null
             }
 
@@ -201,6 +216,7 @@ object ArtemisNotificationManager {
 
                 addAction(action)
             }
+
             else -> {}
         }
     }

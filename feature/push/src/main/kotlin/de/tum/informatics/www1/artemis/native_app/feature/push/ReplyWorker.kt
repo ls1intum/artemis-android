@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push
 
 import android.content.Context
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
@@ -36,6 +37,8 @@ class ReplyWorker(
         const val KEY_METIS_CONTEXT = "metis_context"
         const val KEY_POST_ID = "post_id"
         const val KEY_REPLY_CONTENT = "reply_content"
+
+        private const val TAG = "ReplyWorker"
     }
 
     override suspend fun doWork(): Result {
@@ -93,8 +96,12 @@ class ReplyWorker(
                 .setAutoCancel(true)
                 .build()
 
-        NotificationManagerCompat
-            .from(applicationContext)
-            .notify(id, notification)
+        try {
+            NotificationManagerCompat
+                .from(applicationContext)
+                .notify(id, notification)
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Could not push reply notification due to missing permission")
+        }
     }
 }

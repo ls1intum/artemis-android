@@ -18,6 +18,7 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.playServices)
+    implementation(libs.kotlinx.coroutines.guava)
     implementation(libs.accompanist.permissions)
 
     implementation(platform(libs.google.firebase.bom))
