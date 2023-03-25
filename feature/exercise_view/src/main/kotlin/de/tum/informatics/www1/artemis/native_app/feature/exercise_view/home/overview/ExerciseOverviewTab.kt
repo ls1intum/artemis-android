@@ -20,6 +20,8 @@ internal fun ExerciseOverviewTab(
     modifier: Modifier,
     exercise: Exercise,
     webViewState: WebViewState?,
+    serverUrl: String,
+    authToken: String,
     setWebView: (WebView) -> Unit,
     webView: WebView?,
     actions: ExerciseActions
@@ -44,6 +46,8 @@ internal fun ExerciseOverviewTab(
                     modifier = Modifier.fillMaxWidth(),
                     webViewState = webViewState,
                     webView = webView,
+                    serverUrl = serverUrl,
+                    authToken = authToken,
                     setWebView = setWebView
                 )
             }

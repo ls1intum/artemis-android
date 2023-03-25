@@ -18,6 +18,8 @@ import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
@@ -58,6 +60,17 @@ internal fun ExerciseScreen(
         }
     }
 
+    val latestParticipationId by remember(exerciseDataState) {
+        derivedStateOf {
+            exerciseDataState.bind { exercise ->
+                // Only relevant for programming exercises
+                if (exercise is ProgrammingExercise) {
+                    exercise.latestParticipation?.id
+                } else null
+            }.orNull()
+        }
+    }
+
     val metisContext by remember(courseId, exerciseId) {
         derivedStateOf {
             val currentExerciseId = exerciseId
@@ -70,12 +83,9 @@ internal fun ExerciseScreen(
     val webViewState: WebViewState? = getProblemStatementWebViewState(
         serverUrl = serverUrl,
         courseId = courseId,
-        exerciseId = exerciseId
+        exerciseId = exerciseId,
+        participationId = latestParticipationId
     )
-
-    LaunchedEffect(serverUrl, authToken) {
-        CookieManager.getInstance().setCookie(serverUrl, "jwt=$authToken")
-    }
 
     // Retain web view instance to avoid reloading when switching between tabs
     var savedWebView: WebView? by remember(exerciseDataState) {
@@ -138,7 +148,9 @@ internal fun ExerciseScreen(
                 webViewState = webViewState,
                 setWebView = { savedWebView = it },
                 webView = savedWebView,
-                onClickRetry = viewModel::requestReloadExercise
+                onClickRetry = viewModel::requestReloadExercise,
+                serverUrl = serverUrl,
+                authToken = authToken
             )
         }
 

@@ -61,6 +61,8 @@ internal fun TextExerciseParticipationScreen(
 ) {
     val exerciseDataState by viewModel.exerciseDataState.collectAsState()
     val courseId: Long? = exerciseDataState.courseId
+    val serverUrl: String by viewModel.serverUrl.collectAsState()
+    val authToken: String by viewModel.authToken.collectAsState()
 
     EmptyDataStateUi(dataState = exerciseDataState) { exercise ->
         val exerciseId: Long = exercise.id
@@ -78,9 +80,11 @@ internal fun TextExerciseParticipationScreen(
             .widthSizeClass >= WindowWidthSizeClass.Medium
 
         val webViewState: WebViewState? = getProblemStatementWebViewState(
-            serverUrl = viewModel.serverUrl.collectAsState().value,
+            serverUrl = serverUrl,
             courseId = courseId,
-            exerciseId = exerciseId
+            exerciseId = exerciseId,
+            // participationId is only relevant for programming exercises
+            participationId = null
         )
 
         var webView: WebView? by remember { mutableStateOf(null) }
@@ -135,7 +139,9 @@ internal fun TextExerciseParticipationScreen(
                             modifier = modifier,
                             webViewState = webViewState,
                             webView = webView,
-                            setWebView = { webView = it }
+                            setWebView = { webView = it },
+                            serverUrl = serverUrl,
+                            authToken = authToken
                         )
                     } else {
                         Box(modifier = modifier)

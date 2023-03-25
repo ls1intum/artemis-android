@@ -52,6 +52,8 @@ internal fun ExerciseScreenBody(
     displayCommunicationOnSide: Boolean,
     navController: NavController,
     metisContext: MetisContext?,
+    serverUrl: String,
+    authToken: String,
     actions: ExerciseActions,
     webViewState: WebViewState?,
     setWebView: (WebView) -> Unit,
@@ -73,7 +75,9 @@ internal fun ExerciseScreenBody(
                         webViewState = webViewState,
                         setWebView = setWebView,
                         webView = webView,
-                        actions = actions
+                        actions = actions,
+                        serverUrl = serverUrl,
+                        authToken = authToken
                     )
                 }
 
