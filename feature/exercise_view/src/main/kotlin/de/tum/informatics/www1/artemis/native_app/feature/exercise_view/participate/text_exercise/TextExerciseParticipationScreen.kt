@@ -45,7 +45,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.isInFuture
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ProblemStatementWebView
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.courseId
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.getProblemStatementWebViewState
@@ -135,7 +135,7 @@ internal fun TextExerciseParticipationScreen(
 
                 val problemStatementUi = @Composable { modifier: Modifier ->
                     if (webViewState != null) {
-                        ProblemStatementWebView(
+                        ArtemisWebView(
                             modifier = modifier,
                             webViewState = webViewState,
                             webView = webView,
