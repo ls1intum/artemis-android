@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager
 
 import android.content.Context
-import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscNotificationType
@@ -16,22 +15,20 @@ internal class NotificationManagerImpl(
     private val communicationNotificationManager: CommunicationNotificationManager
 ) : NotificationManager {
 
-    override fun popNotification(
+    @Suppress("UNCHECKED_CAST")
+    override suspend fun popNotification(
         context: Context,
-        notificationType: NotificationType,
-        artemisNotification: ArtemisNotification
+        artemisNotification: ArtemisNotification<NotificationType>
     ) {
-        when (notificationType) {
+        when (artemisNotification.type) {
             is MiscNotificationType -> {
                 miscNotificationManager.popMiscNotification(
-                    notificationType = notificationType,
-                    artemisNotification = artemisNotification
+                    artemisNotification = artemisNotification as ArtemisNotification<MiscNotificationType>
                 )
             }
             is CommunicationNotificationType -> {
                 communicationNotificationManager.popNotification(
-                    notificationType = notificationType,
-                    artemisNotification = artemisNotification
+                    artemisNotification = artemisNotification as ArtemisNotification<CommunicationNotificationType>
                 )
             }
         }

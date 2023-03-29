@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.Metis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.PostReactionEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostTagEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostingEntity
+import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationMessageEntity
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.PushCommunicationDao
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.PushCommunicationEntity
 
@@ -24,7 +25,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.communication_not
         StandalonePostTagEntity::class,
         PostReactionEntity::class,
         MetisPostContextEntity::class,
-        PushCommunicationEntity::class
+        PushCommunicationEntity::class,
+        CommunicationMessageEntity::class
     ],
     exportSchema = true,
     version = 7

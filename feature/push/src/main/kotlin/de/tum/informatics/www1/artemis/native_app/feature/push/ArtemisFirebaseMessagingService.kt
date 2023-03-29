@@ -6,8 +6,8 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import kotlinx.coroutines.flow.first
@@ -40,6 +40,7 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
     private val pushNotificationJobService: PushNotificationJobService = get()
     private val pushNotificationConfigurationService: PushNotificationConfigurationService = get()
     private val serverConfigurationService: ServerConfigurationService = get()
+    private val notificationManager: NotificationManager = get()
 
     /**
      * Whenever this functions is called we need to synchronize the new token with the server.
@@ -64,6 +65,8 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
+    // In this method we only have 10 seconds to handle the notification
+    // Furthermore, it is not possible to use dispatching coroutines here, therefore we rely on runBlocking
     override fun onMessageReceived(message: RemoteMessage) {
         Log.d(TAG, "New push notification received")
 
@@ -80,9 +83,14 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
             cipher.decrypt(payloadCiphertext, key, ivAsBytes) ?: return@runBlocking null
         } ?: return
 
-        val notification: ArtemisNotification = Json.decodeFromString(payload)
+        val notification: ArtemisNotification<NotificationType> = Json.decodeFromString(payload)
 
-
+        runBlocking {
+            notificationManager.popNotification(
+                context = this@ArtemisFirebaseMessagingService,
+                artemisNotification = notification
+            )
+        }
     }
 
     private fun Cipher.decrypt(ciphertext: String, key: SecretKey, iv: ByteArray): String? {

@@ -79,4 +79,8 @@
     <string name="push_notification_title_tutorialGroupUpdated">Tutorial Group updated</string>
     <string name="push_notification_text_tutorialGroupDeleted">The tutorial group %2$s has been deleted.</string>
     <string name="push_notification_text_tutorialGroupUpdated">The tutorial group %2$s has been updated.</string>
+
+    <string name="conversation_title_course_post">%1$s: %2$s</string>
+    <string name="conversation_title_exercise_post">%1$s/%2$s: %3$s</string>
+    <string name="conversation_title_lecture_post">%1$s/%2$s: %3$s</string>
 </resources>

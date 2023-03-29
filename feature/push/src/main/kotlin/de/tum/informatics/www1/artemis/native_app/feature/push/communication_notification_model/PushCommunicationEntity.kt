@@ -17,5 +17,11 @@ data class PushCommunicationEntity(
     @ColumnInfo(name = "parent_id")
     val parentId: Long,
     @ColumnInfo(name = "type")
-    val type: CommunicationType
+    val type: CommunicationType,
+    @ColumnInfo(name = "notification_id")
+    val notificationId: Int,
+    @ColumnInfo(name = "course_title")
+    val courseTitle: String,
+    @ColumnInfo(name = "title")
+    val title: String?
 )

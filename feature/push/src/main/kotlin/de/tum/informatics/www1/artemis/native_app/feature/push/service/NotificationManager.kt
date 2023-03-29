@@ -6,9 +6,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 
 interface NotificationManager {
 
-    fun popNotification(
+    suspend fun popNotification(
         context: Context,
-        notificationType: NotificationType,
-        artemisNotification: ArtemisNotification
+        artemisNotification: ArtemisNotification<NotificationType>
     )
 }

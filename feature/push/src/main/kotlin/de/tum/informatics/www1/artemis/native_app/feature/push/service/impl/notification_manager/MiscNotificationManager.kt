@@ -18,12 +18,11 @@ internal class MiscNotificationManager(private val context: Context) : BaseNotif
      * Pop a notification based on the decrypted payload received from the server.
      */
     fun popMiscNotification(
-        notificationType: MiscNotificationType,
-        artemisNotification: ArtemisNotification
+        artemisNotification: ArtemisNotification<MiscNotificationType>
     ) {
         val notificationContent = ArtemisNotificationBuilder.generateNotificationContent(
             context,
-            notificationType,
+            artemisNotification.type,
             artemisNotification.notificationPlaceholders
         )
 
@@ -33,7 +32,7 @@ internal class MiscNotificationManager(private val context: Context) : BaseNotif
                 setContentText(notificationContent.body)
 
                 setSmallIcon(R.drawable.push_notification_icon)
-                setContentIntent(NotificationTargetManager.buildOnClickIntent(context, notificationType, artemisNotification.target))
+                setContentIntent(NotificationTargetManager.buildOnClickIntent(context, artemisNotification.type, artemisNotification.target))
                 setAutoCancel(true)
             }
             .build()
