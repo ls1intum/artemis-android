@@ -40,5 +40,9 @@ gradlePlugin {
             id = "artemis.android.feature"
             implementationClass = "AndroidFeatureConventionPlugin"
         }
+        register("androidRoom") {
+            id = "artemis.android.room"
+            implementationClass = "AndroidRoomConventionPlugin"
+        }
     }
 }

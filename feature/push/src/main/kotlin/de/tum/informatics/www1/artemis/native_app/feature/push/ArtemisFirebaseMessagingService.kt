@@ -5,10 +5,15 @@ import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.koin.android.ext.android.get
 import java.security.NoSuchAlgorithmException
 import javax.crypto.Cipher
@@ -75,14 +80,9 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
             cipher.decrypt(payloadCiphertext, key, ivAsBytes) ?: return@runBlocking null
         } ?: return
 
-        val notificationId =
-            runBlocking { ArtemisNotificationManager.getNextNotificationId(this@ArtemisFirebaseMessagingService) }
+        val notification: ArtemisNotification = Json.decodeFromString(payload)
 
-        ArtemisNotificationManager.popNotification(
-            context = this,
-            payload = payload,
-            notificationId = notificationId
-        )
+
     }
 
     private fun Cipher.decrypt(ciphertext: String, key: SecretKey, iv: ByteArray): String? {

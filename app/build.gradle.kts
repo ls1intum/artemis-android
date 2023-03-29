@@ -13,6 +13,7 @@ plugins {
     id("com.google.firebase.appdistribution")
     id("com.google.android.gms.oss-licenses-plugin")
     id("io.sentry.android.gradle") version "3.4.0"
+    id("artemis.android.room")
 }
 
 android {

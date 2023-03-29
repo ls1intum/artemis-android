@@ -1,6 +1,7 @@
 plugins {
     id("artemis.android.library")
     id("artemis.android.library.compose")
+    id("artemis.android.room")
     kotlin("plugin.serialization")
 }
 

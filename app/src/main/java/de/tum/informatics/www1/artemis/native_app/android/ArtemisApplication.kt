@@ -8,6 +8,7 @@ import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.memory.MemoryCache
+import de.tum.informatics.www1.artemis.native_app.android.db.dbModule
 import de.tum.informatics.www1.artemis.native_app.core.data.service.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
@@ -59,7 +60,8 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
                 quizParticipationModule,
                 settingsModule,
                 lectureModule,
-                pushModule
+                pushModule,
+                dbModule
             )
         }
 

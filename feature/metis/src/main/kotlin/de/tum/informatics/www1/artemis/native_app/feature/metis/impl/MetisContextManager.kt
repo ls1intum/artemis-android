@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.impl
 
-import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisPostAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisPostDTO

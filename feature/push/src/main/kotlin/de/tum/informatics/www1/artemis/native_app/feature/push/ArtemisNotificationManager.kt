@@ -17,11 +17,19 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ExerciseTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.LecturePostTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MetisTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType.*
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType.*
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.UnknownNotificationTarget
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -50,117 +58,14 @@ object ArtemisNotificationManager {
         return id
     }
 
-    /**
-     * Pop a notification based on the decrypted payload received from the server.
-     */
-    fun popNotification(context: Context, payload: String, notificationId: Int) {
-        val messagePayload: MessagePayload = Json.decodeFromString(payload)
-        val title = messagePayload.title
-        val body = messagePayload.body
 
-        val type = try {
-            NotificationType.valueOf(messagePayload.type ?: return)
-        } catch (e: IllegalArgumentException) {
-            return
-        }
 
-        val target = getNotificationTarget(type, messagePayload.target ?: return)
-
-        val notification = NotificationCompat.Builder(context, ArtemisNotificationChannel.id)
-            .apply {
-                if (title != null) setContentTitle(title)
-                if (body != null) setContentText(body)
-
-                setSmallIcon(R.drawable.push_notification_icon)
-                setContentIntent(buildOnClickIntent(context, target, type))
-                setNotificationTypeActions(context, payload, target, notificationId)
-                setAutoCancel(true)
-            }
-            .build()
-
-        try {
-            NotificationManagerCompat
-                .from(context)
-                .notify(notificationId, notification)
-        } catch (e: SecurityException) {
-            Log.e(TAG, "Could not push notification due to missing permission.")
-        }
-    }
-
-    private fun getNotificationTarget(type: NotificationType, target: String): NotificationTarget {
-        return when (type) {
-            NotificationType.NEW_REPLY_FOR_COURSE_POST, NotificationType.NEW_COURSE_POST, NotificationType.NEW_ANNOUNCEMENT_POST -> {
-                Json.decodeFromString<CoursePostTarget>(target)
-            }
-
-            NotificationType.NEW_LECTURE_POST, NotificationType.NEW_REPLY_FOR_LECTURE_POST -> {
-                Json.decodeFromString<LecturePostTarget>(target)
-            }
-
-            NotificationType.NEW_EXERCISE_POST, NotificationType.NEW_REPLY_FOR_EXERCISE_POST -> {
-                Json.decodeFromString<ExercisePostTarget>(target)
-            }
-
-            NotificationType.QUIZ_EXERCISE_STARTED -> {
-                Json.decodeFromString<ExerciseTarget>(target)
-            }
-
-            else -> UnknownNotificationTarget
-        }
-    }
-
-    private fun buildOnClickIntent(
+    fun popCommunicationNotification(
         context: Context,
-        notificationTarget: NotificationTarget,
-        type: NotificationType
-    ): PendingIntent {
-        val mainActivity =
-            Class.forName("de.tum.informatics.www1.artemis.native_app.android.ui.MainActivity")
+        notificationType: CommunicationNotificationType,
+        artemisNotification: ArtemisNotification
+    ) {
 
-        val openAppIntent = PendingIntent.getActivity(
-            context,
-            0,
-            Intent(context, mainActivity),
-            PendingIntent.FLAG_IMMUTABLE
-        )
-
-        try {
-            val uriString: String? = when (notificationTarget) {
-                is CoursePostTarget -> {
-                    "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/null/null"
-                }
-
-                is LecturePostTarget -> {
-                    "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/null/${notificationTarget.lectureId}"
-                }
-
-                is ExercisePostTarget -> {
-                    "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/${notificationTarget.exerciseId}/null"
-                }
-
-                is ExerciseTarget -> {
-                    if (type == NotificationType.QUIZ_EXERCISE_STARTED) {
-                        "artemis://quiz_participation/${notificationTarget.courseId}/${notificationTarget.exerciseId}"
-                    } else null
-                }
-
-                else -> null
-            }
-
-            return if (uriString != null) {
-                PendingIntent.getActivity(
-                    context,
-                    0,
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(uriString)
-                    ),
-                    PendingIntent.FLAG_IMMUTABLE
-                )
-            } else openAppIntent
-        } catch (e: Exception) {
-            return openAppIntent
-        }
     }
 
     private fun NotificationCompat.Builder.setNotificationTypeActions(

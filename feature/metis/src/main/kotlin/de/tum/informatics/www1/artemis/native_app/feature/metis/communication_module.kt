@@ -5,6 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.EmojiServic
 import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisModificationServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisStorageServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.create_standalone_post.CreateStandalonePostViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisStandalonePostViewModel
@@ -16,11 +17,9 @@ import org.koin.dsl.module
 val communicationModule = module {
     single<MetisService> { MetisServiceImpl(get(), get()) }
     single<MetisModificationService> { MetisModificationServiceImpl(get()) }
-    single<EmojiService> {
-        EmojiServiceImpl(
-            androidContext()
-        )
-    }
+    single<EmojiService> { EmojiServiceImpl(androidContext()) }
+
+    single<MetisStorageService> { MetisStorageServiceImpl(get()) }
 
     viewModel { params ->
         MetisListViewModel(

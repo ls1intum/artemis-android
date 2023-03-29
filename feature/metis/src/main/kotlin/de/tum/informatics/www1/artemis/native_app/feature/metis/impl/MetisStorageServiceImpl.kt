@@ -1,20 +1,21 @@
-package de.tum.informatics.www1.artemis.native_app.core.datastore.impl
+package de.tum.informatics.www1.artemis.native_app.feature.metis.impl
 
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
-import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.dao.MetisDao
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
-import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.AnswerPostingEntity
-import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.BasePostingEntity
-import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.MetisPostContextEntity
-import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.MetisUserEntity
-import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.PostReactionEntity
-import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.StandalonePostTagEntity
-import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.StandalonePostingEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisDatabaseProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.dao.MetisDao
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.AnswerPostingEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisPostContextEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisUserEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.PostReactionEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostTagEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostingEntity
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.DisplayPriority
@@ -29,7 +30,7 @@ import java.util.UUID
  * This implementation only displays live created posts, but ignores them when counting the posts for the next page request.
  */
 class MetisStorageServiceImpl(
-    private val databaseProvider: DatabaseProvider
+    private val databaseProvider: MetisDatabaseProvider
 ) : MetisStorageService {
 
     companion object {
@@ -162,7 +163,7 @@ class MetisStorageServiceImpl(
         posts: List<StandalonePost>,
         clearPreviousPosts: Boolean
     ) {
-        val metisDao = databaseProvider.database.metisDao()
+        val metisDao = databaseProvider.metisDao
 
         databaseProvider.database.withTransaction {
             if (clearPreviousPosts) {
@@ -196,7 +197,7 @@ class MetisStorageServiceImpl(
         metisContext: MetisContext,
         post: StandalonePost
     ) {
-        val metisDao = databaseProvider.database.metisDao()
+        val metisDao = databaseProvider.metisDao
         databaseProvider.database.withTransaction {
             val clientSidePostId = metisDao.queryClientPostId(
                 serverId = host,
@@ -226,7 +227,7 @@ class MetisStorageServiceImpl(
         metisContext: MetisContext,
         post: StandalonePost
     ): String? {
-        val metisDao = databaseProvider.database.metisDao()
+        val metisDao = databaseProvider.metisDao
         return databaseProvider.database.withTransaction {
             // First check, if by any chance there is a client side post id for this already.
             // If the post already exists, do nothing
@@ -398,7 +399,7 @@ class MetisStorageServiceImpl(
     }
 
     override suspend fun deletePosts(host: String, postIds: List<Long>) {
-        val metisDao = databaseProvider.database.metisDao()
+        val metisDao = databaseProvider.metisDao
         databaseProvider.database.withTransaction {
             metisDao.deletePostingsWithServerIds(host, postIds)
         }
@@ -412,7 +413,7 @@ class MetisStorageServiceImpl(
         query: String?,
         metisContext: MetisContext
     ): PagingSource<Int, Post> {
-        return databaseProvider.database.metisDao().queryCoursePosts(
+        return databaseProvider.metisDao.queryCoursePosts(
             serverId = serverId,
             clientId = clientId,
             courseId = metisContext.courseId,
@@ -425,11 +426,11 @@ class MetisStorageServiceImpl(
     }
 
     override fun getStandalonePost(clientPostId: String): Flow<Post?> {
-        return databaseProvider.database.metisDao().queryStandalonePost(clientPostId)
+        return databaseProvider.metisDao.queryStandalonePost(clientPostId)
     }
 
     override suspend fun getCachedPostCount(host: String, metisContext: MetisContext): Int {
-        return databaseProvider.database.metisDao().queryContextPostCountNoLiveCreated(
+        return databaseProvider.metisDao.queryContextPostCountNoLiveCreated(
             host,
             metisContext.courseId,
             metisContext.exerciseId,
@@ -438,7 +439,7 @@ class MetisStorageServiceImpl(
     }
 
     override suspend fun getServerSidePostId(host: String, clientSidePostId: String): Long {
-        return databaseProvider.database.metisDao().queryServerSidePostId(host, clientSidePostId)
+        return databaseProvider.metisDao.queryServerSidePostId(host, clientSidePostId)
     }
 
     override suspend fun getClientSidePostId(
@@ -446,7 +447,7 @@ class MetisStorageServiceImpl(
         serverSidePostId: Long,
         postingType: BasePostingEntity.PostingType
     ): String? {
-        return databaseProvider.database.metisDao()
+        return databaseProvider.metisDao
             .queryClientPostId(
                 serverId = host,
                 postId = serverSidePostId,

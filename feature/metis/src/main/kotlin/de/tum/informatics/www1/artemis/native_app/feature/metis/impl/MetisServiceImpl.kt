@@ -4,9 +4,9 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider

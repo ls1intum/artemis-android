@@ -23,7 +23,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisOutdatedBanner
 import kotlinx.serialization.decodeFromString

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis
+package de.tum.informatics.www1.artemis.native_app.feature.metis.model.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

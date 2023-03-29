@@ -56,11 +56,11 @@ class ReplyReceiver : BroadcastReceiver() {
                 WorkManager.getInstance(context)
                     .enqueue(workRequest)
 
-                ArtemisNotificationManager.popNotification(
-                    context = context,
-                    payload = payload,
-                    notificationId = notificationId
-                )
+//                ArtemisNotificationManager.popNotification(
+//                    context = context,
+//                    payload = payload,
+//                    notificationId = notificationId
+//                )
             } else {
                 notificationManager.cancel(notificationId)
             }

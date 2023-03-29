@@ -6,4 +6,77 @@
     <string name="push_notification_action_reply">Reply</string>
     <string name="push_notification_send_reply_failed_title">Could not send reply</string>
     <string name="push_notification_send_reply_failed_message">Affected reply: %1$s</string>
+
+    <string name="push_notification_title_attachmentChange">Attachment updated</string>
+    <string name="push_notification_title_exerciseReleased">Exercise released</string>
+    <string name="push_notification_title_exercisePractice">Exercise open for practice</string>
+    <string name="push_notification_title_quizExerciseStarted">Quiz started</string>
+    <string name="push_notification_title_liveExamExerciseUpdate">Live Exam Exercise Update</string>
+    <string name="push_notification_title_exerciseUpdated">Exercise updated</string>
+    <string name="push_notification_title_programmingTestCasesChanged">Test cases for programming exercise changed</string>
+    <string name="push_notification_title_newManualFeedbackRequest">A new manual feedback request has been submitted</string>
+    <string name="push_notification_title_duplicateTestCase">Duplicate test case was found.</string>
+    <string name="push_notification_title_illegalSubmission">Illegal submission of a student.</string>
+    <string name="push_notification_title_newExercisePost">New exercise post</string>
+    <string name="push_notification_title_newLecturePost">New lecture post</string>
+    <string name="push_notification_title_newCoursePost">New course-wide post</string>
+    <string name="push_notification_title_newAnnouncementPost">New announcement</string>
+    <string name="push_notification_title_newReplyForExercisePost">New reply for exercise post</string>
+    <string name="push_notification_title_newReplyForLecturePost">New reply for lecture post</string>
+    <string name="push_notification_title_newReplyForCoursePost">New reply for course-wide post</string>
+    <string name="push_notification_title_courseArchiveStarted">Course archival started</string>
+    <string name="push_notification_title_courseArchiveFinished">Course archival finished</string>
+    <string name="push_notification_title_courseArchiveFailed">Course archival failed</string>
+    <string name="push_notification_title_examArchiveStarted">Exam archival started</string>
+    <string name="push_notification_title_examArchiveFinished">Exam archival finished</string>
+    <string name="push_notification_title_examArchiveFailed">Exam archival failed</string>
+
+    <string name="push_notification_text_attachmentChange">The attachment "%2$s" of "%3$s" in the course "%1$s" was updated.</string>
+    <string name="push_notification_text_exerciseReleased">A new exercise "%2$s" got released.</string>
+    <string name="push_notification_text_exercisePractice">The exercise "%2$s" is now open for practice.</string>
+    <string name="push_notification_text_quizExerciseStarted">The quiz "%2$s" just started.</string>
+    <string name="push_notification_text_liveExamExerciseUpdate">The exam Exercise "%2$s" got updated.</string>
+    <string name="push_notification_text_exerciseUpdated">The exercise "%2$s" in course "%1$s" got updated.</string>
+    <string name="push_notification_text_programmingTestCasesChanged">The test cases of the programming exercise "%2$s" in the course "%1$s" were updated. The students\' submissions should be rebuilt and tested in order to create new results.</string>
+    <string name="push_notification_text_newManualFeedbackRequest">The programming exercise "%2$s" in the course "%1$s" has a new manual feedback request. Please assess the feedback before the deadline.</string>
+    <string name="push_notification_text_illegalSubmission">The exercise "%2$s" has illegal submissions of students.</string>
+    <string name="push_notification_text_duplicateTestCase">%1$s has a duplicate test case.</string>
+    <string name="push_notification_text_newAnnouncementPost">The course "%1$s" got a new announcement>holderValues.2 }}"</string>
+    <string name="push_notification_text_courseArchiveStarted">The course "%1$s" is being archived.</string>
+    <string name="push_notification_text_courseArchiveFinishedWithoutErrors">The course "%1$s" has been archived.</string>
+    <string name="push_notification_text_courseArchiveFinishedWithErrors">The course "%1$s" has been archived. Some exercises couldn\'t be included in the archive>%2$s</string>
+    <string name="push_notification_text_courseArchiveFailed">There was a problem archiving course "%1$s"></string>
+    <string name="push_notification_text_examArchiveStarted">The exam "%2$s" is being archived.</string>
+    <string name="push_notification_text_examArchiveFinishedWithoutErrors">The exam "%2$s" has been archived.</string>
+    <string name="push_notification_text_examArchiveFinishedWithErrors">The exam "%2$s" has been archived. Some exercises couldn\'t be included in the archive: %2$s</string>
+    <string name="push_notification_text_examArchiveFailed">There was a problem archiving exam "%2$s": %3$s"</string>
+
+    <string name="push_notification_title_exerciseSubmissionAssessed">Exercise Submission Assessed</string>
+    <string name="push_notification_title_fileSubmissionSuccessful">File submission successful</string>
+    <string name="push_notification_title_newPlagiarismCaseStudent">New plagiarism case</string>
+    <string name="push_notification_title_plagiarismCaseVerdictStudent">Verdict for your plagiarism case</string>
+    <string name="push_notification_title_tutorialGroupRegistrationStudent">You have been registered to a tutorial group</string>
+    <string name="push_notification_title_tutorialGroupDeregistrationStudent">You have been deregistered from a tutorial group</string>
+    <string name="push_notification_title_tutorialGroupRegistrationTutor">A student has been registered to your tutorial group</string>
+    <string name="push_notification_title_tutorialGroupDeregistrationTutor">A student has been deregistered from your tutorial group</string>
+    <string name="push_notification_title_tutorialGroupMultipleRegistrationTutor">Multiple students have been registered to your tutorial group</string>
+    <string name="push_notification_title_tutorialGroupAssigned">You have been assigned to lead a tutorial group</string>
+    <string name="push_notification_title_tutorialGroupUnassigned">You have been unassigned from leading a tutorial group</string>
+
+    <string name="push_notification_text_exerciseSubmissionAssessed">Your submission for the %2$s exercise "%3$s" in the course "%1$s" has been assessed.</string>
+    <string name="push_notification_text_fileSubmissionSuccessful">Your file for the exercise "%2$s" was successfully submitted.</string>
+    <string name="push_notification_text_newPlagiarismCaseStudent">New plagiarism case concerning the %2$s exercise "%3$s".</string>
+    <string name="push_notification_text_plagiarismCaseVerdictStudent">Your plagiarism case concerning the %2$s exercise "%3$s" has a verdict.</string>
+    <string name="push_notification_text_tutorialGroupRegistrationStudent">You have been registered to the tutorial group %2$s by %3$s.</string>
+    <string name="push_notification_text_tutorialGroupDeregistrationStudent">You have been deregistered from the tutorial group %2$s by %3$s.</string>
+    <string name="push_notification_text_tutorialGroupRegistrationTutor">The student %2$s has been registered to your tutorial group %3$s by %4$s.</string>
+    <string name="push_notification_text_tutorialGroupDeregistrationTutor">The student %2$s has been deregistered from your tutorial group %3$s by %4$s.</string>
+    <string name="push_notification_text_tutorialGroupMultipleRegistrationTutor">%2$s students have been registered to your tutorial group %3$s by %4$s.</string>
+    <string name="push_notification_text_tutorialGroupAssigned">You have been assigned to lead the tutorial group %2$s by %3$s.</string>
+    <string name="push_notification_text_tutorialGroupUnassigned">You have been unassigned from leading the tutorial group %2$s by %3$s.</string>
+
+    <string name="push_notification_title_tutorialGroupDeleted">Tutorial Group deleted</string>
+    <string name="push_notification_title_tutorialGroupUpdated">Tutorial Group updated</string>
+    <string name="push_notification_text_tutorialGroupDeleted">The tutorial group %2$s has been deleted.</string>
+    <string name="push_notification_text_tutorialGroupUpdated">The tutorial group %2$s has been updated.</string>
 </resources>

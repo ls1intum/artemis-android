@@ -1,11 +1,11 @@
-package de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis
+package de.tum.informatics.www1.artemis.native_app.feature.metis.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Ignore
 import androidx.room.Relation
-import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.BasePostingEntity
-import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.MetisUserEntity
-import de.tum.informatics.www1.artemis.native_app.core.datastore.room.model.metis.PostReactionEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisUserEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.PostReactionEntity
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
 import kotlinx.datetime.Instant

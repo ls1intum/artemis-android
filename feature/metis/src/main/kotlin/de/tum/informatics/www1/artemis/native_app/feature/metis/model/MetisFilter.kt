@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis
+package de.tum.informatics.www1.artemis.native_app.feature.metis.model
 
 enum class MetisFilter {
     /**
