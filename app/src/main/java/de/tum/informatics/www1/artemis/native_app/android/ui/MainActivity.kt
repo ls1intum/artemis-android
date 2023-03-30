@@ -50,7 +50,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_co
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextReporter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisiblePostList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
@@ -62,7 +61,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.quizR
 import de.tum.informatics.www1.artemis.native_app.feature.settings.navigateToSettings
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsScreen
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch

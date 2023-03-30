@@ -9,12 +9,8 @@ import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndef
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
@@ -22,7 +18,11 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketP
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisContentViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow

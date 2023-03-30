@@ -1,9 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push
 
 import android.content.Context
-import androidx.compose.material3.contentColorFor
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
 
 object ArtemisNotificationBuilder {
 

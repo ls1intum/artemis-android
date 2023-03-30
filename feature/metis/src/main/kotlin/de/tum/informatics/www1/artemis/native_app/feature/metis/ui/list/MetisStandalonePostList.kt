@@ -33,9 +33,9 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisModificationFailureDialog
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisOutdatedBanner
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.PostItem

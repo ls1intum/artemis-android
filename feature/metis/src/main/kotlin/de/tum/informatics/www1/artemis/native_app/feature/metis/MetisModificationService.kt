@@ -1,10 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 
 /**
  * Service that can modify metis posts.

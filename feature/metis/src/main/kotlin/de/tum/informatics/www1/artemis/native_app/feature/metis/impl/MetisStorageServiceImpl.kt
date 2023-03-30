@@ -2,6 +2,12 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.impl
 
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.DisplayPriority
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.dao.MetisDao
@@ -16,12 +22,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.Metis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.PostReactionEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostTagEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostingEntity
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.DisplayPriority
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
 import java.util.UUID
