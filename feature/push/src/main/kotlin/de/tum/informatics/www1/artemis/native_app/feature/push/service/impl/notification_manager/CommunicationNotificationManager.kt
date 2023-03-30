@@ -20,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.communicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
 
@@ -27,36 +28,35 @@ import kotlinx.datetime.Instant
  * Handles communication notifications and pops them as communication style push notifications.
  * Uses a database to store previously sent notification.
  */
-internal class CommunicationNotificationManager(
+internal class CommunicationNotificationManagerImpl(
     private val context: Context,
     private val dbProvider: PushCommunicationDatabaseProvider
-) : BaseNotificationManager {
+) : CommunicationNotificationManager, BaseNotificationManager {
 
-    fun popNotification(
+    override suspend fun popNotification(
         artemisNotification: ArtemisNotification<CommunicationNotificationType>
     ) {
-        val (communication, messages) = runBlocking {
-            dbProvider.database.withTransaction {
-                dbProvider.pushCommunicationDao.insertNotification(artemisNotification) {
-                    ArtemisNotificationManager.getNextNotificationId(context)
-                }
-
-                val parentId = artemisNotification.parentId
-                val communicationType = artemisNotification.communicationType
-
-                val communication = dbProvider.pushCommunicationDao.getCommunication(
-                    parentId,
-                    communicationType
-                )
-
-                val messages = dbProvider.pushCommunicationDao.getCommunicationMessages(
-                    parentId,
-                    communicationType
-                )
-
-                communication to messages
+        val (communication, messages) = dbProvider.database.withTransaction {
+            dbProvider.pushCommunicationDao.insertNotification(artemisNotification) {
+                ArtemisNotificationManager.getNextNotificationId(context)
             }
+
+            val parentId = artemisNotification.parentId
+            val communicationType = artemisNotification.communicationType
+
+            val communication = dbProvider.pushCommunicationDao.getCommunication(
+                parentId,
+                communicationType
+            )
+
+            val messages = dbProvider.pushCommunicationDao.getCommunicationMessages(
+                parentId,
+                communicationType
+            )
+
+            communication to messages
         }
+
 
         if (messages.isEmpty()) return
         popCommunicationNotification(communication, messages)
@@ -65,7 +65,7 @@ internal class CommunicationNotificationManager(
     /**
      * Add a message to the notification sent by the user themself using direct reply.
      */
-    suspend fun addSelfMessage(
+    override suspend fun addSelfMessage(
         parentId: Long,
         type: CommunicationType,
         authorName: String,
@@ -76,10 +76,7 @@ internal class CommunicationNotificationManager(
         repopNotification(parentId, type)
     }
 
-    /**
-     * Reads the notification from the database and pops the notification
-     */
-    suspend fun repopNotification(
+    override suspend fun repopNotification(
         parentId: Long,
         communicationType: CommunicationType
     ) {
@@ -149,19 +146,17 @@ internal class CommunicationNotificationManager(
     }
 
 
-    fun deleteCommunication(parentId: Long, type: CommunicationType) {
-        val notificationId = runBlocking {
-            dbProvider.database.withTransaction {
-                if (!dbProvider.pushCommunicationDao.hasPushCommunication(
-                        parentId,
-                        type
-                    )
-                ) return@withTransaction null
+    override suspend fun deleteCommunication(parentId: Long, type: CommunicationType) {
+        val notificationId = dbProvider.database.withTransaction {
+            if (!dbProvider.pushCommunicationDao.hasPushCommunication(
+                    parentId,
+                    type
+                )
+            ) return@withTransaction null
 
-                val communication = dbProvider.pushCommunicationDao.getCommunication(parentId, type)
-                dbProvider.pushCommunicationDao.deleteCommunication(parentId, type)
-                communication.notificationId
-            }
+            val communication = dbProvider.pushCommunicationDao.getCommunication(parentId, type)
+            dbProvider.pushCommunicationDao.deleteCommunication(parentId, type)
+            communication.notificationId
         }
 
         if (notificationId != null) {

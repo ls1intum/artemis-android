@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
@@ -49,6 +50,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_co
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextReporter
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisiblePostList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleStandalonePostDetails
+import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.navigateToQuizParticipation
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.quizParticipation
@@ -60,6 +65,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 
@@ -70,10 +76,12 @@ import org.koin.android.ext.android.get
 class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
 
     private val accountService: AccountService = get()
+    private val communicationNotificationManager: CommunicationNotificationManager = get()
 
-    override val visibleMetisContexts: MutableStateFlow<List<VisibleMetisContext>> = MutableStateFlow(
-        emptyList()
-    )
+    override val visibleMetisContexts: MutableStateFlow<List<VisibleMetisContext>> =
+        MutableStateFlow(
+            emptyList()
+        )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,6 +97,8 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
         val visibleMetisContextManager = object : VisibleMetisContextManager {
             override fun registerMetisContext(metisContext: VisibleMetisContext) {
                 visibleMetisContexts.value = visibleMetisContexts.value + metisContext
+
+                cancelCommunicationNotifications(metisContext)
             }
 
             override fun unregisterMetisContext(metisContext: VisibleMetisContext) {
@@ -303,6 +313,22 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
         override fun openLink(url: String) {
             CustomTabsIntent.Builder().build()
                 .launchUrl(context, Uri.parse(url))
+        }
+    }
+
+    private fun cancelCommunicationNotifications(visibleMetisContext: VisibleMetisContext) {
+        if (visibleMetisContext is VisibleStandalonePostDetails) {
+            val parentId = visibleMetisContext.postId
+            val communicationType: CommunicationType = when (visibleMetisContext.metisContext) {
+                is MetisContext.Course -> CommunicationType.QNA_COURSE
+                is MetisContext.Exercise -> CommunicationType.QNA_EXERCISE
+                is MetisContext.Lecture -> CommunicationType.QNA_LECTURE
+                is MetisContext.Conversation -> throw NotImplementedError()
+            }
+
+            lifecycleScope.launch {
+                communicationNotificationManager.deleteCommunication(parentId, communicationType)
+            }
         }
     }
 }

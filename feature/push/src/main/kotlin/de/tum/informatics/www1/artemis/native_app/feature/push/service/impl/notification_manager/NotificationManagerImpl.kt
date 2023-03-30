@@ -9,10 +9,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscArtemisNotification
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.UnknownArtemisNotification
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.UnknownNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationManager
 
 /**

@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
+import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -21,6 +23,8 @@ class DeleteNotificationReceiver : BroadcastReceiver(), KoinComponent {
 
         val communicationNotificationManager: CommunicationNotificationManager = get()
 
-        communicationNotificationManager.deleteCommunication(parentId, communicationType)
+        runBlocking {
+            communicationNotificationManager.deleteCommunication(parentId, communicationType)
+        }
     }
 }

@@ -8,7 +8,6 @@ import androidx.room.withTransaction
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.data.retryNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -21,13 +20,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificati
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CoursePostTarget
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.ExercisePostTarget
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.LecturePostTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Clock
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 
 /**
  * Worker that sends a reply to a Metis posting to the server.
@@ -99,24 +94,21 @@ internal class ReplyWorker(
                 when (response) {
                     is NetworkResponse.Response -> {
                         // We can add to the notification that the user has responded. However, this does not have super high priority
-                        val authData = accountService.authenticationData.first()
-                        if (authData is AccountService.AuthenticationData.LoggedIn) {
-                            val accountData = serverDataService.getAccountData(
-                                serverConfigurationService.serverUrl.first(),
-                                authData.authToken
-                            )
+                        val accountData = serverDataService.getAccountData(
+                            serverConfigurationService.serverUrl.first(),
+                            authData.authToken
+                        )
 
-                            if (accountData is NetworkResponse.Response) {
-                                val authorName =
-                                    "${accountData.data.firstName} ${accountData.data.lastName}"
-                                communicationNotificationManager.addSelfMessage(
-                                    parentId = parentId,
-                                    type = communicationType,
-                                    authorName = authorName,
-                                    body = replyContent,
-                                    date = time
-                                )
-                            }
+                        if (accountData is NetworkResponse.Response) {
+                            val authorName =
+                                "${accountData.data.firstName} ${accountData.data.lastName}"
+                            communicationNotificationManager.addSelfMessage(
+                                parentId = parentId,
+                                type = communicationType,
+                                authorName = authorName,
+                                body = replyContent,
+                                date = time
+                            )
                         }
 
                         Result.success()
