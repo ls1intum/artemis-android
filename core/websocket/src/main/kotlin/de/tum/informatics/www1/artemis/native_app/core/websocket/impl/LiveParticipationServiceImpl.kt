@@ -1,10 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
 
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Submission
@@ -31,12 +26,7 @@ import kotlin.time.Duration.Companion.minutes
  * From: https://github.com/ls1intum/Artemis/blob/5c13e2e1b5b6d81594b9123946f040cbf6f0cfc6/src/main/webapp/app/overview/participation-websocket.service.ts
  */
 internal class LiveParticipationServiceImpl(
-    private val websocketProvider: WebsocketProvider,
-    private val ktorProvider: KtorProvider,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val networkStatusProvider: NetworkStatusProvider,
-    private val accountService: AccountService,
-    private val jsonProvider: JsonProvider
+    private val websocketProvider: WebsocketProvider
 ) :
     LiveParticipationService {
 
@@ -210,6 +200,7 @@ internal class LiveParticipationServiceImpl(
 
     @Serializable(with = WebsocketProgrammingSubmissionMessage.Deserializer::class)
     private sealed class WebsocketProgrammingSubmissionMessage {
+        @Suppress("unused")
         @Serializable
         class Error(val error: String, val participationId: Long?) :
             WebsocketProgrammingSubmissionMessage()

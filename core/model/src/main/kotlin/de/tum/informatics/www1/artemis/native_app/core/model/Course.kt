@@ -19,7 +19,7 @@ data class Course(
     val semester: String = "",
     val registrationConfirmationMessage: String = "",
     val accuracyOfScores: Float = 1f,
-    val postsEnabled: Boolean = false,
+    val postsEnabled: Boolean = true,
     val color: String? = null,
 ) {
     private val maxPointsPossibleHalves get() = exercises.sumOf { it.maxPointsHalves }

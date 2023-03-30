@@ -8,6 +8,6 @@ interface NotificationManager {
 
     suspend fun popNotification(
         context: Context,
-        artemisNotification: ArtemisNotification<NotificationType>
+        artemisNotification: ArtemisNotification<*>
     )
 }

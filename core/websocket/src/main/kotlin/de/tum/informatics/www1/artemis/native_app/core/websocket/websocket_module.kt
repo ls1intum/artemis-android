@@ -10,11 +10,6 @@ val websocketModule = module {
     singleOf(::WebsocketProvider)
     single<LiveParticipationService> {
         LiveParticipationServiceImpl(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
             get()
         )
     }

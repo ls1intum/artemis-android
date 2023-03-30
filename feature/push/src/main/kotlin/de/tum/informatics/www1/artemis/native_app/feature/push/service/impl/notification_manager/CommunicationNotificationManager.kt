@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.room.withTransaction
@@ -20,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.communicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Instant
 
 /**
  * Handles communication notifications and pops them as communication style push notifications.
@@ -61,6 +63,20 @@ internal class CommunicationNotificationManager(
     }
 
     /**
+     * Add a message to the notification sent by the user themself using direct reply.
+     */
+    suspend fun addSelfMessage(
+        parentId: Long,
+        type: CommunicationType,
+        authorName: String,
+        body: String,
+        date: Instant
+    ) {
+        dbProvider.pushCommunicationDao.insertSelfMessage(parentId, type, authorName, body, date)
+        repopNotification(parentId, type)
+    }
+
+    /**
      * Reads the notification from the database and pops the notification
      */
     suspend fun repopNotification(
@@ -68,6 +84,12 @@ internal class CommunicationNotificationManager(
         communicationType: CommunicationType
     ) {
         val (communication, messages) = dbProvider.database.withTransaction {
+            if (!dbProvider.pushCommunicationDao.hasPushCommunication(
+                    parentId,
+                    communicationType
+                )
+            ) return@withTransaction null to null
+
             val communication = dbProvider.pushCommunicationDao.getCommunication(
                 parentId,
                 communicationType
@@ -81,7 +103,9 @@ internal class CommunicationNotificationManager(
             communication to messages
         }
 
-        popCommunicationNotification(communication, messages)
+        if (communication != null && messages != null) {
+            popCommunicationNotification(communication, messages)
+        }
     }
 
     private fun popCommunicationNotification(
@@ -118,6 +142,7 @@ internal class CommunicationNotificationManager(
                     notificationId = communication.notificationId
                 )
             )
+            .addAction(buildMarkAsReadAction(context = context, communication = communication))
             .build()
 
         popNotification(context, notification, communication.notificationId)
@@ -125,8 +150,24 @@ internal class CommunicationNotificationManager(
 
 
     fun deleteCommunication(parentId: Long, type: CommunicationType) {
-        runBlocking {
-            dbProvider.pushCommunicationDao.deleteCommunication(parentId, type)
+        val notificationId = runBlocking {
+            dbProvider.database.withTransaction {
+                if (!dbProvider.pushCommunicationDao.hasPushCommunication(
+                        parentId,
+                        type
+                    )
+                ) return@withTransaction null
+
+                val communication = dbProvider.pushCommunicationDao.getCommunication(parentId, type)
+                dbProvider.pushCommunicationDao.deleteCommunication(parentId, type)
+                communication.notificationId
+            }
+        }
+
+        if (notificationId != null) {
+            NotificationManagerCompat
+                .from(context)
+                .cancel(notificationId)
         }
     }
 
@@ -190,11 +231,11 @@ internal class CommunicationNotificationManager(
         type: CommunicationType
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
-        0,
+        (type.ordinal shl 16) + (parentId % Int.MAX_VALUE).toInt(),
         Intent(context, DeleteNotificationReceiver::class.java)
             .putExtra(DeleteNotificationReceiver.PARENT_ID, parentId)
             .putExtra(DeleteNotificationReceiver.COMMUNICATION_TYPE, type.name),
-        PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        PendingIntent.FLAG_IMMUTABLE
     )
 
     private fun buildDirectReplyAction(
@@ -237,7 +278,21 @@ internal class CommunicationNotificationManager(
             replyText,
             replyPendingIntent
         )
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
             .addRemoteInput(remoteInput)
+            .build()
+    }
+
+    private fun buildMarkAsReadAction(
+        context: Context,
+        communication: PushCommunicationEntity
+    ): NotificationCompat.Action {
+        return NotificationCompat.Action.Builder(
+            R.drawable.baseline_mark_chat_read_24,
+            context.getString(R.string.push_notification_action_mark_as_read),
+            constructDeletionIntent(context, communication.parentId, communication.type)
+        )
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
             .build()
     }
 }

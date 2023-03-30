@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.communicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.NotificationTargetManager
+import kotlinx.datetime.Instant
 
 @Dao
 interface PushCommunicationDao {
@@ -40,7 +41,6 @@ interface PushCommunicationDao {
         generateNotificationId: suspend () -> Int
     ) {
         val parentId = artemisNotification.parentId
-
         val type = artemisNotification.communicationType
 
         val courseTitle: String = artemisNotification.notificationPlaceholders[0]
@@ -52,11 +52,13 @@ interface PushCommunicationDao {
         val containerTitle: String? = when (artemisNotification.type) {
             StandalonePostCommunicationNotificationType.NEW_COURSE_POST,
             ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_COURSE_POST,
-            StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_POST-> null
+            StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_POST -> null
+
             StandalonePostCommunicationNotificationType.NEW_EXERCISE_POST, StandalonePostCommunicationNotificationType.NEW_LECTURE_POST ->
                 artemisNotification.notificationPlaceholders[5]
+
             ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_EXERCISE_POST,
-            ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_LECTURE_POST-> artemisNotification.notificationPlaceholders[8]
+            ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_LECTURE_POST -> artemisNotification.notificationPlaceholders[8]
         }
 
         if (hasPushCommunication(parentId, type)) {
@@ -102,6 +104,28 @@ interface PushCommunicationDao {
         }
 
         insertCommunicationMessage(message)
+    }
+
+    @Transaction
+    suspend fun insertSelfMessage(
+        parentId: Long,
+        type: CommunicationType,
+        authorName: String,
+        body: String,
+        date: Instant
+    ) {
+        if (hasPushCommunication(parentId, type)) {
+            insertCommunicationMessage(
+                CommunicationMessageEntity(
+                    communicationParentId = parentId,
+                    communicationType = type,
+                    title = null,
+                    text = body,
+                    authorName = authorName,
+                    date = date
+                )
+            )
+        }
     }
 
     @Query("select * from push_communication where parent_id = :parentId and type = :type")

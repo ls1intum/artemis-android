@@ -15,6 +15,8 @@
     <string name="push_notification_channel_lecture_post_name">Lecture Posts</string>
     <string name="push_notification_channel_lecture_post_description">New posts in lectures and replies to lecture posts.</string>
 
+    <string name="push_notification_action_mark_as_read">Mark as read</string>
+
     <string name="push_notification_action_reply">Reply</string>
     <string name="push_notification_send_reply_failed_title">Could not send reply</string>
     <string name="push_notification_send_reply_failed_message">Affected reply: %1$s</string>
@@ -95,4 +97,7 @@
     <string name="conversation_title_course_post">%1$s: %2$s</string>
     <string name="conversation_title_exercise_post">%1$s/%2$s: %3$s</string>
     <string name="conversation_title_lecture_post">%1$s/%2$s: %3$s</string>
+
+    <string name="push_notification_unknown_title">Your application may be outdated.</string>
+    <string name="push_notification_unknown_body">You have received a notification which could not be processed. Try to update your application.</string>
 </resources>

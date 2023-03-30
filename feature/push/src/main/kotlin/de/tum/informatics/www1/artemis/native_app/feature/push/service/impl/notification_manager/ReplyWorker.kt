@@ -8,6 +8,8 @@ import androidx.room.withTransaction
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.retryNetworkCall
+import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
@@ -33,13 +35,15 @@ import kotlinx.serialization.json.Json
  * If the input is valid, but the reply could not be uploaded, the worker will schedule a retry.
  * If the upload failed 5 times, the worker will fail and pop a notification to notify the user about the failure.
  */
-class ReplyWorker(
+internal class ReplyWorker(
     appContext: Context,
     params: WorkerParameters,
     private val metisModificationService: MetisModificationService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
-    private val pushCommunicationDatabaseProvider: PushCommunicationDatabaseProvider
+    private val pushCommunicationDatabaseProvider: PushCommunicationDatabaseProvider,
+    private val communicationNotificationManager: CommunicationNotificationManager,
+    private val serverDataService: ServerDataService
 ) :
     CoroutineWorker(appContext, params) {
 
@@ -66,7 +70,10 @@ class ReplyWorker(
                     communicationType
                 )
 
-            val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(communication.type, communication.target)
+            val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
+                communication.type,
+                communication.target
+            )
             metisTarget.metisContext to metisTarget.postId
         }
 
@@ -74,6 +81,8 @@ class ReplyWorker(
 
         return when (val authData = accountService.authenticationData.first()) {
             is AccountService.AuthenticationData.LoggedIn -> {
+                val time = Clock.System.now()
+
                 val response = metisModificationService.createAnswerPost(
                     metisContext,
                     AnswerPost(
@@ -88,7 +97,31 @@ class ReplyWorker(
                 )
 
                 when (response) {
-                    is NetworkResponse.Response -> Result.success()
+                    is NetworkResponse.Response -> {
+                        // We can add to the notification that the user has responded. However, this does not have super high priority
+                        val authData = accountService.authenticationData.first()
+                        if (authData is AccountService.AuthenticationData.LoggedIn) {
+                            val accountData = serverDataService.getAccountData(
+                                serverConfigurationService.serverUrl.first(),
+                                authData.authToken
+                            )
+
+                            if (accountData is NetworkResponse.Response) {
+                                val authorName =
+                                    "${accountData.data.firstName} ${accountData.data.lastName}"
+                                communicationNotificationManager.addSelfMessage(
+                                    parentId = parentId,
+                                    type = communicationType,
+                                    authorName = authorName,
+                                    body = replyContent,
+                                    date = time
+                                )
+                            }
+                        }
+
+                        Result.success()
+                    }
+
                     is NetworkResponse.Failure -> {
                         if (runAttemptCount > 5) {
                             popFailureNotification(replyContent)
@@ -106,7 +139,10 @@ class ReplyWorker(
         val id = ArtemisNotificationManager.getNextNotificationId(applicationContext)
 
         val notification =
-            NotificationCompat.Builder(applicationContext, ArtemisNotificationChannel.MiscNotificationChannel.id)
+            NotificationCompat.Builder(
+                applicationContext,
+                ArtemisNotificationChannel.MiscNotificationChannel.id
+            )
                 .setSmallIcon(R.drawable.push_notification_icon)
                 .setContentTitle(applicationContext.getString(R.string.push_notification_send_reply_failed_title))
                 .setContentText(

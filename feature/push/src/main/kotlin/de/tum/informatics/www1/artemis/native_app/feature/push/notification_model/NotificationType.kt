@@ -70,3 +70,6 @@ enum class MiscNotificationType(@StringRes val title: Int, @StringRes val body: 
     TUTORIAL_GROUP_ASSIGNED(R.string.push_notification_title_tutorialGroupAssigned, R.string.push_notification_text_tutorialGroupAssigned),
     TUTORIAL_GROUP_UNASSIGNED(R.string.push_notification_title_tutorialGroupUnassigned, R.string.push_notification_text_tutorialGroupUnassigned),
 }
+
+@Serializable
+object UnknownNotificationType : NotificationType
