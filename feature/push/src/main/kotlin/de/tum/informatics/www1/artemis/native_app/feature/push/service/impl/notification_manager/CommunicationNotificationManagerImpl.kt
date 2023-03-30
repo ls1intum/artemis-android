@@ -21,7 +21,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.communicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
-import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
 
 /**
@@ -119,6 +118,7 @@ internal class CommunicationNotificationManagerImpl(
         val notification = NotificationCompat.Builder(context, notificationChannel.id)
             .setStyle(buildMessagingStyle(communication, messages))
             .setSmallIcon(communication.type.notificationIcon)
+            .setAutoCancel(true)
             .setContentIntent(
                 NotificationTargetManager.getMetisContentIntent(
                     context = context,

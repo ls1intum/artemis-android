@@ -316,6 +316,12 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        visibleMetisContexts.value.forEach(::cancelCommunicationNotifications)
+    }
+
     private fun cancelCommunicationNotifications(visibleMetisContext: VisibleMetisContext) {
         if (visibleMetisContext is VisibleStandalonePostDetails) {
             val parentId = visibleMetisContext.postId
