@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="push_notification_channel_name">General</string>
-    <string name="push_notification_channel_descriptions">All notifications. Configure which notifications you want to receive in the app settings.</string>
+    <string name="push_notification_channel_misc_name">Miscellaneous</string>
+    <string name="push_notification_channel_misc_description">All non-communication related notifications.</string>
+
+    <string name="push_notification_channel_course_announcement_name">Course Announcement</string>
+    <string name="push_notification_channel_course_announcement_description">Instructors can create important course-wide announcements.</string>
+
+    <string name="push_notification_channel_course_post_name">Course Posts</string>
+    <string name="push_notification_channel_course_post_description">New posts in courses and replies to course posts.</string>
+
+    <string name="push_notification_channel_exercise_post_name">Exercise Posts</string>
+    <string name="push_notification_channel_exercise_post_description">New posts in exercises and replies to exercise posts.</string>
+
+    <string name="push_notification_channel_lecture_post_name">Lecture Posts</string>
+    <string name="push_notification_channel_lecture_post_description">New posts in lectures and replies to lecture posts.</string>
 
     <string name="push_notification_action_reply">Reply</string>
     <string name="push_notification_send_reply_failed_title">Could not send reply</string>

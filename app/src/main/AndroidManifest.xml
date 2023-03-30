@@ -99,6 +99,6 @@
 
         <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
 
-        <receiver android:name="de.tum.informatics.www1.artemis.native_app.feature.push.ReplyReceiver" />
+        <receiver android:name="de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.ReplyReceiver" />
     </application>
 </manifest>

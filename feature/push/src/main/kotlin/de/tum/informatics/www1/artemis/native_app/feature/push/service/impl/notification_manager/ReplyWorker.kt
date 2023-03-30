@@ -1,9 +1,10 @@
-package de.tum.informatics.www1.artemis.native_app.feature.push
+package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager
 
 import android.content.Context
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.room.withTransaction
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -13,6 +14,14 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisConte
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
+import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationManager
+import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
+import de.tum.informatics.www1.artemis.native_app.feature.push.R
+import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CoursePostTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.ExercisePostTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.LecturePostTarget
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Clock
 import kotlinx.serialization.decodeFromString
@@ -29,25 +38,37 @@ class ReplyWorker(
     params: WorkerParameters,
     private val metisModificationService: MetisModificationService,
     private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService
+    private val accountService: AccountService,
+    private val pushCommunicationDatabaseProvider: PushCommunicationDatabaseProvider
 ) :
     CoroutineWorker(appContext, params) {
 
     companion object {
-        const val KEY_METIS_CONTEXT = "metis_context"
-        const val KEY_POST_ID = "post_id"
+        const val KEY_PARENT_ID = "parent_id"
+        const val KEY_COMMUNICATION_TYPE = "communication_type"
         const val KEY_REPLY_CONTENT = "reply_content"
 
         private const val TAG = "ReplyWorker"
     }
 
     override suspend fun doWork(): Result {
-        val metisContext: MetisContext =
-            Json.decodeFromString(
-                inputData.getString(KEY_METIS_CONTEXT) ?: return Result.failure()
-            )
+        val parentId: Long = inputData.getLong(KEY_PARENT_ID, 0)
+        val communicationType: CommunicationType = CommunicationType.valueOf(
+            inputData.getString(
+                KEY_COMMUNICATION_TYPE
+            ) ?: return Result.failure()
+        )
 
-        val postId: Long = inputData.getLong(KEY_POST_ID, 0L)
+        val (metisContext: MetisContext, postId: Long) = pushCommunicationDatabaseProvider.database.withTransaction {
+            val communication =
+                pushCommunicationDatabaseProvider.pushCommunicationDao.getCommunication(
+                    parentId,
+                    communicationType
+                )
+
+            val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(communication.type, communication.target)
+            metisTarget.metisContext to metisTarget.postId
+        }
 
         val replyContent = inputData.getString(KEY_REPLY_CONTENT) ?: return Result.failure()
 
@@ -76,6 +97,7 @@ class ReplyWorker(
                     }
                 }
             }
+
             AccountService.AuthenticationData.NotLoggedIn -> Result.failure()
         }
     }
@@ -84,7 +106,7 @@ class ReplyWorker(
         val id = ArtemisNotificationManager.getNextNotificationId(applicationContext)
 
         val notification =
-            NotificationCompat.Builder(applicationContext, ArtemisNotificationChannel.id)
+            NotificationCompat.Builder(applicationContext, ArtemisNotificationChannel.MiscNotificationChannel.id)
                 .setSmallIcon(R.drawable.push_notification_icon)
                 .setContentTitle(applicationContext.getString(R.string.push_notification_send_reply_failed_title))
                 .setContentText(

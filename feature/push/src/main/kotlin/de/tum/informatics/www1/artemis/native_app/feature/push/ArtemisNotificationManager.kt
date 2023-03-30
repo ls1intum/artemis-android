@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.NotificationTarget
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.ReplyReceiver
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable

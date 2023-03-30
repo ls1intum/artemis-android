@@ -1,9 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager
 
 import android.content.Context
-import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationBuilder
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationManager
@@ -26,7 +24,7 @@ internal class MiscNotificationManager(private val context: Context) : BaseNotif
             artemisNotification.notificationPlaceholders
         )
 
-        val notification = NotificationCompat.Builder(context, ArtemisNotificationChannel.id)
+        val notification = NotificationCompat.Builder(context, ArtemisNotificationChannel.MiscNotificationChannel.id)
             .apply {
                 setContentTitle(notificationContent.title)
                 setContentText(notificationContent.body)

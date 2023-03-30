@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.notification_mod
 
 import androidx.annotation.StringRes
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
+import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -24,6 +25,17 @@ enum class ReplyPostCommunicationNotificationType : CommunicationNotificationTyp
     NEW_REPLY_FOR_LECTURE_POST,
     NEW_REPLY_FOR_COURSE_POST
 }
+
+val CommunicationNotificationType.communicationType: CommunicationType get() = when(this) {
+    ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_EXERCISE_POST,
+    StandalonePostCommunicationNotificationType.NEW_EXERCISE_POST -> CommunicationType.QNA_EXERCISE
+    ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_LECTURE_POST,
+    StandalonePostCommunicationNotificationType.NEW_LECTURE_POST -> CommunicationType.QNA_LECTURE
+    ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_COURSE_POST,
+    StandalonePostCommunicationNotificationType.NEW_COURSE_POST -> CommunicationType.QNA_COURSE
+    StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_POST -> CommunicationType.ANNOUNCEMENT
+}
+
 
 @Serializable
 enum class MiscNotificationType(@StringRes val title: Int, @StringRes val body: Int) : NotificationType {

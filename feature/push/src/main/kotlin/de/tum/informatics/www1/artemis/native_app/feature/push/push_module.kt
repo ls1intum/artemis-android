@@ -10,6 +10,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.Work
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.MiscNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.NotificationManagerImpl
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.ReplyWorker
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel

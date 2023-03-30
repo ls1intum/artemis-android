@@ -15,11 +15,11 @@ data class ArtemisNotification<T : NotificationType>(
 
 val ArtemisNotification<CommunicationNotificationType>.parentId: Long
     get() = NotificationTargetManager.getCommunicationNotificationTarget(
-        type,
+        type.communicationType,
         target
     ).postId
 
 val ArtemisNotification<CommunicationNotificationType>.communicationType: CommunicationType
     get() = when (type) {
-        is StandalonePostCommunicationNotificationType, is ReplyPostCommunicationNotificationType -> CommunicationType.QUESTION_AND_ANSWER
+        is StandalonePostCommunicationNotificationType, is ReplyPostCommunicationNotificationType -> CommunicationType.QNA_COURSE
     }

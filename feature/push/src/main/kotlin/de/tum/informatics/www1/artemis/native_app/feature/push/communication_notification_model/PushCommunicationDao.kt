@@ -24,7 +24,12 @@ interface PushCommunicationDao {
     suspend fun insertPushCommunication(pushCommunicationEntity: PushCommunicationEntity)
 
     @Query("update push_communication set course_title = :courseTitle, title = :title where parent_id = :parentId and type = :type")
-    suspend fun updatePushCommunication(parentId: Long, type: CommunicationType, courseTitle: String, title: String?)
+    suspend fun updatePushCommunication(
+        parentId: Long,
+        type: CommunicationType,
+        courseTitle: String,
+        title: String?
+    )
 
     @Insert
     suspend fun insertCommunicationMessage(communicationMessageEntity: CommunicationMessageEntity)
@@ -44,6 +49,16 @@ interface PushCommunicationDao {
         // val postCreationDate: String = artemisNotification.notificationPlaceholders[3]
         val postAuthor: String = artemisNotification.notificationPlaceholders[4]
 
+        val containerTitle: String? = when (artemisNotification.type) {
+            StandalonePostCommunicationNotificationType.NEW_COURSE_POST,
+            ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_COURSE_POST,
+            StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_POST-> null
+            StandalonePostCommunicationNotificationType.NEW_EXERCISE_POST, StandalonePostCommunicationNotificationType.NEW_LECTURE_POST ->
+                artemisNotification.notificationPlaceholders[5]
+            ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_EXERCISE_POST,
+            ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_LECTURE_POST-> artemisNotification.notificationPlaceholders[8]
+        }
+
         if (hasPushCommunication(parentId, type)) {
             updatePushCommunication(parentId, type, courseTitle, postTitle)
         } else {
@@ -52,7 +67,9 @@ interface PushCommunicationDao {
                 type = type,
                 notificationId = generateNotificationId(),
                 courseTitle = courseTitle,
-                title = postTitle
+                containerTitle = containerTitle,
+                title = postTitle,
+                target = artemisNotification.target
             )
 
             insertPushCommunication(pushCommunicationEntity)

@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.android
 
 import android.app.Application
 import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
@@ -22,7 +21,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lectureMo
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
-import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.quizParticipationModule
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsModule
@@ -66,19 +64,18 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = getString(R.string.push_notification_channel_name)
-            val description = getString(R.string.push_notification_channel_descriptions)
+            ArtemisNotificationChannel.values().forEach { notificationChannel ->
+                val channel = NotificationChannel(
+                    notificationChannel.id,
+                    getString(notificationChannel.title),
+                    notificationChannel.importance
+                )
+                channel.description = getString(notificationChannel.description)
 
-            val channel = NotificationChannel(
-                ArtemisNotificationChannel.id,
-                name,
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            channel.description = description
-
-            NotificationManagerCompat
-                .from(this)
-                .createNotificationChannel(channel)
+                NotificationManagerCompat
+                    .from(this)
+                    .createNotificationChannel(channel)
+            }
         }
     }
 
