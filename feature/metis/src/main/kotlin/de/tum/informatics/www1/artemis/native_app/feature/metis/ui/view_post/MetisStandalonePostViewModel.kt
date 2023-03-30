@@ -42,8 +42,8 @@ import kotlinx.datetime.Clock
  * ViewModel for the standalone view of communication posts. Handles loading of the singular post by the given post id.
  */
 internal class MetisStandalonePostViewModel(
-    private val postId: StandalonePostId,
-    private val metisContext: MetisContext,
+    val postId: StandalonePostId,
+    val metisContext: MetisContext,
     private val metisStorageService: MetisStorageService,
     private val metisService: MetisService,
     private val networkStatusProvider: NetworkStatusProvider,

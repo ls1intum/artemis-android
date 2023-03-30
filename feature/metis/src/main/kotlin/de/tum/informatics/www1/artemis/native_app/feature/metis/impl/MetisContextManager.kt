@@ -3,8 +3,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.impl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisPostAction
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisPostDTO
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostAction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostDTO
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope

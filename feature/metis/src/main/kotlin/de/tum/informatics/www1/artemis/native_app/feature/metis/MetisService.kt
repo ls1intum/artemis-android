@@ -7,6 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSorti
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostDTO
 import kotlinx.coroutines.flow.Flow
 
 interface MetisService {

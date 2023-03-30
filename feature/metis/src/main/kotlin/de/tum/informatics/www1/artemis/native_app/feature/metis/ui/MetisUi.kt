@@ -53,6 +53,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.Met
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisStandalonePostViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -95,7 +96,8 @@ fun SideBarMetisUi(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            targetState = currentSelectedClientSidePostId
+            targetState = currentSelectedClientSidePostId,
+            label = "Tablet post list to standalone post fade"
         ) { clientSidePostId ->
             if (clientSidePostId == null) {
                 Column(modifier = Modifier.fillMaxSize()) {

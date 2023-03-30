@@ -32,6 +32,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
@@ -40,6 +41,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisOutdated
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.PostItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ProvideEmojis
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisiblePostList
 
 @Composable
 internal fun MetisStandalonePostList(
@@ -51,10 +54,16 @@ internal fun MetisStandalonePostList(
     onClickViewReplies: (clientPostId: String) -> Unit,
     onClickCreatePost: (() -> Unit)?
 ) {
+    ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
+
     val posts: LazyPagingItems<Post> = viewModel.postPagingData.collectAsLazyPagingItems()
     val isDataOutdated = viewModel.isDataOutdated.collectAsState(initial = false).value
 
-    var metisFailure: de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure? by remember { mutableStateOf(null) }
+    var metisFailure: MetisModificationFailure? by remember {
+        mutableStateOf(
+            null
+        )
+    }
 
     val clientId: Long = viewModel.clientId.collectAsState().value.orElse(0L)
 

@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
@@ -38,6 +39,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificatio
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.*
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.MarkdownTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisiblePostList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleStandalonePostDetails
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -55,6 +59,18 @@ internal fun MetisStandalonePostUi(
 ) {
     val postDataState: DataState<Post> by viewModel.post.collectAsState()
     val clientId: Long = viewModel.clientId.collectAsState().value.orElse(0L)
+
+    postDataState.bind { it.serverPostId }.orNull()?.let { serverSidePostId ->
+        ReportVisibleMetisContext(
+            remember(
+                viewModel.metisContext,
+                serverSidePostId
+            ) {
+                VisibleStandalonePostDetails(viewModel.metisContext, serverSidePostId)
+            }
+        )
+    }
+
 
     var metisFailure: MetisModificationFailure? by remember { mutableStateOf(null) }
 

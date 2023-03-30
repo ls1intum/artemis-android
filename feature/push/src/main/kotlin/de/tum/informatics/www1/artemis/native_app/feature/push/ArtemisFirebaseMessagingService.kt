@@ -5,12 +5,20 @@ import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextReporter
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.communicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.NotificationTargetManager
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -41,6 +49,18 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
     private val pushNotificationConfigurationService: PushNotificationConfigurationService = get()
     private val serverConfigurationService: ServerConfigurationService = get()
     private val notificationManager: NotificationManager = get()
+
+    private val currentActivityListener = CurrentActivityListener()
+
+    override fun onCreate() {
+        super.onCreate()
+        application.registerActivityLifecycleCallbacks(currentActivityListener)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        application.unregisterActivityLifecycleCallbacks(currentActivityListener)
+    }
 
     /**
      * Whenever this functions is called we need to synchronize the new token with the server.
@@ -84,6 +104,24 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
         } ?: return
 
         val notification: ArtemisNotification<NotificationType> = Json.decodeFromString(payload)
+
+        // if the metis context this notification is about is already visible we do not pop that notification.
+        val visibleMetisContexts: List<VisibleMetisContext> =
+            (currentActivityListener.currentActivity.value as? VisibleMetisContextReporter)?.visibleMetisContexts?.value.orEmpty()
+
+        val notificationType = notification.type
+        if (notificationType is CommunicationNotificationType) {
+            val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
+                notificationType.communicationType,
+                notification.target
+            )
+
+            val visibleMetisContext =
+                VisibleStandalonePostDetails(metisTarget.metisContext, metisTarget.postId)
+
+            // If the context is already visible cancel now!
+            if (visibleMetisContext in visibleMetisContexts) return
+        }
 
         runBlocking {
             notificationManager.popNotification(

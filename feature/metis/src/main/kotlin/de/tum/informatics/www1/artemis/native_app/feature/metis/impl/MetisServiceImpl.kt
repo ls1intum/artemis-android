@@ -10,7 +10,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSorti
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisPostDTO
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostDTO
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisService
 import io.ktor.client.call.body
 import io.ktor.client.request.get

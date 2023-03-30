@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 sealed class MetisContext(
-    val postPathSegments: List<String>,
+    @Suppress("unused") val postPathSegments: List<String>,
     val standalonePostResourceEndpoint: String,
     val answerPostResourceEndpoint: String
 ) {
