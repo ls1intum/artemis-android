@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
@@ -44,9 +45,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseHeaderViewMode
@@ -111,6 +111,13 @@ internal fun CoursesOverview(
             TopAppBar(
                 title = { Text(text = stringResource(id = R.string.course_overview_title)) },
                 actions = {
+                    IconButton(onClick = viewModel::requestReloadDashboard) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = null
+                        )
+                    }
+
                     IconButton(onClick = onClickRegisterForCourse) {
                         Icon(
                             imageVector = Icons.Default.Add,
@@ -136,27 +143,21 @@ internal fun CoursesOverview(
             retryButtonText = stringResource(id = R.string.courses_loading_try_again),
             onClickRetry = viewModel::requestReloadDashboard
         ) { dashboard: Dashboard ->
-            // TODO: Replace this once pull to refresh is available in material 3 https://issuetracker.google.com/issues/261760718
-            @Suppress("DEPRECATION") val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = false)
-
-            @Suppress("DEPRECATION")
-            SwipeRefresh(state = swipeRefreshState, onRefresh = viewModel::requestReloadDashboard) {
-                if (dashboard.courses.isEmpty()) {
-                    DashboardEmpty(
-                        modifier = Modifier.fillMaxSize(),
-                        onClickSignup = onClickRegisterForCourse
-                    )
-                } else {
-                    CourseList(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp),
-                        courses = dashboard.courses,
-                        serverUrl = serverUrl,
-                        authorizationToken = authToken,
-                        onClickOnCourse = { course -> onViewCourse(course.id) }
-                    )
-                }
+            if (dashboard.courses.isEmpty()) {
+                DashboardEmpty(
+                    modifier = Modifier.fillMaxSize(),
+                    onClickSignup = onClickRegisterForCourse
+                )
+            } else {
+                CourseList(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 8.dp),
+                    courses = dashboard.courses,
+                    serverUrl = serverUrl,
+                    authorizationToken = authToken,
+                    onClickOnCourse = { course -> onViewCourse(course.id) }
+                )
             }
         }
     }
@@ -168,7 +169,7 @@ internal fun CoursesOverview(
 @Composable
 private fun CourseList(
     modifier: Modifier,
-    courses: List<Course>,
+    courses: List<CourseWithScore>,
     serverUrl: String,
     authorizationToken: String,
     onClickOnCourse: (Course) -> Unit
@@ -176,13 +177,13 @@ private fun CourseList(
     CourseItemGrid(
         modifier = modifier,
         courses = courses,
-    ) { course, courseItemModifier, isCompact ->
+    ) { dashboardCourse, courseItemModifier, isCompact ->
         CourseItem(
             modifier = courseItemModifier,
-            course = course,
+            courseWithScore = dashboardCourse,
             serverUrl = serverUrl,
             authorizationToken = authorizationToken,
-            onClick = { onClickOnCourse(course) },
+            onClick = { onClickOnCourse(dashboardCourse.course) },
             isCompact = isCompact
         )
     }
@@ -195,13 +196,13 @@ private fun CourseList(
 fun CourseItem(
     modifier: Modifier,
     isCompact: Boolean,
-    course: Course,
+    courseWithScore: CourseWithScore,
     serverUrl: String,
     authorizationToken: String,
     onClick: () -> Unit
 ) {
-    val currentPoints = 67
-    val maxPoints = 100
+    val currentPoints = courseWithScore.totalScores.studentScores.absoluteScore
+    val maxPoints = courseWithScore.totalScores.maxPoints
 
     val currentPointsFormatted = remember(currentPoints) {
         CoursePointsDecimalFormat.format(currentPoints)
@@ -210,7 +211,7 @@ fun CourseItem(
         CoursePointsDecimalFormat.format(maxPoints)
     }
 
-    val progress = currentPoints.toFloat() / maxPoints.toFloat()
+    val progress = if (maxPoints == 0f) 0f else currentPoints / maxPoints
 
     val progressPercentFormatted = remember(progress) {
         DecimalFormat.getPercentInstance().format(progress)
@@ -219,13 +220,12 @@ fun CourseItem(
     if (isCompact) {
         CompactCourseItemHeader(
             modifier = modifier,
-            course = course,
+            course = courseWithScore.course,
             serverUrl = serverUrl,
             authorizationToken = authorizationToken,
             onClick = onClick,
             compactCourseHeaderViewMode = CompactCourseHeaderViewMode.EXERCISE_AND_LECTURE_COUNT,
             content = {
-                val courseProgress = currentPoints.toFloat() / maxPoints.toFloat()
                 Divider()
 
                 Row(
@@ -237,7 +237,7 @@ fun CourseItem(
                 ) {
                     LinearProgressIndicator(
                         modifier = Modifier.weight(1f),
-                        progress = courseProgress,
+                        progress = progress,
                         trackColor = MaterialTheme.colorScheme.onPrimary
                     )
 
@@ -253,7 +253,7 @@ fun CourseItem(
     } else {
         ExpandedCourseItemHeader(
             modifier = modifier,
-            course = course,
+            course = courseWithScore.course,
             serverUrl = serverUrl,
             authorizationToken = authorizationToken,
             onClick = onClick,
@@ -279,8 +279,8 @@ fun CourseItem(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(vertical = 8.dp),
-                    exerciseCount = course.exercises.size,
-                    lectureCount = course.lectures.size,
+                    exerciseCount = courseWithScore.course.exercises.size,
+                    lectureCount = courseWithScore.course.lectures.size,
                     textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center),
                     alignment = Alignment.CenterHorizontally
                 )

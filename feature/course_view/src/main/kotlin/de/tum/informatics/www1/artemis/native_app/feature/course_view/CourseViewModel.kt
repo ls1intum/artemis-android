@@ -1,13 +1,16 @@
 package de.tum.informatics.www1.artemis.native_app.feature.course_view
 
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
@@ -40,20 +43,23 @@ internal class CourseViewModel(
     private val liveParticipationService: LiveParticipationService,
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
-    courseExerciseService: CourseExerciseService
+    courseExerciseService: CourseExerciseService,
+    networkStatusProvider: NetworkStatusProvider
 ) : BaseExerciseListViewModel(serverConfigurationService, accountService, courseExerciseService) {
 
     private val requestReloadCourse = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     val course: StateFlow<DataState<Course>> =
-        transformLatest(
+        flatMapLatest(
             serverConfigurationService.serverUrl,
             accountService.authToken,
             requestReloadCourse.onStart { emit(Unit) }
         ) { serverUrl, authToken, _ ->
-            emitAll(
-                courseService.getCourse(courseId, serverUrl, authToken)
-            )
+            retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                courseService
+                    .getCourse(courseId, serverUrl, authToken)
+                    .bind { it.course }
+            }
         }
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 

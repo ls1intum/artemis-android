@@ -7,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.DashboardService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -29,7 +29,7 @@ internal class DashboardServiceImpl(
         return retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             performNetworkCall {
                 //Perform a network call to $serverUrl/api/courses/for-dashboard
-                val courses: List<Course> = ktorProvider.ktorClient.get(serverUrl) {
+                val courses: List<CourseWithScore> = ktorProvider.ktorClient.get(serverUrl) {
                     url {
                         appendPathSegments("api", "courses", "for-dashboard")
                     }
