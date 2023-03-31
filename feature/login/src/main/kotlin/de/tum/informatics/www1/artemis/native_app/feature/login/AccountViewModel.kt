@@ -28,5 +28,5 @@ class AccountViewModel(
                 ArtemisInstances.ArtemisInstance.Type.CUSTOM
             )
         }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, ArtemisInstances.TUM_ARTEMIS)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, ArtemisInstances.TumArtemis)
 }

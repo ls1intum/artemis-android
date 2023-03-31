@@ -127,10 +127,10 @@ private fun <T> WeeklyItemsSectionHeader(
                 format.format(fromDate) to format.format(toData)
             }
 
-            stringResource(id = R.string.course_ui_exercise_list_week_header, fromText, toText)
+            stringResource(id = R.string.course_ui_weekly_list_week_header, fromText, toText)
         }
 
-        is GroupedByWeek.Unbound -> stringResource(id = R.string.course_ui_exercise_list_unbound_week_header)
+        is GroupedByWeek.Unbound -> stringResource(id = R.string.course_ui_weekly_list_unbound_week_header)
     }
 
 

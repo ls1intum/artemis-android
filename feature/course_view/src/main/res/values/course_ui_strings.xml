@@ -15,14 +15,14 @@
     <string name="course_ui_loading_course_try_again">Try again</string>
 
     <!--  Supplied with the from date and to date.   -->
-    <string name="course_ui_exercise_list_week_header">%1$s - %2$s</string>
-    <string name="course_ui_exercise_list_unbound_week_header">No time specified</string>
+    <string name="course_ui_weekly_list_week_header">%1$s - %2$s</string>
+    <string name="course_ui_weekly_list_unbound_week_header">No date associated</string>
     <!--  Screen reader information about the expand button to show weekly exercises  -->
     <string name="course_ui_list_expand_button_more_content_info">Expand  list</string>
     <string name="course_ui_list_expand_button_less_content_info">Collapse list</string>
 
     <string name="course_ui_lecture_item_start_date_set">Start date: %1$s</string>
-    <string name="course_ui_lecture_item_start_date_not_set">No start date</string>
+    <string name="course_ui_lecture_item_start_date_not_set">No due date</string>
 
     <!--  Lecture list  -->
     <string name="course_ui_lectures_empty">This course does not have any lectures yet.</string>

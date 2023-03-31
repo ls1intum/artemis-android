@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="create_standalone_post_title">Create post</string>
-    <string name="create_standalone_post_fab_create">Create</string>
+    <string name="create_standalone_post_fab_create">Save</string>
 
-    <string name="create_standalone_post_label_select_context">Select context:</string>
+    <string name="create_standalone_post_label_select_context">Context:</string>
     <string name="create_standalone_post_info_announcement">Announcements are pinned per default and listed at the top of the course overview. Possible replies cannot be marked as resolving. Only instructors can create announcements. All course participants who have not disabled this explicitly will automatically receive an email notification with the announcement content.</string>
 
-    <string name="create_standalone_post_section_title">Post title</string>
+    <string name="create_standalone_post_section_title">Title</string>
     <string name="create_standalone_post_title_label">Enter summarizing title</string>
     <string name="create_standalone_post_title_label_required">A title is required.</string>
-    <string name="create_standalone_post_section_content">Post content</string>
+    <string name="create_standalone_post_section_content">Content</string>
     <string name="create_standalone_post_content_label_required">Content is required.</string>
     <string name="create_standalone_post_section_tags">Tags</string>
     <string name="create_standalone_post_tags_info">Add up to three tags that describe your post. Separate your tags by a comma.</string>

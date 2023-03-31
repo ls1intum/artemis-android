@@ -19,13 +19,15 @@
     <string name="course_wide_context_announcement">Announcement</string>
 
     <string name="metis_filter_client_created">Own</string>
-    <string name="metis_filter_with_reaction">Has reaction</string>
+    <string name="metis_filter_with_reaction">Reacted</string>
     <string name="metis_filter_unresolved">Unresolved</string>
 
     <string name="metis_sorting_strategy_criteria_title">Sort by:</string>
     <string name="metis_sorting_strategy_criteria_date">Date</string>
     <string name="metis_sorting_strategy_criteria_votes">Votes</string>
     <string name="metis_sorting_strategy_criteria_replies">Replies</string>
+
+    <string name="metis_query_placeholder">Search for a post, use # to find a specific post (e.g. #1)</string>
 
     <string name="metis_sorting_strategy_order_title">Order by:</string>
     <string name="metis_sorting_strategy_order_ascending">Ascending</string>

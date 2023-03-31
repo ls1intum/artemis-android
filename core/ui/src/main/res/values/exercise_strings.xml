@@ -3,7 +3,7 @@
 <resources>
 
     <string name="exercise_item_due_date_set">Due date: %1$s</string>
-    <string name="exercise_item_due_date_not_set">No due date</string>
+    <string name="exercise_item_due_date_not_set">No date associated</string>
 
     <!--  Difficulty  -->
     <string name="exercise_difficulty_easy">Easy</string>
@@ -22,6 +22,8 @@
     <string name="exercise_user_not_participated">Not participated.</string>
     <string name="exercise_user_participating">Currently participating.</string>
     <string name="exercise_user_submitted">Already submitted.</string>
+    <!--  Display nothing like the webapp does.  -->
+    <string name="exercise_user_unknown"> </string>
 
     <string name="exercise_result_is_building">Building…</string>
     <string name="exercise_result_no_result">You have no results yet.</string>

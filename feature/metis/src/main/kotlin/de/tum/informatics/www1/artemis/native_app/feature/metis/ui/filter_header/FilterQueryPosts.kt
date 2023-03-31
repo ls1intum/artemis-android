@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,6 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 
 @Composable
 internal fun FilterQueryPosts(
@@ -45,6 +49,14 @@ internal fun FilterQueryPosts(
                 .focusRequester(focusRequester),
             value = query,
             onValueChange = onUpdateQuery,
+            singleLine = true,
+            placeholder = {
+                Text(
+                    text = stringResource(id = R.string.metis_query_placeholder),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         )
 
         IconButton(onClick = onClose) {
