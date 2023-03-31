@@ -12,7 +12,8 @@ enum class ArtemisNotificationChannel(
     MiscNotificationChannel(
         "misc-notification-channel",
         R.string.push_notification_channel_misc_name,
-        R.string.push_notification_channel_misc_description
+        R.string.push_notification_channel_misc_description,
+        NotificationManager.IMPORTANCE_DEFAULT
     ),
     CourseAnnouncementNotificationChannel(
         "course-announcement-notification-channel",
@@ -23,16 +24,19 @@ enum class ArtemisNotificationChannel(
     CoursePostNotificationChannel(
         "course-post-notification-channel",
         R.string.push_notification_channel_course_post_name,
-        R.string.push_notification_channel_course_post_description
+        R.string.push_notification_channel_course_post_description,
+        NotificationManager.IMPORTANCE_HIGH
     ),
     ExercisePostNotificationChannel(
         "exercise-post-notification-channel",
         R.string.push_notification_channel_exercise_post_name,
-        R.string.push_notification_channel_exercise_post_description
+        R.string.push_notification_channel_exercise_post_description,
+        NotificationManager.IMPORTANCE_HIGH
     ),
     LecturePostNotificationChannel(
         "lecture-post-notification-channel",
         R.string.push_notification_channel_lecture_post_name,
-        R.string.push_notification_channel_lecture_post_description
+        R.string.push_notification_channel_lecture_post_description,
+        NotificationManager.IMPORTANCE_HIGH
     )
 }
