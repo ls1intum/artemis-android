@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndefinetly
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
@@ -122,6 +123,7 @@ internal class MetisStandalonePostViewModel(
                                 .asDataStateFlow()
                         } else failureFlow
                     }
+
                     is DataState.Failure -> flowOf(DataState.Failure(standalonePostDataState.throwable))
                     is DataState.Loading -> flowOf(DataState.Loading())
                 }
@@ -149,6 +151,7 @@ internal class MetisStandalonePostViewModel(
                             is StandalonePostId.ClientSideId -> {
                                 post.filterSuccess().filterNotNull().first().serverPostId
                             }
+
                             is StandalonePostId.ServerSideId -> postId.serverSidePostId
                         }
 
@@ -231,6 +234,8 @@ internal class MetisStandalonePostViewModel(
         onResponse: (MetisModificationFailure?) -> Unit
     ): Job {
         return viewModelScope.launch {
+            if (!post.value.isSuccess) return@launch
+
             val replyPost = AnswerPost(
                 creationDate = Clock.System.now(),
                 content = replyText,
@@ -240,6 +245,7 @@ internal class MetisStandalonePostViewModel(
                             serverConfigurationService.host.first(),
                             postId.clientSideId
                         )
+
                         is StandalonePostId.ServerSideId -> postId.serverSidePostId
                     }
                 )

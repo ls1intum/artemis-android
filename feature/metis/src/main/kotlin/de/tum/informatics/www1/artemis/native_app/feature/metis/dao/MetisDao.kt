@@ -5,6 +5,7 @@ import androidx.room.*
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 
@@ -120,20 +121,22 @@ interface MetisDao {
 
     @Query(
         """
-        delete from metis_post_context where
-        server_id = :host and
-        server_post_id not in (:answerServerIds) and
+        delete from answer_postings where
+        parent_post_id = :standalonePostClientId and 
         exists (
-            select * from answer_postings ap where 
-            ap.post_id = client_post_id and
-            ap.parent_post_id = :standalonePostClientId
-        ) 
+            select * from metis_post_context mpc where
+            mpc.server_id = :host and
+            mpc.client_post_id = post_id and
+            mpc.server_post_id not in (:answerServerIds) and
+            mpc.type = :postingType
+        )
     """
     )
     suspend fun removeSuperfluousAnswerPosts(
         host: String,
         standalonePostClientId: String,
-        answerServerIds: List<Long>
+        answerServerIds: List<Long>,
+        postingType: BasePostingEntity.PostingType = BasePostingEntity.PostingType.ANSWER
     )
 
     @Transaction
