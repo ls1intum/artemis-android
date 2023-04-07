@@ -58,7 +58,7 @@ internal fun DragAndDropWorkArea(
 ) {
     val context = LocalContext.current
 
-    val request = remember {
+    val request = remember(imageUrl, questionId) {
         ImageRequest.Builder(context)
             .data(imageUrl)
             .memoryCacheKey("QQ_$questionId")
