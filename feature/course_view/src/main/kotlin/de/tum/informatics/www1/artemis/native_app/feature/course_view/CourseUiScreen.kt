@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.compose.composable
@@ -136,7 +137,7 @@ internal fun CourseUiScreen(
                         Tab(
                             selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
-                            text = { Text(text = text) },
+                            text = { Text(text = text, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                             icon = { Icon(icon, contentDescription = null) }
                         )
                     }
