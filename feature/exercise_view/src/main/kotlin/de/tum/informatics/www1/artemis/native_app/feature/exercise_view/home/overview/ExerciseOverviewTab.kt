@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.LoadingState
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ProblemStatementWebView
 
@@ -33,30 +34,32 @@ internal fun ExerciseOverviewTab(
             actions = actions
         )
 
-        Box(
-            modifier = if (webViewState?.isLoading != true) Modifier.fillMaxWidth() else
-                Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-        ) {
-            if (webViewState != null) {
-                ProblemStatementWebView(
-                    modifier = Modifier.fillMaxWidth(),
-                    webViewState = webViewState,
-                    webView = webView,
-                    setWebView = setWebView
-                )
-            }
-
-            val loadingState = webViewState?.loadingState
-            if (loadingState is LoadingState.Loading) {
-                LinearProgressIndicator(
-                    modifier = Modifier
+        if (exercise !is QuizExercise) {
+            Box(
+                modifier = if (webViewState?.isLoading != true) Modifier.fillMaxWidth() else
+                    Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
-                        .align(Alignment.Center),
-                    progress = loadingState.progress
-                )
+                        .height(200.dp)
+            ) {
+                if (webViewState != null) {
+                    ProblemStatementWebView(
+                        modifier = Modifier.fillMaxWidth(),
+                        webViewState = webViewState,
+                        webView = webView,
+                        setWebView = setWebView
+                    )
+                }
+
+                val loadingState = webViewState?.loadingState
+                if (loadingState is LoadingState.Loading) {
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .align(Alignment.Center),
+                        progress = loadingState.progress
+                    )
+                }
             }
         }
     }
