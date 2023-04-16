@@ -139,7 +139,7 @@ sealed class Exercise {
 
     fun getDueDate(participation: Participation?): Instant? =
         if (dueDate == null) null else {
-            participation?.initializationDate ?: dueDate
+            participation?.individualDueDate ?: dueDate
         }
 }
 

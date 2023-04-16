@@ -248,12 +248,10 @@ private fun isActive(
     exercise: Exercise,
     participation: Participation
 ): Boolean {
-    return latestResult == null && (
-            isAlwaysActive(null, exercise, participation) || (
-                    exercise.dueDate != null
-                            && exercise.getDueDate(participation)?.isInFuture() ?: true
-                    )
-            )
+    val alwaysActive = isAlwaysActive(latestResult, exercise, participation)
+    val isDueDateInFuture = exercise.dueDate != null && exercise.getDueDate(participation)?.isInFuture() ?: true
+
+    return latestResult == null && (alwaysActive || isDueDateInFuture)
 }
 
 @Composable

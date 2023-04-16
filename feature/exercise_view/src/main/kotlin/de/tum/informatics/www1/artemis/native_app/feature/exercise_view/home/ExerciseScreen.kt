@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home
 
-import android.webkit.CookieManager
 import android.webkit.WebView
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.filled.*
@@ -17,7 +16,6 @@ import androidx.navigation.NavController
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.*

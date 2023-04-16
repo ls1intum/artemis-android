@@ -1,6 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.work_area
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,7 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
@@ -21,7 +23,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.scale
 import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
@@ -76,10 +81,40 @@ internal fun DragAndDropWorkArea(
         retryButtonText = stringResource(id = R.string.quiz_participation_load_dnd_image_retry),
         onClickRetry = resultData.requestRetry
     ) { loadedDrawable ->
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            var composableSize by remember { mutableStateOf(IntSize.Zero) }
+        val localDensity = LocalDensity.current
 
-            val painter = remember { BitmapPainter(loadedDrawable.toBitmap().asImageBitmap()) }
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val maxWidthInPx = with(localDensity) { maxWidth.toPx() }
+
+            var composableSize by remember {
+                mutableStateOf(with(localDensity) {
+                    IntSize(
+                        maxWidth.toPx().toInt(),
+                        maxHeight.toPx().toInt()
+                    )
+                })
+            }
+
+            val painter = remember(loadedDrawable, maxWidthInPx) {
+                val bitmap = if (loadedDrawable.intrinsicWidth < maxWidthInPx) {
+                    val scale = maxWidthInPx / loadedDrawable.intrinsicWidth.toFloat()
+                    val newWidth = (loadedDrawable.intrinsicWidth * scale).toInt()
+                    val newHeight = (loadedDrawable.intrinsicHeight * scale).toInt()
+
+                    loadedDrawable
+                        .toBitmap()
+                        .copy(Bitmap.Config.ARGB_8888, true)
+                        .scale(newWidth, newHeight)
+                        .asImageBitmap()
+                } else {
+                    loadedDrawable
+                        .toBitmap()
+                        .asImageBitmap()
+                }
+
+                BitmapPainter(bitmap)
+            }
+
             Image(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -91,17 +126,9 @@ internal fun DragAndDropWorkArea(
                 contentScale = ContentScale.Fit
             )
 
-            val srcSize = Size(
-                loadedDrawable.intrinsicWidth.toFloat(),
-                loadedDrawable.intrinsicHeight.toFloat()
-            )
+            val srcSize = painter.intrinsicSize
 
-            val dstSize = with(LocalDensity.current) {
-                Size(
-                    maxWidth.toPx(),
-                    maxHeight.toPx()
-                )
-            }
+            val dstSize = composableSize.toSize()
 
             val scaleFactor = ContentScale.Fit.computeScaleFactor(srcSize, dstSize)
             val actImageSize = srcSize * scaleFactor
@@ -147,6 +174,7 @@ internal fun DragAndDropWorkArea(
                                     }
                                 )
                             }
+
                             is DragAndDropAreaType.ViewOnly -> {
                                 val isCorrect =
                                     type.sampleSolutionMappings[dropLocation] == dropLocationMapping[dropLocation]
