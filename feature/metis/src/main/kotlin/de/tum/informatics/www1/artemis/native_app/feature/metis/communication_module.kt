@@ -1,13 +1,16 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis
 
-import de.tum.informatics.www1.artemis.native_app.feature.metis.emoji.EmojiService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.EmojiServiceImpl
-import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisContextManager
-import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisModificationServiceImpl
-import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisServiceImpl
-import de.tum.informatics.www1.artemis.native_app.feature.metis.impl.MetisStorageServiceImpl
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.create_standalone_post.CreateStandalonePostViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.list.MetisListViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.EmojiServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.MetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.MetisModificationServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.MetisServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.MetisStorageServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.create_standalone_post.CreateStandalonePostViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisStandalonePostViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -58,6 +61,18 @@ val communicationModule = module {
             params.get(),
             get(),
             get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+
+    viewModel { params ->
+        ConversationOverviewViewModel(
+            params.get(),
             get(),
             get(),
             get(),

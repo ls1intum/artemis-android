@@ -16,12 +16,17 @@ import kotlinx.coroutines.flow.shareIn
 
 class NetworkStatusProviderImpl(context: Context) : NetworkStatusProvider {
 
-    private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     @OptIn(DelicateCoroutinesApi::class)
     override val currentNetworkStatus: Flow<NetworkStatusProvider.NetworkStatus> = callbackFlow {
+        val networksWithInternet = mutableSetOf<Network>()
+
+
         val callback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
+                networksWithInternet += network
                 trySend(NetworkStatusProvider.NetworkStatus.Internet)
             }
 
@@ -29,12 +34,11 @@ class NetworkStatusProviderImpl(context: Context) : NetworkStatusProvider {
                 trySend(NetworkStatusProvider.NetworkStatus.Unavailable)
             }
 
-            override fun onLosing(network: Network, maxMsToLive: Int) {
-                trySend(NetworkStatusProvider.NetworkStatus.Unavailable)
-            }
-
             override fun onLost(network: Network) {
-                trySend(NetworkStatusProvider.NetworkStatus.Unavailable)
+                networksWithInternet -= network
+                if (networksWithInternet.isEmpty()) {
+                    trySend(NetworkStatusProvider.NetworkStatus.Unavailable)
+                }
             }
         }
 

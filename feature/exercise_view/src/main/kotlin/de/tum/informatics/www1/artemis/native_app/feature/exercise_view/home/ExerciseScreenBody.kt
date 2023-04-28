@@ -36,9 +36,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.Exercise
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.overview.ExerciseOverviewTab
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SideBarMetisUi
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SmartphoneMetisUi
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.create_standalone_post.navigateToCreateStandalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.SideBarMetisUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.SmartphoneMetisUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.create_standalone_post.navigateToCreateStandalonePostScreen
 
 // Ratio of metis content in contrast to the actual exercise content
 const val METIS_RATIO = 0.3f

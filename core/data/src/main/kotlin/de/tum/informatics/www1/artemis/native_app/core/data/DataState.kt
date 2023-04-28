@@ -84,6 +84,8 @@ fun <T> Flow<DataState<T>>.filterSuccess(): Flow<T> = transform {
     }
 }
 
+fun <T> Flow<DataState<T>>.keepSuccess(): Flow<DataState<T>> = filter { it.isSuccess }
+
 fun <T> Flow<DataState<T>>.stateIn(scope: CoroutineScope, sharingStarted: SharingStarted): StateFlow<DataState<T>> =
     stateIn(scope, sharingStarted, DataState.Loading())
 

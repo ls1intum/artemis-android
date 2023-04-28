@@ -17,7 +17,8 @@ sealed class MetisContext(
     @Serializable
     @SerialName("course")
     data class Course(override val courseId: Long) :
-        MetisContext(listOf("courses", courseId.toString(), "discussion"), "posts", "answer-posts")
+        MetisContext(listOf("courses", courseId.toString(), "discussion"), "posts", "answer-posts"),
+        QnaMetisContext
 
     @Serializable
     @SerialName("exercise")
@@ -26,7 +27,7 @@ sealed class MetisContext(
             listOf("courses", courseId.toString(), "exercises", exerciseId.toString()),
             "posts",
             "answer-posts"
-        )
+        ), QnaMetisContext
 
     @Serializable
     @SerialName("lecture")
@@ -35,10 +36,10 @@ sealed class MetisContext(
             listOf("courses", courseId.toString(), "lectures", lectureId.toString()),
             "posts",
             "answer-posts"
-        )
+        ), QnaMetisContext
 
     @Serializable
     @SerialName("conversation")
     data class Conversation(override val courseId: Long, val conversationId: Int) :
-        MetisContext(listOf(), "messages", "answer-messages")
+        MetisContext(listOf(), "messages", "answer-messages"), ConversationMetisContext
 }

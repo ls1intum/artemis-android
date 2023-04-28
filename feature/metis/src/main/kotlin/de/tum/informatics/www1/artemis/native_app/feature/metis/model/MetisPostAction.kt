@@ -7,5 +7,5 @@ enum class MetisPostAction(val value: String) {
     CREATE("CREATE"),
     UPDATE("UPDATE"),
     DELETE("DELETE"),
-    READ_CONVERSATION("READ_CONVERSATION")
+    NEW_MESSAGE("NEW_MESSAGE")
 }

@@ -19,11 +19,12 @@ import androidx.navigation.*
 import androidx.navigation.compose.composable
 import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SmartphoneMetisUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.SmartphoneMetisUi
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -39,6 +40,7 @@ fun NavGraphBuilder.course(
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
     onViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
+    onNavigateToMessages: (courseId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     composable(
@@ -73,7 +75,8 @@ fun NavGraphBuilder.course(
                 )
             },
             onClickViewQuizResults = onViewQuizResults,
-            onNavigateToExerciseResultView = onNavigateToExerciseResultView
+            onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+            onNavigateToMessages = { onNavigateToMessages(courseId) }
         )
     }
 }
@@ -90,6 +93,7 @@ internal fun CourseUiScreen(
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onNavigateToLecture: (lectureId: Long) -> Unit,
+    onNavigateToMessages: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val courseDataState by viewModel.course.collectAsState()
@@ -107,58 +111,15 @@ internal fun CourseUiScreen(
     Scaffold(
         modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
         topBar = {
-            Column {
-                TopAppBar(
-                    title = {
-                        Text(
-                            modifier = Modifier.placeholder(visible = courseDataState !is DataState.Success),
-                            text = courseDataState.bind { it.title }
-                                .orElse("Placeholder course title")
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = viewModel::reloadCourse) {
-                            Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
-                        }
-                    },
-                    scrollBehavior = scrollBehavior
-                )
-                TabRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    selectedTabIndex = selectedTabIndex
-                ) {
-                    @Suppress("LocalVariableName")
-                    val CourseTab = @Composable { index: Int, text: String, icon: ImageVector ->
-                        Tab(
-                            selected = selectedTabIndex == index,
-                            onClick = { selectedTabIndex = index },
-                            text = { Text(text = text, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                            icon = { Icon(icon, contentDescription = null) }
-                        )
-                    }
-
-                    CourseTab(
-                        0,
-                        stringResource(id = R.string.course_ui_tab_exercises),
-                        Icons.Default.ListAlt
-                    )
-                    CourseTab(
-                        1,
-                        stringResource(id = R.string.course_ui_tab_lectures),
-                        Icons.Default.School
-                    )
-                    CourseTab(
-                        2,
-                        stringResource(id = R.string.course_ui_tab_communication),
-                        Icons.Default.Chat
-                    )
-                }
-            }
+            CourseTopAppBar(
+                courseDataState = courseDataState,
+                onNavigateBack = onNavigateBack,
+                scrollBehavior = scrollBehavior,
+                selectedTabIndex = selectedTabIndex,
+                changeTab = { selectedTabIndex = it },
+                onReloadCourse = viewModel::reloadCourse,
+                onNavigateToCourseMessages = onNavigateToMessages
+            )
         }
     ) { padding ->
         BasicDataStateUi(
@@ -183,7 +144,8 @@ internal fun CourseUiScreen(
                     }.using(
                         SizeTransform(clip = false)
                     )
-                }
+                },
+                label = "Switch Course Tab"
             ) { tabIndex ->
                 when (tabIndex) {
                     0 -> {
@@ -260,6 +222,80 @@ internal fun CourseUiScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun CourseTopAppBar(
+    selectedTabIndex: Int,
+    courseDataState: DataState<Course>,
+    scrollBehavior: TopAppBarScrollBehavior,
+    changeTab: (Int) -> Unit,
+    onReloadCourse: () -> Unit,
+    onNavigateToCourseMessages: () -> Unit,
+    onNavigateBack: () -> Unit
+) {
+    Column {
+        TopAppBar(
+            title = {
+                Text(
+                    modifier = Modifier.placeholder(visible = courseDataState !is DataState.Success),
+                    text = courseDataState.bind { it.title }
+                        .orElse("Placeholder course title")
+                )
+            },
+            navigationIcon = {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                }
+            },
+            actions = {
+                IconButton(onClick = onNavigateToCourseMessages) {
+                    Icon(imageVector = Icons.Default.Message, contentDescription = null)
+                }
+
+                IconButton(onClick = onReloadCourse) {
+                    Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                }
+            },
+            scrollBehavior = scrollBehavior
+        )
+        TabRow(
+            modifier = Modifier.fillMaxWidth(),
+            selectedTabIndex = selectedTabIndex
+        ) {
+            @Suppress("LocalVariableName")
+            val CourseTab = @Composable { index: Int, text: String, icon: ImageVector ->
+                Tab(
+                    selected = selectedTabIndex == index,
+                    onClick = { changeTab(index) },
+                    text = {
+                        Text(
+                            text = text,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    icon = { Icon(icon, contentDescription = null) }
+                )
+            }
+
+            CourseTab(
+                0,
+                stringResource(id = R.string.course_ui_tab_exercises),
+                Icons.Default.ListAlt
+            )
+            CourseTab(
+                1,
+                stringResource(id = R.string.course_ui_tab_lectures),
+                Icons.Default.School
+            )
+            CourseTab(
+                2,
+                stringResource(id = R.string.course_ui_tab_communication),
+                Icons.Default.Chat
+            )
         }
     }
 }

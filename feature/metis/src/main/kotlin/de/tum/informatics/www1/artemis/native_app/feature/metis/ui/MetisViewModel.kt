@@ -17,7 +17,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePos
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import kotlinx.coroutines.flow.MutableSharedFlow

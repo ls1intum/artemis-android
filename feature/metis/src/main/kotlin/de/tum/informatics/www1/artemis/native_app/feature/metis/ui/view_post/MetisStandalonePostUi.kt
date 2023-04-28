@@ -41,6 +41,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.*
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.MarkdownTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.AnswerPostItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleStandalonePostDetails
 import kotlinx.coroutines.CoroutineScope
