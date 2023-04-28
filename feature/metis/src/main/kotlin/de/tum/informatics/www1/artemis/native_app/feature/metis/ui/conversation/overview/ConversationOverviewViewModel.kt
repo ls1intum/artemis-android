@@ -24,9 +24,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostA
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -48,6 +50,9 @@ class ConversationOverviewViewModel(
     accountService: AccountService,
     serverDataService: ServerDataService
 ) : ViewModel() {
+
+    private val _query = MutableStateFlow("")
+    val query: StateFlow<String> = _query
 
     private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
@@ -94,7 +99,7 @@ class ConversationOverviewViewModel(
     /**
      * Conversations of the server updates by the websocket.
      */
-    private val conversations: StateFlow<DataState<List<Conversation>>> = loadedConversations
+    private val updatedConversations: StateFlow<DataState<List<Conversation>>> = loadedConversations
         .flatMapLatest { loadedConversationsDataState ->
             when (loadedConversationsDataState) {
                 is Success -> getUpdateConversationsFlow(loadedConversationsDataState.data)
@@ -128,20 +133,22 @@ class ConversationOverviewViewModel(
         }
             .map(::Success)
 
-    val isReloadingConversations: StateFlow<Boolean> = conversations
+    val isReloadingConversations: StateFlow<Boolean> = updatedConversations
         .map { conversations ->
             conversations !is Success
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     private val conversationsAsCollections: StateFlow<DataState<ConversationCollection>> =
-        conversations
+        updatedConversations
             .map { conversationsDataState ->
                 conversationsDataState.bind { conversations ->
                     ConversationCollection(
-                        channels = conversations.filterIsInstance<ChannelChat>(),
-                        groupChats = conversations.filterIsInstance<GroupChat>(),
-                        directChats = conversations.filterIsInstance<OneToOneChat>()
+                        channels = conversations.filterNotHiddenNorFavourite(),
+                        groupChats = conversations.filterNotHiddenNorFavourite(),
+                        directChats = conversations.filterNotHiddenNorFavourite(),
+                        favorites = conversations.filter { it.isFavorite },
+                        hidden = conversations.filter { it.isHidden }
                     )
                 }
             }
@@ -150,16 +157,50 @@ class ConversationOverviewViewModel(
     /**
      * Holds the latest conversations we could successfully load.
      */
-    val latestConversations: StateFlow<DataState<ConversationCollection>> = conversationsAsCollections
-        .transformWhile { conversationsAsCollections ->
-            emit(conversationsAsCollections)
-            conversationsAsCollections !is Success
+    private val latestConversations: StateFlow<DataState<ConversationCollection>> =
+        conversationsAsCollections
+            .transformWhile { conversationsAsCollections ->
+                emit(conversationsAsCollections)
+                conversationsAsCollections !is Success
+            }
+            // After we have received our first success, we only take winners
+            .onCompletion {
+                emitAll(
+                    conversationsAsCollections.keepSuccess()
+                )
+            }
+            .stateIn(viewModelScope, SharingStarted.Eagerly)
+
+    val conversations: StateFlow<DataState<ConversationCollection>> =
+        combine(latestConversations, query) { latestConversationsDataState, query ->
+            if (query.isBlank()) {
+                latestConversationsDataState
+            } else {
+                latestConversationsDataState.bind { latestConversations ->
+                    latestConversations.filtered(query)
+                }
+            }
         }
-        // After we have received our first success, we only take winners
-        .onCompletion {
-            emitAll(
-                conversationsAsCollections.keepSuccess()
-            )
-        }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+            .stateIn(viewModelScope, SharingStarted.Eagerly)
+
+    fun requestReload() {
+        onRequestReload.tryEmit(Unit)
+    }
+
+    fun onUpdateQuery(newQuery: String) {
+        _query.value = newQuery
+    }
+
+    fun markConversationAsHidden(conversationId: Long, hidden: Boolean) {
+
+    }
+
+    fun markConversationAsFavorite(conversationId: Long, favorite: Boolean) {
+
+    }
+
+    private inline fun <reified T : Conversation> List<*>.filterNotHiddenNorFavourite(): List<T> {
+        return filterIsInstance<T>()
+            .filter { !it.isHidden && !it.isFavorite }
+    }
 }

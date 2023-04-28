@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="conversation_overview_title">Conversations</string>
+
+    <string name="conversation_overview_search_hint">Search for conversation</string>
+
+    <string name="conversation_overview_conversation_item_mark_as_favorite">Favorite</string>
+    <string name="conversation_overview_conversation_item_unmark_as_favorite">Unfavorite</string>
+
+    <string name="conversation_overview_conversation_item_mark_as_hidden">Hide</string>
+    <string name="conversation_overview_conversation_item_unmark_as_hidden">Unhide</string>
+
+    <string name="conversation_overview_section_favorites">Favorites</string>
+    <string name="conversation_overview_section_channels">Channels</string>
+    <string name="conversation_overview_section_groups">Group Chats</string>
+    <string name="conversation_overview_section_direct_messages">Direct Messages</string>
+    <string name="conversation_overview_section_hidden">Hidden</string>
+
+    <string name="conversation_overview_section_add_channel_browse">Browse channels</string>
+    <string name="conversation_overview_section_add_channel_create">Create channel</string>
+
+    <string name="conversation_overview_loading">Loading conversations…</string>
+    <string name="conversation_overview_loading_failed">Something went wrong while loading your conversations.</string>
+    <string name="conversation_overview_loading_try_again">Try again.</string>
+</resources>

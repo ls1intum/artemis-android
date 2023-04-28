@@ -40,7 +40,7 @@ import org.koin.core.parameter.parametersOf
  * Metis ui displayed on the right side of other content.
  */
 @Composable
-internal fun SideBarMetisUi(
+fun SideBarMetisUi(
     modifier: Modifier,
     metisContext: MetisContext,
     navController: NavController,

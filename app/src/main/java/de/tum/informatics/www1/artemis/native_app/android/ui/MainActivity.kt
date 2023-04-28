@@ -42,6 +42,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATIO
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.conversationOverviewScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.navigateToConversationOverviewScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.create_standalone_post.createStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen
@@ -234,7 +236,12 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
                     },
                     onNavigateBack = navController::navigateUp,
                     navController = navController,
-                    onViewQuizResults = onClickViewQuizResults
+                    onViewQuizResults = onClickViewQuizResults,
+                    onNavigateToMessages = { courseId ->
+                        navController.navigateToConversationOverviewScreen(
+                            courseId
+                        ) { }
+                    }
                 )
 
                 exercise(
@@ -273,6 +280,11 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
                             ViewType.POST
                         ) {}
                     }
+                )
+
+                conversationOverviewScreen(
+                    navController = navController,
+                    onNavigateBack = navController::navigateUp
                 )
 
                 quizParticipation(

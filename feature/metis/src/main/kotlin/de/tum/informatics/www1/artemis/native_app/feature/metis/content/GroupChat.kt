@@ -18,6 +18,6 @@ class GroupChat(
     override val isCreator: Boolean = false,
     override val isMember: Boolean = false,
     override val numberOfMembers: Int = 0,
-    val name: String = "",
+    val name: String? = null,
     val members: List<ConversationUser> = emptyList()
 ) : Conversation()

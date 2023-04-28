@@ -51,7 +51,7 @@ internal fun ViewModelMetisFilterHeaderImpl(
  * @param metisContentRatio the percentage of the screen width associated with metis
  */
 @Composable
-internal fun canDisplayMetisOnDisplaySide(
+fun canDisplayMetisOnDisplaySide(
     windowSizeClass: WindowSizeClass = getWindowSizeClass(),
     parentWidth: Dp,
     metisContentRatio: Float
