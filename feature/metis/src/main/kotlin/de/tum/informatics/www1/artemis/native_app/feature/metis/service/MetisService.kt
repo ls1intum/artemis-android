@@ -13,12 +13,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface MetisService {
 
-    suspend fun getConversations(
-        courseId: Long,
-        authToken: String,
-        serverUrl: String
-    ): NetworkResponse<List<Conversation>>
-
     /**
      * Performs a paged call to get the list of standalone posts available.
      */

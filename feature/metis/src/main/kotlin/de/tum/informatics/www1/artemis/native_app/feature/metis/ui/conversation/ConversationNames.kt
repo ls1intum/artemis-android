@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation
 
+import de.tum.informatics.www1.artemis.native_app.core.model.account.BaseAccount
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
@@ -14,7 +15,8 @@ val OneToOneChat.humanReadableTitle: String
         return members.firstOrNull()?.humanReadableName.orEmpty()
     }
 
-val ConversationUser.humanReadableName: String
+val BaseAccount.humanReadableName: String
     get() {
         return "$firstName $lastName"
     }
+

@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOne
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationWebsocketDTO
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostAction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -43,7 +44,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class ConversationOverviewViewModel(
     private val courseId: Long,
-    metisService: MetisService,
+    conversationService: ConversationService,
     websocketProvider: WebsocketProvider,
     networkStatusProvider: NetworkStatusProvider,
     serverConfigurationService: ServerConfigurationService,
@@ -91,7 +92,7 @@ class ConversationOverviewViewModel(
             onRequestReload.onStart { emit(Unit) }
         ) { serverUrl, authToken, _ ->
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                metisService.getConversations(courseId, authToken, serverUrl)
+                conversationService.getConversations(courseId, authToken, serverUrl)
             }
         }
             .stateIn(viewModelScope, SharingStarted.Eagerly)

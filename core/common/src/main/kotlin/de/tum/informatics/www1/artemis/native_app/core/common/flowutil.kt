@@ -69,4 +69,18 @@ fun <A, B, C, D, E> flatMapLatest(
         .flatMapLatest { (a, b, c, d) -> transform(a, b, c, d) }
 }
 
+fun <A, B, C, D, E, F> flatMapLatest(
+    flow1: Flow<A>,
+    flow2: Flow<B>,
+    flow3: Flow<C>,
+    flow4: Flow<D>,
+    flow5: Flow<E>,
+    transform: suspend (A, B, C, D, E) -> Flow<F>
+): Flow<F> {
+    return combine(flow1, flow2, flow3, flow4, flow5, ::Quintuple)
+        .flatMapLatest { (a, b, c, d, e) -> transform(a, b, c, d, e) }
+}
+
 private data class Quadruple<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)
+
+private data class Quintuple<A, B, C, D, E>(val a: A, val b: B, val c: C, val d: D, val e: E)

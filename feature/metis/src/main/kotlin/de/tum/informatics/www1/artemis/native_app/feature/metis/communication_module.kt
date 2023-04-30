@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis
 
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.EmojiServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.MetisContextManager
@@ -8,6 +9,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.Met
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.MetisStorageServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.ConversationServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.CreatePersonalConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.create_standalone_post.CreateStandalonePostViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
@@ -19,6 +22,7 @@ import org.koin.dsl.module
 
 val communicationModule = module {
     single<MetisService> { MetisServiceImpl(get(), get()) }
+    single<ConversationService> { ConversationServiceImpl(get()) }
     single<MetisModificationService> { MetisModificationServiceImpl(get()) }
     single<EmojiService> { EmojiServiceImpl(androidContext()) }
 
@@ -75,6 +79,16 @@ val communicationModule = module {
             params.get(),
             get(),
             get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+
+    viewModel { params ->
+        CreatePersonalConversationViewModel(
+            params.get(),
             get(),
             get(),
             get(),

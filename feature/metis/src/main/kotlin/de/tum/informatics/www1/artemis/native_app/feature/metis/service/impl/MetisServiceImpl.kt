@@ -24,22 +24,6 @@ internal class MetisServiceImpl(
     private val websocketProvider: WebsocketProvider
 ) : MetisService {
 
-    override suspend fun getConversations(
-        courseId: Long,
-        authToken: String,
-        serverUrl: String
-    ): NetworkResponse<List<Conversation>> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url {
-                    appendPathSegments("api", "courses", courseId.toString(), "conversations")
-                }
-
-                cookieAuth(authToken)
-            }.body()
-        }
-    }
-
     override suspend fun getPosts(
         standalonePostsContext: MetisService.StandalonePostsContext,
         pageSize: Int,

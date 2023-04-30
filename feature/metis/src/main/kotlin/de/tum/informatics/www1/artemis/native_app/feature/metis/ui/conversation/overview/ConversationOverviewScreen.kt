@@ -37,9 +37,11 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.navigateToCreatePersonalConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -76,7 +78,10 @@ fun NavGraphBuilder.conversationOverviewScreen(
             onNavigateToConversation = { conversationId ->
                 navController.navigateToConversationDetailScreen(courseId, conversationId) {}
             },
-            onNavigateBack = onNavigateBack
+            onNavigateBack = onNavigateBack,
+            onRequestCreatePersonalConversation = {
+                navController.navigateToCreatePersonalConversationScreen(courseId) {}
+            }
         )
     }
 }
@@ -86,6 +91,7 @@ private fun ConversationScreen(
     modifier: Modifier,
     courseId: Long,
     onNavigateToConversation: (conversationId: Long) -> Unit,
+    onRequestCreatePersonalConversation: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val viewModel: ConversationOverviewViewModel = koinViewModel { parametersOf(courseId) }
@@ -142,7 +148,8 @@ private fun ConversationScreen(
                     conversationCollection = conversationCollection,
                     onNavigateToConversation = onNavigateToConversation,
                     onToggleMarkAsFavourite = viewModel::markConversationAsFavorite,
-                    onToggleHidden = viewModel::markConversationAsHidden
+                    onToggleHidden = viewModel::markConversationAsHidden,
+                    onRequestCreatePersonalConversation = onRequestCreatePersonalConversation
                 )
             }
         }
@@ -155,11 +162,6 @@ private fun ConversationSearch(
     query: String,
     updateQuery: (String) -> Unit
 ) {
-    var hasFocus by remember { mutableStateOf(false) }
-
-    val currentValue =
-        if (query.isNotBlank() || hasFocus) query else stringResource(id = R.string.conversation_overview_search_hint)
-
     Box(
         modifier = modifier.border(
             width = 1.dp,
@@ -167,14 +169,12 @@ private fun ConversationSearch(
             shape = RoundedCornerShape(10)
         )
     ) {
-        BasicTextField(
+        BasicHintTextField(
             modifier = Modifier
                 .padding(8.dp)
-                .fillMaxWidth()
-                .onFocusChanged { focusState ->
-                    hasFocus = focusState.hasFocus
-                },
-            value = currentValue,
+                .fillMaxWidth(),
+            hint = stringResource(id = R.string.conversation_overview_search_hint),
+            value = query,
             onValueChange = updateQuery,
             maxLines = 1
         )

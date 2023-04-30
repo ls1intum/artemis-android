@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_personal_conversation_title">Start a conversation</string>
+    <string name="create_personal_conversation_address_label">To:</string>
+    <string name="create_personal_conversation_address_hint">Enter name of recipient</string>
+
+    <string name="create_personal_conversation_include_students">Students</string>
+    <string name="create_personal_conversation_include_tutors">Tutors</string>
+    <string name="create_personal_conversation_include_instructors">Instructors</string>
+
+    <string name="create_personal_conversation_load_recipients_loading">Loading other users…</string>
+    <string name="create_personal_conversation_load_recipients_failure">Something went wrong while loading the users.</string>
+    <string name="create_personal_conversation_load_recipients_try_again">Try again</string>
+
+    <string name="create_personal_conversation_recipients_empty">No users matching your input has been found.</string>
+</resources>
