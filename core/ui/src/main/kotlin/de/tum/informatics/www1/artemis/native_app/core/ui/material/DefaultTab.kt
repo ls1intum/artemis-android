@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun DefaultTab(
@@ -26,7 +27,11 @@ fun DefaultTab(
             )
         },
         text = {
-            Text(text = stringResource(id = textRes))
+            Text(
+                text = stringResource(id = textRes),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     )
 }

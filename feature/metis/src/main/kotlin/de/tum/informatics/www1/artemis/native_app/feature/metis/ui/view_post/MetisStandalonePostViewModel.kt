@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndefinetly
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
@@ -95,41 +96,46 @@ internal class MetisStandalonePostViewModel(
             }
         }
             .flatMapLatest { standalonePostDataState ->
-                val failureFlow: Flow<DataState<Post>> =
-                    flowOf(DataState.Failure(RuntimeException("Something went wrong while loading the post.")))
-
-                when (standalonePostDataState) {
-                    is DataState.Success -> {
-                        val post = standalonePostDataState.data
-
-                        val host = serverConfigurationService.host.first()
-                        metisStorageService.insertOrUpdatePosts(
-                            host = host,
-                            metisContext = metisContext,
-                            posts = listOf(post),
-                            clearPreviousPosts = false
-                        )
-
-                        val clientSidePostId = metisStorageService.getClientSidePostId(
-                            host = host,
-                            serverSidePostId = post.id ?: 0L,
-                            postingType = BasePostingEntity.PostingType.STANDALONE
-                        )
-
-                        if (clientSidePostId != null) {
-                            metisStorageService
-                                .getStandalonePost(clientSidePostId)
-                                .asDataStateFlow()
-                        } else failureFlow
-                    }
-                    is DataState.Failure -> flowOf(DataState.Failure(standalonePostDataState.throwable))
-                    is DataState.Loading -> flowOf(DataState.Loading())
-                }
+                handleServerLoadedStandalonePost(standalonePostDataState)
             }
             .onStart { emit(DataState.Loading()) }
     }
         .map { dataState -> dataState.bind { it } } // Type check adaption
         .stateIn(viewModelScope, SharingStarted.Eagerly)
+
+    private suspend fun handleServerLoadedStandalonePost(standalonePostDataState: DataState<StandalonePost>): Flow<DataState<Post>> {
+        val failureFlow: Flow<DataState<Post>> =
+            flowOf(DataState.Failure(RuntimeException("Something went wrong while loading the post.")))
+
+        return when (standalonePostDataState) {
+            is DataState.Success -> {
+                val post = standalonePostDataState.data
+
+                val host = serverConfigurationService.host.first()
+                metisStorageService.insertOrUpdatePosts(
+                    host = host,
+                    metisContext = metisContext,
+                    posts = listOf(post),
+                    clearPreviousPosts = false
+                )
+
+                val clientSidePostId = metisStorageService.getClientSidePostId(
+                    host = host,
+                    serverSidePostId = post.id ?: 0L,
+                    postingType = BasePostingEntity.PostingType.STANDALONE
+                )
+
+                if (clientSidePostId != null) {
+                    metisStorageService
+                        .getStandalonePost(clientSidePostId)
+                        .asDataStateFlow()
+                } else failureFlow
+            }
+
+            is DataState.Failure -> flowOf(DataState.Failure(standalonePostDataState.throwable))
+            is DataState.Loading -> flowOf(DataState.Loading())
+        }
+    }
 
     /**
      * Wait for the metis context manager to request a refresh. Then load the post from the server.
@@ -149,6 +155,7 @@ internal class MetisStandalonePostViewModel(
                             is StandalonePostId.ClientSideId -> {
                                 post.filterSuccess().filterNotNull().first().serverPostId
                             }
+
                             is StandalonePostId.ServerSideId -> postId.serverSidePostId
                         }
 
@@ -231,6 +238,8 @@ internal class MetisStandalonePostViewModel(
         onResponse: (MetisModificationFailure?) -> Unit
     ): Job {
         return viewModelScope.launch {
+            if (!post.value.isSuccess) return@launch
+
             val replyPost = AnswerPost(
                 creationDate = Clock.System.now(),
                 content = replyText,
@@ -240,6 +249,7 @@ internal class MetisStandalonePostViewModel(
                             serverConfigurationService.host.first(),
                             postId.clientSideId
                         )
+
                         is StandalonePostId.ServerSideId -> postId.serverSidePostId
                     }
                 )

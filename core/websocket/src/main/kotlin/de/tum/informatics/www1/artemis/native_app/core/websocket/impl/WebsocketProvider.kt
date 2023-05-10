@@ -56,7 +56,7 @@ class WebsocketProvider(
 
     private val client =
         StompClient(webSocketClient) {
-            heartBeat = HeartBeat(10.seconds, 10.seconds)
+            heartBeat = HeartBeat(60.seconds, 60.seconds)
             gracefulDisconnect = false
             connectionTimeout = 20.minutes
         }

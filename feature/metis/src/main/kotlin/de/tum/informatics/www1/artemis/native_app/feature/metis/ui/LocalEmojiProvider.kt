@@ -10,16 +10,21 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import de.tum.informatics.www1.artemis.native_app.feature.metis.emoji.EmojiService
 import org.koin.androidx.compose.get
 
-private val LocalEmojiProvider: ProvidableCompositionLocal<EmojiProvider> =
-    compositionLocalOf { throw RuntimeException("No emoji provider set. Please call ProvideEmojis") }
+private val localEmojiProvider: ProvidableCompositionLocal<EmojiProvider> =
+    compositionLocalOf { throw RuntimeException("No emoji provider set. Please call ProvideEmojis as a parent of your composable.") }
 
 private data class EmojiProvider(val unicodeForEmojiIdMap: MutableState<Map<String, String>?>)
 
+/**
+ * Loads emojis from the [EmojiService] and makes them available for the UI.
+ * You cannot use the communication emojis outside of children of this composable.
+ */
 @Composable
 fun ProvideEmojis(content: @Composable () -> Unit) {
-    val emojiService: de.tum.informatics.www1.artemis.native_app.feature.metis.emoji.EmojiService = get()
+    val emojiService: EmojiService = get()
 
     val map: MutableState<Map<String, String>?> = remember { mutableStateOf(null) }
 
@@ -30,7 +35,7 @@ fun ProvideEmojis(content: @Composable () -> Unit) {
     }
 
     CompositionLocalProvider(
-        LocalEmojiProvider provides EmojiProvider(
+        localEmojiProvider provides EmojiProvider(
             unicodeForEmojiIdMap = map
         ),
         content = content
@@ -39,7 +44,7 @@ fun ProvideEmojis(content: @Composable () -> Unit) {
 
 @Composable
 fun getUnicodeForEmojiId(emojiId: String): String {
-    val map by LocalEmojiProvider.current.unicodeForEmojiIdMap
+    val map by localEmojiProvider.current.unicodeForEmojiIdMap
     return remember(map, emojiId) {
         derivedStateOf { map?.get(emojiId) ?: "?" }
     }.value

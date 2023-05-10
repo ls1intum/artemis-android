@@ -292,14 +292,15 @@ class MetisStorageServiceImpl(
             )
 
         if (queryClientPostId != null) {
-            if (!metisDao.isPostPresentInContext(
-                    queryClientPostId,
-                    sp.id ?: 0L,
-                    courseId = postMetisContext.courseId,
-                    exerciseId = postMetisContext.exerciseId,
-                    lectureId = postMetisContext.lectureId
-                )
-            ) {
+            val isPostPresent = metisDao.isPostPresentInContext(
+                queryClientPostId,
+                sp.id ?: 0L,
+                courseId = postMetisContext.courseId,
+                exerciseId = postMetisContext.exerciseId,
+                lectureId = postMetisContext.lectureId
+            )
+
+            if (!isPostPresent) {
                 metisDao.insertPostMetisContext(
                     postMetisContext
                 )
@@ -322,7 +323,6 @@ class MetisStorageServiceImpl(
             metisDao.insertPost(standalonePosting)
             metisDao.insertReactions(standalonePostReactions)
             metisDao.insertTags(tags)
-
 
             metisDao.insertPostMetisContext(
                 postMetisContext

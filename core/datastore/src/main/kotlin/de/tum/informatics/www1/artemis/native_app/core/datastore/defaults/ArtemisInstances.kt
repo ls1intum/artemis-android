@@ -18,12 +18,6 @@ object ArtemisInstances {
         type = ArtemisInstance.Type.PRODUCTION
     )
 
-    private val HochschuleMuenchen = ArtemisInstance(
-        serverUrl = "https://artemis.cs.hm.edu/",
-        name = R.string.artemis_instance_hm_production,
-        type = ArtemisInstance.Type.PRODUCTION
-    )
-
     private val Kit = ArtemisInstance(
         serverUrl = "https://artemis.praktomat.cs.kit.edu/",
         name = R.string.artemis_instance_kiot_production,
@@ -51,7 +45,7 @@ object ArtemisInstances {
     val instances: List<ArtemisInstance> =
         (if (BuildConfig.DEBUG) {
             listOf(TumTs0, TumTs1, TumTs2)
-        } else emptyList()) + listOf(TumArtemis, Kit, Codeability, HochschuleMuenchen)
+        } else emptyList()) + listOf(TumArtemis, Kit, Codeability)
 
     data class ArtemisInstance(val serverUrl: String, @StringRes val name: Int, val type: Type) {
         enum class Type {

@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
@@ -116,14 +118,16 @@ internal fun MetisStandalonePostUi(
                     state
                 }
 
-                ReplyUi(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
-                    replyState = replyState,
-                    replyContent = replyContent,
-                    updateReplyContent = { replyContent = it }
-                )
+                AnimatedVisibility(visible = postDataState.isSuccess) {
+                    ReplyUi(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
+                        replyState = replyState,
+                        replyContent = replyContent,
+                        updateReplyContent = { replyContent = it }
+                    )
+                }
             }
         }
     }
