@@ -21,12 +21,4 @@ data class Course(
     val accuracyOfScores: Float = 1f,
     val postsEnabled: Boolean = true,
     val color: String? = null,
-) {
-    private val maxPointsPossibleHalves get() = exercises.sumOf { it.maxPointsHalves }
-    private val currentScoreHalves get() = exercises.sumOf { it.currentScoreHalves }
-
-    val progress: Float get() = currentScoreHalves.toFloat() / maxPointsPossibleHalves.toFloat()
-
-    val maxPointsPossible: Float get() = maxPointsPossibleHalves.toFloat() / 2f
-    val currentScore: Float get() = (currentScoreHalves.toFloat() / 2f)
-}
+)

@@ -48,6 +48,7 @@ import androidx.core.graphics.toColorInt
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
@@ -61,8 +62,8 @@ private val headerHeight = 80.dp
 @Composable
 fun CourseItemGrid(
     modifier: Modifier,
-    courses: List<Course>,
-    courseItem: @Composable LazyGridItemScope.(Course, Modifier, isCompact: Boolean) -> Unit
+    courses: List<CourseWithScore>,
+    courseItem: @Composable LazyGridItemScope.(CourseWithScore, Modifier, isCompact: Boolean) -> Unit
 ) {
     val windowSizeClass = getWindowSizeClass()
     val columnCount = computeCourseColumnCount(windowSizeClass)
@@ -77,7 +78,7 @@ fun CourseItemGrid(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(bottom = 90.dp)
     ) {
-        items(courses, key = Course::id) { course ->
+        items(courses, key = { it.course.id }) { course ->
             courseItem(course, courseItemModifier, isCompact)
         }
     }
@@ -151,6 +152,7 @@ fun CompactCourseItemHeader(
                                 maxLines = 3
                             )
                         }
+
                         CompactCourseHeaderViewMode.EXERCISE_AND_LECTURE_COUNT -> {
                             CourseExerciseAndLectureCount(
                                 modifier = Modifier.fillMaxWidth(),
