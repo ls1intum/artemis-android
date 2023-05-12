@@ -65,13 +65,7 @@ internal fun NotificationSettingsUi(modifier: Modifier, onDone: () -> Unit) {
                 onClick = {
                     // If changes have been made, these need to be synced first.
                     if (isDirty) {
-                        saveJob = viewModel.saveSettings { successful ->
-                            if (successful) {
-                                onDone()
-                            } else {
-                                displaySyncFailedDialog = true
-                            }
-                        }
+                        saveJob = viewModel.saveSettings()
                     } else onDone()
                 },
                 text = {

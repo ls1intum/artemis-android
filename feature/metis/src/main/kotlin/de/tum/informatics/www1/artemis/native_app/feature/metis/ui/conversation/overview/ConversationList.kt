@@ -174,12 +174,14 @@ private fun LazyListScope.conversationList(
             },
             onToggleHidden = { onToggleHidden(conversation.id, !conversation.isHidden) },
             content = {
+                val unreadMessagesCount = conversation.unreadMessagesCount ?: 0
+
                 when (conversation) {
                     is ChannelChat -> {
                         ListItem(modifier = it,
                             headlineText = { Text(conversation.name) },
                             trailingContent = {
-                                UnreadMessages(unreadMessagesCount = conversation.unreadMessagesCount)
+                                UnreadMessages(unreadMessagesCount = unreadMessagesCount)
                             }
                         )
                     }
@@ -192,7 +194,7 @@ private fun LazyListScope.conversationList(
                                 Icon(imageVector = Icons.Default.Groups2, contentDescription = null)
                             },
                             trailingContent = {
-                                UnreadMessages(unreadMessagesCount = conversation.unreadMessagesCount)
+                                UnreadMessages(unreadMessagesCount = unreadMessagesCount)
                             }
                         )
                     }
@@ -202,7 +204,7 @@ private fun LazyListScope.conversationList(
                             modifier = it,
                             headlineText = { Text(conversation.humanReadableTitle) },
                             trailingContent = {
-                                UnreadMessages(unreadMessagesCount = conversation.unreadMessagesCount)
+                                UnreadMessages(unreadMessagesCount = unreadMessagesCount)
                             }
                         )
                     }

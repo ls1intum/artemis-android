@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 
 /**
@@ -13,6 +14,15 @@ fun AwaitJobCompletion(job: Job?, onComplete: () -> Unit) {
         job?.let {
             job.join()
             onComplete()
+        }
+    }
+}
+
+@Composable
+fun <T> AwaitDeferredCompletion(job: Deferred<T>?, onComplete: (T) -> Unit) {
+    LaunchedEffect(job) {
+        job?.let {
+            onComplete(job.await())
         }
     }
 }

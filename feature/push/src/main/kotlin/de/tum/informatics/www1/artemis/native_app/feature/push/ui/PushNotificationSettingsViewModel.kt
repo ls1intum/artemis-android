@@ -13,7 +13,9 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.group
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -157,12 +159,11 @@ class PushNotificationSettingsViewModel internal constructor(
         requestReloadSettings.tryEmit(Unit)
     }
 
-    fun saveSettings(onResponse: (successful: Boolean) -> Unit): Job {
-        return viewModelScope.launch {
+    fun saveSettings(): Deferred<Boolean> {
+        return viewModelScope.async {
             val settingsToSync = currentSettings.value
             if (settingsToSync !is DataState.Success) {
-                onResponse(false)
-                return@launch
+                return@async false
             }
 
             val response = notificationSettingsService.updateNotificationSettings(
@@ -178,7 +179,7 @@ class PushNotificationSettingsViewModel internal constructor(
                 updatedSettings.value = emptyMap()
             }
 
-            onResponse(response is NetworkResponse.Response)
+            response is NetworkResponse.Response
         }
     }
 

@@ -1,8 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.settings
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -10,8 +7,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -27,7 +22,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitJobCompletion
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.AnimatedFloatingActionButton
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFloatingActionButton
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncFailedDialog
@@ -39,11 +35,7 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
     val viewModel: PushNotificationSettingsViewModel = koinViewModel()
     val isDirty: Boolean by viewModel.isDirty.collectAsState(initial = false)
 
-    // Set if currently syncing changes with server
-    var syncChangesJob: Job? by remember { mutableStateOf(null) }
     var displaySyncFailedDialog: Boolean by rememberSaveable { mutableStateOf(false) }
-
-    AwaitJobCompletion(syncChangesJob) { syncChangesJob = null }
 
     Scaffold(
         modifier = modifier,
@@ -62,29 +54,16 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
             )
         },
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = isDirty,
-                enter = scaleIn(),
-                exit = scaleOut(),
-            ) {
-                FloatingActionButton(
-                    onClick = {
-                        syncChangesJob?.cancel()
-
-                        syncChangesJob = viewModel.saveSettings { isSuccessful ->
-                            syncChangesJob = null
-                            if (!isSuccessful) {
-                                displaySyncFailedDialog = true
-                            }
-                        }
-                    }
-                ) {
-                    if (syncChangesJob == null) {
-                        Icon(imageVector = Icons.Default.Save, contentDescription = null)
-                    } else {
-                        CircularProgressIndicator()
+            JobAnimatedFloatingActionButton(
+                enabled = isDirty,
+                startJob = { viewModel.saveSettings() },
+                onJobCompleted = { isSuccessful ->
+                    if (!isSuccessful) {
+                        displaySyncFailedDialog = true
                     }
                 }
+            ) {
+                Icon(imageVector = Icons.Default.Save, contentDescription = null)
             }
         }
     ) { padding ->

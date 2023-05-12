@@ -1,8 +1,16 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -12,11 +20,15 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 
-fun NavController.navigateToConversationDetailScreen(courseId: Long, conversationId: Long, builder: NavOptionsBuilder.() -> Unit) {
+fun NavController.navigateToConversationDetailScreen(
+    courseId: Long,
+    conversationId: Long,
+    builder: NavOptionsBuilder.() -> Unit
+) {
     navigate("course/$courseId/conversations/$conversationId", builder)
 }
 
-fun NavGraphBuilder.conversationOverviewScreen(
+fun NavGraphBuilder.conversationDetailScreen(
     navController: NavController,
     onNavigateBack: () -> Unit
 ) {
@@ -43,9 +55,6 @@ fun NavGraphBuilder.conversationOverviewScreen(
 
         ConversationScreen(
             modifier = Modifier.fillMaxSize(),
-            onNavigateToConversation = { conversation ->
-
-            },
             onNavigateBack = onNavigateBack
         )
     }
@@ -54,8 +63,23 @@ fun NavGraphBuilder.conversationOverviewScreen(
 @Composable
 private fun ConversationScreen(
     modifier: Modifier,
-    onNavigateToConversation: (Conversation) -> Unit,
     onNavigateBack: () -> Unit
 ) {
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Conversation")
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                    }
+                }
+            )
+        }
+    ) { padding ->
 
+    }
 }

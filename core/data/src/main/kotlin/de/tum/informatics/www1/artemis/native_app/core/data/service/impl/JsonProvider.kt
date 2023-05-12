@@ -15,10 +15,11 @@ class JsonProvider {
      * The response json configuration.
      */
     val applicationJsonConfiguration = Json {
-        //Ignore unknown keys. If set to false, parsing JSON will throw an error when a new key is introduced.
+        // Ignore unknown keys. If set to false, parsing JSON will throw an error when a new key is introduced.
         ignoreUnknownKeys = true
 
-        encodeDefaults = true //Values that are not set are filled with the defaults given in the constructor.
+        encodeDefaults = true // Values that are not set are filled with the defaults given in the constructor.
+        coerceInputValues = true
 
         serializersModule = SerializersModule {
             include(exerciseSerializerModule)

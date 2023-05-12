@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState.Success
+import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.keepSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
@@ -71,6 +72,7 @@ class ConversationOverviewViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     private val conversationUpdates: Flow<ConversationWebsocketDTO> = userId
+        .filterSuccess()
         .flatMapLatest { userId ->
             val topic = "/user/topic/metis/courses/$courseId/conversations/user/$userId"
 
@@ -120,8 +122,18 @@ class ConversationOverviewViewModel(
 
             conversationUpdates.collect { update ->
                 when (update.crudAction) {
-                    MetisPostAction.CREATE, MetisPostAction.UPDATE, MetisPostAction.NEW_MESSAGE -> {
+                    MetisPostAction.CREATE, MetisPostAction.UPDATE -> {
                         currentConversations[update.conversation.id] = update.conversation
+                    }
+
+                    MetisPostAction.NEW_MESSAGE -> {
+                        val existingConversation = currentConversations[update.conversation.id]
+                        if (existingConversation != null) {
+                            currentConversations[update.conversation.id] =
+                                existingConversation.withUnreadMessagesCount(
+                                    (existingConversation.unreadMessagesCount ?: 0) + 1
+                                )
+                        }
                     }
 
                     MetisPostAction.DELETE -> {

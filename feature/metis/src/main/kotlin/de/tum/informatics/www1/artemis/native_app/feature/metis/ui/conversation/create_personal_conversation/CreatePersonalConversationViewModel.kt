@@ -11,8 +11,11 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,16 +24,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 
 internal class CreatePersonalConversationViewModel(
     private val courseId: Long,
     private val conversationService: ConversationService,
-    networkStatusProvider: NetworkStatusProvider,
-    accountService: AccountService,
-    serverConfigurationService: ServerConfigurationService
+    private val accountService: AccountService,
+    private val serverConfigurationService: ServerConfigurationService,
+    networkStatusProvider: NetworkStatusProvider
 ) : ViewModel() {
 
     private val onRequestReloadPotentialRecipients =
@@ -76,6 +82,37 @@ internal class CreatePersonalConversationViewModel(
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly)
+
+    val canCreateConversation: StateFlow<Boolean> = _recipients
+        .map { it.isNotEmpty() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun createConversation(): Deferred<Conversation?> {
+        return viewModelScope.async {
+            val authToken = accountService.authToken.first()
+            val serverUrl = serverConfigurationService.serverUrl.first()
+
+            val recipients = _recipients.value
+
+            val recipientsAsUsernames = recipients.mapNotNull { it.username }
+
+            if (recipients.size > 1) {
+                conversationService.createGroupChat(
+                    courseId,
+                    recipientsAsUsernames,
+                    authToken,
+                    serverUrl
+                ).orNull()
+            } else if (recipients.isNotEmpty()) {
+                conversationService.createOneToOneConversation(
+                    courseId,
+                    recipientsAsUsernames.first(),
+                    authToken,
+                    serverUrl
+                ).orNull()
+            } else null
+        }
+    }
 
     fun updateQuery(query: String) {
         _query.value = query

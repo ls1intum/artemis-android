@@ -12,7 +12,7 @@ data class ChannelChat(
     override val lastMessageDate: Instant? = null,
     override val creator: ConversationUser? = null,
     override val lastReadDate: Instant? = null,
-    override val unreadMessagesCount: Long = 0L,
+    override val unreadMessagesCount: Long? = 0L,
     override val isFavorite: Boolean = false,
     override val isHidden: Boolean = false,
     override val isCreator: Boolean = false,
@@ -28,4 +28,7 @@ data class ChannelChat(
     val isChannelModerator: Boolean = false,
     val tutorialGroupId: Long? = null,
     val tutorialGroupTitle: String? = null
-) : Conversation()
+) : Conversation() {
+    override fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation =
+        copy(unreadMessagesCount = unreadMessagesCount)
+}

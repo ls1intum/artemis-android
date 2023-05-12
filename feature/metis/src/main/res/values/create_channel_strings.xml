@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_channel_title">Create channel</string>
+
+    <string name="create_channel_description">A channel is a way to group people together around a project, a topic, or just for fun. You can create as many channels as you want. You will become the first channel moderator. You will not be able to leave the channel.</string>
+    <string name="create_channel_text_field_name_label">Name</string>
+    <string name="create_channel_text_field_name_hint">e.g. tech-support</string>
+    <string name="create_channel_text_field_name_required">required</string>
+    <string name="create_channel_text_field_name_invalid">Names can only contain lowercase letters, numbers, and dashes. Only Artemis can create channels that start with a $.</string>
+
+    <string name="create_channel_text_field_description_label">Description (optional)</string>
+    <string name="create_channel_text_field_description_hint">e.g. tech-support</string>
+
+    <string name="create_channel_channel_accessibility_type">Private Channel / Public Channel</string>
+    <string name="create_channel_channel_accessibility_type_hint">Every user except instructors will need an invitation to join a private channel. Everybody can join a public channel.</string>
+    <string name="create_channel_channel_accessibility_type_public">Public</string>
+    <string name="create_channel_channel_accessibility_type_private">Private</string>
+
+    <string name="create_channel_channel_announcement_type">Announcement Channel</string>
+    <string name="create_channel_channel_announcement_type_hint">Only instructors and channel moderators can create new messages in an announcement channel. Students can only read the messages and answer to them.</string>
+    <string name="create_channel_channel_announcement_type_announcement">Announcement Channel</string>
+    <string name="create_channel_channel_announcement_type_unrestricted">Unrestricted Channel</string>
+</resources>

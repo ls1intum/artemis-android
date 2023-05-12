@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -40,6 +41,7 @@ fun BasicHintTextField(
         value = currentValue,
         onValueChange = onValueChange,
         maxLines = maxLines,
+        textStyle = LocalTextStyle.current,
         visualTransformation = { text ->
             if (isValueDisplayed) TransformedText(text, OffsetMapping.Identity)
             else TransformedText(

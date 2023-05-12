@@ -23,6 +23,11 @@ sealed class NetworkResponse<T> {
         is Response -> data
     }
 
+    fun orNull(): T? = when (this) {
+        is Failure -> null
+        is Response -> data
+    }
+
     data class Response<T>(val data: T) : NetworkResponse<T>()
 
     data class Failure<T>(val exception: Exception) : NetworkResponse<T>()

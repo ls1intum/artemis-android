@@ -10,10 +10,12 @@ sealed class Conversation {
     abstract val lastMessageDate: Instant?
     abstract val creator: ConversationUser?
     abstract val lastReadDate: Instant?
-    abstract val unreadMessagesCount: Long
+    abstract val unreadMessagesCount: Long?
     abstract val isFavorite: Boolean
     abstract val isHidden: Boolean
     abstract val isCreator: Boolean
     abstract val isMember: Boolean
     abstract val numberOfMembers: Int
+
+    abstract fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation
 }
