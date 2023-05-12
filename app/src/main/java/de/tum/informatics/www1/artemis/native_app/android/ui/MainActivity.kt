@@ -42,6 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATIO
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel.createChannelScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.createPersonalConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.conversationDetailScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.conversationOverviewScreen
@@ -295,6 +296,11 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
                 )
 
                 createPersonalConversationScreen(
+                    navController = navController,
+                    onNavigateBack = navController::navigateUp
+                )
+
+                createChannelScreen(
                     navController = navController,
                     onNavigateBack = navController::navigateUp
                 )

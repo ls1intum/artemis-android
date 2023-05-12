@@ -56,7 +56,8 @@ internal fun ConversationList(
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
-    onRequestCreatePersonalConversation: () -> Unit
+    onRequestCreatePersonalConversation: () -> Unit,
+    onRequestCreateChannel: () -> Unit
 ) {
     val defaultConversationList: LazyListScope.(List<Conversation>) -> Unit =
         { conversations: List<Conversation> ->
@@ -82,7 +83,7 @@ internal fun ConversationList(
         conversationSectionHeader(
             key = SECTION_CHANNELS_KEY,
             text = R.string.conversation_overview_section_channels,
-            onClickAddAction = AddConversation {}
+            onClickAddAction = AddConversation(onRequestCreateChannel)
         )
 
         defaultConversationList(conversationCollection.channels)

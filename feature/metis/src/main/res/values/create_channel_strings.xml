@@ -9,7 +9,8 @@
     <string name="create_channel_text_field_name_invalid">Names can only contain lowercase letters, numbers, and dashes. Only Artemis can create channels that start with a $.</string>
 
     <string name="create_channel_text_field_description_label">Description (optional)</string>
-    <string name="create_channel_text_field_description_hint">e.g. tech-support</string>
+    <string name="create_channel_text_field_description_hint">What\'s this channel about?</string>
+    <string name="create_channel_text_field_description_invalid">Description can be max 250 characters long!</string>
 
     <string name="create_channel_channel_accessibility_type">Private Channel / Public Channel</string>
     <string name="create_channel_channel_accessibility_type_hint">Every user except instructors will need an invitation to join a private channel. Everybody can join a public channel.</string>
@@ -20,4 +21,8 @@
     <string name="create_channel_channel_announcement_type_hint">Only instructors and channel moderators can create new messages in an announcement channel. Students can only read the messages and answer to them.</string>
     <string name="create_channel_channel_announcement_type_announcement">Announcement Channel</string>
     <string name="create_channel_channel_announcement_type_unrestricted">Unrestricted Channel</string>
+
+    <string name="create_channel_failed_title">Could not create channel.</string>
+    <string name="create_channel_failed_message">Something went wrong while creating your channel. Please try again.</string>
+    <string name="create_channel_failed_positive">@android:string/ok</string>
 </resources>

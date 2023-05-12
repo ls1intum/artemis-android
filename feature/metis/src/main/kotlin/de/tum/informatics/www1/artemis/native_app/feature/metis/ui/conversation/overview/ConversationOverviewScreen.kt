@@ -42,6 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextFi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel.navigateToCreateChannelScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.navigateToCreatePersonalConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
 import org.koin.androidx.compose.koinViewModel
@@ -82,6 +83,9 @@ fun NavGraphBuilder.conversationOverviewScreen(
             onNavigateBack = onNavigateBack,
             onRequestCreatePersonalConversation = {
                 navController.navigateToCreatePersonalConversationScreen(courseId) {}
+            },
+            onRequestCreateChannel = {
+                navController.navigateToCreateChannelScreen(courseId) {}
             }
         )
     }
@@ -93,6 +97,7 @@ private fun ConversationScreen(
     courseId: Long,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
+    onRequestCreateChannel: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val viewModel: ConversationOverviewViewModel = koinViewModel { parametersOf(courseId) }
@@ -154,7 +159,8 @@ private fun ConversationScreen(
                     onNavigateToConversation = onNavigateToConversation,
                     onToggleMarkAsFavourite = viewModel::markConversationAsFavorite,
                     onToggleHidden = viewModel::markConversationAsHidden,
-                    onRequestCreatePersonalConversation = onRequestCreatePersonalConversation
+                    onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
+                    onRequestCreateChannel = onRequestCreateChannel
                 )
             }
         }

@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-class CreateChannelViewModel(
+internal class CreateChannelViewModel(
     private val courseId: Long,
     private val conversationService: ConversationService,
     private val accountService: AccountService,
@@ -41,9 +41,19 @@ class CreateChannelViewModel(
     val isAnnouncement: StateFlow<Boolean> =
         savedStateHandle.getStateFlow(KEY_IS_ANNOUNCEMENT, true)
 
-    val canCreate: StateFlow<Boolean> = name
-        .map { channelNamePattern.matches(it) }
+    val isNameIllegal: StateFlow<Boolean> = name
+        .map { !channelNamePattern.matches(it) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val isDescriptionIllegal: StateFlow<Boolean> = description
+        .map { it.length > 250 }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val canCreate: StateFlow<Boolean> =
+        combine(isNameIllegal, isDescriptionIllegal) { isNameIllegal, isDescriptionIllegal ->
+            !isNameIllegal && !isDescriptionIllegal
+        }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     fun createChannel(): Deferred<ChannelChat?> {
         return viewModelScope.async {

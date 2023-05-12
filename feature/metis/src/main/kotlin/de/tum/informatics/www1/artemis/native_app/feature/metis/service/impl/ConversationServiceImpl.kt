@@ -5,6 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
@@ -18,6 +19,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
+import kotlinx.serialization.Serializable
 
 class ConversationServiceImpl(private val ktorProvider: KtorProvider) : ConversationService {
 
@@ -106,4 +108,42 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
             }.body()
         }
     }
+
+    override suspend fun createChannel(
+        courseId: Long,
+        name: String,
+        description: String,
+        isPublic: Boolean,
+        isAnnouncement: Boolean,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<ChannelChat> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments("api", "courses", courseId.toString(), "channels")
+                }
+
+                setBody(
+                    CreateChannelData(
+                        isPublic = isPublic,
+                        isAnnouncementChannel = isAnnouncement,
+                        name = name
+                    )
+                )
+                contentType(ContentType.Application.Json)
+
+                accept(ContentType.Application.Json)
+                cookieAuth(authToken)
+            }.body()
+        }
+    }
+
+    @Serializable
+    private data class CreateChannelData(
+        val type: String = "channel",
+        val isPublic: Boolean,
+        val isAnnouncementChannel: Boolean,
+        val name: String
+    )
 }
