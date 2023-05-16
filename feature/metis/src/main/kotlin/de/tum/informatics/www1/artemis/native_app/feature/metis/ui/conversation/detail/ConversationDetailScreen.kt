@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -19,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.navigateToConversationSettingsScreen
 
 fun NavController.navigateToConversationDetailScreen(
     courseId: Long,
@@ -55,7 +57,10 @@ fun NavGraphBuilder.conversationDetailScreen(
 
         ConversationScreen(
             modifier = Modifier.fillMaxSize(),
-            onNavigateBack = onNavigateBack
+            onNavigateBack = onNavigateBack,
+            onNavigateToSettings = {
+                navController.navigateToConversationSettingsScreen(courseId, conversationId) {}
+            }
         )
     }
 }
@@ -63,7 +68,8 @@ fun NavGraphBuilder.conversationDetailScreen(
 @Composable
 private fun ConversationScreen(
     modifier: Modifier,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     Scaffold(
         modifier = modifier,
@@ -75,6 +81,11 @@ private fun ConversationScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(imageVector = Icons.Default.Settings, contentDescription = null)
                     }
                 }
             )
