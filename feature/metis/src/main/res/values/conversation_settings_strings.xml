@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="conversation_settings_title">Conversation Settings</string>
+    <string name="conversation_settings_loading">Loading conversation…</string>
+    <string name="conversation_settings_failure">Something went wrong while loading your conversation.</string>
+    <string name="conversation_settings_try_again">Try again</string>
+
+    <string name="conversation_settings_section_more_info">More info</string>
+    <string name="conversation_settings_section_more_info_created_by">Created by: %1$s (%2$s)</string>
+    <string name="conversation_settings_section_more_info_created_on">Created on: %1$s</string>
+</resources>

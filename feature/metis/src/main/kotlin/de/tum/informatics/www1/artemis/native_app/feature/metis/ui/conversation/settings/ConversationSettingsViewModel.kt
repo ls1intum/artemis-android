@@ -143,4 +143,8 @@ internal class ConversationSettingsViewModel(
     fun updateTopic(topic: String) {
         savedStateHandle[KEY_TOPIC] = topic
     }
+
+    fun requestReload() {
+        onRequestReload.tryEmit(Unit)
+    }
 }
