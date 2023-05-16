@@ -4,4 +4,6 @@ import androidx.compose.ui.unit.dp
 
 object Spacings {
     val ScreenHorizontalSpacing = 16.dp
+
+    val FabContentBottomPadding = 80.dp
 }

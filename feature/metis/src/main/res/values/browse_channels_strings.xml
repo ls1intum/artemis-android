@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="browse_channels_title">Browse channels</string>
+    <string name="browse_channels_search_hint">Search for channels</string>
+
+    <string name="browse_channel_list_loading">Loading channels…</string>
+    <string name="browse_channel_list_failure">Something went wrong while loading the channels.</string>
+    <string name="browse_channel_list_try_again">Try again</string>
+
+    <string name="browse_channel_list_empty">There are no channels in this course you have not already joined.</string>
+
+    <plurals name="browse_channel_channel_item_member_count">
+        <item quantity="zero">No members</item>
+        <item quantity="one">1 member</item>
+        <item quantity="other">%d member</item>
+    </plurals>
+
+    <string name="browse_channel_registration_failed_dialog_title">Could not register</string>
+    <string name="browse_channel_registration_failed_dialog_message">Something went wrong while registering for your channel. Please try again later.</string>
+    <string name="browse_channel_registration_failed_dialog_positive">@android:string/ok</string>
+</resources>

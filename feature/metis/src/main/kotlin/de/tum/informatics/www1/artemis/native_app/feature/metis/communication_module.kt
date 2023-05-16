@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis
 
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ChannelService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.EmojiServiceImpl
@@ -9,7 +10,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.Met
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.MetisStorageServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.ChannelServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.ConversationServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.browse_channels.BrowseChannelsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel.CreateChannelViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.CreatePersonalConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewViewModel
@@ -24,6 +27,7 @@ import org.koin.dsl.module
 val communicationModule = module {
     single<MetisService> { MetisServiceImpl(get(), get()) }
     single<ConversationService> { ConversationServiceImpl(get()) }
+    single<ChannelService> { ChannelServiceImpl(get()) }
     single<MetisModificationService> { MetisModificationServiceImpl(get()) }
     single<EmojiService> { EmojiServiceImpl(androidContext()) }
 
@@ -100,6 +104,17 @@ val communicationModule = module {
     viewModel { params ->
         CreateChannelViewModel(
             params.get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+
+    viewModel { params ->
+        BrowseChannelsViewModel(
+            params.get(),
+            get(),
             get(),
             get(),
             get(),

@@ -42,7 +42,7 @@ internal class CreateChannelViewModel(
         savedStateHandle.getStateFlow(KEY_IS_ANNOUNCEMENT, true)
 
     val isNameIllegal: StateFlow<Boolean> = name
-        .map { !channelNamePattern.matches(it) }
+        .map { it.isNotEmpty() && !channelNamePattern.matches(it) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val isDescriptionIllegal: StateFlow<Boolean> = description
@@ -76,8 +76,8 @@ internal class CreateChannelViewModel(
         savedStateHandle[KEY_NAME] = name
     }
 
-    fun updateDescription(name: String) {
-        savedStateHandle[KEY_NAME] = name
+    fun updateDescription(description: String) {
+        savedStateHandle[KEY_DESCRIPTION] = description
     }
 
     fun updatePublic(isPublic: Boolean) {

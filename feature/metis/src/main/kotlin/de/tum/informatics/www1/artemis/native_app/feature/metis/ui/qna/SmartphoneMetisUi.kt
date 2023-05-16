@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.create_standalone_post.navigateToCreateStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
@@ -69,7 +70,7 @@ fun SmartphoneMetisUi(
             MetisStandalonePostList(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
-                listContentPadding = PaddingValues(top = 8.dp, bottom = 80.dp),
+                listContentPadding = PaddingValues(top = 8.dp, bottom = Spacings.FabContentBottomPadding),
                 onClickViewPost = { clientPostId ->
                     navigateToStandalonePostScreen(clientPostId, ViewType.POST)
                 },

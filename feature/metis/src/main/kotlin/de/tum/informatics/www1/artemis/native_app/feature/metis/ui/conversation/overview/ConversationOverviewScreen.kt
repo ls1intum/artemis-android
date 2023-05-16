@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
@@ -22,11 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -40,13 +35,15 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.browse_channels.navigateToBrowseChannelsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel.navigateToCreateChannelScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.navigateToCreatePersonalConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+
+const val ConversationOverviewRoute = "course/{courseId}/conversations"
 
 fun NavController.navigateToConversationOverviewScreen(
     courseId: Long,
@@ -60,7 +57,7 @@ fun NavGraphBuilder.conversationOverviewScreen(
     onNavigateBack: () -> Unit
 ) {
     composable(
-        route = "course/{courseId}/conversations",
+        route = ConversationOverviewRoute,
         arguments = listOf(
             navArgument("courseId") { type = NavType.LongType; nullable = false }
         ),
@@ -84,8 +81,8 @@ fun NavGraphBuilder.conversationOverviewScreen(
             onRequestCreatePersonalConversation = {
                 navController.navigateToCreatePersonalConversationScreen(courseId) {}
             },
-            onRequestCreateChannel = {
-                navController.navigateToCreateChannelScreen(courseId) {}
+            onRequestAddChannel = {
+                navController.navigateToBrowseChannelsScreen(courseId) {}
             }
         )
     }
@@ -97,7 +94,7 @@ private fun ConversationScreen(
     courseId: Long,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
-    onRequestCreateChannel: () -> Unit,
+    onRequestAddChannel: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val viewModel: ConversationOverviewViewModel = koinViewModel { parametersOf(courseId) }
@@ -160,7 +157,7 @@ private fun ConversationScreen(
                     onToggleMarkAsFavourite = viewModel::markConversationAsFavorite,
                     onToggleHidden = viewModel::markConversationAsHidden,
                     onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
-                    onRequestCreateChannel = onRequestCreateChannel
+                    onRequestAddChannel = onRequestAddChannel
                 )
             }
         }

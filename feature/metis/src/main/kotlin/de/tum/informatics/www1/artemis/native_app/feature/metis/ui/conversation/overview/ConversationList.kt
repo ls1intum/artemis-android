@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,7 +56,7 @@ internal fun ConversationList(
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
-    onRequestCreateChannel: () -> Unit
+    onRequestAddChannel: () -> Unit
 ) {
     val defaultConversationList: LazyListScope.(List<Conversation>) -> Unit =
         { conversations: List<Conversation> ->
@@ -83,7 +82,7 @@ internal fun ConversationList(
         conversationSectionHeader(
             key = SECTION_CHANNELS_KEY,
             text = R.string.conversation_overview_section_channels,
-            onClickAddAction = AddConversation(onRequestCreateChannel)
+            onClickAddAction = OnClickAction(onRequestAddChannel)
         )
 
         defaultConversationList(conversationCollection.channels)
@@ -91,7 +90,7 @@ internal fun ConversationList(
         conversationSectionHeader(
             key = SECTION_GROUPS_KEY,
             text = R.string.conversation_overview_section_groups,
-            onClickAddAction = AddConversation(onRequestCreatePersonalConversation)
+            onClickAddAction = OnClickAction(onRequestCreatePersonalConversation)
         )
 
         defaultConversationList(conversationCollection.groupChats)
@@ -99,7 +98,7 @@ internal fun ConversationList(
         conversationSectionHeader(
             key = SECTION_DIRECT_MESSAGES_KEY,
             text = R.string.conversation_overview_section_direct_messages,
-            onClickAddAction = AddConversation(onRequestCreatePersonalConversation)
+            onClickAddAction = OnClickAction(onRequestCreatePersonalConversation)
         )
 
         defaultConversationList(conversationCollection.directChats)
@@ -137,7 +136,7 @@ private fun LazyListScope.conversationSectionHeader(
                     style = MaterialTheme.typography.titleSmall
                 )
 
-                if (onClickAddAction is AddConversation) {
+                if (onClickAddAction is OnClickAction) {
                     IconButton(
                         onClick = onClickAddAction.onClick
                     ) {
@@ -295,6 +294,6 @@ private fun ConversationListItem(
 
 private sealed interface ConversationSectionHeaderAction
 
-private data class AddConversation(val onClick: () -> Unit) : ConversationSectionHeaderAction
+private data class OnClickAction(val onClick: () -> Unit) : ConversationSectionHeaderAction
 
-object NoAction : ConversationSectionHeaderAction
+private object NoAction : ConversationSectionHeaderAction

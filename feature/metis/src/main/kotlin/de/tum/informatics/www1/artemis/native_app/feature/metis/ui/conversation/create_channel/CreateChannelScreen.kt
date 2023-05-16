@@ -1,10 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -39,6 +41,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFlo
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewRoute
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -67,8 +70,11 @@ fun NavGraphBuilder.createChannelScreen(
             modifier = Modifier.fillMaxSize(),
             courseId = courseId,
             onConversationCreated = { conversationId ->
-                navController.popBackStack()
-                navController.navigateToConversationDetailScreen(courseId, conversationId) { }
+                navController.navigateToConversationDetailScreen(courseId, conversationId) {
+                    popUpTo(ConversationOverviewRoute) {
+                        inclusive = false
+                    }
+                }
             },
             onNavigateBack = onNavigateBack
         )
@@ -149,7 +155,8 @@ private fun CreateChannelScreen(
                     id = if (isNameIllegal) {
                         R.string.create_channel_text_field_name_invalid
                     } else R.string.create_channel_text_field_name_hint
-                )
+                ),
+                requiredSupportText = stringResource(id = R.string.create_channel_text_field_name_required)
             )
 
             PotentiallyIllegalTextField(
@@ -161,7 +168,8 @@ private fun CreateChannelScreen(
                 isIllegal = isDescriptionIllegal,
                 illegalStateExplanation = stringResource(
                     id = R.string.create_channel_text_field_description_invalid
-                )
+                ),
+                requiredSupportText = null
             )
 
             BinarySelection(
@@ -183,6 +191,8 @@ private fun CreateChannelScreen(
                 choice = isAnnouncement,
                 updateChoice = viewModel::updateAnnouncement
             )
+
+            Box(modifier = Modifier.height(Spacings.FabContentBottomPadding))
         }
     }
 
@@ -206,7 +216,8 @@ private fun PotentiallyIllegalTextField(
     placeholder: String,
     updateValue: (String) -> Unit,
     isIllegal: Boolean,
-    illegalStateExplanation: String
+    illegalStateExplanation: String,
+    requiredSupportText: String?
 ) {
     OutlinedTextField(
         modifier = modifier,
@@ -217,6 +228,8 @@ private fun PotentiallyIllegalTextField(
         supportingText = {
             if (isIllegal) {
                 Text(text = illegalStateExplanation)
+            } else if (requiredSupportText != null) {
+                Text(text = requiredSupportText)
             }
         },
         isError = isIllegal
