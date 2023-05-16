@@ -21,4 +21,8 @@ data class Course(
     val accuracyOfScores: Float = 1f,
     val postsEnabled: Boolean = true,
     val color: String? = null,
+    val instructorGroupName: String = "",
+    val studentGroupName: String = "",
+    val teachingAssistantGroupName: String = "",
+    val editorGroupName: String = ""
 )

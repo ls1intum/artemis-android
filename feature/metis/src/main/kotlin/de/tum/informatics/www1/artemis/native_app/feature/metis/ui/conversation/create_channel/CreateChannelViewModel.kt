@@ -50,8 +50,8 @@ internal class CreateChannelViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val canCreate: StateFlow<Boolean> =
-        combine(isNameIllegal, isDescriptionIllegal) { isNameIllegal, isDescriptionIllegal ->
-            !isNameIllegal && !isDescriptionIllegal
+        combine(isNameIllegal, isDescriptionIllegal, name) { isNameIllegal, isDescriptionIllegal, name ->
+            !isNameIllegal && !isDescriptionIllegal && name.isNotEmpty()
         }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 

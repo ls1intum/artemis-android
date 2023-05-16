@@ -91,6 +91,8 @@ private fun BrowseChannelsScreen(
 ) {
     val viewModel: BrowseChannelsViewModel = koinViewModel { parametersOf(courseId) }
 
+    val canCreateChannel: Boolean by viewModel.canCreateChannel.collectAsState()
+
     val channelsDataState by viewModel.channels.collectAsState()
 
     var registerInChannelJob: Deferred<Long?>? by remember { mutableStateOf(null) }
@@ -118,8 +120,10 @@ private fun BrowseChannelsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToCreateChannel) {
-                Icon(imageVector = Icons.Default.Create, contentDescription = null)
+            if (canCreateChannel) {
+                FloatingActionButton(onClick = onNavigateToCreateChannel) {
+                    Icon(imageVector = Icons.Default.Create, contentDescription = null)
+                }
             }
         }
     ) { padding ->

@@ -18,6 +18,13 @@ sealed class NetworkResponse<T> {
         }
     }
 
+    inline fun <K> then(transform: (T) -> NetworkResponse<K>): NetworkResponse<K> {
+        return when (this) {
+            is Response -> transform(data)
+            is Failure -> Failure(exception)
+        }
+    }
+
     fun or(fallback: T): T = when (this) {
         is Failure -> fallback
         is Response -> data
