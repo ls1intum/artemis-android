@@ -9,6 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.conversationNavGraphBuilderExtension
 
 fun NavController.navigateToConversationSettingsScreen(
     courseId: Long,
@@ -22,25 +23,10 @@ fun NavGraphBuilder.conversationSettingsScreen(
     navController: NavController,
     onNavigateBack: () -> Unit
 ) {
-    composable(
+    conversationNavGraphBuilderExtension(
         route = "course/{courseId}/conversations/{conversationId}/settings",
-        arguments = listOf(
-            navArgument("courseId") { type = NavType.LongType; nullable = false },
-            navArgument("conversationId") { type = NavType.LongType; nullable = false }
-        ),
-        deepLinks = listOf(
-            navDeepLink {
-                uriPattern = "artemis://courses/{courseId}/conversations/{conversationId}/settings"
-            }
-        )
-    ) { backStackEntry ->
-        val courseId =
-            backStackEntry.arguments?.getLong("courseId")
+        deepLink = "artemis://courses/{courseId}/conversations/{conversationId}/settings"
+    ) { courseId, conversationId ->
 
-        val conversationId =
-            backStackEntry.arguments?.getLong("conversationId")
-
-        checkNotNull(courseId)
-        checkNotNull(conversationId)
     }
 }

@@ -37,6 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextFi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.browse_channels.navigateToBrowseChannelsScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.courseNavGraphBuilderExtensions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel.navigateToCreateChannelScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.navigateToCreatePersonalConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
@@ -56,21 +57,10 @@ fun NavGraphBuilder.conversationOverviewScreen(
     navController: NavController,
     onNavigateBack: () -> Unit
 ) {
-    composable(
+    courseNavGraphBuilderExtensions(
         route = ConversationOverviewRoute,
-        arguments = listOf(
-            navArgument("courseId") { type = NavType.LongType; nullable = false }
-        ),
-        deepLinks = listOf(
-            navDeepLink {
-                uriPattern = "artemis://courses/{courseId}/conversations"
-            }
-        )
-    ) { backStackEntry ->
-        val courseId =
-            backStackEntry.arguments?.getLong("courseId")
-        checkNotNull(courseId)
-
+        deepLink = "artemis://courses/{courseId}/conversations"
+    ) { courseId ->
         ConversationScreen(
             modifier = Modifier.fillMaxSize(),
             courseId = courseId,

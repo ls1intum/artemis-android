@@ -40,6 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFloatingActionButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.courseNavGraphBuilderExtensions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewRoute
 import org.koin.androidx.compose.koinViewModel
@@ -56,16 +57,9 @@ fun NavGraphBuilder.createChannelScreen(
     navController: NavController,
     onNavigateBack: () -> Unit
 ) {
-    composable(
-        route = "course/{courseId}/create_channel",
-        arguments = listOf(
-            navArgument("courseId") { type = NavType.LongType; nullable = false }
-        )
-    ) { backStackEntry ->
-        val courseId =
-            backStackEntry.arguments?.getLong("courseId")
-        checkNotNull(courseId)
-
+    courseNavGraphBuilderExtensions(
+        route = "course/{courseId}/create_channel"
+    ) { courseId ->
         CreateChannelScreen(
             modifier = Modifier.fillMaxSize(),
             courseId = courseId,

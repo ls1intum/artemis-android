@@ -49,6 +49,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFloatingActionButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.courseNavGraphBuilderExtensions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableName
 import org.koin.androidx.compose.koinViewModel
@@ -65,16 +66,9 @@ fun NavGraphBuilder.createPersonalConversationScreen(
     navController: NavController,
     onNavigateBack: () -> Unit
 ) {
-    composable(
-        route = "course/{courseId}/create_personal_conversation",
-        arguments = listOf(
-            navArgument("courseId") { type = NavType.LongType; nullable = false }
-        )
-    ) { backStackEntry ->
-        val courseId =
-            backStackEntry.arguments?.getLong("courseId")
-        checkNotNull(courseId)
-
+    courseNavGraphBuilderExtensions(
+        route = "course/{courseId}/create_personal_conversation"
+    ) { courseId ->
         CreatePersonalConversationScreen(
             modifier = Modifier.fillMaxSize(),
             courseId = courseId,

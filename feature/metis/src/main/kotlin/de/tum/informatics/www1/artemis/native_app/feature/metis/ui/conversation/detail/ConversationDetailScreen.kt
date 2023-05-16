@@ -20,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.conversationNavGraphBuilderExtension
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.navigateToConversationSettingsScreen
 
 fun NavController.navigateToConversationDetailScreen(
@@ -34,27 +35,10 @@ fun NavGraphBuilder.conversationDetailScreen(
     navController: NavController,
     onNavigateBack: () -> Unit
 ) {
-    composable(
+    conversationNavGraphBuilderExtension(
         route = "course/{courseId}/conversations/{conversationId}",
-        arguments = listOf(
-            navArgument("courseId") { type = NavType.LongType; nullable = false },
-            navArgument("conversationId") { type = NavType.LongType; nullable = false }
-        ),
-        deepLinks = listOf(
-            navDeepLink {
-                uriPattern = "artemis://courses/{courseId}/conversations/{conversationId}"
-            }
-        )
-    ) { backStackEntry ->
-        val courseId =
-            backStackEntry.arguments?.getLong("courseId")
-
-        val conversationId =
-            backStackEntry.arguments?.getLong("conversationId")
-
-        checkNotNull(courseId)
-        checkNotNull(conversationId)
-
+        deepLink = "artemis://courses/{courseId}/conversations/{conversationId}"
+    ) { courseId, conversationId ->
         ConversationScreen(
             modifier = Modifier.fillMaxSize(),
             onNavigateBack = onNavigateBack,
