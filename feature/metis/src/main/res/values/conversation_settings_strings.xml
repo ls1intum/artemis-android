@@ -5,7 +5,21 @@
     <string name="conversation_settings_failure">Something went wrong while loading your conversation.</string>
     <string name="conversation_settings_try_again">Try again</string>
 
+    <string name="conversation_settings_basic_data_name">Name</string>
+    <string name="conversation_settings_basic_data_description">Description</string>
+    <string name="conversation_settings_basic_data_topic">Topic</string>
+
+    <string name="conversation_settings_basic_data_name_empty">No name set</string>
+    <string name="conversation_settings_basic_data_description_empty">No description set</string>
+    <string name="conversation_settings_basic_data_topic_empty">No topic set</string>
+
+    <string name="conversation_settings_basic_data_save">Save changes</string>
+
     <string name="conversation_settings_section_more_info">More info</string>
     <string name="conversation_settings_section_more_info_created_by">Created by: %1$s (%2$s)</string>
     <string name="conversation_settings_section_more_info_created_on">Created on: %1$s</string>
+
+    <string name="conversation_settings_basic_data_save_failed_dialog_title">Could not save</string>
+    <string name="conversation_settings_basic_data_save_failed_dialog_message">Something went wrong while saving your changes. Please try again later.</string>
+    <string name="conversation_settings_basic_data_save_failed_dialog_positive">@android:string/ok</string>
 </resources>

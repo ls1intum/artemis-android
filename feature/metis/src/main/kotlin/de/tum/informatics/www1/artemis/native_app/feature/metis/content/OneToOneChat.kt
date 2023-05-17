@@ -20,6 +20,8 @@ data class OneToOneChat(
     override val numberOfMembers: Int = 0,
     val members: List<ConversationUser> = emptyList()
 ) : Conversation() {
+    override val type: String = "oneToOneChat"
+
     override fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation =
         copy(unreadMessagesCount = unreadMessagesCount)
 }

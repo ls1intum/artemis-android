@@ -29,6 +29,8 @@ data class ChannelChat(
     val tutorialGroupId: Long? = null,
     val tutorialGroupTitle: String? = null
 ) : Conversation() {
+    override val type: String = "channel"
+
     override fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation =
         copy(unreadMessagesCount = unreadMessagesCount)
 }

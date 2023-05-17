@@ -21,6 +21,9 @@ data class GroupChat(
     val name: String? = null,
     val members: List<ConversationUser> = emptyList()
 ) : Conversation() {
+
+    override val type: String = "groupChat"
+
     override fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation =
         copy(unreadMessagesCount = unreadMessagesCount)
 }

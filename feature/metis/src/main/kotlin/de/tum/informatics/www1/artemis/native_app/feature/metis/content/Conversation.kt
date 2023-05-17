@@ -17,5 +17,7 @@ sealed class Conversation {
     abstract val isMember: Boolean
     abstract val numberOfMembers: Int
 
+    abstract val type: String
+
     abstract fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation
 }

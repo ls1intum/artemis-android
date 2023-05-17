@@ -15,11 +15,15 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class ConversationServiceImpl(private val ktorProvider: KtorProvider) : ConversationService {
 
@@ -145,5 +149,53 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         val isPublic: Boolean,
         val isAnnouncementChannel: Boolean,
         val name: String
+    )
+
+    override suspend fun updateConversation(
+        courseId: Long,
+        conversationId: Long,
+        newName: String?,
+        newDescription: String?,
+        newTopic: String?,
+        conversation: Conversation,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.put(serverUrl) {
+                url {
+                    appendPathSegments("api", "courses", courseId.toString())
+
+                    when (conversation) {
+                        is ChannelChat -> appendPathSegments("channels", conversationId.toString())
+                        is GroupChat -> appendPathSegments("group-chats", conversationId.toString())
+                        is OneToOneChat -> {} // One to one chats cannot be updated
+                    }
+                }
+
+                setBody(
+                    UpdateConversationData(
+                        type = conversation.type,
+                        name = newName,
+                        description = newDescription,
+                        topic = newTopic
+                    )
+                )
+
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                cookieAuth(authToken)
+            }
+                .status
+                .isSuccess()
+        }
+    }
+
+    @Serializable
+    private data class UpdateConversationData(
+        val type: String,
+        val name: String?,
+        val description: String?,
+        val topic: String?
     )
 }

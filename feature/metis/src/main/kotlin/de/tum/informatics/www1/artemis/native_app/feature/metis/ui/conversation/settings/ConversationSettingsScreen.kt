@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -78,9 +79,7 @@ private fun ConversationSettingsScreen(
         ConversationSettingsBody(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                .padding(paddingValues),
             viewModel = viewModel
         )
     }

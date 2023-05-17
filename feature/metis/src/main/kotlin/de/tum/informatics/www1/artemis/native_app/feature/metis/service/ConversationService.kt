@@ -48,4 +48,15 @@ interface ConversationService {
         authToken: String,
         serverUrl: String
     ): NetworkResponse<ChannelChat>
+
+    suspend fun updateConversation(
+        courseId: Long,
+        conversationId: Long,
+        newName: String?,
+        newDescription: String?,
+        newTopic: String?,
+        conversation: Conversation,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean>
 }

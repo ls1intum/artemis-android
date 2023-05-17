@@ -84,3 +84,11 @@ suspend inline fun <T> retryNetworkCall(
         }
     }
 }
+
+inline fun <T> NetworkResponse<T>.onSuccess(onSuccess: (T) -> Unit): NetworkResponse<T> {
+    if (this is NetworkResponse.Response) {
+        onSuccess(data)
+    }
+
+    return this
+}

@@ -20,6 +20,7 @@ class JsonProvider {
 
         encodeDefaults = true // Values that are not set are filled with the defaults given in the constructor.
         coerceInputValues = true
+        explicitNulls = false
 
         serializersModule = SerializersModule {
             include(exerciseSerializerModule)
