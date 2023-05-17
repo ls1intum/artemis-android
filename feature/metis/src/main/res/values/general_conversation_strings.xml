@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_text_field_name_invalid">Names can only contain lowercase letters, numbers, and dashes. Only Artemis can create channels that start with a $.</string>
+    <string name="channel_text_field_description_invalid">The description can be max 250 characters long!</string>
+    <string name="channel_text_field_topic_invalid">the topic can be max 250 characters long!</string>
+</resources>

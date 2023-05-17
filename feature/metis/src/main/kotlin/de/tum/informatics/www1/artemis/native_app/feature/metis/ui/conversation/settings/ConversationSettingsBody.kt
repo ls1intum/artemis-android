@@ -32,7 +32,12 @@ internal fun ConversationSettingsBody(
     val description by viewModel.description.collectAsState()
     val topic by viewModel.topic.collectAsState()
 
+    val isNameIllegal by viewModel.isNameIllegal.collectAsState()
+    val isDescriptionIllegal by viewModel.isDescriptionIllegal.collectAsState()
+    val isTopicIllegal by viewModel.isTopicIllegal.collectAsState()
+
     val canEdit by viewModel.canEdit.collectAsState()
+    val canSave by viewModel.canSave.collectAsState()
     val isDirty by viewModel.isDirty.collectAsState()
 
     var savingJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
@@ -50,17 +55,31 @@ internal fun ConversationSettingsBody(
         }
     )
 
-    val editableConversationInfo = remember(name, description, topic, canEdit, isDirty, savingJob) {
+    val editableConversationInfo = remember(
+        name,
+        description,
+        topic,
+        isNameIllegal,
+        isDescriptionIllegal,
+        isTopicIllegal,
+        canEdit,
+        isDirty,
+        savingJob
+    ) {
         EditableConversationInfo(
             name = name,
             description = description,
             topic = topic,
+            isNameIllegal = isNameIllegal,
+            isDescriptionIllegal = isDescriptionIllegal,
+            isTopicIllegal = isTopicIllegal,
             updateName = viewModel::updateName,
             updateDescription = viewModel::updateDescription,
             updateTopic = viewModel::updateTopic,
             canEditName = canEdit,
             canEditDescription = canEdit,
             canEditTopic = canEdit,
+            canSave = canSave,
             isDirty = isDirty,
             isSavingChanges = savingJob != null,
             onRequestSaveChanges = {

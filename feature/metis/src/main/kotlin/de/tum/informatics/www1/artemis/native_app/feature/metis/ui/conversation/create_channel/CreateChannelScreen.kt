@@ -14,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,14 +31,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.NavType
-import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFloatingActionButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.PotentiallyIllegalTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.courseNavGraphBuilderExtensions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewRoute
@@ -147,7 +144,7 @@ private fun CreateChannelScreen(
                 isIllegal = isNameIllegal,
                 illegalStateExplanation = stringResource(
                     id = if (isNameIllegal) {
-                        R.string.create_channel_text_field_name_invalid
+                        R.string.channel_text_field_name_invalid
                     } else R.string.create_channel_text_field_name_hint
                 ),
                 requiredSupportText = stringResource(id = R.string.create_channel_text_field_name_required)
@@ -161,7 +158,7 @@ private fun CreateChannelScreen(
                 updateValue = viewModel::updateDescription,
                 isIllegal = isDescriptionIllegal,
                 illegalStateExplanation = stringResource(
-                    id = R.string.create_channel_text_field_description_invalid
+                    id = R.string.channel_text_field_description_invalid
                 ),
                 requiredSupportText = null
             )
@@ -200,34 +197,6 @@ private fun CreateChannelScreen(
             onDismissRequest = { isDisplayingErrorDialog = false }
         )
     }
-}
-
-@Composable
-private fun PotentiallyIllegalTextField(
-    modifier: Modifier,
-    label: String,
-    value: String,
-    placeholder: String,
-    updateValue: (String) -> Unit,
-    isIllegal: Boolean,
-    illegalStateExplanation: String,
-    requiredSupportText: String?
-) {
-    OutlinedTextField(
-        modifier = modifier,
-        label = { Text(text = label) },
-        value = value,
-        onValueChange = updateValue,
-        placeholder = { Text(text = placeholder) },
-        supportingText = {
-            if (isIllegal) {
-                Text(text = illegalStateExplanation)
-            } else if (requiredSupportText != null) {
-                Text(text = requiredSupportText)
-            }
-        },
-        isError = isIllegal
-    )
 }
 
 @Composable

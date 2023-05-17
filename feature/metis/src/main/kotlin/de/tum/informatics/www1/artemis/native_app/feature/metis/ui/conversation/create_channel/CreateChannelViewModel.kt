@@ -8,13 +8,14 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.mapIsChannelNameIllegal
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.mapIsDescriptionOrTopicIllegal
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 internal class CreateChannelViewModel(
@@ -32,8 +33,6 @@ internal class CreateChannelViewModel(
         private const val KEY_IS_ANNOUNCEMENT = "announcement"
     }
 
-    private val channelNamePattern = "^[a-z0-9-]{1}[a-z0-9-]{0,20}\$".toRegex()
-
     val name: StateFlow<String> = savedStateHandle.getStateFlow(KEY_NAME, "")
     val description: StateFlow<String> = savedStateHandle.getStateFlow(KEY_DESCRIPTION, "")
 
@@ -42,11 +41,11 @@ internal class CreateChannelViewModel(
         savedStateHandle.getStateFlow(KEY_IS_ANNOUNCEMENT, true)
 
     val isNameIllegal: StateFlow<Boolean> = name
-        .map { it.isNotEmpty() && !channelNamePattern.matches(it) }
+        .mapIsChannelNameIllegal()
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val isDescriptionIllegal: StateFlow<Boolean> = description
-        .map { it.length > 250 }
+        .mapIsDescriptionOrTopicIllegal()
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val canCreate: StateFlow<Boolean> =

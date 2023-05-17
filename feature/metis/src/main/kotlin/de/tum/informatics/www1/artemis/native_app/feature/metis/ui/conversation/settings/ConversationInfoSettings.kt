@@ -20,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelC
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.PotentiallyIllegalTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableName
 import kotlinx.datetime.toJavaInstant
 import java.text.SimpleDateFormat
@@ -79,41 +80,50 @@ private fun SectionBasicData(
     ) {
         val textFieldModifier = Modifier.fillMaxWidth()
 
-        BasicDataTextField(
+        PotentiallyIllegalTextField(
             modifier = textFieldModifier,
             label = R.string.conversation_settings_basic_data_name,
-            emptyHint = R.string.conversation_settings_basic_data_name_empty,
             value = editableConversationInfo.name,
-            onValueChange = editableConversationInfo.updateName,
-            canEdit = editableConversationInfo.canEditName
+            placeholder = R.string.conversation_settings_basic_data_name_empty,
+            updateValue = editableConversationInfo.updateName,
+            isIllegal = editableConversationInfo.isNameIllegal,
+            illegalStateExplanation = R.string.channel_text_field_name_invalid,
+            requiredSupportText = null,
+            readOnly = !editableConversationInfo.canEditName
         )
 
         if (displayDescription) {
-            BasicDataTextField(
+            PotentiallyIllegalTextField(
                 modifier = textFieldModifier,
                 label = R.string.conversation_settings_basic_data_description,
-                emptyHint = R.string.conversation_settings_basic_data_description_empty,
                 value = editableConversationInfo.description,
-                onValueChange = editableConversationInfo.updateDescription,
-                canEdit = editableConversationInfo.canEditDescription
+                placeholder = R.string.conversation_settings_basic_data_description_empty,
+                updateValue = editableConversationInfo.updateDescription,
+                isIllegal = editableConversationInfo.isDescriptionIllegal,
+                illegalStateExplanation = R.string.channel_text_field_description_invalid,
+                requiredSupportText = null,
+                readOnly = !editableConversationInfo.canEditDescription
             )
         }
 
         if (displayTopic) {
-            BasicDataTextField(
+            PotentiallyIllegalTextField(
                 modifier = textFieldModifier,
                 label = R.string.conversation_settings_basic_data_topic,
-                emptyHint = R.string.conversation_settings_basic_data_topic_empty,
                 value = editableConversationInfo.topic,
-                onValueChange = editableConversationInfo.updateTopic,
-                canEdit = editableConversationInfo.canEditTopic
+                placeholder = R.string.conversation_settings_basic_data_topic_empty,
+                updateValue = editableConversationInfo.updateTopic,
+                isIllegal = editableConversationInfo.isTopicIllegal,
+                illegalStateExplanation = R.string.channel_text_field_topic_invalid,
+                requiredSupportText = null,
+                readOnly = !editableConversationInfo.canEditTopic
             )
         }
 
         AnimatedVisibility(visible = editableConversationInfo.isDirty || editableConversationInfo.isSavingChanges) {
             Button(
                 onClick = editableConversationInfo.onRequestSaveChanges,
-                enabled = !editableConversationInfo.isSavingChanges
+                enabled = !editableConversationInfo.isSavingChanges && editableConversationInfo.canSave
             ) {
                 Text(text = stringResource(id = R.string.conversation_settings_basic_data_save))
 

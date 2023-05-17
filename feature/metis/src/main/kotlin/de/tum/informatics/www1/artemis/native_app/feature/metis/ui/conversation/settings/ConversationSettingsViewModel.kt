@@ -18,6 +18,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversa
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.mapIsChannelNameIllegal
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.mapIsDescriptionOrTopicIllegal
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -53,6 +55,21 @@ internal class ConversationSettingsViewModel(
     private val _description: StateFlow<String?> =
         savedStateHandle.getStateFlow(KEY_DESCRIPTION, null)
     private val _topic: StateFlow<String?> = savedStateHandle.getStateFlow(KEY_TOPIC, null)
+
+    val isNameIllegal: StateFlow<Boolean> = _name
+        .map { it.orEmpty() }
+        .mapIsChannelNameIllegal()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val isDescriptionIllegal: StateFlow<Boolean> = _description
+        .map { it.orEmpty() }
+        .mapIsDescriptionOrTopicIllegal()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val isTopicIllegal: StateFlow<Boolean> = _topic
+        .map { it.orEmpty() }
+        .mapIsDescriptionOrTopicIllegal()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     private val savedName = MutableStateFlow<String?>(null)
     private val savedDescription = MutableStateFlow<String?>(null)
@@ -179,6 +196,12 @@ internal class ConversationSettingsViewModel(
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    val canSave: StateFlow<Boolean> =
+        combine(isNameIllegal, isDescriptionIllegal, isTopicIllegal) { a, b, c ->
+            !a && !b && !c
+        }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     fun saveChanges(): Deferred<Boolean> {
         return viewModelScope.async {
             val conversation = conversation.value.orNull() ?: return@async false
@@ -233,7 +256,8 @@ internal class ConversationSettingsViewModel(
         localValueFlow: Flow<T>,
         getCurrentValue: Conversation.() -> T
     ): Flow<Boolean> = combine(localValueFlow, conversation) { localValue, conversationDataState ->
-        conversationDataState.bind(getCurrentValue).bind { localValue != null && it != localValue }.orElse(false)
+        conversationDataState.bind(getCurrentValue).bind { localValue != null && it != localValue }
+            .orElse(false)
     }
 
     private fun copyConversationWithSavedValues(
