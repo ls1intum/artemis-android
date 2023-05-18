@@ -25,6 +25,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.courseId
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.getProblemStatementWebViewState
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import io.ktor.http.*
 import me.onebone.toolbar.*

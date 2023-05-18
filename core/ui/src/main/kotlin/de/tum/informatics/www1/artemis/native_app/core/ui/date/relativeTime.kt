@@ -4,6 +4,8 @@ import android.text.format.DateUtils
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
+import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.Clock
@@ -14,25 +16,38 @@ import kotlin.time.Duration.Companion.seconds
 
 /**
  * Format the given time relative to now and update as often as relevant.
+ * @param formatSeconds if second precision should be used or minute precision.
  */
 @Composable
-fun getRelativeTime(to: Instant, clock: Clock = Clock.System): CharSequence {
-    val flow = remember(to, clock) {
+fun getRelativeTime(
+    to: Instant,
+    clock: Clock = Clock.System,
+    formatSeconds: Boolean = false
+): CharSequence {
+    val timeDifferenceBelowOneMinuteString = stringResource(id = R.string.time_difference_under_one_minute)
+
+    val flow = remember(to, clock, timeDifferenceBelowOneMinuteString) {
         flow {
             while (true) {
                 val now = clock.now()
-                emit(
-                    DateUtils.getRelativeTimeSpanString(
-                        to.toEpochMilliseconds(),
-                        now.toEpochMilliseconds(),
-                        0L,
-                        DateUtils.FORMAT_ABBREV_RELATIVE
-                    )
-                )
 
                 val timeDifference = (now - to).absoluteValue
+
+                if (formatSeconds || timeDifference >= 1.minutes) {
+                    emit(
+                        DateUtils.getRelativeTimeSpanString(
+                            to.toEpochMilliseconds(),
+                            now.toEpochMilliseconds(),
+                            0L,
+                            DateUtils.FORMAT_ABBREV_RELATIVE
+                        )
+                    )
+                } else {
+                    emit(timeDifferenceBelowOneMinuteString)
+                }
+
                 when {
-                    timeDifference < 1.minutes -> {
+                    timeDifference < 1.minutes && formatSeconds -> {
                         delay(1.seconds)
                     }
 

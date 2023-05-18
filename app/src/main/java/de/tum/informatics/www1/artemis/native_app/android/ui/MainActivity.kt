@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
@@ -40,10 +41,18 @@ import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.navigateT
 import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATION
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.create_standalone_post.createStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.standalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ProvideLocalVisibleMetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextReporter
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleStandalonePostDetails
+import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.navigateToQuizParticipation
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.quizParticipation
@@ -51,8 +60,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.navig
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.quizResults
 import de.tum.informatics.www1.artemis.native_app.feature.settings.navigateToSettings
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsScreen
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 
@@ -60,9 +71,15 @@ import org.koin.android.ext.android.get
  * Main and only activity used in the android app.
  * Navigation is handled by decompose and jetpack compose.
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
 
     private val accountService: AccountService = get()
+    private val communicationNotificationManager: CommunicationNotificationManager = get()
+
+    override val visibleMetisContexts: MutableStateFlow<List<VisibleMetisContext>> =
+        MutableStateFlow(
+            emptyList()
+        )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,196 +92,216 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val visibleMetisContextManager = object : VisibleMetisContextManager {
+            override fun registerMetisContext(metisContext: VisibleMetisContext) {
+                visibleMetisContexts.value = visibleMetisContexts.value + metisContext
+
+                cancelCommunicationNotifications(metisContext)
+            }
+
+            override fun unregisterMetisContext(metisContext: VisibleMetisContext) {
+                visibleMetisContexts.value = visibleMetisContexts.value - metisContext
+            }
+
+        }
+
         setContent {
             AppTheme {
-                val navController = rememberNavController()
+                ProvideLocalVisibleMetisContextManager(visibleMetisContextManager = visibleMetisContextManager) {
+                    MainActivityComposeUi(startDestination)
+                }
+            }
+        }
+    }
 
-                // Listen for when the user get logged out (e.g. because their token has expired)
-                // This only happens when the user has the app running for multiple days or the user logged out manually
-                LaunchedEffect(Unit) {
-                    accountService.authenticationData.withPrevious()
-                        .map { (prev, now) -> prev?.isLoggedIn to now.isLoggedIn }
-                        .collect { (wasLoggedIn, isLoggedIn) ->
-                            if (wasLoggedIn == true && !isLoggedIn) {
-                                navController.navigateToLogin {
-                                    popUpTo(DASHBOARD_DESTINATION) {
-                                        inclusive = true
-                                    }
-                                }
+    @Composable
+    private fun MainActivityComposeUi(startDestination: String) {
+        val navController = rememberNavController()
+
+        // Listen for when the user get logged out (e.g. because their token has expired)
+        // This only happens when the user has the app running for multiple days or the user logged out manually
+        LaunchedEffect(Unit) {
+            accountService.authenticationData.withPrevious()
+                .map { (prev, now) -> prev?.isLoggedIn to now.isLoggedIn }
+                .collect { (wasLoggedIn, isLoggedIn) ->
+                    if (wasLoggedIn == true && !isLoggedIn) {
+                        navController.navigateToLogin {
+                            popUpTo(DASHBOARD_DESTINATION) {
+                                inclusive = true
                             }
                         }
-                }
-
-                val onLoggedIn = {
-                    // Navigate to the course overview and remove the login screen from the navigation stack.
-                    navController.navigateToDashboard {
-                        popUpTo(LOGIN_DESTINATION) {
-                            inclusive = true
-                        }
                     }
                 }
+        }
 
-                val windowSizeClassProvider = remember {
-                    object : WindowSizeClassProvider {
-                        @Composable
-                        override fun provideWindowSizeClass(): WindowSizeClass =
-                            calculateWindowSizeClass(
-                                activity = this@MainActivity
-                            )
-                    }
+        val onLoggedIn = {
+            // Navigate to the course overview and remove the login screen from the navigation stack.
+            navController.navigateToDashboard {
+                popUpTo(LOGIN_DESTINATION) {
+                    inclusive = true
                 }
+            }
+        }
 
-                val onNavigateToTextExerciseParticipation =
-                    { exerciseId: Long, participationId: Long ->
+        val windowSizeClassProvider = remember {
+            object : WindowSizeClassProvider {
+                @Composable
+                override fun provideWindowSizeClass(): WindowSizeClass =
+                    calculateWindowSizeClass(
+                        activity = this@MainActivity
+                    )
+            }
+        }
+
+        val onNavigateToTextExerciseParticipation =
+            { exerciseId: Long, participationId: Long ->
+                navController.navigateToExercise(
+                    exerciseId,
+                    ExerciseViewMode.TextParticipation(participationId)
+                ) {}
+            }
+
+        val onNavigateToExerciseResultView = { exerciseId: Long ->
+            navController.navigateToExercise(
+                exerciseId,
+                ExerciseViewMode.ViewResult
+            ) {}
+        }
+
+        val onParticipateInQuiz = { courseId: Long, exerciseId: Long, isPractice: Boolean ->
+            navController.navigateToQuizParticipation(
+                courseId,
+                exerciseId,
+                if (isPractice) QuizType.Practice else QuizType.Live
+            )
+        }
+
+        val onClickViewQuizResults = { courseId: Long, exerciseId: Long ->
+            navController.navigateToQuizResult(courseId, exerciseId)
+        }
+
+        val linkOpener = remember {
+            CustomTabsLinkOpener(this@MainActivity)
+        }
+
+        CompositionLocalProvider(
+            LocalWindowSizeClassProvider provides windowSizeClassProvider,
+            LocalLinkOpener provides linkOpener
+        ) {
+            // Use jetpack compose navigation for the navigation logic.
+            NavHost(navController = navController, startDestination = startDestination) {
+                loginScreen(
+                    onFinishedLoginFlow = onLoggedIn,
+                    onRequestOpenSettings = {
+                        navController.navigateToSettings { }
+                    }
+                )
+
+                dashboard(
+                    onOpenSettings = {
+                        navController.navigateToSettings { }
+                    },
+                    onClickRegisterForCourse = {
+                        navController.navigateToCourseRegistration { }
+                    },
+                    onViewCourse = { courseId ->
+                        navController.navigateToCourse(courseId) { }
+                    }
+                )
+
+                courseRegistration(
+                    onNavigateUp = navController::navigateUp,
+                    onRegisteredInCourse = { courseId ->
+                        navController.navigateUp()
+                        navController.navigateToCourse(courseId) { }
+                    }
+                )
+
+                course(
+                    onNavigateToExercise = { exerciseId ->
                         navController.navigateToExercise(
                             exerciseId,
-                            ExerciseViewMode.TextParticipation(participationId)
+                            ExerciseViewMode.Overview
+                        ) { }
+                    },
+                    onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
+                    onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+                    onParticipateInQuiz = onParticipateInQuiz,
+                    onNavigateToLecture = { _, lectureId ->
+                        navController.navigateToLecture(
+                            lectureId = lectureId
+                        ) { }
+                    },
+                    onNavigateBack = navController::navigateUp,
+                    navController = navController,
+                    onViewQuizResults = onClickViewQuizResults
+                )
+
+                exercise(
+                    navController = navController,
+                    onNavigateBack = navController::navigateUp,
+                    onParticipateInQuiz = onParticipateInQuiz,
+                    onClickViewQuizResults = onClickViewQuizResults
+                )
+
+                lecture(
+                    navController = navController,
+                    onNavigateBack = navController::navigateUp,
+                    onViewExercise = { exerciseId ->
+                        navController.navigateToExercise(
+                            exerciseId,
+                            ExerciseViewMode.Overview
+                        ) { }
+                    },
+                    onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+                    onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
+                    onParticipateInQuiz = onParticipateInQuiz,
+                    onClickViewQuizResults = onClickViewQuizResults
+                )
+
+                standalonePostScreen(
+                    onNavigateUp = navController::navigateUp
+                )
+
+                createStandalonePostScreen(
+                    onNavigateUp = navController::navigateUp,
+                    onCreatedPost = { clientSidePostId, metisContext ->
+                        navController.navigateUp()
+                        navController.navigateToStandalonePostScreen(
+                            clientSidePostId,
+                            metisContext,
+                            ViewType.POST
                         ) {}
                     }
+                )
 
-                val onNavigateToExerciseResultView = { exerciseId: Long ->
-                    navController.navigateToExercise(
-                        exerciseId,
-                        ExerciseViewMode.ViewResult
-                    ) {}
-                }
-
-                val onParticipateInQuiz = { courseId: Long, exerciseId: Long, isPractice: Boolean ->
-                    navController.navigateToQuizParticipation(
-                        courseId,
-                        exerciseId,
-                        if (isPractice) QuizType.Practice else QuizType.Live
-                    )
-                }
-
-                val onClickViewQuizResults = { courseId: Long, exerciseId: Long ->
-                    navController.navigateToQuizResult(courseId, exerciseId)
-                }
-
-                val linkOpener = remember {
-                    CustomTabsLinkOpener(this@MainActivity)
-                }
-
-                CompositionLocalProvider(
-                    LocalWindowSizeClassProvider provides windowSizeClassProvider,
-                    LocalLinkOpener provides linkOpener
-                ) {
-                    // Use jetpack compose navigation for the navigation logic.
-                    NavHost(navController = navController, startDestination = startDestination) {
-                        loginScreen(
-                            onFinishedLoginFlow = onLoggedIn,
-                            onRequestOpenSettings = {
-                                navController.navigateToSettings { }
-                            }
-                        )
-
-                        dashboard(
-                            onOpenSettings = {
-                                navController.navigateToSettings { }
-                            },
-                            onClickRegisterForCourse = {
-                                navController.navigateToCourseRegistration { }
-                            },
-                            onViewCourse = { courseId ->
-                                navController.navigateToCourse(courseId) { }
-                            }
-                        )
-
-                        courseRegistration(
-                            onNavigateUp = navController::navigateUp,
-                            onRegisteredInCourse = { courseId ->
-                                navController.navigateUp()
-                                navController.navigateToCourse(courseId) { }
-                            }
-                        )
-
-                        course(
-                            onNavigateToExercise = { exerciseId ->
-                                navController.navigateToExercise(
-                                    exerciseId,
-                                    ExerciseViewMode.Overview
-                                ) { }
-                            },
-                            onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
-                            onNavigateToExerciseResultView = onNavigateToExerciseResultView,
-                            onParticipateInQuiz = onParticipateInQuiz,
-                            onNavigateToLecture = { _, lectureId ->
-                                navController.navigateToLecture(
-                                    lectureId = lectureId
-                                ) { }
-                            },
-                            onNavigateBack = navController::navigateUp,
-                            navController = navController,
-                            onViewQuizResults = onClickViewQuizResults
-                        )
-
-                        exercise(
-                            navController = navController,
-                            onNavigateBack = navController::navigateUp,
-                            onParticipateInQuiz = onParticipateInQuiz,
-                            onClickViewQuizResults = onClickViewQuizResults
-                        )
-
-                        lecture(
-                            navController = navController,
-                            onNavigateBack = navController::navigateUp,
-                            onViewExercise = { exerciseId ->
-                                navController.navigateToExercise(
-                                    exerciseId,
-                                    ExerciseViewMode.Overview
-                                ) { }
-                            },
-                            onNavigateToExerciseResultView = onNavigateToExerciseResultView,
-                            onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
-                            onParticipateInQuiz = onParticipateInQuiz,
-                            onClickViewQuizResults = onClickViewQuizResults
-                        )
-
-                        standalonePostScreen(
-                            onNavigateUp = navController::navigateUp
-                        )
-
-                        createStandalonePostScreen(
-                            onNavigateUp = navController::navigateUp,
-                            onCreatedPost = { clientSidePostId, metisContext ->
-                                navController.navigateUp()
-                                navController.navigateToStandalonePostScreen(
-                                    clientSidePostId,
-                                    metisContext,
-                                    ViewType.POST
-                                ) {}
-                            }
-                        )
-
-                        quizParticipation(
-                            onLeaveQuiz = {
-                                val previousBackStackEntry = navController.previousBackStackEntry
-                                if (previousBackStackEntry?.destination?.route == ExerciseViewDestination.EXERCISE_VIEW_ROUTE) {
-                                    previousBackStackEntry.savedStateHandle[ExerciseViewDestination.REQUIRE_RELOAD_KEY] =
-                                        true
-                                }
-                                navController.navigateUp()
-                            }
-                        )
-
-                        quizResults(
-                            onRequestLeaveQuizResults = navController::navigateUp
-                        )
-
-                        settingsScreen(
-                            navController = navController,
-                            versionCode = BuildConfig.VERSION_CODE,
-                            versionName = BuildConfig.VERSION_NAME,
-                            onNavigateUp = navController::navigateUp,
-                            onLoggedOut = {
-                                // Nothing to do here, automatically moved to login screen
-                            }
-                        ) {
-                            val intent =
-                                Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
-                            startActivity(intent)
+                quizParticipation(
+                    onLeaveQuiz = {
+                        val previousBackStackEntry = navController.previousBackStackEntry
+                        if (previousBackStackEntry?.destination?.route == ExerciseViewDestination.EXERCISE_VIEW_ROUTE) {
+                            previousBackStackEntry.savedStateHandle[ExerciseViewDestination.REQUIRE_RELOAD_KEY] =
+                                true
                         }
+                        navController.navigateUp()
                     }
+                )
+
+                quizResults(
+                    onRequestLeaveQuizResults = navController::navigateUp
+                )
+
+                settingsScreen(
+                    navController = navController,
+                    versionCode = BuildConfig.VERSION_CODE,
+                    versionName = BuildConfig.VERSION_NAME,
+                    onNavigateUp = navController::navigateUp,
+                    onLoggedOut = {
+                        // Nothing to do here, automatically moved to login screen
+                    }
+                ) {
+                    val intent =
+                        Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
+                    startActivity(intent)
                 }
             }
         }
@@ -274,6 +311,28 @@ class MainActivity : AppCompatActivity() {
         override fun openLink(url: String) {
             CustomTabsIntent.Builder().build()
                 .launchUrl(context, Uri.parse(url))
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        visibleMetisContexts.value.forEach(::cancelCommunicationNotifications)
+    }
+
+    private fun cancelCommunicationNotifications(visibleMetisContext: VisibleMetisContext) {
+        if (visibleMetisContext is VisibleStandalonePostDetails) {
+            val parentId = visibleMetisContext.postId
+            val communicationType: CommunicationType = when (visibleMetisContext.metisContext) {
+                is MetisContext.Course -> CommunicationType.QNA_COURSE
+                is MetisContext.Exercise -> CommunicationType.QNA_EXERCISE
+                is MetisContext.Lecture -> CommunicationType.QNA_LECTURE
+                is MetisContext.Conversation -> throw NotImplementedError()
+            }
+
+            lifecycleScope.launch {
+                communicationNotificationManager.deleteCommunication(parentId, communicationType)
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.LoadingState
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ArtemisWebView
 
@@ -35,7 +36,7 @@ internal fun ExerciseOverviewTab(
             actions = actions
         )
 
-        if (webViewState != null) {
+        if (exercise !is QuizExercise && webViewState != null) {
             ArtemisWebView(
                 modifier = Modifier.fillMaxWidth(),
                 webViewState = webViewState,

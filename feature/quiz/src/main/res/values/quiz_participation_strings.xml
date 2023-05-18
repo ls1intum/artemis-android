@@ -6,13 +6,13 @@
     <string name="quiz_participation_retry">Try again</string>
 
     <string name="quiz_participation_wait_for_start_please_wait">Please wait.</string>
-    <string name="quiz_participation_wait_for_start_explanation">The quiz will be displayed automatically once it is started.</string>
+    <string name="quiz_participation_wait_for_start_explanation">This page will refresh automatically, when the quiz starts.</string>
     <string name="quiz_participation_wait_for_start_refresh_button">Refresh</string>
     <string name="quiz_participation_wait_for_start_time_until_start">Time until planned start:</string>
     <string name="quiz_participation_wait_for_start_enter_password">Please enter the passcode:</string>
     <string name="quiz_participation_wait_for_start_join_button">Join now</string>
-    <string name="quiz_participation_wait_for_start_start_now">Start your quiz run now.</string>
-    <string name="quiz_participation_wait_for_start_start_now_button">Start now</string>
+    <string name="quiz_participation_wait_for_start_start_now">Start your quiz run now</string>
+    <string name="quiz_participation_wait_for_start_start_now_button">Start Batch</string>
 
     <string name="quiz_participation_wait_for_start_no_more_attempts_already_participated">You have already participated.</string>
     <string name="quiz_participation_wait_for_start_no_more_attempts_no_more_attempts">You have used up all of your attempts.</string>
@@ -38,7 +38,7 @@
     <string name="quiz_participation_time_left">Deadline: %1$s</string>
     <string name="quiz_participation_time_left_quiz_ended">Quiz has ended!</string>
     <string name="quiz_participation_last_saved">Saved: %1$s</string>
-    <string name="quiz_participation_never_saved">Never saved!</string>
+    <string name="quiz_participation_never_saved">Saved: Never</string>
     <string name="quiz_participation_practice_mode">Practice</string>
     <string name="quiz_participation_button_previous_question">Previous</string>
     <string name="quiz_participation_button_next_question">Next</string>

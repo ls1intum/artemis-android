@@ -53,12 +53,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.google.accompanist.placeholder.material.placeholder
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.Post
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.EmojiView
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.emoji_picker.EmojiPicker
 import kotlinx.datetime.Clock

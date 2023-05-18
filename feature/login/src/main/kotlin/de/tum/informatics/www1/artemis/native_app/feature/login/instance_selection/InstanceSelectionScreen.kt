@@ -125,7 +125,7 @@ private fun ArtemisInstanceGridCell(
 
             when (item) {
                 is GridCellItem.ArtemisInstanceGridCellItem -> {
-                    val model = remember {
+                    val model = remember(item) {
                         ImageRequest
                             .Builder(context)
                             .data(item.imageUrl)

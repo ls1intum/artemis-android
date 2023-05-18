@@ -3,11 +3,11 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisStorageService
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first

@@ -20,9 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -31,13 +29,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.overview.ExerciseOverviewTab
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SideBarMetisUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SmartphoneMetisUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.create_standalone_post.navigateToCreateStandalonePostScreen

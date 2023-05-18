@@ -20,7 +20,7 @@ val dataModule = module {
     singleOf(::KtorProvider)
 
     single<CourseRegistrationService> { CourseRegistrationServiceImpl(get(), get()) }
-    single<CourseService> { CourseServiceImpl(get(), get()) }
+    single<CourseService> { CourseServiceImpl(get()) }
     single<DashboardService> { DashboardServiceImpl(get(), get()) }
     single<ExerciseService> { ExerciseServiceImpl(get(), get()) }
     single<LoginService> { LoginServiceImpl(get()) }

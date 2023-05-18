@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="course_overview_title">Dashboard</string>
+    <string name="course_overview_title">Your current courses</string>
 
     <!--  The placeholders are digits, but are supplied as strings, as the number formatting is handled in code.  -->
     <string name="course_overview_course_progress">%1$sP/%2$sP (%3$s)</string>

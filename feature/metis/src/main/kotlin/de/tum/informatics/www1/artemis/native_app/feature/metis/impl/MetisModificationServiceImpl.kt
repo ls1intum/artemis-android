@@ -4,11 +4,11 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.post

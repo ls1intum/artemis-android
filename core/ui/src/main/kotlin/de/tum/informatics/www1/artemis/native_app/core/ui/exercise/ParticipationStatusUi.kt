@@ -77,7 +77,7 @@ private fun getSubmissionResultStatusText(
         participation?.initializationState == InitializationState.FINISHED -> R.string.exercise_user_submitted
         participation?.initializationState == InitializationState.INITIALIZED && exercise is QuizExercise -> R.string.exercise_user_participating
         exercise is QuizExercise && exercise.notStartedC -> R.string.exercise_quiz_not_started
-        else -> 0
+        else -> R.string.exercise_user_unknown
     }
 
     return stringResource(id = id)

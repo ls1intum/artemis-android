@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="course_registration_title">Register for course</string>
+    <string name="course_registration_title">Register for a course</string>
     <string name="course_registration_loading_courses_failed">Something went wrong while loading courses.</string>
-    <string name="course_registration_loading_courses_suspended">Your Internet connection may be unstable.</string>
     <string name="course_registration_loading_courses_loading">Fetching courses from server…</string>
     <string name="course_registration_loading_courses_try_again">Try again</string>
 
-    <string name="course_registration_sign_up">Sign up</string>
+    <string name="course_registration_sign_up">Register</string>
     <string name="course_registration_sign_up_dialog_message">Are you sure you want to register?</string>
-    <string name="course_registration_sign_up_dialog_positive_button">Sign up now</string>
+    <string name="course_registration_sign_up_dialog_positive_button">Confirm</string>
 
     <string name="course_registration_sign_up_failed_dialog_title">Registration failed</string>
     <string name="course_registration_sign_up_failed_dialog_message">Something went wrong while registering you to the server. Please try again later.</string>

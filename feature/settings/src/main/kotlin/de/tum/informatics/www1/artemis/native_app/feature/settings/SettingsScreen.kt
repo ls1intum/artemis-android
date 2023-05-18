@@ -186,13 +186,13 @@ private fun SettingsScreen(
                     onRequestLogout = {
                         scope.launch {
                             // the user manually logs out. Therefore we need to tell the server asap.
-                            pushNotificationJobService.scheduleUnsubscribeFromNotifications(
-                                serverUrl = serverUrl,
-                                authToken = authToken,
-                                firebaseToken = pushNotificationConfigurationService
-                                    .firebaseToken
-                                    .first() ?: return@launch
-                            )
+                            pushNotificationConfigurationService.firebaseToken.first()?.let {firebaseToken ->
+                                pushNotificationJobService.scheduleUnsubscribeFromNotifications(
+                                    serverUrl = serverUrl,
+                                    authToken = authToken,
+                                    firebaseToken = firebaseToken
+                                )
+                            }
 
                             accountService.logout()
 

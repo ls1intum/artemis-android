@@ -1,12 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisContext
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.core.datastore.model.metis.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostDTO
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy
 import kotlinx.coroutines.flow.Flow
 
 interface MetisService {

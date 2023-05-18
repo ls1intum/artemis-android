@@ -1,7 +1,7 @@
 plugins {
     id("artemis.android.library")
     kotlin("plugin.serialization")
-    id("kotlin-kapt")
+    id("artemis.android.room")
 }
 
 android {

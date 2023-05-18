@@ -32,7 +32,7 @@ internal class ServerConfigurationServiceImpl(
         context
             .serverCommunicationPreferences
             .data
-            .map { data -> data[SERVER_URL_KEY] ?: ArtemisInstances.TUM_ARTEMIS.serverUrl }
+            .map { data -> data[SERVER_URL_KEY] ?: ArtemisInstances.TumArtemis.serverUrl }
             .distinctUntilChanged()
             .shareIn(GlobalScope, SharingStarted.Eagerly, replay = 1)
 
