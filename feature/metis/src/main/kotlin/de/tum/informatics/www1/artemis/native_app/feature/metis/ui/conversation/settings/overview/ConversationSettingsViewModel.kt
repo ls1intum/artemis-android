@@ -43,7 +43,15 @@ internal class ConversationSettingsViewModel(
     networkStatusProvider: NetworkStatusProvider,
     serverDataService: ServerDataService,
     private val savedStateHandle: SavedStateHandle
-) : SettingsBaseViewModel(courseId, conversationId, conversationService, accountService, serverConfigurationService, networkStatusProvider, serverDataService) {
+) : SettingsBaseViewModel(
+    courseId,
+    conversationId,
+    conversationService,
+    accountService,
+    serverConfigurationService,
+    networkStatusProvider,
+    serverDataService
+) {
 
     companion object {
         private const val KEY_NAME = "name"
@@ -224,6 +232,42 @@ internal class ConversationSettingsViewModel(
                     }
                 }
                 .or(false)
+        }
+    }
+
+    fun leaveConversation(): Deferred<Boolean> {
+        return viewModelScope.async {
+            // Leaving the conversation is like kicking yourself
+            kickMember(clientUsername.value.orNull() ?: return@async false).await()
+        }
+    }
+
+    fun toggleChannelArchivation(): Deferred<Boolean> {
+        return viewModelScope.async {
+            val conversation = conversation.value.orNull() as? ChannelChat ?: return@async false
+
+            val result = if (conversation.isArchived) {
+                conversationService.unarchiveChannel(
+                    courseId,
+                    conversationId,
+                    accountService.authToken.first(),
+                    serverConfigurationService.serverUrl.first()
+                )
+            } else {
+                conversationService.archiveChannel(
+                    courseId,
+                    conversationId,
+                    accountService.authToken.first(),
+                    serverConfigurationService.serverUrl.first()
+                )
+            }
+                .or(false)
+
+            if (result) {
+                onRequestReload.tryEmit(Unit)
+            }
+
+            result
         }
     }
 

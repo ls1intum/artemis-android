@@ -19,6 +19,12 @@
     <string name="conversation_settings_section_more_info_created_by">Created by: %1$s (%2$s)</string>
     <string name="conversation_settings_section_more_info_created_on">Created on: %1$s</string>
 
+    <string name="conversation_settings_section_other">Other</string>
+    <string name="conversation_settings_section_other_leave_conversation">Leave conversation</string>
+    <string name="conversation_settings_section_other_archive_channel">Archive channel</string>
+    <string name="conversation_settings_section_other_unarchive_channel">Unarchive channel</string>
+    <string name="conversation_settings_section_other_delete_channel">Delete channel</string>
+
     <string name="conversation_settings_section_members">Members</string>
     <plurals name="conversation_settings_section_members_count">
         <item quantity="zero">No members</item>
@@ -54,4 +60,14 @@
     <string name="conversation_settings_perform_action_on_user_failed_dialog_title">Could not perform action</string>
     <string name="conversation_settings_perform_action_on_user_failed_dialog_message">Something went wrong while saving your changes. Please try again later.</string>
     <string name="conversation_settings_perform_action_on_user_failed_dialog_positive">@android:string/ok</string>
+
+    <string name="conversation_settings_dialog_archive_channel_title">Archive channel?</string>
+    <string name="conversation_settings_dialog_archive_channel_message">**Do you really want to archive channel %1$s?** No one will be able to send messages to the channel. You can unarchive the channel at any time.</string>
+    <string name="conversation_settings_dialog_archive_channel_positive">Archive channel</string>
+    <string name="conversation_settings_dialog_archive_channel_negative">@android:string/cancel</string>
+
+    <string name="conversation_settings_dialog_unarchive_channel_title">Unarchive channel?</string>
+    <string name="conversation_settings_dialog_unarchive_channel_message">**Do you really want to unarchive channel %1$s?** Unarchiving a channel will allow members to post. You can archive the channel again at any time.</string>
+    <string name="conversation_settings_dialog_unarchive_channel_positive">Unarchive channel</string>
+    <string name="conversation_settings_dialog_unarchive_channel_negative">@android:string/cancel</string>
 </resources>

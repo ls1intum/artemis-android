@@ -46,7 +46,7 @@ internal fun PerformActionOnUserDialogs(
             conversation = conversation,
             performActionOnUserData = performActionOnUserData,
             onKickUser = {
-                performActionOnUserJob = viewModel.kickMember(performActionOnUserData.user)
+                performActionOnUserJob = viewModel.kickMember(performActionOnUserData.user.username.orEmpty())
             },
             onGiveModerationRights = {
                 performActionOnUserJob = viewModel.grantModerationRights(performActionOnUserData.user)

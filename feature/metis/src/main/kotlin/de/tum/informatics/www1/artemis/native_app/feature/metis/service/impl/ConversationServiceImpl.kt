@@ -199,6 +199,38 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         val topic: String?
     )
 
+    override suspend fun archiveChannel(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> {
+        return performActionOnChannel(
+            courseId,
+            conversationId,
+            authToken,
+            serverUrl
+        ) {
+            appendPathSegments("archive")
+        }
+    }
+
+    override suspend fun unarchiveChannel(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> {
+        return performActionOnChannel(
+            courseId,
+            conversationId,
+            authToken,
+            serverUrl
+        ) {
+            appendPathSegments("unarchive")
+        }
+    }
+
     override suspend fun getMembers(
         courseId: Long,
         conversationId: Long,
@@ -309,6 +341,34 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
                 cookieAuth(authToken)
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
+            }
+                .status
+                .isSuccess()
+        }
+    }
+
+    private suspend fun performActionOnChannel(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String,
+        urlBlock: URLBuilder.() -> Unit
+    ): NetworkResponse<Boolean> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments(
+                        "api",
+                        "courses",
+                        courseId.toString(),
+                        "channels",
+                        conversationId.toString()
+                    )
+
+                    urlBlock()
+                }
+
+                cookieAuth(authToken)
             }
                 .status
                 .isSuccess()

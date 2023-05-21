@@ -25,8 +25,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.PerformActionOnUserData
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.PerformActionOnUserDialogs
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.UserAction
@@ -60,17 +58,41 @@ internal fun ConversationSettingsBody(
     val isDirty by viewModel.isDirty.collectAsState()
 
     var savingJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
+    var leaveConversationJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
+    var archiveChannelJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
 
     var displaySaveFailedDialog by remember { mutableStateOf(false) }
+
+    val onSaveResult = { successful: Boolean ->
+        if (!successful) {
+            displaySaveFailedDialog = true
+        }
+    }
 
     AwaitDeferredCompletion(
         job = savingJob,
         onComplete = { successful ->
             savingJob = null
 
-            if (!successful) {
-                displaySaveFailedDialog = true
-            }
+            onSaveResult(successful)
+        }
+    )
+
+    AwaitDeferredCompletion(
+        job = leaveConversationJob,
+        onComplete = { successful ->
+            leaveConversationJob = null
+
+            onSaveResult(successful)
+        }
+    )
+
+    AwaitDeferredCompletion(
+        job = archiveChannelJob,
+        onComplete = { successful ->
+            archiveChannelJob = null
+
+            onSaveResult(successful)
         }
     )
 
@@ -96,7 +118,7 @@ internal fun ConversationSettingsBody(
         retryButtonText = stringResource(id = R.string.conversation_settings_try_again),
         onClickRetry = viewModel::requestReload
     ) { (conversation, members, clientUsername) ->
-        val conversationSectionPadding = Modifier
+        val conversationSectionModifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = Spacings.ScreenHorizontalSpacing)
 
@@ -107,7 +129,7 @@ internal fun ConversationSettingsBody(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ConversationInfoSettings(
-                modifier = conversationSectionPadding,
+                modifier = conversationSectionModifier,
                 conversation = conversation,
                 editableConversationInfo = editableConversationInfo
             )
@@ -132,8 +154,17 @@ internal fun ConversationSettingsBody(
             }
 
             SectionMoreInfo(
-                modifier = conversationSectionPadding,
+                modifier = conversationSectionModifier,
                 conversation = conversation
+            )
+
+            ConversationOtherSettings(
+                modifier = conversationSectionModifier,
+                conversation = conversation,
+                onLeaveConversation = { leaveConversationJob = viewModel.leaveConversation() },
+                onToggleChannelArchivation = {
+                    archiveChannelJob = viewModel.toggleChannelArchivation()
+                }
             )
         }
 

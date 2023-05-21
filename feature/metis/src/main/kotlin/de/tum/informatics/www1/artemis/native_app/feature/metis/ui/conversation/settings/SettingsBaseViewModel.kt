@@ -73,20 +73,20 @@ abstract class SettingsBaseViewModel(
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly)
 
-    fun kickMember(conversationUser: ConversationUser): Deferred<Boolean> {
-        return performActionOnUser(conversationUser, ConversationService::kickMember)
+    fun kickMember(username: String): Deferred<Boolean> {
+        return performActionOnUser(username, ConversationService::kickMember)
     }
 
     fun grantModerationRights(conversationUser: ConversationUser): Deferred<Boolean> {
-        return performActionOnUser(conversationUser, ConversationService::grantModerationRights)
+        return performActionOnUser(conversationUser.username.orEmpty(), ConversationService::grantModerationRights)
     }
 
     fun revokeModerationRights(conversationUser: ConversationUser): Deferred<Boolean> {
-        return performActionOnUser(conversationUser, ConversationService::revokeModerationRights)
+        return performActionOnUser(conversationUser.username.orEmpty(), ConversationService::revokeModerationRights)
     }
 
     private fun performActionOnUser(
-        conversationUser: ConversationUser,
+        username: String,
         action: suspend ConversationService.(Long, Conversation, String, String, String) -> NetworkResponse<Boolean>
     ): Deferred<Boolean> {
         return viewModelScope.async {
@@ -95,7 +95,7 @@ abstract class SettingsBaseViewModel(
             conversationService.action(
                 courseId,
                 conversation,
-                conversationUser.username ?: return@async false,
+                username,
                 accountService.authToken.first(),
                 serverConfigurationService.serverUrl.first()
             )
