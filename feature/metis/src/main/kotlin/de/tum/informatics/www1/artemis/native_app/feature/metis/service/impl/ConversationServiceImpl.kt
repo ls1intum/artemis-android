@@ -166,11 +166,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
                 url {
                     appendPathSegments("api", "courses", courseId.toString())
 
-                    when (conversation) {
-                        is ChannelChat -> appendPathSegments("channels", conversationId.toString())
-                        is GroupChat -> appendPathSegments("group-chats", conversationId.toString())
-                        is OneToOneChat -> {} // One to one chats cannot be updated
-                    }
+                    appendConversationTypeWithId(conversation, conversationId)
                 }
 
                 setBody(
@@ -331,7 +327,8 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
                     appendPathSegments("api", "courses", courseId.toString())
-                    appendPathSegments(conversation.type, conversation.id.toString())
+
+                    appendConversationTypeWithId(conversation, conversation.id)
 
                     urlBlock()
                 }
@@ -372,6 +369,17 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
             }
                 .status
                 .isSuccess()
+        }
+    }
+
+    private fun URLBuilder.appendConversationTypeWithId(
+        conversation: Conversation,
+        conversationId: Long
+    ) {
+        when (conversation) {
+            is ChannelChat -> appendPathSegments("channels", conversationId.toString())
+            is GroupChat -> appendPathSegments("group-chats", conversationId.toString())
+            is OneToOneChat -> {} // One to one chats cannot be updated
         }
     }
 }

@@ -14,6 +14,7 @@ import androidx.navigation.NavOptionsBuilder
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.conversationNavGraphBuilderExtension
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewRoute
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -37,7 +38,10 @@ fun NavGraphBuilder.conversationSettingsScreen(
             modifier = Modifier.fillMaxSize(),
             courseId = courseId,
             conversationId = conversationId,
-            onNavigateBack = onNavigateBack
+            onNavigateBack = onNavigateBack,
+            onConversationLeft = {
+                navController.popBackStack(ConversationOverviewRoute, false)
+            }
         )
     }
 }
@@ -47,7 +51,8 @@ private fun ConversationSettingsScreen(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onConversationLeft: () -> Unit
 ) {
     val viewModel: ConversationSettingsViewModel =
         koinViewModel { parametersOf(courseId, conversationId) }
@@ -69,7 +74,8 @@ private fun ConversationSettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            viewModel = viewModel
+            viewModel = viewModel,
+            onConversationLeft = onConversationLeft
         )
     }
 }

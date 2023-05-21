@@ -36,7 +36,8 @@ internal val ConversationSettingsSectionTextStyle: TextStyle
 @Composable
 internal fun ConversationSettingsBody(
     modifier: Modifier,
-    viewModel: ConversationSettingsViewModel
+    viewModel: ConversationSettingsViewModel,
+    onConversationLeft: () -> Unit
 ) {
     val conversationDataState by viewModel.conversation.collectAsState()
     val usernameDataState by viewModel.clientUsername.collectAsState()
@@ -84,6 +85,10 @@ internal fun ConversationSettingsBody(
             leaveConversationJob = null
 
             onSaveResult(successful)
+
+            if (successful) {
+                onConversationLeft()
+            }
         }
     )
 
