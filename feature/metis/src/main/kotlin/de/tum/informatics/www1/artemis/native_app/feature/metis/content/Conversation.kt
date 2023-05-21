@@ -21,3 +21,10 @@ sealed class Conversation {
 
     abstract fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation
 }
+
+val Conversation.hasModerationRights: Boolean
+    get() = when(this) {
+        is ChannelChat -> isChannelModerator
+        is GroupChat -> isCreator
+        is OneToOneChat -> false
+    }

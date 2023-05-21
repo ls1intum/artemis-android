@@ -24,6 +24,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.PerformActionOnUserData
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.PerformActionOnUserDialogs
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.UserAction
@@ -111,6 +114,7 @@ internal fun ConversationSettingsBody(
 
             ConversationMemberSettings(
                 modifier = Modifier.fillMaxWidth(),
+                conversation = conversation,
                 clientUsername = clientUsername,
                 memberCount = conversation.numberOfMembers,
                 members = members,
@@ -123,7 +127,9 @@ internal fun ConversationSettingsBody(
                 onRequestGiveModerationRights = {
                     userActionData = PerformActionOnUserData(it, UserAction.GIVE_MODERATION_RIGHTS)
                 }
-            )
+            ) {
+                userActionData = PerformActionOnUserData(it, UserAction.REVOKE_MODERATION_RIGHTS)
+            }
 
             SectionMoreInfo(
                 modifier = conversationSectionPadding,

@@ -19,5 +19,9 @@ data class ConversationUser(
     override val imageUrl: String? = null,
     override val id: Long = 0L,
     val isChannelModerator: Boolean = false,
-    val isRequestingUser: Boolean = false
+    val isRequestingUser: Boolean = false,
+    val isInstructor: Boolean = false,
+    val isEditor: Boolean = false,
+    val isTeachingAssistant: Boolean = false,
+    val isStudent: Boolean = false
 ) : BaseAccount
