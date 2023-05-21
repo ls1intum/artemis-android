@@ -37,6 +37,7 @@ internal val ConversationSettingsSectionTextStyle: TextStyle
 internal fun ConversationSettingsBody(
     modifier: Modifier,
     viewModel: ConversationSettingsViewModel,
+    onRequestViewAllMembers: () -> Unit,
     onConversationLeft: () -> Unit
 ) {
     val conversationDataState by viewModel.conversation.collectAsState()
@@ -145,18 +146,19 @@ internal fun ConversationSettingsBody(
                 clientUsername = clientUsername,
                 memberCount = conversation.numberOfMembers,
                 members = members,
-                hasMoreMembers = conversation.numberOfMembers > 10,
+                hasMoreMembers = conversation.numberOfMembers > 10 || true,
                 onRequestAddMembers = {},
-                onRequestViewAllMembers = {},
+                onRequestViewAllMembers = onRequestViewAllMembers,
                 onRequestKickMember = {
                     userActionData = PerformActionOnUserData(it, UserAction.KICK)
                 },
                 onRequestGiveModerationRights = {
                     userActionData = PerformActionOnUserData(it, UserAction.GIVE_MODERATION_RIGHTS)
+                },
+                onRequestRevokeModerationRights = {
+                    userActionData = PerformActionOnUserData(it, UserAction.REVOKE_MODERATION_RIGHTS)
                 }
-            ) {
-                userActionData = PerformActionOnUserData(it, UserAction.REVOKE_MODERATION_RIGHTS)
-            }
+            )
 
             SectionMoreInfo(
                 modifier = conversationSectionModifier,

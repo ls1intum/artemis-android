@@ -6,18 +6,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddModerator
-import androidx.compose.material.icons.filled.GroupRemove
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.RemoveModerator
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -29,11 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.hasModerationRights
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableName
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.ConversationMemberListItem
 
 @Composable
 internal fun ConversationMemberSettings(
@@ -114,59 +103,13 @@ private fun ConversationMemberPreviewList(
 ) {
     Column(modifier = modifier) {
         members.fastForEach { member ->
-            ListItem(
-                headlineText = {
-                    Text(text = member.humanReadableName)
-                },
-                supportingText = member.username?.let { username ->
-                    {
-                        Text(text = username)
-                    }
-                },
-                leadingContent = {
-                    Row {
-                        val personIcon = when {
-                            member.isInstructor -> Icons.Default.School
-                            member.isEditor || member.isTeachingAssistant -> Icons.Default.SupervisorAccount
-                            else -> Icons.Default.Person
-                        }
-
-                        Icon(imageVector = personIcon, contentDescription = null)
-
-                        if (member.isChannelModerator) {
-                            Icon(imageVector = Icons.Default.Shield, contentDescription = null)
-                        }
-                    }
-                },
-                trailingContent = {
-                    if (member.username != clientUsername && conversation.hasModerationRights) {
-                        Row {
-                            IconButton(onClick = { onRequestKickMember(member) }) {
-                                Icon(
-                                    imageVector = Icons.Default.GroupRemove,
-                                    contentDescription = null
-                                )
-                            }
-
-                            if (conversation is ChannelChat) {
-                                IconButton(
-                                    onClick = {
-                                        if (member.isChannelModerator) {
-                                            onRequestGrantModerationPermission(member)
-                                        } else {
-                                            onRequestRevokeModerationPermission(member)
-                                        }
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = if (member.isChannelModerator) Icons.Default.RemoveModerator else Icons.Default.AddModerator,
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+            ConversationMemberListItem(
+                member = member,
+                clientUsername = clientUsername,
+                conversation = conversation,
+                onRequestKickMember = onRequestKickMember,
+                onRequestGrantModerationPermission = onRequestGrantModerationPermission,
+                onRequestRevokeModerationPermission = onRequestRevokeModerationPermission
             )
         }
 

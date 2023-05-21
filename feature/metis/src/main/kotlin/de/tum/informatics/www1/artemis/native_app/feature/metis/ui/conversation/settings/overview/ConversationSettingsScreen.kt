@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBack
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.conversationNavGraphBuilderExtension
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewRoute
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.navigateToConversationMembersScreen
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -39,6 +40,9 @@ fun NavGraphBuilder.conversationSettingsScreen(
             courseId = courseId,
             conversationId = conversationId,
             onNavigateBack = onNavigateBack,
+            onRequestViewAllMembers = {
+                navController.navigateToConversationMembersScreen(courseId, conversationId) {}
+            },
             onConversationLeft = {
                 navController.popBackStack(ConversationOverviewRoute, false)
             }
@@ -52,6 +56,7 @@ private fun ConversationSettingsScreen(
     courseId: Long,
     conversationId: Long,
     onNavigateBack: () -> Unit,
+    onRequestViewAllMembers: () -> Unit,
     onConversationLeft: () -> Unit
 ) {
     val viewModel: ConversationSettingsViewModel =
@@ -75,6 +80,7 @@ private fun ConversationSettingsScreen(
                 .fillMaxSize()
                 .padding(paddingValues),
             viewModel = viewModel,
+            onRequestViewAllMembers = onRequestViewAllMembers,
             onConversationLeft = onConversationLeft
         )
     }
