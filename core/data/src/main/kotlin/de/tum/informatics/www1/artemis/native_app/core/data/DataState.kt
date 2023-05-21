@@ -71,6 +71,13 @@ infix fun <T, K> DataState<T>.join(other: DataState<K>): DataState<Pair<T, K>> {
     }
 }
 
+fun <T, K, L> DataState<T>.join(first: DataState<K>, second: DataState<L>): DataState<Triple<T, K, L>> {
+    return (this join first join second).bind { (ab, c) ->
+        val (a, b) = ab
+        Triple(a, b, c)
+    }
+}
+
 val <T> DataState<T>.isSuccess: Boolean
     get() = when (this) {
         is DataState.Success<T> -> true

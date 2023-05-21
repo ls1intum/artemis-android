@@ -140,7 +140,7 @@ internal fun WorkOnQuizQuestionFooter(
                     QuizType.Live -> {
                         if (lastSubmissionTime != null) {
                             val relLastSubmissionTime =
-                                getRelativeTime(to = lastSubmissionTime, clock = clock)
+                                getRelativeTime(to = lastSubmissionTime, clock = clock, formatSeconds = true)
                             stringResource(
                                 id = R.string.quiz_participation_last_saved,
                                 relLastSubmissionTime

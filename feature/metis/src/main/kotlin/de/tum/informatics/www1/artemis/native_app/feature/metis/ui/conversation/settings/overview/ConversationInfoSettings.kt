@@ -1,14 +1,11 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings
+package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview
 
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -59,8 +56,6 @@ internal fun ConversationInfoSettings(
                 // No editable data
             }
         }
-
-        SectionMoreInfo(modifier = Modifier.fillMaxWidth(), conversation = conversation)
     }
 }
 
@@ -136,26 +131,7 @@ private fun SectionBasicData(
 }
 
 @Composable
-private fun BasicDataTextField(
-    modifier: Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    canEdit: Boolean,
-    @StringRes label: Int,
-    @StringRes emptyHint: Int
-) {
-    OutlinedTextField(
-        modifier = modifier,
-        label = { Text(text = stringResource(id = label)) },
-        value = value,
-        onValueChange = onValueChange,
-        readOnly = !canEdit,
-        placeholder = { Text(text = stringResource(id = emptyHint)) }
-    )
-}
-
-@Composable
-private fun SectionMoreInfo(modifier: Modifier, conversation: Conversation) {
+internal fun SectionMoreInfo(modifier: Modifier, conversation: Conversation) {
     val creator = conversation.creator
     val creatorText: Pair<String, String>? = remember(creator) {
         if (creator != null) {
@@ -175,7 +151,7 @@ private fun SectionMoreInfo(modifier: Modifier, conversation: Conversation) {
     Column(modifier = modifier) {
         Text(
             text = stringResource(id = R.string.conversation_settings_section_more_info),
-            style = MaterialTheme.typography.titleMedium
+            style = ConversationSettingsSectionTextStyle
         )
 
         if (creatorText != null) {

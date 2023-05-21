@@ -19,7 +19,39 @@
     <string name="conversation_settings_section_more_info_created_by">Created by: %1$s (%2$s)</string>
     <string name="conversation_settings_section_more_info_created_on">Created on: %1$s</string>
 
+    <string name="conversation_settings_section_members">Members</string>
+    <plurals name="conversation_settings_section_members_count">
+        <item quantity="zero">No members</item>
+        <item quantity="one">1 member</item>
+        <item quantity="other">%d members</item>
+    </plurals>
+    <string name="conversation_settings_section_members_add_members">Add members</string>
+    <string name="conversation_settings_section_members_view_all_members">View all members</string>
+
+    <string name="conversation_settings_dialog_kick_member_from_channel_title">Remove user from public channel?</string>
+    <string name="conversation_settings_dialog_kick_member_from_channel_message">**Remove %1$s (%2$s) from public channel %3$s?** This member will not be able to access this channel anymore unless they join again.</string>
+
+    <string name="conversation_settings_dialog_kick_member_from_group_title">Remove user from group chat?</string>
+    <string name="conversation_settings_dialog_kick_member_from_group_message">**Remove %1$s (%2$s) from group chat?** This member will not be able to access this group chat anymore unless they are invited again.</string>
+
+    <string name="conversation_settings_dialog_kick_member_positive">Remove user</string>
+    <string name="conversation_settings_dialog_kick_member_negative">@android:string/cancel</string>
+
+    <string name="conversation_settings_dialog_revoke_moderation_rights_title">Revoke moderator role?</string>
+    <string name="conversation_settings_dialog_revoke_moderation_rights_message">**Do you really want to revoke the moderator role of %1$s (%2$s) in %3$s?** You can grant the moderator role again at any time.</string>
+    <string name="conversation_settings_dialog_revoke_moderation_rights_positive">Revoke Moderator Role</string>
+    <string name="conversation_settings_dialog_revoke_moderation_rights_negative">@android:string/cancel</string>
+
+    <string name="conversation_settings_dialog_grant_moderation_rights_title">Grant moderator role?</string>
+    <string name="conversation_settings_dialog_grant_moderation_rights_message">**Do you really want to make %1$s (%2$s) a moderator of %3$s?** This will allow %1$s (%2$s) to manage the channel and its members. They can also edit and delete messages in the channel.</string>
+    <string name="conversation_settings_dialog_grant_moderation_rights_positive">Grant Moderator Role</string>
+    <string name="conversation_settings_dialog_grant_moderation_rights_negative">@android:string/cancel</string>
+
     <string name="conversation_settings_basic_data_save_failed_dialog_title">Could not save</string>
     <string name="conversation_settings_basic_data_save_failed_dialog_message">Something went wrong while saving your changes. Please try again later.</string>
     <string name="conversation_settings_basic_data_save_failed_dialog_positive">@android:string/ok</string>
+
+    <string name="conversation_settings_perform_action_on_user_failed_dialog_title">Could not perform action</string>
+    <string name="conversation_settings_perform_action_on_user_failed_dialog_message">Something went wrong while saving your changes. Please try again later.</string>
+    <string name="conversation_settings_perform_action_on_user_failed_dialog_positive">@android:string/ok</string>
 </resources>

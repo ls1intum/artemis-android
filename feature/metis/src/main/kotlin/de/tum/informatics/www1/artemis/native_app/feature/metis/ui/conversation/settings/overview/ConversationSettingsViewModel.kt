@@ -1,13 +1,13 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings
+package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -15,15 +15,16 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.mapIsChannelNameIllegal
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.mapIsDescriptionOrTopicIllegal
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.SettingsBaseViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,22 +35,21 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
 internal class ConversationSettingsViewModel(
-    val courseId: Long,
-    val conversationId: Long,
-    private val conversationService: ConversationService,
-    private val accountService: AccountService,
-    private val serverConfigurationService: ServerConfigurationService,
+    courseId: Long,
+    conversationId: Long,
+    conversationService: ConversationService,
+    accountService: AccountService,
+    serverConfigurationService: ServerConfigurationService,
     networkStatusProvider: NetworkStatusProvider,
+    serverDataService: ServerDataService,
     private val savedStateHandle: SavedStateHandle
-) : ViewModel() {
+) : SettingsBaseViewModel(courseId, conversationId, conversationService, accountService, serverConfigurationService, networkStatusProvider, serverDataService) {
 
     companion object {
         private const val KEY_NAME = "name"
         private const val KEY_DESCRIPTION = "description"
         private const val KEY_TOPIC = "topic"
     }
-
-    private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     private val _name: StateFlow<String?> = savedStateHandle.getStateFlow(KEY_NAME, null)
     private val _description: StateFlow<String?> =
@@ -75,30 +75,6 @@ internal class ConversationSettingsViewModel(
     private val savedDescription = MutableStateFlow<String?>(null)
     private val savedTopic = MutableStateFlow<String?>(null)
 
-    private val loadedConversation: StateFlow<DataState<Conversation>> = flatMapLatest(
-        accountService.authToken,
-        serverConfigurationService.serverUrl,
-        onRequestReload.onStart { emit(Unit) }
-    ) { authToken, serverUrl, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            conversationService
-                .getConversations(courseId, authToken, serverUrl)
-                .bind { conversations ->
-                    conversations.firstOrNull { it.id == conversationId }
-                }
-        }
-            .map { dataState ->
-                dataState.transform {
-                    if (it != null) {
-                        DataState.Success(it)
-                    } else {
-                        DataState.Failure(RuntimeException("Conversation not found"))
-                    }
-                }
-            }
-    }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
-
     val conversation: StateFlow<DataState<Conversation>> = combine(
         loadedConversation,
         savedName,
@@ -107,6 +83,25 @@ internal class ConversationSettingsViewModel(
     ) { convDataState, savedName, savedDescription, savedTopic ->
         convDataState.bind { conversation ->
             copyConversationWithSavedValues(conversation, savedName, savedDescription, savedTopic)
+        }
+    }
+        .stateIn(viewModelScope, SharingStarted.Eagerly)
+
+    val previewMembers: StateFlow<DataState<List<ConversationUser>>> = flatMapLatest(
+        accountService.authToken,
+        serverConfigurationService.serverUrl,
+        onRequestReload.onStart { emit(Unit) }
+    ) { authToken, serverUrl, _ ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            conversationService.getMembers(
+                courseId = courseId,
+                conversationId = conversationId,
+                query = "",
+                size = 10,
+                pageNum = 0,
+                authToken = authToken,
+                serverUrl = serverUrl
+            )
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly)
@@ -244,8 +239,8 @@ internal class ConversationSettingsViewModel(
         savedStateHandle[KEY_TOPIC] = topic
     }
 
-    fun requestReload() {
-        onRequestReload.tryEmit(Unit)
+    override fun requestReload() {
+        super.requestReload()
 
         savedName.value = null
         savedDescription.value = null

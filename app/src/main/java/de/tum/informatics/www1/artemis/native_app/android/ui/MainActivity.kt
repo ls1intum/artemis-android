@@ -50,7 +50,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.conversationOverviewScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.navigateToConversationOverviewScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.conversationSettingsScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.conversationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.create_standalone_post.createStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen

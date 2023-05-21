@@ -7,6 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorPro
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
@@ -18,12 +19,11 @@ import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 class ConversationServiceImpl(private val ktorProvider: KtorProvider) : ConversationService {
 
@@ -198,4 +198,120 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         val description: String?,
         val topic: String?
     )
+
+    override suspend fun getMembers(
+        courseId: Long,
+        conversationId: Long,
+        query: String,
+        size: Int,
+        pageNum: Int,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<List<ConversationUser>> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.get(serverUrl) {
+                url {
+                    appendPathSegments(
+                        "api",
+                        "courses",
+                        courseId.toString(),
+                        "conversations",
+                        conversationId.toString(),
+                        "members",
+                        "search"
+                    )
+
+                    parameter("page", pageNum)
+                    parameter("size", size)
+                    parameter("loginOrName", query)
+                }
+
+                cookieAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }
+                .body()
+        }
+    }
+
+    override suspend fun kickMember(
+        courseId: Long,
+        conversation: Conversation,
+        user: String,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> {
+        return performActionOnUser(
+            courseId = courseId,
+            conversation = conversation,
+            user = user,
+            authToken = authToken,
+            serverUrl = serverUrl
+        ) {
+            appendPathSegments("deregister")
+        }
+    }
+
+    override suspend fun grantModerationRights(
+        courseId: Long,
+        conversation: Conversation,
+        user: String,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> {
+        return performActionOnUser(
+            courseId = courseId,
+            conversation = conversation,
+            user = user,
+            authToken = authToken,
+            serverUrl = serverUrl
+        ) {
+            appendPathSegments("grant-channel-moderator")
+        }
+    }
+
+    override suspend fun revokeModerationRights(
+        courseId: Long,
+        conversation: Conversation,
+        user: String,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> {
+        return performActionOnUser(
+            courseId = courseId,
+            conversation = conversation,
+            user = user,
+            authToken = authToken,
+            serverUrl = serverUrl
+        ) {
+            appendPathSegments("revoke-channel-moderator")
+        }
+    }
+
+    private suspend fun performActionOnUser(
+        courseId: Long,
+        conversation: Conversation,
+        user: String,
+        authToken: String,
+        serverUrl: String,
+        urlBlock: URLBuilder.() -> Unit
+    ): NetworkResponse<Boolean> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments("api", "courses", courseId.toString())
+                    appendPathSegments(conversation.type, conversation.id.toString())
+
+                    urlBlock()
+                }
+
+                setBody(listOf(user))
+
+                cookieAuth(authToken)
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+            }
+                .status
+                .isSuccess()
+        }
+    }
 }

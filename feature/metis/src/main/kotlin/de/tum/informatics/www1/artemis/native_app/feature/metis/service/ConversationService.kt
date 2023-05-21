@@ -4,6 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 
@@ -56,6 +57,40 @@ interface ConversationService {
         newDescription: String?,
         newTopic: String?,
         conversation: Conversation,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean>
+
+    suspend fun getMembers(
+        courseId: Long,
+        conversationId: Long,
+        query: String,
+        size: Int,
+        pageNum: Int,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<List<ConversationUser>>
+
+    suspend fun kickMember(
+        courseId: Long,
+        conversation: Conversation,
+        user: String,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean>
+
+    suspend fun grantModerationRights(
+        courseId: Long,
+        conversation: Conversation,
+        user: String,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean>
+
+    suspend fun revokeModerationRights(
+        courseId: Long,
+        conversation: Conversation,
+        user: String,
         authToken: String,
         serverUrl: String
     ): NetworkResponse<Boolean>

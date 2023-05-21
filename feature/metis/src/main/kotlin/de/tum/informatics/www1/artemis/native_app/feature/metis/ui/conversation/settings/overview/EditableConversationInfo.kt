@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings
+package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview
 
 data class EditableConversationInfo(
     val name: String,
