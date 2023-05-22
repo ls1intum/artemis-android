@@ -2,10 +2,15 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
@@ -67,6 +72,10 @@ private fun ConversationSettingsScreen(
     val viewModel: ConversationSettingsViewModel =
         koinViewModel { parametersOf(courseId, conversationId) }
 
+    LaunchedEffect(key1 = Unit) {
+        viewModel.requestReload()
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -76,6 +85,11 @@ private fun ConversationSettingsScreen(
                 },
                 navigationIcon = {
                     NavigationBackButton(onNavigateBack)
+                },
+                actions = {
+                    IconButton(onClick = viewModel::requestReload) {
+                        Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                    }
                 }
             )
         }

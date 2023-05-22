@@ -64,14 +64,6 @@ internal fun ConversationOtherSettings(
                     )
                 )
             }
-
-            OutlinedButton(
-                modifier = buttonModifier,
-                onClick = { displayDeleteChannelDialog = true },
-                enabled = false
-            ) {
-                Text(text = stringResource(id = R.string.conversation_settings_section_other_delete_channel))
-            }
         }
     }
 
