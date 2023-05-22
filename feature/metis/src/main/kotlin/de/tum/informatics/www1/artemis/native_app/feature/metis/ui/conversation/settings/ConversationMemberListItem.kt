@@ -67,9 +67,9 @@ internal fun ConversationMemberListItem(
                         IconButton(
                             onClick = {
                                 if (member.isChannelModerator) {
-                                    onRequestGrantModerationPermission(member)
-                                } else {
                                     onRequestRevokeModerationPermission(member)
+                                } else {
+                                    onRequestGrantModerationPermission(member)
                                 }
                             }
                         ) {

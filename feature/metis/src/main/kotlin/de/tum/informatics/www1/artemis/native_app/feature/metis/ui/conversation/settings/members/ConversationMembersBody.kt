@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,12 +23,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import de.tum.informatics.www1.artemis.native_app.core.data.join
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.PagingStateError
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.ConversationMemberListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.PerformActionOnUserData
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.PerformActionOnUserDialogs
@@ -74,24 +79,89 @@ internal fun ConversationMembersBody(
                 placeholder = { Text(text = stringResource(id = R.string.conversation_members_query_placeholder)) }
             )
 
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
+            ConversationMembersList(
+                modifier = Modifier.fillMaxSize(),
+                members = members,
+                clientUsername = clientUsername,
+                conversation = conversation,
+                onRequestKickMember = {
+                    userActionData = PerformActionOnUserData(it, UserAction.KICK)
+                },
+                onRequestGrantModerationPermission = {
+                    userActionData =
+                        PerformActionOnUserData(it, UserAction.GIVE_MODERATION_RIGHTS)
+                },
+                onRequestRevokeModerationPermission = {
+                    userActionData =
+                        PerformActionOnUserData(it, UserAction.REVOKE_MODERATION_RIGHTS)
+                }
+            )
+        }
+
+        PerformActionOnUserDialogs(
+            conversation = conversation,
+            performActionOnUserData = userActionData,
+            viewModel = viewModel,
+            onDismiss = { userActionData = null }
+        )
+    }
+}
+
+@Composable
+private fun ConversationMembersList(
+    modifier: Modifier,
+    members: LazyPagingItems<ConversationUser>,
+    clientUsername: String,
+    conversation: Conversation,
+    onRequestKickMember: (ConversationUser) -> Unit,
+    onRequestGrantModerationPermission: (ConversationUser) -> Unit,
+    onRequestRevokeModerationPermission: (ConversationUser) -> Unit
+) {
+    when (members.loadState.refresh) {
+        LoadState.Loading -> {
+            Box(
+                modifier = modifier,
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.conversation_members_loading),
+                        textAlign = TextAlign.Center
+                    )
+
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+            }
+        }
+
+        is LoadState.Error -> {
+            Box(
+                modifier = modifier.padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                contentAlignment = Alignment.Center
+            ) {
+                PagingStateError(
+                    modifier = Modifier,
+                    errorText = R.string.conversation_members_failure,
+                    buttonText = R.string.conversation_members_try_again,
+                    retry = members::retry
+                )
+            }
+        }
+
+        is LoadState.NotLoading -> {
+            LazyColumn(modifier = modifier) {
                 items(members) { conversationUser ->
                     if (conversationUser != null) {
                         ConversationMemberListItem(
                             member = conversationUser,
                             clientUsername = clientUsername,
                             conversation = conversation,
-                            onRequestKickMember = {
-                                userActionData = PerformActionOnUserData(it, UserAction.KICK)
-                            },
-                            onRequestGrantModerationPermission = {
-                                userActionData =
-                                    PerformActionOnUserData(it, UserAction.GIVE_MODERATION_RIGHTS)
-                            },
-                            onRequestRevokeModerationPermission = {
-                                userActionData =
-                                    PerformActionOnUserData(it, UserAction.REVOKE_MODERATION_RIGHTS)
-                            }
+                            onRequestKickMember = onRequestKickMember,
+                            onRequestGrantModerationPermission = onRequestGrantModerationPermission,
+                            onRequestRevokeModerationPermission = onRequestRevokeModerationPermission
                         )
                     }
                 }
@@ -109,22 +179,14 @@ internal fun ConversationMembersBody(
 
                     is LoadState.Error -> {
                         item {
-                            Column(
+                            PagingStateError(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = Spacings.ScreenHorizontalSpacing),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(id = R.string.conversation_members_failure),
-                                    textAlign = TextAlign.Center
-                                )
-
-                                TextButton(onClick = members::retry) {
-                                    Text(text = stringResource(id = R.string.conversation_members_try_again))
-                                }
-                            }
+                                errorText = R.string.conversation_members_failure,
+                                buttonText = R.string.conversation_members_try_again,
+                                retry = members::retry
+                            )
                         }
                     }
 
@@ -132,12 +194,5 @@ internal fun ConversationMembersBody(
                 }
             }
         }
-
-        PerformActionOnUserDialogs(
-            conversation = conversation,
-            performActionOnUserData = userActionData,
-            viewModel = viewModel,
-            onDismiss = { userActionData = null }
-        )
     }
 }

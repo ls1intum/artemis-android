@@ -15,25 +15,37 @@ internal class MembersDataSource(
     private val conversationService: ConversationService
 ) : PagingSource<Int, ConversationUser>() {
 
-    override fun getRefreshKey(state: PagingState<Int, ConversationUser>): Int? {
+    companion object {
+        private const val MAX_PAGE_SIZE = 20
+    }
+
+    override fun getRefreshKey(state: PagingState<Int, ConversationUser>): Int {
         return state.anchorPosition?.let { anchorPosition ->
             (anchorPosition / state.config.pageSize) + 1
         } ?: 0
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, ConversationUser> {
+        val pageNum = params.key ?: 0
+
+        val pageSize = params.loadSize.coerceAtMost(MAX_PAGE_SIZE)
         return when (
             val membersNetworkResponse = conversationService.getMembers(
                 courseId,
                 conversationId,
                 query,
-                params.loadSize,
-                params.key ?: 0,
+                pageSize,
+                pageNum,
                 authToken,
                 serverUrl
             )
         ) {
-            is NetworkResponse.Response -> LoadResult.Page(membersNetworkResponse.data, null, null)
+            is NetworkResponse.Response -> LoadResult.Page(
+                membersNetworkResponse.data,
+                null,
+                if (membersNetworkResponse.data.size >= pageSize) pageNum + 1 else null
+            )
+
             is NetworkResponse.Failure -> LoadResult.Error(membersNetworkResponse.exception)
         }
     }

@@ -41,6 +41,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.MetisOutd
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ProvideEmojis
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.PagingStateError
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisiblePostList
 
@@ -124,7 +125,12 @@ internal fun MetisStandalonePostList(
                 }
 
                 posts.loadState.refresh is LoadState.Error -> {
-                    PageStateError(modifier = informationModifier, retry = posts::retry)
+                    PagingStateError(
+                        modifier = informationModifier,
+                        errorText = R.string.metis_post_list_error,
+                        buttonText = R.string.metis_post_list_error_try_again,
+                        retry = posts::retry
+                    )
                 }
 
                 else -> {
@@ -196,8 +202,10 @@ internal fun MetisStandalonePostList(
 
                             if (posts.loadState.append is LoadState.Error) {
                                 item {
-                                    PageStateError(
+                                    PagingStateError(
                                         modifier = Modifier.fillMaxWidth(),
+                                        errorText = R.string.metis_post_list_error,
+                                        buttonText = R.string.metis_post_list_error_try_again,
                                         retry = posts::retry
                                     )
                                 }
@@ -223,27 +231,5 @@ private fun CreatePostButton(modifier: Modifier, onClick: () -> Unit) {
         )
 
         Text(text = stringResource(id = R.string.communication_create_post_button))
-    }
-}
-
-@Composable
-private fun PageStateError(
-    modifier: Modifier,
-    retry: () -> Unit
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = stringResource(id = R.string.metis_post_list_error),
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
-        )
-
-        Button(onClick = retry) {
-            Text(text = stringResource(id = R.string.metis_post_list_error_try_again))
-        }
     }
 }

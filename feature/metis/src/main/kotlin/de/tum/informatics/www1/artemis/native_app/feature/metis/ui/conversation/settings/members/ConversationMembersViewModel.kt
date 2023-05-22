@@ -19,7 +19,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.shareIn
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class ConversationMembersViewModel(
     courseId: Long,
@@ -50,7 +52,7 @@ internal class ConversationMembersViewModel(
     val membersPagingData: Flow<PagingData<ConversationUser>> = flatMapLatest(
         serverConfigurationService.serverUrl,
         accountService.authToken,
-        query
+        query.debounce(200.milliseconds)
     ) { serverUrl, authToken, query ->
         Pager(
             config = PagingConfig(10)
