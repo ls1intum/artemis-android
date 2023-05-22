@@ -79,6 +79,14 @@ interface ConversationService {
         serverUrl: String
     ): NetworkResponse<Boolean>
 
+    suspend fun registerMembers(
+        courseId: Long,
+        conversation: Conversation,
+        users: List<String>,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean>
+
     suspend fun grantModerationRights(
         courseId: Long,
         conversation: Conversation,
@@ -108,4 +116,23 @@ interface ConversationService {
         authToken: String,
         serverUrl: String
     ): NetworkResponse<Boolean>
+}
+
+suspend fun ConversationService.getConversation(
+    courseId: Long,
+    conversationId: Long,
+    authToken: String,
+    serverUrl: String
+): NetworkResponse<Conversation> {
+    return getConversations(courseId, authToken, serverUrl)
+        .bind { conversations ->
+            conversations.firstOrNull { it.id == conversationId }
+        }
+        .then { conversation ->
+            if (conversation != null) {
+                NetworkResponse.Response(conversation)
+            } else {
+                NetworkResponse.Failure(RuntimeException("Conversation not found"))
+            }
+        }
 }

@@ -50,6 +50,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.conversationOverviewScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.navigateToConversationOverviewScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.add_members.conversationAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.conversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.conversationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.create_standalone_post.createStandalonePostScreen
@@ -306,7 +307,10 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
                 )
 
                 conversationMembersScreen(
-                    navController = navController,
+                    onNavigateBack = navController::navigateUp
+                )
+
+                conversationAddMembersScreen(
                     onNavigateBack = navController::navigateUp
                 )
 

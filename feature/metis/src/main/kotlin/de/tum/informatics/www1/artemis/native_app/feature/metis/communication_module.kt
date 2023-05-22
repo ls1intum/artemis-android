@@ -16,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel.CreateChannelViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.CreatePersonalConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.add_members.ConversationAddMembersViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.ConversationMembersViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.ConversationSettingsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.create_standalone_post.CreateStandalonePostViewModel
@@ -99,6 +100,7 @@ val communicationModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
@@ -142,6 +144,18 @@ val communicationModule = module {
         ConversationMembersViewModel(
             params[0],
             params[1],
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+
+    viewModel { params ->
+        ConversationAddMembersViewModel(
+            params[0],
             get(),
             get(),
             get(),

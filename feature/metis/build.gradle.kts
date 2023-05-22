@@ -3,6 +3,7 @@ plugins {
     id("artemis.android.library.compose")
     id("artemis.android.room")
     kotlin("plugin.serialization")
+    id("kotlin-parcelize")
 }
 
 android {

@@ -279,6 +279,24 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         }
     }
 
+    override suspend fun registerMembers(
+        courseId: Long,
+        conversation: Conversation,
+        users: List<String>,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> {
+        return performActionOnUsers(
+            courseId,
+            conversation,
+            users,
+            authToken,
+            serverUrl
+        ) {
+            appendPathSegments("register")
+        }
+    }
+
     override suspend fun grantModerationRights(
         courseId: Long,
         conversation: Conversation,
@@ -322,6 +340,16 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         authToken: String,
         serverUrl: String,
         urlBlock: URLBuilder.() -> Unit
+    ): NetworkResponse<Boolean> =
+        performActionOnUsers(courseId, conversation, listOf(user), authToken, serverUrl, urlBlock)
+
+    private suspend fun performActionOnUsers(
+        courseId: Long,
+        conversation: Conversation,
+        users: List<String>,
+        authToken: String,
+        serverUrl: String,
+        urlBlock: URLBuilder.() -> Unit
     ): NetworkResponse<Boolean> {
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
@@ -333,7 +361,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
                     urlBlock()
                 }
 
-                setBody(listOf(user))
+                setBody(users)
 
                 cookieAuth(authToken)
                 accept(ContentType.Application.Json)

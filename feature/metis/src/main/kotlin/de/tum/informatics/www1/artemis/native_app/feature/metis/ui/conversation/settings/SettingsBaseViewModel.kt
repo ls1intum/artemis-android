@@ -16,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.getConversation
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -44,20 +45,8 @@ abstract class SettingsBaseViewModel(
     ) { authToken, serverUrl, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             conversationService
-                .getConversations(courseId, authToken, serverUrl)
-                .bind { conversations ->
-                    conversations.firstOrNull { it.id == conversationId }
-                }
+                .getConversation(courseId, conversationId, authToken, serverUrl)
         }
-            .map { dataState ->
-                dataState.transform {
-                    if (it != null) {
-                        DataState.Success(it)
-                    } else {
-                        DataState.Failure(RuntimeException("Conversation not found"))
-                    }
-                }
-            }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly)
 

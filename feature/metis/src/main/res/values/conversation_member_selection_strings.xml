@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="conversation_member_selection_address_label">Members:</string>
+    <string name="conversation_member_selection_search_label">Search:</string>
+    <string name="conversation_member_selection_address_hint">Enter name of recipient</string>
+
+    <string name="conversation_member_selection_include_students">Students</string>
+    <string name="conversation_member_selection_include_tutors">Tutors</string>
+    <string name="conversation_member_selection_include_instructors">Instructors</string>
+
+    <string name="conversation_member_selection_load_recipients_loading">Loading other users…</string>
+    <string name="conversation_member_selection_load_recipients_failure">Something went wrong while loading the users.</string>
+    <string name="conversation_member_selection_load_recipients_try_again">Try again</string>
+
+    <string name="conversation_member_selection_recipients_empty">No users matching your input has been found.</string>
+</resources>

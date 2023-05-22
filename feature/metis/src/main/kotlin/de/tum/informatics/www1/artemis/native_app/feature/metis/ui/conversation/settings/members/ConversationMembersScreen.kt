@@ -25,7 +25,6 @@ fun NavController.navigateToConversationMembersScreen(
 }
 
 fun NavGraphBuilder.conversationMembersScreen(
-    navController: NavController,
     onNavigateBack: () -> Unit
 ) {
     conversationNavGraphBuilderExtension(

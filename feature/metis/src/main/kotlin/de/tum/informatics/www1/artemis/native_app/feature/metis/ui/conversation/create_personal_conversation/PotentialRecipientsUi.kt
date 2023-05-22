@@ -52,9 +52,9 @@ internal fun PotentialRecipientsUi(
                 .fillMaxWidth()
                 .weight(1f),
             dataState = potentialRecipientsDataState,
-            loadingText = stringResource(id = R.string.create_personal_conversation_load_recipients_loading),
-            failureText = stringResource(id = R.string.create_personal_conversation_load_recipients_failure),
-            retryButtonText = stringResource(id = R.string.create_personal_conversation_load_recipients_try_again),
+            loadingText = stringResource(id = R.string.conversation_member_selection_load_recipients_loading),
+            failureText = stringResource(id = R.string.conversation_member_selection_load_recipients_failure),
+            retryButtonText = stringResource(id = R.string.conversation_member_selection_load_recipients_try_again),
             onClickRetry = retryLoadPotentialRecipients
         ) { potentialRecipients ->
             PotentialRecipientsList(
@@ -78,7 +78,7 @@ private fun InclusionListUi(
             onClick = {
                 updateInclusionList(inclusionList.copy(students = !inclusionList.students))
             },
-            label = { Text(text = stringResource(id = R.string.create_personal_conversation_include_students)) }
+            label = { Text(text = stringResource(id = R.string.conversation_member_selection_include_students)) }
         )
 
         FilterChip(
@@ -86,7 +86,7 @@ private fun InclusionListUi(
             onClick = {
                 updateInclusionList(inclusionList.copy(tutors = !inclusionList.tutors))
             },
-            label = { Text(text = stringResource(id = R.string.create_personal_conversation_include_tutors)) }
+            label = { Text(text = stringResource(id = R.string.conversation_member_selection_include_tutors)) }
         )
 
         FilterChip(
@@ -94,7 +94,7 @@ private fun InclusionListUi(
             onClick = {
                 updateInclusionList(inclusionList.copy(instructors = !inclusionList.instructors))
             },
-            label = { Text(text = stringResource(id = R.string.create_personal_conversation_include_instructors)) }
+            label = { Text(text = stringResource(id = R.string.conversation_member_selection_include_instructors)) }
         )
     }
 }
@@ -128,7 +128,7 @@ private fun PotentialRecipientsList(
         Box(modifier = modifier) {
             Text(
                 modifier = Modifier.align(Alignment.TopCenter),
-                text = stringResource(id = R.string.create_personal_conversation_recipients_empty)
+                text = stringResource(id = R.string.conversation_member_selection_recipients_empty)
             )
         }
     }

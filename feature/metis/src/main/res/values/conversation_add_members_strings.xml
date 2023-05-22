@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="conversation_add_members_title">Add members</string>
+
+    <string name="conversation_add_members_button_add_members">Add</string>
+
+    <string name="conversation_add_members_failed_dialog_title">Could not add members</string>
+    <string name="conversation_add_members_failed_dialog_message">Something went wrong while adding the members to this conversation. Please try again later.</string>
+    <string name="conversation_add_members_failed_dialog_positive">@android:string/ok</string>
+</resources>

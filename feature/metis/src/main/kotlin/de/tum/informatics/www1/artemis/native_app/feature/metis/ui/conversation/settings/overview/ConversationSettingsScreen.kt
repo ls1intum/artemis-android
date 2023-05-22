@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBack
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.conversationNavGraphBuilderExtension
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewRoute
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.add_members.navigateToAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.navigateToConversationMembersScreen
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -40,6 +41,9 @@ fun NavGraphBuilder.conversationSettingsScreen(
             courseId = courseId,
             conversationId = conversationId,
             onNavigateBack = onNavigateBack,
+            onRequestAddMembers = {
+                navController.navigateToAddMembersScreen(courseId, conversationId) { }
+            },
             onRequestViewAllMembers = {
                 navController.navigateToConversationMembersScreen(courseId, conversationId) {}
             },
@@ -56,6 +60,7 @@ private fun ConversationSettingsScreen(
     courseId: Long,
     conversationId: Long,
     onNavigateBack: () -> Unit,
+    onRequestAddMembers: () -> Unit,
     onRequestViewAllMembers: () -> Unit,
     onConversationLeft: () -> Unit
 ) {
@@ -81,6 +86,7 @@ private fun ConversationSettingsScreen(
                 .padding(paddingValues),
             viewModel = viewModel,
             onRequestViewAllMembers = onRequestViewAllMembers,
+            onRequestAddMembers = onRequestAddMembers,
             onConversationLeft = onConversationLeft
         )
     }
