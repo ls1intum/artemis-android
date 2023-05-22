@@ -117,6 +117,7 @@ private fun SectionBasicData(
 
         AnimatedVisibility(visible = editableConversationInfo.isDirty || editableConversationInfo.isSavingChanges) {
             Button(
+                modifier = Modifier.fillMaxWidth(),
                 onClick = editableConversationInfo.onRequestSaveChanges,
                 enabled = !editableConversationInfo.isSavingChanges && editableConversationInfo.canSave
             ) {
