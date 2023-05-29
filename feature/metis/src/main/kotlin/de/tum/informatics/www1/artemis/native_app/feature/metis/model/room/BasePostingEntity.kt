@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.UserRole
 import kotlinx.datetime.Instant
 
 @Entity(

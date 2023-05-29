@@ -16,9 +16,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.create_standalone_post.navigateToCreateStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisStandalonePostList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen
 import org.koin.androidx.compose.koinViewModel
@@ -38,7 +37,7 @@ fun SmartphoneMetisUi(
         floatingActionButton = {
             if (displayFab) {
                 FloatingActionButton(onClick = {
-                    navController.navigateToCreateStandalonePostScreen(metisContext) {}
+
                 }) {
                     Icon(
                         imageVector = Icons.Default.Create,
@@ -67,18 +66,13 @@ fun SmartphoneMetisUi(
                 ) {}
             }
 
-            MetisStandalonePostList(
+            MetisChatList(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
-                listContentPadding = PaddingValues(top = 8.dp, bottom = Spacings.FabContentBottomPadding),
-                onClickViewPost = { clientPostId ->
-                    navigateToStandalonePostScreen(clientPostId, ViewType.POST)
-                },
-                onClickViewReplies = { clientPostId ->
-                    navigateToStandalonePostScreen(clientPostId, ViewType.REPLIES)
-                },
-                onClickCreatePost = null
-            )
+                listContentPadding = PaddingValues(top = 8.dp, bottom = Spacings.FabContentBottomPadding)
+            ) { clientPostId ->
+                navigateToStandalonePostScreen(clientPostId, ViewType.POST)
+            }
         }
     }
 }

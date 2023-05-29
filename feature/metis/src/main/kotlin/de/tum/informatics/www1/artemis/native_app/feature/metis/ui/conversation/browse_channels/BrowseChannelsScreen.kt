@@ -43,6 +43,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.ChannelIcons
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.courseNavGraphBuilderExtensions
 import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.koinViewModel
@@ -176,22 +177,10 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick),
         leadingContent = {
-            Row {
-                Icon(
-                    imageVector = if (channelChat.isPublic) Icons.Default.Numbers else Icons.Default.Lock,
-                    contentDescription = null
-                )
-
-                if (channelChat.isAnnouncementChannel) {
-                    Icon(
-                        imageVector = Icons.Default.Campaign,
-                        contentDescription = null
-                    )
-                }
-            }
+            ChannelIcons(channelChat)
         },
-        headlineText = { Text(channelChat.name) },
-        supportingText = {
+        headlineContent = { Text(channelChat.name) },
+        supportingContent = {
             Text(
                 text = pluralStringResource(
                     id = R.plurals.browse_channel_channel_item_member_count,

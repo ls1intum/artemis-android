@@ -1,9 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.Reaction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 
 /**
@@ -57,10 +57,19 @@ interface MetisModificationService {
         reactionId: Long,
         serverUrl: String,
         authToken: String
-    ): NetworkResponse<Unit>
+    ): NetworkResponse<Boolean>
+
+    suspend fun deletePost(
+        context: MetisContext,
+        post: AffectedPost,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<Boolean>
 
     sealed class AffectedPost {
-        data class Standalone(val postId: Long) : AffectedPost()
-        data class Answer(val postId: Long) : AffectedPost()
+        abstract val postId: Long
+
+        data class Standalone(override val postId: Long) : AffectedPost()
+        data class Answer(override val postId: Long) : AffectedPost()
     }
 }

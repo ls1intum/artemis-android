@@ -3,14 +3,22 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.DisplayPriority
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService.StandalonePostsContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
@@ -20,10 +28,16 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisConte
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisContentViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.StandalonePostId
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class MetisListViewModel(
@@ -33,18 +47,21 @@ internal class MetisListViewModel(
     private val serverConfigurationService: ServerConfigurationService,
     private val metisContextManager: MetisContextManager,
     metisModificationService: MetisModificationService,
-    accountService: AccountService,
+    private val accountService: AccountService,
     websocketProvider: WebsocketProvider,
     serverDataService: ServerDataService,
-    networkStatusProvider: NetworkStatusProvider
+    networkStatusProvider: NetworkStatusProvider,
+    private val conversationService: ConversationService
 ) : MetisContentViewModel(
+    metisContext,
     websocketProvider,
     metisModificationService,
     metisStorageService,
     serverConfigurationService,
     accountService,
     serverDataService,
-    networkStatusProvider
+    networkStatusProvider,
+    conversationService
 ) {
 
     private val _filter = MutableStateFlow<List<MetisFilter>>(emptyList())
@@ -142,6 +159,31 @@ internal class MetisListViewModel(
             serverConfigurationService.host.collectLatest { host ->
                 metisContextManager.updatePosts(host, metisContext)
             }
+        }
+    }
+
+    fun createPost(postText: String): Deferred<MetisModificationFailure?> {
+        return viewModelScope.async {
+            if (metisContext !is MetisContext.Conversation) return@async MetisModificationFailure.CREATE_POST
+
+            val conversation = conversationService.getConversation(
+                metisContext.courseId,
+                metisContext.conversationId,
+                accountService.authToken.first(),
+                serverConfigurationService.serverUrl.first()
+            ).orNull() ?: return@async MetisModificationFailure.CREATE_POST
+
+            val post = StandalonePost(
+                id = null,
+                title = null,
+                tags = null,
+                content = postText,
+                conversation = conversation,
+                creationDate = Clock.System.now(),
+                displayPriority = DisplayPriority.NONE
+            )
+
+            createStandalonePostImpl(post)
         }
     }
 

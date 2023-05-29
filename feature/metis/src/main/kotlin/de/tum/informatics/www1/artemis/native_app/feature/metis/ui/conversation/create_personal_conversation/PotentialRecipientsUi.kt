@@ -110,12 +110,12 @@ private fun PotentialRecipientsList(
             items(recipients) { user ->
                 ListItem(
                     modifier = Modifier.fillMaxWidth(),
-                    headlineText = {
+                    headlineContent = {
                         val username = remember(user) { user.humanReadableName }
 
                         Text(username)
                     },
-                    supportingText = user.username?.let { username -> { Text(username) } },
+                    supportingContent = user.username?.let { username -> { Text(username) } },
                     trailingContent = {
                         IconButton(onClick = { addRecipient(user) }) {
                             Icon(imageVector = Icons.Default.Add, contentDescription = null)

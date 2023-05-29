@@ -1,9 +1,7 @@
-package de.tum.informatics.www1.artemis.native_app.core.model.metis
+package de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto
 
-import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -20,15 +18,15 @@ data class StandalonePost(
     val visibleForStudents: Boolean = true,
     override val answers: List<AnswerPost>? = null,
     override val tags: List<String>? = null,
-    val exercise: Exercise? = null,
-    val lecture: Lecture? = null,
-    val course: Course? = null,
 //    val plagiarismCase: PlagiarismCase? = null,
-//    val conversation: Conversation? = null,
+    val conversation: Conversation? = null,
     val courseWideContext: CourseWideContext? = null,
     val displayPriority: DisplayPriority? = null,
     override val resolved: Boolean? = null
 ) : BasePost(), IStandalonePost {
+
+    @Transient
+    override val authorId: Long? = author?.id
 
     @Transient
     override val serverPostId: Long = id ?: 0L

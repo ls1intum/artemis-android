@@ -27,11 +27,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.create_standalone_post.navigateToCreateStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisStandalonePostList
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisStandalonePostUi
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisStandalonePostViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisChatList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ViewType
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -86,28 +85,19 @@ fun SideBarMetisUi(
                         viewModel = viewModel
                     )
 
-                    MetisStandalonePostList(
+                    MetisChatList(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f),
                         viewModel = viewModel,
                         listContentPadding = PaddingValues(bottom = 8.dp),
-                        state = postListState,
-                        onClickViewPost = { clientPostId ->
-                            selectedClientSidePostId.value = clientPostId
-                        },
-                        onClickViewReplies = { clientPostId ->
-                            selectedClientSidePostId.value = clientPostId
-                        },
-                        onClickCreatePost = {
-                            navController.navigateToCreateStandalonePostScreen(
-                                metisContext
-                            ) {}
-                        }
-                    )
+                        state = postListState
+                    ) { clientPostId ->
+                        selectedClientSidePostId.value = clientPostId
+                    }
                 }
             } else {
-                val standalonePostViewModel: MetisStandalonePostViewModel =
+                val standalonePostViewModel: MetisThreadViewModel =
                     koinViewModel(parameters = {
                         parametersOf(
                             currentSelectedClientSidePostId,
@@ -116,7 +106,7 @@ fun SideBarMetisUi(
                         )
                     })
 
-                MetisStandalonePostUi(
+                MetisThreadUi(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(bottom = 8.dp),

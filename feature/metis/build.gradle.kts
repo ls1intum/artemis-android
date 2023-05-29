@@ -33,6 +33,7 @@ dependencies {
     implementation(libs.androidx.emoji2)
     implementation(libs.androidx.emoji2.views)
     implementation(libs.androidx.emoji2.views.helper)
+    implementation(libs.androidx.emoji2.emojiPicker)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.appcompat)
 }

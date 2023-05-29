@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.model.metis
+package de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto
 
 interface IStandalonePost : IBasePost {
     val serverPostId: Long

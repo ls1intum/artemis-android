@@ -11,7 +11,6 @@
     <string name="post_view_delete_post">Delete</string>
 
     <string name="standalone_screen_title">View post</string>
-    <string name="standalone_screen_replies_title">Replies</string>
 
     <string name="course_wide_context_organization">Organization</string>
     <string name="course_wide_context_tech_support">Tech Support</string>

@@ -171,7 +171,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
 
                 setBody(
                     UpdateConversationData(
-                        type = conversation.type,
+                        type = conversation.typeAsString,
                         name = newName,
                         description = newDescription,
                         topic = newTopic

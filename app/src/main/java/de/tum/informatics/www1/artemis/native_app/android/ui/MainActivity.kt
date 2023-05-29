@@ -53,7 +53,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.add_members.conversationAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.conversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.conversationSettingsScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.create_standalone_post.createStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.standalonePostScreen
@@ -277,18 +276,6 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
 
                 standalonePostScreen(
                     onNavigateUp = navController::navigateUp
-                )
-
-                createStandalonePostScreen(
-                    onNavigateUp = navController::navigateUp,
-                    onCreatedPost = { clientSidePostId, metisContext ->
-                        navController.navigateUp()
-                        navController.navigateToStandalonePostScreen(
-                            clientSidePostId,
-                            metisContext,
-                            ViewType.POST
-                        ) {}
-                    }
                 )
 
                 conversationOverviewScreen(

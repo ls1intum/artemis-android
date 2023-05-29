@@ -60,7 +60,7 @@ private fun LectureListItem(modifier: Modifier, lecture: Lecture, onClick: () ->
 
     ListItem(
         modifier = modifier.clickable(onClick = onClick),
-        headlineText = { Text(text = lecture.title) },
-        supportingText = { Text(text = startTimeText) }
+        headlineContent = { Text(text = lecture.title) },
+        supportingContent = { Text(text = startTimeText) }
     )
 }

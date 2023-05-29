@@ -67,6 +67,7 @@ fun MarkdownText(
     style: TextStyle = LocalTextStyle.current,
     @IdRes viewId: Int? = null,
     onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     imageLoader: ImageLoader? = null,
 ) {
     val defaultColor: Color = LocalContentColor.current
@@ -105,7 +106,8 @@ private fun createTextView(
     @FontRes fontResource: Int? = null,
     style: TextStyle,
     @IdRes viewId: Int? = null,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null
 ): TextView {
 
     val textColor = color.takeOrElse { style.color.takeOrElse { defaultColor } }
@@ -118,6 +120,7 @@ private fun createTextView(
     )
     return TextView(context).apply {
         onClick?.let { setOnClickListener { onClick() } }
+        onLongClick?.let { setOnLongClickListener { onLongClick(); true } }
         setTextColor(textColor.toArgb())
         setMaxLines(maxLines)
         setTextSize(TypedValue.COMPLEX_UNIT_DIP, mergedStyle.fontSize.value)

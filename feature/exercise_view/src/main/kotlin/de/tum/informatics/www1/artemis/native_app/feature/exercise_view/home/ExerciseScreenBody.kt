@@ -38,7 +38,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.ove
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.SideBarMetisUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.SmartphoneMetisUi
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.create_standalone_post.navigateToCreateStandalonePostScreen
 
 // Ratio of metis content in contrast to the actual exercise content
 const val METIS_RATIO = 0.3f
@@ -178,9 +177,6 @@ private fun BodyWithTabs(
                         icon = Icons.Default.Create,
                         contentDescription = null,
                         onClick = {
-                            if (metisContext != null) {
-                                navController.navigateToCreateStandalonePostScreen(metisContext) {}
-                            }
                         }
                     )
 

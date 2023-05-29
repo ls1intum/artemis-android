@@ -40,6 +40,6 @@ sealed class MetisContext(
 
     @Serializable
     @SerialName("conversation")
-    data class Conversation(override val courseId: Long, val conversationId: Int) :
+    data class Conversation(override val courseId: Long, val conversationId: Long) :
         MetisContext(listOf(), "messages", "answer-messages"), ConversationMetisContext
 }

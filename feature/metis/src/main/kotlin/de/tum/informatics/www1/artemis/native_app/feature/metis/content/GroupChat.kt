@@ -22,7 +22,7 @@ data class GroupChat(
     val members: List<ConversationUser> = emptyList()
 ) : Conversation() {
 
-    override val type: String = "groupChat"
+    override val typeAsString: String = "groupChat"
 
     override fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation =
         copy(unreadMessagesCount = unreadMessagesCount)

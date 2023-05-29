@@ -11,8 +11,8 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel

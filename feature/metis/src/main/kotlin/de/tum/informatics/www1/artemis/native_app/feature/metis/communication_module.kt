@@ -19,9 +19,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.add_members.ConversationAddMembersViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.ConversationMembersViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.ConversationSettingsViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.create_standalone_post.CreateStandalonePostViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisStandalonePostViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.dsl.singleOf
@@ -47,30 +46,18 @@ val communicationModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
 
     viewModel { params ->
-        MetisStandalonePostViewModel(
+        MetisThreadViewModel(
             params[0],
             params[1],
             get(),
             get(),
             get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get()
-        )
-    }
-
-    viewModel { params ->
-        CreateStandalonePostViewModel(
-            params.get(),
             get(),
             get(),
             get(),

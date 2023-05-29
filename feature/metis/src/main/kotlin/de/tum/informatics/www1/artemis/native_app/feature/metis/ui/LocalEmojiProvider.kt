@@ -13,10 +13,13 @@ import androidx.compose.runtime.remember
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.EmojiService
 import org.koin.androidx.compose.get
 
-private val localEmojiProvider: ProvidableCompositionLocal<EmojiProvider> =
+internal val LocalEmojiProvider: ProvidableCompositionLocal<EmojiProvider> =
     compositionLocalOf { throw RuntimeException("No emoji provider set. Please call ProvideEmojis as a parent of your composable.") }
 
-private data class EmojiProvider(val unicodeForEmojiIdMap: MutableState<Map<String, String>?>)
+internal data class EmojiProvider(
+    val unicodeForEmojiIdMap: MutableState<Map<String, String>?>,
+    val unicodeToEmojiIdMap: MutableState<Map<String, String>?>
+)
 
 /**
  * Loads emojis from the [EmojiService] and makes them available for the UI.
@@ -26,17 +29,21 @@ private data class EmojiProvider(val unicodeForEmojiIdMap: MutableState<Map<Stri
 fun ProvideEmojis(content: @Composable () -> Unit) {
     val emojiService: EmojiService = get()
 
-    val map: MutableState<Map<String, String>?> = remember { mutableStateOf(null) }
+    val unicodeForEmojiIdMap: MutableState<Map<String, String>?> = remember { mutableStateOf(null) }
+    val unicodeToEmojiIdMap: MutableState<Map<String, String>?> = remember { mutableStateOf(null) }
 
-    LaunchedEffect(key1 = Unit) {
-        if (map.value == null) {
-            map.value = emojiService.getEmojiToUnicodeMap()
+    LaunchedEffect(Unit) {
+        if (unicodeForEmojiIdMap.value == null) {
+            val emojiToUnicodeMap = emojiService.getEmojiToUnicodeMap()
+            unicodeForEmojiIdMap.value = emojiToUnicodeMap
+            unicodeToEmojiIdMap.value = emojiToUnicodeMap.map { it.value to it.key }.toMap()
         }
     }
 
     CompositionLocalProvider(
-        localEmojiProvider provides EmojiProvider(
-            unicodeForEmojiIdMap = map
+        LocalEmojiProvider provides EmojiProvider(
+            unicodeForEmojiIdMap = unicodeForEmojiIdMap,
+            unicodeToEmojiIdMap = unicodeToEmojiIdMap
         ),
         content = content
     )
@@ -44,7 +51,7 @@ fun ProvideEmojis(content: @Composable () -> Unit) {
 
 @Composable
 fun getUnicodeForEmojiId(emojiId: String): String {
-    val map by localEmojiProvider.current.unicodeForEmojiIdMap
+    val map by LocalEmojiProvider.current.unicodeForEmojiIdMap
     return remember(map, emojiId) {
         derivedStateOf { map?.get(emojiId) ?: "?" }
     }.value

@@ -3,7 +3,7 @@ accompanist = "0.30.0"
 androidDesugarJdkLibs = "2.0.2"
 androidxActivity = "1.7.0"
 androidxAppCompat = "1.6.1"
-androidxComposeBom = "2023.03.00"
+androidxComposeBom = "2023.05.01"
 androidxComposeCompiler = "1.4.4"
 androidxCore = "1.9.0"
 androidxLifecycle = "2.6.1"
@@ -14,7 +14,7 @@ androidxPaging = "3.1.1"
 androidxPagingCompose = "1.0.0-alpha17"
 androidxWork = "2.7.1"
 coil = "2.2.2"
-emoji2 = "1.2.0"
+emoji2 = "1.4.0-beta04"
 kotlin = "1.8.10"
 kotlinxCoroutines = "1.6.4"
 kotlinxDatetime = "0.4.0"
@@ -54,6 +54,7 @@ androidx-dataStore-preferences = { group = "androidx.datastore", name = "datasto
 androidx-emoji2 = { group = "androidx.emoji2", name = "emoji2", version.ref = "emoji2" }
 androidx-emoji2-views = { group = "androidx.emoji2", name = "emoji2-views", version.ref = "emoji2" }
 androidx-emoji2-views-helper = { group = "androidx.emoji2", name = "emoji2-views-helper", version.ref = "emoji2" }
+androidx-emoji2-emojiPicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
 androidx-lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidxLifecycle" }
 androidx-lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidxLifecycle" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidxNavigation" }

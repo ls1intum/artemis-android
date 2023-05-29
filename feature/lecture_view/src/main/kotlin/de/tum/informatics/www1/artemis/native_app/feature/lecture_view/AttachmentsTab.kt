@@ -70,7 +70,7 @@ private fun AttachmentItem(modifier: Modifier, attachment: Attachment, onClick: 
     val uploadDate = attachment.uploadDate
     val formattedUploadDate = uploadDate?.let { getRelativeTime(to = it) }
 
-    val supportingText = when {
+    val supportingContent = when {
         version != null && formattedUploadDate != null ->
             stringResource(
                 id = R.string.lecture_view_attachments_file_info_version_date,
@@ -91,8 +91,8 @@ private fun AttachmentItem(modifier: Modifier, attachment: Attachment, onClick: 
 
     ListItem(
         modifier = modifier.clickable(onClick = onClick),
-        headlineText = { Text(text = attachment.name.orEmpty()) },
-        supportingText = supportingText?.let { { Text(text = it) } },
+        headlineContent = { Text(text = attachment.name.orEmpty()) },
+        supportingContent = supportingContent?.let { { Text(text = it) } },
         leadingContent = {
             Icon(
                 modifier = Modifier.size(40.dp),

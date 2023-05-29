@@ -17,7 +17,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Groups2
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -41,6 +43,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversa
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.ChannelIcons
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableTitle
 
 private const val SECTION_HIDDEN_KEY = "hidden"
@@ -173,13 +176,26 @@ private fun LazyListScope.conversationList(
                 )
             },
             onToggleHidden = { onToggleHidden(conversation.id, !conversation.isHidden) },
-            content = {
+            content = { contentModifier ->
                 val unreadMessagesCount = conversation.unreadMessagesCount ?: 0
 
                 when (conversation) {
                     is ChannelChat -> {
-                        ListItem(modifier = it,
-                            headlineText = { Text(conversation.name) },
+                        val channelName = if (conversation.isArchived) {
+                            stringResource(
+                                id = R.string.conversation_overview_archived_channel_name,
+                                conversation.name
+                            )
+                        } else conversation.name
+
+                        ListItem(
+                            modifier = contentModifier,
+                            leadingContent = {
+                                Row {
+                                    ChannelIcons(channelChat = conversation)
+                                }
+                            },
+                            headlineContent = { Text(channelName) },
                             trailingContent = {
                                 UnreadMessages(unreadMessagesCount = unreadMessagesCount)
                             }
@@ -188,8 +204,8 @@ private fun LazyListScope.conversationList(
 
                     is GroupChat -> {
                         ListItem(
-                            modifier = it,
-                            headlineText = { Text(conversation.humanReadableTitle) },
+                            modifier = contentModifier,
+                            headlineContent = { Text(conversation.humanReadableTitle) },
                             leadingContent = {
                                 Icon(imageVector = Icons.Default.Groups2, contentDescription = null)
                             },
@@ -201,8 +217,8 @@ private fun LazyListScope.conversationList(
 
                     is OneToOneChat -> {
                         ListItem(
-                            modifier = it,
-                            headlineText = { Text(conversation.humanReadableTitle) },
+                            modifier = contentModifier,
+                            headlineContent = { Text(conversation.humanReadableTitle) },
                             trailingContent = {
                                 UnreadMessages(unreadMessagesCount = unreadMessagesCount)
                             }

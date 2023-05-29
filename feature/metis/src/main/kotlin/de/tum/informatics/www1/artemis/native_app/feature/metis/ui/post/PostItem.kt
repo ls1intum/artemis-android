@@ -7,10 +7,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,12 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.More
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SupervisorAccount
@@ -32,68 +28,41 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.google.accompanist.placeholder.material.placeholder
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IReaction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.UserRole
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.emoji.EmojiView
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.emoji.emoji_picker.EmojiPicker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.getUnicodeForEmojiId
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlin.time.Duration.Companion.minutes
 
-sealed interface PostItemViewType {
-    object StandaloneView : PostItemViewType
+sealed class PostItemViewType {
 
-    sealed class ModifiablePostItem(
-        val canEdit: Boolean,
-        val canDelete: Boolean,
-        val onClickEdit: () -> Unit,
-        val onClickDelete: () -> Unit
-    ) : PostItemViewType
+    data class ChatListItem(
+        val answerPosts: List<AnswerPost>
+    ) : PostItemViewType()
 
-    class AnswerItem(
-        canEdit: Boolean,
-        canDelete: Boolean,
-        onClickEdit: () -> Unit,
-        onClickDelete: () -> Unit
-    ) : ModifiablePostItem(canEdit, canDelete, onClickEdit, onClickDelete)
+    object ThreadItem : PostItemViewType()
 
-    class StandaloneListItem(
-        val answerPosts: List<AnswerPost>,
-        val onClickPost: () -> Unit,
-        val onClickReply: () -> Unit,
-        val onClickViewReplies: () -> Unit,
-        canEdit: Boolean,
-        canDelete: Boolean,
-        onClickEdit: () -> Unit,
-        onClickDelete: () -> Unit
-    ) : ModifiablePostItem(canEdit, canDelete, onClickEdit, onClickDelete)
+    object ThreadAnswerItem : PostItemViewType()
 }
 
 /**
@@ -102,136 +71,53 @@ sealed interface PostItemViewType {
 @Composable
 internal fun PostItem(
     modifier: Modifier,
-    post: Post?,
+    post: IBasePost?,
     postItemViewType: PostItemViewType,
     clientId: Long,
-    onReactWithEmoji: (emojiId: String) -> Unit,
-    onClickOnPresentReaction: (emojiId: String) -> Unit
+    onRequestReactWithEmoji: () -> Unit,
+    onClickOnPresentReaction: (emojiId: String) -> Unit,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
 ) {
-    PostItemBase(
-        modifier = modifier,
-        isPlaceholder = post == null,
-        authorRole = post?.authorRole,
-        authorName = post?.authorName,
-        creationDate = post?.creationDate,
-        title = post?.title,
-        content = post?.content,
-        reactions = post?.reactions.orEmpty(),
-        postItemViewType = postItemViewType,
-        onReactWithEmoji = onReactWithEmoji,
-        onClickOnPresentReaction = onClickOnPresentReaction,
-        clientId = clientId
-    )
-}
+    val isPlaceholder = post == null
 
-@Composable
-internal fun AnswerPostItem(
-    modifier: Modifier,
-    answerPost: AnswerPost,
-    answerItem: PostItemViewType.AnswerItem,
-    clientId: Long,
-    onReactWithEmoji: (emojiId: String) -> Unit,
-    onClickOnPresentReaction: (emojiId: String) -> Unit
-) {
-    PostItemBase(
-        modifier = modifier,
-        isPlaceholder = false,
-        authorRole = answerPost.authorRole,
-        authorName = answerPost.authorName,
-        creationDate = answerPost.creationDate,
-        title = null,
-        content = answerPost.content,
-        reactions = answerPost.reactions,
-        postItemViewType = answerItem,
-        onReactWithEmoji = onReactWithEmoji,
-        onClickOnPresentReaction = onClickOnPresentReaction,
-        clientId = clientId
-    )
-}
-
-@Composable
-private fun PostItemBase(
-    modifier: Modifier,
-    isPlaceholder: Boolean,
-    authorRole: UserRole?,
-    authorName: String?,
-    creationDate: Instant?,
-    title: String?,
-    content: String?,
-    clientId: Long,
-    reactions: List<Post.Reaction>,
-    postItemViewType: PostItemViewType,
-    onReactWithEmoji: (emojiId: String) -> Unit,
-    onClickOnPresentReaction: (emojiId: String) -> Unit
-) {
-    val cardContent = @Composable {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            PostHeadline(
-                modifier = Modifier.fillMaxWidth(),
-                isPlaceholder = isPlaceholder,
-                authorRole = authorRole,
-                authorName = authorName,
-                creationDate = creationDate
+    Column(
+        modifier = modifier
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
             )
-
-            if (title != null || isPlaceholder) {
-                Text(
-                    text = title ?: "W".repeat(15),
+            .padding(PaddingValues(horizontal = Spacings.ScreenHorizontalSpacing)),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        PostHeadline(
+            modifier = Modifier.fillMaxWidth(),
+            isPlaceholder = isPlaceholder,
+            authorRole = post?.authorRole,
+            authorName = post?.authorName,
+            creationDate = post?.creationDate
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                MarkdownText(
+                    markdown = post?.content ?: "W".repeat(40),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .placeholder(isPlaceholder),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleMedium
+                        .placeholder(visible = isPlaceholder),
+                    maxLines = 5,
+                    style = MaterialTheme.typography.bodyMedium,
+                    onClick = onClick,
+                    onLongClick = onLongClick
                 )
-            }
 
-            MarkdownText(
-                markdown = content ?: "W".repeat(40),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .placeholder(isPlaceholder),
-                maxLines = 5,
-                style = MaterialTheme.typography.bodyMedium,
-                onClick = when (postItemViewType) {
-                    is PostItemViewType.AnswerItem, PostItemViewType.StandaloneView -> { {} }
-                    is PostItemViewType.StandaloneListItem -> {
-                        postItemViewType.onClickPost
-                    }
-                }
-            )
-
-            StandalonePostFooter(
-                modifier = Modifier.fillMaxWidth(),
-                isPlaceholder = isPlaceholder,
-                reactions = reactions,
-                postItemViewType = postItemViewType,
-                onReactWithEmoji = onReactWithEmoji,
-                onClickReaction = onClickOnPresentReaction,
-                clientId = clientId
-            )
-        }
-    }
-
-    // The composable with onClick behaves differently. Therefore we need this separation when onClick is not needed.
-    when (postItemViewType) {
-        is PostItemViewType.StandaloneListItem -> {
-            OutlinedCard(
-                modifier = modifier,
-                onClick = postItemViewType.onClickPost
-            ) {
-                cardContent()
-            }
-        }
-
-        else -> {
-            OutlinedCard(modifier = modifier) {
-                cardContent()
+                StandalonePostFooter(
+                    modifier = Modifier.fillMaxWidth(),
+                    isPlaceholder = isPlaceholder,
+                    reactions = post?.reactions.orEmpty(),
+                    postItemViewType = postItemViewType,
+                    onRequestReactWithEmoji = onRequestReactWithEmoji,
+                    onClickReaction = onClickOnPresentReaction,
+                    clientId = clientId
+                )
             }
         }
     }
@@ -243,10 +129,12 @@ private fun PostHeadline(
     isPlaceholder: Boolean,
     authorRole: UserRole?,
     authorName: String?,
-    creationDate: Instant?
+    creationDate: Instant?,
+    content: @Composable () -> Unit
 ) {
     Row(
-        modifier = modifier
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         val icon = when (authorRole) {
             UserRole.INSTRUCTOR -> Icons.Default.School
@@ -257,29 +145,39 @@ private fun PostHeadline(
 
         Icon(
             modifier = Modifier
-                .size(40.dp)
+                .size(30.dp)
                 .placeholder(visible = isPlaceholder),
             imageVector = icon,
             contentDescription = null
         )
 
-        Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .placeholder(visible = isPlaceholder),
-                text = authorName ?: "Placeholder",
-                maxLines = 1,
-                style = MaterialTheme.typography.titleSmall
-            )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    modifier = Modifier.placeholder(visible = isPlaceholder),
+                    text = authorName ?: "Placeholder",
+                    maxLines = 1,
+                    style = MaterialTheme.typography.titleSmall
+                )
 
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .placeholder(visible = isPlaceholder),
-                text = getRelativeTime(to = creationDate ?: Clock.System.now()).toString(),
-                style = MaterialTheme.typography.bodySmall
-            )
+                val relativeTimeTo = remember(creationDate) {
+                    creationDate ?: Clock.System.now()
+                }
+
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .placeholder(visible = isPlaceholder),
+                    text = getRelativeTime(to = relativeTimeTo).toString(),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+            content()
         }
     }
 }
@@ -292,21 +190,19 @@ private fun StandalonePostFooter(
     modifier: Modifier,
     isPlaceholder: Boolean,
     clientId: Long,
-    reactions: List<Post.Reaction>,
+    reactions: List<IReaction>,
     postItemViewType: PostItemViewType,
-    onReactWithEmoji: (emojiId: String) -> Unit,
+    onRequestReactWithEmoji: () -> Unit,
     onClickReaction: (emojiId: String) -> Unit
 ) {
     val reactionCount: Map<String, ReactionData> = remember(reactions, clientId) {
         reactions.groupBy { it.emojiId }.mapValues { groupedReactions ->
             ReactionData(
                 groupedReactions.value.size,
-                groupedReactions.value.any { it.authorId == clientId }
+                groupedReactions.value.any { it.creatorId == clientId }
             )
         }
     }
-
-    var displayEmojiPicker: Boolean by remember { mutableStateOf(false) }
 
     Row(modifier = modifier.placeholder(isPlaceholder)) {
         Row(
@@ -334,7 +230,7 @@ private fun StandalonePostFooter(
                 )
             }
 
-            IconButton(onClick = { displayEmojiPicker = true }) {
+            IconButton(onClick = onRequestReactWithEmoji) {
                 Icon(
                     imageVector = Icons.Outlined.AddReaction,
                     contentDescription = null
@@ -342,74 +238,19 @@ private fun StandalonePostFooter(
             }
         }
 
-        if (postItemViewType is PostItemViewType.StandaloneListItem) {
+        if (postItemViewType is PostItemViewType.ChatListItem) {
             val replyCount = postItemViewType.answerPosts.size
 
             if (replyCount > 0) {
-                TextButton(onClick = postItemViewType.onClickViewReplies) {
-                    Text(
-                        text = pluralStringResource(
-                            id = R.plurals.communication_standalone_post_view_replies_button,
-                            count = replyCount,
-                            replyCount
-                        )
+                Text(
+                    text = pluralStringResource(
+                        id = R.plurals.communication_standalone_post_view_replies_button,
+                        count = replyCount,
+                        replyCount
                     )
-                }
+                )
             }
         }
-
-        if (postItemViewType is PostItemViewType.ModifiablePostItem) {
-            var displayMenu: Boolean by remember { mutableStateOf(false) }
-
-            if (postItemViewType.canEdit || postItemViewType.canDelete) {
-                Box {
-                    IconButton(onClick = { displayMenu = true }) {
-                        Icon(imageVector = Icons.Default.More, contentDescription = null)
-                    }
-
-                    DropdownMenu(
-                        expanded = displayMenu,
-                        onDismissRequest = { displayMenu = false }
-                    ) {
-                        if (postItemViewType.canEdit) {
-                            DropdownMenuItem(
-                                onClick = postItemViewType.onClickEdit,
-                            ) {
-                                Icon(imageVector = Icons.Default.Edit, contentDescription = null)
-
-                                Text(text = stringResource(id = R.string.post_view_edit_post))
-                            }
-                        }
-
-                        if (postItemViewType.canDelete) {
-                            DropdownMenuItem(
-                                onClick = postItemViewType.onClickDelete,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.DeleteForever,
-                                    contentDescription = null
-                                )
-
-                                Text(text = stringResource(id = R.string.post_view_delete_post))
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (displayEmojiPicker) {
-        EmojiDialog(
-            onDismissRequest = {
-                displayEmojiPicker = false
-
-            },
-            onSelectEmoji = { emojiId ->
-                displayEmojiPicker = false
-                onReactWithEmoji(emojiId)
-            }
-        )
     }
 }
 
@@ -455,72 +296,5 @@ private fun AnimatedCounter(currentCount: Int) {
         label = "Animate reaction count change"
     ) { targetCount ->
         Text(text = "$targetCount")
-    }
-}
-
-private class PostPreviewProvider : PreviewParameterProvider<Post?> {
-    override val values: Sequence<Post?>
-        get() {
-            val baseReaction = Post.Reaction("rocket", 0, "I reacted", 0, Clock.System.now())
-
-            val basePost = Post(
-                clientPostId = "",
-                serverPostId = 0,
-                title = "Example title",
-                content = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.",
-                authorName = "Max Mustermann",
-                authorRole = UserRole.USER,
-                creationDate = Clock.System.now().minus(5.minutes),
-                resolved = false,
-                tags = listOf("Very", "Important"),
-                answers = emptyList(),
-                reactions = listOf(
-                    baseReaction
-                ),
-                courseWideContext = null
-            )
-
-            return sequenceOf(
-                null,
-                basePost,
-                basePost.copy(tags = emptyList(), title = null),
-                basePost.copy(
-                    reactions = listOf(
-                        baseReaction.copy(emojiId = "rocket"),
-                        baseReaction.copy(emojiId = "older_woman"),
-                        baseReaction.copy(emojiId = "red_haired_woman"),
-                        baseReaction.copy(emojiId = "bone"),
-                        baseReaction.copy(emojiId = "eyes"),
-                        baseReaction.copy(emojiId = "female_vampire")
-                    )
-                )
-            )
-        }
-
-}
-
-@Preview
-@Composable
-private fun PostPreview(
-    @PreviewParameter(provider = PostPreviewProvider::class) post: Post?
-) {
-    ProvideEmojis {
-        PostItem(
-            modifier = Modifier.fillMaxWidth(),
-            post = post,
-            postItemViewType = PostItemViewType.StandaloneListItem(
-                answerPosts = post?.answers.orEmpty(),
-                onClickPost = {},
-                onClickReply = {},
-                onClickViewReplies = {},
-                canEdit = true,
-                canDelete = true,
-                onClickEdit = {},
-                onClickDelete = {}
-            ),
-            onReactWithEmoji = {},
-            onClickOnPresentReaction = {},
-            clientId = 0
-        )
     }
 }

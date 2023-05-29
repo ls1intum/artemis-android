@@ -7,7 +7,7 @@ import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Support
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 
 fun getIconForCourseWideContext(courseWideContext: CourseWideContext) = when (courseWideContext) {

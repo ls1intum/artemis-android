@@ -4,8 +4,17 @@ import androidx.paging.PagingSource
 import androidx.room.*
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.UserRole
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.AnswerPostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisPostContextEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisUserEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.PostReactionEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostTagEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostingEntity
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 
@@ -40,11 +49,11 @@ interface MetisDao {
     suspend fun queryClientPostId(
         serverId: String,
         postId: Long,
-        postingType: de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity.PostingType
+        postingType: BasePostingEntity.PostingType
     ): String?
 
     @Insert
-    suspend fun insertPostMetisContext(postMetisContext: de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisPostContextEntity)
+    suspend fun insertPostMetisContext(postMetisContext: MetisPostContextEntity)
 
     @Query("select exists(select * from metis_post_context where client_post_id = :clientPostId and server_post_id = :serverPostId and course_id = :courseId and exercise_id = :exerciseId and lecture_id = :lectureId)")
     suspend fun isPostPresentInContext(
@@ -56,35 +65,35 @@ interface MetisDao {
     ): Boolean
 
     @Update
-    suspend fun updateBasePost(post: de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity)
+    suspend fun updateBasePost(post: BasePostingEntity)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertBasePost(post: de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity)
+    suspend fun insertBasePost(post: BasePostingEntity)
 
     @Update
-    suspend fun updatePost(post: de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostingEntity)
+    suspend fun updatePost(post: StandalonePostingEntity)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertPost(post: de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostingEntity)
+    suspend fun insertPost(post: StandalonePostingEntity)
 
     @Update
-    suspend fun updateAnswerPosting(answerPost: de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.AnswerPostingEntity)
+    suspend fun updateAnswerPosting(answerPost: AnswerPostingEntity)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertAnswerPosting(answerPost: de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.AnswerPostingEntity)
+    suspend fun insertAnswerPosting(answerPost: AnswerPostingEntity)
 
     @Query("delete from reactions where post_id = :postId")
     suspend fun removeReactions(postId: String)
 
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertReactions(reactions: List<de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.PostReactionEntity>)
+    suspend fun insertReactions(reactions: List<PostReactionEntity>)
 
     @Update
-    suspend fun updateTags(tags: List<de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostTagEntity>)
+    suspend fun updateTags(tags: List<StandalonePostTagEntity>)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertTags(tags: List<de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostTagEntity>)
+    suspend fun insertTags(tags: List<StandalonePostTagEntity>)
 
     @Query(
         """
@@ -94,16 +103,16 @@ interface MetisDao {
     suspend fun removeSuperfluousTags(postId: String, remainingTags: List<String>)
 
     @Update
-    suspend fun updateUser(user: de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisUserEntity)
+    suspend fun updateUser(user: MetisUserEntity)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertUser(user: de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisUserEntity)
+    suspend fun insertUser(user: MetisUserEntity)
 
     @Update
-    suspend fun updateUsers(users: List<de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisUserEntity>)
+    suspend fun updateUsers(users: List<MetisUserEntity>)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertUsers(users: List<de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisUserEntity>)
+    suspend fun insertUsers(users: List<MetisUserEntity>)
 
     @Query(
         """
@@ -116,7 +125,7 @@ interface MetisDao {
     suspend fun deletePostingsWithServerIds(
         host: String,
         serverPostIds: List<Long>,
-        postingType: de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity.PostingType = de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity.PostingType.STANDALONE
+        postingType: BasePostingEntity.PostingType = BasePostingEntity.PostingType.STANDALONE
     )
 
     @Query(
@@ -151,7 +160,8 @@ interface MetisDao {
             sp.title,
             sp.resolved,
             u.name as author_name,
-            p.author_role
+            p.author_role,
+            p.author_id as author_id
         from 
             metis_post_context mpc, postings p, standalone_postings sp, users u
         where
@@ -163,7 +173,7 @@ interface MetisDao {
             u.id = p.author_id
     """
     )
-    fun queryStandalonePost(clientPostId: String): Flow<de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post?>
+    fun queryStandalonePost(clientPostId: String): Flow<Post?>
 
     fun queryCoursePosts(
         serverId: String,
@@ -171,31 +181,31 @@ interface MetisDao {
         exerciseId: Long,
         lectureId: Long,
         clientId: Long,
-        metisFilter: List<de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter>,
-        metisSortingStrategy: de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy,
+        metisFilter: List<MetisFilter>,
+        metisSortingStrategy: MetisSortingStrategy,
         query: String?
-    ): PagingSource<Int, de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post> {
+    ): PagingSource<Int, Post> {
         val queryReplyCount =
             "(select count(*) from answer_postings ap where ap.parent_post_id = sp.post_id)"
         val queryEmojiCount = "(select count(*) from reactions r where r.post_id = p.id)"
 
         val orderBy = when (metisSortingStrategy) {
-            de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy.DATE_ASCENDING -> "order by p.creation_date asc"
-            de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy.DATE_DESCENDING -> "order by p.creation_date desc"
-            de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy.REPLIES_ASCENDING -> "order by $queryReplyCount asc"
-            de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy.REPLIES_DESCENDING -> "order by $queryReplyCount desc"
-            de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy.VOTES_ASCENDING -> "order by $queryEmojiCount asc"
-            de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy.VOTES_DESCENDING -> "order by $queryEmojiCount desc"
+            MetisSortingStrategy.DATE_ASCENDING -> "order by p.creation_date asc"
+            MetisSortingStrategy.DATE_DESCENDING -> "order by p.creation_date desc"
+            MetisSortingStrategy.REPLIES_ASCENDING -> "order by $queryReplyCount asc"
+            MetisSortingStrategy.REPLIES_DESCENDING -> "order by $queryReplyCount desc"
+            MetisSortingStrategy.VOTES_ASCENDING -> "order by $queryEmojiCount asc"
+            MetisSortingStrategy.VOTES_DESCENDING -> "order by $queryEmojiCount desc"
         }
 
         val metisFilterSql = buildString {
-            if (de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter.UNRESOLVED in metisFilter) {
+            if (MetisFilter.UNRESOLVED in metisFilter) {
                 append("and sp.resolved = 0 \n")
             }
-            if (de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter.CREATED_BY_CLIENT in metisFilter) {
+            if (MetisFilter.CREATED_BY_CLIENT in metisFilter) {
                 append("and p.author_id = ? \n")
             }
-            if (de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter.WITH_REACTION in metisFilter) {
+            if (MetisFilter.WITH_REACTION in metisFilter) {
                 append("and ($queryReplyCount > 0 or \n")
                 append("(select count(*) from reactions r where r.post_id = p.id) > 0)  \n")
             }
@@ -229,7 +239,8 @@ interface MetisDao {
                 sp.title,
                 sp.resolved,
                 u.name as author_name,
-                p.author_role
+                p.author_role,
+                p.author_id as author_id
             from
                 metis_post_context mpc,
                 postings p,
@@ -258,7 +269,7 @@ interface MetisDao {
                 exerciseId,
                 lectureId
             )
-                    + (if (de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter.CREATED_BY_CLIENT in metisFilter) arrayOf(clientId) else emptyArray())
+                    + (if (MetisFilter.CREATED_BY_CLIENT in metisFilter) arrayOf(clientId) else emptyArray())
                     + (if (bindServerPostId) arrayOf(queryServerPostId) else emptyArray())
                     + if (!bindServerPostId && query != null) arrayOf(
                 likeQueryLiteral,
@@ -272,16 +283,16 @@ interface MetisDao {
 
     @RawQuery(
         observedEntities = [
-            de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity::class,
-            de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostingEntity::class,
-            de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.AnswerPostingEntity::class,
-            de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.PostReactionEntity::class,
-            de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostTagEntity::class,
-            de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisUserEntity::class,
-            de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisPostContextEntity::class
+            BasePostingEntity::class,
+            StandalonePostingEntity::class,
+            AnswerPostingEntity::class,
+            PostReactionEntity::class,
+            StandalonePostTagEntity::class,
+            MetisUserEntity::class,
+            MetisPostContextEntity::class
         ]
     )
-    fun queryCoursePosts(query: SupportSQLiteQuery): PagingSource<Int, de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post>
+    fun queryCoursePosts(query: SupportSQLiteQuery): PagingSource<Int, Post>
 
     @Transaction
     @Query(

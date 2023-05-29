@@ -1,9 +1,10 @@
-package de.tum.informatics.www1.artemis.native_app.core.model.metis
+package de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto
 
 import kotlinx.datetime.Instant
 
-interface IBasePost {
+sealed interface IBasePost {
     val authorName: String?
+    val authorId: Long?
     val authorRole: UserRole?
     val creationDate: Instant?
     val content: String?

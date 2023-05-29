@@ -138,7 +138,7 @@ private fun MetisStandalonePostScreen(
     viewType: ViewType,
     onNavigateUp: () -> Unit
 ) {
-    val viewModel: MetisStandalonePostViewModel =
+    val viewModel: MetisThreadViewModel =
         koinViewModel(parameters = { parametersOf(standalonePostId, metisContext, true) })
 
     val isDataOutdated by viewModel.isDataOutdated.collectAsState()
@@ -174,7 +174,7 @@ private fun MetisStandalonePostScreen(
                 requestRefresh = viewModel::requestReload
             )
 
-            MetisStandalonePostUi(
+            MetisThreadUi(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),

@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.hasModerationRights
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableName
 
@@ -30,10 +32,10 @@ internal fun ConversationMemberListItem(
     onRequestRevokeModerationPermission: (ConversationUser) -> Unit
 ) {
     ListItem(
-        headlineText = {
+        headlineContent = {
             Text(text = member.humanReadableName)
         },
-        supportingText = member.username?.let { username ->
+        supportingContent = member.username?.let { username ->
             {
                 Text(text = username)
             }

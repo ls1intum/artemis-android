@@ -2,12 +2,12 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl
 
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.CourseWideContext
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.DisplayPriority
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.UserRole
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.DisplayPriority
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.Reaction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.dao.MetisDao

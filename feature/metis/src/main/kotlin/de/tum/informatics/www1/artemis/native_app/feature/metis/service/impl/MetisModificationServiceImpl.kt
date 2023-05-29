@@ -4,9 +4,9 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.Reaction
-import de.tum.informatics.www1.artemis.native_app.core.model.metis.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.Reaction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import io.ktor.client.call.body
@@ -17,6 +17,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 
 internal class MetisModificationServiceImpl(
     private val ktorProvider: KtorProvider
@@ -162,7 +163,7 @@ internal class MetisModificationServiceImpl(
         reactionId: Long,
         serverUrl: String,
         authToken: String
-    ): NetworkResponse<Unit> {
+    ): NetworkResponse<Boolean> {
         return performNetworkCall {
             ktorProvider.ktorClient.delete(serverUrl) {
                 url {
@@ -178,8 +179,34 @@ internal class MetisModificationServiceImpl(
                 cookieAuth(authToken)
                 contentType(ContentType.Application.Json)
             }
+                .status
+                .isSuccess()
+        }
+    }
 
-            Unit
+    override suspend fun deletePost(
+        context: MetisContext,
+        post: MetisModificationService.AffectedPost,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<Boolean> {
+        val identifier = when (post) {
+            is MetisModificationService.AffectedPost.Answer -> "answer-messages"
+            is MetisModificationService.AffectedPost.Standalone -> "messages"
+        }
+
+        return performNetworkCall {
+            ktorProvider.ktorClient.delete(serverUrl) {
+                url {
+                    appendPathSegments(RESOURCE_PATH_SEGMENTS)
+                    appendPathSegments(context.courseId.toString(), identifier, post.postId.toString())
+                }
+
+                cookieAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }
+                .status
+                .isSuccess()
         }
     }
 }

@@ -19,6 +19,8 @@
     <string name="conversation_overview_section_add_channel_browse">Browse channels</string>
     <string name="conversation_overview_section_add_channel_create">Create channel</string>
 
+    <string name="conversation_overview_archived_channel_name">%1$s (Archived)</string>
+
     <string name="conversation_overview_loading">Loading conversations…</string>
     <string name="conversation_overview_loading_failed">Something went wrong while loading your conversations.</string>
     <string name="conversation_overview_loading_try_again">Try again.</string>
