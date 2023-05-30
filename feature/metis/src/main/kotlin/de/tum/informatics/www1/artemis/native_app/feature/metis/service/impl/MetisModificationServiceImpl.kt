@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisConte
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IStandalonePost
 import io.ktor.client.call.body
+import io.ktor.client.request.accept
 import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.put
@@ -158,6 +159,7 @@ internal class MetisModificationServiceImpl(
                 setBody(reaction)
                 cookieAuth(authToken)
                 contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
             }.body()
         }
     }

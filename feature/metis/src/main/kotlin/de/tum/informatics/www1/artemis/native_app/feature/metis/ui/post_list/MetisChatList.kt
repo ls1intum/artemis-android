@@ -15,7 +15,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,7 +30,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisModificationFailureDialog
@@ -42,7 +40,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.Paging
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.getPostActions
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.rememberReplyMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
@@ -132,8 +129,8 @@ internal fun MetisChatList(
                             onRequestDelete = { post ->
                                 metisModificationTask = viewModel.deletePost(post)
                             },
-                            onRequestReactWithEmoji = { post, emojiId ->
-                                metisModificationTask = viewModel.createReaction(emojiId, post)
+                            onRequestReactWithEmoji = { post, emojiId, create ->
+                                metisModificationTask = viewModel.createOrDeleteReaction(emojiId, post, create)
                             }
                         )
                     }
@@ -164,7 +161,7 @@ private fun ChatList(
     onClickViewPost: (clientPostId: String) -> Unit,
     onRequestEdit: (Post) -> Unit,
     onRequestDelete: (Post) -> Unit,
-    onRequestReactWithEmoji: (Post, emojiId: String) -> Unit
+    onRequestReactWithEmoji: (Post, emojiId: String, create: Boolean) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
@@ -182,7 +179,9 @@ private fun ChatList(
                             clientId,
                             onRequestEdit = { onRequestEdit(post) },
                             onRequestDelete = { onRequestDelete(post) },
-                            onRequestReactWithEmoji = {}
+                            onClickReaction = { id, create ->
+                                onRequestReactWithEmoji(post, id, create)
+                            }
                         )
                     } else PostActions()
                 }

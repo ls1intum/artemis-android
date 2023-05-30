@@ -5,7 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBaseP
 data class PostActions(
     val requestEditPost: (() -> Unit)? = null,
     val requestDeletePost: (() -> Unit)? = null,
-    val onRequestReactWithEmoji: (emojiId: String) -> Unit = {}
+    val onClickReaction: (emojiId: String, create: Boolean) -> Unit = { _, _ -> }
 ) {
     val canPerformAnyAction: Boolean get() = requestDeletePost != null || requestEditPost != null
 }
@@ -16,12 +16,12 @@ fun getPostActions(
     clientId: Long,
     onRequestEdit: () -> Unit,
     onRequestDelete: () -> Unit,
-    onRequestReactWithEmoji: (emojiId: String) -> Unit
+    onClickReaction: (emojiId: String, create: Boolean) -> Unit
 ): PostActions {
     val hasEditPostRights = hasModerationRights || post.authorId == clientId
     return PostActions(
         requestEditPost = if (hasEditPostRights) onRequestEdit else null,
         requestDeletePost = if (hasEditPostRights) onRequestDelete else null,
-        onRequestReactWithEmoji = onRequestReactWithEmoji
+        onClickReaction = onClickReaction
     )
 }

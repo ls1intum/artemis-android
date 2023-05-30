@@ -27,17 +27,17 @@ internal fun PostWithBottomSheet(
         post = post,
         postItemViewType = postItemViewType,
         clientId = clientId,
-        onRequestReactWithEmoji = { displayBottomSheet = true },
-        onClickOnPresentReaction = postActions.onRequestReactWithEmoji,
-        onClick = onClick,
-        onLongClick = {
-            displayBottomSheet = true
-        }
-    )
+        onClickOnReaction = postActions.onClickReaction,
+        onClick = onClick
+    ) {
+        displayBottomSheet = true
+    }
 
-    if (displayBottomSheet) {
+    if (displayBottomSheet && post != null) {
         PostContextBottomSheet(
             postActions = postActions,
+            post = post,
+            clientId = clientId,
             onDismissRequest = {
                 displayBottomSheet = false
             }

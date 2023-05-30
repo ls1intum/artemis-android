@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndefinetly
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
@@ -18,11 +19,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IStand
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.Reaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -63,60 +62,29 @@ abstract class MetisViewModel(
      * Handles a reaction click. If the client has already reacted, it deletes the reaction.
      * Otherwise it creates a reaction with the same emoji id.
      */
-    fun onClickReaction(
+    fun createOrDeleteReaction(
         emojiId: String,
-        post: MetisModificationService.AffectedPost,
-        presentReactions: List<Post.Reaction>
+        post: IBasePost,
+        create: Boolean
     ): Deferred<MetisModificationFailure?> {
         return viewModelScope.async {
-            onClickReactionImpl(emojiId, post, presentReactions)
-        }
-    }
+            if (create) {
+                createReactionImpl(emojiId, post.asAffectedPost)
+            } else {
+                val clientId =
+                    clientId.value.orNull() ?: return@async MetisModificationFailure.DELETE_REACTION
 
-    protected suspend fun onClickReactionImpl(
-        emojiId: String,
-        post: MetisModificationService.AffectedPost,
-        presentReactions: List<Post.Reaction>
-    ): MetisModificationFailure? {
-        return when (val clientId = clientId.first()) {
-            is DataState.Success -> {
-                val userId = clientId.data
-
-                val existingReaction = presentReactions
+                val exitingReactionId = post
+                    .reactions
+                    .orEmpty()
                     .filter { it.emojiId == emojiId }
-                    .firstOrNull { it.authorId == userId }
+                    .firstOrNull { it.creatorId == clientId }
+                    ?.id
+                    ?: return@async MetisModificationFailure.DELETE_REACTION
 
-                if (existingReaction != null) {
-                    deleteReaction(existingReaction.id)
-                } else {
-                    createReactionImpl(emojiId, post)
-                }
-            }
-
-            else -> {
-                MetisModificationFailure.CREATE_REACTION
+                deleteReactionImpl(exitingReactionId)
             }
         }
-    }
-
-    fun createReaction(
-        emojiId: String,
-        post: IBasePost
-    ): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async {
-            createReactionImpl(emojiId, post.asAffectedPost)
-        }
-    }
-
-    private suspend fun deleteReaction(reactionId: Long): MetisModificationFailure? {
-        val success = metisModificationService.deleteReaction(
-            context = getMetisContext(),
-            reactionId = reactionId,
-            serverUrl = serverConfigurationService.serverUrl.first(),
-            authToken = accountService.authToken.first()
-        ).or(false)
-
-        return if (success) null else MetisModificationFailure.DELETE_REACTION
     }
 
     protected suspend fun createReactionImpl(
@@ -133,6 +101,17 @@ abstract class MetisViewModel(
 
         return networkResponse.bind<MetisModificationFailure?> { null }
             .or(MetisModificationFailure.CREATE_REACTION)
+    }
+
+    private suspend fun deleteReactionImpl(reactionId: Long): MetisModificationFailure? {
+        val success = metisModificationService.deleteReaction(
+            context = getMetisContext(),
+            reactionId = reactionId,
+            serverUrl = serverConfigurationService.serverUrl.first(),
+            authToken = accountService.authToken.first()
+        ).or(false)
+
+        return if (success) null else MetisModificationFailure.DELETE_REACTION
     }
 
     protected suspend fun createStandalonePostImpl(post: StandalonePost): MetisModificationFailure? {
@@ -191,9 +170,9 @@ abstract class MetisViewModel(
 
     private val IBasePost.asAffectedPost: MetisModificationService.AffectedPost
         get() = when (this) {
-            is IAnswerPost -> MetisModificationService.AffectedPost.Answer(serverPostId)
             is AnswerPost -> MetisModificationService.AffectedPost.Answer(serverPostId)
-            is IStandalonePost -> MetisModificationService.AffectedPost.Standalone(serverPostId)
+            is IAnswerPost -> MetisModificationService.AffectedPost.Answer(serverPostId)
             is StandalonePost -> MetisModificationService.AffectedPost.Standalone(serverPostId)
+            is IStandalonePost -> MetisModificationService.AffectedPost.Standalone(serverPostId)
         }
 }

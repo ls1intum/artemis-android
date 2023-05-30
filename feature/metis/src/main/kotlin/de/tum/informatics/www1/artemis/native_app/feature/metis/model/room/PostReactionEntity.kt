@@ -33,5 +33,5 @@ data class PostReactionEntity(
     @ColumnInfo(name = "author_id")
     val authorId: Long,
     @ColumnInfo(name = "id")
-    val id: Int
+    val id: Long
 )

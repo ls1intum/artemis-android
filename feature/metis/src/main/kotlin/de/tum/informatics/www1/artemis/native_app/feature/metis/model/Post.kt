@@ -72,7 +72,7 @@ data class Post(
         )
         val username: String,
         @ColumnInfo(name = "id")
-        val id: Long,
+        override val id: Long,
         @ColumnInfo(name = "creation_date")
         override val creationDate: Instant?
     ) : IReaction {

@@ -215,25 +215,6 @@ internal class MetisThreadViewModel(
         }
     }
 
-    fun onClickReactionOfAnswer(
-        emojiId: String,
-        clientSidePostId: String,
-        presentReactions: List<Post.Reaction>
-    ): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async {
-            val serverSidePostId = metisStorageService.getServerSidePostId(
-                serverConfigurationService.host.first(),
-                clientSidePostId
-            )
-
-            onClickReactionImpl(
-                emojiId = emojiId,
-                post = MetisModificationService.AffectedPost.Answer(postId = serverSidePostId),
-                presentReactions = presentReactions
-            )
-        }
-    }
-
     fun createReply(replyText: String): Deferred<MetisModificationFailure?> {
         return viewModelScope.async {
             if (!post.value.isSuccess) return@async MetisModificationFailure.CREATE_POST

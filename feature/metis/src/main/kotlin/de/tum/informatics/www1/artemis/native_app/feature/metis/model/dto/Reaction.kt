@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class Reaction(
-    val id: Int? = null,
+    override val id: Long? = null,
     val user: User? = null,
     override val creationDate: Instant? = null,
     override val emojiId: String = "",

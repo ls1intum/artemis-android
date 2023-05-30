@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,9 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SupervisorAccount
-import androidx.compose.material.icons.outlined.AddReaction
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -74,8 +73,7 @@ internal fun PostItem(
     post: IBasePost?,
     postItemViewType: PostItemViewType,
     clientId: Long,
-    onRequestReactWithEmoji: () -> Unit,
-    onClickOnPresentReaction: (emojiId: String) -> Unit,
+    onClickOnReaction: (emojiId: String, create: Boolean) -> Unit,
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
@@ -112,11 +110,10 @@ internal fun PostItem(
                 StandalonePostFooter(
                     modifier = Modifier.fillMaxWidth(),
                     isPlaceholder = isPlaceholder,
+                    clientId = clientId,
                     reactions = post?.reactions.orEmpty(),
                     postItemViewType = postItemViewType,
-                    onRequestReactWithEmoji = onRequestReactWithEmoji,
-                    onClickReaction = onClickOnPresentReaction,
-                    clientId = clientId
+                    onClickReaction = onClickOnReaction
                 )
             }
         }
@@ -192,8 +189,7 @@ private fun StandalonePostFooter(
     clientId: Long,
     reactions: List<IReaction>,
     postItemViewType: PostItemViewType,
-    onRequestReactWithEmoji: () -> Unit,
-    onClickReaction: (emojiId: String) -> Unit
+    onClickReaction: (emojiId: String, create: Boolean) -> Unit
 ) {
     val reactionCount: Map<String, ReactionData> = remember(reactions, clientId) {
         reactions.groupBy { it.emojiId }.mapValues { groupedReactions ->
@@ -204,10 +200,10 @@ private fun StandalonePostFooter(
         }
     }
 
-    Row(modifier = modifier.placeholder(isPlaceholder)) {
+    Column(modifier = modifier.placeholder(isPlaceholder)) {
         Row(
             modifier = Modifier
-                .weight(1f)
+                .fillMaxSize()
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -225,15 +221,8 @@ private fun StandalonePostFooter(
                         AnimatedCounter(reactionData.reactionCount)
                     },
                     onClick = {
-                        onClickReaction(emoji)
+                        onClickReaction(emoji, !reactionData.hasClientReacted)
                     }
-                )
-            }
-
-            IconButton(onClick = onRequestReactWithEmoji) {
-                Icon(
-                    imageVector = Icons.Outlined.AddReaction,
-                    contentDescription = null
                 )
             }
         }
@@ -243,11 +232,13 @@ private fun StandalonePostFooter(
 
             if (replyCount > 0) {
                 Text(
+                    style = MaterialTheme.typography.bodyMedium,
                     text = pluralStringResource(
                         id = R.plurals.communication_standalone_post_view_replies_button,
                         count = replyCount,
                         replyCount
-                    )
+                    ),
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
         }
