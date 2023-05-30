@@ -38,5 +38,11 @@ enum class ArtemisNotificationChannel(
         R.string.push_notification_channel_lecture_post_name,
         R.string.push_notification_channel_lecture_post_description,
         NotificationManager.IMPORTANCE_HIGH
+    ),
+    CommunicationNotificationChannel(
+        "communication-notification-channel",
+        R.string.push_notification_channel_communication_name,
+        R.string.push_notification_channel_communication_description,
+        NotificationManager.IMPORTANCE_HIGH
     )
 }

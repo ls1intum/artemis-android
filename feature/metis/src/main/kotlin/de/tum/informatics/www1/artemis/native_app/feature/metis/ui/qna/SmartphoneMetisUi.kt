@@ -18,7 +18,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisChatList
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -58,10 +57,9 @@ fun SmartphoneMetisUi(
                 viewModel = viewModel
             )
 
-            val navigateToStandalonePostScreen = { clientPostId: String, viewType: ViewType ->
+            val navigateToStandalonePostScreen = { clientPostId: String ->
                 navController.navigateToStandalonePostScreen(
                     clientPostId = clientPostId,
-                    viewType = viewType,
                     metisContext = metisContext
                 ) {}
             }
@@ -71,7 +69,7 @@ fun SmartphoneMetisUi(
                 viewModel = viewModel,
                 listContentPadding = PaddingValues(top = 8.dp, bottom = Spacings.FabContentBottomPadding)
             ) { clientPostId ->
-                navigateToStandalonePostScreen(clientPostId, ViewType.POST)
+                navigateToStandalonePostScreen(clientPostId)
             }
         }
     }

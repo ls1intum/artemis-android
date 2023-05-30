@@ -13,13 +13,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
@@ -27,28 +25,23 @@ import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.google.accompanist.placeholder.material.placeholder
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBasePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IReaction
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.emoji.EmojiView
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.emoji.emoji_picker.EmojiPicker
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IReaction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.getUnicodeForEmojiId
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -211,10 +204,9 @@ private fun StandalonePostFooter(
                 InputChip(
                     selected = reactionData.hasClientReacted,
                     leadingIcon = {
-                        EmojiView(
-                            modifier = Modifier,
-                            emojiUnicode = getUnicodeForEmojiId(emojiId = emoji),
-                            emojiFontSize = 16.sp
+                        Text(
+                            text = getUnicodeForEmojiId(emojiId = emoji),
+                            fontSize = 16.sp
                         )
                     },
                     label = {

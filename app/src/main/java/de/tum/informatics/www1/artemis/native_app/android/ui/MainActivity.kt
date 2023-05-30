@@ -53,8 +53,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.add_members.conversationAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.conversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.conversationSettingsScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ViewType
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.standalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ProvideLocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContext
@@ -374,7 +372,7 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
                 is MetisContext.Course -> CommunicationType.QNA_COURSE
                 is MetisContext.Exercise -> CommunicationType.QNA_EXERCISE
                 is MetisContext.Lecture -> CommunicationType.QNA_LECTURE
-                is MetisContext.Conversation -> throw NotImplementedError()
+                is MetisContext.Conversation -> CommunicationType.COMMUNICATION
             }
 
             lifecycleScope.launch {

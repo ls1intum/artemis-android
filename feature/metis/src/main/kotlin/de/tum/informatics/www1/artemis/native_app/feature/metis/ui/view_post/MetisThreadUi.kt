@@ -38,8 +38,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_co
 @Composable
 internal fun MetisThreadUi(
     modifier: Modifier,
-    viewModel: MetisThreadViewModel,
-    @Suppress("UNUSED_PARAMETER") viewType: ViewType
+    viewModel: MetisThreadViewModel
 ) {
     val postDataState: DataState<Post> by viewModel.post.collectAsState()
     val clientId: Long = viewModel.clientId.collectAsState().value.orElse(0L)

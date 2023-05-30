@@ -31,7 +31,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.Met
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ViewType
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -110,8 +109,7 @@ fun SideBarMetisUi(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(bottom = 8.dp),
-                    viewModel = standalonePostViewModel,
-                    viewType = ViewType.POST
+                    viewModel = standalonePostViewModel
                 )
             }
         }

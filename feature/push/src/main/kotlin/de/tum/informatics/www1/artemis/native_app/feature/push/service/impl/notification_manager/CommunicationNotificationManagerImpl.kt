@@ -171,7 +171,7 @@ internal class CommunicationNotificationManagerImpl(
         messages: List<CommunicationMessageEntity>
     ): NotificationCompat.MessagingStyle {
         val person = when (communication.type) {
-            CommunicationType.QNA_COURSE, CommunicationType.QNA_EXERCISE, CommunicationType.QNA_LECTURE, CommunicationType.ANNOUNCEMENT -> {
+            CommunicationType.QNA_COURSE, CommunicationType.QNA_EXERCISE, CommunicationType.QNA_LECTURE, CommunicationType.ANNOUNCEMENT, CommunicationType.COMMUNICATION -> {
                 val firstMessage = messages.first()
                 Person.Builder().setName(firstMessage.authorName).build()
             }
@@ -191,7 +191,7 @@ internal class CommunicationNotificationManagerImpl(
         }
 
         when (communication.type) {
-            CommunicationType.QNA_COURSE, CommunicationType.QNA_EXERCISE, CommunicationType.QNA_LECTURE, CommunicationType.ANNOUNCEMENT -> {
+            CommunicationType.QNA_COURSE, CommunicationType.QNA_EXERCISE, CommunicationType.QNA_LECTURE, CommunicationType.ANNOUNCEMENT, CommunicationType.COMMUNICATION -> {
                 style.isGroupConversation = true
                 style.conversationTitle = when (communication.type) {
                     CommunicationType.QNA_COURSE, CommunicationType.ANNOUNCEMENT -> context.getString(
@@ -213,6 +213,21 @@ internal class CommunicationNotificationManagerImpl(
                         communication.containerTitle,
                         communication.title
                     )
+
+                    CommunicationType.COMMUNICATION -> if (communication.title != null) {
+                        context.getString(
+                            R.string.conversation_title_conversation_thread,
+                            communication.courseTitle,
+                            communication.containerTitle,
+                            communication.title
+                        )
+                    } else {
+                        context.getString(
+                            R.string.conversation_title_conversation,
+                            communication.courseTitle,
+                            communication.containerTitle
+                        )
+                    }
                 }
             }
         }

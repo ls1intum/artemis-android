@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisConte
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.conversationNavGraphBuilderExtension
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.navigateToConversationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisChatList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -47,6 +48,12 @@ fun NavGraphBuilder.conversationDetailScreen(
             conversationId = conversationId,
             onNavigateToSettings = {
                 navController.navigateToConversationSettingsScreen(courseId, conversationId) {}
+            },
+            onClickViewPost = { clientPostId ->
+                navController.navigateToStandalonePostScreen(
+                    clientPostId = clientPostId,
+                    metisContext = MetisContext.Conversation(courseId, conversationId)
+                ) {}
             }
         )
     }
@@ -58,7 +65,8 @@ private fun ConversationScreen(
     courseId: Long,
     conversationId: Long,
     onNavigateBack: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onClickViewPost: (clientPostId: String) -> Unit
 ) {
     val metisContext = remember(courseId, conversationId) {
         MetisContext.Conversation(courseId, conversationId)
@@ -89,7 +97,8 @@ private fun ConversationScreen(
                 .fillMaxSize()
                 .padding(padding),
             viewModel = koinViewModel { parametersOf(metisContext) },
-            listContentPadding = PaddingValues()
-        ) {}
+            listContentPadding = PaddingValues(),
+            onClickViewPost = onClickViewPost
+        )
     }
 }

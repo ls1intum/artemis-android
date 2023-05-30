@@ -36,17 +36,16 @@ import org.koin.core.parameter.parametersOf
 fun NavController.navigateToStandalonePostScreen(
     clientPostId: String,
     metisContext: MetisContext,
-    viewType: ViewType,
     builder: NavOptionsBuilder.() -> Unit
 ) {
     val metisContextAsString = Json.encodeToString(metisContext)
 
-    navigate("metisStandalonePost/$clientPostId&$viewType&$metisContextAsString", builder)
+    navigate("metisStandalonePost/$clientPostId&$metisContextAsString", builder)
 }
 
 fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
     composable(
-        route = "metisStandalonePost/{clientPostId}&{viewType}&{metisContext}",
+        route = "metisStandalonePost/{clientPostId}&{metisContext}",
         arguments = listOf(
             navArgument("clientPostId") {
                 nullable = true
@@ -99,9 +98,6 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
             StandalonePostId.ServerSideId(serverPostId!!)
         }
 
-        val viewTypeString = backStackEntry.arguments?.getString("viewType")
-        val viewType = viewTypeString?.let { ViewType.valueOf(it) } ?: ViewType.POST
-
         val metisContextArg = backStackEntry.arguments?.getString("metisContext")
         val metisContext: MetisContext = if (metisContextArg != null) {
             Json.decodeFromString(metisContextArg)
@@ -121,7 +117,6 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
 
         MetisStandalonePostScreen(
             standalonePostId = postId,
-            viewType = viewType,
             onNavigateUp = onNavigateUp,
             metisContext = metisContext
         )
@@ -135,7 +130,6 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
 private fun MetisStandalonePostScreen(
     standalonePostId: StandalonePostId,
     metisContext: MetisContext,
-    viewType: ViewType,
     onNavigateUp: () -> Unit
 ) {
     val viewModel: MetisThreadViewModel =
@@ -178,15 +172,8 @@ private fun MetisStandalonePostScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                viewModel = viewModel,
-                viewType = viewType
+                viewModel = viewModel
             )
         }
     }
-}
-
-enum class ViewType {
-    REPLIES,
-    WRITE_COMMENT,
-    POST
 }

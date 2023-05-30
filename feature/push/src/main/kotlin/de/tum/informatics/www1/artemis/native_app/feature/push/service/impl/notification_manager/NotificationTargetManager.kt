@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.communicationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CommunicationPostTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CoursePostTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.ExercisePostTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.ExerciseTarget
@@ -64,6 +65,11 @@ internal object NotificationTargetManager {
             is ExercisePostTarget -> {
                 "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/${notificationTarget.exerciseId}/null"
             }
+
+            is CommunicationPostTarget -> {
+                TODO()
+//                "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/${notificationTarget.exerciseId}/null"
+            }
         }
     }
 
@@ -109,6 +115,9 @@ internal object NotificationTargetManager {
 
             CommunicationType.QNA_EXERCISE -> {
                 Json.decodeFromString<ExercisePostTarget>(target)
+            }
+            CommunicationType.COMMUNICATION -> {
+                Json.decodeFromString<CommunicationPostTarget>(target)
             }
         }
     }

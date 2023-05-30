@@ -174,9 +174,9 @@ private fun ChatList(
                 remember(post, hasModerationRights, clientId, onRequestEdit, onRequestDelete) {
                     if (post != null) {
                         getPostActions(
-                            post,
-                            hasModerationRights,
-                            clientId,
+                            post = post,
+                            hasModerationRights = hasModerationRights,
+                            clientId = clientId,
                             onRequestEdit = { onRequestEdit(post) },
                             onRequestDelete = { onRequestDelete(post) },
                             onClickReaction = { id, create ->
