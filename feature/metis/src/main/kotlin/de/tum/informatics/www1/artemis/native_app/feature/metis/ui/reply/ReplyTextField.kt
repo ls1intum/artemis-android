@@ -17,6 +17,7 @@ import androidx.compose.material.LocalContentColor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -28,48 +29,29 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.MarkdownTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ReplyState
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-internal fun ReplyUi(
+internal fun ReplyTextField(
     modifier: Modifier,
-    replyContent: String,
-    updateReplyContent: (String) -> Unit,
-    updateFailureState: (MetisModificationFailure?) -> Unit,
-    createReply: (String) -> Deferred<MetisModificationFailure?>
+    replyMode: ReplyMode,
+    updateFailureState: (MetisModificationFailure?) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-
-    val replyState: ReplyState by remember {
-        val state = mutableStateOf<ReplyState>(ReplyState.HasSentReply)
-
-        state.value = createCanCreateReplyState(
-            coroutineScope = scope,
-            updateReplyState = { state.value = it },
-            updateFailureState = updateFailureState,
-            clearReplyContent = { updateReplyContent("") },
-            createReply = createReply
-        )
-
-        state
-    }
+    val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
 
     Surface(
         modifier = modifier.defaultMinSize(minHeight = 48.dp),
@@ -92,9 +74,8 @@ internal fun ReplyUi(
                     is ReplyState.CanCreate -> {
                         CreateReplyUi(
                             modifier = Modifier.fillMaxWidth(),
-                            onReply = targetReplyState.onCreateReply,
-                            replyContent = replyContent,
-                            updateReplyContent = updateReplyContent
+                            replyMode = replyMode,
+                            onReply = { targetReplyState.onCreateReply() }
                         )
                     }
 
@@ -109,27 +90,12 @@ internal fun ReplyUi(
                     }
 
                     is ReplyState.IsSendingReply -> {
-                        Row(
+                        SendingReplyUi(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .size(30.dp)
-                            )
-
-                            Text(
-                                text = stringResource(id = R.string.create_answer_sending_reply),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            IconButton(onClick = targetReplyState.onCancelSendReply) {
-                                Icon(imageVector = Icons.Default.Cancel, contentDescription = null)
-                            }
-                        }
+                            onCancel = targetReplyState.onCancelSendReply
+                        )
                     }
                 }
             }
@@ -138,42 +104,87 @@ internal fun ReplyUi(
 }
 
 @Composable
+private fun SendingReplyUi(modifier: Modifier, onCancel: () -> Unit) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .size(30.dp)
+        )
+
+        Text(
+            text = stringResource(id = R.string.create_answer_sending_reply),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+
+        IconButton(onClick = onCancel) {
+            Icon(imageVector = Icons.Default.Cancel, contentDescription = null)
+        }
+    }
+}
+
+@Composable
 private fun CreateReplyUi(
     modifier: Modifier,
-    replyContent: String,
-    updateReplyContent: (String) -> Unit,
-    onReply: (String) -> Unit
+    replyMode: ReplyMode,
+    focusRequester: FocusRequester = remember { FocusRequester() },
+    onReply: () -> Unit
 ) {
+    var prevReplyContent by remember { mutableStateOf("") }
     var displayTextField: Boolean by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier) {
-        if (displayTextField) {
-            val focusRequest = remember { FocusRequester() }
+    val currentText by replyMode.currentText
 
+    LaunchedEffect(displayTextField, currentText) {
+        if (!displayTextField && currentText.isNotBlank() && prevReplyContent.isBlank()) {
+            focusRequester.requestFocus()
+            displayTextField = true
+        }
+
+        prevReplyContent = currentText
+    }
+
+    Box(modifier = modifier) {
+        if (displayTextField || currentText.isNotBlank()) {
             MarkdownTextField(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp, horizontal = 8.dp),
-                text = replyContent,
-                onTextChanged = updateReplyContent,
-                focusRequester = focusRequest,
+                text = currentText,
+                onTextChanged = replyMode::onUpdateText,
+                focusRequester = focusRequester,
                 onFocusLost = {
-                    if (displayTextField && replyContent.isEmpty()) {
+                    if (displayTextField && currentText.isEmpty()) {
                         displayTextField = false
                     }
                 },
                 sendButton = {
                     IconButton(
-                        onClick = { onReply(replyContent) },
-                        enabled = replyContent.isNotBlank()
+                        onClick = onReply,
+                        enabled = currentText.isNotBlank()
                     ) {
-                        Icon(imageVector = Icons.Default.Send, contentDescription = null)
+                        Icon(
+                            imageVector = when (replyMode) {
+                                is ReplyMode.EditMessage -> Icons.Default.Edit
+                                is ReplyMode.NewMessage -> Icons.Default.Send
+                            }, contentDescription = null
+                        )
+                    }
+                },
+                topRightButton = {
+                    if (replyMode is ReplyMode.EditMessage) {
+                        IconButton(onClick = replyMode.onCancelEditMessage) {
+                            Icon(imageVector = Icons.Default.Cancel, contentDescription = null)
+                        }
                     }
                 }
             )
 
             LaunchedEffect(key1 = displayTextField) {
-                focusRequest.requestFocus()
+                focusRequester.requestFocus()
             }
         } else {
             Row(
@@ -197,86 +208,54 @@ private fun CreateReplyUi(
                 )
             }
         }
-
     }
 }
 
 /**
- * Factory to not duplicate can create reply state code.
- * @param updateReplyState set the UI reply state state
- * @param updateFailureState set failure state to show dialog if creating reply failed.
- * @param clearReplyContent set the reply content back to an empty string
+ * Cycles through the reply state. When create reply is clicked, switches to sending reply.
+ * If sending the reply was successful, shows has sent reply shortly.
  */
-private fun createCanCreateReplyState(
-    coroutineScope: CoroutineScope,
-    updateReplyState: (ReplyState) -> Unit,
-    updateFailureState: (MetisModificationFailure?) -> Unit,
-    clearReplyContent: () -> Unit,
-    createReply: (String) -> Deferred<MetisModificationFailure?>
-): ReplyState.CanCreate {
-    val reset = {
-        updateReplyState(
-            createCanCreateReplyState(
-                coroutineScope,
-                updateReplyState,
-                updateFailureState,
-                clearReplyContent,
-                createReply
-            )
-        )
+@Composable
+private fun rememberReplyState(
+    replyMode: ReplyMode,
+    updateFailureState: (MetisModificationFailure?) -> Unit
+): ReplyState {
+    var isCreatingReplyJob: Deferred<MetisModificationFailure?>? by remember { mutableStateOf(null) }
+    var hasSentReply by remember { mutableStateOf(false) }
+
+    AwaitDeferredCompletion(job = isCreatingReplyJob) { failure ->
+        if (failure == null) {
+            replyMode.onUpdateText("")
+            hasSentReply = true
+        } else {
+            updateFailureState(failure)
+        }
+
+        isCreatingReplyJob = null
     }
 
-    return ReplyState.CanCreate(
-        onCreateReply = { content ->
-            val job = createReply(content)
+    LaunchedEffect(key1 = hasSentReply) {
+        if (hasSentReply) {
+            delay(1.seconds)
 
-            coroutineScope.launch {
-                val failure = job.await()
+            hasSentReply = false
+        }
+    }
 
-                if (failure == null) {
-                    updateReplyState(ReplyState.HasSentReply)
-                    clearReplyContent()
-
-                    // Show success for 1 seconds. Then allow input of new reply.
-                    delay(1.seconds)
-                    reset()
-                } else {
-                    updateFailureState(failure)
-                    reset()
-                }
+    return remember(isCreatingReplyJob, hasSentReply, replyMode) {
+        when {
+            isCreatingReplyJob != null -> ReplyState.IsSendingReply {
+                isCreatingReplyJob?.cancel()
+                isCreatingReplyJob = null
             }
 
-            updateReplyState(
-                ReplyState.IsSendingReply(
-                    onCancelSendReply = {
-                        job.cancel()
-
-                        updateReplyState(
-                            createCanCreateReplyState(
-                                coroutineScope,
-                                updateReplyState,
-                                updateFailureState,
-                                clearReplyContent,
-                                createReply
-                            )
-                        )
-                    }
-                )
-            )
-
+            hasSentReply -> ReplyState.HasSentReply
+            else -> ReplyState.CanCreate {
+                isCreatingReplyJob = when (replyMode) {
+                    is ReplyMode.EditMessage -> replyMode.onEditMessage()
+                    is ReplyMode.NewMessage -> replyMode.onCreateNewMessage()
+                }
+            }
         }
-    )
-}
-
-@Composable
-@Preview
-private fun ReplyUiPreview() {
-    var replyContent by remember { mutableStateOf("") }
-
-    CreateReplyUi(
-        modifier = Modifier.fillMaxWidth(),
-        onReply = {},
-        replyContent = replyContent,
-        updateReplyContent = { replyContent = it }
-    )
+    }
 }

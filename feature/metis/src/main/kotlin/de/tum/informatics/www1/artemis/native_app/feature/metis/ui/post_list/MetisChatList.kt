@@ -15,10 +15,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,14 +36,15 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisModificationFailureDialog
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.MetisOutdatedBanner
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.PagingStateError
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.getPostActions
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyMode
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.rememberReplyMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisiblePostList
 import kotlinx.coroutines.Deferred
@@ -71,6 +72,13 @@ internal fun MetisChatList(
     var metisModificationTask: Deferred<MetisModificationFailure?>? by remember {
         mutableStateOf(null)
     }
+    var editingPost: Post? by remember { mutableStateOf(null) }
+    val replyMode = rememberReplyMode(
+        editingPost = editingPost,
+        onClearEditingPost = { editingPost = null },
+        onCreatePost = viewModel::createPost,
+        onEditPost = viewModel::editPost
+    )
 
     AwaitDeferredCompletion(job = metisModificationTask) {
         metisFailure = it
@@ -120,7 +128,7 @@ internal fun MetisChatList(
                             clientId = clientId,
                             onClickViewPost = onClickViewPost,
                             hasModerationRights = hasModerationRights,
-                            onRequestEdit = {},
+                            onRequestEdit = { post -> editingPost = post },
                             onRequestDelete = { post ->
                                 metisModificationTask = viewModel.deletePost(post)
                             },
@@ -133,14 +141,10 @@ internal fun MetisChatList(
             }
         }
 
-        var content by rememberSaveable { mutableStateOf("") }
-
-        ReplyUi(
+        ReplyTextField(
             modifier = Modifier.fillMaxWidth(),
-            replyContent = content,
-            updateReplyContent = { content = it },
-            updateFailureState = { metisFailure = it },
-            createReply = viewModel::createPost
+            replyMode = replyMode,
+            updateFailureState = { metisFailure = it }
         )
     }
 
@@ -169,18 +173,19 @@ private fun ChatList(
         state = state
     ) {
         items(posts, key = { it.clientPostId }) { post ->
-            val postActions = remember(post, hasModerationRights, clientId) {
-                if (post != null) {
-                    getPostActions(
-                        post,
-                        hasModerationRights,
-                        clientId,
-                        onRequestEdit = { onRequestEdit(post) },
-                        onRequestDelete = { onRequestDelete(post) },
-                        onRequestReactWithEmoji = {}
-                    )
-                } else PostActions()
-            }
+            val postActions =
+                remember(post, hasModerationRights, clientId, onRequestEdit, onRequestDelete) {
+                    if (post != null) {
+                        getPostActions(
+                            post,
+                            hasModerationRights,
+                            clientId,
+                            onRequestEdit = { onRequestEdit(post) },
+                            onRequestDelete = { onRequestDelete(post) },
+                            onRequestReactWithEmoji = {}
+                        )
+                    } else PostActions()
+                }
 
             PostWithBottomSheet(
                 modifier = Modifier.fillMaxWidth(),

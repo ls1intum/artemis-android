@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto
 
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -12,7 +13,7 @@ data class StandalonePost(
     override val author: User? = null,
     override val authorRole: UserRole? = null,
     override val creationDate: Instant? = null,
-    override val content: String? = null,
+    override val content: String = "",
     override val reactions: List<Reaction>? = null,
     override val title: String? = null,
     val visibleForStudents: Boolean = true,
@@ -24,6 +25,19 @@ data class StandalonePost(
     val displayPriority: DisplayPriority? = null,
     override val resolved: Boolean? = null
 ) : BasePost(), IStandalonePost {
+
+    constructor(post: Post, conversation: Conversation) : this(
+        id = post.serverPostId,
+        author = User(
+            id = post.authorId
+        ),
+        authorRole = post.authorRole,
+        content = post.content,
+        conversation = conversation,
+        creationDate = post.creationDate,
+        title = post.title,
+        resolved = post.resolved
+    )
 
     @Transient
     override val authorId: Long? = author?.id

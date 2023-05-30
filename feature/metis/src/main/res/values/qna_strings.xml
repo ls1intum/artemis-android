@@ -46,6 +46,7 @@
     <string name="metis_modification_failure_dialog_message_delete_reaction">Could not delete reaction.</string>
     <string name="metis_modification_failure_dialog_message_create_post">Could not create post.</string>
     <string name="metis_modification_failure_dialog_message_delete_post">Could not delete post.</string>
+    <string name="metis_modification_failure_dialog_message_update_post">Could not update post.</string>
 
     <string name="standalone_post_loading">Loading post…</string>
     <string name="standalone_post_failure">Something went wrong while loading the post.</string>

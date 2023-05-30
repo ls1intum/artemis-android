@@ -17,7 +17,7 @@ interface MetisModificationService {
         authToken: String
     ): NetworkResponse<StandalonePost>
 
-    suspend fun updatePost(
+    suspend fun updateStandalonePost(
         context: MetisContext,
         post: StandalonePost,
         serverUrl: String,

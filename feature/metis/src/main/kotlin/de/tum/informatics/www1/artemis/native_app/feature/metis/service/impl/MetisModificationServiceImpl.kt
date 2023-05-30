@@ -9,6 +9,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.Reacti
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IAnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IStandalonePost
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.post
@@ -71,7 +73,7 @@ internal class MetisModificationServiceImpl(
         }
     }
 
-    override suspend fun updatePost(
+    override suspend fun updateStandalonePost(
         context: MetisContext,
         post: StandalonePost,
         serverUrl: String,
@@ -88,6 +90,7 @@ internal class MetisModificationServiceImpl(
                     appendPathSegments(post.id.toString())
                 }
 
+                contentType(ContentType.Application.Json)
                 setBody(post)
                 cookieAuth(authToken)
             }.body()
@@ -111,6 +114,7 @@ internal class MetisModificationServiceImpl(
                     appendPathSegments(post.id.toString())
                 }
 
+                contentType(ContentType.Application.Json)
                 setBody(post)
                 cookieAuth(authToken)
             }.body()
@@ -199,7 +203,11 @@ internal class MetisModificationServiceImpl(
             ktorProvider.ktorClient.delete(serverUrl) {
                 url {
                     appendPathSegments(RESOURCE_PATH_SEGMENTS)
-                    appendPathSegments(context.courseId.toString(), identifier, post.postId.toString())
+                    appendPathSegments(
+                        context.courseId.toString(),
+                        identifier,
+                        post.postId.toString()
+                    )
                 }
 
                 cookieAuth(authToken)

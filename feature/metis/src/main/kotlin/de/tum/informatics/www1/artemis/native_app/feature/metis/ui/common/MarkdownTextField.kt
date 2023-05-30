@@ -1,8 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +35,7 @@ internal fun MarkdownTextField(
     text: String,
     focusRequester: FocusRequester = remember { FocusRequester() },
     sendButton: @Composable () -> Unit = {},
+    topRightButton: @Composable RowScope.() -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (String) -> Unit
 ) {
@@ -40,7 +43,10 @@ internal fun MarkdownTextField(
     var hadFocus by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
-        Row(modifier = Modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             InputChip(
                 selected = selectedType == ViewType.TEXT,
                 onClick = { selectedType = ViewType.TEXT },
@@ -57,6 +63,10 @@ internal fun MarkdownTextField(
                     Text(text = stringResource(id = R.string.markdown_textfield_tab_preview))
                 }
             )
+
+            Box(modifier = Modifier.weight(1f))
+
+            topRightButton()
         }
 
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

@@ -12,9 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
@@ -25,18 +23,14 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificatio
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.*
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.MarkdownTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.getPostActions
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyMode
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleStandalonePostDetails
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Displays a single post with its replies.
@@ -88,19 +82,19 @@ internal fun MetisThreadUi(
                     ) { metisFailure = it }
                 }
 
-                var replyContent: String by rememberSaveable {
-                    mutableStateOf("")
+                var replyMode: ReplyMode by remember {
+                    mutableStateOf(
+                        ReplyMode.NewMessage(onCreateNewMessage = viewModel::createReply)
+                    )
                 }
 
                 AnimatedVisibility(visible = postDataState.isSuccess) {
-                    ReplyUi(
+                    ReplyTextField(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
-                        replyContent = replyContent,
-                        updateReplyContent = { replyContent = it },
-                        updateFailureState = { metisFailure = it },
-                        createReply = viewModel::createReply
+                        replyMode = replyMode,
+                        updateFailureState = { metisFailure = it }
                     )
                 }
             }

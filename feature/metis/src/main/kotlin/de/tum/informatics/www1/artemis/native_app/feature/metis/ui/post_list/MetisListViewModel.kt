@@ -18,6 +18,7 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketP
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService.StandalonePostsContext
@@ -46,7 +47,7 @@ internal class MetisListViewModel(
     private val metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
     private val metisContextManager: MetisContextManager,
-    metisModificationService: MetisModificationService,
+    private val metisModificationService: MetisModificationService,
     private val accountService: AccountService,
     websocketProvider: WebsocketProvider,
     serverDataService: ServerDataService,
@@ -166,12 +167,8 @@ internal class MetisListViewModel(
         return viewModelScope.async {
             if (metisContext !is MetisContext.Conversation) return@async MetisModificationFailure.CREATE_POST
 
-            val conversation = conversationService.getConversation(
-                metisContext.courseId,
-                metisContext.conversationId,
-                accountService.authToken.first(),
-                serverConfigurationService.serverUrl.first()
-            ).orNull() ?: return@async MetisModificationFailure.CREATE_POST
+            val conversation =
+                loadConversation(metisContext) ?: return@async MetisModificationFailure.CREATE_POST
 
             val post = StandalonePost(
                 id = null,
@@ -184,6 +181,28 @@ internal class MetisListViewModel(
             )
 
             createStandalonePostImpl(post)
+        }
+    }
+
+    fun editPost(post: Post, newText: String): Deferred<MetisModificationFailure?> {
+        return viewModelScope.async {
+            if (metisContext !is MetisContext.Conversation) return@async MetisModificationFailure.UPDATE_POST
+
+            val conversation =
+                loadConversation(metisContext) ?: return@async MetisModificationFailure.UPDATE_POST
+
+            val newPost = StandalonePost(
+                post = post.copy(content = newText),
+                conversation = conversation
+            )
+
+            metisModificationService.updateStandalonePost(
+                context = metisContext,
+                post = newPost,
+                serverUrl = serverConfigurationService.serverUrl.first(),
+                authToken = accountService.authToken.first()
+            )
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
         }
     }
 
@@ -208,4 +227,12 @@ internal class MetisListViewModel(
     }
 
     override suspend fun getMetisContext(): MetisContext = metisContext
+
+    private suspend fun loadConversation(metisContext: MetisContext.Conversation) =
+        conversationService.getConversation(
+            metisContext.courseId,
+            metisContext.conversationId,
+            accountService.authToken.first(),
+            serverConfigurationService.serverUrl.first()
+        ).orNull()
 }
