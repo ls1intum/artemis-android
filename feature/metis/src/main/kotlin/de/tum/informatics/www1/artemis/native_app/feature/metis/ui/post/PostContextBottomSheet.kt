@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -22,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -38,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
 import androidx.core.view.ViewCompat
 import androidx.emoji2.emojipicker.EmojiPickerView
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
@@ -48,7 +52,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.LocalEmojiPro
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.getUnicodeForEmojiId
 
 private val predefinedEmojiIds = listOf("heavy_plus_sign", "rocket", "tada", "recycle")
-private val EmojiPickerHeight = 400.dp
 
 @Composable
 internal fun PostContextBottomSheet(
@@ -59,61 +62,71 @@ internal fun PostContextBottomSheet(
 ) {
     var displayAllEmojis by remember { mutableStateOf(false) }
 
-    ModalBottomSheet(
-        modifier = Modifier,
-        sheetState = rememberModalBottomSheetState(),
-        onDismissRequest = onDismissRequest
-    ) {
-        val actionButtonModifier = Modifier.fillMaxWidth()
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+    if (!displayAllEmojis) {
+        ModalBottomSheet(
+            modifier = Modifier,
+            sheetState = rememberModalBottomSheetState(),
+            onDismissRequest = onDismissRequest
         ) {
-            EmojiReactionBar(
+            val actionButtonModifier = Modifier.fillMaxWidth()
+
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                presentReactions = post.reactions.orEmpty(),
-                clientId = clientId,
-                onReactWithEmoji = {
-                    onDismissRequest()
-                    postActions.onClickReaction(it, true)
-                },
-                onRequestViewMoreEmojis = {
-                    displayAllEmojis = true
+                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+            ) {
+                EmojiReactionBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    presentReactions = post.reactions.orEmpty(),
+                    clientId = clientId,
+                    onReactWithEmoji = {
+                        onDismissRequest()
+                        postActions.onClickReaction(it, true)
+                    },
+                    onRequestViewMoreEmojis = {
+                        displayAllEmojis = true
+                    }
+                )
+
+                if (postActions.canPerformAnyAction) {
+                    Divider()
                 }
-            )
 
-            if (postActions.canPerformAnyAction) {
-                Divider()
-            }
+                postActions.requestEditPost?.let {
+                    ActionButton(
+                        modifier = actionButtonModifier,
+                        icon = Icons.Default.Edit,
+                        text = stringResource(id = R.string.post_edit),
+                        onClick = {
+                            onDismissRequest()
+                            it()
+                        }
+                    )
+                }
 
-            postActions.requestEditPost?.let {
-                ActionButton(
-                    modifier = actionButtonModifier,
-                    icon = Icons.Default.Edit,
-                    text = stringResource(id = R.string.post_edit),
-                    onClick = {
-                        onDismissRequest()
-                        it()
-                    }
-                )
-            }
-
-            postActions.requestDeletePost?.let {
-                ActionButton(
-                    modifier = actionButtonModifier,
-                    icon = Icons.Default.Delete,
-                    text = stringResource(id = R.string.post_delete),
-                    onClick = {
-                        onDismissRequest()
-                        it()
-                    }
-                )
+                postActions.requestDeletePost?.let {
+                    ActionButton(
+                        modifier = actionButtonModifier,
+                        icon = Icons.Default.Delete,
+                        text = stringResource(id = R.string.post_delete),
+                        onClick = {
+                            onDismissRequest()
+                            it()
+                        }
+                    )
+                }
             }
         }
+    } else {
+        EmojiDialog(
+            onDismissRequest = onDismissRequest,
+            onSelectEmoji = {
+                onDismissRequest()
+                postActions.onClickReaction(it, true)
+            }
+        )
     }
 }
 
@@ -185,6 +198,53 @@ private fun EmojiButton(
 }
 
 @Composable
+private fun ActionButton(
+    modifier: Modifier,
+    icon: ImageVector,
+    text: String,
+    onClick: () -> Unit
+) {
+    TextButton(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null
+        )
+
+        Box(modifier = Modifier.width(16.dp))
+
+        Text(
+            modifier = Modifier.weight(1f),
+            text = text
+        )
+    }
+}
+
+@Composable
+private fun EmojiDialog(
+    onDismissRequest: () -> Unit,
+    onSelectEmoji: (emojiId: String) -> Unit
+) {
+    Dialog(onDismissRequest = onDismissRequest) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(5))
+        ) {
+            EmojiPicker(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.8f)
+                    .padding(horizontal = 8.dp),
+                onReactWithEmoji = onSelectEmoji
+            )
+        }
+    }
+}
+
+@Composable
 private fun EmojiPicker(
     modifier: Modifier,
     onReactWithEmoji: (emojiId: String) -> Unit
@@ -213,29 +273,4 @@ private fun EmojiPicker(
             }
         }
     )
-}
-
-@Composable
-private fun ActionButton(
-    modifier: Modifier,
-    icon: ImageVector,
-    text: String,
-    onClick: () -> Unit
-) {
-    TextButton(
-        modifier = modifier,
-        onClick = onClick
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null
-        )
-
-        Box(modifier = Modifier.width(16.dp))
-
-        Text(
-            modifier = Modifier.weight(1f),
-            text = text
-        )
-    }
 }

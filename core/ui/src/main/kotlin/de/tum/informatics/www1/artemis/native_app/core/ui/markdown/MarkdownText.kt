@@ -87,6 +87,7 @@ fun MarkdownText(
                 textAlign = textAlign,
                 viewId = viewId,
                 onClick = onClick,
+                onLongClick = onLongClick
             )
         },
         update = { textView ->

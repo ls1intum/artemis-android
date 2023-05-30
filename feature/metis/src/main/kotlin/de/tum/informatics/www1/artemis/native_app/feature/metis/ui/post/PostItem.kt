@@ -248,28 +248,6 @@ private fun StandalonePostFooter(
 private data class ReactionData(val reactionCount: Int, val hasClientReacted: Boolean)
 
 @Composable
-private fun EmojiDialog(
-    onDismissRequest: () -> Unit,
-    onSelectEmoji: (emojiId: String) -> Unit
-) {
-    Dialog(onDismissRequest = onDismissRequest) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(5))
-        ) {
-            EmojiPicker(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.8f)
-                    .padding(horizontal = 8.dp),
-                onSelectEmoji = onSelectEmoji
-            )
-        }
-    }
-}
-
-@Composable
 private fun AnimatedCounter(currentCount: Int) {
     AnimatedContent(
         targetState = currentCount,
