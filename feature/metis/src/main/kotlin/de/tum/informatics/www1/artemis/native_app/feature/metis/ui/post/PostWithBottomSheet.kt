@@ -18,6 +18,7 @@ internal fun PostWithBottomSheet(
     postItemViewType: PostItemViewType,
     postActions: PostActions,
     clientId: Long,
+    displayHeader: Boolean,
     onClick: () -> Unit
 ) {
     var displayBottomSheet by remember(post, postItemViewType) { mutableStateOf(false) }
@@ -27,6 +28,7 @@ internal fun PostWithBottomSheet(
         post = post,
         postItemViewType = postItemViewType,
         clientId = clientId,
+        displayHeader = displayHeader,
         onClickOnReaction = postActions.onClickReaction,
         onClick = onClick
     ) {

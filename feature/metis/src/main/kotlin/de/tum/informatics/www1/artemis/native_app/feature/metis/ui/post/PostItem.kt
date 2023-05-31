@@ -10,6 +10,7 @@ import androidx.compose.animation.with
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -69,6 +70,7 @@ internal fun PostItem(
     post: IBasePost?,
     postItemViewType: PostItemViewType,
     clientId: Long,
+    displayHeader: Boolean,
     onClickOnReaction: (emojiId: String, create: Boolean) -> Unit,
     onClick: () -> Unit,
     onLongClick: () -> Unit
@@ -94,7 +96,8 @@ internal fun PostItem(
             authorRole = post?.authorRole,
             authorName = post?.authorName,
             creationDate = post?.creationDate,
-            expanded = isExpanded
+            expanded = isExpanded,
+            displayHeader = displayHeader
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 MarkdownText(
@@ -133,6 +136,7 @@ private fun PostHeadline(
     authorName: String?,
     creationDate: Instant?,
     expanded: Boolean = false,
+    displayHeader: Boolean = true,
     content: @Composable () -> Unit
 ) {
     if (expanded) {
@@ -159,16 +163,18 @@ private fun PostHeadline(
             modifier = modifier,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HeadlineAuthorIcon(authorRole, isPlaceholder)
+            HeadlineAuthorIcon(authorRole, isPlaceholder, displayIcon = displayHeader)
 
             Column(modifier = Modifier.fillMaxWidth()) {
-                HeadlineAuthorInfo(
-                    modifier = Modifier.fillMaxWidth(),
-                    isPlaceholder = isPlaceholder,
-                    authorName = authorName,
-                    creationDate = creationDate,
-                    expanded = false
-                )
+                if (displayHeader) {
+                    HeadlineAuthorInfo(
+                        modifier = Modifier.fillMaxWidth(),
+                        isPlaceholder = isPlaceholder,
+                        authorName = authorName,
+                        creationDate = creationDate,
+                        expanded = false
+                    )
+                }
 
                 content()
             }
@@ -231,22 +237,28 @@ private fun HeadlineAuthorInfo(
 @Composable
 private fun HeadlineAuthorIcon(
     authorRole: UserRole?,
-    isPlaceholder: Boolean
+    isPlaceholder: Boolean,
+    displayIcon: Boolean = true
 ) {
-    val icon = when (authorRole) {
-        UserRole.INSTRUCTOR -> Icons.Default.School
-        UserRole.TUTOR -> Icons.Default.SupervisorAccount
-        UserRole.USER -> Icons.Default.Person
-        null -> Icons.Default.Person
+    if (displayIcon) {
+        val icon = when (authorRole) {
+            UserRole.INSTRUCTOR -> Icons.Default.School
+            UserRole.TUTOR -> Icons.Default.SupervisorAccount
+            UserRole.USER -> Icons.Default.Person
+            null -> Icons.Default.Person
+        }
+
+        Icon(
+            modifier = Modifier
+                .size(30.dp)
+                .placeholder(visible = isPlaceholder),
+            imageVector = icon,
+            contentDescription = null
+        )
+    } else {
+        Box(modifier = Modifier.size(30.dp))
     }
 
-    Icon(
-        modifier = Modifier
-            .size(30.dp)
-            .placeholder(visible = isPlaceholder),
-        imageVector = icon,
-        contentDescription = null
-    )
 }
 
 /**

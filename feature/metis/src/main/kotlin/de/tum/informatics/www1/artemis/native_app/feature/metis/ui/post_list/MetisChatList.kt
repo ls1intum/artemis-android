@@ -16,9 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -27,26 +25,23 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
-import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
+import androidx.paging.compose.itemsIndexed
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisModificationFailureDialog
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.MetisOutdatedBanner
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.PagingStateError
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.DisplayHeaderOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.getPostActions
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.shouldDisplayHeader
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyTextField
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.rememberReplyMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisiblePostList
-import kotlinx.coroutines.Deferred
 
 @Composable
 internal fun MetisChatList(
@@ -157,7 +152,7 @@ private fun ChatList(
         state = state,
         reverseLayout = true
     ) {
-        items(posts, key = { it.clientPostId }) { post ->
+        itemsIndexed(posts, key = { _, post -> post.clientPostId }) { index, post ->
             val postActions =
                 remember(post, hasModerationRights, clientId, onRequestEdit, onRequestDelete) {
                     if (post != null) {
@@ -180,6 +175,13 @@ private fun ChatList(
                 clientId = clientId,
                 postItemViewType = remember(post?.answers) { PostItemViewType.ChatListItem(post?.answers.orEmpty()) },
                 postActions = postActions,
+                displayHeader = shouldDisplayHeader(
+                    index = index,
+                    post = post,
+                    postCount = posts.itemCount,
+                    order = DisplayHeaderOrder.REVERSED,
+                    getPost = posts::peek
+                ),
                 onClick = {
                     if (post != null) {
                         onClickViewPost(post.clientPostId)

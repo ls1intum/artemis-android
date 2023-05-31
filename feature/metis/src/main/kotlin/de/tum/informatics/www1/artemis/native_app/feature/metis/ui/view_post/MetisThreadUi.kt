@@ -3,7 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,10 +24,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.*
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.isReplyEnabled
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.DisplayHeaderOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.getPostActions
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.shouldDisplayHeader
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
@@ -167,6 +169,7 @@ private fun PostAndRepliesList(
                         post = post,
                         postItemViewType = PostItemViewType.ThreadContextPostItem,
                         postActions = postActions,
+                        displayHeader = true,
                         clientId = clientId,
                         onClick = {}
                     )
@@ -177,7 +180,7 @@ private fun PostAndRepliesList(
                 }
             }
 
-            items(post.orderedAnswerPostings, key = { it.postId }) { answerPost ->
+            itemsIndexed(post.orderedAnswerPostings, key = { _, post -> post.postId }) { index, answerPost ->
                 val postActions = rememberPostActions(answerPost)
 
                 PostWithBottomSheet(
@@ -186,6 +189,13 @@ private fun PostAndRepliesList(
                     postActions = postActions,
                     postItemViewType = PostItemViewType.ThreadAnswerItem,
                     clientId = clientId,
+                    displayHeader = shouldDisplayHeader(
+                        index = index,
+                        post = answerPost,
+                        postCount = post.orderedAnswerPostings.size,
+                        order = DisplayHeaderOrder.REGULAR,
+                        getPost = post.orderedAnswerPostings::get
+                    ),
                     onClick = {}
                 )
             }
