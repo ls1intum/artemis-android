@@ -53,15 +53,16 @@ internal fun MetisChatList(
     viewModel: MetisListViewModel,
     listContentPadding: PaddingValues,
     state: LazyListState = rememberLazyListState(),
+    isReplyEnabled: Boolean = true,
     onClickViewPost: (clientPostId: String) -> Unit
 ) {
     ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
 
     val posts: LazyPagingItems<Post> = viewModel.postPagingData.collectAsLazyPagingItems()
-    val isDataOutdated = viewModel.isDataOutdated.collectAsState(initial = false).value
+    val isDataOutdated by viewModel.isDataOutdated.collectAsState(initial = false)
 
-    val clientId: Long = viewModel.clientId.collectAsState().value.orElse(0L)
-    val hasModerationRights = viewModel.hasModerationRights.collectAsState().value.orElse(false)
+    val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
+    val hasModerationRights by viewModel.hasModerationRights.collectAsState()
 
     MetisReplyHandler(
         onCreatePost = viewModel::createPost,
@@ -122,11 +123,13 @@ internal fun MetisChatList(
                 }
             }
 
-            ReplyTextField(
-                modifier = Modifier.fillMaxWidth(),
-                replyMode = replyMode,
-                updateFailureState = updateFailureStateDelegate
-            )
+            if (isReplyEnabled) {
+                ReplyTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    replyMode = replyMode,
+                    updateFailureState = updateFailureStateDelegate
+                )
+            }
         }
     }
 }
@@ -148,7 +151,8 @@ private fun ChatList(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = listContentPadding,
-        state = state
+        state = state,
+        reverseLayout = true
     ) {
         items(posts, key = { it.clientPostId }) { post ->
             val postActions =
@@ -171,7 +175,7 @@ private fun ChatList(
                 modifier = Modifier.fillMaxWidth(),
                 post = post,
                 clientId = clientId,
-                postItemViewType = PostItemViewType.ChatListItem(post?.answers.orEmpty()),
+                postItemViewType = remember(post?.answers) { PostItemViewType.ChatListItem(post?.answers.orEmpty()) },
                 postActions = postActions,
                 onClick = {
                     if (post != null) {

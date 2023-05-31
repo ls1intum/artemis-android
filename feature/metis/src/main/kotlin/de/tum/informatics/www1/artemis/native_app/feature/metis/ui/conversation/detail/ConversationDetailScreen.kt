@@ -12,15 +12,26 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
+import com.google.accompanist.placeholder.material.placeholder
+import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.conversationNavGraphBuilderExtension
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.navigateToConversationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisChatList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -72,12 +83,25 @@ private fun ConversationScreen(
         MetisContext.Conversation(courseId, conversationId)
     }
 
+    val viewModel = koinViewModel<MetisListViewModel> { parametersOf(metisContext) }
+
+    val conversationDataState by viewModel.conversation.collectAsState()
+
     Scaffold(
         modifier = modifier,
         topBar = {
+            val title by remember(conversationDataState) {
+                derivedStateOf {
+                    conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
+                }
+            }
+
             TopAppBar(
                 title = {
-                    Text("Conversation")
+                    Text(
+                        modifier = Modifier.placeholder(visible = !conversationDataState.isSuccess),
+                        text = title
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -92,13 +116,16 @@ private fun ConversationScreen(
             )
         }
     ) { padding ->
+        val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
+
         MetisChatList(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            viewModel = koinViewModel { parametersOf(metisContext) },
+            viewModel = viewModel,
             listContentPadding = PaddingValues(),
-            onClickViewPost = onClickViewPost
+            onClickViewPost = onClickViewPost,
+            isReplyEnabled = isReplyEnabled
         )
     }
 }

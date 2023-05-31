@@ -114,7 +114,12 @@ internal fun ConversationSettingsBody(
         isDirty = isDirty,
         savingJob = savingJob,
         viewModel = viewModel,
-        canSave = canSave
+        canSave = canSave,
+        onRequestSaveChanges = {
+            if (savingJob == null) {
+                savingJob = viewModel.saveChanges()
+            }
+        }
     )
 
     BasicDataStateUi(
@@ -157,7 +162,8 @@ internal fun ConversationSettingsBody(
                     userActionData = PerformActionOnUserData(it, UserAction.GIVE_MODERATION_RIGHTS)
                 },
                 onRequestRevokeModerationRights = {
-                    userActionData = PerformActionOnUserData(it, UserAction.REVOKE_MODERATION_RIGHTS)
+                    userActionData =
+                        PerformActionOnUserData(it, UserAction.REVOKE_MODERATION_RIGHTS)
                 }
             )
 
@@ -208,9 +214,9 @@ private fun rememberEditableConversationInfo(
     isDirty: Boolean,
     savingJob: Deferred<Boolean>?,
     viewModel: ConversationSettingsViewModel,
-    canSave: Boolean
+    canSave: Boolean,
+    onRequestSaveChanges: () -> Unit
 ): EditableConversationInfo {
-    var savingJob1 = savingJob
     return remember(
         name,
         description,
@@ -220,7 +226,8 @@ private fun rememberEditableConversationInfo(
         isTopicIllegal,
         canEdit,
         isDirty,
-        savingJob1
+        savingJob,
+        onRequestSaveChanges
     ) {
         EditableConversationInfo(
             name = name,
@@ -237,12 +244,8 @@ private fun rememberEditableConversationInfo(
             canEditTopic = canEdit,
             canSave = canSave,
             isDirty = isDirty,
-            isSavingChanges = savingJob1 != null,
-            onRequestSaveChanges = {
-                if (savingJob1 == null) {
-                    savingJob1 = viewModel.saveChanges()
-                }
-            }
+            isSavingChanges = savingJob != null,
+            onRequestSaveChanges = onRequestSaveChanges
         )
     }
 }

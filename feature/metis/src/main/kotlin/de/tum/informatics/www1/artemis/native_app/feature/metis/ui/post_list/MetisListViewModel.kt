@@ -3,8 +3,11 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -165,7 +168,8 @@ internal class MetisListViewModel(
 
     fun createPost(postText: String): Deferred<MetisModificationFailure?> {
         return viewModelScope.async {
-            val conversation = loadConversation() ?: return@async MetisModificationFailure.CREATE_POST
+            val conversation =
+                loadConversation() ?: return@async MetisModificationFailure.CREATE_POST
 
             val post = StandalonePost(
                 id = null,

@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
@@ -64,6 +65,10 @@ abstract class MetisViewModel(
         }
     }
         .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
+
+    val clientIdOrDefault: StateFlow<Long> = clientId
+        .map { it.orElse(0L) }
+        .stateIn(viewModelScope, SharingStarted.Lazily, 0L)
 
     /**
      * Handles a reaction click. If the client has already reacted, it deletes the reaction.
@@ -171,7 +176,8 @@ abstract class MetisViewModel(
 
     fun editPost(post: Post, newText: String): Deferred<MetisModificationFailure?> {
         return viewModelScope.async {
-            val conversation = loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
+            val conversation =
+                loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
 
             val newPost = StandalonePost(
                 post = post.copy(content = newText),
@@ -188,9 +194,14 @@ abstract class MetisViewModel(
         }
     }
 
-    fun editAnswerPost(parentPost: Post, post: AnswerPostDb, newText: String): Deferred<MetisModificationFailure?> {
+    fun editAnswerPost(
+        parentPost: Post,
+        post: AnswerPostDb,
+        newText: String
+    ): Deferred<MetisModificationFailure?> {
         return viewModelScope.async {
-            val conversation = loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
+            val conversation =
+                loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
 
             val serializedParentPost = StandalonePost(parentPost, conversation)
             val newPost = AnswerPost(post, serializedParentPost).copy(content = newText)

@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.hasModerationRights
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
@@ -50,7 +52,7 @@ abstract class MetisContentViewModel(
     conversationService
 ) {
 
-    val hasModerationRights: StateFlow<DataState<Boolean>> = when (metisContext) {
+    val hasModerationRights: StateFlow<Boolean> = when (metisContext) {
         is MetisContext.Conversation -> {
             flatMapLatest(
                 serverConfigurationService.serverUrl,
@@ -67,12 +69,13 @@ abstract class MetisContentViewModel(
                         )
                         .bind { it.hasModerationRights }
                 }
+                    .map { it.orElse(false) }
             }
         }
 
-        else -> flowOf(DataState.Success(false))
+        else -> flowOf(false)
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     /**
      * Emits true if the data may be outdated. Listens to the connection state of the websocket
@@ -100,6 +103,26 @@ abstract class MetisContentViewModel(
             }
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val conversation: StateFlow<DataState<Conversation>> = flatMapLatest(
+        serverConfigurationService.serverUrl,
+        accountService.authToken,
+        onRequestReload.onStart { emit(Unit) }
+    ) { serverUrl, authToken, _ ->
+        when (metisContext) {
+            is MetisContext.Conversation -> retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                conversationService.getConversation(
+                    courseId = metisContext.courseId,
+                    conversationId = metisContext.conversationId,
+                    authToken = authToken,
+                    serverUrl = serverUrl
+                )
+            }
+
+            else -> flowOf(DataState.Failure(RuntimeException("Not a conversation")))
+        }
+    }
+        .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     /**
      * Emits to onRequestReload. If the websocket is currently not connected, requests a reconnect to the websocket

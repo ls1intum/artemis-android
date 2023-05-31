@@ -22,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.*
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
@@ -41,9 +42,9 @@ internal fun MetisThreadUi(
     viewModel: MetisThreadViewModel
 ) {
     val postDataState: DataState<Post> by viewModel.post.collectAsState()
-    val clientId: Long = viewModel.clientId.collectAsState().value.orElse(0L)
+    val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
 
-    val hasModerationRights = viewModel.hasModerationRights.collectAsState().value.orElse(false)
+    val hasModerationRights by viewModel.hasModerationRights.collectAsState()
 
     postDataState.bind { it.serverPostId }.orNull()?.let { serverSidePostId ->
         ReportVisibleMetisContext(
@@ -56,6 +57,8 @@ internal fun MetisThreadUi(
         )
     }
 
+    val conversationDataState by viewModel.conversation.collectAsState()
+    val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
     ProvideEmojis {
         MetisReplyHandler(
@@ -101,7 +104,7 @@ internal fun MetisThreadUi(
                         )
                     }
 
-                    AnimatedVisibility(visible = postDataState.isSuccess) {
+                    AnimatedVisibility(visible = postDataState.isSuccess && isReplyEnabled) {
                         ReplyTextField(
                             modifier = Modifier
                                 .fillMaxWidth()

@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.content
 
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableTitle
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
@@ -27,4 +28,11 @@ val Conversation.hasModerationRights: Boolean
         is ChannelChat -> isChannelModerator
         is GroupChat -> isCreator
         is OneToOneChat -> false
+    }
+
+val Conversation.humanReadableName: String
+    get() = when(this) {
+        is ChannelChat -> name
+        is GroupChat -> humanReadableTitle
+        is OneToOneChat -> humanReadableTitle
     }

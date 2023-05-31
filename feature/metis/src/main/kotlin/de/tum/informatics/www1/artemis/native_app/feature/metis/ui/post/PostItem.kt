@@ -57,6 +57,9 @@ sealed class PostItemViewType {
     object ThreadAnswerItem : PostItemViewType()
 }
 
+private const val PlaceholderContent =
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+
 /**
  * Displays a post item or a placeholder for it.
  */
@@ -95,7 +98,11 @@ internal fun PostItem(
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 MarkdownText(
-                    markdown = post?.content ?: "W".repeat(40),
+                    markdown = remember(post?.content, isPlaceholder) {
+                        if (isPlaceholder) {
+                            PlaceholderContent
+                        } else post?.content.orEmpty()
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .placeholder(visible = isPlaceholder),
@@ -109,7 +116,7 @@ internal fun PostItem(
                     modifier = Modifier.fillMaxWidth(),
                     isPlaceholder = isPlaceholder,
                     clientId = clientId,
-                    reactions = post?.reactions.orEmpty(),
+                    reactions = remember(post?.reactions) { post?.reactions.orEmpty() },
                     postItemViewType = postItemViewType,
                     onClickReaction = onClickOnReaction
                 )
@@ -141,7 +148,7 @@ private fun PostHeadline(
                     isPlaceholder = isPlaceholder,
                     authorName = authorName,
                     creationDate = creationDate,
-                    expanded = expanded
+                    expanded = true
                 )
             }
 
@@ -160,7 +167,7 @@ private fun PostHeadline(
                     isPlaceholder = isPlaceholder,
                     authorName = authorName,
                     creationDate = creationDate,
-                    expanded = expanded
+                    expanded = false
                 )
 
                 content()
@@ -184,18 +191,20 @@ private fun HeadlineAuthorInfo(
     val authorNameContent: @Composable () -> Unit = {
         Text(
             modifier = Modifier.placeholder(visible = isPlaceholder),
-            text = authorName ?: "Placeholder",
+            text = remember(authorName) { authorName ?: "Placeholder" },
             maxLines = 1,
             style = MaterialTheme.typography.titleSmall
         )
     }
 
     val creationDateContent: @Composable () -> Unit = {
+        val relativeTime = getRelativeTime(to = relativeTimeTo)
+
         Text(
             modifier = Modifier
                 .fillMaxWidth()
                 .placeholder(visible = isPlaceholder),
-            text = getRelativeTime(to = relativeTimeTo).toString(),
+            text = remember(relativeTime) { relativeTime.toString() },
             style = MaterialTheme.typography.bodySmall
         )
     }
