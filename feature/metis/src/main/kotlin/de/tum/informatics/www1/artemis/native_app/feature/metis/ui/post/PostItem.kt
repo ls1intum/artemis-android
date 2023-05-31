@@ -52,7 +52,7 @@ sealed class PostItemViewType {
         val answerPosts: List<AnswerPostDb>
     ) : PostItemViewType()
 
-    object ThreadItem : PostItemViewType()
+    object ThreadContextPostItem : PostItemViewType()
 
     object ThreadAnswerItem : PostItemViewType()
 }
@@ -71,6 +71,10 @@ internal fun PostItem(
     onLongClick: () -> Unit
 ) {
     val isPlaceholder = post == null
+    val isExpanded = when (postItemViewType) {
+        PostItemViewType.ThreadContextPostItem -> true
+        else -> false
+    }
 
     Column(
         modifier = modifier
@@ -86,7 +90,8 @@ internal fun PostItem(
             isPlaceholder = isPlaceholder,
             authorRole = post?.authorRole,
             authorName = post?.authorName,
-            creationDate = post?.creationDate
+            creationDate = post?.creationDate,
+            expanded = isExpanded
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 MarkdownText(
@@ -120,56 +125,119 @@ private fun PostHeadline(
     authorRole: UserRole?,
     authorName: String?,
     creationDate: Instant?,
+    expanded: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        val icon = when (authorRole) {
-            UserRole.INSTRUCTOR -> Icons.Default.School
-            UserRole.TUTOR -> Icons.Default.SupervisorAccount
-            UserRole.USER -> Icons.Default.Person
-            null -> Icons.Default.Person
-        }
-
-        Icon(
-            modifier = Modifier
-                .size(30.dp)
-                .placeholder(visible = isPlaceholder),
-            imageVector = icon,
-            contentDescription = null
-        )
-
-        Column(modifier = Modifier.fillMaxWidth()) {
+    if (expanded) {
+        Column(modifier = modifier) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    modifier = Modifier.placeholder(visible = isPlaceholder),
-                    text = authorName ?: "Placeholder",
-                    maxLines = 1,
-                    style = MaterialTheme.typography.titleSmall
-                )
+                HeadlineAuthorIcon(authorRole, isPlaceholder)
 
-                val relativeTimeTo = remember(creationDate) {
-                    creationDate ?: Clock.System.now()
-                }
-
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .placeholder(visible = isPlaceholder),
-                    text = getRelativeTime(to = relativeTimeTo).toString(),
-                    style = MaterialTheme.typography.bodySmall
+                HeadlineAuthorInfo(
+                    modifier = Modifier.fillMaxWidth(),
+                    isPlaceholder = isPlaceholder,
+                    authorName = authorName,
+                    creationDate = creationDate,
+                    expanded = expanded
                 )
             }
 
             content()
         }
+    } else {
+        Row(
+            modifier = modifier,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            HeadlineAuthorIcon(authorRole, isPlaceholder)
+
+            Column(modifier = Modifier.fillMaxWidth()) {
+                HeadlineAuthorInfo(
+                    modifier = Modifier.fillMaxWidth(),
+                    isPlaceholder = isPlaceholder,
+                    authorName = authorName,
+                    creationDate = creationDate,
+                    expanded = expanded
+                )
+
+                content()
+            }
+        }
     }
+}
+
+@Composable
+private fun HeadlineAuthorInfo(
+    modifier: Modifier,
+    isPlaceholder: Boolean,
+    authorName: String?,
+    creationDate: Instant?,
+    expanded: Boolean
+) {
+    val relativeTimeTo = remember(creationDate) {
+        creationDate ?: Clock.System.now()
+    }
+
+    val authorNameContent: @Composable () -> Unit = {
+        Text(
+            modifier = Modifier.placeholder(visible = isPlaceholder),
+            text = authorName ?: "Placeholder",
+            maxLines = 1,
+            style = MaterialTheme.typography.titleSmall
+        )
+    }
+
+    val creationDateContent: @Composable () -> Unit = {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .placeholder(visible = isPlaceholder),
+            text = getRelativeTime(to = relativeTimeTo).toString(),
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+
+    if (expanded) {
+        Column(modifier) {
+            authorNameContent()
+
+            creationDateContent()
+        }
+    } else {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            authorNameContent()
+
+            creationDateContent()
+        }
+    }
+}
+
+@Composable
+private fun HeadlineAuthorIcon(
+    authorRole: UserRole?,
+    isPlaceholder: Boolean
+) {
+    val icon = when (authorRole) {
+        UserRole.INSTRUCTOR -> Icons.Default.School
+        UserRole.TUTOR -> Icons.Default.SupervisorAccount
+        UserRole.USER -> Icons.Default.Person
+        null -> Icons.Default.Person
+    }
+
+    Icon(
+        modifier = Modifier
+            .size(30.dp)
+            .placeholder(visible = isPlaceholder),
+        imageVector = icon,
+        contentDescription = null
+    )
 }
 
 /**

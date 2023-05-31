@@ -4,12 +4,11 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -18,24 +17,17 @@ import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.AnswerPostDb
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBasePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IStandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.*
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.getPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.MetisReplyHandler
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyTextField
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.rememberReplyMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleStandalonePostDetails
 import kotlinx.coroutines.CompletableDeferred
@@ -161,14 +153,23 @@ private fun PostAndRepliesList(
         item {
             val postActions = rememberPostActions(post)
 
-            PostWithBottomSheet(
-                modifier = Modifier.padding(top = 8.dp),
-                post = post,
-                postItemViewType = PostItemViewType.ThreadAnswerItem,
-                postActions = postActions,
-                clientId = clientId,
-                onClick = {}
-            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                PostWithBottomSheet(
+                    modifier = Modifier.padding(top = 8.dp),
+                    post = post,
+                    postItemViewType = PostItemViewType.ThreadContextPostItem,
+                    postActions = postActions,
+                    clientId = clientId,
+                    onClick = {}
+                )
+
+                Divider()
+
+                Box {}
+            }
         }
 
         items(post.orderedAnswerPostings, key = { it.postId }) { answerPost ->
@@ -178,7 +179,7 @@ private fun PostAndRepliesList(
                 modifier = Modifier.fillMaxWidth(),
                 post = answerPost,
                 postActions = postActions,
-                postItemViewType = PostItemViewType.ThreadItem,
+                postItemViewType = PostItemViewType.ThreadAnswerItem,
                 clientId = clientId,
                 onClick = {}
             )
