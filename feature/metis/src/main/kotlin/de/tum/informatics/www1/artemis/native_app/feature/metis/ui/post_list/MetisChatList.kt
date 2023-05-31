@@ -36,7 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.MetisOutd
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.PagingStateError
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.DisplayHeaderOrder
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.getPostActions
@@ -86,10 +86,14 @@ internal fun MetisChatList(
                 .fillMaxSize()
                 .padding(16.dp)
 
-            Box(
+            MetisPostListHandler(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .weight(1f),
+                state = state,
+                itemCount = posts.itemCount,
+                order = DisplayPostOrder.REVERSED,
+                getItem = posts::peek
             ) {
                 when {
                     posts.itemCount == 0 -> {
@@ -217,7 +221,7 @@ private fun ChatList(
                             index = index,
                             post = post,
                             postCount = posts.itemCount,
-                            order = DisplayHeaderOrder.REVERSED,
+                            order = DisplayPostOrder.REVERSED,
                             getPost = { getPostIndex ->
                                 when (val entry = posts.peek(getPostIndex)) {
                                     is ChatListItem.PostChatListItem -> entry.post
@@ -235,7 +239,6 @@ private fun ChatList(
 
                 null -> {} // Not reachable but required by compiler
             }
-
         }
 
         if (posts.loadState.append is LoadState.Loading) {

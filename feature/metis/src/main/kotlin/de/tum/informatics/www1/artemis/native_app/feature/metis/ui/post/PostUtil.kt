@@ -7,7 +7,7 @@ import kotlin.time.Duration.Companion.minutes
 
 private val MaxDurationJoinMessages = 5.minutes
 
-internal enum class DisplayHeaderOrder {
+internal enum class DisplayPostOrder {
     REVERSED,
     REGULAR
 }
@@ -17,13 +17,13 @@ internal fun <T : IBasePost> shouldDisplayHeader(
     index: Int,
     post: T?,
     postCount: Int,
-    order: DisplayHeaderOrder,
+    order: DisplayPostOrder,
     getPost: (index: Int) -> T?
 ): Boolean {
     return remember(index, post, getPost, postCount) {
         val prefPost = when (order) {
-            DisplayHeaderOrder.REVERSED -> if (index + 1 < postCount) getPost(index + 1) else null
-            DisplayHeaderOrder.REGULAR -> if (index - 1 >= 0) getPost(index - 1) else null
+            DisplayPostOrder.REVERSED -> if (index + 1 < postCount) getPost(index + 1) else null
+            DisplayPostOrder.REGULAR -> if (index - 1 >= 0) getPost(index - 1) else null
         }
 
         val prefPostCreationDate = prefPost?.creationDate

@@ -3,7 +3,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,12 +26,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.*
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.isReplyEnabled
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.DisplayHeaderOrder
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.getPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.shouldDisplayHeader
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisPostListHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
@@ -62,6 +65,8 @@ internal fun MetisThreadUi(
 
     val conversationDataState by viewModel.conversation.collectAsState()
     val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
+
+    val listState = rememberLazyListState()
 
     ProvideEmojis {
         MetisReplyHandler(
@@ -96,15 +101,24 @@ internal fun MetisThreadUi(
                         retryButtonText = stringResource(id = R.string.standalone_post_try_again),
                         onClickRetry = viewModel::requestReload
                     ) { post ->
-                        PostAndRepliesList(
+                        MetisPostListHandler(
                             modifier = Modifier.fillMaxSize(),
-                            post = post,
-                            hasModerationRights = hasModerationRights,
-                            clientId = clientId,
-                            onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
-                            onRequestEdit = onEditPostDelegate,
-                            onRequestDelete = onDeletePostDelegate
-                        )
+                            state = listState,
+                            itemCount = post.orderedAnswerPostings.size,
+                            order = DisplayPostOrder.REGULAR,
+                            getItem = post.orderedAnswerPostings::get,
+                        ) {
+                            PostAndRepliesList(
+                                modifier = Modifier.fillMaxSize(),
+                                post = post,
+                                hasModerationRights = hasModerationRights,
+                                clientId = clientId,
+                                onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
+                                onRequestEdit = onEditPostDelegate,
+                                onRequestDelete = onDeletePostDelegate,
+                                state = listState
+                            )
+                        }
                     }
 
                     AnimatedVisibility(visible = postDataState.isSuccess && isReplyEnabled) {
@@ -125,6 +139,7 @@ internal fun MetisThreadUi(
 @Composable
 private fun PostAndRepliesList(
     modifier: Modifier,
+    state: LazyListState,
     post: Post,
     hasModerationRights: Boolean,
     clientId: Long,
@@ -155,7 +170,8 @@ private fun PostAndRepliesList(
         LazyColumn(
             modifier = modifier,
             contentPadding = PaddingValues(vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            state = state
         ) {
             item {
                 val postActions = rememberPostActions(post)
@@ -180,7 +196,9 @@ private fun PostAndRepliesList(
                 }
             }
 
-            itemsIndexed(post.orderedAnswerPostings, key = { _, post -> post.postId }) { index, answerPost ->
+            itemsIndexed(
+                post.orderedAnswerPostings,
+                key = { _, post -> post.postId }) { index, answerPost ->
                 val postActions = rememberPostActions(answerPost)
 
                 PostWithBottomSheet(
@@ -193,7 +211,7 @@ private fun PostAndRepliesList(
                         index = index,
                         post = answerPost,
                         postCount = post.orderedAnswerPostings.size,
-                        order = DisplayHeaderOrder.REGULAR,
+                        order = DisplayPostOrder.REGULAR,
                         getPost = post.orderedAnswerPostings::get
                     ),
                     onClick = {}
