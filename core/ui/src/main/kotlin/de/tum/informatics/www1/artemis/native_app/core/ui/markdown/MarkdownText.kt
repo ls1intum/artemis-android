@@ -82,8 +82,6 @@ fun MarkdownText(
     AndroidView(
         modifier = modifier,
         factory = { ctx ->
-            Log.w("FOO", "create textview")
-
             createTextView(
                 context = ctx,
                 color = color,
@@ -154,8 +152,6 @@ private fun createTextView(
 }
 
 fun createMarkdownRender(context: Context, imageLoader: ImageLoader?): Markwon {
-    Log.w("FOO", "create markwon")
-
     return Markwon.builder(context)
         .usePlugin(HtmlPlugin.create())
         .usePlugin(StrikethroughPlugin.create())

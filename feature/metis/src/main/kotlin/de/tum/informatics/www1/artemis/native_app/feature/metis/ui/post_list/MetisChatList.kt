@@ -4,12 +4,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Divider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -42,6 +45,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.MetisRe
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisiblePostList
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toJavaInstant
+import java.text.SimpleDateFormat
+import java.util.Date
 
 @Composable
 internal fun MetisChatList(
@@ -54,7 +63,7 @@ internal fun MetisChatList(
 ) {
     ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
 
-    val posts: LazyPagingItems<Post> = viewModel.postPagingData.collectAsLazyPagingItems()
+    val posts: LazyPagingItems<ChatListItem> = viewModel.postPagingData.collectAsLazyPagingItems()
     val isDataOutdated by viewModel.isDataOutdated.collectAsState(initial = false)
 
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
@@ -137,7 +146,7 @@ private fun ChatList(
     modifier: Modifier,
     listContentPadding: PaddingValues,
     state: LazyListState,
-    posts: LazyPagingItems<Post>,
+    posts: LazyPagingItems<ChatListItem>,
     hasModerationRights: Boolean,
     clientId: Long,
     onClickViewPost: (clientPostId: String) -> Unit,
@@ -152,42 +161,81 @@ private fun ChatList(
         state = state,
         reverseLayout = true
     ) {
-        itemsIndexed(posts, key = { _, post -> post.clientPostId }) { index, post ->
-            val postActions =
-                remember(post, hasModerationRights, clientId, onRequestEdit, onRequestDelete) {
-                    if (post != null) {
-                        getPostActions(
-                            post = post,
-                            hasModerationRights = hasModerationRights,
-                            clientId = clientId,
-                            onRequestEdit = { onRequestEdit(post) },
-                            onRequestDelete = { onRequestDelete(post) },
-                            onClickReaction = { id, create ->
-                                onRequestReactWithEmoji(post, id, create)
-                            }
-                        )
-                    } else PostActions()
+        itemsIndexed(
+            items = posts,
+            key = { _, chatListItem ->
+                when (chatListItem) {
+                    is ChatListItem.DateDivider -> chatListItem.localDate.toEpochDays()
+                    is ChatListItem.PostChatListItem -> chatListItem.post.clientPostId
+                }
+            }
+        ) { index, chatListItem ->
+            when (chatListItem) {
+                is ChatListItem.DateDivider -> {
+                    DateDivider(
+                        modifier = Modifier.fillMaxWidth(),
+                        date = chatListItem.localDate
+                    )
                 }
 
-            PostWithBottomSheet(
-                modifier = Modifier.fillMaxWidth(),
-                post = post,
-                clientId = clientId,
-                postItemViewType = remember(post?.answers) { PostItemViewType.ChatListItem(post?.answers.orEmpty()) },
-                postActions = postActions,
-                displayHeader = shouldDisplayHeader(
-                    index = index,
-                    post = post,
-                    postCount = posts.itemCount,
-                    order = DisplayHeaderOrder.REVERSED,
-                    getPost = posts::peek
-                ),
-                onClick = {
-                    if (post != null) {
-                        onClickViewPost(post.clientPostId)
-                    }
+                is ChatListItem.PostChatListItem? -> {
+                    val post = chatListItem?.post
+
+                    val postActions =
+                        remember(
+                            chatListItem,
+                            hasModerationRights,
+                            clientId,
+                            onRequestEdit,
+                            onRequestDelete
+                        ) {
+                            if (post != null) {
+                                getPostActions(
+                                    post = post,
+                                    hasModerationRights = hasModerationRights,
+                                    clientId = clientId,
+                                    onRequestEdit = { onRequestEdit(post) },
+                                    onRequestDelete = { onRequestDelete(post) },
+                                    onClickReaction = { id, create ->
+                                        onRequestReactWithEmoji(post, id, create)
+                                    }
+                                )
+                            } else PostActions()
+                        }
+
+                    PostWithBottomSheet(
+                        modifier = Modifier.fillMaxWidth(),
+                        post = post,
+                        clientId = clientId,
+                        postItemViewType = remember(post?.answers) {
+                            PostItemViewType.ChatListItem(
+                                post?.answers.orEmpty()
+                            )
+                        },
+                        postActions = postActions,
+                        displayHeader = shouldDisplayHeader(
+                            index = index,
+                            post = post,
+                            postCount = posts.itemCount,
+                            order = DisplayHeaderOrder.REVERSED,
+                            getPost = { getPostIndex ->
+                                when (val entry = posts.peek(getPostIndex)) {
+                                    is ChatListItem.PostChatListItem -> entry.post
+                                    else -> null
+                                }
+                            }
+                        ),
+                        onClick = {
+                            if (post != null) {
+                                onClickViewPost(post.clientPostId)
+                            }
+                        }
+                    )
                 }
-            )
+
+                null -> {} // Not reachable but required by compiler
+            }
+
         }
 
         if (posts.loadState.append is LoadState.Loading) {
@@ -241,5 +289,34 @@ private fun NoPostsFoundInformation(
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )
+    }
+}
+
+private val DateFormat = SimpleDateFormat.getDateInstance()
+
+@Composable
+private fun DateDivider(modifier: Modifier, date: LocalDate) {
+    val dateAsString = remember(date) {
+        DateFormat.format(
+            Date.from(
+                date.atStartOfDayIn(TimeZone.currentSystemDefault()).toJavaInstant()
+            )
+        )
+    }
+
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Divider(modifier = Modifier.weight(1f))
+
+        Text(
+            text = dateAsString,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Divider(modifier = Modifier.weight(1f))
     }
 }

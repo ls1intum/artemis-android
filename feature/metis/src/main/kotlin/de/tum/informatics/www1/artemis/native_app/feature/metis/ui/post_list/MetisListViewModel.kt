@@ -42,6 +42,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class MetisListViewModel(
@@ -124,7 +127,7 @@ internal class MetisListViewModel(
     )
 
     @OptIn(ExperimentalPagingApi::class)
-    val postPagingData: Flow<PagingData<Post>> =
+    val postPagingData: Flow<PagingData<ChatListItem>> =
         flatMapLatest(
             pagingDataInput,
             accountService.authToken,
@@ -154,7 +157,11 @@ internal class MetisListViewModel(
                         metisContext = metisContext
                     )
                 }
-            ).flow.cachedIn(viewModelScope)
+            )
+                .flow
+                .cachedIn(viewModelScope)
+                .map { pagingList -> pagingList.map(ChatListItem::PostChatListItem) }
+                .map(::insertDateSeparators)
         }
             .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
 
@@ -206,4 +213,27 @@ internal class MetisListViewModel(
     }
 
     override suspend fun getMetisContext(): MetisContext = metisContext
+
+    private fun insertDateSeparators(pagingList: PagingData<ChatListItem.PostChatListItem>) =
+        pagingList.insertSeparators { before: ChatListItem.PostChatListItem?, after: ChatListItem.PostChatListItem? ->
+            when {
+                before == null && after == null -> null
+                before != null && after == null -> {
+                    ChatListItem.DateDivider(before.post.creationLocalDate)
+                }
+
+                after != null && before != null -> {
+                    val beforeDate = before.post.creationLocalDate
+                    val afterDate = after.post.creationLocalDate
+
+                    if (beforeDate != afterDate) {
+                        ChatListItem.DateDivider(beforeDate)
+                    } else null
+                }
+
+                else -> null
+            }
+        }
+
+    private val Post.creationLocalDate: LocalDate get() = creationDate.toLocalDateTime(TimeZone.currentSystemDefault()).date
 }
