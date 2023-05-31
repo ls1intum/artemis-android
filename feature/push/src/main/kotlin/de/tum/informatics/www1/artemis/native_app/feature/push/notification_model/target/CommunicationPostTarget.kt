@@ -10,7 +10,7 @@ class CommunicationPostTarget(
     override val postId: Long,
     @SerialName("course")
     val courseId: Long,
-    @SerialName("conversation")
+    @SerialName("conversationId")
     val conversationId: Long
 ) : MetisTarget {
     override val metisContext: MetisContext = MetisContext.Conversation(courseId, conversationId)

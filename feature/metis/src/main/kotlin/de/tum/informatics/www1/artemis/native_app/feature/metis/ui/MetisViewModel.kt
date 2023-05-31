@@ -20,8 +20,14 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.Reacti
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.asMetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.AnswerPostDb
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.getConversation
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -40,7 +46,8 @@ abstract class MetisViewModel(
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val serverDataService: ServerDataService,
-    private val networkStatusProvider: NetworkStatusProvider
+    private val networkStatusProvider: NetworkStatusProvider,
+    private val conversationService: ConversationService
 ) : ViewModel() {
 
     protected val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -63,8 +70,8 @@ abstract class MetisViewModel(
      * Otherwise it creates a reaction with the same emoji id.
      */
     fun createOrDeleteReaction(
-        emojiId: String,
         post: IBasePost,
+        emojiId: String,
         create: Boolean
     ): Deferred<MetisModificationFailure?> {
         return viewModelScope.async {
@@ -162,6 +169,42 @@ abstract class MetisViewModel(
         }
     }
 
+    fun editPost(post: Post, newText: String): Deferred<MetisModificationFailure?> {
+        return viewModelScope.async {
+            val conversation = loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
+
+            val newPost = StandalonePost(
+                post = post.copy(content = newText),
+                conversation = conversation
+            )
+
+            metisModificationService.updateStandalonePost(
+                context = getMetisContext(),
+                post = newPost,
+                serverUrl = serverConfigurationService.serverUrl.first(),
+                authToken = accountService.authToken.first()
+            )
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
+        }
+    }
+
+    fun editAnswerPost(parentPost: Post, post: AnswerPostDb, newText: String): Deferred<MetisModificationFailure?> {
+        return viewModelScope.async {
+            val conversation = loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
+
+            val serializedParentPost = StandalonePost(parentPost, conversation)
+            val newPost = AnswerPost(post, serializedParentPost).copy(content = newText)
+
+            metisModificationService.updateAnswerPost(
+                context = getMetisContext(),
+                post = newPost,
+                serverUrl = serverConfigurationService.serverUrl.first(),
+                authToken = accountService.authToken.first()
+            )
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
+        }
+    }
+
     protected abstract suspend fun getMetisContext(): MetisContext
 
     open fun requestReload() {
@@ -175,4 +218,17 @@ abstract class MetisViewModel(
             is StandalonePost -> MetisModificationService.AffectedPost.Standalone(serverPostId)
             is IStandalonePost -> MetisModificationService.AffectedPost.Standalone(serverPostId)
         }
+
+    protected suspend fun loadConversation(): Conversation? {
+        val metisContext = getMetisContext()
+
+        if (metisContext !is MetisContext.Conversation) return null
+
+        return conversationService.getConversation(
+            metisContext.courseId,
+            metisContext.conversationId,
+            accountService.authToken.first(),
+            serverConfigurationService.serverUrl.first()
+        ).orNull()
+    }
 }

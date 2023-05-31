@@ -55,20 +55,19 @@ internal object NotificationTargetManager {
     private fun getMetisDeeplink(notificationTarget: MetisTarget): String {
         return when (notificationTarget) {
             is CoursePostTarget -> {
-                "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/null/null"
+                "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/null/null/null"
             }
 
             is LecturePostTarget -> {
-                "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/null/${notificationTarget.lectureId}"
+                "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/null/${notificationTarget.lectureId}/null"
             }
 
             is ExercisePostTarget -> {
-                "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/${notificationTarget.exerciseId}/null"
+                "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/${notificationTarget.exerciseId}/null/null"
             }
 
             is CommunicationPostTarget -> {
-                TODO()
-//                "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/${notificationTarget.exerciseId}/null"
+                "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/null/null/${notificationTarget.conversationId}"
             }
         }
     }

@@ -195,29 +195,11 @@ internal class MetisThreadViewModel(
         }
     }
 
-    /**
-     * Convenience method that wraps the superclass create reaction.
-     */
-    fun createReactionForAnswer(
-        emojiId: String,
-        clientSidePostId: String
-    ): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async {
-            val serverSidePostId = metisStorageService.getServerSidePostId(
-                serverConfigurationService.host.first(),
-                clientSidePostId
-            )
-
-            createReactionImpl(
-                emojiId = emojiId,
-                post = MetisModificationService.AffectedPost.Answer(postId = serverSidePostId)
-            )
-        }
-    }
-
     fun createReply(replyText: String): Deferred<MetisModificationFailure?> {
         return viewModelScope.async {
             if (!post.value.isSuccess) return@async MetisModificationFailure.CREATE_POST
+
+            val conversation = loadConversation() ?: return@async MetisModificationFailure.CREATE_POST
 
             val replyPost = AnswerPost(
                 creationDate = Clock.System.now(),
@@ -230,7 +212,8 @@ internal class MetisThreadViewModel(
                         )
 
                         is StandalonePostId.ServerSideId -> postId.serverSidePostId
-                    }
+                    },
+                    conversation = conversation
                 )
             )
 

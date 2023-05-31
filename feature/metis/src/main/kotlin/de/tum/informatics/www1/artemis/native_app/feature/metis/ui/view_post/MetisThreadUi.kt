@@ -20,20 +20,28 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.AnswerPostDb
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IAnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IStandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.*
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.getPostActions
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.rememberReplyMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleStandalonePostDetails
+import kotlinx.coroutines.CompletableDeferred
 
 /**
  * Displays a single post with its replies.
- * @param viewType is currently unused, but should be used to scroll to the requested content in the future.
  */
 @Composable
 internal fun MetisThreadUi(
@@ -57,50 +65,62 @@ internal fun MetisThreadUi(
     }
 
 
-    var metisFailure: MetisModificationFailure? by remember { mutableStateOf(null) }
-
     ProvideEmojis {
-        BoxWithConstraints(modifier = modifier) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                BasicDataStateUi(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .weight(1f),
-                    dataState = postDataState,
-                    loadingText = stringResource(id = R.string.standalone_post_loading),
-                    failureText = stringResource(id = R.string.standalone_post_failure),
-                    retryButtonText = stringResource(id = R.string.standalone_post_try_again),
-                    onClickRetry = viewModel::requestReload
-                ) { post ->
-                    PostAndRepliesList(
-                        modifier = Modifier.fillMaxSize(),
-                        post = post,
-                        hasModerationRights = hasModerationRights,
-                        clientId = clientId
-                    ) { metisFailure = it }
-                }
+        MetisReplyHandler(
+            onCreatePost = viewModel::createReply,
+            onEditPost = { post, newText ->
+                val parentPost = postDataState.orNull()
 
-                var replyMode: ReplyMode by remember {
-                    mutableStateOf(
-                        ReplyMode.NewMessage(onCreateNewMessage = viewModel::createReply)
-                    )
-                }
+                when (post) {
+                    is AnswerPostDb -> {
+                        if (parentPost == null) return@MetisReplyHandler CompletableDeferred(
+                            MetisModificationFailure.UPDATE_POST
+                        )
+                        viewModel.editAnswerPost(parentPost, post, newText)
+                    }
 
-                AnimatedVisibility(visible = postDataState.isSuccess) {
-                    ReplyTextField(
+                    is Post -> viewModel.editPost(post, newText)
+                    else -> throw NotImplementedError()
+                }
+            },
+            onDeletePost = viewModel::deletePost,
+            onRequestReactWithEmoji = viewModel::createOrDeleteReaction
+        ) { replyMode, onEditPostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, updateFailureStateDelegate ->
+            BoxWithConstraints(modifier = modifier) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    BasicDataStateUi(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
-                        replyMode = replyMode,
-                        updateFailureState = { metisFailure = it }
-                    )
+                            .padding(horizontal = 8.dp)
+                            .weight(1f),
+                        dataState = postDataState,
+                        loadingText = stringResource(id = R.string.standalone_post_loading),
+                        failureText = stringResource(id = R.string.standalone_post_failure),
+                        retryButtonText = stringResource(id = R.string.standalone_post_try_again),
+                        onClickRetry = viewModel::requestReload
+                    ) { post ->
+                        PostAndRepliesList(
+                            modifier = Modifier.fillMaxSize(),
+                            post = post,
+                            hasModerationRights = hasModerationRights,
+                            clientId = clientId,
+                            onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
+                            onRequestEdit = onEditPostDelegate,
+                            onRequestDelete = onDeletePostDelegate
+                        )
+                    }
+
+                    AnimatedVisibility(visible = postDataState.isSuccess) {
+                        ReplyTextField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
+                            replyMode = replyMode,
+                            updateFailureState = updateFailureStateDelegate
+                        )
+                    }
                 }
             }
         }
-    }
-
-    MetisModificationFailureDialog(metisModificationFailure = metisFailure) {
-        metisFailure = null
     }
 }
 
@@ -110,89 +130,54 @@ private fun PostAndRepliesList(
     post: Post,
     hasModerationRights: Boolean,
     clientId: Long,
-    setMetisFailure: (MetisModificationFailure?) -> Unit
+    onRequestEdit: (IBasePost) -> Unit,
+    onRequestDelete: (IBasePost) -> Unit,
+    onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit
 ) {
+    val rememberPostActions: @Composable (IBasePost) -> PostActions = { affectedPost: IBasePost ->
+        remember(affectedPost, hasModerationRights, clientId) {
+            getPostActions(
+                affectedPost,
+                hasModerationRights,
+                clientId,
+                onRequestEdit = { onRequestEdit(affectedPost) },
+                onRequestDelete = { onRequestDelete(affectedPost) },
+                onClickReaction = { emojiId, create ->
+                    onRequestReactWithEmoji(
+                        affectedPost,
+                        emojiId,
+                        create
+                    )
+                }
+            )
+        }
+    }
+
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
-            val asAffectedPost = post.let {
-                MetisModificationService.AffectedPost.Standalone(
-                    postId = it.serverPostId
-                )
-            }
-
-            val postActions = remember(post, hasModerationRights, clientId) {
-                if (post != null) {
-                    getPostActions(
-                        post = post,
-                        hasModerationRights = hasModerationRights,
-                        clientId = clientId,
-                        onRequestEdit = {},
-                        onRequestDelete = {},
-                        onClickReaction = { _, _ -> }
-                    )
-                } else PostActions()
-            }
+            val postActions = rememberPostActions(post)
 
             PostWithBottomSheet(
                 modifier = Modifier.padding(top = 8.dp),
                 post = post,
                 postItemViewType = PostItemViewType.ThreadAnswerItem,
                 postActions = postActions,
-//                onRequestReactWithEmoji = { emojiId ->
-//                    viewModel.createReaction(
-//                        emojiId = emojiId,
-//                        post = asAffectedPost,
-//                        response = setMetisFailure
-//                    )
-//                },
-//                onClickOnPresentReaction = { emojiId ->
-//                    viewModel.onClickReaction(
-//                        emojiId = emojiId,
-//                        post = asAffectedPost,
-//                        presentReactions = post.reactions,
-//                        response = setMetisFailure
-//                    )
-//                },
                 clientId = clientId,
                 onClick = {}
             )
         }
 
         items(post.orderedAnswerPostings, key = { it.postId }) { answerPost ->
-            val postActions = remember(answerPost, hasModerationRights, clientId) {
-                getPostActions(
-                    post = answerPost,
-                    hasModerationRights = hasModerationRights,
-                    clientId = clientId,
-                    onRequestEdit = {},
-                    onRequestDelete = {},
-                    onClickReaction = { _, _ -> }
-                )
-            }
+            val postActions = rememberPostActions(answerPost)
 
             PostWithBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 post = answerPost,
                 postActions = postActions,
-//                onRequestReactWithEmoji = { emojiId ->
-//                    viewModel.createReactionForAnswer(
-//                        emojiId = emojiId,
-//                        clientSidePostId = answerPost.postId,
-//                        onResponse = setMetisFailure
-//                    )
-//                },
-//                onClickOnPresentReaction = { emojiId ->
-//                    viewModel.onClickReactionOfAnswer(
-//                        emojiId = emojiId,
-//                        clientSidePostId = answerPost.postId,
-//                        presentReactions = answerPost.reactions,
-//                        onResponse = setMetisFailure
-//                    )
-//                },
                 postItemViewType = PostItemViewType.ThreadItem,
                 clientId = clientId,
                 onClick = {}

@@ -55,10 +55,6 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
                 nullable = true
                 type = NavType.StringType
             },
-            navArgument("viewType") {
-                nullable = true
-                type = NavType.StringType
-            },
             navArgument("metisContext") {
                 nullable = true
                 type = NavType.StringType
@@ -79,7 +75,7 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
         deepLinks = listOf(
             navDeepLink {
                 uriPattern =
-                    "artemis://metis_standalone_post/{serverPostId}/{courseId}/{exerciseId}/{lectureId}"
+                    "artemis://metis_standalone_post/{serverPostId}/{courseId}/{exerciseId}/{lectureId}/{conversationId}"
             }
         )
     ) { backStackEntry ->
@@ -106,10 +102,12 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
             if (courseId != null) {
                 val exerciseId = backStackEntry.arguments?.getString("exerciseId")?.toLongOrNull()
                 val lectureId = backStackEntry.arguments?.getString("lectureId")?.toLongOrNull()
+                val conversationId = backStackEntry.arguments?.getString("conversationId")?.toLongOrNull()
 
                 when {
                     exerciseId != null -> MetisContext.Exercise(courseId, exerciseId)
                     lectureId != null -> MetisContext.Lecture(courseId, lectureId)
+                    conversationId != null -> MetisContext.Conversation(courseId, conversationId)
                     else -> MetisContext.Course(courseId)
                 }
             } else null

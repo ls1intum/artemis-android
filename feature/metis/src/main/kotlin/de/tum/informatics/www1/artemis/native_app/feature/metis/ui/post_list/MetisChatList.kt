@@ -40,6 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.Paging
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.getPostActions
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.rememberReplyMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
@@ -62,91 +63,71 @@ internal fun MetisChatList(
     val clientId: Long = viewModel.clientId.collectAsState().value.orElse(0L)
     val hasModerationRights = viewModel.hasModerationRights.collectAsState().value.orElse(false)
 
-    var metisFailure: MetisModificationFailure? by remember {
-        mutableStateOf(null)
-    }
-
-    var metisModificationTask: Deferred<MetisModificationFailure?>? by remember {
-        mutableStateOf(null)
-    }
-    var editingPost: Post? by remember { mutableStateOf(null) }
-    val replyMode = rememberReplyMode(
-        editingPost = editingPost,
-        onClearEditingPost = { editingPost = null },
+    MetisReplyHandler(
         onCreatePost = viewModel::createPost,
-        onEditPost = viewModel::editPost
-    )
+        onEditPost = viewModel::editPost,
+        onDeletePost = viewModel::deletePost,
+        onRequestReactWithEmoji = viewModel::createOrDeleteReaction
+    ) { replyMode, onEditPostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, updateFailureStateDelegate ->
+        Column(modifier = modifier) {
+            MetisOutdatedBanner(
+                modifier = Modifier.fillMaxWidth(),
+                isOutdated = isDataOutdated,
+                requestRefresh = viewModel::requestReload
+            )
 
-    AwaitDeferredCompletion(job = metisModificationTask) {
-        metisFailure = it
-    }
+            val informationModifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
 
-    Column(modifier = modifier) {
-        MetisOutdatedBanner(
-            modifier = Modifier.fillMaxWidth(),
-            isOutdated = isDataOutdated,
-            requestRefresh = viewModel::requestReload
-        )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                when {
+                    posts.itemCount == 0 -> {
+                        NoPostsFoundInformation(modifier = informationModifier)
+                    }
 
-        val informationModifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+                    posts.loadState.refresh is LoadState.Loading -> {
+                        LoadingPostsInformation(informationModifier)
+                    }
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            when {
-                posts.itemCount == 0 -> {
-                    NoPostsFoundInformation(modifier = informationModifier)
-                }
-
-                posts.loadState.refresh is LoadState.Loading -> {
-                    LoadingPostsInformation(informationModifier)
-                }
-
-                posts.loadState.refresh is LoadState.Error -> {
-                    PagingStateError(
-                        modifier = informationModifier,
-                        errorText = R.string.metis_post_list_error,
-                        buttonText = R.string.metis_post_list_error_try_again,
-                        retry = posts::retry
-                    )
-                }
-
-                else -> {
-                    ProvideEmojis {
-                        ChatList(
-                            modifier = Modifier.fillMaxSize(),
-                            listContentPadding = listContentPadding,
-                            state = state,
-                            posts = posts,
-                            clientId = clientId,
-                            onClickViewPost = onClickViewPost,
-                            hasModerationRights = hasModerationRights,
-                            onRequestEdit = { post -> editingPost = post },
-                            onRequestDelete = { post ->
-                                metisModificationTask = viewModel.deletePost(post)
-                            },
-                            onRequestReactWithEmoji = { post, emojiId, create ->
-                                metisModificationTask = viewModel.createOrDeleteReaction(emojiId, post, create)
-                            }
+                    posts.loadState.refresh is LoadState.Error -> {
+                        PagingStateError(
+                            modifier = informationModifier,
+                            errorText = R.string.metis_post_list_error,
+                            buttonText = R.string.metis_post_list_error_try_again,
+                            retry = posts::retry
                         )
+                    }
+
+                    else -> {
+                        ProvideEmojis {
+                            ChatList(
+                                modifier = Modifier.fillMaxSize(),
+                                listContentPadding = listContentPadding,
+                                state = state,
+                                posts = posts,
+                                clientId = clientId,
+                                onClickViewPost = onClickViewPost,
+                                hasModerationRights = hasModerationRights,
+                                onRequestEdit = onEditPostDelegate,
+                                onRequestDelete = onDeletePostDelegate,
+                                onRequestReactWithEmoji = onRequestReactWithEmojiDelegate
+                            )
+                        }
                     }
                 }
             }
+
+            ReplyTextField(
+                modifier = Modifier.fillMaxWidth(),
+                replyMode = replyMode,
+                updateFailureState = updateFailureStateDelegate
+            )
         }
-
-        ReplyTextField(
-            modifier = Modifier.fillMaxWidth(),
-            replyMode = replyMode,
-            updateFailureState = { metisFailure = it }
-        )
-    }
-
-    MetisModificationFailureDialog(metisModificationFailure = metisFailure) {
-        metisFailure = null
     }
 }
 

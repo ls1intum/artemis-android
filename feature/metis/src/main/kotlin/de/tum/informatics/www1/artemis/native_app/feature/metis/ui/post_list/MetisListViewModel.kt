@@ -165,10 +165,7 @@ internal class MetisListViewModel(
 
     fun createPost(postText: String): Deferred<MetisModificationFailure?> {
         return viewModelScope.async {
-            if (metisContext !is MetisContext.Conversation) return@async MetisModificationFailure.CREATE_POST
-
-            val conversation =
-                loadConversation(metisContext) ?: return@async MetisModificationFailure.CREATE_POST
+            val conversation = loadConversation() ?: return@async MetisModificationFailure.CREATE_POST
 
             val post = StandalonePost(
                 id = null,
@@ -181,28 +178,6 @@ internal class MetisListViewModel(
             )
 
             createStandalonePostImpl(post)
-        }
-    }
-
-    fun editPost(post: Post, newText: String): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async {
-            if (metisContext !is MetisContext.Conversation) return@async MetisModificationFailure.UPDATE_POST
-
-            val conversation =
-                loadConversation(metisContext) ?: return@async MetisModificationFailure.UPDATE_POST
-
-            val newPost = StandalonePost(
-                post = post.copy(content = newText),
-                conversation = conversation
-            )
-
-            metisModificationService.updateStandalonePost(
-                context = metisContext,
-                post = newPost,
-                serverUrl = serverConfigurationService.serverUrl.first(),
-                authToken = accountService.authToken.first()
-            )
-                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
         }
     }
 
@@ -227,12 +202,4 @@ internal class MetisListViewModel(
     }
 
     override suspend fun getMetisContext(): MetisContext = metisContext
-
-    private suspend fun loadConversation(metisContext: MetisContext.Conversation) =
-        conversationService.getConversation(
-            metisContext.courseId,
-            metisContext.conversationId,
-            accountService.authToken.first(),
-            serverConfigurationService.serverUrl.first()
-        ).orNull()
 }

@@ -46,7 +46,7 @@ data class Post(
         entityColumn = "parent_post_id",
         parentColumn = "client_post_id"
     )
-    override val answers: List<AnswerPost>,
+    override val answers: List<AnswerPostDb>,
     @Relation(
         entity = PostReactionEntity::class,
         entityColumn = "post_id",

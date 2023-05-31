@@ -6,11 +6,12 @@ import androidx.room.Relation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisPostContextEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisUserEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.PostReactionEntity
 import kotlinx.datetime.Instant
 
-data class AnswerPost(
+data class AnswerPostDb(
     @ColumnInfo(name = "parent_post_id")
     val parentPostId: String,
     @ColumnInfo(name = "post_id")
@@ -30,7 +31,14 @@ data class AnswerPost(
         parentColumn = "post_id",
         projection = ["author_id", "emoji", "id"]
     )
-    override val reactions: List<Post.Reaction>
+    override val reactions: List<Post.Reaction>,
+    @Relation(
+        entity = MetisPostContextEntity::class,
+        entityColumn = "client_post_id",
+        parentColumn = "post_id",
+        projection = ["server_post_id"]
+    )
+    val serverPostIdCache: ServerPostIdCache
 ) : IAnswerPost {
     @Ignore
     override val creationDate: Instant = basePostingCache.creationDate
@@ -48,7 +56,7 @@ data class AnswerPost(
     override val authorId: Long = basePostingCache.authorId
 
     @Ignore
-    override val serverPostId: Long = basePostingCache.serverPostId
+    override val serverPostId: Long = serverPostIdCache.serverPostId
 
     data class BasePostingCache(
         @ColumnInfo(name = "id")
@@ -68,5 +76,10 @@ data class AnswerPost(
             projection = ["name"]
         )
         val authorName: String
+    )
+
+    data class ServerPostIdCache(
+        @ColumnInfo(name = "server_post_id")
+        val serverPostId: Long
     )
 }

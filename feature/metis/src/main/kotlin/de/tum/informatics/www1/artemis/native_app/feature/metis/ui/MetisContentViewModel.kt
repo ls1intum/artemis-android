@@ -46,7 +46,8 @@ abstract class MetisContentViewModel(
     serverConfigurationService,
     accountService,
     serverDataService,
-    networkStatusProvider
+    networkStatusProvider,
+    conversationService
 ) {
 
     val hasModerationRights: StateFlow<DataState<Boolean>> = when (metisContext) {

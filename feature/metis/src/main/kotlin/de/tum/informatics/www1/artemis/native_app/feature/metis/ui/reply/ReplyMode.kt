@@ -9,7 +9,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisContentViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisModificationFailureDialog
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisViewModel
 import kotlinx.coroutines.Deferred
 
 internal sealed class ReplyMode(initialText: String) {
@@ -69,4 +73,58 @@ internal fun <T : IBasePost> rememberReplyMode(
     }
 
     return replyMode
+}
+
+/**
+ * Holds the necessary data about the reply mode and tasks going on. Exposes methods to update the associated states over the content lambda.
+ */
+@Composable
+internal fun <T : IBasePost> MetisReplyHandler(
+    onCreatePost: (String) -> Deferred<MetisModificationFailure?>,
+    onEditPost: (T, String) -> Deferred<MetisModificationFailure?>,
+    onDeletePost: (T) -> Deferred<MetisModificationFailure?>,
+    onRequestReactWithEmoji: (T, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
+    content: @Composable (
+        replyMode: ReplyMode,
+        onRequestEditPostDelegate: (T) -> Unit,
+        onRequestReactWithEmojiDelegate: (T, emojiId: String, create: Boolean) -> Unit,
+        onDeletePostDelegate: (T) -> Unit,
+        updateFailureStateDelegate: (MetisModificationFailure?) -> Unit
+    ) -> Unit
+) {
+    var metisFailure: MetisModificationFailure? by remember {
+        mutableStateOf(null)
+    }
+
+    var metisModificationTask: Deferred<MetisModificationFailure?>? by remember {
+        mutableStateOf(null)
+    }
+
+    AwaitDeferredCompletion(job = metisModificationTask) {
+        metisFailure = it
+    }
+
+    var editingPost: T? by remember { mutableStateOf(null) }
+    val replyMode = rememberReplyMode(
+        editingPost = editingPost,
+        onClearEditingPost = { editingPost = null },
+        onCreatePost = onCreatePost,
+        onEditPost = onEditPost
+    )
+
+    content(
+        replyMode,
+        { post -> editingPost = post },
+        { post, emojiId, create ->
+            metisModificationTask = onRequestReactWithEmoji(post, emojiId, create)
+        },
+        { post -> metisModificationTask = onDeletePost(post) },
+        { metisFailure = it }
+    )
+
+    if (metisFailure != null) {
+        MetisModificationFailureDialog(metisModificationFailure = metisFailure) {
+            metisFailure = null
+        }
+    }
 }

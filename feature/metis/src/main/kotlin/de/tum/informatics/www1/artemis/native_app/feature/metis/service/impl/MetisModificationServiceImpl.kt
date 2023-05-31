@@ -112,7 +112,7 @@ internal class MetisModificationServiceImpl(
                         context.courseId.toString(),
                         context.answerPostResourceEndpoint
                     )
-                    appendPathSegments(post.id.toString())
+                    appendPathSegments(post.serverPostId.toString())
                 }
 
                 contentType(ContentType.Application.Json)

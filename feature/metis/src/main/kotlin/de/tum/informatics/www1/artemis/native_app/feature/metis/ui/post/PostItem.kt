@@ -38,7 +38,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.AnswerPostDb
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.UserRole
@@ -49,7 +49,7 @@ import kotlinx.datetime.Instant
 sealed class PostItemViewType {
 
     data class ChatListItem(
-        val answerPosts: List<AnswerPost>
+        val answerPosts: List<AnswerPostDb>
     ) : PostItemViewType()
 
     object ThreadItem : PostItemViewType()
