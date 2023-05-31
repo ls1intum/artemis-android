@@ -16,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.AnswerPostDb
@@ -148,44 +149,46 @@ private fun PostAndRepliesList(
         }
     }
 
-    LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item {
-            val postActions = rememberPostActions(post)
+    ProvideMarkwon {
+        LazyColumn(
+            modifier = modifier,
+            contentPadding = PaddingValues(vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                val postActions = rememberPostActions(post)
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    PostWithBottomSheet(
+                        modifier = Modifier.padding(top = 8.dp),
+                        post = post,
+                        postItemViewType = PostItemViewType.ThreadContextPostItem,
+                        postActions = postActions,
+                        clientId = clientId,
+                        onClick = {}
+                    )
+
+                    Divider()
+
+                    Box {}
+                }
+            }
+
+            items(post.orderedAnswerPostings, key = { it.postId }) { answerPost ->
+                val postActions = rememberPostActions(answerPost)
+
                 PostWithBottomSheet(
-                    modifier = Modifier.padding(top = 8.dp),
-                    post = post,
-                    postItemViewType = PostItemViewType.ThreadContextPostItem,
+                    modifier = Modifier.fillMaxWidth(),
+                    post = answerPost,
                     postActions = postActions,
+                    postItemViewType = PostItemViewType.ThreadAnswerItem,
                     clientId = clientId,
                     onClick = {}
                 )
-
-                Divider()
-
-                Box {}
             }
-        }
-
-        items(post.orderedAnswerPostings, key = { it.postId }) { answerPost ->
-            val postActions = rememberPostActions(answerPost)
-
-            PostWithBottomSheet(
-                modifier = Modifier.fillMaxWidth(),
-                post = answerPost,
-                postActions = postActions,
-                postItemViewType = PostItemViewType.ThreadAnswerItem,
-                clientId = clientId,
-                onClick = {}
-            )
         }
     }
 }

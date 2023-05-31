@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import android.content.Context
 import android.text.method.LinkMovementMethod
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
@@ -72,10 +73,17 @@ fun MarkdownText(
 ) {
     val defaultColor: Color = LocalContentColor.current
     val context: Context = LocalContext.current
-    val markdownRender: Markwon = remember { createMarkdownRender(context, imageLoader) }
+    val localMarkwon = LocalMarkwon.current
+
+    val markdownRender: Markwon = localMarkwon ?: remember(imageLoader) {
+        createMarkdownRender(context, imageLoader)
+    }
+
     AndroidView(
         modifier = modifier,
         factory = { ctx ->
+            Log.w("FOO", "create textview")
+
             createTextView(
                 context = ctx,
                 color = color,
@@ -93,7 +101,9 @@ fun MarkdownText(
         update = { textView ->
             markdownRender.setMarkdown(textView, markdown)
             textView.movementMethod = LinkMovementMethod.getInstance()
-        }
+        },
+        onReset = { },
+        onRelease = {}
     )
 }
 
@@ -144,6 +154,8 @@ private fun createTextView(
 }
 
 fun createMarkdownRender(context: Context, imageLoader: ImageLoader?): Markwon {
+    Log.w("FOO", "create markwon")
+
     return Markwon.builder(context)
         .usePlugin(HtmlPlugin.create())
         .usePlugin(StrikethroughPlugin.create())

@@ -29,6 +29,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
@@ -105,19 +106,21 @@ internal fun MetisChatList(
                     }
 
                     else -> {
-                        ProvideEmojis {
-                            ChatList(
-                                modifier = Modifier.fillMaxSize(),
-                                listContentPadding = listContentPadding,
-                                state = state,
-                                posts = posts,
-                                clientId = clientId,
-                                onClickViewPost = onClickViewPost,
-                                hasModerationRights = hasModerationRights,
-                                onRequestEdit = onEditPostDelegate,
-                                onRequestDelete = onDeletePostDelegate,
-                                onRequestReactWithEmoji = onRequestReactWithEmojiDelegate
-                            )
+                        ProvideMarkwon {
+                            ProvideEmojis {
+                                ChatList(
+                                    modifier = Modifier.fillMaxSize(),
+                                    listContentPadding = listContentPadding,
+                                    state = state,
+                                    posts = posts,
+                                    clientId = clientId,
+                                    onClickViewPost = onClickViewPost,
+                                    hasModerationRights = hasModerationRights,
+                                    onRequestEdit = onEditPostDelegate,
+                                    onRequestDelete = onDeletePostDelegate,
+                                    onRequestReactWithEmoji = onRequestReactWithEmojiDelegate
+                                )
+                            }
                         }
                     }
                 }
