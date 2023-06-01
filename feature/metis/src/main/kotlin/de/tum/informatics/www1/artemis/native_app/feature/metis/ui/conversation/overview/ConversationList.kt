@@ -46,10 +46,17 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversa
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.ChannelIcons
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableTitle
 
+private const val SECTION_FAVORITES_KEY = "favorites"
 private const val SECTION_HIDDEN_KEY = "hidden"
 private const val SECTION_CHANNELS_KEY = "channels"
 private const val SECTION_GROUPS_KEY = "groups"
 private const val SECTION_DIRECT_MESSAGES_KEY = "direct-messages"
+
+private const val KEY_SUFFIX_FAVORITES = "_f"
+private const val KEY_SUFFIX_CHANNELS = "_c"
+private const val KEY_SUFFIX_GROUPS = "_g"
+private const val KEY_SUFFIX_PERSONAL = "_p"
+private const val KEY_SUFFIX_HIDDEN = "_h"
 
 @Composable
 internal fun ConversationList(
@@ -61,9 +68,10 @@ internal fun ConversationList(
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit
 ) {
-    val defaultConversationList: LazyListScope.(List<Conversation>) -> Unit =
-        { conversations: List<Conversation> ->
+    val defaultConversationList: LazyListScope.(List<Conversation>, String) -> Unit =
+        { conversations: List<Conversation>, keySuffix: String ->
             conversationList(
+                keySuffix = keySuffix,
                 conversations = conversations,
                 onNavigateToConversation = onNavigateToConversation,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
@@ -74,12 +82,12 @@ internal fun ConversationList(
     LazyColumn(modifier = modifier) {
         if (conversationCollection.favorites.isNotEmpty()) {
             conversationSectionHeader(
-                key = SECTION_HIDDEN_KEY,
+                key = SECTION_FAVORITES_KEY,
                 text = R.string.conversation_overview_section_favorites,
                 onClickAddAction = NoAction
             )
 
-            defaultConversationList(conversationCollection.favorites)
+            defaultConversationList(conversationCollection.favorites, KEY_SUFFIX_FAVORITES)
         }
 
         conversationSectionHeader(
@@ -88,7 +96,7 @@ internal fun ConversationList(
             onClickAddAction = OnClickAction(onRequestAddChannel)
         )
 
-        defaultConversationList(conversationCollection.channels)
+        defaultConversationList(conversationCollection.channels, KEY_SUFFIX_CHANNELS)
 
         conversationSectionHeader(
             key = SECTION_GROUPS_KEY,
@@ -96,7 +104,7 @@ internal fun ConversationList(
             onClickAddAction = OnClickAction(onRequestCreatePersonalConversation)
         )
 
-        defaultConversationList(conversationCollection.groupChats)
+        defaultConversationList(conversationCollection.groupChats, KEY_SUFFIX_GROUPS)
 
         conversationSectionHeader(
             key = SECTION_DIRECT_MESSAGES_KEY,
@@ -104,7 +112,7 @@ internal fun ConversationList(
             onClickAddAction = OnClickAction(onRequestCreatePersonalConversation)
         )
 
-        defaultConversationList(conversationCollection.directChats)
+        defaultConversationList(conversationCollection.directChats, KEY_SUFFIX_PERSONAL)
 
         if (conversationCollection.hidden.isNotEmpty()) {
             conversationSectionHeader(
@@ -113,7 +121,7 @@ internal fun ConversationList(
                 onClickAddAction = NoAction
             )
 
-            defaultConversationList(conversationCollection.hidden)
+            defaultConversationList(conversationCollection.hidden, KEY_SUFFIX_HIDDEN)
         }
     }
 }
@@ -159,12 +167,13 @@ private fun LazyListScope.conversationSectionHeader(
 }
 
 private fun LazyListScope.conversationList(
+    keySuffix: String,
     conversations: List<Conversation>,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
 ) {
-    items(conversations, key = Conversation::id) { conversation ->
+    items(conversations, key = { "${it.id}$keySuffix" }) { conversation ->
         ConversationListItem(
             modifier = Modifier.fillMaxWidth(),
             conversation = conversation,

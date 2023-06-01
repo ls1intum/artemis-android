@@ -100,7 +100,8 @@ private fun ConversationScreen(
                 title = {
                     Text(
                         modifier = Modifier.placeholder(visible = !conversationDataState.isSuccess),
-                        text = title
+                        text = title,
+                        maxLines = 1
                     )
                 },
                 navigationIcon = {

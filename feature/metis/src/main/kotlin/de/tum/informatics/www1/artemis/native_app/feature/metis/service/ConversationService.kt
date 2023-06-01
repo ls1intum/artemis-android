@@ -116,6 +116,22 @@ interface ConversationService {
         authToken: String,
         serverUrl: String
     ): NetworkResponse<Boolean>
+
+    suspend fun markConversationAsHidden(
+        courseId: Long,
+        conversationId: Long,
+        hidden: Boolean,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean>
+
+    suspend fun markConversationAsFavorite(
+        courseId: Long,
+        conversationId: Long,
+        favorite: Boolean,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean>
 }
 
 suspend fun ConversationService.getConversation(

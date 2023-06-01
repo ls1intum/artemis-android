@@ -7,6 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState.Success
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.keepSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
@@ -24,6 +25,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversa
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +35,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -45,11 +49,11 @@ import kotlin.time.Duration.Companion.seconds
 
 class ConversationOverviewViewModel(
     private val courseId: Long,
-    conversationService: ConversationService,
+    private val conversationService: ConversationService,
     websocketProvider: WebsocketProvider,
     networkStatusProvider: NetworkStatusProvider,
-    serverConfigurationService: ServerConfigurationService,
-    accountService: AccountService,
+    private val serverConfigurationService: ServerConfigurationService,
+    private val accountService: AccountService,
     serverDataService: ServerDataService
 ) : ViewModel() {
 
@@ -204,12 +208,40 @@ class ConversationOverviewViewModel(
         _query.value = newQuery
     }
 
-    fun markConversationAsHidden(conversationId: Long, hidden: Boolean) {
-
+    fun markConversationAsHidden(conversationId: Long, hidden: Boolean): Deferred<Boolean> {
+        return viewModelScope.async {
+            conversationService.markConversationAsHidden(
+                courseId,
+                conversationId,
+                hidden,
+                accountService.authToken.first(),
+                serverConfigurationService.serverUrl.first()
+            )
+                .onSuccess {
+                    if (it) {
+                        onRequestReload.tryEmit(Unit)
+                    }
+                }
+                .or(false)
+        }
     }
 
-    fun markConversationAsFavorite(conversationId: Long, favorite: Boolean) {
-
+    fun markConversationAsFavorite(conversationId: Long, favorite: Boolean): Deferred<Boolean> {
+        return viewModelScope.async {
+            conversationService.markConversationAsFavorite(
+                courseId,
+                conversationId,
+                favorite,
+                accountService.authToken.first(),
+                serverConfigurationService.serverUrl.first()
+            )
+                .onSuccess {
+                    if (it) {
+                        onRequestReload.tryEmit(Unit)
+                    }
+                }
+                .or(false)
+        }
     }
 
     private inline fun <reified T : Conversation> List<*>.filterNotHiddenNorFavourite(): List<T> {

@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupCha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import io.ktor.client.call.body
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -333,6 +334,42 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         }
     }
 
+    override suspend fun markConversationAsHidden(
+        courseId: Long,
+        conversationId: Long,
+        hidden: Boolean,
+        authToken: String,
+        serverUrl: String
+    ) = performActionOnConversation(
+        courseId,
+        conversationId,
+        authToken = authToken,
+        serverUrl = serverUrl,
+        httpRequestBlock = {
+            parameter("isHidden", hidden)
+        }
+    ) {
+        appendPathSegments("hidden")
+    }
+
+    override suspend fun markConversationAsFavorite(
+        courseId: Long,
+        conversationId: Long,
+        favorite: Boolean,
+        authToken: String,
+        serverUrl: String
+    ) = performActionOnConversation(
+        courseId,
+        conversationId,
+        authToken = authToken,
+        serverUrl = serverUrl,
+        httpRequestBlock = {
+            parameter("isFavorite", favorite)
+        }
+    ) {
+        appendPathSegments("favorite")
+    }
+
     private suspend fun performActionOnUser(
         courseId: Long,
         conversation: Conversation,
@@ -378,6 +415,23 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         authToken: String,
         serverUrl: String,
         urlBlock: URLBuilder.() -> Unit
+    ): NetworkResponse<Boolean> = performActionOnConversation(
+        courseId,
+        conversationId,
+        "channels",
+        authToken,
+        serverUrl,
+        urlBlock = urlBlock
+    )
+
+    private suspend fun performActionOnConversation(
+        courseId: Long,
+        conversationId: Long,
+        conversationTypePath: String = "conversations",
+        authToken: String,
+        serverUrl: String,
+        httpRequestBlock: HttpRequestBuilder.() -> Unit = {},
+        urlBlock: URLBuilder.() -> Unit
     ): NetworkResponse<Boolean> {
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
@@ -386,12 +440,14 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
                         "api",
                         "courses",
                         courseId.toString(),
-                        "channels",
+                        conversationTypePath,
                         conversationId.toString()
                     )
 
                     urlBlock()
                 }
+
+                httpRequestBlock()
 
                 cookieAuth(authToken)
             }
