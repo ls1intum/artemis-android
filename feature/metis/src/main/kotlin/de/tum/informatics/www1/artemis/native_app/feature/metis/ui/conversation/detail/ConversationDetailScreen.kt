@@ -85,7 +85,7 @@ private fun ConversationScreen(
 
     val viewModel = koinViewModel<MetisListViewModel> { parametersOf(metisContext) }
 
-    val conversationDataState by viewModel.conversation.collectAsState()
+    val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
 
     Scaffold(
         modifier = modifier,

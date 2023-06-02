@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -16,19 +15,16 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationWebsocketDTO
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.subscribeToConversationUpdates
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -55,32 +51,21 @@ class ConversationOverviewViewModel(
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     serverDataService: ServerDataService
-) : ViewModel() {
+) : MetisViewModel(
+    serverConfigurationService,
+    accountService,
+    serverDataService,
+    networkStatusProvider,
+    websocketProvider
+) {
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query
 
-    private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-
-    private val userId: StateFlow<DataState<Long>> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
-        onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            serverDataService
-                .getAccountData(serverUrl, authToken)
-                .bind { it.id }
-        }
-    }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
-
-    private val conversationUpdates: Flow<ConversationWebsocketDTO> = userId
+    private val conversationUpdates: Flow<ConversationWebsocketDTO> = clientId
         .filterSuccess()
         .flatMapLatest { userId ->
-            val topic = "/user/topic/metis/courses/$courseId/conversations/user/$userId"
-
-            websocketProvider.subscribeMessage(topic, ConversationWebsocketDTO.serializer())
+            websocketProvider.subscribeToConversationUpdates(userId, courseId)
         }
         .shareIn(
             viewModelScope,
@@ -150,11 +135,8 @@ class ConversationOverviewViewModel(
         }
             .map(::Success)
 
-    val isReloadingConversations: StateFlow<Boolean> = updatedConversations
-        .map { conversations ->
-            conversations !is Success
-        }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val isConnected: StateFlow<Boolean> =
+        websocketProvider.isConnected.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     private val conversationsAsCollections: StateFlow<DataState<ConversationCollection>> =
         updatedConversations
@@ -199,10 +181,6 @@ class ConversationOverviewViewModel(
             }
         }
             .stateIn(viewModelScope, SharingStarted.Eagerly)
-
-    fun requestReload() {
-        onRequestReload.tryEmit(Unit)
-    }
 
     fun onUpdateQuery(newQuery: String) {
         _query.value = newQuery

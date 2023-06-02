@@ -1,9 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -21,16 +24,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.NavType
-import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
-import androidx.navigation.navDeepLink
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
@@ -38,7 +38,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.browse_channels.navigateToBrowseChannelsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.courseNavGraphBuilderExtensions
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel.navigateToCreateChannelScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.navigateToCreatePersonalConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
 import org.koin.androidx.compose.koinViewModel
@@ -61,7 +60,7 @@ fun NavGraphBuilder.conversationOverviewScreen(
         route = ConversationOverviewRoute,
         deepLink = "artemis://courses/{courseId}/conversations"
     ) { courseId ->
-        ConversationScreen(
+        ConversationOverviewScreen(
             modifier = Modifier.fillMaxSize(),
             courseId = courseId,
             onNavigateToConversation = { conversationId ->
@@ -79,7 +78,7 @@ fun NavGraphBuilder.conversationOverviewScreen(
 }
 
 @Composable
-private fun ConversationScreen(
+private fun ConversationOverviewScreen(
     modifier: Modifier,
     courseId: Long,
     onNavigateToConversation: (conversationId: Long) -> Unit,
@@ -89,6 +88,8 @@ private fun ConversationScreen(
 ) {
     val viewModel: ConversationOverviewViewModel = koinViewModel { parametersOf(courseId) }
     val conversationCollectionDataState: DataState<ConversationCollection> by viewModel.conversations.collectAsState()
+
+    val isConnected by viewModel.isConnected.collectAsState()
 
     val query by viewModel.query.collectAsState()
 
@@ -100,7 +101,9 @@ private fun ConversationScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(id = R.string.conversation_overview_title)) },
+                title = {
+                    Text(text = stringResource(id = R.string.conversation_overview_title))
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
@@ -131,6 +134,23 @@ private fun ConversationScreen(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                AnimatedVisibility(modifier = Modifier.fillMaxWidth(), visible = !isConnected) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(imageVector = Icons.Default.WifiOff, contentDescription = null)
+
+                            Text(
+                                text = stringResource(id = R.string.conversation_overview_not_connected_banner),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+
                 ConversationSearch(
                     modifier = Modifier
                         .fillMaxWidth()

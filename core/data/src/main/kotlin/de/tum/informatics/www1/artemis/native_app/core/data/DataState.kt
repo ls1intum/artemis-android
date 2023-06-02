@@ -71,7 +71,10 @@ infix fun <T, K> DataState<T>.join(other: DataState<K>): DataState<Pair<T, K>> {
     }
 }
 
-fun <T, K, L> DataState<T>.join(first: DataState<K>, second: DataState<L>): DataState<Triple<T, K, L>> {
+fun <T, K, L> DataState<T>.join(
+    first: DataState<K>,
+    second: DataState<L>
+): DataState<Triple<T, K, L>> {
     return (this join first join second).bind { (ab, c) ->
         val (a, b) = ab
         Triple(a, b, c)
@@ -93,7 +96,20 @@ fun <T> Flow<DataState<T>>.filterSuccess(): Flow<T> = transform {
 
 fun <T> Flow<DataState<T>>.keepSuccess(): Flow<DataState<T>> = filter { it.isSuccess }
 
-fun <T> Flow<DataState<T>>.stateIn(scope: CoroutineScope, sharingStarted: SharingStarted): StateFlow<DataState<T>> =
+fun <T> Flow<DataState<T>>.holdLatestLoaded(): Flow<DataState<T>> =
+    transformWhile { dataState ->
+        emit(dataState)
+        dataState !is DataState.Success
+    }
+        // After we have received our first success, we only take winners
+        .onCompletion {
+            emitAll(this@holdLatestLoaded.keepSuccess())
+        }
+
+fun <T> Flow<DataState<T>>.stateIn(
+    scope: CoroutineScope,
+    sharingStarted: SharingStarted
+): StateFlow<DataState<T>> =
     stateIn(scope, sharingStarted, DataState.Loading())
 
 /**
@@ -140,7 +156,7 @@ inline fun <T> retryOnInternet(
                 currentBackoff += 2
             }
         }
-        .catch {  error ->
+        .catch { error ->
             emit(DataState.Failure(error))
         }
         .transformWhile { dataState ->

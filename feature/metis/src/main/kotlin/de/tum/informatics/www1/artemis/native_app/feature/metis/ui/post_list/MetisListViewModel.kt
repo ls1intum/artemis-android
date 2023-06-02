@@ -53,12 +53,12 @@ internal class MetisListViewModel(
     private val metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
     private val metisContextManager: MetisContextManager,
-    private val metisModificationService: MetisModificationService,
-    private val accountService: AccountService,
+    metisModificationService: MetisModificationService,
+    accountService: AccountService,
     websocketProvider: WebsocketProvider,
     serverDataService: ServerDataService,
     networkStatusProvider: NetworkStatusProvider,
-    private val conversationService: ConversationService
+    conversationService: ConversationService
 ) : MetisContentViewModel(
     metisContext,
     websocketProvider,

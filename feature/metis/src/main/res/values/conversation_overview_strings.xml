@@ -24,4 +24,6 @@
     <string name="conversation_overview_loading">Loading conversations…</string>
     <string name="conversation_overview_loading_failed">Something went wrong while loading your conversations.</string>
     <string name="conversation_overview_loading_try_again">Try again.</string>
+
+    <string name="conversation_overview_not_connected_banner">Not connected to server</string>
 </resources>
