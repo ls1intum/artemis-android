@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="conversation_overview_title">Conversations</string>
-
     <string name="conversation_overview_search_hint">Search for conversation</string>
 
     <string name="conversation_overview_conversation_item_mark_as_favorite">Favorite</string>

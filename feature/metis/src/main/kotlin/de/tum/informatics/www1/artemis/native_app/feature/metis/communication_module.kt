@@ -37,7 +37,7 @@ val communicationModule = module {
 
     viewModel { params ->
         MetisListViewModel(
-            metisContext = params.get(),
+            initialMetisContext = params.get(),
             get(),
             get(),
             get(),

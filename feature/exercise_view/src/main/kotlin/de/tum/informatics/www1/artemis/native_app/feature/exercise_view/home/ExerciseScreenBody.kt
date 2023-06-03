@@ -37,7 +37,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.overview.ExerciseOverviewTab
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.SideBarMetisUi
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.SmartphoneMetisUi
 
 // Ratio of metis content in contrast to the actual exercise content
 const val METIS_RATIO = 0.3f
@@ -186,14 +185,14 @@ private fun BodyWithTabs(
                 }
 
                 if (metisContext != null) {
-                    SmartphoneMetisUi(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp),
-                        metisContext = metisContext,
-                        navController = navController,
-                        displayFab = false // The FAB is displayed by the exercise screen itself.
-                    )
+//                    SmartphoneConversationUi(
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .padding(horizontal = 8.dp),
+//                        metisContext = metisContext,
+//                        navController = navController
+//                        // The FAB is displayed by the exercise screen itself.
+//                    )
                 }
             }
         }

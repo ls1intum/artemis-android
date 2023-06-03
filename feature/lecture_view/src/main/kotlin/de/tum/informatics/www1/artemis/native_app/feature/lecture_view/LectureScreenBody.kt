@@ -26,7 +26,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.SmartphoneMetisUi
 
 @Composable
 internal fun LectureScreenBody(
@@ -152,13 +151,13 @@ internal fun LectureScreenBody(
                 }
 
                 qnaTabIndex -> {
-                    SmartphoneMetisUi(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp),
-                        metisContext = metisContext,
-                        navController = navController
-                    )
+//                    SmartphoneConversationUi(
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .padding(horizontal = 8.dp),
+//                        metisContext = metisContext,
+//                        navController = navController
+//                    )
                 }
 
                 attachmentsTabIndex -> {

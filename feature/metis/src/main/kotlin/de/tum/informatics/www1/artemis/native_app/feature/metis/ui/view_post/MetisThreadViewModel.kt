@@ -29,11 +29,14 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisContentV
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -45,8 +48,8 @@ import kotlinx.datetime.Clock
  * ViewModel for the standalone view of communication posts. Handles loading of the singular post by the given post id.
  */
 internal class MetisThreadViewModel(
-    val postId: StandalonePostId,
-    val metisContext: MetisContext,
+    initialPostId: StandalonePostId,
+    initialMetisContext: MetisContext,
     private val metisStorageService: MetisStorageService,
     private val metisService: MetisService,
     private val networkStatusProvider: NetworkStatusProvider,
@@ -59,7 +62,7 @@ internal class MetisThreadViewModel(
     serverDataService: ServerDataService,
     conversationService: ConversationService
 ) : MetisContentViewModel(
-    metisContext,
+    initialMetisContext,
     websocketProvider,
     metisModificationService,
     metisStorageService,
@@ -78,37 +81,47 @@ internal class MetisThreadViewModel(
         }
     }
 
+    private val postId = MutableStateFlow(initialPostId)
+
     /**
      * The post data state flow as loading from the server.
      */
-    val post: StateFlow<DataState<Post>> = when (postId) {
-        is StandalonePostId.ClientSideId -> metisStorageService
-            .getStandalonePost(postId.clientSideId)
-            .asDataStateFlow()
+    val post: StateFlow<DataState<Post>> = postId.flatMapLatest { postId ->
+        when (postId) {
+            is StandalonePostId.ClientSideId -> metisStorageService
+                .getStandalonePost(postId.clientSideId)
+                .asDataStateFlow()
 
-        is StandalonePostId.ServerSideId -> flatMapLatest(
-            serverConfigurationService.serverUrl,
-            accountService.authToken,
-            onRequestReload.onStart { emit(Unit) }
-        ) { serverUrl, authToken, _ ->
-            retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                metisService.getPost(
-                    metisContext,
-                    serverSidePostId = postId.serverSidePostId,
-                    serverUrl = serverUrl,
-                    authToken = authToken
-                )
+            is StandalonePostId.ServerSideId -> flatMapLatest(
+                metisContext,
+                serverConfigurationService.serverUrl,
+                accountService.authToken,
+                onRequestReload.onStart { emit(Unit) }
+            ) { metisContext, serverUrl, authToken, _ ->
+                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                    metisService.getPost(
+                        metisContext,
+                        serverSidePostId = postId.serverSidePostId,
+                        serverUrl = serverUrl,
+                        authToken = authToken
+                    )
+                }
             }
+                .flatMapLatest { standalonePostDataState ->
+                    currentMetisContext.flatMapLatest { metisContext ->
+                        handleServerLoadedStandalonePost(metisContext, standalonePostDataState)
+                    }
+                }
+                .onStart { emit(DataState.Loading()) }
         }
-            .flatMapLatest { standalonePostDataState ->
-                handleServerLoadedStandalonePost(standalonePostDataState)
-            }
-            .onStart { emit(DataState.Loading()) }
     }
         .map { dataState -> dataState.bind { it } } // Type check adaption
         .stateIn(viewModelScope, SharingStarted.Eagerly)
 
-    private suspend fun handleServerLoadedStandalonePost(standalonePostDataState: DataState<StandalonePost>): Flow<DataState<Post>> {
+    private suspend fun handleServerLoadedStandalonePost(
+        metisContext: MetisContext,
+        standalonePostDataState: DataState<StandalonePost>
+    ): Flow<DataState<Post>> {
         val failureFlow: Flow<DataState<Post>> =
             flowOf(DataState.Failure(RuntimeException("Something went wrong while loading the post.")))
 
@@ -148,14 +161,22 @@ internal class MetisThreadViewModel(
     init {
         if (subscribeToLiveUpdateService) {
             viewModelScope.launch {
-                serverConfigurationService.host.collectLatest { host ->
+                combine(
+                    serverConfigurationService.host,
+                    metisContext,
+                    ::Pair
+                ).collectLatest { (host, metisContext) ->
                     metisContextManager.updatePosts(host, metisContext)
                 }
             }
 
             viewModelScope.launch {
-                onRequestReload
-                    .collect {
+                combine(
+                    metisContext,
+                    postId,
+                    onRequestReload
+                ) { a, b, _ -> a to b }
+                    .collect { (metisContext, postId) ->
                         val serverSidePostId = when (postId) {
                             is StandalonePostId.ClientSideId -> {
                                 post.filterSuccess().filterNotNull().first().serverPostId
@@ -199,13 +220,14 @@ internal class MetisThreadViewModel(
         return viewModelScope.async {
             if (!post.value.isSuccess) return@async MetisModificationFailure.CREATE_POST
 
-            val conversation = loadConversation() ?: return@async MetisModificationFailure.CREATE_POST
+            val conversation =
+                loadConversation() ?: return@async MetisModificationFailure.CREATE_POST
 
             val replyPost = AnswerPost(
                 creationDate = Clock.System.now(),
                 content = replyText,
                 post = StandalonePost(
-                    id = when (postId) {
+                    id = when (val postId = postId.value) {
                         is StandalonePostId.ClientSideId -> metisStorageService.getServerSidePostId(
                             serverConfigurationService.host.first(),
                             postId.clientSideId
@@ -221,5 +243,7 @@ internal class MetisThreadViewModel(
         }
     }
 
-    override suspend fun getMetisContext(): MetisContext = metisContext
+    fun updatePostId(newPostId: StandalonePostId) {
+        postId.value = newPostId
+    }
 }

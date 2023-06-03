@@ -30,6 +30,7 @@ class MetisContextManager(
 
     private val metisUpdateListenerMap: MutableMap<MetisContext, Flow<WebsocketProvider.WebsocketData<MetisPostDTO>>> =
         ConcurrentHashMap()
+
     /**
      * Collect updates from the STOMP service and update the database accordingly.
      */

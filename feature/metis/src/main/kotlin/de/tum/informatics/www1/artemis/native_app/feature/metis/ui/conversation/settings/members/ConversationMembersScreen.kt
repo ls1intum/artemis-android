@@ -41,7 +41,7 @@ fun NavGraphBuilder.conversationMembersScreen(
 }
 
 @Composable
-private fun ConversationMembersScreen(
+internal fun ConversationMembersScreen(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,

@@ -61,7 +61,9 @@ internal fun MetisChatList(
     isReplyEnabled: Boolean = true,
     onClickViewPost: (clientPostId: String) -> Unit
 ) {
-    ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
+    val metisContext by viewModel.currentMetisContext.collectAsState()
+
+    ReportVisibleMetisContext(remember(metisContext) { VisiblePostList(metisContext) })
 
     val posts: LazyPagingItems<ChatListItem> = viewModel.postPagingData.collectAsLazyPagingItems()
     val isDataOutdated by viewModel.isDataOutdated.collectAsState(initial = false)

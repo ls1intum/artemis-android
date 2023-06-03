@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
@@ -48,7 +49,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class MetisListViewModel(
-    val metisContext: MetisContext,
+    initialMetisContext: MetisContext,
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
@@ -60,7 +61,7 @@ internal class MetisListViewModel(
     networkStatusProvider: NetworkStatusProvider,
     conversationService: ConversationService
 ) : MetisContentViewModel(
-    metisContext,
+    initialMetisContext,
     websocketProvider,
     metisModificationService,
     metisStorageService,
@@ -97,11 +98,12 @@ internal class MetisListViewModel(
     val courseWideContext: StateFlow<CourseWideContext?> = _courseWideContext
 
     private val standaloneMetisContext: Flow<StandalonePostsContext> = combine(
+        metisContext,
         _filter,
         delayedQuery,
         _sortingStrategy,
         _courseWideContext
-    ) { filter, query, sortingStrategy, courseWideContext ->
+    ) { metisContext, filter, query, sortingStrategy, courseWideContext ->
         StandalonePostsContext(
             metisContext = metisContext,
             filter = filter,
@@ -131,9 +133,11 @@ internal class MetisListViewModel(
         flatMapLatest(
             pagingDataInput,
             accountService.authToken,
-            clientId.map { it.orElse(0L) },
+            clientIdOrDefault,
             onRequestReload.onStart { emit(Unit) }
         ) { pagingDataInput, authToken, clientId, _ ->
+            Log.w("FOO", "new pager")
+
             Pager(
                 config = PagingConfig(
                     pageSize = 20
@@ -154,7 +158,7 @@ internal class MetisListViewModel(
                         filter = pagingDataInput.standalonePostsContext.filter,
                         sortingStrategy = pagingDataInput.standalonePostsContext.sortingStrategy,
                         query = pagingDataInput.standalonePostsContext.query,
-                        metisContext = metisContext
+                        metisContext = pagingDataInput.standalonePostsContext.metisContext
                     )
                 }
             )
@@ -167,7 +171,11 @@ internal class MetisListViewModel(
 
     init {
         viewModelScope.launch {
-            serverConfigurationService.host.collectLatest { host ->
+            combine(
+                serverConfigurationService.host,
+                metisContext,
+                ::Pair
+            ).collectLatest { (host, metisContext) ->
                 metisContextManager.updatePosts(host, metisContext)
             }
         }
@@ -211,8 +219,6 @@ internal class MetisListViewModel(
     fun updateSortingStrategy(new: MetisSortingStrategy) {
         _sortingStrategy.value = new
     }
-
-    override suspend fun getMetisContext(): MetisContext = metisContext
 
     private fun insertDateSeparators(pagingList: PagingData<ChatListItem.PostChatListItem>) =
         pagingList.insertSeparators { before: ChatListItem.PostChatListItem?, after: ChatListItem.PostChatListItem? ->

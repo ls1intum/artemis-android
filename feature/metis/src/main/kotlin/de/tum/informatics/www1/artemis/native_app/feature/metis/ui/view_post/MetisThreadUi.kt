@@ -52,13 +52,15 @@ internal fun MetisThreadUi(
 
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
 
+    val metisContext by viewModel.currentMetisContext.collectAsState()
+
     postDataState.bind { it.serverPostId }.orNull()?.let { serverSidePostId ->
         ReportVisibleMetisContext(
             remember(
-                viewModel.metisContext,
+                metisContext,
                 serverSidePostId
             ) {
-                VisibleStandalonePostDetails(viewModel.metisContext, serverSidePostId)
+                VisibleStandalonePostDetails(metisContext, serverSidePostId)
             }
         )
     }

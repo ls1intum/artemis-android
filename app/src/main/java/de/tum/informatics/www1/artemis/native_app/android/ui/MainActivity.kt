@@ -48,8 +48,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.createPersonalConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.conversationDetailScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.conversationOverviewScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.navigateToConversationOverviewScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.add_members.conversationAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.conversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.conversationSettingsScreen
@@ -242,12 +240,7 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
                     },
                     onNavigateBack = navController::navigateUp,
                     navController = navController,
-                    onViewQuizResults = onClickViewQuizResults,
-                    onNavigateToMessages = { courseId ->
-                        navController.navigateToConversationOverviewScreen(
-                            courseId
-                        ) { }
-                    }
+                    onViewQuizResults = onClickViewQuizResults
                 )
 
                 exercise(
@@ -274,11 +267,6 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
 
                 standalonePostScreen(
                     onNavigateUp = navController::navigateUp
-                )
-
-                conversationOverviewScreen(
-                    navController = navController,
-                    onNavigateBack = navController::navigateUp
                 )
 
                 conversationDetailScreen(

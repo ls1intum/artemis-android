@@ -12,6 +12,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -36,6 +37,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.nav
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+internal const val ConversationDetailsRoute = "course/{courseId}/conversations/{conversationId}"
+
 fun NavController.navigateToConversationDetailScreen(
     courseId: Long,
     conversationId: Long,
@@ -49,7 +52,7 @@ fun NavGraphBuilder.conversationDetailScreen(
     onNavigateBack: () -> Unit
 ) {
     conversationNavGraphBuilderExtension(
-        route = "course/{courseId}/conversations/{conversationId}",
+        route = ConversationDetailsRoute,
         deepLink = "artemis://courses/{courseId}/conversations/{conversationId}"
     ) { courseId, conversationId ->
         ConversationScreen(
@@ -71,11 +74,11 @@ fun NavGraphBuilder.conversationDetailScreen(
 }
 
 @Composable
-private fun ConversationScreen(
+fun ConversationScreen(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,
-    onNavigateBack: () -> Unit,
+    onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onClickViewPost: (clientPostId: String) -> Unit
 ) {
@@ -84,6 +87,10 @@ private fun ConversationScreen(
     }
 
     val viewModel = koinViewModel<MetisListViewModel> { parametersOf(metisContext) }
+
+    LaunchedEffect(metisContext) {
+        viewModel.updateMetisContext(metisContext)
+    }
 
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
 
@@ -105,8 +112,10 @@ private fun ConversationScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                    onNavigateBack?.let {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                        }
                     }
                 },
                 actions = {

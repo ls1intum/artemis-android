@@ -55,7 +55,7 @@ fun NavGraphBuilder.conversationAddMembersScreen(
 }
 
 @Composable
-private fun ConversationAddMembersScreen(
+internal fun ConversationAddMembersScreen(
     modifier: Modifier,
     courseId: Long,
     onNavigateBack: () -> Unit

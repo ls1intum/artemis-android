@@ -49,6 +49,8 @@ import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+internal const val BrowseChannelsRoute = "course/{courseId}/browse_channel"
+
 fun NavController.navigateToBrowseChannelsScreen(
     courseId: Long,
     builder: NavOptionsBuilder.() -> Unit
@@ -62,7 +64,7 @@ fun NavGraphBuilder.browseChannelsScreen(
     onNavigateBack: () -> Unit
 ) {
     courseNavGraphBuilderExtensions(
-        route = "course/{courseId}/browse_channel"
+        route = BrowseChannelsRoute
     ) { courseId ->
         BrowseChannelsScreen(
             modifier = Modifier.fillMaxSize(),
@@ -77,7 +79,7 @@ fun NavGraphBuilder.browseChannelsScreen(
 }
 
 @Composable
-private fun BrowseChannelsScreen(
+internal fun BrowseChannelsScreen(
     modifier: Modifier,
     courseId: Long,
     onNavigateToConversation: (conversationId: Long) -> Unit,

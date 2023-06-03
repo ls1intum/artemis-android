@@ -59,7 +59,7 @@ fun NavGraphBuilder.createPersonalConversationScreen(
 }
 
 @Composable
-private fun CreatePersonalConversationScreen(
+fun CreatePersonalConversationScreen(
     modifier: Modifier,
     courseId: Long,
     onConversationCreated: (conversationId: Long) -> Unit,

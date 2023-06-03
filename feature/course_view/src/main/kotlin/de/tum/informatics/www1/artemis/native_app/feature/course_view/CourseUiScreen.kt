@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -20,11 +21,16 @@ import androidx.navigation.compose.composable
 import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.SmartphoneMetisUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.browse_channels.navigateToBrowseChannelsScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.navigateToCreatePersonalConversationScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.SinglePageConversationBody
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewBody
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -40,7 +46,6 @@ fun NavGraphBuilder.course(
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
     onViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
-    onNavigateToMessages: (courseId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     composable(
@@ -54,8 +59,7 @@ fun NavGraphBuilder.course(
             }
         )
     ) { backStackEntry ->
-        val courseId =
-            backStackEntry.arguments?.getLong("courseId")
+        val courseId = backStackEntry.arguments?.getLong("courseId")
         checkNotNull(courseId)
 
         CourseUiScreen(
@@ -75,8 +79,7 @@ fun NavGraphBuilder.course(
                 )
             },
             onClickViewQuizResults = onViewQuizResults,
-            onNavigateToExerciseResultView = onNavigateToExerciseResultView,
-            onNavigateToMessages = { onNavigateToMessages(courseId) }
+            onNavigateToExerciseResultView = onNavigateToExerciseResultView
         )
     }
 }
@@ -93,7 +96,6 @@ internal fun CourseUiScreen(
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onNavigateToLecture: (lectureId: Long) -> Unit,
-    onNavigateToMessages: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val courseDataState by viewModel.course.collectAsState()
@@ -117,8 +119,7 @@ internal fun CourseUiScreen(
                 scrollBehavior = scrollBehavior,
                 selectedTabIndex = selectedTabIndex,
                 changeTab = { selectedTabIndex = it },
-                onReloadCourse = viewModel::reloadCourse,
-                onNavigateToCourseMessages = onNavigateToMessages
+                onReloadCourse = viewModel::reloadCourse
             )
         }
     ) { padding ->
@@ -200,15 +201,8 @@ internal fun CourseUiScreen(
                             .fillMaxSize()
                             .padding(horizontal = 8.dp)
 
-                        if (course.postsEnabled) {
-                            val metisContext = remember {
-                                MetisContext.Course(courseId = courseId)
-                            }
-                            SmartphoneMetisUi(
-                                modifier = metisModifier,
-                                metisContext = metisContext,
-                                navController = navController
-                            )
+                        if (course.courseInformationSharingConfiguration.supportsMessaging) {
+                            SinglePageConversationBody(metisModifier, courseId)
                         } else {
                             Box(modifier = metisModifier) {
                                 Text(
@@ -233,7 +227,6 @@ private fun CourseTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
     changeTab: (Int) -> Unit,
     onReloadCourse: () -> Unit,
-    onNavigateToCourseMessages: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     Column {
@@ -251,10 +244,6 @@ private fun CourseTopAppBar(
                 }
             },
             actions = {
-                IconButton(onClick = onNavigateToCourseMessages) {
-                    Icon(imageVector = Icons.Default.Message, contentDescription = null)
-                }
-
                 IconButton(onClick = onReloadCourse) {
                     Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
                 }

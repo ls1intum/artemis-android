@@ -19,10 +19,17 @@ data class Course(
     val semester: String = "",
     val registrationConfirmationMessage: String = "",
     val accuracyOfScores: Float = 1f,
-    val postsEnabled: Boolean = true,
+    val courseInformationSharingConfiguration: CourseInformationSharingConfiguration = CourseInformationSharingConfiguration.DISABLED,
     val color: String? = null,
     val instructorGroupName: String = "",
     val studentGroupName: String = "",
     val teachingAssistantGroupName: String = "",
     val editorGroupName: String = ""
-)
+) {
+    enum class CourseInformationSharingConfiguration(val supportsMessaging: Boolean) {
+        COMMUNICATION_AND_MESSAGING(true),
+        COMMUNICATION_ONLY(false),
+        MESSAGING_ONLY(true),
+        DISABLED(false)
+    }
+}

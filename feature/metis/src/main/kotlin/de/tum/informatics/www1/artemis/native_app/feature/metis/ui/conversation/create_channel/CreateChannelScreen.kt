@@ -37,9 +37,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFlo
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.PotentiallyIllegalTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.browse_channels.BrowseChannelsRoute
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.courseNavGraphBuilderExtensions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewRoute
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -62,8 +62,8 @@ fun NavGraphBuilder.createChannelScreen(
             courseId = courseId,
             onConversationCreated = { conversationId ->
                 navController.navigateToConversationDetailScreen(courseId, conversationId) {
-                    popUpTo(ConversationOverviewRoute) {
-                        inclusive = false
+                    popUpTo(BrowseChannelsRoute) {
+                        inclusive = true
                     }
                 }
             },
@@ -73,7 +73,7 @@ fun NavGraphBuilder.createChannelScreen(
 }
 
 @Composable
-private fun CreateChannelScreen(
+fun CreateChannelScreen(
     modifier: Modifier,
     courseId: Long,
     onConversationCreated: (conversationId: Long) -> Unit,

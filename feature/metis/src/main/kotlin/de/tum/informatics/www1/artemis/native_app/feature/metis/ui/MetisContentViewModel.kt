@@ -37,6 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisSto
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.getConversation
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
@@ -54,7 +55,7 @@ import kotlinx.coroutines.launch
  * Live metis content is content that is being permanently updated by websockets.
  */
 abstract class MetisContentViewModel(
-    metisContext: MetisContext,
+    initialMetisContext: MetisContext,
     private val websocketProvider: WebsocketProvider,
     private val metisModificationService: MetisModificationService,
     private val metisStorageService: MetisStorageService,
@@ -71,28 +72,33 @@ abstract class MetisContentViewModel(
     websocketProvider
 ) {
 
-    val hasModerationRights: StateFlow<Boolean> = when (metisContext) {
-        is MetisContext.Conversation -> {
-            flatMapLatest(
-                serverConfigurationService.serverUrl,
-                accountService.authToken,
-                onRequestReload.onStart { emit(Unit) }
-            ) { serverUrl, authToken, _ ->
-                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                    conversationService
-                        .getConversation(
-                            courseId = metisContext.courseId,
-                            conversationId = metisContext.conversationId,
-                            authToken = serverUrl,
-                            serverUrl = authToken
-                        )
-                        .bind { it.hasModerationRights }
-                }
-                    .map { it.orElse(false) }
-            }
-        }
+    protected val metisContext = MutableStateFlow(initialMetisContext)
+    val currentMetisContext: StateFlow<MetisContext> = metisContext
 
-        else -> flowOf(false)
+    val hasModerationRights: StateFlow<Boolean> = metisContext.flatMapLatest { metisContext ->
+        when (metisContext) {
+            is MetisContext.Conversation -> {
+                flatMapLatest(
+                    serverConfigurationService.serverUrl,
+                    accountService.authToken,
+                    onRequestReload.onStart { emit(Unit) }
+                ) { serverUrl, authToken, _ ->
+                    retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                        conversationService
+                            .getConversation(
+                                courseId = metisContext.courseId,
+                                conversationId = metisContext.conversationId,
+                                authToken = serverUrl,
+                                serverUrl = authToken
+                            )
+                            .bind { it.hasModerationRights }
+                    }
+                        .map { it.orElse(false) }
+                }
+            }
+
+            else -> flowOf(false)
+        }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
@@ -125,10 +131,11 @@ abstract class MetisContentViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val conversation: StateFlow<DataState<Conversation>> = flatMapLatest(
+        metisContext,
         serverConfigurationService.serverUrl,
         accountService.authToken,
         onReloadRequestAndWebsocketReconnect.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
+    ) { metisContext, serverUrl, authToken, _ ->
         when (metisContext) {
             is MetisContext.Conversation -> retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                 conversationService.getConversation(
@@ -145,9 +152,10 @@ abstract class MetisContentViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     val latestUpdatedConversation: StateFlow<DataState<Conversation>> = flatMapLatest(
+        metisContext,
         conversation.holdLatestLoaded(),
         clientId.filterSuccess()
-    ) { conversationDataState, clientId ->
+    ) { metisContext, conversationDataState, clientId ->
         websocketProvider.subscribeToConversationUpdates(clientId, metisContext.courseId)
             .filter { it.crudAction == MetisPostAction.UPDATE }
             .map<ConversationWebsocketDTO, DataState<Conversation>> { DataState.Success(it.conversation) }
@@ -189,7 +197,7 @@ abstract class MetisContentViewModel(
         post: MetisModificationService.AffectedPost
     ): MetisModificationFailure? {
         val networkResponse: NetworkResponse<Reaction> = metisModificationService.createReaction(
-            context = getMetisContext(),
+            context = metisContext.value,
             post = post,
             emojiId = emojiId,
             serverUrl = serverConfigurationService.serverUrl.first(),
@@ -202,7 +210,7 @@ abstract class MetisContentViewModel(
 
     private suspend fun deleteReactionImpl(reactionId: Long): MetisModificationFailure? {
         val success = metisModificationService.deleteReaction(
-            context = getMetisContext(),
+            context = metisContext.value,
             reactionId = reactionId,
             serverUrl = serverConfigurationService.serverUrl.first(),
             authToken = accountService.authToken.first()
@@ -212,7 +220,7 @@ abstract class MetisContentViewModel(
     }
 
     protected suspend fun createStandalonePostImpl(post: StandalonePost): MetisModificationFailure? {
-        val metisContext = getMetisContext()
+        val metisContext = metisContext.value
         val response = metisModificationService.createPost(
             context = metisContext,
             post = post,
@@ -236,7 +244,7 @@ abstract class MetisContentViewModel(
 
     protected suspend fun createAnswerPostImpl(post: AnswerPost): MetisModificationFailure? {
         val response = metisModificationService.createAnswerPost(
-            context = getMetisContext(),
+            context = metisContext.value,
             post = post,
             serverUrl = serverConfigurationService.serverUrl.first(),
             authToken = accountService.authToken.first()
@@ -249,7 +257,7 @@ abstract class MetisContentViewModel(
     fun deletePost(post: IBasePost): Deferred<MetisModificationFailure?> {
         return viewModelScope.async {
             metisModificationService.deletePost(
-                getMetisContext(),
+                metisContext.value,
                 post.asAffectedPost,
                 serverConfigurationService.serverUrl.first(),
                 accountService.authToken.first()
@@ -270,7 +278,7 @@ abstract class MetisContentViewModel(
             )
 
             metisModificationService.updateStandalonePost(
-                context = getMetisContext(),
+                context = metisContext.value,
                 post = newPost,
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first()
@@ -292,7 +300,7 @@ abstract class MetisContentViewModel(
             val newPost = AnswerPost(post, serializedParentPost).copy(content = newText)
 
             metisModificationService.updateAnswerPost(
-                context = getMetisContext(),
+                context = metisContext.value,
                 post = newPost,
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first()
@@ -313,8 +321,6 @@ abstract class MetisContentViewModel(
         }
     }
 
-    protected abstract suspend fun getMetisContext(): MetisContext
-
     private val IBasePost.asAffectedPost: MetisModificationService.AffectedPost
         get() = when (this) {
             is AnswerPost -> MetisModificationService.AffectedPost.Answer(serverPostId)
@@ -324,7 +330,7 @@ abstract class MetisContentViewModel(
         }
 
     protected suspend fun loadConversation(): Conversation? {
-        val metisContext = getMetisContext()
+        val metisContext = metisContext.value
 
         if (metisContext !is MetisContext.Conversation) return null
 
@@ -334,5 +340,9 @@ abstract class MetisContentViewModel(
             accountService.authToken.first(),
             serverConfigurationService.serverUrl.first()
         ).orNull()
+    }
+
+    fun updateMetisContext(newMetisContext: MetisContext) {
+        metisContext.value = newMetisContext
     }
 }

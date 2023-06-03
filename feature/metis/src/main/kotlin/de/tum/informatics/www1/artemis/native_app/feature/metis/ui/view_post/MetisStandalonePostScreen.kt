@@ -13,6 +13,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -102,7 +103,8 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
             if (courseId != null) {
                 val exerciseId = backStackEntry.arguments?.getString("exerciseId")?.toLongOrNull()
                 val lectureId = backStackEntry.arguments?.getString("lectureId")?.toLongOrNull()
-                val conversationId = backStackEntry.arguments?.getString("conversationId")?.toLongOrNull()
+                val conversationId =
+                    backStackEntry.arguments?.getString("conversationId")?.toLongOrNull()
 
                 when {
                     exerciseId != null -> MetisContext.Exercise(courseId, exerciseId)
@@ -114,6 +116,7 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
         } ?: return@composable // Invalid input, not sure how to handle therefore display nothing
 
         MetisStandalonePostScreen(
+            modifier = Modifier.fillMaxSize(),
             standalonePostId = postId,
             onNavigateUp = onNavigateUp,
             metisContext = metisContext
@@ -125,7 +128,8 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
  * Display the post and its replied. If metis may be outdated, a banner will be displayed to the user.
  */
 @Composable
-private fun MetisStandalonePostScreen(
+internal fun MetisStandalonePostScreen(
+    modifier: Modifier,
     standalonePostId: StandalonePostId,
     metisContext: MetisContext,
     onNavigateUp: () -> Unit
@@ -133,10 +137,18 @@ private fun MetisStandalonePostScreen(
     val viewModel: MetisThreadViewModel =
         koinViewModel(parameters = { parametersOf(standalonePostId, metisContext, true) })
 
+    LaunchedEffect(metisContext) {
+        viewModel.updateMetisContext(metisContext)
+    }
+
+    LaunchedEffect(standalonePostId) {
+        viewModel.updatePostId(standalonePostId)
+    }
+
     val isDataOutdated by viewModel.isDataOutdated.collectAsState()
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {

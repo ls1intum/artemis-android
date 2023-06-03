@@ -19,7 +19,7 @@ import androidx.navigation.NavOptionsBuilder
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.conversationNavGraphBuilderExtension
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewRoute
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.ConversationDetailsRoute
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.add_members.navigateToAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.navigateToConversationMembersScreen
 import org.koin.androidx.compose.koinViewModel
@@ -53,14 +53,14 @@ fun NavGraphBuilder.conversationSettingsScreen(
                 navController.navigateToConversationMembersScreen(courseId, conversationId) {}
             },
             onConversationLeft = {
-                navController.popBackStack(ConversationOverviewRoute, false)
+                navController.popBackStack(ConversationDetailsRoute, true)
             }
         )
     }
 }
 
 @Composable
-private fun ConversationSettingsScreen(
+internal fun ConversationSettingsScreen(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,
