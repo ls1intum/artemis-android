@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation
 
 import android.app.Activity
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
@@ -31,28 +30,27 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_co
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextReporter
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformWhile
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 class ConversationOverviewViewModel(
@@ -71,7 +69,8 @@ class ConversationOverviewViewModel(
     networkStatusProvider,
     websocketProvider
 ) {
-    private val currentActivity: Flow<Activity?> = (application as? CurrentActivityListener)?.currentActivity ?: flowOf(null)
+    private val currentActivity: Flow<Activity?> =
+        (application as? CurrentActivityListener)?.currentActivity ?: flowOf(null)
 
     /**
      * The metis contexts that are currently visible. Used to check if we have to increase the unread messages count on a conversation.
@@ -96,6 +95,8 @@ class ConversationOverviewViewModel(
             SharingStarted.WhileSubscribed(stopTimeout = 5.seconds),
             replay = 0
         )
+
+    private val manualConversationUpdates = MutableSharedFlow<MarkMessagesRead>()
 
     /**
      * Conversations as loaded from the server.
@@ -180,36 +181,56 @@ class ConversationOverviewViewModel(
 
             emit(loadedConversations)
 
-            conversationUpdates.collect { update ->
-                when (update.crudAction) {
-                    MetisPostAction.CREATE, MetisPostAction.UPDATE -> {
-                        currentConversations[update.conversation.id] = update.conversation
-                    }
-
-                    MetisPostAction.NEW_MESSAGE -> {
-                        val isMetisContextVisible =
-                            visibleMetisContexts.value.any { visibleMetisContext ->
-                                val metisContext = visibleMetisContext.metisContext
-
-                                metisContext is MetisContext.Conversation && metisContext.conversationId == update.conversation.id
+            merge(
+                conversationUpdates.map(::ServerSentConversationUpdate),
+                manualConversationUpdates
+            )
+                .collect { update ->
+                    when (update) {
+                        is MarkMessagesRead -> {
+                            val affectedConversation = currentConversations[update.conversationId]
+                            if (affectedConversation != null) {
+                                currentConversations[update.conversationId] =
+                                    affectedConversation.withUnreadMessagesCount(0L)
                             }
+                        }
 
-                        val existingConversation = currentConversations[update.conversation.id]
-                        if (existingConversation != null && !isMetisContextVisible) {
-                            currentConversations[update.conversation.id] =
-                                existingConversation.withUnreadMessagesCount(
-                                    (existingConversation.unreadMessagesCount ?: 0) + 1
-                                )
+                        is ServerSentConversationUpdate -> {
+                            val serverSentUpdate = update.update
+
+                            when (serverSentUpdate.crudAction) {
+                                MetisPostAction.CREATE, MetisPostAction.UPDATE -> {
+                                    currentConversations[serverSentUpdate.conversation.id] =
+                                        serverSentUpdate.conversation
+                                }
+
+                                MetisPostAction.NEW_MESSAGE -> {
+                                    val isMetisContextVisible =
+                                        visibleMetisContexts.value.any { visibleMetisContext ->
+                                            val metisContext = visibleMetisContext.metisContext
+
+                                            metisContext is MetisContext.Conversation && metisContext.conversationId == serverSentUpdate.conversation.id
+                                        }
+
+                                    val existingConversation =
+                                        currentConversations[serverSentUpdate.conversation.id]
+                                    if (existingConversation != null && !isMetisContextVisible) {
+                                        currentConversations[serverSentUpdate.conversation.id] =
+                                            existingConversation.withUnreadMessagesCount(
+                                                (existingConversation.unreadMessagesCount ?: 0) + 1
+                                            )
+                                    }
+                                }
+
+                                MetisPostAction.DELETE -> {
+                                    currentConversations.remove(serverSentUpdate.conversation.id)
+                                }
+                            }
                         }
                     }
 
-                    MetisPostAction.DELETE -> {
-                        currentConversations.remove(update.conversation.id)
-                    }
+                    emit(currentConversations.values.toList())
                 }
-
-                emit(currentConversations.values.toList())
-            }
         }
             .map(::Success)
 
@@ -250,6 +271,12 @@ class ConversationOverviewViewModel(
                     }
                 }
                 .or(false)
+        }
+    }
+
+    fun setConversationMessagesRead(conversationId: Long) {
+        viewModelScope.launch {
+            manualConversationUpdates.emit(MarkMessagesRead(conversationId))
         }
     }
 

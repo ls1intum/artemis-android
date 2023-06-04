@@ -91,7 +91,10 @@ fun ConversationOverviewBody(
                 modifier = Modifier
                     .fillMaxSize(),
                 conversationCollection = conversationCollection,
-                onNavigateToConversation = onNavigateToConversation,
+                onNavigateToConversation = { conversationId ->
+                    viewModel.setConversationMessagesRead(conversationId)
+                    onNavigateToConversation(conversationId)
+                },
                 onToggleMarkAsFavourite = viewModel::markConversationAsFavorite,
                 onToggleHidden = viewModel::markConversationAsHidden,
                 onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
