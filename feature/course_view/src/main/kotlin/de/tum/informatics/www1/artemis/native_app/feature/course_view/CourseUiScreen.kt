@@ -104,7 +104,7 @@ internal fun CourseUiScreen(
 
     val topAppBarState = rememberTopAppBarState()
 
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
         topAppBarState
     )
 

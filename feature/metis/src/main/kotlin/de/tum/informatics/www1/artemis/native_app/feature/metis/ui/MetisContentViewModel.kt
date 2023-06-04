@@ -153,7 +153,7 @@ abstract class MetisContentViewModel(
 
     val latestUpdatedConversation: StateFlow<DataState<Conversation>> = flatMapLatest(
         metisContext,
-        conversation.holdLatestLoaded(),
+        metisContext.flatMapLatest { conversation.holdLatestLoaded() },
         clientId.filterSuccess()
     ) { metisContext, conversationDataState, clientId ->
         websocketProvider.subscribeToConversationUpdates(clientId, metisContext.courseId)
