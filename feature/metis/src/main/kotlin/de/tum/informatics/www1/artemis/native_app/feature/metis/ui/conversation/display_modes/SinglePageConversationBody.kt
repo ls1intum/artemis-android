@@ -39,8 +39,14 @@ private const val ConversationOverviewMaxWeight = 0.3f
 private val ConversationOverviewMaxWidth = 600.dp
 
 @Composable
-fun SinglePageConversationBody(modifier: Modifier, courseId: Long) {
-    var configuration: ConversationConfiguration by rememberSaveable { mutableStateOf(NothingOpened) }
+fun SinglePageConversationBody(
+    modifier: Modifier,
+    courseId: Long,
+    initialConfiguration: ConversationConfiguration = NothingOpened
+) {
+    var configuration: ConversationConfiguration by rememberSaveable(initialConfiguration) {
+        mutableStateOf(initialConfiguration)
+    }
 
     val openConversation = { conversationId: Long ->
         configuration = when (val currentConfig = configuration) {
@@ -69,13 +75,9 @@ fun SinglePageConversationBody(modifier: Modifier, courseId: Long) {
                 MetisContext.Conversation(courseId, openedThread.conversationId)
             }
 
-            val standalonePostId = remember(openedThread) {
-                StandalonePostId.ClientSideId(openedThread.clientSidePostId)
-            }
-
             MetisStandalonePostScreen(
                 modifier = m,
-                standalonePostId = standalonePostId,
+                standalonePostId = openedThread.postId,
                 metisContext = metisContext,
                 onNavigateUp = {
                     configuration = OpenedConversation(parent.conversationId, null)
@@ -100,7 +102,7 @@ fun SinglePageConversationBody(modifier: Modifier, courseId: Long) {
                 onClickViewPost = {
                     configuration = OpenedConversation(
                         conf.conversationId,
-                        OpenedThread(conf.conversationId, it)
+                        OpenedThread(conf.conversationId, StandalonePostId.ClientSideId(it))
                     )
                 }
             )
@@ -279,17 +281,17 @@ private fun VerticalDivider() {
 }
 
 @Parcelize
-private sealed interface ConversationConfiguration : Parcelable
+sealed interface ConversationConfiguration : Parcelable
 
 @Parcelize
-private object NothingOpened : ConversationConfiguration
+object NothingOpened : ConversationConfiguration
 
 @Parcelize
-private data class OpenedConversation(val conversationId: Long, val openedThread: OpenedThread?) :
+data class OpenedConversation(val conversationId: Long, val openedThread: OpenedThread?) :
     ConversationConfiguration
 
 @Parcelize
-private data class OpenedThread(val conversationId: Long, val clientSidePostId: String) : Parcelable
+data class OpenedThread(val conversationId: Long, val postId: StandalonePostId) : Parcelable
 
 @Parcelize
 private data class AddChannelConfiguration(

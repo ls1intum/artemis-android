@@ -52,7 +52,8 @@ data class UnknownArtemisNotification(
 private val nameToTypeMapping: Map<String, NotificationType> = (
         StandalonePostCommunicationNotificationType.values().toList() +
                 ReplyPostCommunicationNotificationType.values().toList() +
-                MiscNotificationType.values().toList()
+                MiscNotificationType.values().toList() +
+                ConversationNotificationType.values().toList()
         ).associateBy { it.name }
 
 object ArtemisNotificationDeserializer :
@@ -77,7 +78,8 @@ object CommunicationNotificationTypeDeserializer :
         (nameToTypeMapping[decoder.decodeString()] as? CommunicationNotificationType)
             ?: throw IllegalStateException()
 
-    override fun serialize(encoder: Encoder, value: CommunicationNotificationType) = throw NotImplementedError()
+    override fun serialize(encoder: Encoder, value: CommunicationNotificationType) =
+        throw NotImplementedError()
 }
 
 val ArtemisNotification<CommunicationNotificationType>.parentId: Long
@@ -89,4 +91,5 @@ val ArtemisNotification<CommunicationNotificationType>.parentId: Long
 val ArtemisNotification<CommunicationNotificationType>.communicationType: CommunicationType
     get() = when (type) {
         is StandalonePostCommunicationNotificationType, is ReplyPostCommunicationNotificationType -> CommunicationType.QNA_COURSE
+        ConversationNotificationType.CONVERSATION_NEW_MESSAGE, ConversationNotificationType.CONVERSATION_NEW_REPLY_MESSAGE -> CommunicationType.CONVERSATION
     }

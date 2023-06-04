@@ -230,17 +230,16 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
                             ExerciseViewMode.Overview
                         ) { }
                     },
-                    onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
                     onNavigateToExerciseResultView = onNavigateToExerciseResultView,
+                    onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
                     onParticipateInQuiz = onParticipateInQuiz,
+                    onViewQuizResults = onClickViewQuizResults,
                     onNavigateToLecture = { _, lectureId ->
                         navController.navigateToLecture(
                             lectureId = lectureId
                         ) { }
                     },
-                    onNavigateBack = navController::navigateUp,
-                    navController = navController,
-                    onViewQuizResults = onClickViewQuizResults
+                    onNavigateBack = navController::navigateUp
                 )
 
                 exercise(
@@ -360,7 +359,7 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
                 is MetisContext.Course -> CommunicationType.QNA_COURSE
                 is MetisContext.Exercise -> CommunicationType.QNA_EXERCISE
                 is MetisContext.Lecture -> CommunicationType.QNA_LECTURE
-                is MetisContext.Conversation -> CommunicationType.COMMUNICATION
+                is MetisContext.Conversation -> CommunicationType.CONVERSATION
             }
 
             lifecycleScope.launch {

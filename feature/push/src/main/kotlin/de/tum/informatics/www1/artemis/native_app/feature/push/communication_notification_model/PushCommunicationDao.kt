@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ConversationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.communicationType
@@ -57,6 +58,9 @@ interface PushCommunicationDao {
 
             ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_EXERCISE_POST,
             ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_LECTURE_POST -> artemisNotification.notificationPlaceholders[8]
+
+            ConversationNotificationType.CONVERSATION_NEW_MESSAGE -> "TODO: Conversation name"
+            ConversationNotificationType.CONVERSATION_NEW_REPLY_MESSAGE -> "TODO: Not included"
         }
 
         if (hasPushCommunication(parentId, type)) {
@@ -76,7 +80,7 @@ interface PushCommunicationDao {
         }
 
         val message: CommunicationMessageEntity = when (artemisNotification.type) {
-            is StandalonePostCommunicationNotificationType -> CommunicationMessageEntity(
+            is StandalonePostCommunicationNotificationType, ConversationNotificationType.CONVERSATION_NEW_MESSAGE -> CommunicationMessageEntity(
                 communicationParentId = parentId,
                 communicationType = type,
                 title = postTitle,
@@ -85,10 +89,13 @@ interface PushCommunicationDao {
                 date = artemisNotification.date
             )
 
-            is ReplyPostCommunicationNotificationType -> {
+            is ReplyPostCommunicationNotificationType, ConversationNotificationType.CONVERSATION_NEW_REPLY_MESSAGE -> {
                 val answerPostContent = artemisNotification.notificationPlaceholders[5]
                 // val answerPostCreationDate = artemisNotification.notificationPlaceholders[6]
-                val answerPostAuthor = artemisNotification.notificationPlaceholders[7]
+                val answerPostAuthor = when (artemisNotification.type) {
+                    is ReplyPostCommunicationNotificationType -> artemisNotification.notificationPlaceholders[7]
+                    else -> "TODO: author"
+                }
 
                 CommunicationMessageEntity(
                     communicationParentId = parentId,

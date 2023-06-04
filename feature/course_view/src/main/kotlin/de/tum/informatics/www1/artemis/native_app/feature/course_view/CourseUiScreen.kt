@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,16 +55,26 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.NothingOpened
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.OpenedConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.OpenedThread
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.SinglePageConversationBody
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.StandalonePostId
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+
+private const val TAB_EXERCISES = 0
+private const val TAB_LECTURES = 1
+private const val TAB_COMMUNICATION = 2
+
+private const val DEFAULT_CONVERSATION_ID = -1L
+private const val DEFAULT_POST_ID = -1L
 
 fun NavController.navigateToCourse(courseId: Long, builder: NavOptionsBuilder.() -> Unit) {
     navigate("course/$courseId", builder)
 }
 
 fun NavGraphBuilder.course(
-    navController: NavController,
     onNavigateToExercise: (exerciseId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
@@ -75,26 +86,34 @@ fun NavGraphBuilder.course(
     composable(
         route = "course/{courseId}",
         arguments = listOf(
-            navArgument("courseId") { type = NavType.LongType; nullable = false }
+            navArgument("courseId") { type = NavType.LongType; nullable = false },
+            navArgument("conversationId") {
+                type = NavType.LongType; defaultValue = DEFAULT_CONVERSATION_ID
+            },
+            navArgument("postId") { type = NavType.LongType; defaultValue = DEFAULT_POST_ID }
         ),
         deepLinks = listOf(
             navDeepLink {
-                uriPattern = "artemis://courses/{courseId}"
+                uriPattern = "artemis://courses/{courseId}/{conversationId}/{postId}"
             }
         )
     ) { backStackEntry ->
         val courseId = backStackEntry.arguments?.getLong("courseId")
         checkNotNull(courseId)
 
+        val conversationId =
+            backStackEntry.arguments?.getLong("conversationId") ?: DEFAULT_CONVERSATION_ID
+        val postId = backStackEntry.arguments?.getLong("postId") ?: DEFAULT_POST_ID
+
         CourseUiScreen(
             modifier = Modifier.fillMaxSize(),
             viewModel = koinViewModel { parametersOf(courseId) },
-            onNavigateBack = onNavigateBack,
-            onNavigateToExercise = onNavigateToExercise,
             courseId = courseId,
-            navController = navController,
-            onNavigateToLecture = { lectureId -> onNavigateToLecture(courseId, lectureId) },
+            conversationId = conversationId,
+            postId = postId,
+            onNavigateToExercise = onNavigateToExercise,
             onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
+            onNavigateToExerciseResultView = onNavigateToExerciseResultView,
             onParticipateInQuiz = { exerciseId, isPractice ->
                 onParticipateInQuiz(
                     courseId,
@@ -103,7 +122,8 @@ fun NavGraphBuilder.course(
                 )
             },
             onClickViewQuizResults = onViewQuizResults,
-            onNavigateToExerciseResultView = onNavigateToExerciseResultView
+            onNavigateToLecture = { lectureId -> onNavigateToLecture(courseId, lectureId) },
+            onNavigateBack = onNavigateBack
         )
     }
 }
@@ -113,7 +133,8 @@ internal fun CourseUiScreen(
     modifier: Modifier,
     viewModel: CourseViewModel,
     courseId: Long,
-    navController: NavController,
+    conversationId: Long,
+    postId: Long,
     onNavigateToExercise: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
@@ -132,7 +153,14 @@ internal fun CourseUiScreen(
         topAppBarState
     )
 
-    var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
+    var selectedTabIndex by rememberSaveable(conversationId) {
+        val initialTab = when {
+            conversationId != DEFAULT_CONVERSATION_ID -> TAB_COMMUNICATION
+            else -> TAB_EXERCISES
+        }
+
+        mutableStateOf(initialTab)
+    }
 
     Scaffold(
         modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
@@ -173,7 +201,7 @@ internal fun CourseUiScreen(
                 label = "Switch Course Tab"
             ) { tabIndex ->
                 when (tabIndex) {
-                    0 -> {
+                    TAB_EXERCISES -> {
                         EmptyDataStateUi(dataState = weeklyExercisesDataState) { weeklyExercises ->
                             ExerciseListUi(
                                 modifier = Modifier.fillMaxSize(),
@@ -210,7 +238,7 @@ internal fun CourseUiScreen(
                         }
                     }
 
-                    1 -> {
+                    TAB_LECTURES -> {
                         EmptyDataStateUi(dataState = weeklyLecturesDataState) { weeklyLectures ->
                             LectureListUi(
                                 modifier = Modifier.fillMaxSize(),
@@ -220,13 +248,36 @@ internal fun CourseUiScreen(
                         }
                     }
 
-                    2 -> {
+                    TAB_COMMUNICATION -> {
                         val metisModifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 8.dp)
 
                         if (course.courseInformationSharingConfiguration.supportsMessaging) {
-                            SinglePageConversationBody(metisModifier, courseId)
+                            val initialConfiguration = remember(conversationId, postId) {
+                                when {
+                                    conversationId != DEFAULT_CONVERSATION_ID && postId != DEFAULT_POST_ID -> OpenedConversation(
+                                        conversationId,
+                                        OpenedThread(
+                                            conversationId,
+                                            StandalonePostId.ServerSideId(postId)
+                                        )
+                                    )
+
+                                    conversationId != DEFAULT_CONVERSATION_ID -> OpenedConversation(
+                                        conversationId,
+                                        null
+                                    )
+
+                                    else -> NothingOpened
+                                }
+                            }
+
+                            SinglePageConversationBody(
+                                metisModifier,
+                                courseId,
+                                initialConfiguration
+                            )
                         } else {
                             Box(modifier = metisModifier) {
                                 Text(

@@ -25,6 +25,10 @@ internal object NotificationTargetManager {
     private val MainActivity =
         Class.forName("de.tum.informatics.www1.artemis.native_app.android.ui.MainActivity")
 
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+
     fun buildOnClickIntent(
         context: Context,
         type: NotificationType,
@@ -67,7 +71,7 @@ internal object NotificationTargetManager {
             }
 
             is CommunicationPostTarget -> {
-                "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/null/null/${notificationTarget.conversationId}"
+                "artemis://courses/${notificationTarget.courseId}/${notificationTarget.conversationId}/${notificationTarget.postId}"
             }
         }
     }
@@ -92,7 +96,7 @@ internal object NotificationTargetManager {
             is CommunicationNotificationType -> getCommunicationNotificationTarget(type.communicationType, target)
 
             MiscNotificationType.QUIZ_EXERCISE_STARTED -> {
-                Json.decodeFromString<ExerciseTarget>(target)
+                json.decodeFromString<ExerciseTarget>(target)
             }
 
             else -> UnknownNotificationTarget
@@ -105,18 +109,18 @@ internal object NotificationTargetManager {
     ): MetisTarget {
         return when (type) {
             CommunicationType.QNA_COURSE, CommunicationType.ANNOUNCEMENT -> {
-                Json.decodeFromString<CoursePostTarget>(target)
+                json.decodeFromString<CoursePostTarget>(target)
             }
 
             CommunicationType.QNA_LECTURE -> {
-                Json.decodeFromString<LecturePostTarget>(target)
+                json.decodeFromString<LecturePostTarget>(target)
             }
 
             CommunicationType.QNA_EXERCISE -> {
-                Json.decodeFromString<ExercisePostTarget>(target)
+                json.decodeFromString<ExercisePostTarget>(target)
             }
-            CommunicationType.COMMUNICATION -> {
-                Json.decodeFromString<CommunicationPostTarget>(target)
+            CommunicationType.CONVERSATION -> {
+                json.decodeFromString<CommunicationPostTarget>(target)
             }
         }
     }

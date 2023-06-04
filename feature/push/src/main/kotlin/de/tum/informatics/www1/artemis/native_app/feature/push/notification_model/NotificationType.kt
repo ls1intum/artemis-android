@@ -26,6 +26,12 @@ enum class ReplyPostCommunicationNotificationType : CommunicationNotificationTyp
     NEW_REPLY_FOR_COURSE_POST
 }
 
+@Serializable
+enum class ConversationNotificationType : CommunicationNotificationType {
+    CONVERSATION_NEW_MESSAGE,
+    CONVERSATION_NEW_REPLY_MESSAGE
+}
+
 val CommunicationNotificationType.communicationType: CommunicationType get() = when(this) {
     ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_EXERCISE_POST,
     StandalonePostCommunicationNotificationType.NEW_EXERCISE_POST -> CommunicationType.QNA_EXERCISE
@@ -34,6 +40,7 @@ val CommunicationNotificationType.communicationType: CommunicationType get() = w
     ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_COURSE_POST,
     StandalonePostCommunicationNotificationType.NEW_COURSE_POST -> CommunicationType.QNA_COURSE
     StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_POST -> CommunicationType.ANNOUNCEMENT
+    is ConversationNotificationType -> CommunicationType.CONVERSATION
 }
 
 

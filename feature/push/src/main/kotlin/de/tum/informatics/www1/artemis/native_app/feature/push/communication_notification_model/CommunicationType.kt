@@ -9,5 +9,5 @@ enum class CommunicationType(val notificationChannel: ArtemisNotificationChannel
     QNA_COURSE(ArtemisNotificationChannel.CoursePostNotificationChannel, R.drawable.baseline_contact_support_24),
     QNA_EXERCISE(ArtemisNotificationChannel.ExercisePostNotificationChannel, R.drawable.baseline_contact_support_24),
     QNA_LECTURE(ArtemisNotificationChannel.LecturePostNotificationChannel, R.drawable.baseline_contact_support_24),
-    COMMUNICATION(ArtemisNotificationChannel.CommunicationNotificationChannel, R.drawable.baseline_chat_bubble_24)
+    CONVERSATION(ArtemisNotificationChannel.CommunicationNotificationChannel, R.drawable.baseline_chat_bubble_24)
 }

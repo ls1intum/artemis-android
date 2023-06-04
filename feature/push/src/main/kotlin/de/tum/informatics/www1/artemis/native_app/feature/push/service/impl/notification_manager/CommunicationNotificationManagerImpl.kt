@@ -171,7 +171,7 @@ internal class CommunicationNotificationManagerImpl(
         messages: List<CommunicationMessageEntity>
     ): NotificationCompat.MessagingStyle {
         val person = when (communication.type) {
-            CommunicationType.QNA_COURSE, CommunicationType.QNA_EXERCISE, CommunicationType.QNA_LECTURE, CommunicationType.ANNOUNCEMENT, CommunicationType.COMMUNICATION -> {
+            CommunicationType.QNA_COURSE, CommunicationType.QNA_EXERCISE, CommunicationType.QNA_LECTURE, CommunicationType.ANNOUNCEMENT, CommunicationType.CONVERSATION -> {
                 val firstMessage = messages.first()
                 Person.Builder().setName(firstMessage.authorName).build()
             }
@@ -191,7 +191,7 @@ internal class CommunicationNotificationManagerImpl(
         }
 
         when (communication.type) {
-            CommunicationType.QNA_COURSE, CommunicationType.QNA_EXERCISE, CommunicationType.QNA_LECTURE, CommunicationType.ANNOUNCEMENT, CommunicationType.COMMUNICATION -> {
+            CommunicationType.QNA_COURSE, CommunicationType.QNA_EXERCISE, CommunicationType.QNA_LECTURE, CommunicationType.ANNOUNCEMENT, CommunicationType.CONVERSATION -> {
                 style.isGroupConversation = true
                 style.conversationTitle = when (communication.type) {
                     CommunicationType.QNA_COURSE, CommunicationType.ANNOUNCEMENT -> context.getString(
@@ -214,7 +214,7 @@ internal class CommunicationNotificationManagerImpl(
                         communication.title
                     )
 
-                    CommunicationType.COMMUNICATION -> if (communication.title != null) {
+                    CommunicationType.CONVERSATION -> if (communication.title != null) {
                         context.getString(
                             R.string.conversation_title_conversation_thread,
                             communication.courseTitle,
