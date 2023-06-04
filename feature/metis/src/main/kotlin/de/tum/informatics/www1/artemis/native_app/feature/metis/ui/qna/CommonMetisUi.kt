@@ -10,8 +10,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.filter_header.MetisFilterHeader
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.filter_header.MetisFilterHeader
 
 @Composable
 internal fun ViewModelMetisFilterHeaderImpl(

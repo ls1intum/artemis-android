@@ -9,11 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBasePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisContentViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisModificationFailureDialog
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisViewModel
 import kotlinx.coroutines.Deferred
 
 internal sealed class ReplyMode(initialText: String) {

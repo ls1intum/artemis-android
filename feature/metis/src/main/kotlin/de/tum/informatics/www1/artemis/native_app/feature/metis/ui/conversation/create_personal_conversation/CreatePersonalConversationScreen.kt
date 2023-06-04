@@ -28,7 +28,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.courseNavGraphBuilderExtensions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.member_selection.MemberSelection
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.member_selection.Recipient
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 

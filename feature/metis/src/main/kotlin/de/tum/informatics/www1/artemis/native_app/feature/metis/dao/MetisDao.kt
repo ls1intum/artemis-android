@@ -4,10 +4,10 @@ import androidx.paging.PagingSource
 import androidx.room.*
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.AnswerPostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisPostContextEntity

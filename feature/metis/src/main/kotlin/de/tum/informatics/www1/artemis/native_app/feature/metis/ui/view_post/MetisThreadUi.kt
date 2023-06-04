@@ -1,7 +1,15 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -24,7 +32,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.AnswerPostDb
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBasePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.*
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions

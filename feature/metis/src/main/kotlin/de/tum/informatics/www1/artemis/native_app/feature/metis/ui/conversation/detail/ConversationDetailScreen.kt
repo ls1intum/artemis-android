@@ -23,9 +23,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.conversationNavGraphBuilderExtension

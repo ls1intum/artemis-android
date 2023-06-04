@@ -7,7 +7,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversa
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 
 interface ConversationService {
 

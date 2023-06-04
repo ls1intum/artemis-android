@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import io.ktor.client.statement.*
+import io.ktor.client.statement.HttpResponse
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

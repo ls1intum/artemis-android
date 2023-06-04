@@ -12,9 +12,6 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

@@ -2,19 +2,18 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl
 
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisDatabaseProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.dao.MetisDao
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.Reaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.UserRole
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisDatabaseProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.dao.MetisDao
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.AnswerPostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.MetisPostContextEntity
@@ -22,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.Metis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.PostReactionEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostTagEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostingEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
 import java.util.UUID

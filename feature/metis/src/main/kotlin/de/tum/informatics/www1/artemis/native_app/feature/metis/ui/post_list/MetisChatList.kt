@@ -32,15 +32,15 @@ import androidx.paging.compose.itemsIndexed
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.MetisOutdatedBanner
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.PagingStateError
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.getPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.shouldDisplayHeader
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.MetisOutdatedBanner
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext

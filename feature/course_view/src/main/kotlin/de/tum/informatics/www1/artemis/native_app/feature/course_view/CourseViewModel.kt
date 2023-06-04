@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.course_view
 
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
-import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseExerciseService
@@ -20,7 +19,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart

@@ -12,7 +12,6 @@ import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
-import io.ktor.http.userAgent
 
 internal class ServerDataServiceImpl(private val ktorProvider: KtorProvider) : ServerDataService {
 

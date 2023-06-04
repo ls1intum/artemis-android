@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import android.content.Context
 import android.text.method.LinkMovementMethod
-import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView

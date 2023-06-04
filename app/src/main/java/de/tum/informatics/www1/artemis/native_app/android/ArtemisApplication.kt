@@ -29,7 +29,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.quizParticipation
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsModule
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin

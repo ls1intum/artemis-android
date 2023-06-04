@@ -24,7 +24,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.PerformActionOnUserData
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.PerformActionOnUserDialogs
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.UserAction

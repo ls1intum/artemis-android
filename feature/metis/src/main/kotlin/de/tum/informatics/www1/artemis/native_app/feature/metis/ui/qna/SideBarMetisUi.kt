@@ -27,8 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisChatList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadViewModel
 import org.koin.androidx.compose.koinViewModel

@@ -18,7 +18,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableName
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine

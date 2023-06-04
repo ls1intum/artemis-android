@@ -16,18 +16,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.AnimatedFloatingActionButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFloatingActionButton
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncFailedDialog
-import kotlinx.coroutines.Job
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

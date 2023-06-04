@@ -1,11 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.service
 
 import androidx.paging.PagingSource
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.BasePostingEntity
 import kotlinx.coroutines.flow.Flow
 
