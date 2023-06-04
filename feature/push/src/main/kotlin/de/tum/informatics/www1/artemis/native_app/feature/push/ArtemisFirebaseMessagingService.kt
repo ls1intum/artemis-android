@@ -4,6 +4,7 @@ import android.util.Base64
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextReporter
@@ -47,18 +48,6 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
     private val pushNotificationConfigurationService: PushNotificationConfigurationService = get()
     private val serverConfigurationService: ServerConfigurationService = get()
     private val notificationManager: NotificationManager = get()
-
-    private val currentActivityListener = CurrentActivityListener()
-
-    override fun onCreate() {
-        super.onCreate()
-        application.registerActivityLifecycleCallbacks(currentActivityListener)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        application.unregisterActivityLifecycleCallbacks(currentActivityListener)
-    }
 
     /**
      * Whenever this functions is called we need to synchronize the new token with the server.
@@ -104,8 +93,10 @@ class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
         val notification: ArtemisNotification<NotificationType> = Json.decodeFromString(payload)
 
         // if the metis context this notification is about is already visible we do not pop that notification.
+        val currentActivity = (application as? CurrentActivityListener)?.currentActivity?.value
+
         val visibleMetisContexts: List<VisibleMetisContext> =
-            (currentActivityListener.currentActivity.value as? VisibleMetisContextReporter)?.visibleMetisContexts?.value.orEmpty()
+            (currentActivity as? VisibleMetisContextReporter)?.visibleMetisContexts?.value.orEmpty()
 
         val notificationType = notification.type
         if (notificationType is CommunicationNotificationType) {

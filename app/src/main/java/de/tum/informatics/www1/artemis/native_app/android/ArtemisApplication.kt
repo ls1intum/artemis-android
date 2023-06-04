@@ -1,13 +1,16 @@
 package de.tum.informatics.www1.artemis.native_app.android
 
+import android.app.Activity
 import android.app.Application
 import android.app.NotificationChannel
 import android.os.Build
+import android.os.Bundle
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.memory.MemoryCache
 import de.tum.informatics.www1.artemis.native_app.android.db.dbModule
+import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
 import de.tum.informatics.www1.artemis.native_app.core.data.service.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
@@ -25,11 +28,15 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.quizParticipationModule
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsModule
 import io.sentry.Sentry
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin
 
-class ArtemisApplication : Application(), ImageLoaderFactory {
+class ArtemisApplication : Application(), ImageLoaderFactory, CurrentActivityListener {
+
+    override val currentActivity = MutableStateFlow<Activity?>(null)
 
     override fun onCreate() {
         super.onCreate()
@@ -77,6 +84,8 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
                     .createNotificationChannel(channel)
             }
         }
+
+        registerActivityLifecycleCallbacks(this)
     }
 
     override fun newImageLoader(): ImageLoader =
@@ -87,4 +96,29 @@ class ArtemisApplication : Application(), ImageLoaderFactory {
                     .build()
             }
             .build()
+
+    override fun onActivityResumed(activity: Activity) {
+        currentActivity.value = activity
+    }
+
+    override fun onActivityPaused(activity: Activity) {
+        if (currentActivity.value == activity) {
+            currentActivity.value = null
+        }
+    }
+
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+    }
+
+    override fun onActivityStarted(activity: Activity) {
+    }
+
+    override fun onActivityStopped(activity: Activity) {
+    }
+
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+    }
+
+    override fun onActivityDestroyed(activity: Activity) {
+    }
 }

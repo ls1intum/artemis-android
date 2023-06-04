@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.ConversationSettingsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadViewModel
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.dsl.singleOf
@@ -71,6 +72,7 @@ val communicationModule = module {
 
     viewModel { params ->
         ConversationOverviewViewModel(
+            androidApplication(),
             params.get(),
             get(),
             get(),

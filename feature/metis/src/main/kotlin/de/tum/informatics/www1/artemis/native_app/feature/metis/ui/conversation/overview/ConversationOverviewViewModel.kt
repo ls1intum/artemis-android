@@ -1,6 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview
 
+import android.app.Activity
+import android.app.Application
+import android.util.Log
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState.Success
@@ -18,25 +22,33 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketP
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationWebsocketDTO
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.subscribeToConversationUpdates
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextReporter
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -44,12 +56,13 @@ import kotlinx.coroutines.flow.transformWhile
 import kotlin.time.Duration.Companion.seconds
 
 class ConversationOverviewViewModel(
+    private val application: Application,
     private val courseId: Long,
     private val conversationService: ConversationService,
-    websocketProvider: WebsocketProvider,
-    networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
+    websocketProvider: WebsocketProvider,
+    networkStatusProvider: NetworkStatusProvider,
     serverDataService: ServerDataService
 ) : MetisViewModel(
     serverConfigurationService,
@@ -58,6 +71,17 @@ class ConversationOverviewViewModel(
     networkStatusProvider,
     websocketProvider
 ) {
+    private val currentActivity: Flow<Activity?> = (application as? CurrentActivityListener)?.currentActivity ?: flowOf(null)
+
+    /**
+     * The metis contexts that are currently visible. Used to check if we have to increase the unread messages count on a conversation.
+     */
+    private val visibleMetisContexts: StateFlow<List<VisibleMetisContext>> = currentActivity
+        .filterIsInstance<VisibleMetisContextReporter?>()
+        .flatMapLatest { visibleMetisContextReporter ->
+            visibleMetisContextReporter?.visibleMetisContexts ?: flowOf(emptyList())
+        }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query
@@ -100,40 +124,7 @@ class ConversationOverviewViewModel(
                 is DataState.Failure -> flowOf(DataState.Failure(loadedConversationsDataState.throwable))
             }
         }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
-
-    private fun getUpdateConversationsFlow(loadedConversations: List<Conversation>): Flow<Success<List<Conversation>>> =
-        flow {
-            val currentConversations =
-                loadedConversations.associateBy { it.id }.toMutableMap()
-
-            emit(loadedConversations)
-
-            conversationUpdates.collect { update ->
-                when (update.crudAction) {
-                    MetisPostAction.CREATE, MetisPostAction.UPDATE -> {
-                        currentConversations[update.conversation.id] = update.conversation
-                    }
-
-                    MetisPostAction.NEW_MESSAGE -> {
-                        val existingConversation = currentConversations[update.conversation.id]
-                        if (existingConversation != null) {
-                            currentConversations[update.conversation.id] =
-                                existingConversation.withUnreadMessagesCount(
-                                    (existingConversation.unreadMessagesCount ?: 0) + 1
-                                )
-                        }
-                    }
-
-                    MetisPostAction.DELETE -> {
-                        currentConversations.remove(update.conversation.id)
-                    }
-                }
-
-                emit(currentConversations.values.toList())
-            }
-        }
-            .map(::Success)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed())
 
     val isConnected: StateFlow<Boolean> =
         websocketProvider.isConnected.stateIn(viewModelScope, SharingStarted.Eagerly, true)
@@ -181,6 +172,46 @@ class ConversationOverviewViewModel(
             }
         }
             .stateIn(viewModelScope, SharingStarted.Eagerly)
+
+    private fun getUpdateConversationsFlow(loadedConversations: List<Conversation>): Flow<Success<List<Conversation>>> =
+        flow {
+            val currentConversations =
+                loadedConversations.associateBy { it.id }.toMutableMap()
+
+            emit(loadedConversations)
+
+            conversationUpdates.collect { update ->
+                when (update.crudAction) {
+                    MetisPostAction.CREATE, MetisPostAction.UPDATE -> {
+                        currentConversations[update.conversation.id] = update.conversation
+                    }
+
+                    MetisPostAction.NEW_MESSAGE -> {
+                        val isMetisContextVisible =
+                            visibleMetisContexts.value.any { visibleMetisContext ->
+                                val metisContext = visibleMetisContext.metisContext
+
+                                metisContext is MetisContext.Conversation && metisContext.conversationId == update.conversation.id
+                            }
+
+                        val existingConversation = currentConversations[update.conversation.id]
+                        if (existingConversation != null && !isMetisContextVisible) {
+                            currentConversations[update.conversation.id] =
+                                existingConversation.withUnreadMessagesCount(
+                                    (existingConversation.unreadMessagesCount ?: 0) + 1
+                                )
+                        }
+                    }
+
+                    MetisPostAction.DELETE -> {
+                        currentConversations.remove(update.conversation.id)
+                    }
+                }
+
+                emit(currentConversations.values.toList())
+            }
+        }
+            .map(::Success)
 
     fun onUpdateQuery(newQuery: String) {
         _query.value = newQuery

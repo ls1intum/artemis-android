@@ -136,8 +136,6 @@ internal class MetisListViewModel(
             clientIdOrDefault,
             onRequestReload.onStart { emit(Unit) }
         ) { pagingDataInput, authToken, clientId, _ ->
-            Log.w("FOO", "new pager")
-
             Pager(
                 config = PagingConfig(
                     pageSize = 20
