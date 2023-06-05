@@ -13,17 +13,21 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelC
 @Composable
 internal fun ChannelIcons(channelChat: ChannelChat) {
     Row {
+        PrimaryChannelIcon(channelChat)
+
+        ExtraChannelIcons(channelChat)
+    }
+}
+
+@Composable
+internal fun ExtraChannelIcons(channelChat: ChannelChat) {
+    Row {
         if (channelChat.isArchived) {
             Icon(
                 imageVector = Icons.Default.Archive,
                 contentDescription = null
             )
         }
-
-        Icon(
-            imageVector = if (channelChat.isPublic) Icons.Default.Numbers else Icons.Default.Lock,
-            contentDescription = null
-        )
 
         if (channelChat.isAnnouncementChannel) {
             Icon(
@@ -32,4 +36,14 @@ internal fun ChannelIcons(channelChat: ChannelChat) {
             )
         }
     }
+
 }
+
+@Composable
+internal fun PrimaryChannelIcon(channelChat: ChannelChat) {
+    Icon(
+        imageVector = if (channelChat.isPublic) Icons.Default.Numbers else Icons.Default.Lock,
+        contentDescription = null
+    )
+}
+

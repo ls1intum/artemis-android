@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,6 +46,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupCha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.ChannelIcons
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.ExtraChannelIcons
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.PrimaryChannelIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableTitle
 
 private const val SECTION_FAVORITES_KEY = "favorites"
@@ -157,7 +160,10 @@ private fun LazyListScope.conversationSectionHeader(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = toggleIsExpanded) {
-                    Icon(imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowRight, contentDescription = null)
+                    Icon(
+                        imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowRight,
+                        contentDescription = null
+                    )
                 }
 
                 Text(
@@ -222,11 +228,15 @@ private fun <T : Conversation> LazyListScope.conversationList(
                         ListItem(
                             modifier = contentModifier,
                             leadingContent = {
-                                Row {
-                                    ChannelIcons(channelChat = conversation)
+                                PrimaryChannelIcon(channelChat = conversation)
+                            },
+                            headlineContent = {
+                                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    Text(text = channelName, maxLines = 1)
+
+                                    ExtraChannelIcons(channelChat = conversation)
                                 }
                             },
-                            headlineContent = { Text(channelName) },
                             trailingContent = {
                                 UnreadMessages(unreadMessagesCount = unreadMessagesCount)
                             }
