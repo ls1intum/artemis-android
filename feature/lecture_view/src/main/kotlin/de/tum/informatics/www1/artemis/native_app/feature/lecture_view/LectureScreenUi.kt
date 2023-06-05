@@ -42,6 +42,7 @@ import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.SideBarMetisUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.canDisplayMetisOnDisplaySide
@@ -81,7 +82,7 @@ fun NavGraphBuilder.lecture(
             navDeepLink {
                 uriPattern = "artemis://lectures/{lectureId}"
             }
-        )
+        ) + generateLinks("courses/{courseId}/lectures/{lectureId}")
     ) { backStackEntry ->
         val lectureId =
             backStackEntry.arguments?.getLong("lectureId")

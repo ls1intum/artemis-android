@@ -55,6 +55,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
+import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.OpenedConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.OpenedThread
@@ -83,6 +84,13 @@ fun NavGraphBuilder.course(
     onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
+    val deepLinks = listOf(
+        navDeepLink {
+            uriPattern = "artemis://courses/{courseId}/{conversationId}/{postId}"
+        }
+    ) +
+            generateLinks("courses/{courseId}") +
+            generateLinks("courses/{courseId}/messages?conversationId={conversationId}")
     composable(
         route = "course/{courseId}",
         arguments = listOf(
@@ -92,11 +100,7 @@ fun NavGraphBuilder.course(
             },
             navArgument("postId") { type = NavType.LongType; defaultValue = DEFAULT_POST_ID }
         ),
-        deepLinks = listOf(
-            navDeepLink {
-                uriPattern = "artemis://courses/{courseId}/{conversationId}/{postId}"
-            }
-        )
+        deepLinks = deepLinks
     ) { backStackEntry ->
         val courseId = backStackEntry.arguments?.getLong("courseId")
         checkNotNull(courseId)

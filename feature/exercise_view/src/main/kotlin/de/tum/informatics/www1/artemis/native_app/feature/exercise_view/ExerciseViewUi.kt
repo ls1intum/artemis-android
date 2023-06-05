@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.ExerciseScreen
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise.TextExerciseParticipationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.view_result.ViewResultScreen
@@ -80,7 +81,7 @@ fun NavGraphBuilder.exercise(
             navDeepLink {
                 uriPattern = "artemis://exercises/{exerciseId}"
             }
-        )
+        ) + generateLinks("courses/{courseId}/exercises/{exerciseId}")
     ) { backStackEntry ->
         val exerciseId =
             backStackEntry.arguments?.getLong("exerciseId")

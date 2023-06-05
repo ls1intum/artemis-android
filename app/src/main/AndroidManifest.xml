@@ -20,7 +20,6 @@
             android:exported="true"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize">
-            <tools:validation testUrl="https://artemis.ase.in.tum.de/courses/39" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -32,32 +31,35 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data
-                    android:scheme="artemis"
-                    android:host="courses" />
-                <data
-                    android:scheme="artemis"
-                    android:host="metis_standalone_post" />
-                <data
-                    android:scheme="artemis"
-                    android:host="exercises" />
-                <data
-                    android:scheme="artemis"
-                    android:host="lectures" />
-                <data
-                    android:scheme="artemis"
-                    android:host="quiz_participation" />
+                <data android:scheme="artemis" />
+
+                <data android:host="courses" />
+                <data android:host="metis_standalone_post" />
+                <data android:scheme="artemis" />
+                <data android:host="exercises" />
+                <data android:host="lectures" />
+                <data android:host="quiz_participation" />
             </intent-filter>
+
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:scheme="https"
-                    android:host="artemis.ase.in.tum.de"
-                    android:pathAdvancedPattern="/courses/[0-9]+" />
+                <data android:scheme="https"/>
+                <data android:host="artemis.ase.in.tum.de"/>
+                <data android:host="artemis.cit.tum.de"/>
+                <data android:host="artemis.codeability.uibk.ac.at"/>
+                <data android:host="artemis.praktomat.cs.kit.edu"/>
+                <data android:host="artemis-test0.artemis.cit.tum.de"/>
+                <data android:host="artemis-test1.artemis.cit.tum.de"/>
+                <data android:host="artemis-test2.cit.tum.de"/>
+
+                <data android:pathPattern="/courses/.*" />
+                <data android:pathPattern="/courses/.*/exercises/.*/" />
+                <data android:pathPattern="/courses/.*/messages?conversationId=.*/" />
+                <data android:pathPattern="/courses/.*/lectures/.*/" />
             </intent-filter>
         </activity>
 
@@ -97,7 +99,9 @@
             android:name="firebase_analytics_collection_enabled"
             android:value="false" />
 
-        <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
+        <meta-data
+            android:name="asset_statements"
+            android:resource="@string/asset_statements" />
 
         <receiver android:name="de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.ReplyReceiver" />
         <receiver android:name="de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.DeleteNotificationReceiver" />

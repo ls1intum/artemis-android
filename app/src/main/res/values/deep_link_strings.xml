@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="deep_link_wrong_host_dialog_title">Server mismatch</string>
+    <string name="deep_link_wrong_host_dialog_message">You are currently logged in to %1$s but the url links to %2$s. Do you want to switch the selected server? You will be logged out of your current session.</string>
+    <string name="deep_link_wrong_host_dialog_positive">Logout</string>
+    <string name="deep_link_wrong_host_dialog_negative">Cancel</string>
+</resources>

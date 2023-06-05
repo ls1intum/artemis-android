@@ -12,19 +12,27 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import de.tum.informatics.www1.artemis.native_app.android.BuildConfig
+import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.isLoggedIn
 import de.tum.informatics.www1.artemis.native_app.core.ui.LinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.WindowSizeClassProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.navigateToCourseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.course
@@ -79,6 +87,7 @@ import org.koin.android.ext.android.get
  */
 class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
 
+    private val serverConfigurationService: ServerConfigurationService = get()
     private val accountService: AccountService = get()
     private val communicationNotificationManager: CommunicationNotificationManager = get()
 
@@ -108,13 +117,40 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
             override fun unregisterMetisContext(metisContext: VisibleMetisContext) {
                 visibleMetisContexts.value = visibleMetisContexts.value - metisContext
             }
+        }
 
+        val currentHost = runBlocking {
+            serverConfigurationService.serverUrl.first().toUri().host
+        }
+
+        val data = intent?.data
+        val newHost = if (data != null && data.scheme == "https") data.host else null
+        val hasServerMismatch = newHost != null && newHost != currentHost
+        var displayWrongServerDialog by mutableStateOf(hasServerMismatch)
+
+        if (hasServerMismatch) {
+            intent.data = null
         }
 
         setContent {
             AppTheme {
                 ProvideLocalVisibleMetisContextManager(visibleMetisContextManager = visibleMetisContextManager) {
                     MainActivityComposeUi(startDestination)
+
+                    if (displayWrongServerDialog) {
+                        TextAlertDialog(
+                            title = stringResource(id = R.string.deep_link_wrong_host_dialog_title),
+                            text = stringResource(
+                                id = R.string.deep_link_wrong_host_dialog_message,
+                                currentHost.orEmpty(),
+                                newHost.orEmpty()
+                            ),
+                            confirmButtonText = stringResource(id = R.string.deep_link_wrong_host_dialog_positive),
+                            dismissButtonText = stringResource(id = R.string.deep_link_wrong_host_dialog_negative),
+                            onPressPositiveButton = { /*TODO*/ },
+                            onDismissRequest = { displayWrongServerDialog = false }
+                        )
+                    }
                 }
             }
         }
