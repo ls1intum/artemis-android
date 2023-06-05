@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -70,6 +71,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.register.Registe
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNotificationStorageService
+import io.ktor.http.encodeURLPathPart
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -78,7 +80,9 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import java.io.IOException
 
-const val LOGIN_DESTINATION = "login"
+private const val NAV_ARG_NEXT_DESTINATION = "next_destination"
+
+const val LOGIN_DESTINATION = "login/{$NAV_ARG_NEXT_DESTINATION}"
 private const val ARG_REMEMBER_ME = "rememberMe"
 private const val NESTED_SAML2_LOGIN_ROUTE = "saml2_login"
 
@@ -103,21 +107,49 @@ private enum class NestedDestination(val destination: String) {
     }
 }
 
-
-fun NavController.navigateToLogin(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(LOGIN_DESTINATION, builder)
+/**
+ * @param nextDestination the deep link to a destination that should be opened after a successful login
+ */
+fun NavController.navigateToLogin(
+    nextDestination: String? = null,
+    builder: NavOptionsBuilder.() -> Unit
+) {
+    if (nextDestination != null) {
+        navigate("login/${nextDestination.encodeURLPathPart()}", builder)
+    } else {
+        navigate("login/null", builder)
+    }
 }
 
 fun NavGraphBuilder.loginScreen(
-    onFinishedLoginFlow: () -> Unit,
+    onFinishedLoginFlow: (deepLink: String?) -> Unit,
     onRequestOpenSettings: () -> Unit
 ) {
-    composable(LOGIN_DESTINATION) {
+    composable(
+        LOGIN_DESTINATION,
+        arguments = listOf(
+            navArgument(NAV_ARG_NEXT_DESTINATION) {
+                type = NavType.StringType
+                defaultValue = null
+                nullable = true
+            }
+        )
+    ) {
+        val nextDestinationValue = it.arguments?.getString(NAV_ARG_NEXT_DESTINATION)
+
+        var nextDestination by remember(nextDestinationValue) {
+            mutableStateOf(if (nextDestinationValue == null || nextDestinationValue == "null") null else nextDestinationValue)
+        }
+
         val scope = rememberCoroutineScope()
         val serverNotificationStorageService: ServerNotificationStorageService = get()
         val serverConfigurationService: ServerConfigurationService = get()
 
         var currentContent by rememberSaveable { mutableStateOf(LoginScreenContent.LOGIN) }
+
+        val onFinishedLoginFlowImpl = {
+            onFinishedLoginFlow(nextDestination)
+        }
 
         AnimatedContent(
             targetState = currentContent,
@@ -125,7 +157,8 @@ fun NavGraphBuilder.loginScreen(
                 // Animation is always the same
                 slideInHorizontally { width -> width } with
                         slideOutHorizontally { width -> -width }
-            }
+            },
+            label = ""
         ) { content ->
             when (content) {
                 LoginScreenContent.LOGIN -> {
@@ -136,13 +169,16 @@ fun NavGraphBuilder.loginScreen(
                             scope.launch {
                                 val serverUrl = serverConfigurationService.serverUrl.first()
                                 if (serverNotificationStorageService.hasDisplayedForServer(serverUrl)) {
-                                    onFinishedLoginFlow()
+                                    onFinishedLoginFlowImpl()
                                 } else {
                                     currentContent = LoginScreenContent.NOTIFICATION_SETTINGS
                                 }
                             }
                         },
-                        onRequestOpenSettings = onRequestOpenSettings
+                        onRequestOpenSettings = onRequestOpenSettings,
+                        onNavigatedToInstanceSelection = {
+                            nextDestination = null
+                        }
                     )
                 }
 
@@ -154,7 +190,7 @@ fun NavGraphBuilder.loginScreen(
                                 serverNotificationStorageService.setHasDisplayed(
                                     serverConfigurationService.serverUrl.first()
                                 )
-                                onFinishedLoginFlow()
+                                onFinishedLoginFlowImpl()
                             }
                         }
                     )
@@ -176,7 +212,8 @@ enum class LoginScreenContent {
 private fun LoginUiScreen(
     modifier: Modifier,
     onLoggedIn: () -> Unit,
-    onRequestOpenSettings: () -> Unit
+    onRequestOpenSettings: () -> Unit,
+    onNavigatedToInstanceSelection: () -> Unit
 ) {
     val nestedNavController = rememberNavController()
     val serverConfigurationService: ServerConfigurationService = get()
@@ -248,6 +285,8 @@ private fun LoginUiScreen(
                         nestedNavController.navigate(NestedDestination.REGISTER.destination)
                     },
                     onNavigateToInstanceSelection = {
+                        onNavigatedToInstanceSelection()
+
                         nestedNavController.navigate(NestedDestination.INSTANCE_SELECTION.destination) {
                             popUpTo(NestedDestination.HOME.destination) {
                                 inclusive = true
@@ -278,7 +317,7 @@ private fun LoginUiScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = getViewModel(),
                     onLoggedIn = onLoggedIn,
-                    onClickSaml2Login = onClickSaml2Login,
+                    onClickSaml2Login = onClickSaml2Login
                 )
             }
 

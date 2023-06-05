@@ -46,6 +46,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
+import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import kotlinx.coroutines.flow.SharingStarted
@@ -186,13 +187,12 @@ private fun SettingsScreen(
                     onRequestLogout = {
                         scope.launch {
                             // the user manually logs out. Therefore we need to tell the server asap.
-                            pushNotificationConfigurationService.firebaseToken.first()?.let {firebaseToken ->
-                                pushNotificationJobService.scheduleUnsubscribeFromNotifications(
-                                    serverUrl = serverUrl,
-                                    authToken = authToken,
-                                    firebaseToken = firebaseToken
-                                )
-                            }
+                            unsubscribeFromNotifications(
+                                serverConfigurationService,
+                                accountService,
+                                pushNotificationConfigurationService,
+                                pushNotificationJobService
+                            )
 
                             accountService.logout()
 

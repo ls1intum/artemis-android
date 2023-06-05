@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
@@ -19,6 +20,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavHostController
+import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
@@ -67,6 +71,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_co
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
+import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.navigateToQuizParticipation
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.quizParticipation
@@ -74,6 +79,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.navig
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.quizResults
 import de.tum.informatics.www1.artemis.native_app.feature.settings.navigateToSettings
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsScreen
+import io.ktor.http.URLBuilder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -135,7 +141,9 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
         setContent {
             AppTheme {
                 ProvideLocalVisibleMetisContextManager(visibleMetisContextManager = visibleMetisContextManager) {
-                    MainActivityComposeUi(startDestination)
+                    val navController = rememberNavController()
+
+                    MainActivityComposeUi(startDestination, navController)
 
                     if (displayWrongServerDialog) {
                         TextAlertDialog(
@@ -147,7 +155,27 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
                             ),
                             confirmButtonText = stringResource(id = R.string.deep_link_wrong_host_dialog_positive),
                             dismissButtonText = stringResource(id = R.string.deep_link_wrong_host_dialog_negative),
-                            onPressPositiveButton = { /*TODO*/ },
+                            onPressPositiveButton = {
+                                lifecycleScope.launch {
+                                    if (data != null) {
+                                        unsubscribeFromNotifications(
+                                            serverConfigurationService, accountService, get(), get()
+                                        )
+                                        accountService.logout()
+
+                                        val newUrl = data.scheme + "://" + data.host.orEmpty()
+                                        serverConfigurationService.updateServerUrl(newUrl)
+
+                                        navController.navigateToLogin(nextDestination = data.toString()) {
+                                            popUpTo(navController.graph.id) {
+                                                inclusive = true
+                                            }
+                                        }
+
+                                        displayWrongServerDialog = false
+                                    }
+                                }
+                            },
                             onDismissRequest = { displayWrongServerDialog = false }
                         )
                     }
@@ -157,9 +185,7 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
     }
 
     @Composable
-    private fun MainActivityComposeUi(startDestination: String) {
-        val navController = rememberNavController()
-
+    private fun MainActivityComposeUi(startDestination: String, navController: NavHostController) {
         // Listen for when the user get logged out (e.g. because their token has expired)
         // This only happens when the user has the app running for multiple days or the user logged out manually
         LaunchedEffect(Unit) {
@@ -174,15 +200,6 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
                         }
                     }
                 }
-        }
-
-        val onLoggedIn = {
-            // Navigate to the course overview and remove the login screen from the navigation stack.
-            navController.navigateToDashboard {
-                popUpTo(LOGIN_DESTINATION) {
-                    inclusive = true
-                }
-            }
         }
 
         val windowSizeClassProvider = remember {
@@ -233,7 +250,21 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
             // Use jetpack compose navigation for the navigation logic.
             NavHost(navController = navController, startDestination = startDestination) {
                 loginScreen(
-                    onFinishedLoginFlow = onLoggedIn,
+                    onFinishedLoginFlow = { deepLink ->
+                        if (deepLink == null) {
+                            // Navigate to the course overview and remove the login screen from the navigation stack.
+                            navController.navigateToDashboard {
+                                popUpTo(LOGIN_DESTINATION) {
+                                    inclusive = true
+                                }
+                            }
+                        } else {
+                            navController.navigate(
+                                Uri.parse(deepLink),
+                                NavOptions.Builder().setPopUpTo(LOGIN_DESTINATION, true).build()
+                            )
+                        }
+                    },
                     onRequestOpenSettings = {
                         navController.navigateToSettings { }
                     }
