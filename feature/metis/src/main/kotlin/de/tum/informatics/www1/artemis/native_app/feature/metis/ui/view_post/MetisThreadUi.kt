@@ -38,7 +38,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.DisplayP
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.getPostActions
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.rememberPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.shouldDisplayHeader
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisPostListHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.MetisReplyHandler
@@ -158,22 +158,21 @@ private fun PostAndRepliesList(
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit
 ) {
     val rememberPostActions: @Composable (IBasePost) -> PostActions = { affectedPost: IBasePost ->
-        remember(affectedPost, hasModerationRights, clientId) {
-            getPostActions(
-                affectedPost,
-                hasModerationRights,
-                clientId,
-                onRequestEdit = { onRequestEdit(affectedPost) },
-                onRequestDelete = { onRequestDelete(affectedPost) },
-                onClickReaction = { emojiId, create ->
-                    onRequestReactWithEmoji(
-                        affectedPost,
-                        emojiId,
-                        create
-                    )
-                }
-            )
-        }
+        rememberPostActions(
+            affectedPost,
+            hasModerationRights,
+            clientId,
+            onRequestEdit = { onRequestEdit(affectedPost) },
+            onRequestDelete = { onRequestDelete(affectedPost) },
+            onClickReaction = { emojiId, create ->
+                onRequestReactWithEmoji(
+                    affectedPost,
+                    emojiId,
+                    create
+                )
+            },
+            onReplyInThread = null
+        )
     }
 
     ProvideMarkwon {

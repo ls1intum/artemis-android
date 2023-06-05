@@ -30,10 +30,9 @@ internal fun PostWithBottomSheet(
         clientId = clientId,
         displayHeader = displayHeader,
         onClickOnReaction = postActions.onClickReaction,
-        onClick = onClick
-    ) {
-        displayBottomSheet = true
-    }
+        onClick = onClick,
+        onLongClick = { displayBottomSheet = true }
+    )
 
     if (displayBottomSheet && post != null) {
         PostContextBottomSheet(

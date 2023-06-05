@@ -7,6 +7,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -16,22 +18,28 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
+import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.placeholder.material.placeholder
@@ -99,7 +107,10 @@ internal fun PostItem(
             expanded = isExpanded,
             displayHeader = displayHeader
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 MarkdownText(
                     markdown = remember(post?.content, isPlaceholder) {
                         if (isPlaceholder) {
@@ -123,6 +134,10 @@ internal fun PostItem(
                     postItemViewType = postItemViewType,
                     onClickReaction = onClickOnReaction
                 )
+
+                if (!post?.reactions.isNullOrEmpty()) {
+                    Box(modifier = Modifier.height(2.dp))
+                }
             }
         }
     }
@@ -165,7 +180,10 @@ private fun PostHeadline(
         ) {
             HeadlineAuthorIcon(authorRole, isPlaceholder, displayIcon = displayHeader)
 
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 if (displayHeader) {
                     HeadlineAuthorInfo(
                         modifier = Modifier.fillMaxWidth(),
@@ -174,6 +192,8 @@ private fun PostHeadline(
                         creationDate = creationDate,
                         expanded = false
                     )
+                } else {
+                    Box(modifier = Modifier.height(4.dp))
                 }
 
                 content()
@@ -199,7 +219,8 @@ private fun HeadlineAuthorInfo(
             modifier = Modifier.placeholder(visible = isPlaceholder),
             text = remember(authorName) { authorName ?: "Placeholder" },
             maxLines = 1,
-            style = MaterialTheme.typography.titleSmall
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold
         )
     }
 
@@ -290,17 +311,10 @@ private fun StandalonePostFooter(
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             reactionCount.forEach { (emoji, reactionData) ->
-                InputChip(
+                EmojiChip(
                     selected = reactionData.hasClientReacted,
-                    leadingIcon = {
-                        Text(
-                            text = getUnicodeForEmojiId(emojiId = emoji),
-                            fontSize = 16.sp
-                        )
-                    },
-                    label = {
-                        AnimatedCounter(reactionData.reactionCount)
-                    },
+                    emojiId = emoji,
+                    reactionCount = reactionData.reactionCount,
                     onClick = {
                         onClickReaction(emoji, !reactionData.hasClientReacted)
                     }
@@ -346,5 +360,38 @@ private fun AnimatedCounter(currentCount: Int) {
         label = "Animate reaction count change"
     ) { targetCount ->
         Text(text = "$targetCount")
+    }
+}
+
+@Composable
+private fun EmojiChip(
+    modifier: Modifier = Modifier,
+    selected: Boolean,
+    emojiId: String,
+    reactionCount: Int,
+    onClick: () -> Unit
+) {
+    val shape = CircleShape
+
+    val backgroundColor =
+        if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
+
+    Box(
+        modifier = modifier
+            .background(color = backgroundColor, shape)
+            .clip(shape)
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier.padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = getUnicodeForEmojiId(emojiId = emojiId),
+                fontSize = 14.sp
+            )
+
+            AnimatedCounter(reactionCount)
+        }
     }
 }

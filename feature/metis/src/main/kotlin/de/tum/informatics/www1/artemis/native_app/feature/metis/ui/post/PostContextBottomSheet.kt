@@ -16,9 +16,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -111,6 +113,28 @@ internal fun PostContextBottomSheet(
                         modifier = actionButtonModifier,
                         icon = Icons.Default.Delete,
                         text = stringResource(id = R.string.post_delete),
+                        onClick = {
+                            onDismissRequest()
+                            it()
+                        }
+                    )
+                }
+
+                ActionButton(
+                    modifier = actionButtonModifier,
+                    icon = Icons.Default.ContentCopy,
+                    text = stringResource(id = R.string.post_copy_text),
+                    onClick = {
+                        onDismissRequest()
+                        postActions.onCopyText()
+                    }
+                )
+
+                postActions.onReplyInThread?.let {
+                    ActionButton(
+                        modifier = actionButtonModifier,
+                        icon = Icons.Default.Reply,
+                        text = stringResource(id = R.string.post_reply),
                         onClick = {
                             onDismissRequest()
                             it()

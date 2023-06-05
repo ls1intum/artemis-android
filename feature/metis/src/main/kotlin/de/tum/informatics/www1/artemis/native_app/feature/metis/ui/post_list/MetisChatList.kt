@@ -35,10 +35,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.PagingStateError
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.DisplayPostOrder
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.PostWithBottomSheet
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.getPostActions
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.rememberPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.shouldDisplayHeader
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.MetisOutdatedBanner
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.MetisReplyHandler
@@ -162,7 +161,7 @@ private fun ChatList(
 ) {
     LazyColumn(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         contentPadding = listContentPadding,
         state = state,
         reverseLayout = true
@@ -187,27 +186,21 @@ private fun ChatList(
                 is ChatListItem.PostChatListItem? -> {
                     val post = chatListItem?.post
 
-                    val postActions =
-                        remember(
-                            chatListItem,
-                            hasModerationRights,
-                            clientId,
-                            onRequestEdit,
-                            onRequestDelete
-                        ) {
-                            if (post != null) {
-                                getPostActions(
-                                    post = post,
-                                    hasModerationRights = hasModerationRights,
-                                    clientId = clientId,
-                                    onRequestEdit = { onRequestEdit(post) },
-                                    onRequestDelete = { onRequestDelete(post) },
-                                    onClickReaction = { id, create ->
-                                        onRequestReactWithEmoji(post, id, create)
-                                    }
-                                )
-                            } else PostActions()
+                    val postActions = rememberPostActions(
+                        post = post,
+                        hasModerationRights = hasModerationRights,
+                        clientId = clientId,
+                        onRequestEdit = { onRequestEdit(post ?: return@rememberPostActions) },
+                        onRequestDelete = { onRequestDelete(post ?: return@rememberPostActions) },
+                        onClickReaction = { id, create ->
+                            onRequestReactWithEmoji(post ?: return@rememberPostActions, id, create)
+                        },
+                        onReplyInThread = {
+                            onClickViewPost(
+                                post?.clientPostId ?: return@rememberPostActions
+                            )
                         }
+                    )
 
                     PostWithBottomSheet(
                         modifier = Modifier.fillMaxWidth(),

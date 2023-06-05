@@ -99,7 +99,7 @@ fun MarkdownText(
             markdownRender.setMarkdown(textView, markdown)
             textView.movementMethod = LinkMovementMethod.getInstance()
         },
-        onReset = { },
+        onReset = {},
         onRelease = {}
     )
 }
