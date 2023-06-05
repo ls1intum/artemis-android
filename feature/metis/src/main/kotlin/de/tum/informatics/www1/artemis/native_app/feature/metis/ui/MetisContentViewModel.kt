@@ -39,11 +39,13 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
@@ -105,8 +107,10 @@ abstract class MetisContentViewModel(
      * Emits true if the data may be outdated. Listens to the connection state of the websocket
      * If a connection was established and is broken, then the data may be corrupted. A reload resets this
      */
-    val isDataOutdated: StateFlow<Boolean> = onRequestReload
-        .onStart { emit(Unit) }
+    val isDataOutdated: StateFlow<Boolean> = merge(
+        onRequestReload,
+        metisContext.map { }
+    )
         .transformLatest {
             emit(false)
             var wasConnected = false

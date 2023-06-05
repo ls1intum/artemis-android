@@ -6,15 +6,15 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupCha
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableTitle
 
-data class ConversationCollection(
-    val favorites: List<Conversation>,
-    val channels: List<ChannelChat>,
-    val groupChats: List<GroupChat>,
-    val directChats: List<OneToOneChat>,
-    val hidden: List<Conversation>
+data class ConversationCollections(
+    val favorites: ConversationCollection<Conversation>,
+    val channels: ConversationCollection<ChannelChat>,
+    val groupChats: ConversationCollection<GroupChat>,
+    val directChats: ConversationCollection<OneToOneChat>,
+    val hidden: ConversationCollection<Conversation>
 ) {
-    fun filtered(query: String): ConversationCollection {
-        return ConversationCollection(
+    fun filtered(query: String): ConversationCollections {
+        return ConversationCollections(
             channels = channels.filter { it.filterPredicate(query) },
             groupChats = groupChats.filter { it.filterPredicate(query) },
             directChats = directChats.filter { it.filterPredicate(query) },
@@ -23,6 +23,9 @@ data class ConversationCollection(
         )
     }
 
+    data class ConversationCollection<T : Conversation>(val conversations: List<T>, val isExpanded: Boolean) {
+        fun filter(predicate: (Conversation) -> Boolean) = copy(conversations = conversations.filter(predicate))
+    }
 }
 
 private fun Conversation.filterPredicate(query: String): Boolean = when (this) {

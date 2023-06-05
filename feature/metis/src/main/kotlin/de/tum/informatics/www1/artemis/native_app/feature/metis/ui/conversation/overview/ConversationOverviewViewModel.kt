@@ -18,11 +18,15 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationWebsocketDTO
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostAction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.subscribeToConversationUpdates
@@ -53,12 +57,13 @@ import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-class ConversationOverviewViewModel(
-    private val application: Application,
+internal class ConversationOverviewViewModel(
+    application: Application,
     private val courseId: Long,
     private val conversationService: ConversationService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
+    private val conversationPreferenceService: ConversationPreferenceService,
     websocketProvider: WebsocketProvider,
     networkStatusProvider: NetworkStatusProvider,
     serverDataService: ServerDataService
@@ -69,6 +74,7 @@ class ConversationOverviewViewModel(
     networkStatusProvider,
     websocketProvider
 ) {
+
     private val currentActivity: Flow<Activity?> =
         (application as? CurrentActivityListener)?.currentActivity ?: flowOf(null)
 
@@ -130,25 +136,40 @@ class ConversationOverviewViewModel(
     val isConnected: StateFlow<Boolean> =
         websocketProvider.isConnected.stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    private val conversationsAsCollections: StateFlow<DataState<ConversationCollection>> =
-        updatedConversations
-            .map { conversationsDataState ->
-                conversationsDataState.bind { conversations ->
-                    ConversationCollection(
-                        channels = conversations.filterNotHiddenNorFavourite(),
-                        groupChats = conversations.filterNotHiddenNorFavourite(),
-                        directChats = conversations.filterNotHiddenNorFavourite(),
-                        favorites = conversations.filter { it.isFavorite },
-                        hidden = conversations.filter { it.isHidden }
-                    )
-                }
+    private val currentPreferences: Flow<ConversationPreferenceService.Preferences> =
+        serverConfigurationService
+            .serverUrl
+            .flatMapLatest { serverUrl ->
+                conversationPreferenceService.getPreferences(serverUrl, courseId)
             }
+            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+
+    private val conversationsAsCollections: StateFlow<DataState<ConversationCollections>> =
+        combine(
+            updatedConversations,
+            currentPreferences
+        ) { conversationsDataState, preferences ->
+            conversationsDataState.bind { conversations ->
+                ConversationCollections(
+                    channels = conversations.filterNotHiddenNorFavourite<ChannelChat>()
+                        .asCollection(preferences.channelsExpanded),
+                    groupChats = conversations.filterNotHiddenNorFavourite<GroupChat>()
+                        .asCollection(preferences.groupChatsExpanded),
+                    directChats = conversations.filterNotHiddenNorFavourite<OneToOneChat>()
+                        .asCollection(preferences.personalConversationsExpanded),
+                    favorites = conversations.filter { it.isFavorite }
+                        .asCollection(preferences.favouritesExpanded),
+                    hidden = conversations.filter { it.isHidden }
+                        .asCollection(preferences.hiddenExpanded)
+                )
+            }
+        }
             .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     /**
      * Holds the latest conversations we could successfully load.
      */
-    private val latestConversations: StateFlow<DataState<ConversationCollection>> =
+    private val latestConversations: StateFlow<DataState<ConversationCollections>> =
         conversationsAsCollections
             .transformWhile { conversationsAsCollections ->
                 emit(conversationsAsCollections)
@@ -162,7 +183,7 @@ class ConversationOverviewViewModel(
             }
             .stateIn(viewModelScope, SharingStarted.Eagerly)
 
-    val conversations: StateFlow<DataState<ConversationCollection>> =
+    val conversations: StateFlow<DataState<ConversationCollections>> =
         combine(latestConversations, query) { latestConversationsDataState, query ->
             if (query.isBlank()) {
                 latestConversationsDataState
@@ -280,8 +301,41 @@ class ConversationOverviewViewModel(
         }
     }
 
+    fun toggleFavoritesExpanded() {
+        expandOrCollapseSection { copy(favouritesExpanded = !favouritesExpanded) }
+    }
+
+    fun toggleChannelsExpanded() {
+        expandOrCollapseSection { copy(channelsExpanded = !channelsExpanded) }
+    }
+
+    fun toggleGroupChatsExpanded() {
+        expandOrCollapseSection { copy(groupChatsExpanded = !groupChatsExpanded) }
+    }
+
+    fun togglePersonalConversationsExpanded() {
+        expandOrCollapseSection { copy(personalConversationsExpanded = !personalConversationsExpanded) }
+    }
+
+    fun toggleHiddenExpanded() {
+        expandOrCollapseSection { copy(hiddenExpanded = !hiddenExpanded) }
+    }
+
+    private fun expandOrCollapseSection(update: ConversationPreferenceService.Preferences.() -> ConversationPreferenceService.Preferences) {
+        viewModelScope.launch {
+            conversationPreferenceService.updatePreferences(
+                serverUrl = serverConfigurationService.serverUrl.first(),
+                courseId = courseId,
+                preferences = update(currentPreferences.first())
+            )
+        }
+    }
+
     private inline fun <reified T : Conversation> List<*>.filterNotHiddenNorFavourite(): List<T> {
         return filterIsInstance<T>()
             .filter { !it.isHidden && !it.isFavorite }
     }
+
+    private fun <T : Conversation> List<T>.asCollection(isExpanded: Boolean) =
+        ConversationCollections.ConversationCollection(this, isExpanded)
 }

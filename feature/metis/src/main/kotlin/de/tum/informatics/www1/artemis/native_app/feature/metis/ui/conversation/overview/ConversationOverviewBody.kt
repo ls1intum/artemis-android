@@ -27,7 +27,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollections
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -40,7 +40,7 @@ fun ConversationOverviewBody(
     onRequestAddChannel: () -> Unit
 ) {
     val viewModel: ConversationOverviewViewModel = koinViewModel { parametersOf(courseId) }
-    val conversationCollectionDataState: DataState<ConversationCollection> by viewModel.conversations.collectAsState()
+    val conversationCollectionsDataState: DataState<ConversationCollections> by viewModel.conversations.collectAsState()
 
     val isConnected by viewModel.isConnected.collectAsState()
 
@@ -52,7 +52,7 @@ fun ConversationOverviewBody(
 
     BasicDataStateUi(
         modifier = modifier,
-        dataState = conversationCollectionDataState,
+        dataState = conversationCollectionsDataState,
         loadingText = stringResource(id = R.string.conversation_overview_loading),
         failureText = stringResource(id = R.string.conversation_overview_loading_failed),
         retryButtonText = stringResource(id = R.string.conversation_overview_loading_try_again),
@@ -90,7 +90,8 @@ fun ConversationOverviewBody(
             ConversationList(
                 modifier = Modifier
                     .fillMaxSize(),
-                conversationCollection = conversationCollection,
+                viewModel = viewModel,
+                conversationCollections = conversationCollection,
                 onNavigateToConversation = { conversationId ->
                     viewModel.setConversationMessagesRead(conversationId)
                     onNavigateToConversation(conversationId)

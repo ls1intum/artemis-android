@@ -17,6 +17,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowRight
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Groups2
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
@@ -40,7 +43,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelC
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.ChannelIcons
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableTitle
 
@@ -59,18 +62,27 @@ private const val KEY_SUFFIX_HIDDEN = "_h"
 @Composable
 internal fun ConversationList(
     modifier: Modifier,
-    conversationCollection: ConversationCollection,
+    viewModel: ConversationOverviewViewModel,
+    conversationCollections: ConversationCollections,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit
 ) {
-    val defaultConversationList: LazyListScope.(List<Conversation>, String) -> Unit =
-        { conversations: List<Conversation>, keySuffix: String ->
+    val listWithHeader: LazyListScope.(ConversationCollections.ConversationCollection<*>, String, String, Int, ConversationSectionHeaderAction, () -> Unit) -> Unit =
+        { collection, key, suffix, textRes, action, toggleIsExpanded ->
+            conversationSectionHeader(
+                key = key,
+                text = textRes,
+                onClickAddAction = action,
+                isExpanded = collection.isExpanded,
+                toggleIsExpanded = toggleIsExpanded
+            )
+
             conversationList(
-                keySuffix = keySuffix,
-                conversations = conversations,
+                keySuffix = suffix,
+                conversations = collection,
                 onNavigateToConversation = onNavigateToConversation,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
                 onToggleHidden = onToggleHidden
@@ -78,48 +90,53 @@ internal fun ConversationList(
         }
 
     LazyColumn(modifier = modifier) {
-        if (conversationCollection.favorites.isNotEmpty()) {
-            conversationSectionHeader(
-                key = SECTION_FAVORITES_KEY,
-                text = R.string.conversation_overview_section_favorites,
-                onClickAddAction = NoAction
+        if (conversationCollections.favorites.conversations.isNotEmpty()) {
+            listWithHeader(
+                conversationCollections.favorites,
+                SECTION_FAVORITES_KEY,
+                KEY_SUFFIX_FAVORITES,
+                R.string.conversation_overview_section_favorites,
+                NoAction,
+                viewModel::toggleFavoritesExpanded
             )
-
-            defaultConversationList(conversationCollection.favorites, KEY_SUFFIX_FAVORITES)
         }
 
-        conversationSectionHeader(
-            key = SECTION_CHANNELS_KEY,
-            text = R.string.conversation_overview_section_channels,
-            onClickAddAction = OnClickAction(onRequestAddChannel)
+        listWithHeader(
+            conversationCollections.channels,
+            SECTION_CHANNELS_KEY,
+            KEY_SUFFIX_CHANNELS,
+            R.string.conversation_overview_section_channels,
+            OnClickAction(onRequestAddChannel),
+            viewModel::toggleChannelsExpanded
         )
 
-        defaultConversationList(conversationCollection.channels, KEY_SUFFIX_CHANNELS)
-
-        conversationSectionHeader(
-            key = SECTION_GROUPS_KEY,
-            text = R.string.conversation_overview_section_groups,
-            onClickAddAction = OnClickAction(onRequestCreatePersonalConversation)
+        listWithHeader(
+            conversationCollections.groupChats,
+            SECTION_GROUPS_KEY,
+            KEY_SUFFIX_GROUPS,
+            R.string.conversation_overview_section_groups,
+            OnClickAction(onRequestCreatePersonalConversation),
+            viewModel::toggleGroupChatsExpanded
         )
 
-        defaultConversationList(conversationCollection.groupChats, KEY_SUFFIX_GROUPS)
-
-        conversationSectionHeader(
-            key = SECTION_DIRECT_MESSAGES_KEY,
-            text = R.string.conversation_overview_section_direct_messages,
-            onClickAddAction = OnClickAction(onRequestCreatePersonalConversation)
+        listWithHeader(
+            conversationCollections.directChats,
+            SECTION_DIRECT_MESSAGES_KEY,
+            KEY_SUFFIX_PERSONAL,
+            R.string.conversation_overview_section_direct_messages,
+            OnClickAction(onRequestCreatePersonalConversation),
+            viewModel::togglePersonalConversationsExpanded
         )
 
-        defaultConversationList(conversationCollection.directChats, KEY_SUFFIX_PERSONAL)
-
-        if (conversationCollection.hidden.isNotEmpty()) {
-            conversationSectionHeader(
-                key = SECTION_HIDDEN_KEY,
-                text = R.string.conversation_overview_section_hidden,
-                onClickAddAction = NoAction
+        if (conversationCollections.hidden.conversations.isNotEmpty()) {
+            listWithHeader(
+                conversationCollections.hidden,
+                SECTION_HIDDEN_KEY,
+                KEY_SUFFIX_HIDDEN,
+                R.string.conversation_overview_section_hidden,
+                NoAction,
+                viewModel::toggleHiddenExpanded
             )
-
-            defaultConversationList(conversationCollection.hidden, KEY_SUFFIX_HIDDEN)
         }
     }
 }
@@ -127,7 +144,9 @@ internal fun ConversationList(
 private fun LazyListScope.conversationSectionHeader(
     key: String,
     @StringRes text: Int,
-    onClickAddAction: ConversationSectionHeaderAction
+    isExpanded: Boolean,
+    onClickAddAction: ConversationSectionHeaderAction,
+    toggleIsExpanded: () -> Unit
 ) {
     item(key = key) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -137,6 +156,10 @@ private fun LazyListScope.conversationSectionHeader(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                IconButton(onClick = toggleIsExpanded) {
+                    Icon(imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowRight, contentDescription = null)
+                }
+
                 Text(
                     modifier = Modifier
                         .weight(1f)
@@ -164,14 +187,15 @@ private fun LazyListScope.conversationSectionHeader(
     }
 }
 
-private fun LazyListScope.conversationList(
+private fun <T : Conversation> LazyListScope.conversationList(
     keySuffix: String,
-    conversations: List<Conversation>,
+    conversations: ConversationCollections.ConversationCollection<T>,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
 ) {
-    items(conversations, key = { "${it.id}$keySuffix" }) { conversation ->
+    if (!conversations.isExpanded) return
+    items(conversations.conversations, key = { "${it.id}$keySuffix" }) { conversation ->
         ConversationListItem(
             modifier = Modifier.fillMaxWidth(),
             conversation = conversation,

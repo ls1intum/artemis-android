@@ -36,6 +36,9 @@ dependencies {
     implementation(libs.androidx.emoji2.emojiPicker)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.appcompat)
+
+    implementation(libs.androidx.dataStore.core)
+    implementation(libs.androidx.dataStore.preferences)
 }
 
 tasks.register("fetchAndPrepareEmojis", emoji.FetchAndPrepareEmojisTask::class) {

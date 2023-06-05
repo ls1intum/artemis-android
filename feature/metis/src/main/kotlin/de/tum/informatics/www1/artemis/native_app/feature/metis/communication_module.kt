@@ -1,11 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis
 
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ChannelService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.ChannelServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.ConversationPreferenceStorageServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.ConversationServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.EmojiServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.MetisContextManager
@@ -28,6 +30,8 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val communicationModule = module {
+    single<ConversationPreferenceService> { ConversationPreferenceStorageServiceImpl(androidContext()) }
+
     single<MetisService> { MetisServiceImpl(get(), get()) }
     single<ConversationService> { ConversationServiceImpl(get()) }
     single<ChannelService> { ChannelServiceImpl(get()) }
@@ -74,6 +78,7 @@ val communicationModule = module {
         ConversationOverviewViewModel(
             androidApplication(),
             params.get(),
+            get(),
             get(),
             get(),
             get(),
