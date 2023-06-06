@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.communicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import kotlinx.datetime.Instant
+import okhttp3.internal.notify
 
 @Dao
 interface PushCommunicationDao {
@@ -43,10 +44,25 @@ interface PushCommunicationDao {
         val type = artemisNotification.communicationType
 
         val courseTitle: String = artemisNotification.notificationPlaceholders[0]
-        val postTitle: String = artemisNotification.notificationPlaceholders[1]
-        val postContent: String = artemisNotification.notificationPlaceholders[2]
+        val postTitle: String? = when (artemisNotification.type) {
+            is ConversationNotificationType -> null
+            else -> artemisNotification.notificationPlaceholders[1]
+        }
+
+        val postContent: String = when (artemisNotification.type) {
+            is ConversationNotificationType -> artemisNotification.notificationPlaceholders[1]
+            else -> artemisNotification.notificationPlaceholders[2]
+        }
         // val postCreationDate: String = artemisNotification.notificationPlaceholders[3]
-        val postAuthor: String = artemisNotification.notificationPlaceholders[4]
+        val postAuthor: String = when (artemisNotification.type) {
+            ConversationNotificationType.CONVERSATION_NEW_MESSAGE -> when (artemisNotification.notificationPlaceholders[5]) {
+                "channel" -> artemisNotification.notificationPlaceholders[4]
+                else -> artemisNotification.notificationPlaceholders[3]
+            }
+
+            ConversationNotificationType.CONVERSATION_NEW_REPLY_MESSAGE -> artemisNotification.notificationPlaceholders[3]
+            else -> artemisNotification.notificationPlaceholders[4]
+        }
 
         val containerTitle: String? = when (artemisNotification.type) {
             StandalonePostCommunicationNotificationType.NEW_COURSE_POST,
@@ -59,8 +75,14 @@ interface PushCommunicationDao {
             ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_EXERCISE_POST,
             ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_LECTURE_POST -> artemisNotification.notificationPlaceholders[8]
 
-            ConversationNotificationType.CONVERSATION_NEW_MESSAGE -> "TODO: Conversation name"
-            ConversationNotificationType.CONVERSATION_NEW_REPLY_MESSAGE -> "TODO: Not included"
+            ConversationNotificationType.CONVERSATION_NEW_MESSAGE -> {
+                when (artemisNotification.notificationPlaceholders[5]) {
+                    "channel" -> artemisNotification.notificationPlaceholders[3]
+                    else -> artemisNotification.notificationPlaceholders[4]
+                }
+            }
+
+            ConversationNotificationType.CONVERSATION_NEW_REPLY_MESSAGE -> artemisNotification.notificationPlaceholders[7]
         }
 
         if (hasPushCommunication(parentId, type)) {
@@ -90,11 +112,14 @@ interface PushCommunicationDao {
             )
 
             is ReplyPostCommunicationNotificationType, ConversationNotificationType.CONVERSATION_NEW_REPLY_MESSAGE -> {
-                val answerPostContent = artemisNotification.notificationPlaceholders[5]
+                val answerPostContent = when (artemisNotification.type) {
+                    is ReplyPostCommunicationNotificationType -> artemisNotification.notificationPlaceholders[5]
+                    else -> artemisNotification.notificationPlaceholders[1]
+                }
                 // val answerPostCreationDate = artemisNotification.notificationPlaceholders[6]
                 val answerPostAuthor = when (artemisNotification.type) {
                     is ReplyPostCommunicationNotificationType -> artemisNotification.notificationPlaceholders[7]
-                    else -> "TODO: author"
+                    else -> artemisNotification.notificationPlaceholders[3]
                 }
 
                 CommunicationMessageEntity(
