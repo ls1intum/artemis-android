@@ -8,13 +8,17 @@ import androidx.room.withTransaction
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
@@ -38,7 +42,8 @@ internal class ReplyWorker(
     private val accountService: AccountService,
     private val pushCommunicationDatabaseProvider: PushCommunicationDatabaseProvider,
     private val communicationNotificationManager: CommunicationNotificationManager,
-    private val serverDataService: ServerDataService
+    private val serverDataService: ServerDataService,
+    private val conversationService: ConversationService
 ) :
     CoroutineWorker(appContext, params) {
 
@@ -74,28 +79,46 @@ internal class ReplyWorker(
 
         val replyContent = inputData.getString(KEY_REPLY_CONTENT) ?: return Result.failure()
 
+        val errorReturnType = if (runAttemptCount > 5) {
+            popFailureNotification(replyContent)
+            Result.failure()
+        } else Result.retry()
+
         return when (val authData = accountService.authenticationData.first()) {
             is AccountService.AuthenticationData.LoggedIn -> {
+                val serverUrl = serverConfigurationService.serverUrl.first()
+
+                val conversation = when (metisContext) {
+                    is MetisContext.Conversation -> conversationService
+                        .getConversation(
+                            metisContext.courseId,
+                            metisContext.conversationId,
+                            authData.authToken,
+                            serverUrl
+                        ).orNull() ?: return errorReturnType
+
+                    else -> null
+                }
+
                 val time = Clock.System.now()
 
-                val response = metisModificationService.createAnswerPost(
+                metisModificationService.createAnswerPost(
                     metisContext,
                     AnswerPost(
                         content = replyContent,
                         post = StandalonePost(
-                            id = postId
+                            id = postId,
+                            conversation = conversation
                         ),
                         creationDate = Clock.System.now()
                     ),
-                    serverUrl = serverConfigurationService.serverUrl.first(),
+                    serverUrl = serverUrl,
                     authToken = authData.authToken
                 )
-
-                when (response) {
-                    is NetworkResponse.Response -> {
+                    .onSuccess {
                         // We can add to the notification that the user has responded. However, this does not have super high priority
                         val accountData = serverDataService.getAccountData(
-                            serverConfigurationService.serverUrl.first(),
+                            serverUrl,
                             authData.authToken
                         )
 
@@ -110,17 +133,9 @@ internal class ReplyWorker(
                                 date = time
                             )
                         }
-
-                        Result.success()
                     }
-
-                    is NetworkResponse.Failure -> {
-                        if (runAttemptCount > 5) {
-                            popFailureNotification(replyContent)
-                            Result.failure()
-                        } else Result.retry()
-                    }
-                }
+                    .bind { Result.success() }
+                    .or(errorReturnType)
             }
 
             AccountService.AuthenticationData.NotLoggedIn -> Result.failure()
