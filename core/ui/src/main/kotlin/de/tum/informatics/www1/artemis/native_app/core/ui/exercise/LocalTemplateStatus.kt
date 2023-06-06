@@ -8,6 +8,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.emptyFlow
@@ -30,7 +31,7 @@ fun ProvideDefaultExerciseTemplateStatus(exercise: Exercise, content: @Composabl
         computeTemplateStatus(
             service = liveParticipationService,
             exercise = exercise,
-            participation = exercise.studentParticipations.orEmpty().firstOrNull() ?: return@remember emptyFlow(),
+            participation = exercise.latestParticipation ?: return@remember emptyFlow(),
             result = null,
             showUngradedResults = true,
             personal = true

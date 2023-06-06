@@ -45,7 +45,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.isInFuture
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ProblemStatementWebView
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.courseId
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.getProblemStatementWebViewState
@@ -61,6 +61,8 @@ internal fun TextExerciseParticipationScreen(
 ) {
     val exerciseDataState by viewModel.exerciseDataState.collectAsState()
     val courseId: Long? = exerciseDataState.courseId
+    val serverUrl: String by viewModel.serverUrl.collectAsState()
+    val authToken: String by viewModel.authToken.collectAsState()
 
     EmptyDataStateUi(dataState = exerciseDataState) { exercise ->
         val exerciseId: Long = exercise.id
@@ -78,9 +80,11 @@ internal fun TextExerciseParticipationScreen(
             .widthSizeClass >= WindowWidthSizeClass.Medium
 
         val webViewState: WebViewState? = getProblemStatementWebViewState(
-            serverUrl = viewModel.serverUrl.collectAsState().value,
+            serverUrl = serverUrl,
             courseId = courseId,
-            exerciseId = exerciseId
+            exerciseId = exerciseId,
+            // participationId is only relevant for programming exercises
+            participationId = null
         )
 
         var webView: WebView? by remember { mutableStateOf(null) }
@@ -131,11 +135,13 @@ internal fun TextExerciseParticipationScreen(
 
                 val problemStatementUi = @Composable { modifier: Modifier ->
                     if (webViewState != null) {
-                        ProblemStatementWebView(
+                        ArtemisWebView(
                             modifier = modifier,
                             webViewState = webViewState,
                             webView = webView,
-                            setWebView = { webView = it }
+                            setWebView = { webView = it },
+                            serverUrl = serverUrl,
+                            authToken = authToken
                         )
                     } else {
                         Box(modifier = modifier)
@@ -242,12 +248,10 @@ private fun isActive(
     exercise: Exercise,
     participation: Participation
 ): Boolean {
-    return latestResult == null && (
-            isAlwaysActive(null, exercise, participation) || (
-                    exercise.dueDate != null
-                            && exercise.getDueDate(participation)?.isInFuture() ?: true
-                    )
-            )
+    val alwaysActive = isAlwaysActive(latestResult, exercise, participation)
+    val isDueDateInFuture = exercise.dueDate != null && exercise.getDueDate(participation)?.isInFuture() ?: true
+
+    return latestResult == null && (alwaysActive || isDueDateInFuture)
 }
 
 @Composable

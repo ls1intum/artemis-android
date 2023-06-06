@@ -170,7 +170,7 @@ private fun evaluateTemplateStatus(
         return isAssessmentDueDateInPast.flatMapLatest { isAssessmentDueDateInPastValue ->
             if (inDueTime && result?.score != null) {
                 // Submission is in due time of exercise and has a result with score
-                if (assessmentDueDate != null || isAssessmentDueDateInPastValue) {
+                if (assessmentDueDate == null || isAssessmentDueDateInPastValue) {
                     flowOf(ResultTemplateStatus.HasResult(result))
                 } else {
                     // the assessment period is still active
