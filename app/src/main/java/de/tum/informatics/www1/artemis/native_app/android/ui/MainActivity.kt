@@ -125,13 +125,14 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
             }
         }
 
-        val currentHost = runBlocking {
-            serverConfigurationService.serverUrl.first().toUri().host
+        val (currentHost, isLoggedIn) = runBlocking {
+            serverConfigurationService.serverUrl.first()
+                .toUri().host to (accountService.authenticationData.first() is AccountService.AuthenticationData.LoggedIn)
         }
 
         val data = intent?.data
         val newHost = if (data != null && data.scheme == "https") data.host else null
-        val hasServerMismatch = newHost != null && newHost != currentHost
+        val hasServerMismatch = newHost != null && (newHost != currentHost || !isLoggedIn)
         var displayWrongServerDialog by mutableStateOf(hasServerMismatch)
 
         if (hasServerMismatch) {
