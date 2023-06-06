@@ -73,54 +73,76 @@ internal fun ExerciseScreenBody(
                     )
                 }
 
-                if (displayCommunicationOnSide) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        exerciseOverviewTab(
-                            Modifier
-                                .fillMaxHeight()
-                                .weight(1f - METIS_RATIO)
-                                .verticalScroll(rememberScrollState())
-                        )
+                exerciseOverviewTab(
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 8.dp)
+                )
 
-                        val sideBarMetisModifier = Modifier
-                            .weight(METIS_RATIO)
-                            .fillMaxHeight()
+                // Commented out as we may need that code again once we display communications for exercises
 
-                        if (metisContext != null) {
-                            SideBarMetisUi(
-                                modifier = sideBarMetisModifier,
-                                metisContext = metisContext,
-                                navController = navController,
-                                title = {
-                                    Text(
-                                        text = stringResource(id = R.string.exercise_view_tab_qna),
-                                    )
-                                }
-                            )
-                        } else {
-                            // Placeholder
-                            Box(modifier = sideBarMetisModifier)
-                        }
-                    }
-                } else {
-                    BodyWithTabs(
-                        modifier = Modifier.fillMaxSize(),
-                        metisContext = metisContext,
-                        navController = navController
-                    ) {
-                        exerciseOverviewTab(
-                            Modifier
-                                .fillMaxSize()
-                                .verticalScroll(rememberScrollState())
-                                .padding(horizontal = 8.dp)
-                        )
-                    }
-                }
+//                BodyWithTabs(
+//                    modifier = Modifier.fillMaxSize(),
+//                    metisContext = metisContext,
+//                    navController = navController
+//                ) {
+//                    exerciseOverviewTab(
+//                        Modifier
+//                            .fillMaxSize()
+//                            .verticalScroll(rememberScrollState())
+//                            .padding(horizontal = 8.dp)
+//                    )
+//                }
+
+//                if (displayCommunicationOnSide) {
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .padding(horizontal = 8.dp),
+//                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+//                    ) {
+//                        exerciseOverviewTab(
+//                            Modifier
+//                                .fillMaxHeight()
+//                                .weight(1f - METIS_RATIO)
+//                                .verticalScroll(rememberScrollState())
+//                        )
+//
+//                        val sideBarMetisModifier = Modifier
+//                            .weight(METIS_RATIO)
+//                            .fillMaxHeight()
+//
+//                        if (metisContext != null) {
+//                            SideBarMetisUi(
+//                                modifier = sideBarMetisModifier,
+//                                metisContext = metisContext,
+//                                navController = navController,
+//                                title = {
+//                                    Text(
+//                                        text = stringResource(id = R.string.exercise_view_tab_qna),
+//                                    )
+//                                }
+//                            )
+//                        } else {
+//                            // Placeholder
+//                            Box(modifier = sideBarMetisModifier)
+//                        }
+//                    }
+//                } else {
+//                    BodyWithTabs(
+//                        modifier = Modifier.fillMaxSize(),
+//                        metisContext = metisContext,
+//                        navController = navController
+//                    ) {
+//                        exerciseOverviewTab(
+//                            Modifier
+//                                .fillMaxSize()
+//                                .verticalScroll(rememberScrollState())
+//                                .padding(horizontal = 8.dp)
+//                        )
+//                    }
+//                }
             }
         }
     )
@@ -129,6 +151,7 @@ internal fun ExerciseScreenBody(
 /**
  * Displays a tab row and shows the selected tab body.
  */
+@Suppress("UNUSED_PARAMETER")
 @Composable
 private fun BodyWithTabs(
     modifier: Modifier,

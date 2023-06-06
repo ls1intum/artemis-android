@@ -27,6 +27,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 internal fun LectureScreenBody(
     modifier: Modifier,
@@ -76,14 +77,14 @@ internal fun LectureScreenBody(
                 selectedTabIndex = selectedTabIndexState
             )
 
-            if (!displayCommunicationOnSide) {
-                DefaultTab(
-                    index = qnaTabIndex,
-                    icon = Icons.Default.HelpCenter,
-                    textRes = R.string.lecture_view_tab_communication,
-                    selectedTabIndex = selectedTabIndexState
-                )
-            }
+//            if (!displayCommunicationOnSide) {
+//                DefaultTab(
+//                    index = qnaTabIndex,
+//                    icon = Icons.Default.HelpCenter,
+//                    textRes = R.string.lecture_view_tab_communication,
+//                    selectedTabIndex = selectedTabIndexState
+//                )
+//            }
         }
 
         BasicDataStateUi(

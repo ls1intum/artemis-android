@@ -199,31 +199,37 @@ private fun LectureScreen(
                 .fillMaxSize()
                 .padding(padding)
 
-            if (displayCommunicationOnSide) {
-                Row(
-                    modifier = bodyModifier,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    contentBody(
-                        Modifier
-                            .weight(1f - METIS_RATIO)
-                            .fillMaxHeight()
-                    )
+            contentBody(
+                bodyModifier
+            )
 
-                    SideBarMetisUi(
-                        modifier = Modifier
-                            .weight(METIS_RATIO)
-                            .fillMaxHeight(),
-                        metisContext = metisContext,
-                        navController = navController,
-                        title = { Text(text = stringResource(id = R.string.lecture_view_tab_communication)) }
-                    )
-                }
-            } else {
-                contentBody(
-                    bodyModifier
-                )
-            }
+            // Commented out as we may need to add this functionality again later if communication is also available for lectures.
+
+//            if (displayCommunicationOnSide) {
+//                Row(
+//                    modifier = bodyModifier,
+//                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+//                ) {
+//                    contentBody(
+//                        Modifier
+//                            .weight(1f - METIS_RATIO)
+//                            .fillMaxHeight()
+//                    )
+//
+//                    SideBarMetisUi(
+//                        modifier = Modifier
+//                            .weight(METIS_RATIO)
+//                            .fillMaxHeight(),
+//                        metisContext = metisContext,
+//                        navController = navController,
+//                        title = { Text(text = stringResource(id = R.string.lecture_view_tab_communication)) }
+//                    )
+//                }
+//            } else {
+//                contentBody(
+//                    bodyModifier
+//                )
+//            }
 
             val currentPendingOpenFileAttachment = pendingOpenFileAttachment
             if (currentPendingOpenFileAttachment != null) {
