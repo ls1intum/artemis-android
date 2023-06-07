@@ -179,7 +179,8 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
             Text(
                 text = pluralStringResource(
                     id = R.plurals.browse_channel_channel_item_member_count,
-                    count = channelChat.numberOfMembers
+                    count = channelChat.numberOfMembers,
+                    channelChat.numberOfMembers
                 )
             )
         }

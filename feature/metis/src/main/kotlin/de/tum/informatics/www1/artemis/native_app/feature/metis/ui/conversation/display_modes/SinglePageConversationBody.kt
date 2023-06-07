@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes
 
 import android.os.Parcelable
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +53,17 @@ fun SinglePageConversationBody(
         configuration = when (val currentConfig = configuration) {
             is OpenedConversation -> OpenedConversation(conversationId, null)
             else -> OpenedConversation(conversationId, null)
+        }
+    }
+
+    BackHandler(configuration != NothingOpened) {
+        when (val config = configuration) {
+            is ConversationSettings -> configuration = config.prevConfiguration
+            is AddChannelConfiguration -> configuration = config.prevConfiguration
+            is CreatePersonalConversation -> configuration = config.prevConfiguration
+            is OpenedConversation -> configuration =
+                if (config.openedThread != null) config.copy(openedThread = null) else NothingOpened
+            NothingOpened -> {}
         }
     }
 
@@ -232,9 +244,7 @@ fun SinglePageConversationBody(
                         modifier = modifier,
                         courseId = courseId,
                         conversationId = config.conversationId,
-                        onNavigateBack = {
-                            configuration = config.copy(isViewingAllMembers = false)
-                        }
+                        onNavigateBack = { configuration = config.prevConfiguration }
                     )
                 }
 
@@ -242,9 +252,7 @@ fun SinglePageConversationBody(
                     ConversationAddMembersScreen(
                         modifier = modifier,
                         courseId = courseId,
-                        onNavigateBack = {
-                            configuration = config.copy(isAddingMembers = false)
-                        }
+                        onNavigateBack = { configuration = config.prevConfiguration }
                     )
                 }
 
@@ -255,10 +263,10 @@ fun SinglePageConversationBody(
                         conversationId = config.conversationId,
                         onNavigateBack = { configuration = config.prevConfiguration },
                         onRequestAddMembers = {
-                            configuration = config.copy(isAddingMembers = true)
+                            configuration = config.copy(isAddingMembers = true, prevConfiguration = configuration)
                         },
                         onRequestViewAllMembers = {
-                            configuration = config.copy(isViewingAllMembers = true)
+                            configuration = config.copy(isViewingAllMembers = true, prevConfiguration = configuration)
                         },
                         onConversationLeft = {
                             configuration = NothingOpened

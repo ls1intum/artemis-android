@@ -43,7 +43,7 @@ internal abstract class MemberSelectionBaseViewModel(
         private const val KEY_RECIPIENTS = "recipients"
     }
 
-    protected val onRequestReloadPotentialRecipients =
+    private val onRequestReloadPotentialRecipients =
         MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     val query: StateFlow<String> = savedStateHandle.getStateFlow(KEY_QUERY, "")
@@ -117,6 +117,12 @@ internal abstract class MemberSelectionBaseViewModel(
 
     fun retryLoadPotentialRecipients() {
         onRequestReloadPotentialRecipients.tryEmit(Unit)
+    }
+
+    protected fun reset() {
+        savedStateHandle[KEY_RECIPIENTS] = RecipientsList(emptyList())
+        savedStateHandle[KEY_INCLUSION_LIST] = InclusionList()
+        savedStateHandle[KEY_QUERY] = ""
     }
 
     @Parcelize

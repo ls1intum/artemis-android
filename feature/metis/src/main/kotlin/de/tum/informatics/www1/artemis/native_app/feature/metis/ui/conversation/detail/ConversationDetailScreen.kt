@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -109,6 +110,13 @@ fun ConversationScreen(
 
     val searchBarFocusRequester = remember { FocusRequester() }
 
+    val closeSearch = {
+        isSearchBarOpen = false
+        viewModel.updateQuery("")
+    }
+
+    BackHandler(isSearchBarOpen, closeSearch)
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -146,8 +154,7 @@ fun ConversationScreen(
                         IconButton(
                             onClick = {
                                 if (isSearchBarOpen) {
-                                    isSearchBarOpen = false
-                                    viewModel.updateQuery("")
+                                    closeSearch()
                                 } else {
                                     onNavigateBack()
                                 }

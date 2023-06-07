@@ -22,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.ConversationMemberListItem
 
 @Composable
@@ -67,10 +68,12 @@ internal fun ConversationMemberSettings(
                 )
             )
 
-            Button(onClick = onRequestAddMembers) {
-                Icon(imageVector = Icons.Default.PersonAdd, contentDescription = null)
+            if (conversation !is OneToOneChat) {
+                Button(onClick = onRequestAddMembers) {
+                    Icon(imageVector = Icons.Default.PersonAdd, contentDescription = null)
 
-                Text(text = stringResource(id = R.string.conversation_settings_section_members_add_members))
+                    Text(text = stringResource(id = R.string.conversation_settings_section_members_add_members))
+                }
             }
         }
 

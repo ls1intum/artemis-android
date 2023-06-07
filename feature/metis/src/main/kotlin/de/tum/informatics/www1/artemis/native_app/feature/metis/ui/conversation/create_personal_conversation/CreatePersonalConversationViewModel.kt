@@ -44,9 +44,9 @@ internal class CreatePersonalConversationViewModel(
 
             val currentRecipients = recipients.value
 
-            val recipientsAsUsernames = currentRecipients.mapNotNull { it.username }
+            val recipientsAsUsernames = currentRecipients.map { it.username }
 
-            if (currentRecipients.size > 1) {
+            val result = if (currentRecipients.size > 1) {
                 conversationService.createGroupChat(
                     courseId,
                     recipientsAsUsernames,
@@ -61,6 +61,12 @@ internal class CreatePersonalConversationViewModel(
                     serverUrl
                 ).orNull()
             } else null
+
+            if (result != null) {
+                reset()
+            }
+
+            result
         }
     }
 }

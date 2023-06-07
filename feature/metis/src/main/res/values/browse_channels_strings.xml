@@ -12,7 +12,7 @@
     <plurals name="browse_channel_channel_item_member_count">
         <item quantity="zero">No members</item>
         <item quantity="one">1 member</item>
-        <item quantity="other">%d member</item>
+        <item quantity="other">%d members</item>
     </plurals>
 
     <string name="browse_channel_registration_failed_dialog_title">Could not register</string>
