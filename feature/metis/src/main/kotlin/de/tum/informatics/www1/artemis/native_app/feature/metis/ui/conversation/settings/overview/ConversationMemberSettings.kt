@@ -23,6 +23,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.hasModerationRights
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.ConversationMemberListItem
 
 @Composable
@@ -68,7 +69,7 @@ internal fun ConversationMemberSettings(
                 )
             )
 
-            if (conversation !is OneToOneChat) {
+            if (conversation !is OneToOneChat && conversation.hasModerationRights) {
                 Button(onClick = onRequestAddMembers) {
                     Icon(imageVector = Icons.Default.PersonAdd, contentDescription = null)
 
