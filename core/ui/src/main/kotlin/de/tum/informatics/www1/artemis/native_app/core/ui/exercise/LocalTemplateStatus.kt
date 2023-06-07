@@ -13,7 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipati
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.shareIn
-import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 
 val LocalTemplateStatusProvider: ProvidableCompositionLocal<@Composable () -> ResultTemplateStatus?> =
     compositionLocalOf { { throw RuntimeException("No template status provider set") } }
@@ -25,7 +25,7 @@ val LocalTemplateStatusProvider: ProvidableCompositionLocal<@Composable () -> Re
 @Composable
 fun ProvideDefaultExerciseTemplateStatus(exercise: Exercise, content: @Composable () -> Unit) {
     val scope = rememberCoroutineScope()
-    val liveParticipationService: LiveParticipationService = get()
+    val liveParticipationService: LiveParticipationService = koinInject()
 
     val templateStatusFlow = remember(exercise) {
         computeTemplateStatus(

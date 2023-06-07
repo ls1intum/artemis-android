@@ -24,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
+import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 
 /**
  * Display a single exercise.
@@ -33,13 +34,14 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 fun ExerciseListItem(
     modifier: Modifier,
     exercise: Exercise,
-    displayActionButtons: Boolean =
-        LocalWindowSizeClassProvider.current.provideWindowSizeClass().widthSizeClass >= WindowWidthSizeClass.Expanded,
+    displayActionButtons: Boolean = getWindowSizeClass().widthSizeClass >= WindowWidthSizeClass.Expanded,
     onClickExercise: () -> Unit,
     exerciseActions: ExerciseActions
 ) {
-
-    Card(modifier = modifier, onClick = onClickExercise) {
+    Card(
+        modifier = modifier,
+        onClick = onClickExercise
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

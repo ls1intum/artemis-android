@@ -78,7 +78,6 @@ internal fun ConversationMemberSettings(
             }
         }
 
-
         ConversationMemberPreviewList(
             modifier = Modifier.fillMaxWidth(),
             conversation = conversation,
