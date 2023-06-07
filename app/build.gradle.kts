@@ -12,7 +12,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
     id("com.google.android.gms.oss-licenses-plugin")
-    id("io.sentry.android.gradle") version "3.4.0"
+    id("io.sentry.android.gradle") version "3.9.0"
     id("artemis.android.room")
 }
 

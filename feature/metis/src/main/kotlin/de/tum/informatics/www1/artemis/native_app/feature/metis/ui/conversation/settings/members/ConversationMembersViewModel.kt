@@ -24,8 +24,8 @@ import kotlinx.coroutines.flow.shareIn
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class ConversationMembersViewModel(
-    courseId: Long,
-    conversationId: Long,
+    initialCourseId: Long,
+    initialConversationId: Long,
     conversationService: ConversationService,
     accountService: AccountService,
     serverConfigurationService: ServerConfigurationService,
@@ -33,8 +33,8 @@ internal class ConversationMembersViewModel(
     serverDataService: ServerDataService,
     private val savedStateHandle: SavedStateHandle
 ) : SettingsBaseViewModel(
-    courseId,
-    conversationId,
+    initialCourseId,
+    initialConversationId,
     conversationService,
     accountService,
     serverConfigurationService,
@@ -50,20 +50,21 @@ internal class ConversationMembersViewModel(
     val query: StateFlow<String> = savedStateHandle.getStateFlow(KEY_QUERY, "")
 
     val membersPagingData: Flow<PagingData<ConversationUser>> = flatMapLatest(
+        conversationSettings,
         serverConfigurationService.serverUrl,
         accountService.authToken,
         query.debounce(200.milliseconds)
-    ) { serverUrl, authToken, query ->
+    ) { conversationSettings, serverUrl, authToken, query ->
         Pager(
             config = PagingConfig(10)
         ) {
             MembersDataSource(
-                courseId,
-                conversationId,
-                serverUrl,
-                authToken,
-                query,
-                conversationService
+                courseId = conversationSettings.courseId,
+                conversationId = conversationSettings.conversationId,
+                serverUrl = serverUrl,
+                authToken = authToken,
+                query = query,
+                conversationService = conversationService
             )
         }
             .flow

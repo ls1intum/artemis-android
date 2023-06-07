@@ -35,8 +35,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
 internal class ConversationSettingsViewModel(
-    courseId: Long,
-    conversationId: Long,
+    initialCourseId: Long,
+    initialConversationId: Long,
     conversationService: ConversationService,
     accountService: AccountService,
     serverConfigurationService: ServerConfigurationService,
@@ -44,8 +44,8 @@ internal class ConversationSettingsViewModel(
     serverDataService: ServerDataService,
     private val savedStateHandle: SavedStateHandle
 ) : SettingsBaseViewModel(
-    courseId,
-    conversationId,
+    initialCourseId,
+    initialConversationId,
     conversationService,
     accountService,
     serverConfigurationService,
@@ -96,14 +96,15 @@ internal class ConversationSettingsViewModel(
         .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     val previewMembers: StateFlow<DataState<List<ConversationUser>>> = flatMapLatest(
+        conversationSettings,
         accountService.authToken,
         serverConfigurationService.serverUrl,
         onRequestReload.onStart { emit(Unit) }
-    ) { authToken, serverUrl, _ ->
+    ) { conversationSettings, authToken, serverUrl, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             conversationService.getMembers(
-                courseId = courseId,
-                conversationId = conversationId,
+                courseId = conversationSettings.courseId,
+                conversationId = conversationSettings.conversationId,
                 query = "",
                 size = 10,
                 pageNum = 0,
@@ -215,8 +216,8 @@ internal class ConversationSettingsViewModel(
 
             conversationService
                 .updateConversation(
-                    courseId = courseId,
-                    conversationId = conversationId,
+                    courseId = conversationSettings.value.courseId,
+                    conversationId = conversationSettings.value.conversationId,
                     newName = newName,
                     newDescription = newDescription,
                     newTopic = newTopic,
@@ -248,17 +249,17 @@ internal class ConversationSettingsViewModel(
 
             val result = if (conversation.isArchived) {
                 conversationService.unarchiveChannel(
-                    courseId,
-                    conversationId,
-                    accountService.authToken.first(),
-                    serverConfigurationService.serverUrl.first()
+                    courseId = conversationSettings.value.courseId,
+                    conversationId = conversationSettings.value.conversationId,
+                    authToken = accountService.authToken.first(),
+                    serverUrl = serverConfigurationService.serverUrl.first()
                 )
             } else {
                 conversationService.archiveChannel(
-                    courseId,
-                    conversationId,
-                    accountService.authToken.first(),
-                    serverConfigurationService.serverUrl.first()
+                    courseId = conversationSettings.value.courseId,
+                    conversationId = conversationSettings.value.conversationId,
+                    authToken = accountService.authToken.first(),
+                    serverUrl = serverConfigurationService.serverUrl.first()
                 )
             }
                 .or(false)

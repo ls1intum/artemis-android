@@ -11,8 +11,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModelStore
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -22,7 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.ConversationDetailsRoute
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.add_members.navigateToAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.navigateToConversationMembersScreen
-import org.koin.androidx.compose.koinViewModel
+import org.koin.androidx.compose.getViewModel
 import org.koin.core.parameter.parametersOf
 
 fun NavController.navigateToConversationSettingsScreen(
@@ -70,7 +72,11 @@ internal fun ConversationSettingsScreen(
     onConversationLeft: () -> Unit
 ) {
     val viewModel: ConversationSettingsViewModel =
-        koinViewModel { parametersOf(courseId, conversationId) }
+        getViewModel { parametersOf(courseId, conversationId) }
+
+    LaunchedEffect(courseId, conversationId) {
+        viewModel.updateConversation(courseId, conversationId)
+    }
 
     LaunchedEffect(key1 = Unit) {
         viewModel.requestReload()

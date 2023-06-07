@@ -20,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.service.getConve
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -27,8 +28,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 abstract class SettingsBaseViewModel(
-    protected val courseId: Long,
-    protected val conversationId: Long,
+    initialCourseId: Long,
+    initialConversationId: Long,
     protected val conversationService: ConversationService,
     protected val accountService: AccountService,
     protected val serverConfigurationService: ServerConfigurationService,
@@ -36,16 +37,19 @@ abstract class SettingsBaseViewModel(
     serverDataService: ServerDataService
 ) : ViewModel() {
 
+    protected val conversationSettings = MutableStateFlow(ConversationSettings(initialCourseId, initialConversationId))
+
     protected val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     protected val loadedConversation: StateFlow<DataState<Conversation>> = flatMapLatest(
+        conversationSettings,
         accountService.authToken,
         serverConfigurationService.serverUrl,
         onRequestReload.onStart { emit(Unit) }
-    ) { authToken, serverUrl, _ ->
+    ) { convSettings, authToken, serverUrl, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             conversationService
-                .getConversation(courseId, conversationId, authToken, serverUrl)
+                .getConversation(convSettings.courseId, convSettings.conversationId, authToken, serverUrl)
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly)
@@ -82,7 +86,7 @@ abstract class SettingsBaseViewModel(
             val conversation = loadedConversation.value.orNull() ?: return@async false
 
             conversationService.action(
-                courseId,
+                conversationSettings.value.courseId,
                 conversation,
                 username,
                 accountService.authToken.first(),
@@ -100,4 +104,10 @@ abstract class SettingsBaseViewModel(
     open fun requestReload() {
         onRequestReload.tryEmit(Unit)
     }
+
+    fun updateConversation(courseId: Long, conversationId: Long) {
+        conversationSettings.value = ConversationSettings(courseId, conversationId)
+    }
+
+    protected data class ConversationSettings(val courseId: Long, val conversationId: Long)
 }
