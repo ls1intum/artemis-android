@@ -4,6 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelC
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.content.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableTitle
 
 data class ConversationCollections(
@@ -23,13 +24,14 @@ data class ConversationCollections(
         )
     }
 
-    data class ConversationCollection<T : Conversation>(val conversations: List<T>, val isExpanded: Boolean) {
-        fun filter(predicate: (Conversation) -> Boolean) = copy(conversations = conversations.filter(predicate))
+    data class ConversationCollection<T : Conversation>(
+        val conversations: List<T>,
+        val isExpanded: Boolean
+    ) {
+        fun filter(predicate: (Conversation) -> Boolean) =
+            copy(conversations = conversations.filter(predicate))
     }
 }
 
-private fun Conversation.filterPredicate(query: String): Boolean = when (this) {
-    is ChannelChat -> query in name
-    is GroupChat -> query in humanReadableTitle
-    is OneToOneChat -> query in humanReadableTitle
-}
+private fun Conversation.filterPredicate(query: String): Boolean =
+    humanReadableName.contains(query, ignoreCase = true)

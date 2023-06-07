@@ -31,6 +31,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.MetisOutd
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -135,7 +136,7 @@ internal fun MetisStandalonePostScreen(
     onNavigateUp: () -> Unit
 ) {
     val viewModel: MetisThreadViewModel =
-        koinViewModel(parameters = { parametersOf(standalonePostId, metisContext, true) })
+        getViewModel(parameters = { parametersOf(standalonePostId, metisContext, true) })
 
     LaunchedEffect(metisContext) {
         viewModel.updateMetisContext(metisContext)

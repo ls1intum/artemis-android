@@ -49,12 +49,12 @@ import kotlinx.datetime.Clock
 internal class MetisThreadViewModel(
     initialPostId: StandalonePostId,
     initialMetisContext: MetisContext,
+    subscribeToLiveUpdateService: Boolean,
     private val metisStorageService: MetisStorageService,
     private val metisService: MetisService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
-    subscribeToLiveUpdateService: Boolean,
     websocketProvider: WebsocketProvider,
     metisContextManager: MetisContextManager,
     metisModificationService: MetisModificationService,

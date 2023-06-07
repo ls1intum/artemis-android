@@ -60,7 +60,7 @@ val communicationModule = module {
         MetisThreadViewModel(
             params[0],
             params[1],
-            get(),
+            params[2],
             get(),
             get(),
             get(),
