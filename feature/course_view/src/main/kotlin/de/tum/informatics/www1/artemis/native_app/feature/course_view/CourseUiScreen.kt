@@ -90,6 +90,7 @@ fun NavGraphBuilder.course(
         }
     ) +
             generateLinks("courses/{courseId}") +
+            generateLinks("courses/{courseId}/exercises") +
             generateLinks("courses/{courseId}/messages?conversationId={conversationId}")
     composable(
         route = "course/{courseId}",

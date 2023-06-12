@@ -132,10 +132,13 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
 
         val data = intent?.data
         val newHost = if (data != null && data.scheme == "https") data.host else null
-        val hasServerMismatch = newHost != null && (newHost != currentHost || !isLoggedIn)
+
+        val hasServerMismatch = newHost != null && newHost != currentHost
+        val requiresLogin = hasServerMismatch || !isLoggedIn
+
         var displayWrongServerDialog by mutableStateOf(hasServerMismatch)
 
-        if (hasServerMismatch) {
+        if (hasServerMismatch || requiresLogin) {
             intent.data = null
         }
 
@@ -143,6 +146,20 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
             AppTheme {
                 ProvideLocalVisibleMetisContextManager(visibleMetisContextManager = visibleMetisContextManager) {
                     val navController = rememberNavController()
+
+                    val navigateToDeepLinkLogin = {
+                        navController.navigateToLogin(nextDestination = data.toString()) {
+                            popUpTo(navController.graph.id) {
+                                inclusive = true
+                            }
+                        }
+                    }
+
+                    LaunchedEffect(hasServerMismatch, requiresLogin) {
+                        if (!hasServerMismatch && requiresLogin) {
+                            navigateToDeepLinkLogin()
+                        }
+                    }
 
                     MainActivityComposeUi(startDestination, navController)
 
@@ -167,11 +184,7 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
                                         val newUrl = data.scheme + "://" + data.host.orEmpty()
                                         serverConfigurationService.updateServerUrl(newUrl)
 
-                                        navController.navigateToLogin(nextDestination = data.toString()) {
-                                            popUpTo(navController.graph.id) {
-                                                inclusive = true
-                                            }
-                                        }
+                                        navigateToDeepLinkLogin()
 
                                         displayWrongServerDialog = false
                                     }
@@ -260,10 +273,18 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
                                 }
                             }
                         } else {
-                            navController.navigate(
-                                Uri.parse(deepLink),
-                                NavOptions.Builder().setPopUpTo(LOGIN_DESTINATION, true).build()
-                            )
+                            try {
+                                navController.navigate(
+                                    Uri.parse(deepLink),
+                                    NavOptions.Builder().setPopUpTo(LOGIN_DESTINATION, true).build()
+                                )
+                            } catch (_: IllegalArgumentException) {
+                                navController.navigateToDashboard {
+                                    popUpTo(navController.graph.id) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
                         }
                     },
                     onRequestOpenSettings = {

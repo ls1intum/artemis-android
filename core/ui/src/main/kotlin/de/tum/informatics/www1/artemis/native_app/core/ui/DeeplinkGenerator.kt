@@ -5,9 +5,14 @@ import androidx.navigation.NavDeepLinkDslBuilder
 import androidx.navigation.navDeepLink
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
 
-private val supportedUrls = ArtemisInstances.instances.map { it.host }
+private const val LegacyArtemisInstanceHost = "artemis.ase.in.tum.de"
 
-fun generateLinks(path: String, constructor: NavDeepLinkDslBuilder.() -> Unit = {}): List<NavDeepLink> {
+private val supportedUrls = ArtemisInstances.instances.map { it.host } + LegacyArtemisInstanceHost
+
+fun generateLinks(
+    path: String,
+    constructor: NavDeepLinkDslBuilder.() -> Unit = {}
+): List<NavDeepLink> {
     return supportedUrls.map { url ->
         navDeepLink {
             uriPattern = "$url/$path"

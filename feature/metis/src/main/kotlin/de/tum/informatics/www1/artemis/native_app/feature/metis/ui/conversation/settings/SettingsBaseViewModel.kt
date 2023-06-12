@@ -105,7 +105,7 @@ abstract class SettingsBaseViewModel(
         onRequestReload.tryEmit(Unit)
     }
 
-    fun updateConversation(courseId: Long, conversationId: Long) {
+    open fun updateConversation(courseId: Long, conversationId: Long) {
         conversationSettings.value = ConversationSettings(courseId, conversationId)
     }
 
