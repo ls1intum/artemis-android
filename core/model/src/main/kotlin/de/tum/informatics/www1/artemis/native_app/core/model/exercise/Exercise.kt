@@ -20,7 +20,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonClassDiscriminator
-import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.math.roundToInt
 
@@ -103,11 +103,15 @@ sealed class Exercise {
             override fun deserialize(decoder: Decoder): Category {
                 val categoryString = decoder.decodeString()
 
-                val obj = Json.parseToJsonElement(categoryString).jsonObject
-                val category = obj["category"]?.jsonPrimitive?.content ?: ""
-                val colorString = obj["color"]?.jsonPrimitive?.content ?: ""
+                return when(val parsedCategory = Json.parseToJsonElement(categoryString)) {
+                    is JsonObject -> {
+                        val category = parsedCategory["category"]?.jsonPrimitive?.content ?: ""
+                        val colorString = parsedCategory["color"]?.jsonPrimitive?.content ?: ""
 
-                return Category(category, parseColor(colorString))
+                        Category(category, parseColor(colorString))
+                    }
+                    else -> Category("", null)
+                }
             }
 
             private fun parseColor(colorString: String): Long? {
