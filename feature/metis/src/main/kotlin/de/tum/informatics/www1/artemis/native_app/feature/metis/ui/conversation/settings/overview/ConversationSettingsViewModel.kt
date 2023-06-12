@@ -292,6 +292,18 @@ internal class ConversationSettingsViewModel(
         savedTopic.value = null
     }
 
+    override fun updateConversation(courseId: Long, conversationId: Long) {
+        super.updateConversation(courseId, conversationId)
+
+        savedStateHandle[KEY_NAME] = null
+        savedStateHandle[KEY_DESCRIPTION] = null
+        savedStateHandle[KEY_TOPIC] = null
+
+        savedName.value = null
+        savedDescription.value = null
+        savedTopic.value = null
+    }
+
     private fun <T> isDirtyFlow(
         localValueFlow: Flow<T>,
         getCurrentValue: Conversation.() -> T
