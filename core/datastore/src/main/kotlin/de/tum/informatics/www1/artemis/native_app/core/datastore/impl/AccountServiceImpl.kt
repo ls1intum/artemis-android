@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.auth0.android.jwt.DecodeException
 import com.auth0.android.jwt.JWT
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.service.LoginService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -89,37 +90,14 @@ internal class AccountServiceImpl(
                 replay = 1
             )
 
-    override suspend fun login(
-        username: String,
-        password: String,
-        rememberMe: Boolean
-    ): AccountService.LoginResponse {
-        return when (val tokenResponse = loginService.loginWithCredentials(
-            username,
-            password,
-            rememberMe,
-            serverConfigurationService.serverUrl.first()
-        )) {
-            is NetworkResponse.Response -> {
-                //either store the token permanently, or just cache it in memory.
-                if (rememberMe) {
-                    context.accountSettingsStore.edit { data ->
-                        data[JWT_KEY] = tokenResponse.data.idToken
-                    }
-                } else {
-                    inMemoryJWT.value = tokenResponse.data.idToken
-                }
-
-                AccountService.LoginResponse(isSuccessful = true)
+    override suspend fun storeAccessToken(jwt: String, rememberMe: Boolean) {
+        //either store the token permanently, or just cache it in memory.
+        if (rememberMe) {
+            context.accountSettingsStore.edit { data ->
+                data[JWT_KEY] = jwt
             }
-
-            is NetworkResponse.Failure -> AccountService.LoginResponse(isSuccessful = false)
-        }
-    }
-
-    override suspend fun storeAccessToken(jwt: String) {
-        context.accountSettingsStore.edit { data ->
-            data[JWT_KEY] = jwt
+        } else {
+            inMemoryJWT.value = jwt
         }
     }
 

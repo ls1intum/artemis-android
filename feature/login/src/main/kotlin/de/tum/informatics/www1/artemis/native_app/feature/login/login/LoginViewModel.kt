@@ -3,12 +3,17 @@ package de.tum.informatics.www1.artemis.native_app.feature.login.login
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.service.LoginService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +21,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.lang.RuntimeException
 
 /**
  * View model to handle the login process.
@@ -23,6 +29,8 @@ import kotlinx.coroutines.launch
 class LoginViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val accountService: AccountService,
+    private val loginService: LoginService,
+    private val pushNotificationConfigurationService: PushNotificationConfigurationService,
     serverConfigurationService: ServerConfigurationService,
     serverDataService: ServerDataService,
     networkStatusProvider: NetworkStatusProvider
@@ -79,14 +87,38 @@ class LoginViewModel(
 
     fun login(onSuccess: () -> Unit, onFailure: () -> Unit): Job {
         return viewModelScope.launch {
-            val response: AccountService.LoginResponse =
-                accountService.login(username.first(), password.first(), rememberMe.first())
+            val serverUrl = serverUrl.value
+            val rememberMe = rememberMe.first()
 
-            if (response.isSuccessful) {
-                onSuccess()
-            } else {
-                onFailure()
-            }
+            val hasToRegisterForPushNotifications =
+                pushNotificationConfigurationService.getArePushNotificationsEnabledFlow(serverUrl)
+                    .first()
+
+            loginService.loginWithCredentials(
+                username.first(),
+                password.first(),
+                rememberMe,
+                serverUrl
+            )
+                .then {
+                    if (hasToRegisterForPushNotifications) {
+                        val wasSuccess =
+                            pushNotificationConfigurationService.updateArePushNotificationEnabled(
+                                true,
+                                serverUrl,
+                                it.idToken
+                            )
+
+                        if (wasSuccess) NetworkResponse.Response(it) else NetworkResponse.Failure(
+                            RuntimeException("Could not register for push notifications")
+                        )
+                    } else NetworkResponse.Response(it)
+                }
+                .onSuccess {
+                    accountService.storeAccessToken(it.idToken, rememberMe)
+                    onSuccess()
+                }
+                .onFailure { onFailure() }
         }
     }
 }

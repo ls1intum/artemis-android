@@ -57,7 +57,7 @@ class Saml2LoginViewModel(
 
     fun saveAccessToken(token: String, onDone: () -> Unit) {
         viewModelScope.launch {
-            accountService.storeAccessToken(token)
+            accountService.storeAccessToken(token, rememberMe)
             onDone()
         }
     }

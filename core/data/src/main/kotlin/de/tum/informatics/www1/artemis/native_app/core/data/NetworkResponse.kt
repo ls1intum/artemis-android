@@ -11,7 +11,7 @@ import kotlin.time.Duration.Companion.seconds
  * Wrapper around network responses. Used to propagate failures correctly.
  */
 sealed class NetworkResponse<T> {
-    fun <K> bind(transform: (T) -> K): NetworkResponse<K> {
+    inline fun <K> bind(transform: (T) -> K): NetworkResponse<K> {
         return when (this) {
             is Failure -> Failure(exception)
             is Response -> Response(transform(data))
@@ -88,6 +88,14 @@ suspend inline fun <T> retryNetworkCall(
 inline fun <T> NetworkResponse<T>.onSuccess(onSuccess: (T) -> Unit): NetworkResponse<T> {
     if (this is NetworkResponse.Response) {
         onSuccess(data)
+    }
+
+    return this
+}
+
+inline fun <T> NetworkResponse<T>.onFailure(onFailure: (Throwable) -> Unit): NetworkResponse<T> {
+    if (this is NetworkResponse.Failure) {
+        onFailure(exception)
     }
 
     return this
