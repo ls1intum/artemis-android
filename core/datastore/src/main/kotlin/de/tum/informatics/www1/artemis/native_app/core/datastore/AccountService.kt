@@ -22,10 +22,7 @@ interface AccountService {
     sealed class AuthenticationData {
         object NotLoggedIn : AuthenticationData()
 
-        data class LoggedIn(val authToken: String, val username: String) :
-            AuthenticationData() {
-            val asBearer = "Bearer $authToken"
-        }
+        data class LoggedIn(val authToken: String, val username: String) : AuthenticationData()
     }
 
     suspend fun login(username: String, password: String, rememberMe: Boolean): LoginResponse

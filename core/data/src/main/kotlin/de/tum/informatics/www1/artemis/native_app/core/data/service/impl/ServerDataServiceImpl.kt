@@ -34,7 +34,7 @@ internal class ServerDataServiceImpl(private val ktorProvider: KtorProvider) : S
                 .ktorClient
                 .get(serverUrl) {
                     url {
-                        appendPathSegments("api", "account")
+                        appendPathSegments("api", "public", "account")
                     }
 
                     contentType(ContentType.Application.Json)

@@ -88,34 +88,5 @@ internal fun ViewResultScreen(
                 )
             }
         }
-
-
-        // Commented out because we use the web view for now.
-//        val latestIndividualDueDate by viewModel.latestIndividualDueDate.collectAsState()
-//
-//        val feedbackItems by viewModel.feedbackItems.collectAsState()
-//
-//        val buildLogs by viewModel.buildLogs.collectAsState()
-//
-//        ExerciseDataStateUi(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(padding),
-//            value = latestResultDataState join exerciseDataState,
-//            onClickRetry = { viewModel.requestReloadExercise() },
-//            onSuccess = { (latestResult, exercise) ->
-//                ResultDetailUi(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(8.dp)
-//                        .verticalScroll(rememberScrollState()),
-//                    exercise = exercise,
-//                    latestResult = latestResult ?: return@ExerciseDataStateUi,
-//                    feedbackItems = feedbackItems.orElse(emptyList()),
-//                    latestIndividualDueDate = latestIndividualDueDate.orElse(null),
-//                    buildLogs = buildLogs.orElse(emptyList())
-//                )
-//            }
-//        )
     }
 }

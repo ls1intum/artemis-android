@@ -26,7 +26,7 @@ internal class LoginServiceImpl(
         return performNetworkCall {
             val response = ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments("api", "authenticate")
+                    appendPathSegments("api", "public", "authenticate")
                 }
 
                 contentType(ContentType.Application.Json)
@@ -48,7 +48,7 @@ internal class LoginServiceImpl(
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments("api", "saml2")
+                    appendPathSegments("api", "public", "saml2")
                 }
                 setBody(rememberMe)
                 contentType(ContentType.Application.Json)

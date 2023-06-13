@@ -16,11 +16,14 @@ internal class RegisterServiceImpl(
     private val ktorProvider: KtorProvider
 ) : RegisterService {
 
-    override suspend fun register(account: User, serverUrl: String): NetworkResponse<HttpStatusCode> {
+    override suspend fun register(
+        account: User,
+        serverUrl: String
+    ): NetworkResponse<HttpStatusCode> {
         return performNetworkCall {
             ktorProvider.ktorClient.post(serverUrl) {
                 url {
-                    appendPathSegments("api", "register")
+                    appendPathSegments("api", "public", "register")
                 }
 
                 setBody(account)

@@ -134,7 +134,7 @@ internal class ServerTimeServiceImpl(
             performNetworkCall {
                 ktorProvider.ktorClient.get(serverUrl) {
                     url {
-                        appendPathSegments("time")
+                        appendPathSegments("api", "public", "time")
                     }
 
                     contentType(ContentType.Application.Json)

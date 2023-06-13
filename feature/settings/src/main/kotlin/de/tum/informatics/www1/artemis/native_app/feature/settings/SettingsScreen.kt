@@ -56,6 +56,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 
 private const val SETTINGS_DESTINATION = "settings"
 private const val PUSH_NOTIFICATION_SETTINGS_DESTINATION = "push_notification_settings"
@@ -112,14 +113,14 @@ private fun SettingsScreen(
 ) {
     val linkOpener = LocalLinkOpener.current
 
-    val pushNotificationJobService: PushNotificationJobService = get()
-    val pushNotificationConfigurationService: PushNotificationConfigurationService = get()
+    val pushNotificationJobService: PushNotificationJobService = koinInject()
+    val pushNotificationConfigurationService: PushNotificationConfigurationService = koinInject()
 
-    val accountService: AccountService = get()
+    val accountService: AccountService = koinInject()
     val authenticationData: AccountService.AuthenticationData? by accountService.authenticationData.collectAsState(
         initial = null
     )
-    val serverConfigurationService: ServerConfigurationService = get()
+    val serverConfigurationService: ServerConfigurationService = koinInject()
     val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
 
     val scope = rememberCoroutineScope()
@@ -136,8 +137,8 @@ private fun SettingsScreen(
         else -> null
     }
 
-    val serverDataService: ServerDataService = get()
-    val networkStatusProvider: NetworkStatusProvider = get()
+    val serverDataService: ServerDataService = koinInject()
+    val networkStatusProvider: NetworkStatusProvider = koinInject()
 
     val accountDataFlow: StateFlow<DataState<Account>?> = remember {
         flatMapLatest(
