@@ -22,6 +22,8 @@
     <string name="push_notification_settings_group_tutorNotifications">Tutor Notifications</string>
     <string name="push_notification_settings_group_editorNotifications">Editor Notifications</string>
     <string name="push_notification_settings_group_instructorNotifications">Instructor Notifications</string>
+    <string name="push_notification_settings_group_conversationNotification">Conversation Notifications</string>
+
 
     <string name="push_notification_settings_setting_basicWeeklySummary">Basic Weekly Summary</string>
     <string name="push_notification_settings_setting_exerciseReleased">Exercise released</string>
@@ -42,6 +44,8 @@
     <string name="push_notification_settings_setting_tutorialGroupUpdateDelete">Update and Delete of Tutorial Groups</string>
     <string name="push_notification_settings_setting_assignUnassignTutorialGroup">Assign and Unassign of Tutorial Groups</string>
     <string name="push_notification_settings_setting_quizStartReminder">Quiz start</string>
+    <string name="push_notification_setting_setting_newConversationMessages">New messages in conversations</string>
+    <string name="push_notification_setting_setting_newConversationReplies">New replies in conversations</string>
 
     <string name="push_notification_setting_setting_description_basicWeeklySummaryDescription">Receive a basic weekly summary every Friday at 5pm (e.g. what new exercises have been released this week and are still open)"</string>
     <string name="push_notification_setting_setting_description_exerciseReleasedDescription">Get notified when a new exercise has been released"</string>

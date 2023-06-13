@@ -177,6 +177,7 @@ private fun getLocalizedNotificationGroupName(groupName: String): String {
         "tutor-notification" -> R.string.push_notification_settings_group_tutorNotifications
         "editor-notification" -> R.string.push_notification_settings_group_editorNotifications
         "instructor-notification" -> R.string.push_notification_settings_group_instructorNotifications
+        "user-notification" -> R.string.push_notification_settings_group_conversationNotification
         else -> null
     }
 
@@ -205,6 +206,8 @@ private fun getLocalizedNotificationSettingName(settingName: String): String {
         "tutorial-group-delete-update" -> R.string.push_notification_settings_setting_tutorialGroupUpdateDelete
         "tutorial-group-assign-unassign" -> R.string.push_notification_settings_setting_assignUnassignTutorialGroup
         "quiz_start_reminder" -> R.string.push_notification_settings_setting_quizStartReminder
+        "conversation-message" -> R.string.push_notification_setting_setting_newConversationMessages
+        "new-reply-in-conversation" -> R.string.push_notification_setting_setting_newConversationReplies
         else -> null
     }
 
