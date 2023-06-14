@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,8 +29,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material3.Icon
-import androidx.compose.material3.InputChip
-import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,6 +54,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.UserRo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.getUnicodeForEmojiId
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+
+private val EditedGray: Color
+    @Composable get() = Color.Gray
 
 sealed class PostItemViewType {
 
@@ -111,20 +114,30 @@ internal fun PostItem(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                MarkdownText(
-                    markdown = remember(post?.content, isPlaceholder) {
-                        if (isPlaceholder) {
-                            PlaceholderContent
-                        } else post?.content.orEmpty()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .placeholder(visible = isPlaceholder),
-                    maxLines = 5,
-                    style = MaterialTheme.typography.bodyMedium,
-                    onClick = onClick,
-                    onLongClick = onLongClick
-                )
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    MarkdownText(
+                        markdown = remember(post?.content, isPlaceholder) {
+                            if (isPlaceholder) {
+                                PlaceholderContent
+                            } else post?.content.orEmpty()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .placeholder(visible = isPlaceholder),
+                        maxLines = 5,
+                        style = MaterialTheme.typography.bodyMedium,
+                        onClick = onClick,
+                        onLongClick = onLongClick
+                    )
+
+                    if (post?.updatedDate != null) {
+                        Text(
+                            text = stringResource(id = R.string.post_edited_hint),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = EditedGray
+                        )
+                    }
+                }
 
                 StandalonePostFooter(
                     modifier = Modifier.fillMaxWidth(),

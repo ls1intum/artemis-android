@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto
 
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
@@ -14,6 +13,7 @@ data class StandalonePost(
     override val author: User? = null,
     override val authorRole: UserRole? = null,
     override val creationDate: Instant? = null,
+    override val updatedDate: Instant? = null,
     override val content: String = "",
     override val reactions: List<Reaction>? = null,
     override val title: String? = null,

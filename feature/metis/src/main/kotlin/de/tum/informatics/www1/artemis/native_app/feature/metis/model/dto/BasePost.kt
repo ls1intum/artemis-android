@@ -10,6 +10,7 @@ sealed class BasePost : IBasePost {
     abstract val author: User?
     abstract override val authorRole: UserRole?
     abstract override val creationDate: Instant?
+    abstract override val updatedDate: Instant?
     abstract override val content: String?
     abstract override val reactions: List<Reaction>?
 

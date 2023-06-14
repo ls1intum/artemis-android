@@ -31,6 +31,8 @@ data class BasePostingEntity(
     val authorId: Long,
     @ColumnInfo(name = "creation_date")
     val creationDate: Instant,
+    @ColumnInfo(name = "updated_date")
+    val updatedDate: Instant?,
     @ColumnInfo(name = "content")
     val content: String?,
     @ColumnInfo(name = "author_role")
