@@ -51,9 +51,11 @@ android {
         getByName("debug") {
             isMinifyEnabled = false
         }
-        getByName("release") {
-            isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
+        if (keystoreProperties != null) {
+            getByName("release") {
+                isMinifyEnabled = false
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 }
