@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "88090765578",
+    "project_id": "artemis-interactive-learning",
+    "storage_bucket": "artemis-interactive-learning.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:88090765578:android:867ba04c73e06b43f5f2f3",
+        "android_client_info": {
+          "package_name": "de.tum.informatics.www1.artemis.native_app.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "88090765578-igik6gh36g5o6qdtk1m2loaj5kk2es68.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWNH0qnUfy_NZJR9-iqtl_5zdlM84GEXA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "88090765578-igik6gh36g5o6qdtk1m2loaj5kk2es68.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
