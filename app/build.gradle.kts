@@ -3,8 +3,9 @@ import java.util.Properties
 
 // https://developer.android.com/studio/publish/app-signing#secure-shared-keystore
 val keystorePropertiesFile = rootProject.file("keystore.properties")
-val keystoreProperties = Properties()
-keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+val keystoreProperties: Properties? = if (keystorePropertiesFile.exists()) Properties().apply {
+    load(FileInputStream(keystorePropertiesFile))
+} else null
 
 plugins {
     id("artemis.android.application")
@@ -20,11 +21,13 @@ android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
     signingConfigs {
-        create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
-            storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
-            storePassword = keystoreProperties["storePassword"] as String
+        if (keystoreProperties != null) {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+            }
         }
     }
 
