@@ -25,7 +25,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitJobCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
-import de.tum.informatics.www1.artemis.native_app.feature.account.R
+import de.tum.informatics.www1.artemis.native_app.feature.login.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.PasswordTextField
 import kotlinx.coroutines.Job
 import org.koin.androidx.compose.getViewModel

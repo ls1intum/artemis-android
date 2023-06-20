@@ -11,7 +11,7 @@ import coil.ImageLoaderFactory
 import coil.memory.MemoryCache
 import de.tum.informatics.www1.artemis.native_app.android.db.dbModule
 import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
-import de.tum.informatics.www1.artemis.native_app.core.data.service.dataModule
+import de.tum.informatics.www1.artemis.native_app.core.data.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
 import de.tum.informatics.www1.artemis.native_app.core.ui.uiModule

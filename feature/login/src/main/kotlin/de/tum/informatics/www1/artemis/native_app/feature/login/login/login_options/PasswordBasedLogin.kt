@@ -23,7 +23,7 @@ import androidx.compose.ui.platform.LocalAutofill
 import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.feature.account.R
+import de.tum.informatics.www1.artemis.native_app.feature.login.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.PasswordTextField
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.RememberLoginCheckBox
 

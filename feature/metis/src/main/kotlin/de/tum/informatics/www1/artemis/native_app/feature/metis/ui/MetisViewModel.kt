@@ -6,7 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndefinetly
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.stateIn
 abstract class MetisViewModel(
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
-    private val serverDataService: ServerDataService,
+    private val accountDataService: AccountDataService,
     private val networkStatusProvider: NetworkStatusProvider,
     websocketProvider: WebsocketProvider
 ) : ViewModel() {
@@ -57,7 +57,7 @@ abstract class MetisViewModel(
         retryOnInternetIndefinetly(
             networkStatusProvider.currentNetworkStatus
         ) {
-            serverDataService.getAccountData(serverUrl, authToken).bind { it.id }
+            accountDataService.getAccountData(serverUrl, authToken).bind { it.id }
         }
     }
         .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())

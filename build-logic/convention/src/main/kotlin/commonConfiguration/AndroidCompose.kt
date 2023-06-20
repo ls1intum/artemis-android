@@ -40,6 +40,8 @@ internal fun Project.configureCompose(commonExtension: CommonExtension<*, *, *, 
             add("implementation", libs.findLibrary("koin.android").get())
             add("implementation", libs.findLibrary("koin.androidx.compose").get())
             add("implementation", libs.findLibrary("koin.android.compat").get())
+            add("androidTestImplementation", "androidx.compose.ui:ui-test-junit4")
+            add("debugImplementation", "androidx.compose.ui:ui-test-manifest")
         }
     }
 }

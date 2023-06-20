@@ -7,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -34,7 +34,7 @@ abstract class SettingsBaseViewModel(
     protected val accountService: AccountService,
     protected val serverConfigurationService: ServerConfigurationService,
     protected val networkStatusProvider: NetworkStatusProvider,
-    serverDataService: ServerDataService
+    accountDataService: AccountDataService
 ) : ViewModel() {
 
     protected val conversationSettings = MutableStateFlow(ConversationSettings(initialCourseId, initialConversationId))
@@ -60,7 +60,7 @@ abstract class SettingsBaseViewModel(
         onRequestReload.onStart { emit(Unit) }
     ) { authToken, serverUrl, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            serverDataService.getAccountData(serverUrl, authToken)
+            accountDataService.getAccountData(serverUrl, authToken)
         }
             .map { accountDataState -> accountDataState.bind { it.username.orEmpty() } }
     }

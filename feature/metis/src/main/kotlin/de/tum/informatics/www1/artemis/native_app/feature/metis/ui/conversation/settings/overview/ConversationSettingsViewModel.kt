@@ -7,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -41,7 +41,7 @@ internal class ConversationSettingsViewModel(
     accountService: AccountService,
     serverConfigurationService: ServerConfigurationService,
     networkStatusProvider: NetworkStatusProvider,
-    serverDataService: ServerDataService,
+    accountDataService: AccountDataService,
     private val savedStateHandle: SavedStateHandle
 ) : SettingsBaseViewModel(
     initialCourseId,
@@ -50,7 +50,7 @@ internal class ConversationSettingsViewModel(
     accountService,
     serverConfigurationService,
     networkStatusProvider,
-    serverDataService
+    accountDataService
 ) {
 
     companion object {

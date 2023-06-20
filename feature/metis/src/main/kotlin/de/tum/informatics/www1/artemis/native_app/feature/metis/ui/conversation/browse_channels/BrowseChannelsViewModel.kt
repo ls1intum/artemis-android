@@ -6,7 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -31,7 +31,7 @@ internal class BrowseChannelsViewModel(
     private val serverConfigurationService: ServerConfigurationService,
     private val channelService: ChannelService,
     private val networkStatusProvider: NetworkStatusProvider,
-    serverDataService: ServerDataService,
+    accountDataService: AccountDataService,
     courseService: CourseService
 ) : ViewModel() {
 
@@ -58,7 +58,7 @@ internal class BrowseChannelsViewModel(
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             courseService.getCourse(courseId, serverUrl, authToken)
                 .then { courseWithScore ->
-                    serverDataService
+                    accountDataService
                         .getAccountData(serverUrl, authToken)
                         .bind { it.isAtLeastTutorInCourse(courseWithScore.course) }
                 }

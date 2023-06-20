@@ -46,9 +46,9 @@ suspend inline fun <T> performNetworkCall(
     crossinline perform: suspend () -> T
 ): NetworkResponse<T> {
     return try {
-        withTimeout(10.seconds) {
-            NetworkResponse.Response(perform())
-        }
+        NetworkResponse.Response(perform())
+//        withTimeout(10.seconds) {
+//        }
     } catch (e: CancellationException) {
         // Hand through cancellation
         throw e

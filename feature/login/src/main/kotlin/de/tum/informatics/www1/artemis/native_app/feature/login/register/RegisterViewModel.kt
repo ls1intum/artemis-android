@@ -6,14 +6,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.Constants
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
-import de.tum.informatics.www1.artemis.native_app.feature.account.R
+import de.tum.informatics.www1.artemis.native_app.feature.login.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.RegisterService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerProfileInfoService
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -33,9 +33,9 @@ internal class RegisterViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val registerService: RegisterService,
     private val serverConfigurationService: ServerConfigurationService,
-    serverDataService: ServerDataService,
+    serverProfileInfoService: ServerProfileInfoService,
     networkStatusProvider: NetworkStatusProvider
-) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverDataService) {
+) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverProfileInfoService) {
 
     private companion object {
         private val usernameRegex = "^[a-zA-Z0-9]*".toRegex()

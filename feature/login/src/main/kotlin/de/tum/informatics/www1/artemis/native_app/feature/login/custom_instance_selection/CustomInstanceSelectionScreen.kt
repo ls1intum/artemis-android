@@ -25,10 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
-import de.tum.informatics.www1.artemis.native_app.feature.account.R
+import de.tum.informatics.www1.artemis.native_app.feature.login.R
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerProfileInfoService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,7 +40,7 @@ import org.koin.androidx.compose.koinViewModel
 import kotlin.time.Duration.Companion.seconds
 
 internal class CustomInstanceSelectionViewModel(
-    serverDataService: ServerDataService,
+    serverProfileInfoService: ServerProfileInfoService,
     private val serverConfigurationService: ServerConfigurationService
 ) : ViewModel() {
     private val _serverUrl = MutableStateFlow("")
@@ -53,7 +53,7 @@ internal class CustomInstanceSelectionViewModel(
 
         delay(1.seconds)
 
-        val response = serverDataService.getServerProfileInfo(serverUrl)
+        val response = serverProfileInfoService.getServerProfileInfo(serverUrl)
 
         emit(
             when (response) {

@@ -11,7 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.keepSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -66,11 +66,11 @@ internal class ConversationOverviewViewModel(
     private val conversationPreferenceService: ConversationPreferenceService,
     websocketProvider: WebsocketProvider,
     networkStatusProvider: NetworkStatusProvider,
-    serverDataService: ServerDataService
+    accountDataService: AccountDataService
 ) : MetisViewModel(
     serverConfigurationService,
     accountService,
-    serverDataService,
+    accountDataService,
     networkStatusProvider,
     websocketProvider
 ) {

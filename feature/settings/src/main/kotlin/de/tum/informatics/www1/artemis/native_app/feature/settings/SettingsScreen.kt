@@ -37,7 +37,7 @@ import androidx.navigation.compose.composable
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
@@ -51,11 +51,9 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
 import org.koin.compose.koinInject
 
 private const val SETTINGS_DESTINATION = "settings"
@@ -137,7 +135,7 @@ private fun SettingsScreen(
         else -> null
     }
 
-    val serverDataService: ServerDataService = koinInject()
+    val accountDataService: AccountDataService = koinInject()
     val networkStatusProvider: NetworkStatusProvider = koinInject()
 
     val accountDataFlow: StateFlow<DataState<Account>?> = remember {
@@ -148,7 +146,7 @@ private fun SettingsScreen(
             when (authData) {
                 is AccountService.AuthenticationData.LoggedIn -> {
                     retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                        serverDataService.getAccountData(serverUrl, authData.authToken)
+                        accountDataService.getAccountData(serverUrl, authData.authToken)
                     }
                 }
 

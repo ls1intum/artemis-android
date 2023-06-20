@@ -9,11 +9,10 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
@@ -42,7 +41,7 @@ internal class ReplyWorker(
     private val accountService: AccountService,
     private val pushCommunicationDatabaseProvider: PushCommunicationDatabaseProvider,
     private val communicationNotificationManager: CommunicationNotificationManager,
-    private val serverDataService: ServerDataService,
+    private val accountDataService: AccountDataService,
     private val conversationService: ConversationService
 ) :
     CoroutineWorker(appContext, params) {
@@ -117,7 +116,7 @@ internal class ReplyWorker(
                 )
                     .onSuccess {
                         // We can add to the notification that the user has responded. However, this does not have super high priority
-                        val accountData = serverDataService.getAccountData(
+                        val accountData = accountDataService.getAccountData(
                             serverUrl,
                             authData.authToken
                         )

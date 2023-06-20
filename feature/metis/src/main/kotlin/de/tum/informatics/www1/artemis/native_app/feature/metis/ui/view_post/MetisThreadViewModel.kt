@@ -7,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndefinetly
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -58,7 +58,7 @@ internal class MetisThreadViewModel(
     websocketProvider: WebsocketProvider,
     metisContextManager: MetisContextManager,
     metisModificationService: MetisModificationService,
-    serverDataService: ServerDataService,
+    accountDataService: AccountDataService,
     conversationService: ConversationService
 ) : MetisContentViewModel(
     initialMetisContext,
@@ -67,7 +67,7 @@ internal class MetisThreadViewModel(
     metisStorageService,
     serverConfigurationService,
     accountService,
-    serverDataService,
+    accountDataService,
     networkStatusProvider,
     conversationService
 ) {

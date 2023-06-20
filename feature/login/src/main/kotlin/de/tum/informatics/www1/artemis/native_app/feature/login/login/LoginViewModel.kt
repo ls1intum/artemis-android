@@ -6,22 +6,24 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.service.LoginService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.feature.login.BaseAccountViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import java.lang.RuntimeException
+import kotlin.coroutines.CoroutineContext
 
 /**
  * View model to handle the login process.
@@ -32,9 +34,10 @@ class LoginViewModel(
     private val loginService: LoginService,
     private val pushNotificationConfigurationService: PushNotificationConfigurationService,
     serverConfigurationService: ServerConfigurationService,
-    serverDataService: ServerDataService,
-    networkStatusProvider: NetworkStatusProvider
-) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverDataService) {
+    serverProfileInfoService: ServerProfileInfoService,
+    networkStatusProvider: NetworkStatusProvider,
+    private val coroutineContext: CoroutineContext
+) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverProfileInfoService) {
 
     companion object {
         private const val USERNAME_KEY = "username"
@@ -85,8 +88,8 @@ class LoginViewModel(
         savedStateHandle[USER_ACCEPTED_TERMS_KEY] = newUserAcceptedTerms
     }
 
-    fun login(onSuccess: () -> Unit, onFailure: () -> Unit): Job {
-        return viewModelScope.launch {
+    fun login(): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
             val serverUrl = serverUrl.value
             val rememberMe = rememberMe.first()
 
@@ -116,9 +119,17 @@ class LoginViewModel(
                 }
                 .onSuccess {
                     accountService.storeAccessToken(it.idToken, rememberMe)
-                    onSuccess()
                 }
-                .onFailure { onFailure() }
+                .onFailure {
+                    println(it)
+                }
+                .bind { true }
+                .or(false)
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        println("cleared")
     }
 }

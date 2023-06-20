@@ -8,7 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.holdLatestLoaded
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -39,7 +39,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -62,13 +61,13 @@ abstract class MetisContentViewModel(
     private val metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
-    serverDataService: ServerDataService,
+    accountDataService: AccountDataService,
     networkStatusProvider: NetworkStatusProvider,
     private val conversationService: ConversationService
 ) : MetisViewModel(
     serverConfigurationService,
     accountService,
-    serverDataService,
+    accountDataService,
     networkStatusProvider,
     websocketProvider
 ) {

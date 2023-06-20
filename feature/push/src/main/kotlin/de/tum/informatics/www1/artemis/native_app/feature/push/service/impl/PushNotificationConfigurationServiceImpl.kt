@@ -14,7 +14,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import io.ktor.client.call.body
 import io.ktor.client.request.delete

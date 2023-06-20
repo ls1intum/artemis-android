@@ -26,14 +26,14 @@ import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Saml2Config
-import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitJobCompletion
+import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
-import de.tum.informatics.www1.artemis.native_app.feature.account.R
+import de.tum.informatics.www1.artemis.native_app.feature.login.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.login_options.PasswordBasedLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.login_options.Saml2BasedLogin
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.Deferred
 
 /*
  * Autofill code is taken and inspired by https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui/integration-tests/ui-demos/src/main/java/androidx/compose/ui/demos/autofill/ExplicitAutofillTypesDemo.kt
@@ -90,10 +90,16 @@ internal fun LoginUi(
 
     val saml2Config: Saml2Config? = fromProfileInfo(profileInfo, null) { it.saml2 }
 
-    var loginJob: Job? by remember { mutableStateOf(null) }
+    var loginJob: Deferred<Boolean>? by remember { mutableStateOf(null) }
 
-    AwaitJobCompletion(job = loginJob) {
+    AwaitDeferredCompletion(job = loginJob) { wasSuccessful ->
         loginJob = null
+
+        if (wasSuccessful) {
+            onLoggedIn()
+        } else {
+            displayLoginFailedDialog = true
+        }
     }
 
     LoginUi(
@@ -116,14 +122,7 @@ internal fun LoginUi(
                 updateRememberMe = viewModel::updateRememberMe,
                 isLoginButtonEnabled = isLoginButtonEnabled,
                 onClickLogin = {
-                    loginJob = viewModel.login(
-                        onSuccess = {
-                            onLoggedIn()
-                        },
-                        onFailure = {
-                            displayLoginFailedDialog = true
-                        }
-                    )
+                    loginJob = viewModel.login()
                 },
                 onClickForgotPassword = {
                     val link = URLBuilder(serverUrl)

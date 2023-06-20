@@ -6,6 +6,6 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val datastoreModule = module {
-    single<AccountService> { AccountServiceImpl(androidContext(), get(), get()) }
+    single<AccountService> { AccountServiceImpl(androidContext()) }
     single<ServerConfigurationService> { ServerConfigurationServiceImpl(androidContext()) }
 }

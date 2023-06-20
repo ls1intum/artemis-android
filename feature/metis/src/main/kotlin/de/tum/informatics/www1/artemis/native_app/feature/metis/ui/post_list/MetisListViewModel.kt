@@ -9,7 +9,7 @@ import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -61,7 +61,7 @@ internal class MetisListViewModel(
     metisModificationService: MetisModificationService,
     accountService: AccountService,
     websocketProvider: WebsocketProvider,
-    serverDataService: ServerDataService,
+    accountDataService: AccountDataService,
     networkStatusProvider: NetworkStatusProvider,
     conversationService: ConversationService
 ) : MetisContentViewModel(
@@ -71,7 +71,7 @@ internal class MetisListViewModel(
     metisStorageService,
     serverConfigurationService,
     accountService,
-    serverDataService,
+    accountDataService,
     networkStatusProvider,
     conversationService
 ) {

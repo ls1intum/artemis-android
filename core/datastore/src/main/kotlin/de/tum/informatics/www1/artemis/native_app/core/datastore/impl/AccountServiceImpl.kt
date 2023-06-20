@@ -6,9 +6,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.auth0.android.jwt.DecodeException
 import com.auth0.android.jwt.JWT
-import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.service.LoginService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -18,7 +15,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.transformLatest
@@ -30,9 +26,7 @@ import kotlin.time.Duration.Companion.hours
 
 @OptIn(DelicateCoroutinesApi::class)
 internal class AccountServiceImpl(
-    private val context: Context,
-    private val loginService: LoginService,
-    private val serverConfigurationService: ServerConfigurationService,
+    private val context: Context
 ) : AccountService {
 
     companion object {

@@ -4,7 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import io.ktor.client.call.body
 import io.ktor.client.request.get

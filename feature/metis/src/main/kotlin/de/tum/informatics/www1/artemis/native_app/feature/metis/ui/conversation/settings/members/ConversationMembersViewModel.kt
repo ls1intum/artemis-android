@@ -7,7 +7,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ServerDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -30,7 +30,7 @@ internal class ConversationMembersViewModel(
     accountService: AccountService,
     serverConfigurationService: ServerConfigurationService,
     networkStatusProvider: NetworkStatusProvider,
-    serverDataService: ServerDataService,
+    accountDataService: AccountDataService,
     private val savedStateHandle: SavedStateHandle
 ) : SettingsBaseViewModel(
     initialCourseId,
@@ -39,7 +39,7 @@ internal class ConversationMembersViewModel(
     accountService,
     serverConfigurationService,
     networkStatusProvider,
-    serverDataService
+    accountDataService
 ) {
     companion object {
         private const val KEY_QUERY = "query"
