@@ -34,4 +34,6 @@ dependencies {
 
 project.afterEvaluate {
     tasks.getByName("test").onlyIf { !B.getBoolean("skip.tests") }
+    tasks.getByName("testDebugUnitTest").onlyIf { !B.getBoolean("skip.tests") }
+    tasks.getByName("testReleaseUnitTest").onlyIf { !B.getBoolean("skip.tests") }
 }
