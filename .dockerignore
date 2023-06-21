@@ -1,0 +1,7 @@
+artemis-native-keystore.jks
+keystore.properties
+passwords
+private_key.pepk
+**/build
+**/.gradle
+**/.idea

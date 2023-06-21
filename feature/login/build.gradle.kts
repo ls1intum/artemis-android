@@ -1,4 +1,6 @@
 @file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+
+import org.gradle.internal.impldep.org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutorService.TestTask
 import java.lang.Boolean as B
 
 plugins {
@@ -36,4 +38,8 @@ project.afterEvaluate {
     tasks.getByName("test").onlyIf { !B.getBoolean("skip.tests") }
     tasks.getByName("testDebugUnitTest").onlyIf { !B.getBoolean("skip.tests") }
     tasks.getByName("testReleaseUnitTest").onlyIf { !B.getBoolean("skip.tests") }
+
+    tasks.withType(Test::class) {
+        testLogging.showStandardStreams = true
+    }
 }
