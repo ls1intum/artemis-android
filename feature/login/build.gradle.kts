@@ -1,3 +1,6 @@
+@file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+import java.lang.Boolean as B
+
 plugins {
     id("artemis.android.feature")
     id("artemis.android.library.compose")
@@ -27,4 +30,8 @@ dependencies {
 
     implementation(libs.androidx.dataStore.preferences)
     testImplementation(project(":core:data-test"))
+}
+
+project.afterEvaluate {
+    tasks.getByName("test").onlyIf { !B.getBoolean("skip.tests") }
 }
