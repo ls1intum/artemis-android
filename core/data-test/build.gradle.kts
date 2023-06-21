@@ -1,19 +1,20 @@
 plugins {
     id("artemis.android.library")
-    kotlin("plugin.serialization")
 }
 
 android {
-    namespace = "de.tum.informatics.www1.artemis.native_app.core.data"
+    namespace = "de.tum.informatics.www1.artemis.native_app.core.data.test"
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
-    implementation(project(":core:model"))
-    implementation(project(":core:device"))
-
+    implementation(project(":core:data"))
     implementation(libs.kotlinx.coroutines.android)
-
-    implementation(libs.kotlinx.serialization.json)
 
     api(libs.ktor.client.core)
     api(libs.ktor.client.serialization)
@@ -25,5 +26,5 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.kotlinx.datetime)
 
-    debugImplementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.cio)
 }

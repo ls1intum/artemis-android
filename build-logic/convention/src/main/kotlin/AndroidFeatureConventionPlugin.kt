@@ -37,6 +37,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 add("implementation", libs.findLibrary("koin.core").get())
                 add("testImplementation", libs.findLibrary("koin.test").get())
                 add("testImplementation", libs.findLibrary("koin.android.test").get())
+                add("testImplementation", libs.findLibrary("robolectric").get())
             }
         }
     }

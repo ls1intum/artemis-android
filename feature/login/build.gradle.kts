@@ -26,5 +26,5 @@ dependencies {
     implementation(project(":feature:push"))
 
     implementation(libs.androidx.dataStore.preferences)
-    testImplementation("org.robolectric:robolectric:4.10.3")
+    testImplementation(project(":core:data-test"))
 }

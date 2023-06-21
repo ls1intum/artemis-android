@@ -105,6 +105,7 @@ noties-markwon-linkify = { group = "io.noties.markwon", name = "linkify", versio
 noties-markwon-simple-ext = { group = "io.noties.markwon", name = "simple-ext", version.ref = "markwon" }
 noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", version.ref = "markwon" }
 play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.0.1" }
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.10.3" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
 sentry-compose-android = { group = "io.sentry", name = "sentry-compose-android", version.ref = "sentry-android" }
 toolbar-compose = { group = "me.onebone", name = "toolbar-compose", version = "2.3.5" }

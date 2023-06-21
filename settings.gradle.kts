@@ -20,6 +20,7 @@ rootProject.name = "artemis_android"
 include(":app")
 include(":core:common")
 include(":core:data")
+include(":core:data-test")
 include(":core:datastore")
 include(":core:model")
 include(":core:ui")

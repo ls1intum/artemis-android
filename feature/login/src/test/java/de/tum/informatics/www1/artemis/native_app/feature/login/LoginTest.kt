@@ -5,17 +5,16 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
-import de.tum.informatics.www1.artemis.native_app.core.data.testDataModule
+import androidx.test.platform.app.InstrumentationRegistry
+import de.tum.informatics.www1.artemis.native_app.core.data.test.testDataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
 import de.tum.informatics.www1.artemis.native_app.core.ui.uiModule
-import de.tum.informatics.www1.artemis.native_app.core.websocket.websocketModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginService
@@ -23,7 +22,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerPr
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.LoginServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.ServerProfileInfoServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
-import io.ktor.client.HttpClient
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
@@ -57,7 +55,7 @@ class LoginTest : KoinTest {
         get() = System.getenv("serverUrl") ?: "https://localhost"
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createComposeRule()
 
     private val loginModule = module {
         single<LoginService> { LoginServiceImpl(get()) }
@@ -79,8 +77,10 @@ class LoginTest : KoinTest {
 
     @Before
     fun setupTest() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+
         startKoin {
-            androidContext(composeTestRule.activity)
+            androidContext(context)
 
             modules(
                 testDataModule,
@@ -104,6 +104,8 @@ class LoginTest : KoinTest {
 
         var successfullyLoggedIn = false
 
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+
         composeTestRule.setContent {
             LoginUi(
                 modifier = Modifier.fillMaxSize(),
@@ -116,17 +118,17 @@ class LoginTest : KoinTest {
         }
 
         composeTestRule.onNodeWithText(
-            composeTestRule.activity.getString(R.string.login_username_label)
+            context.getString(R.string.login_username_label)
         )
             .performTextInput(username)
 
         composeTestRule.onNodeWithText(
-            composeTestRule.activity.getString(R.string.login_password_label)
+            context.getString(R.string.login_password_label)
         )
             .performTextInput(password)
 
         composeTestRule
-            .onNodeWithText(composeTestRule.activity.getString(R.string.login_perform_login_button_text))
+            .onNodeWithText(context.getString(R.string.login_perform_login_button_text))
             .performClick()
 
         composeTestRule.waitUntil { successfullyLoggedIn }

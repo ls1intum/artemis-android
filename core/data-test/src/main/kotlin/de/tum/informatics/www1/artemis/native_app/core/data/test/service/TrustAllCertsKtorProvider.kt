@@ -1,4 +1,4 @@
-package data.service
+package de.tum.informatics.www1.artemis.native_app.core.data.test.service
 
 import android.annotation.SuppressLint
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider

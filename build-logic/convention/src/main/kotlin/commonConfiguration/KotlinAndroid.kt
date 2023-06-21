@@ -39,6 +39,12 @@ internal fun Project.configureKotlinAndroid(
 
             jvmTarget = JavaVersion.VERSION_11.toString()
         }
+
+        testOptions {
+            unitTests {
+                isIncludeAndroidResources = true
+            }
+        }
     }
 
     val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
