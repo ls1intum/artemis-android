@@ -35,8 +35,8 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
 
                 add("implementation", libs.findLibrary("kotlinx.coroutines.android").get())
                 add("implementation", libs.findLibrary("koin.core").get())
-                add("androidTestImplementation", libs.findLibrary("koin.test").get())
-                add("androidTestImplementation", libs.findLibrary("koin.android.test").get())
+                add("testImplementation", libs.findLibrary("koin.test").get())
+                add("testImplementation", libs.findLibrary("koin.android.test").get())
             }
         }
     }

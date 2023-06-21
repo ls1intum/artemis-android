@@ -10,6 +10,12 @@ android {
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -20,6 +26,5 @@ dependencies {
     implementation(project(":feature:push"))
 
     implementation(libs.androidx.dataStore.preferences)
-    androidTestImplementation(libs.ktor.client.okhttp)
-    implementation("io.ktor:ktor-client-cio:2.3.1")
+    testImplementation("org.robolectric:robolectric:4.10.3")
 }

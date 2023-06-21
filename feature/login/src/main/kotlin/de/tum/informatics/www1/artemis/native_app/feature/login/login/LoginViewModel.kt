@@ -120,16 +120,8 @@ class LoginViewModel(
                 .onSuccess {
                     accountService.storeAccessToken(it.idToken, rememberMe)
                 }
-                .onFailure {
-                    println(it)
-                }
                 .bind { true }
                 .or(false)
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        println("cleared")
     }
 }

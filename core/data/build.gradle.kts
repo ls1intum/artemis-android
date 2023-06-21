@@ -24,4 +24,6 @@ dependencies {
 
     implementation(libs.koin.core)
     implementation(libs.kotlinx.datetime)
+
+    debugImplementation(libs.ktor.client.cio)
 }

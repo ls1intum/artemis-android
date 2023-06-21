@@ -35,12 +35,12 @@ internal fun Project.configureCompose(commonExtension: CommonExtension<*, *, *, 
         dependencies {
             val bom = libs.findLibrary("androidx-compose-bom").get()
             add("implementation", platform(bom))
-            add("androidTestImplementation", platform(bom))
+            add("testImplementation", platform(bom))
             add("implementation", libs.findLibrary("koin.core").get())
             add("implementation", libs.findLibrary("koin.android").get())
             add("implementation", libs.findLibrary("koin.androidx.compose").get())
             add("implementation", libs.findLibrary("koin.android.compat").get())
-            add("androidTestImplementation", "androidx.compose.ui:ui-test-junit4")
+            add("testImplementation", "androidx.compose.ui:ui-test-junit4")
             add("debugImplementation", "androidx.compose.ui:ui-test-manifest")
         }
     }
