@@ -36,6 +36,7 @@ import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLog
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
@@ -77,6 +78,8 @@ class LoginTest : KoinTest {
 
     @Before
     fun setupTest() {
+        ShadowLog.stream = System.out
+
         val context = InstrumentationRegistry.getInstrumentation().targetContext
 
         startKoin {

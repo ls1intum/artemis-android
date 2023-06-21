@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.service.impl
 
+import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
@@ -18,6 +19,10 @@ internal class LoginServiceImpl(
     private val ktorProvider: KtorProvider
 ) : LoginService {
 
+    companion object {
+        private const val TAG = "LoginServiceImpl"
+    }
+
     override suspend fun loginWithCredentials(
         username: String,
         password: String,
@@ -25,6 +30,8 @@ internal class LoginServiceImpl(
         serverUrl: String
     ): NetworkResponse<LoginService.LoginResponse> {
         return performNetworkCall {
+            Log.d(TAG, "Logging in with credentials to serverUrl=$serverUrl")
+
             val response = ktorProvider.ktorClient.post(serverUrl) {
                 url {
                     appendPathSegments("api", "public", "authenticate")
@@ -38,7 +45,7 @@ internal class LoginServiceImpl(
 
             if (response.status.isSuccess() && jwt != null) {
                 LoginService.LoginResponse(jwt)
-            } else throw RuntimeException("Login not successful")
+            } else throw RuntimeException("Login not successful: ${response.status}")
         }
     }
 
