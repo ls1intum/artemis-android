@@ -1,8 +1,11 @@
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.withType
+import java.lang.Boolean
 
 //Adapted from: https://github.com/android/nowinandroid/blob/bbc5460b624d67b64b5b5118f8a0e1763427e7e4/build-logic/convention/src/main/kotlin/AndroidFeatureConventionPlugin.kt
 class AndroidFeatureConventionPlugin : Plugin<Project> {
@@ -38,6 +41,22 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 add("testImplementation", libs.findLibrary("koin.test").get())
                 add("testImplementation", libs.findLibrary("koin.android.test").get())
                 add("testImplementation", libs.findLibrary("robolectric").get())
+
+
+                add("testImplementation", project(":core:common-test"))
+                add("testImplementation", project(":core:data-test"))
+            }
+
+            afterEvaluate {
+                tasks.withType(Test::class) {
+                    testLogging.showStandardStreams = true
+
+                    if (Boolean.getBoolean("skip.e2e")) {
+                        useJUnit {
+                            excludeCategories("de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest")
+                        }
+                    }
+                }
             }
         }
     }

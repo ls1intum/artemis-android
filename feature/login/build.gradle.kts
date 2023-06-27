@@ -22,6 +22,12 @@ android {
     }
 }
 
+sourceSets {
+    create("endToEndTests") {
+        java.srcDirs("src/endToEndTests/kotlin")
+    }
+}
+
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
@@ -30,15 +36,17 @@ dependencies {
     implementation(project(":feature:push"))
 
     implementation(libs.androidx.dataStore.preferences)
-    testImplementation(project(":core:data-test"))
 }
 
-project.afterEvaluate {
-    tasks.getByName("test").onlyIf { !B.getBoolean("skip.tests") }
-    tasks.getByName("testDebugUnitTest").onlyIf { !B.getBoolean("skip.tests") }
-    tasks.getByName("testReleaseUnitTest").onlyIf { !B.getBoolean("skip.tests") }
 
+project.afterEvaluate {
     tasks.withType(Test::class) {
         testLogging.showStandardStreams = true
+
+        if (B.getBoolean("skip.e2e")) {
+            useJUnit {
+                excludeCategories("de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest")
+            }
+        }
     }
 }

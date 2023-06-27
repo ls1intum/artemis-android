@@ -1,5 +1,9 @@
+import org.apache.commons.io.output.ByteArrayOutputStream
 import java.io.FileInputStream
+import java.nio.charset.Charset
 import java.util.Properties
+
+val versionCodeFromGit = deriveVersionCodeFromGit()
 
 // https://developer.android.com/studio/publish/app-signing#secure-shared-keystore
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -33,7 +37,7 @@ android {
 
     defaultConfig {
         applicationId = "de.tum.informatics.www1.artemis.native_app.android"
-        versionCode = deriveVersionCodeFromGit()
+        versionCode = versionCodeFromGit
         versionName = "0.7.2"
 
         javaCompileOptions {
@@ -105,9 +109,7 @@ sentry {
  * The version code is the number of commits in the current branch.
  */
 fun deriveVersionCodeFromGit(): Int {
-    return Runtime.getRuntime().exec("git rev-list --count HEAD").inputStream.use { inputStream ->
-        inputStream.reader().use { reader ->
-            reader.readText().dropLast(1).toInt()
-        }
-    }
+    return providers.exec {
+        commandLine("git", "rev-list", "--count", "HEAD")
+    }.standardOutput.asText.get().trim().toInt()
 }

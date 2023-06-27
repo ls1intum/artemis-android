@@ -19,6 +19,7 @@ dependencyResolutionManagement {
 rootProject.name = "artemis_android"
 include(":app")
 include(":core:common")
+include(":core:common-test")
 include(":core:data")
 include(":core:data-test")
 include(":core:datastore")
