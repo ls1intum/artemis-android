@@ -20,3 +20,9 @@ The following libraries and tools are utilized:
 - Jetpack Compose: UI
 - Koin: Dependency Injection
 - Kotlin Flows: Reactive programing
+
+## License
+By building the dockerfile or using its derived images, you accept the terms in the following license agreements:
+* [Android Software Development Kit License Agreement](https://raw.githubusercontent.com/thyrlian/AndroidSDK/master/EULA/AndroidSoftwareDevelopmentKitLicenseAgreement-20190116) (or read it [here](https://developer.android.com/studio/terms.html))
+* [Android SDK Preview License Agreement](https://raw.githubusercontent.com/thyrlian/AndroidSDK/master/EULA/AndroidSDKPreviewLicenseAgreement)
+* [Intel Android Extra License](https://raw.githubusercontent.com/thyrlian/AndroidSDK/master/EULA/IntelAndroidExtraLicense)
