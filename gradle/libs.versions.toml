@@ -8,7 +8,7 @@ androidxComposeCompiler = "1.4.7"
 androidxCore = "1.9.0"
 androidxLifecycle = "2.6.1"
 androidxNavigation = "2.5.3"
-androidGradlePlugin = "7.4.2"
+androidGradlePlugin = "8.0.2"
 androidxDataStore = "1.0.0"
 androidxPaging = "3.1.1"
 androidxPagingCompose = "1.0.0-alpha20"
@@ -24,6 +24,7 @@ koinAndroidxCompose = "3.4.5"
 ktor = "2.3.1"
 krossbow = "5.2.0"
 markwon = "4.6.2"
+ossLicensesPlugin = "0.10.6"
 room = "2.5.1"
 sentry-android = "6.22.0"
 work = "2.8.1"
@@ -104,6 +105,7 @@ noties-markwon-html = { group = "io.noties.markwon", name = "html", version.ref 
 noties-markwon-linkify = { group = "io.noties.markwon", name = "linkify", version.ref = "markwon" }
 noties-markwon-simple-ext = { group = "io.noties.markwon", name = "simple-ext", version.ref = "markwon" }
 noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", version.ref = "markwon" }
+oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.0.1" }
 robolectric = { group = "org.robolectric", name = "robolectric", version = "4.10.3" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
@@ -120,4 +122,4 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version = "4.3.15" }
 google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.0.0" }
-github-benManes-versions = { id = "com.github.ben-manes.versions", version = "0.46.0" }
+github-benManes-versions = { id = "com.github.ben-manes.versions", version = "0.47.0" }

@@ -33,7 +33,7 @@ android {
 
     defaultConfig {
         applicationId = "de.tum.informatics.www1.artemis.native_app.android"
-        versionCode = 14
+        versionCode = deriveVersionCodeFromGit()
         versionName = "0.7.2"
 
         javaCompileOptions {
@@ -42,11 +42,13 @@ android {
             }
         }
     }
-    packagingOptions {
+
+    packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
     buildTypes {
         getByName("debug") {
             isMinifyEnabled = false
@@ -97,4 +99,15 @@ dependencies {
 
 sentry {
     autoInstallation.enabled.set(false)
+}
+
+/**
+ * The version code is the number of commits in the current branch.
+ */
+fun deriveVersionCodeFromGit(): Int {
+    return Runtime.getRuntime().exec("git rev-list --count HEAD").inputStream.use { inputStream ->
+        inputStream.reader().use { reader ->
+            reader.readText().dropLast(1).toInt()
+        }
+    }
 }
