@@ -33,7 +33,7 @@ android {
 
     defaultConfig {
         applicationId = "de.tum.informatics.www1.artemis.native_app.android"
-        versionCode = System.getenv("bamboo.repository.revision.number").toIntOrNull() ?: deriveVersionCodeFromGit()
+        versionCode = (property("VERSION_CODE") as? Int) ?: deriveVersionCodeFromGit()
         versionName = "0.7.2"
 
         javaCompileOptions {
