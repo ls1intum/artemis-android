@@ -33,7 +33,7 @@ android {
 
     defaultConfig {
         applicationId = "de.tum.informatics.www1.artemis.native_app.android"
-        versionCode = (property("VERSION_CODE") as? Int) ?: deriveVersionCodeFromGit()
+        versionCode = (property("VERSION_CODE")?.toString()?.toIntOrNull()) ?: deriveVersionCodeFromGit()
         versionName = "0.7.2"
 
         javaCompileOptions {
