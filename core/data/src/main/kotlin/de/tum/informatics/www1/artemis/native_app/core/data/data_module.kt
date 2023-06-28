@@ -4,7 +4,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.BuildLogServ
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseRegistrationService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.DashboardService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ParticipationService
@@ -19,7 +18,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ResultS
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.AccountDataServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.courses.CourseRegistrationServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.courses.CourseServiceImpl
-import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.courses.DashboardServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.exercises.ExerciseServiceImpl
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -30,7 +28,6 @@ val dataModule = module {
 
     single<CourseRegistrationService> { CourseRegistrationServiceImpl(get(), get()) }
     single<CourseService> { CourseServiceImpl(get()) }
-    single<DashboardService> { DashboardServiceImpl(get(), get()) }
     single<ExerciseService> { ExerciseServiceImpl(get(), get()) }
     single<AccountDataService> { AccountDataServiceImpl(get()) }
     single<ResultService> { ResultServiceImpl(get()) }

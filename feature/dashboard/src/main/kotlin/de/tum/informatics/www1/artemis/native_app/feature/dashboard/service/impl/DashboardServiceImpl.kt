@@ -1,10 +1,10 @@
-package de.tum.informatics.www1.artemis.native_app.core.data.service.impl.courses
+package de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
-import de.tum.informatics.www1.artemis.native_app.core.data.service.DashboardService
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.Flow
 internal class DashboardServiceImpl(
     private val ktorProvider: KtorProvider,
     private val networkStatusProvider: NetworkStatusProvider
-) : DashboardService {
+) : de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardService {
 
     override suspend fun loadDashboard(
         authToken: String,
