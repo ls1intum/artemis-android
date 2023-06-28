@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.test.testDataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
+import de.tum.informatics.www1.artemis.native_app.core.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.ui.uiModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginViewModel
@@ -20,6 +21,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginSer
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.LoginServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.ServerProfileInfoServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.testPassword
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.testUsername
 import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -46,15 +49,6 @@ class LoginTest : KoinTest {
     companion object {
         private const val TAG = "LoginTest"
     }
-
-    private val username: String
-        get() = System.getenv("username") ?: "test_user"
-
-    private val password: String
-        get() = System.getenv("password") ?: "test_user_password"
-
-    private val serverUrl: String
-        get() = System.getenv("serverUrl") ?: "https://localhost"
 
     @get:Rule
     val composeTestRule = createComposeRule()
@@ -98,13 +92,13 @@ class LoginTest : KoinTest {
 
         val serverConfigurationService: ServerConfigurationService = get()
         runBlocking {
-            serverConfigurationService.updateServerUrl(serverUrl)
+            serverConfigurationService.updateServerUrl(testServerUrl)
         }
     }
 
     @Test
     fun `test login is successful`() {
-        Log.i(TAG, "Logging in with user $username and $password to server $serverUrl")
+        Log.i(TAG, "Logging in with user $testUsername and $testPassword to server $testServerUrl")
 
         var successfullyLoggedIn = false
 
@@ -124,12 +118,12 @@ class LoginTest : KoinTest {
         composeTestRule.onNodeWithText(
             context.getString(R.string.login_username_label)
         )
-            .performTextInput(username)
+            .performTextInput(testUsername)
 
         composeTestRule.onNodeWithText(
             context.getString(R.string.login_password_label)
         )
-            .performTextInput(password)
+            .performTextInput(testPassword)
 
         composeTestRule
             .onNodeWithText(context.getString(R.string.login_perform_login_button_text))

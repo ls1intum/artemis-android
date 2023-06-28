@@ -13,4 +13,6 @@ dependencies {
     implementation(project(":core:device"))
 
     implementation(libs.accompanist.swiperefresh)
+    testImplementation(project(":feature:login"))
+    testImplementation(project(":feature:login-test"))
 }

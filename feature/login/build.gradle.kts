@@ -24,6 +24,7 @@ dependencies {
     implementation(project(":core:device"))
     implementation(project(":core:datastore"))
     implementation(project(":feature:push"))
+    testImplementation(project(":feature:login-test"))
 
     implementation(libs.androidx.dataStore.preferences)
 }

@@ -10,4 +10,9 @@ android {
 
 dependencies {
     implementation(project(":feature:login"))
+
+    implementation(libs.kotlinx.coroutines.core)
+
+    implementation(libs.koin.core)
+    implementation(libs.koin.test)
 }
