@@ -20,6 +20,12 @@ plugins {
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
+    val versionName = "0.7.2"
+    val versionCode = if (hasProperty("VERSION_CODE")) property("VERSION_CODE")?.toString()
+        ?.toIntOrNull() ?: deriveVersionCodeFromGit() else deriveVersionCodeFromGit()
+
+    setProperty("archivesBaseName", "artemis-android-$versionName-$versionCode")
+
     signingConfigs {
         if (keystoreProperties != null) {
             create("release") {
@@ -31,10 +37,11 @@ android {
         }
     }
 
-    defaultConfig {
+    defaultConfig applicationDefaultConfig@{
         applicationId = "de.tum.informatics.www1.artemis.native_app.android"
-        versionCode = System.getenv("bamboo.repository.revision.number")?.toIntOrNull() ?: deriveVersionCodeFromGit()
-        versionName = "0.7.2"
+
+        this@applicationDefaultConfig.versionCode = versionCode
+        this@applicationDefaultConfig.versionName = versionName
 
         javaCompileOptions {
             annotationProcessorOptions {
