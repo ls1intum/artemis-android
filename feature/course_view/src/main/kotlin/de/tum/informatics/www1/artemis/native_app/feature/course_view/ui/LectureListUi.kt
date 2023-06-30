@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -18,6 +19,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.GroupedByWeek
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.R
+
+internal const val TEST_TAG_LECTURE_LIST = "lecture list"
 
 @Composable
 internal fun LectureListUi(
@@ -36,10 +39,10 @@ internal fun LectureListUi(
         }
     } else {
         WeeklyItemsLazyColumn(
-            modifier = modifier,
+            modifier = modifier.testTag(TEST_TAG_LECTURE_LIST),
             verticalArrangement = Arrangement.Top,
             weeklyItemGroups = lectures,
-            getItemId = Lecture::id
+            getItemId = { id ?: 0L }
         ) { lecture ->
             LectureListItem(
                 modifier = Modifier.fillMaxWidth(),

@@ -252,7 +252,7 @@ internal fun CourseUiScreen(
                             LectureListUi(
                                 modifier = Modifier.fillMaxSize(),
                                 lectures = weeklyLectures,
-                                onClickLecture = { onNavigateToLecture(it.id) }
+                                onClickLecture = { onNavigateToLecture(it.id ?: 0L) }
                             )
                         }
                     }

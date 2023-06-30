@@ -7,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonPro
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -63,11 +63,14 @@ suspend fun KoinComponent.createCourse(
 
     return ktorProvider.ktorClient.submitFormWithBinaryData(
         formData {
-            append("course", jsonProvider.applicationJsonConfiguration.encodeToString(course), Headers.build {
-                set("Content-Type", "application/json")
-                set("name", "course")
-                set("filename", "blob")
-            })
+            append(
+                "course",
+                jsonProvider.applicationJsonConfiguration.encodeToString(course),
+                Headers.build {
+                    set("Content-Type", "application/json")
+                    set("name", "course")
+                    set("filename", "blob")
+                })
         }
     ) {
         url(serverConfigurationService.serverUrl.first())
@@ -103,4 +106,28 @@ suspend fun KoinComponent.createExercise(
         accept(ContentType.Application.Json)
     }
         .body()
+}
+
+suspend fun KoinComponent.createLecture(
+    accessToken: String,
+    courseId: Long,
+    lectureName: String = "Lecture ${generateId()}",
+): Lecture {
+    return ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
+        url {
+            appendPathSegments("api", "lectures")
+        }
+
+        setBody(
+            Lecture(
+                id = null,
+                title = lectureName,
+                course = Course(id = courseId)
+            )
+        )
+
+        cookieAuth(accessToken)
+        contentType(ContentType.Application.Json)
+        accept(ContentType.Application.Json)
+    }.body()
 }

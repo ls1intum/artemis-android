@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.course_view
 
+import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -44,6 +45,8 @@ abstract class BaseCourseTest : KoinTest {
     }
 
     lateinit var course: Course
+
+    val context: Context get() = InstrumentationRegistry.getInstrumentation().context
 
     @Before
     fun setup() {

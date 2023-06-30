@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Lecture(
-    val id: Long = 0,
+    val id: Long? = 0,
     val title: String = "",
     val description: String? = null,
     val startDate: Instant? = null,
