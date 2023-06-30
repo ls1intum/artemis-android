@@ -10,8 +10,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Course(
-    val id: Long = 0L,
+    val id: Long? = 0,
     val title: String = "",
+    val shortName: String = "",
     val description: String = "",
     @SerialName("courseIcon") val courseIconPath: String? = null,
     val exercises: List<Exercise> = emptyList(),
@@ -24,7 +25,8 @@ data class Course(
     val instructorGroupName: String = "",
     val studentGroupName: String = "",
     val teachingAssistantGroupName: String = "",
-    val editorGroupName: String = ""
+    val editorGroupName: String = "",
+    val testCourse: Boolean = false
 ) {
     enum class CourseInformationSharingConfiguration(val supportsMessaging: Boolean) {
         COMMUNICATION_AND_MESSAGING(true),

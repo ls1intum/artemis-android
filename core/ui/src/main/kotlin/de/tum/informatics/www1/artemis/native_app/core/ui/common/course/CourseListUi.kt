@@ -78,7 +78,7 @@ fun CourseItemGrid(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(bottom = 90.dp)
     ) {
-        items(courses, key = { it.course.id }) { course ->
+        items(courses, key = { it.course.id ?: 0L }) { course ->
             courseItem(course, courseItemModifier, isCompact)
         }
     }

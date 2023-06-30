@@ -7,5 +7,5 @@ import org.koin.dsl.module
 
 val dashboardModule = module {
     viewModelOf(::CourseOverviewViewModel)
-    single<DashboardService> { DashboardServiceImpl(get(), get()) }
+    single<DashboardService> { DashboardServiceImpl(get()) }
 }

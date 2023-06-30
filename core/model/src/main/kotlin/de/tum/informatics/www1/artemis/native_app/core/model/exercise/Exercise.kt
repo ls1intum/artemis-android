@@ -22,7 +22,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonClassDiscriminator
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalSerializationApi::class)
 @JsonClassDiscriminator("type") //Default is type anyway, however here I make it explicit
@@ -55,12 +54,8 @@ sealed class Exercise {
     // -------
     abstract val attachments: List<Attachment>
 
-    val maxPointsHalves: Int get() = 3
-
     private val currentScore: Float
         get() = 4f
-
-    val currentScoreHalves: Int get() = (currentScore * 2f).roundToInt()
 
     enum class Difficulty {
         EASY,

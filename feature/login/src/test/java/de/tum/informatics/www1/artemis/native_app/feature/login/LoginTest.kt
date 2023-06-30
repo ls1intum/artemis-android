@@ -10,10 +10,10 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.data.test.testDataModule
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
-import de.tum.informatics.www1.artemis.native_app.core.test.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.ui.uiModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginViewModel
@@ -37,7 +37,6 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
-import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLog
 import kotlin.test.assertTrue
@@ -90,9 +89,8 @@ class LoginTest : KoinTest {
             )
         }
 
-        val serverConfigurationService: ServerConfigurationService = get()
         runBlocking {
-            serverConfigurationService.updateServerUrl(testServerUrl)
+            setTestServerUrl()
         }
     }
 
