@@ -1,5 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation
 
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
+
 fun createTextExercise(title: String, courseId: Long): String = """
     {
         "mode": "INDIVIDUAL",
@@ -286,4 +289,35 @@ fun createQuizExercise(title: String, courseId: Long): String = """
   "isPracticeModeAvailable": true,
   "isEditable": true
 }
+""".trimIndent()
+
+fun createTextLectureUnit(name: String) = """
+    {"name":"$name","releaseDate":null,"competencies":[],"type":"text","content":"${generateId()}"}
+""".trimIndent()
+
+fun createExerciseLectureUnit(name: String, exerciseAsString: String) = """
+    {
+      "type": "exercise",
+      "exercise": $exerciseAsString
+    }
+""".trimIndent()
+
+fun createVideoLectureUnit(name: String) = """
+    {
+      "name": "$name",
+      "competencies": [],
+      "type": "video",
+      "description": "${generateId()}",
+      "source": "https://example.com/"
+    }
+""".trimIndent()
+
+fun createOnlineLectureUnit(name: String) = """
+    {
+      "name": "$name",
+      "competencies": [],
+      "type": "online",
+      "description": "${generateId()}",
+      "source": "https://example.com/"
+    }
 """.trimIndent()

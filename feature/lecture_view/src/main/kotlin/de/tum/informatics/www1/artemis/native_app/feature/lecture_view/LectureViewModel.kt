@@ -6,6 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
@@ -22,7 +23,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import de.tum.informatics.www1.artemis.native_app.core.websocket.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.service.LectureService
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,12 +34,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.coroutines.coroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class LectureViewModel(
@@ -45,12 +52,12 @@ internal class LectureViewModel(
     private val lectureService: LectureService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
-    serverTimeService: ServerTimeService,
-    private val savedStateHandle: SavedStateHandle,
-    courseExerciseService: CourseExerciseService,
     private val liveParticipationService: LiveParticipationService,
-
-    ) : BaseExerciseListViewModel(serverConfigurationService, accountService, courseExerciseService) {
+    private val savedStateHandle: SavedStateHandle,
+    serverTimeService: ServerTimeService,
+    courseExerciseService: CourseExerciseService,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
+) : BaseExerciseListViewModel(serverConfigurationService, accountService, courseExerciseService) {
 
     companion object {
         private const val LECTURE_UNIT_COMPLETED_MAP_TAG = "LECTURE_UNIT_COMPLETED_MAP_TAG"
@@ -73,6 +80,7 @@ internal class LectureViewModel(
                     )
                 }
             }
+            .flowOn(coroutineContext)
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
     /**
@@ -119,9 +127,11 @@ internal class LectureViewModel(
                         emit(DataState.Success(lectureDataState.data.copy(lectureUnits = currentLectureUnits)))
                     }
                 }
+
                 else -> emit(lectureDataState)
             }
         }
+            .flowOn(coroutineContext)
             .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     /**
@@ -159,6 +169,7 @@ internal class LectureViewModel(
                 }
             }
         }
+            .flowOn(coroutineContext)
             .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
     val lectureUnits: StateFlow<List<LectureUnit>> = combine(
@@ -170,6 +181,7 @@ internal class LectureViewModel(
             lectureUnit.withCompleted(isCompleted)
         }
     }
+        .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
@@ -191,28 +203,26 @@ internal class LectureViewModel(
 
     fun updateLectureUnitIsComplete(
         lectureUnitId: Long,
-        isCompleted: Boolean,
-        onResponse: (isSuccessful: Boolean) -> Unit
-    ): Job {
-        return viewModelScope.launch {
-            val isSuccessful = lectureService.completeLectureUnit(
+        isCompleted: Boolean
+    ): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
+            lectureService.completeLectureUnit(
                 lectureUnitId = lectureUnitId,
                 lectureId = lectureId,
                 completed = isCompleted,
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first()
-            ) is NetworkResponse.Response
+            )
+                .onSuccess {
+                    val newIsCompletedMap = lectureUnitCompletedMap
+                        .first()
+                        .toMutableMap()
 
-            if (isSuccessful) {
-                val newIsCompletedMap = lectureUnitCompletedMap
-                    .first()
-                    .toMutableMap()
-
-                newIsCompletedMap[lectureUnitId] = isCompleted
-                savedStateHandle[LECTURE_UNIT_COMPLETED_MAP_TAG] = newIsCompletedMap
-            }
-
-            onResponse(isSuccessful)
+                    newIsCompletedMap[lectureUnitId] = isCompleted
+                    savedStateHandle[LECTURE_UNIT_COMPLETED_MAP_TAG] = newIsCompletedMap
+                }
+                .bind { true }
+                .or(false)
         }
     }
 }

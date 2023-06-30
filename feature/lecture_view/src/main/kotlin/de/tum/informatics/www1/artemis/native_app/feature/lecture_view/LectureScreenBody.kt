@@ -12,9 +12,13 @@ import androidx.compose.material.icons.filled.ViewHeadline
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -22,10 +26,12 @@ import androidx.navigation.NavController
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import kotlinx.coroutines.Deferred
 
 @Suppress("UNUSED_PARAMETER")
 @Composable
@@ -60,6 +66,17 @@ internal fun LectureScreenBody(
             overviewTabIndex
         } else selectedTabIndexState.value
 
+    val markLectureUnitDeferredMap = remember { SnapshotStateMap<Long, Deferred<Boolean>>() }
+
+    markLectureUnitDeferredMap.forEach { (lectureUnitId, deferred) ->
+        AwaitDeferredCompletion(job = deferred) { isSuccessful ->
+            if (!isSuccessful) {
+                onDisplaySetCompletedFailureDialog()
+            }
+
+            markLectureUnitDeferredMap -= lectureUnitId
+        }
+    }
 
     Column(modifier = modifier) {
         TabRow(selectedTabIndex = selectedTabIndex) {
@@ -100,23 +117,28 @@ internal fun LectureScreenBody(
             when (selectedTabIndex) {
                 overviewTabIndex -> {
                     val lectureUnits by viewModel.lectureUnits.collectAsState()
+                    val lectureUnitsWithData by remember(lectureUnits, markLectureUnitDeferredMap) {
+                        derivedStateOf {
+                            lectureUnits.map {
+                                LectureUnitData(it, markLectureUnitDeferredMap[it.id] != null)
+                            }
+                        }
+                    }
 
                     OverviewTab(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 8.dp),
                         description = lecture.description,
-                        lectureUnits = lectureUnits,
+                        lectureUnits = lectureUnitsWithData,
                         onViewExercise = onViewExercise,
                         onMarkAsCompleted = { lectureUnitId, isCompleted ->
-                            viewModel.updateLectureUnitIsComplete(
+                            val deferred = viewModel.updateLectureUnitIsComplete(
                                 lectureUnitId,
                                 isCompleted
-                            ) { isSuccessful ->
-                                if (!isSuccessful) {
-                                    onDisplaySetCompletedFailureDialog()
-                                }
-                            }
+                            )
+
+                            markLectureUnitDeferredMap[lectureUnitId] = deferred
                         },
                         onRequestViewLink = onRequestViewLink,
                         onRequestOpenAttachment = onRequestOpenAttachment,

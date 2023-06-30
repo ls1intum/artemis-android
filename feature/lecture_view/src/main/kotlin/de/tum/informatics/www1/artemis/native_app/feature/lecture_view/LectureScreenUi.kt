@@ -117,7 +117,7 @@ fun NavGraphBuilder.lecture(
 }
 
 @Composable
-private fun LectureScreen(
+internal fun LectureScreen(
     modifier: Modifier,
     courseId: Long,
     lectureId: Long,

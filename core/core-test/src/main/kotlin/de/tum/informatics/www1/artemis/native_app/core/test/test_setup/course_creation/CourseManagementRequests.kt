@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -122,8 +123,31 @@ suspend fun KoinComponent.createLecture(
             Lecture(
                 id = null,
                 title = lectureName,
-                course = Course(id = courseId)
+                course = Course(id = courseId),
+                description = "some description"
             )
+        )
+
+        cookieAuth(accessToken)
+        contentType(ContentType.Application.Json)
+        accept(ContentType.Application.Json)
+    }.body()
+}
+
+suspend fun KoinComponent.createLectureUnit(
+    accessToken: String,
+    lectureId: Long,
+    endpoint: String,
+    creator: (String) -> String,
+    lectureUnitName: String = "Lecture Unit ${generateId()}"
+): LectureUnit {
+    return ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
+        url {
+            appendPathSegments("api", "lectures", lectureId.toString(), endpoint)
+        }
+
+        setBody(
+            creator(lectureUnitName)
         )
 
         cookieAuth(accessToken)

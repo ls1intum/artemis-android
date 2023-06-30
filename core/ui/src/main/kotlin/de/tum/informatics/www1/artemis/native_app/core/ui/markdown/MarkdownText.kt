@@ -19,6 +19,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
@@ -100,7 +103,8 @@ fun MarkdownText(
     }
 
     AndroidView(
-        modifier = modifier,
+        // Added semantics for ui testing.
+        modifier = modifier.semantics { text = AnnotatedString(markdown) },
         factory = { ctx ->
             createTextView(
                 context = ctx,
