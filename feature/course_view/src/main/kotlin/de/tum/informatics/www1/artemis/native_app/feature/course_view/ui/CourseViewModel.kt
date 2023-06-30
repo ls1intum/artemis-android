@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.course_view
+package de.tum.informatics.www1.artemis.native_app.feature.course_view.ui
 
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
@@ -15,10 +15,12 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BaseExerciseListViewModel
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.GroupedByWeek
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
@@ -34,6 +36,8 @@ import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.datetime.toLocalDateTime
 import java.time.temporal.WeekFields
 import java.util.Locale
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 internal class CourseViewModel(
     private val courseId: Long,
@@ -42,7 +46,8 @@ internal class CourseViewModel(
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
     courseExerciseService: CourseExerciseService,
-    networkStatusProvider: NetworkStatusProvider
+    networkStatusProvider: NetworkStatusProvider,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : BaseExerciseListViewModel(serverConfigurationService, accountService, courseExerciseService) {
 
     private val requestReloadCourse = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -59,6 +64,7 @@ internal class CourseViewModel(
                     .bind { it.course }
             }
         }
+            .flowOn(coroutineContext)
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
     /**
@@ -115,6 +121,7 @@ internal class CourseViewModel(
                     .groupByWeek(compareBy(Exercise::dueDate)) { dueDate }
             }
         }
+            .flowOn(coroutineContext)
             .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
 
     val lecturesGroupedByWeek: StateFlow<DataState<List<GroupedByWeek<Lecture>>>> =
@@ -125,6 +132,7 @@ internal class CourseViewModel(
                     .groupByWeek(compareBy(Lecture::title)) { startDate }
             }
         }
+            .flowOn(coroutineContext)
             .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
 
     private fun <T> List<T>.groupByWeek(

@@ -6,11 +6,15 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
@@ -28,6 +32,10 @@ private val editorGroupName: String get() = System.getenv("editorGroupName") ?: 
 private val instructorGroupName: String get() = System.getenv("instructorGroupName") ?: DEFAULT
 
 private const val TAG = "CourseCreationService"
+
+val KoinComponent.jsonProvider: JsonProvider get() = get()
+val KoinComponent.ktorProvider: KtorProvider get() = get()
+val KoinComponent.serverConfigurationService: ServerConfigurationService get() = get()
 
 suspend fun KoinComponent.createCourse(
     accessToken: String,
@@ -53,10 +61,6 @@ suspend fun KoinComponent.createCourse(
         instructorGroupName = instructorGroupName
     )
 
-    val jsonProvider: JsonProvider = get()
-    val ktorProvider: KtorProvider = get()
-    val serverConfigurationService: ServerConfigurationService = get()
-
     return ktorProvider.ktorClient.submitFormWithBinaryData(
         formData {
             append("course", jsonProvider.applicationJsonConfiguration.encodeToString(course), Headers.build {
@@ -74,6 +78,28 @@ suspend fun KoinComponent.createCourse(
         cookieAuth(accessToken)
 
         contentType(ContentType.MultiPart.FormData)
+        accept(ContentType.Application.Json)
+    }
+        .body()
+}
+
+suspend fun KoinComponent.createExercise(
+    accessToken: String,
+    courseId: Long,
+    exerciseName: String = "Exercise ${generateId()}",
+    endpoint: String,
+    creator: (String, Long) -> String
+): Exercise {
+    return ktorProvider.ktorClient.post(serverConfigurationService.serverUrl.first()) {
+        url {
+            appendPathSegments("api", endpoint)
+        }
+
+        cookieAuth(accessToken)
+
+        setBody(creator(exerciseName, courseId))
+
+        contentType(ContentType.Application.Json)
         accept(ContentType.Application.Json)
     }
         .body()

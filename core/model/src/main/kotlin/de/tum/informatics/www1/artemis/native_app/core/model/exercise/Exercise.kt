@@ -27,7 +27,7 @@ import kotlinx.serialization.json.jsonPrimitive
 @JsonClassDiscriminator("type") //Default is type anyway, however here I make it explicit
 @Serializable
 sealed class Exercise {
-    abstract val id: Long
+    abstract val id: Long?
     abstract val title: String?
     abstract val shortName: String?
     abstract val maxPoints: Float?

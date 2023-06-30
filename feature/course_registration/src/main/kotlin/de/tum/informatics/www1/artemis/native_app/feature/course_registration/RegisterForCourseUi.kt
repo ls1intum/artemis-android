@@ -144,7 +144,7 @@ internal fun RegisterForCourseScreen(
                             candidate,
                             onSuccess = {
                                 signUpCandidate = null
-                                onRegisteredInCourse(candidate.id)
+                                onRegisteredInCourse(candidate.id ?: 0L)
                             },
                             onFailure = {
                                 signUpCandidate = null

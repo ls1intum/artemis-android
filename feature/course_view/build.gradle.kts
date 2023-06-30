@@ -16,4 +16,7 @@ dependencies {
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.accompanist.placeholder.material)
+
+    testImplementation(project(":feature:login"))
+    testImplementation(project(":feature:login-test"))
 }

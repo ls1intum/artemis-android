@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.course_view
+package de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.course_overview
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
@@ -56,6 +56,10 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.CourseViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.exercise_list.ExerciseListUi
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.LectureListUi
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.OpenedConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.OpenedThread
@@ -68,8 +72,8 @@ private const val TAB_EXERCISES = 0
 private const val TAB_LECTURES = 1
 private const val TAB_COMMUNICATION = 2
 
-private const val DEFAULT_CONVERSATION_ID = -1L
-private const val DEFAULT_POST_ID = -1L
+internal const val DEFAULT_CONVERSATION_ID = -1L
+internal const val DEFAULT_POST_ID = -1L
 
 fun NavController.navigateToCourse(courseId: Long, builder: NavOptionsBuilder.() -> Unit) {
     navigate("course/$courseId", builder)

@@ -20,4 +20,7 @@ dependencies {
     implementation(project(":core:websocket"))
 
     implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.androidx.compose.ui.test.junit4)
 }

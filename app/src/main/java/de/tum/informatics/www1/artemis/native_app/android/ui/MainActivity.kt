@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
@@ -22,7 +21,6 @@ import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
-import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
@@ -39,8 +37,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.WindowSizeClassProvide
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.navigateToCourseRegistration
-import de.tum.informatics.www1.artemis.native_app.feature.course_view.course
-import de.tum.informatics.www1.artemis.native_app.feature.course_view.navigateToCourse
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.course_overview.course
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.course_overview.navigateToCourse
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.DASHBOARD_DESTINATION
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboard
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.navigateToDashboard
@@ -79,7 +77,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.navig
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.quizResults
 import de.tum.informatics.www1.artemis.native_app.feature.settings.navigateToSettings
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsScreen
-import io.ktor.http.URLBuilder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map

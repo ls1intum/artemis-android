@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.course_view
+package de.tum.informatics.www1.artemis.native_app.feature.course_view.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +16,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.GroupedByWeek
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.R
 
 @Composable
 internal fun LectureListUi(

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.course_view
+package de.tum.informatics.www1.artemis.native_app.feature.course_view.ui
 
 import android.os.Parcelable
 import androidx.compose.foundation.clickable
@@ -25,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.GroupedByWeek
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.R
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone

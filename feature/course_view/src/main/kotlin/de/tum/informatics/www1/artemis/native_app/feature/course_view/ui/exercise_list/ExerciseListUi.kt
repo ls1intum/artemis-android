@@ -1,14 +1,19 @@
-package de.tum.informatics.www1.artemis.native_app.feature.course_view
+package de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.exercise_list
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseListItem
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.GroupedByWeek
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.WeeklyItemsLazyColumn
+
+internal const val TEST_TAG_EXERCISE_LIST_LAZY_COLUMN = "exercise list lazy column"
 
 /**
  * Display a list of all exercises with section headers.
@@ -22,17 +27,17 @@ internal fun ExerciseListUi(
     onClickExercise: (exerciseId: Long) -> Unit
 ) {
     WeeklyItemsLazyColumn(
-        modifier = modifier,
+        modifier = modifier.testTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN),
         weeklyItemGroups = weeklyExercises,
-        getItemId = { id }
+        getItemId = { id ?: 0 }
     ) { exercise ->
         ExerciseListItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp),
             exercise = exercise,
-            exerciseActions = remember(exercise, actions) { actions.getUnbound(exerciseId = exercise.id) },
-            onClickExercise = { onClickExercise(exercise.id) }
+            exerciseActions = remember(exercise, actions) { actions.getUnbound(exerciseId = exercise.id ?: 0) },
+            onClickExercise = { onClickExercise(exercise.id ?: 0) }
         )
     }
 }
