@@ -1,20 +1,26 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lecture_view
 
+import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.compose.rememberNavController
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.test.awaitFirstSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createAttachment
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createAttachmentUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExerciseLectureUnit
@@ -42,6 +48,7 @@ import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 @Category(EndToEndTest::class)
@@ -58,6 +65,8 @@ class LectureE2eTest : KoinTest {
         modules(coreTestModules)
         modules(loginModule, lectureModule, testLoginModule)
     }
+
+    val context: Context get() = InstrumentationRegistry.getInstrumentation().context
 
     private lateinit var course: Course
     private lateinit var lecture: Lecture
@@ -91,7 +100,7 @@ class LectureE2eTest : KoinTest {
 
     @Test
     fun `shows text lecture unit`() {
-        createAndVerifyLectureUnit("text-units", ::createTextLectureUnit)
+        verifyLectureUnit(createLectureUnit("text-units", ::createTextLectureUnit))
     }
 
     @Test
@@ -105,26 +114,63 @@ class LectureE2eTest : KoinTest {
             )
         }
 
-        createAndVerifyLectureUnit("exercise-units") {
+        createLectureUnit("exercise-units") {
             createExerciseLectureUnit(
                 it,
                 get<JsonProvider>().applicationJsonConfiguration.encodeToString(exercise)
             )
-        }
+        }.let { verifyLectureUnit(it) }
     }
 
     @Test
     fun `shows video lecture unit`() {
-        createAndVerifyLectureUnit("video-units", ::createVideoLectureUnit)
+        verifyLectureUnit(createLectureUnit("video-units", ::createVideoLectureUnit))
     }
 
     @Test
     fun `shows online lecture unit`() {
-        createAndVerifyLectureUnit("online-units", ::createOnlineLectureUnit)
+        verifyLectureUnit(createLectureUnit("online-units", ::createOnlineLectureUnit))
     }
 
-    private fun createAndVerifyLectureUnit(endpoint: String, creator: (String) -> String) {
+    @Test
+    fun `shows attachment lecture unit`() {
         val lectureUnit = runBlocking {
+            createAttachmentUnit(getAdminAccessToken(), lecture.id!!)
+        }
+
+        verifyLectureUnit(lectureUnit)
+    }
+
+    @Test
+    fun `shows attachments`() {
+        val attachments = runBlocking {
+            (0 until 3).map {
+                createAttachment(getAdminAccessToken(), lecture.id!!)
+            }
+        }
+
+        assert(attachments.size == 3) { "Expected 3 lecture units" }
+
+        val viewModel = setupViewModelAndUi()
+        val loadedAttachments = runBlocking {
+            viewModel.lectureDataState.awaitFirstSuccess("Lecture Data State").attachments
+        }
+
+        assertEquals(loadedAttachments.size, 3, "Expected 3 attachments")
+
+        composeTestRule.onNodeWithText(context.getString(R.string.lecture_view_tab_attachments))
+            .performClick()
+
+        attachments.forEach { attachment ->
+            composeTestRule.onNodeWithText(attachment.name!!).assertExists()
+        }
+    }
+
+    private fun createLectureUnit(
+        endpoint: String,
+        creator: (String) -> String
+    ): LectureUnit {
+        return runBlocking {
             createLectureUnit(
                 getAdminAccessToken(),
                 lecture.id!!,
@@ -132,7 +178,9 @@ class LectureE2eTest : KoinTest {
                 creator
             )
         }
+    }
 
+    private fun verifyLectureUnit(lectureUnit: LectureUnit) {
         setupViewModelAndUi()
 
         composeTestRule.onNodeWithTag(TEST_TAG_OVERVIEW_LIST).performScrollToKey(lectureUnit.id)

@@ -7,18 +7,22 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonPro
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachment
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import kotlinx.coroutines.flow.first
@@ -154,4 +158,107 @@ suspend fun KoinComponent.createLectureUnit(
         contentType(ContentType.Application.Json)
         accept(ContentType.Application.Json)
     }.body()
+}
+
+suspend fun KoinComponent.createAttachmentUnit(
+    accessToken: String,
+    lectureId: Long,
+    lectureUnitName: String = "Attachment lecture unit ${generateId()}"
+): LectureUnitAttachment {
+    return ktorProvider.ktorClient.submitFormWithBinaryData(
+        formData {
+            append(
+                "file",
+                "file content".encodeToByteArray(),
+                Headers.build {
+                    append(HttpHeaders.ContentDisposition, "filename=file.txt")
+                }
+            )
+
+            append(
+                "attachment",
+                """
+                    {"name":"$lectureUnitName","releaseDate":null,"version":1,"attachmentType":"FILE"}
+                """.trimIndent(),
+                Headers.build {
+                    set("Content-Type", "application/json")
+                    set("filename", "blob")
+                }
+            )
+
+            append(
+                "attachmentUnit",
+                """
+                  {"competencies":[],"type":"attachment","description":"Description ${generateId()}"}  
+                """.trimIndent(),
+                Headers.build {
+                    set("Content-Type", "application/json")
+                    set("filename", "blob")
+                }
+            )
+        }
+    ) {
+        url(serverConfigurationService.serverUrl.first())
+
+        url {
+            appendPathSegments("api", "lectures", lectureId.toString(), "attachment-units")
+        }
+
+        parameter("keepFilename", true)
+
+        cookieAuth(accessToken)
+
+        contentType(ContentType.MultiPart.FormData)
+        accept(ContentType.Application.Json)
+    }
+        .body()
+}
+
+suspend fun KoinComponent.createAttachment(
+    accessToken: String,
+    lectureId: Long,
+    attachmentName: String = "Attachment${generateId()}"
+): Attachment {
+    return ktorProvider.ktorClient.submitFormWithBinaryData(
+        formData {
+            append(
+                "file",
+                "file content".encodeToByteArray(),
+                Headers.build {
+                    append(HttpHeaders.ContentDisposition, "filename=file.txt")
+                }
+            )
+
+            append(
+                "attachment",
+                """
+                    {
+                      "name": "$attachmentName",
+                      "link": "$attachmentName.txt",
+                      "version": 1,
+                      "attachmentType": "FILE",
+                      "lecture": {
+                        "id": $lectureId
+                      }
+                    }
+                """.trimIndent(),
+                Headers.build {
+                    set("Content-Type", "application/json")
+                    set("filename", "blob")
+                }
+            )
+        }
+    ) {
+        url(serverConfigurationService.serverUrl.first())
+
+        url {
+            appendPathSegments("api", "attachments")
+        }
+
+        cookieAuth(accessToken)
+
+        contentType(ContentType.MultiPart.FormData)
+        accept(ContentType.Application.Json)
+    }
+        .body()
 }
