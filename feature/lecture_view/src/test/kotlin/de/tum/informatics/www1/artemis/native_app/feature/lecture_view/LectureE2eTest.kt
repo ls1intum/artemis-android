@@ -3,6 +3,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.lecture_view
 import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasParent
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -31,6 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_cr
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextLectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createVideoLectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
+import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
@@ -50,6 +54,7 @@ import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
@@ -66,7 +71,7 @@ class LectureE2eTest : KoinTest {
         modules(loginModule, lectureModule, testLoginModule)
     }
 
-    val context: Context get() = InstrumentationRegistry.getInstrumentation().context
+    private val context: Context get() = InstrumentationRegistry.getInstrumentation().context
 
     private lateinit var course: Course
     private lateinit var lecture: Lecture
@@ -164,6 +169,33 @@ class LectureE2eTest : KoinTest {
         attachments.forEach { attachment ->
             composeTestRule.onNodeWithText(attachment.name!!).assertExists()
         }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun `mark lecture unit as completed is successful`() {
+        val lectureUnit = createLectureUnit("text-units", ::createTextLectureUnit)
+
+        val viewModel = setupViewModelAndUi()
+
+        composeTestRule.onNodeWithTag(TEST_TAG_OVERVIEW_LIST).performScrollToKey(lectureUnit.id)
+
+        val checkboxMatcher =
+            hasParent(hasTestTag(getLectureUnitTestTag(lectureUnitId = lectureUnit.id))) and hasTestTag(
+                TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED
+            )
+
+        // trigger mark as successful
+        composeTestRule.onNode(checkboxMatcher).performClick()
+
+        // Wait until complete
+        composeTestRule.waitUntilAtLeastOneExists(checkboxMatcher)
+
+        // Check now actually completed.
+        assertTrue(
+            viewModel.lectureUnits.value.first { it.id == lectureUnit.id }.completed,
+            "Lecture unit is not marked as completed"
+        )
     }
 
     private fun createLectureUnit(

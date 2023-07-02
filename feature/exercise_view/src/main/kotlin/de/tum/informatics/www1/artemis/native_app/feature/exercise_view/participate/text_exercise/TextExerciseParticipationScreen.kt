@@ -41,163 +41,154 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.isInitializationAfterDueDate
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.isInFuture
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
-import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.courseId
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.getProblemStatementWebViewState
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 @Composable
 internal fun TextExerciseParticipationScreen(
     modifier: Modifier,
-    viewModel: ExerciseViewModel,
-    participationId: Long,
+    viewModel: TextExerciseParticipationViewModel,
+    exercise: Exercise,
     onNavigateUp: () -> Unit
 ) {
-    val exerciseDataState by viewModel.exerciseDataState.collectAsState()
-    val courseId: Long? = exerciseDataState.courseId
     val serverUrl: String by viewModel.serverUrl.collectAsState()
     val authToken: String by viewModel.authToken.collectAsState()
 
-    EmptyDataStateUi(dataState = exerciseDataState) { exercise ->
-        val exerciseId: Long = exercise.id
+    val courseId: Long? = exercise.course?.id
+    val exerciseId: Long = exercise.id ?: 0L
 
-        val participationViewModel: TextExerciseParticipationViewModel =
-            koinViewModel { parametersOf(exerciseId, participationId) }
+    val latestResult by viewModel.latestResult.collectAsState()
+    val latestSubmission by viewModel.latestSubmission.collectAsState()
+    val participation = viewModel.initialParticipation.collectAsState().value
 
-        val latestResult by participationViewModel.latestResult.collectAsState()
-        val latestSubmission by participationViewModel.latestSubmission.collectAsState()
-        val participation = participationViewModel.initialParticipation.collectAsState().value
+    var displayDiscardChangesDialog by rememberSaveable { mutableStateOf(false) }
 
-        var displayDiscardChangesDialog by rememberSaveable { mutableStateOf(false) }
+    val displayProblemStatementOnSide = getWindowSizeClass()
+        .widthSizeClass >= WindowWidthSizeClass.Medium
 
-        val displayProblemStatementOnSide = getWindowSizeClass()
-            .widthSizeClass >= WindowWidthSizeClass.Medium
+    val webViewState: WebViewState? = getProblemStatementWebViewState(
+        serverUrl = serverUrl,
+        courseId = courseId,
+        exerciseId = exerciseId,
+        // participationId is only relevant for programming exercises
+        participationId = null
+    )
 
-        val webViewState: WebViewState? = getProblemStatementWebViewState(
-            serverUrl = serverUrl,
-            courseId = courseId,
-            exerciseId = exerciseId,
-            // participationId is only relevant for programming exercises
-            participationId = null
-        )
+    var webView: WebView? by remember { mutableStateOf(null) }
 
-        var webView: WebView? by remember { mutableStateOf(null) }
+    val syncState by viewModel.syncState.collectAsState(SyncState.Syncing)
 
-        Scaffold(
-            modifier = modifier,
-            topBar = {
-                TopAppBar(
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateUp) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null)
-                        }
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(id = R.string.participate_text_exercise_title),
-                        )
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = null)
                     }
-                )
-            }
-        ) { padding ->
-            if (latestSubmission == null || participation == null) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+                },
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.participate_text_exercise_title),
                     )
                 }
-            } else {
-                val participationUi = @Composable { modifier: Modifier ->
-                    TextExerciseParticipationUi(
-                        modifier = modifier,
-                        text = participationViewModel.text.collectAsState("").value,
-                        syncState = participationViewModel.syncState.collectAsState(SyncState.Syncing).value,
-                        isActive = isActive(
-                            exercise = exercise,
-                            latestResult = latestResult,
-                            participation = participation
-                        ),
-                        onUpdateText = participationViewModel::updateText,
-                        submission = latestSubmission,
-                        requestSubmit = participationViewModel::retrySync
-                    )
-                }
-
-                val problemStatementUi = @Composable { modifier: Modifier ->
-                    if (webViewState != null) {
-                        ArtemisWebView(
-                            modifier = modifier,
-                            webViewState = webViewState,
-                            webView = webView,
-                            setWebView = { webView = it },
-                            serverUrl = serverUrl,
-                            authToken = authToken
-                        )
-                    } else {
-                        Box(modifier = modifier)
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                ) {
-                    if (displayProblemStatementOnSide) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            participationUi(
-                                Modifier
-                                    .fillMaxHeight()
-                                    .weight(1f)
-                            )
-
-                            problemStatementUi(
-                                Modifier
-                                    .fillMaxHeight()
-                                    .weight(1f)
-                            )
-                        }
-                    } else {
-                        val childModifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp)
-                            .padding(bottom = 8.dp)
-
-                        TabView(
-                            modifier = Modifier.fillMaxSize(),
-                            submissionContent = {
-                                participationUi(childModifier)
-                            },
-                            problemStatementContent = {
-                                problemStatementUi(childModifier)
-                            }
-                        )
-                    }
-                }
-            }
-        }
-
-        if (displayDiscardChangesDialog) {
-            DiscardChangesDialog(
-                onDiscardChanges = onNavigateUp,
-                dismissRequest = { displayDiscardChangesDialog = false }
             )
         }
+    ) { padding ->
+        if (latestSubmission == null || participation == null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        } else {
+            val participationUi = @Composable { modifier: Modifier ->
+                TextExerciseParticipationUi(
+                    modifier = modifier,
+                    text = viewModel.text.collectAsState("").value,
+                    syncState = syncState,
+                    isActive = isActive(
+                        exercise = exercise,
+                        latestResult = latestResult,
+                        participation = participation
+                    ),
+                    onUpdateText = viewModel::updateText,
+                    submission = latestSubmission,
+                    requestSubmit = viewModel::retrySync
+                )
+            }
+
+            val problemStatementUi = @Composable { modifier: Modifier ->
+                if (webViewState != null) {
+                    ArtemisWebView(
+                        modifier = modifier,
+                        webViewState = webViewState,
+                        webView = webView,
+                        setWebView = { webView = it },
+                        serverUrl = serverUrl,
+                        authToken = authToken
+                    )
+                } else {
+                    Box(modifier = modifier)
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                if (displayProblemStatementOnSide) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        participationUi(
+                            Modifier
+                                .fillMaxHeight()
+                                .weight(1f)
+                        )
+
+                        problemStatementUi(
+                            Modifier
+                                .fillMaxHeight()
+                                .weight(1f)
+                        )
+                    }
+                } else {
+                    val childModifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 8.dp)
+                        .padding(bottom = 8.dp)
+
+                    TabView(
+                        modifier = Modifier.fillMaxSize(),
+                        submissionContent = {
+                            participationUi(childModifier)
+                        },
+                        problemStatementContent = {
+                            problemStatementUi(childModifier)
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    if (displayDiscardChangesDialog) {
+        DiscardChangesDialog(
+            onDiscardChanges = onNavigateUp,
+            dismissRequest = { displayDiscardChangesDialog = false }
+        )
     }
 }
 

@@ -15,7 +15,7 @@ val testUsername: String
 val testPassword: String
     get() = System.getenv("password") ?: "test_user_password"
 
-suspend fun KoinTest.performTestLogin() {
+suspend fun KoinTest.performTestLogin(): String {
     val loginService: LoginService = get()
     val accountService: AccountService = get()
     val serverConfigurationService: ServerConfigurationService = get()
@@ -29,6 +29,8 @@ suspend fun KoinTest.performTestLogin() {
     val loginResponse: NetworkResponse.Response<LoginService.LoginResponse> =
         assertIs(response, "Login not successful.")
     accountService.storeAccessToken(loginResponse.data.idToken, true)
+
+    return loginResponse.data.idToken
 }
 
 suspend fun KoinTest.getAdminAccessToken(): String {

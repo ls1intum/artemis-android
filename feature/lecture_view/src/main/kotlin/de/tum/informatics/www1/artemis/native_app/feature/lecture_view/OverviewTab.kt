@@ -39,6 +39,8 @@ import kotlinx.coroutines.Job
 
 internal const val TEST_TAG_OVERVIEW_LIST = "overview_list"
 
+internal fun getLectureUnitTestTag(lectureUnitId: Long) = "LectureUnit$lectureUnitId"
+
 @Composable
 internal fun OverviewTab(
     modifier: Modifier,
@@ -116,7 +118,7 @@ private fun LazyListScope.lectureUnitSection(
     lectureUnits.forEachIndexed { index, lectureUnitWithData ->
         item(lectureUnitWithData.lectureUnit.id) {
             LectureUnitListItem(
-                modifier = modifier,
+                modifier = modifier.testTag(getLectureUnitTestTag(lectureUnitWithData.lectureUnit.id)),
                 lectureUnit = lectureUnitWithData.lectureUnit,
                 isUploadingMarkedAsCompleted = lectureUnitWithData.isUploadingChanges,
                 onViewExercise = onViewExercise,

@@ -19,7 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.websocketModule
 import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistrationModule
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.courseViewModule
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboardModule
-import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exerciseViewModule
+import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exerciseModule
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lectureModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
@@ -59,7 +59,7 @@ class ArtemisApplication : Application(), ImageLoaderFactory, CurrentActivityLis
                 courseViewModule,
                 dashboardModule,
                 loginModule,
-                exerciseViewModule,
+                exerciseModule,
                 communicationModule,
                 quizParticipationModule,
                 settingsModule,

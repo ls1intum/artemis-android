@@ -8,7 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.service.
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
-val exerciseViewModule = module {
+val exerciseModule = module {
     viewModel { parametersHolder ->
         ExerciseViewModel(
             parametersHolder.get(),
