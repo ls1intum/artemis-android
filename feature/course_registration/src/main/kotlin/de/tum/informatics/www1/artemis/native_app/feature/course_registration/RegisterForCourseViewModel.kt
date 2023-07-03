@@ -9,23 +9,29 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
-import de.tum.informatics.www1.artemis.native_app.core.ui.authenticationStateFlow
+import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 class RegisterForCourseViewModel(
     private val accountService: AccountService,
     private val courseRegistrationService: CourseRegistrationService,
-    private val serverConfigurationService: ServerConfigurationService
+    private val serverConfigurationService: ServerConfigurationService,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 
     private val reloadRegistrableCourses = MutableSharedFlow<Unit>()
@@ -50,33 +56,31 @@ class RegisterForCourseViewModel(
                     .map { (semester, courses) -> SemesterCourses(semester, courses) }
             }
         }
+        .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Eagerly, initialValue = DataState.Loading())
 
-    val authenticationData: StateFlow<AccountService.AuthenticationData> = authenticationStateFlow(accountService)
+    val authToken: StateFlow<String> = authTokenStateFlow(accountService)
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
 
     fun reloadRegistrableCourses() {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext) {
             reloadRegistrableCourses.emit(Unit)
         }
     }
 
-    fun registerInCourse(course: Course, onSuccess: () -> Unit, onFailure: () -> Unit) {
-        viewModelScope.launch {
-            val authToken = when (val authData = accountService.authenticationData.first()) {
-                is AccountService.AuthenticationData.LoggedIn -> authData.authToken
-                AccountService.AuthenticationData.NotLoggedIn -> {
-                    onFailure()
-                    return@launch
-                }
-            }
-
+    /**
+     * Deferred contains the course id on success, null otherwise
+     */
+    fun registerInCourse(course: Course): Deferred<Long?> {
+        return viewModelScope.async(coroutineContext) {
+            val courseId = course.id ?: 0L
             courseRegistrationService.registerInCourse(
-                serverConfigurationService.serverUrl.first(),
-                authToken,
-                course.id
+                serverUrl.first(),
+                authToken.first(),
+                courseId
             )
-            onSuccess()
+                .bind { course.id }
+                .orNull()
         }
     }
 

@@ -45,7 +45,8 @@ val KoinComponent.serverConfigurationService: ServerConfigurationService get() =
 suspend fun KoinComponent.createCourse(
     accessToken: String,
     courseName: String = "Course ${generateId()}",
-    courseShortName: String = "ae2e${generateId()}"
+    courseShortName: String = "ae2e${generateId()}",
+    forceSelfRegistration: Boolean = false
 ): Course {
     Log.i(
         TAG, """
@@ -54,23 +55,31 @@ suspend fun KoinComponent.createCourse(
         """.trimIndent()
     )
 
-    val course = Course(
-        id = null,
-        title = courseName,
-        shortName = courseShortName,
-        testCourse = true,
-        courseInformationSharingConfiguration = Course.CourseInformationSharingConfiguration.MESSAGING_ONLY,
-        studentGroupName = studentGroupName,
-        teachingAssistantGroupName = teachingAssistantGroupName,
-        editorGroupName = editorGroupName,
-        instructorGroupName = instructorGroupName
-    )
+    val courseJsonString = if (forceSelfRegistration) {
+        createCourseWithSelfRegistration(
+            title = courseName,
+            shortName = courseShortName
+        )
+    } else {
+        val course = Course(
+            id = null,
+            title = courseName,
+            shortName = courseShortName,
+            testCourse = true,
+            courseInformationSharingConfiguration = Course.CourseInformationSharingConfiguration.MESSAGING_ONLY,
+            studentGroupName = studentGroupName,
+            teachingAssistantGroupName = teachingAssistantGroupName,
+            editorGroupName = editorGroupName,
+            instructorGroupName = instructorGroupName
+        )
+        jsonProvider.applicationJsonConfiguration.encodeToString(course)
+    }
 
     return ktorProvider.ktorClient.submitFormWithBinaryData(
         formData {
             append(
                 "course",
-                jsonProvider.applicationJsonConfiguration.encodeToString(course),
+                courseJsonString,
                 Headers.build {
                     set("Content-Type", "application/json")
                     set("name", "course")

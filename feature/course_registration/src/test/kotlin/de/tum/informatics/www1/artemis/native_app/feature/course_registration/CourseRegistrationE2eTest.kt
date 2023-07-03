@@ -1,0 +1,113 @@
+package de.tum.informatics.www1.artemis.native_app.feature.course_registration
+
+import android.content.Context
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.hasParent
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDialog
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToKey
+import androidx.test.platform.app.InstrumentationRegistry
+import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
+import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.experimental.categories.Category
+import org.junit.runner.RunWith
+import org.koin.android.ext.koin.androidContext
+import org.koin.test.KoinTest
+import org.koin.test.KoinTestRule
+import org.koin.test.get
+import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertEquals
+
+@Category(EndToEndTest::class)
+@RunWith(RobolectricTestRunner::class)
+class CourseRegistrationE2eTest : KoinTest {
+
+    private val context: Context get() = InstrumentationRegistry.getInstrumentation().context
+
+    @get:Rule
+    val composeTestRole = createComposeRule()
+
+    @get:Rule
+    val koinTestRule = KoinTestRule.create {
+        androidContext(InstrumentationRegistry.getInstrumentation().context)
+
+        modules(coreTestModules)
+        modules(loginModule, testLoginModule, courseRegistrationModule)
+    }
+
+    private lateinit var course: Course
+
+    @Before
+    fun setup() {
+        runBlocking {
+            setTestServerUrl()
+            performTestLogin()
+            course = createCourse(getAdminAccessToken(), forceSelfRegistration = true)
+        }
+    }
+
+    /**
+     * Tests that the registrable course is displayed and registering to it is successful.
+     */
+    @Test
+    fun `can successfully register in course`() {
+        val viewModel = RegisterForCourseViewModel(get(), get(), get(), UnconfinedTestDispatcher())
+
+        var registeredCourseId: Long? = null
+
+        composeTestRole.setContent {
+            RegisterForCourseScreen(
+                modifier = Modifier.fillMaxSize(),
+                onNavigateUp = { },
+                onRegisteredInCourse = { registeredCourseId = it },
+                viewModel = viewModel
+            )
+        }
+
+        composeTestRole
+            .onNodeWithTag(TEST_TAG_REGISTRABLE_COURSE_LIST)
+            .performScrollToKey(course.id!!)
+
+        composeTestRole.onNodeWithText(course.title)
+            .assertExists("Could not find registrable course in list")
+
+        composeTestRole
+            .onNode(
+                hasParent(
+                    hasTestTag(testTagForRegistrableCourse(course.id!!))
+                ) and hasText(
+                    context.getString(
+                        R.string.course_registration_sign_up
+                    )
+                )
+            )
+            .performClick()
+
+        composeTestRole
+            .onNodeWithText(context.getString(R.string.course_registration_sign_up_dialog_positive_button))
+            .performClick()
+
+        // Wait until registered. Fails if not registered in time.
+        composeTestRole.waitUntil { registeredCourseId != null }
+
+        assertEquals(course.id!!, registeredCourseId)
+    }
+}

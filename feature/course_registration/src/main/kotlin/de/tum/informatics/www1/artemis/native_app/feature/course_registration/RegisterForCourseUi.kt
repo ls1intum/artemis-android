@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -45,8 +46,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseHeaderViewMode
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseItemHeader
@@ -55,7 +56,12 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeC
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseItemModifier
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
+import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.getViewModel
+
+internal const val TEST_TAG_REGISTRABLE_COURSE_LIST = "registrable course list"
+
+internal fun testTagForRegistrableCourse(courseId: Long) = "registrableCourse$courseId"
 
 private const val COURSE_REGISTRATION_DESTINATION = "courseRegistration"
 
@@ -89,22 +95,30 @@ internal fun RegisterForCourseScreen(
     var signUpCandidate: Course? by remember { mutableStateOf(null) }
     var displayRegistrationFailedDialog: Boolean by rememberSaveable { mutableStateOf(false) }
 
-    val authData = viewModel.authenticationData.collectAsState().value
+    val authToken by viewModel.authToken.collectAsState()
     val serverUrl by viewModel.serverUrl.collectAsState()
 
-    //CourseHeader requires url without trailing /
+    // CourseHeader requires url without trailing /
     val properServerUrl = remember(serverUrl) { serverUrl.dropLast(1) }
-
-    val authToken = when (authData) {
-        is AccountService.AuthenticationData.LoggedIn -> authData.authToken
-        AccountService.AuthenticationData.NotLoggedIn -> ""
-    }
 
     val topAppBarState = rememberTopAppBarState()
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         topAppBarState
     )
+
+    var courseRegistrationDeferred: Deferred<Long?>? by remember { mutableStateOf(null) }
+
+    AwaitDeferredCompletion(courseRegistrationDeferred) { courseId ->
+        if (courseId != null) {
+            onRegisteredInCourse(courseId)
+        } else {
+            displayRegistrationFailedDialog = true
+        }
+
+        signUpCandidate = null
+        courseRegistrationDeferred = null
+    }
 
     Scaffold(
         modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
@@ -134,24 +148,15 @@ internal fun RegisterForCourseScreen(
             }
         )
 
-        val candidate = signUpCandidate
-        if (candidate != null) {
+        signUpCandidate?.let { candidate ->
             AlertDialog(
                 onDismissRequest = { signUpCandidate = null },
                 confirmButton = {
-                    Button(onClick = {
-                        viewModel.registerInCourse(
-                            candidate,
-                            onSuccess = {
-                                signUpCandidate = null
-                                onRegisteredInCourse(candidate.id ?: 0L)
-                            },
-                            onFailure = {
-                                signUpCandidate = null
-                                displayRegistrationFailedDialog = true
-                            }
-                        )
-                    }) {
+                    Button(
+                        onClick = {
+                            courseRegistrationDeferred = viewModel.registerInCourse(candidate)
+                        }
+                    ) {
                         Text(text = stringResource(id = R.string.course_registration_sign_up_dialog_positive_button))
                     }
                 },
@@ -210,8 +215,10 @@ private fun RegisterForCourseContent(
             .computeCourseItemModifier(isCompact = isCompact)
 
         LazyVerticalGrid(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag(TEST_TAG_REGISTRABLE_COURSE_LIST),
             columns = GridCells.Fixed(columnCount),
-            modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -223,9 +230,9 @@ private fun RegisterForCourseContent(
                     )
                 }
 
-                items(semesterCourses.courses) { course ->
+                items(semesterCourses.courses, key = { it.id ?: 0L }) { course ->
                     RegistrableCourse(
-                        modifier = courseItemModifier,
+                        modifier = courseItemModifier.testTag(testTagForRegistrableCourse(course.id ?: 0L)),
                         course = course,
                         serverUrl = serverUrl,
                         authToken = authToken,

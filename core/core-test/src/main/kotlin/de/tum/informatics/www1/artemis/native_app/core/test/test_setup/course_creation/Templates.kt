@@ -1,7 +1,52 @@
 package de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation
 
-import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlin.time.Duration.Companion.days
+
+fun createCourseWithSelfRegistration(
+    title: String,
+    shortName: String,
+    startDate: Instant = Clock.System.now(),
+    endDate: Instant = startDate + 3.days
+): String = """
+{
+  "id": null,
+  "title": "$title",
+  "shortName": "$shortName",
+  "customizeGroupNames": true,
+  "studentGroupName": "artemis-$shortName-student",
+  "teachingAssistantGroupName": "artemis-$shortName-tutors",
+  "editorGroupName": "artemis-$shortName-editors",
+  "instructorGroupName": "artemis-$shortName-instructors",
+  "startDate": "$startDate",
+  "endDate": "$endDate",
+  "semester": null,
+  "testCourse": null,
+  "onlineCourse": false,
+  "complaintsEnabled": false,
+  "requestMoreFeedbackEnabled": false,
+  "maxPoints": null,
+  "accuracyOfScores": 1,
+  "defaultProgrammingLanguage": null,
+  "maxComplaints": 0,
+  "maxTeamComplaints": 0,
+  "maxComplaintTimeDays": 0,
+  "maxComplaintTextLimit": 0,
+  "maxComplaintResponseTextLimit": 0,
+  "maxRequestMoreFeedbackTimeDays": 0,
+  "enrollmentStartDate": "$startDate",
+  "enrollmentEndDate": "$endDate",
+  "unenrollmentEnabled": null,
+  "color": null,
+  "courseIcon": null,
+  "timeZone": null,
+  "courseInformationSharingConfiguration": "DISABLED",
+  "enrollmentEnabled": true,
+  "enrollmentConfirmationMessage": "course enrollment message"
+}
+""".trimIndent()
 
 fun createTextExercise(title: String, courseId: Long): String = """
     {

@@ -11,4 +11,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
     implementation(project(":core:device"))
+
+    testImplementation(project(":feature:login"))
+    testImplementation(project(":feature:login-test"))
 }
