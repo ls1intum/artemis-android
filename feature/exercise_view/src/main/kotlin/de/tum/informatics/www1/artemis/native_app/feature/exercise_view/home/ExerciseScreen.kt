@@ -18,6 +18,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
+import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.*
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
@@ -26,6 +27,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.getProbl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.canDisplayMetisOnDisplaySide
 import io.ktor.http.*
+import kotlinx.coroutines.Deferred
 import me.onebone.toolbar.*
 
 val LocalExerciseScreenFloatingActionButton =
@@ -91,6 +93,13 @@ internal fun ExerciseScreen(
         mutableStateOf(null)
     }
 
+    var startExerciseParticipationDeferred: Deferred<Long?>? by remember { mutableStateOf(null) }
+    AwaitDeferredCompletion(startExerciseParticipationDeferred) { participationId ->
+        if (participationId != null) {
+            onViewTextExerciseParticipationScreen(participationId)
+        }
+    }
+
     Box(modifier = modifier) {
         val windowSizeClass = getWindowSizeClass()
         // If true, the communication is not displayed in a tab but in a window on the right
@@ -122,7 +131,7 @@ internal fun ExerciseScreen(
             ) {
                 ExerciseActions(
                     onClickStartTextExercise = {
-                        viewModel.startExercise(onViewTextExerciseParticipationScreen)
+                        startExerciseParticipationDeferred = viewModel.startExercise()
                     },
                     onClickPracticeQuiz = { onParticipateInQuizDelegate(true) },
                     onClickOpenQuiz = { onParticipateInQuizDelegate(false) },

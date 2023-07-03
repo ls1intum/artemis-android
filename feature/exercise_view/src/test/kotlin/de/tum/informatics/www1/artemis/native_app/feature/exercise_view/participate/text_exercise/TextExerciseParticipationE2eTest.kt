@@ -1,37 +1,22 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise
 
-import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseExerciseService
-import de.tum.informatics.www1.artemis.native_app.core.model.Course
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.SubmissionType
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TextSubmission
-import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExercise
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextExercise
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
-import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exerciseModule
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.service.TextSubmissionService
-import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
-import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
-import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
-import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -40,13 +25,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.datetime.Clock
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
-import org.koin.android.ext.koin.androidContext
-import org.koin.test.KoinTest
-import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFalse
@@ -56,25 +37,8 @@ import kotlin.time.Duration.Companion.seconds
 
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
-class TextExerciseParticipationE2eTest : KoinTest {
+class TextExerciseParticipationE2eTest : BaseExerciseTest() {
 
-    private val context: Context get() = InstrumentationRegistry.getInstrumentation().context
-
-    @get:Rule
-    val composeTestRole = createComposeRule()
-
-    @get:Rule
-    val koinTestRule = KoinTestRule.create {
-        androidContext(InstrumentationRegistry.getInstrumentation().context)
-
-        modules(coreTestModules)
-        modules(loginModule, exerciseModule, testLoginModule)
-    }
-
-    private lateinit var accessToken: String
-
-    private lateinit var course: Course
-    private lateinit var exercise: TextExercise
     private lateinit var participation: Participation
 
     private lateinit var initialSubmission: TextSubmission
@@ -83,19 +47,9 @@ class TextExerciseParticipationE2eTest : KoinTest {
         "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam"
 
     @Before
-    fun setup() {
+    override fun setup() {
+        super.setup()
         runBlocking {
-            setTestServerUrl()
-            accessToken = performTestLogin()
-
-            course = createCourse(getAdminAccessToken())
-            exercise = createExercise(
-                getAdminAccessToken(),
-                course.id!!,
-                endpoint = "text-exercises",
-                creator = ::createTextExercise
-            ) as TextExercise
-
             val courseExerciseService: CourseExerciseService = get()
             participation =
                 courseExerciseService
