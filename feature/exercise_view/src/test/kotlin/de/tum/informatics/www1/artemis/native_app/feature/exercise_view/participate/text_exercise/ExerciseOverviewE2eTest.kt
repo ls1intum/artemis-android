@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.rememberNavController
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.ExerciseScreen
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -40,7 +41,7 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
         )
             .performClick()
 
-        composeTestRole.waitUntil { participationId != null }
+        composeTestRole.waitUntil(DefaultTimeoutMillis) { participationId != null }
 
         composeTestRole
             .onNodeWithText(context.getString(CoreUiR.string.exercise_actions_open_exercise_button))

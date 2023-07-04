@@ -14,6 +14,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participat
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.SubmissionType
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TextSubmission
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.service.TextSubmissionService
@@ -108,7 +109,7 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
         testDispatcher.scheduler.advanceTimeBy(TextExerciseParticipationViewModel.SyncDelay + 1.seconds)
 
         runBlocking {
-            withTimeoutOrNull(1000) {
+            withTimeoutOrNull(DefaultTimeoutMillis) {
                 viewModel.syncState.filterIsInstance<SyncState.Synced>().first()
             } ?: throw RuntimeException("State could not be synced in time.")
         }
@@ -120,14 +121,14 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
 
     private fun setupUi(testDispatcher: TestDispatcher = UnconfinedTestDispatcher()): TextExerciseParticipationViewModel {
         val viewModel = TextExerciseParticipationViewModel(
-            exercise.id!!,
-            participation.id!!,
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            testDispatcher
+            exerciseId = exercise.id!!,
+            participationId = participation.id!!,
+            textSubmissionService = get(),
+            serverConfigurationService = get(),
+            accountService = get(),
+            textEditorService = get(),
+            networkStatusProvider = get(),
+            coroutineContext = testDispatcher
         )
 
         composeTestRole.setContent {

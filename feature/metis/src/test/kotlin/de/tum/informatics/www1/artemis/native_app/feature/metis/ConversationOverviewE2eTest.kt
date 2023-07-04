@@ -19,6 +19,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.printToString
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testUsername
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
@@ -229,7 +230,12 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             ).orThrow("Could not send name update")
         }
 
-        composeTestRule.waitUntilExactlyOneExists(hasTestTag(getTagForConversation(chat)) and hasAnyDescendant(hasText(newChannelName)))
+        composeTestRule.waitUntilExactlyOneExists(
+            hasTestTag(getTagForConversation(chat)) and hasAnyDescendant(
+                hasText(newChannelName)
+            ),
+            DefaultTimeoutMillis
+        )
     }
 
     private fun expandHiddenSection(viewModel: ConversationOverviewViewModel) {
@@ -246,7 +252,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             .performClick()
 
         runBlocking {
-            withTimeout(1000) {
+            withTimeout(DefaultTimeoutMillis) {
                 viewModel
                     .conversations
                     .filter { it.bind { conv -> conv.hidden.isExpanded }.orElse(false) }
@@ -282,7 +288,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             .performClick()
 
         runBlocking {
-            withTimeout(1000) {
+            withTimeout(DefaultTimeoutMillis) {
                 viewModel
                     .conversations
                     .filter { state ->
@@ -296,9 +302,6 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
 
         doAfterAvailable(viewModel)
 
-        println(composeTestRule.onRoot().printToString())
-        println(viewModel.conversations.value)
-
         composeTestRule
             .onNodeWithTag(TEST_TAG_CONVERSATION_LIST)
             .performScrollToKey(newTag)
@@ -310,7 +313,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
 
     private fun waitUntilConversationsAreLoaded(viewModel: ConversationOverviewViewModel) {
         runBlocking {
-            withTimeout(1000) {
+            withTimeout(DefaultTimeoutMillis) {
                 viewModel.conversations.filterSuccess().first()
             }
         }

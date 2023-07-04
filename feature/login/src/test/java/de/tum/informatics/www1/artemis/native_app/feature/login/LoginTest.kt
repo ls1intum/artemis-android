@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.data.test.testDataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.ui.uiModule
@@ -58,14 +59,14 @@ class LoginTest : KoinTest {
 
         viewModel {
             LoginViewModel(
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                UnconfinedTestDispatcher()
+                savedStateHandle = get(),
+                accountService = get(),
+                loginService = get(),
+                pushNotificationConfigurationService = get(),
+                serverConfigurationService = get(),
+                serverProfileInfoService = get(),
+                networkStatusProvider = get(),
+                coroutineContext = UnconfinedTestDispatcher()
             )
         }
     }
@@ -127,7 +128,7 @@ class LoginTest : KoinTest {
             .onNodeWithText(context.getString(R.string.login_perform_login_button_text))
             .performClick()
 
-        composeTestRule.waitUntil { successfullyLoggedIn }
+        composeTestRule.waitUntil(DefaultTimeoutMillis) { successfullyLoggedIn }
 
         assertTrue(successfullyLoggedIn)
     }

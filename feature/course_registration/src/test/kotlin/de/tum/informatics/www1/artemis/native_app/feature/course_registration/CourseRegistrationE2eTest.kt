@@ -15,6 +15,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
@@ -105,7 +106,7 @@ class CourseRegistrationE2eTest : KoinTest {
             .performClick()
 
         // Wait until registered. Fails if not registered in time.
-        composeTestRule.waitUntil { registeredCourseId != null }
+        composeTestRule.waitUntil(DefaultTimeoutMillis) { registeredCourseId != null }
 
         assertEquals(course.id!!, registeredCourseId)
     }

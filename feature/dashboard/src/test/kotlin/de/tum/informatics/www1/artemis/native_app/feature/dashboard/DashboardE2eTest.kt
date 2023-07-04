@@ -11,6 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -79,7 +81,9 @@ class DashboardE2eTest : KoinTest {
         }
 
         runBlocking(UnconfinedTestDispatcher()) {
-            viewModel.dashboard.filterSuccess().first()
+            withTimeout(DefaultTimeoutMillis) {
+                viewModel.dashboard.filterSuccess().first()
+            }
         }
 
         val dashboard: DataState.Success<Dashboard> = assertIs(viewModel.dashboard.value)

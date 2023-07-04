@@ -22,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createAttachment
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createAttachmentUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
@@ -41,6 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTest
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.encodeToString
 import org.junit.Before
 import org.junit.Rule
@@ -158,12 +160,15 @@ class LectureE2eTest : KoinTest {
 
         val viewModel = setupViewModelAndUi()
         val loadedAttachments = runBlocking {
-            viewModel.lectureDataState.awaitFirstSuccess("Lecture Data State").attachments
+            withTimeout(DefaultTimeoutMillis) {
+                viewModel.lectureDataState.awaitFirstSuccess("Lecture Data State").attachments
+            }
         }
 
         assertEquals(loadedAttachments.size, 3, "Expected 3 attachments")
 
-        composeTestRule.onNodeWithText(context.getString(R.string.lecture_view_tab_attachments))
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.lecture_view_tab_attachments))
             .performClick()
 
         attachments.forEach { attachment ->

@@ -49,9 +49,12 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
 
         setupAndDisplayCourseUi()
 
-        composeTestRule.onNodeWithTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN)
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN)
             .performScrollToKey(exercise.id!!)
 
-        composeTestRule.onNodeWithText(exercise.title!!).assertExists("Could not find created exercise. Used endpoint: $endpoint")
+        composeTestRule
+            .onNodeWithText(exercise.title!!)
+            .assertExists("Could not find created exercise. Used endpoint: $endpoint")
     }
 }
