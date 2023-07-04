@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -30,6 +31,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.member_selection.MemberSelection
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+
+internal const val TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON = "create personal conversation button"
 
 fun NavController.navigateToCreatePersonalConversationScreen(
     courseId: Long,
@@ -64,8 +67,21 @@ fun CreatePersonalConversationScreen(
     onConversationCreated: (conversationId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    val viewModel: CreatePersonalConversationViewModel = koinViewModel { parametersOf(courseId) }
+    CreatePersonalConversationScreen(
+        modifier = modifier,
+        viewModel = koinViewModel { parametersOf(courseId) },
+        onConversationCreated = onConversationCreated,
+        onNavigateBack = onNavigateBack
+    )
+}
 
+@Composable
+internal fun CreatePersonalConversationScreen(
+    modifier: Modifier,
+    viewModel: CreatePersonalConversationViewModel,
+    onConversationCreated: (conversationId: Long) -> Unit,
+    onNavigateBack: () -> Unit
+) {
     val canCreateConversation by viewModel.canCreateConversation.collectAsState()
 
     var displayCreateConversationFailedDialog: Boolean by remember { mutableStateOf(false) }
@@ -84,6 +100,7 @@ fun CreatePersonalConversationScreen(
         },
         floatingActionButton = {
             JobAnimatedFloatingActionButton(
+                modifier = Modifier.testTag(TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON),
                 enabled = canCreateConversation,
                 startJob = viewModel::createConversation,
                 onJobCompleted = { conversation ->

@@ -47,6 +47,7 @@ abstract class ConversationBaseTest : KoinTest {
     protected val conversationService: ConversationService get() = get()
 
     protected val user2Username: String = System.getenv("user2Username") ?: "test_user_2"
+    protected val user2Name: String = System.getenv("user2Name") ?: "Test User2"
 
     @Before
     open fun setup() {

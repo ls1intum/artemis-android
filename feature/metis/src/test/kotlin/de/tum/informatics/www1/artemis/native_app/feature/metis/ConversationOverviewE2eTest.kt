@@ -203,7 +203,9 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
                 .orThrow("Could not create channel")
         }
 
-        setupUiAndViewModel()
+        val viewModel = setupUiAndViewModel()
+
+        waitUntilConversationsAreLoaded(viewModel)
 
         scrollToConversation(chat)
 
@@ -263,11 +265,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
     ) {
         val viewModel = setupUiAndViewModel()
 
-        runBlocking {
-            withTimeout(1000) {
-                viewModel.conversations.filterSuccess().first()
-            }
-        }
+        waitUntilConversationsAreLoaded(viewModel)
 
         doInitially(viewModel)
 
@@ -308,6 +306,14 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         composeTestRule
             .onNodeWithTag(newTag)
             .assertExists()
+    }
+
+    private fun waitUntilConversationsAreLoaded(viewModel: ConversationOverviewViewModel) {
+        runBlocking {
+            withTimeout(1000) {
+                viewModel.conversations.filterSuccess().first()
+            }
+        }
     }
 
     private fun scrollToConversation(conversation: Conversation) {

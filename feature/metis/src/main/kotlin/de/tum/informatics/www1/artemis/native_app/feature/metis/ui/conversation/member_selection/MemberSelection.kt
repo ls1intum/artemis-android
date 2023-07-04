@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
@@ -34,6 +35,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.PotentialRecipientsUi
+
+internal const val TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD = "member selection search field"
 
 @Composable
 internal fun MemberSelection(
@@ -131,7 +134,8 @@ private fun RecipientsTextField(
             BasicHintTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(focusRequester),
+                    .focusRequester(focusRequester)
+                    .testTag(TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD),
                 value = query,
                 onValueChange = onUpdateQuery,
                 hint = stringResource(id = R.string.conversation_member_selection_address_hint),
