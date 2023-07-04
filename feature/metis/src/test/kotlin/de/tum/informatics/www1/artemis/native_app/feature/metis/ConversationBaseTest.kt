@@ -29,6 +29,9 @@ abstract class ConversationBaseTest : KoinTest {
     protected val context: Context get() = InstrumentationRegistry.getInstrumentation().context
 
     @get:Rule
+    val composeTestRule = createComposeRule()
+
+    @get:Rule
     val koinTestRule = KoinTestRule.create {
         androidContext(InstrumentationRegistry.getInstrumentation().context)
 

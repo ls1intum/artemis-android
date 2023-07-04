@@ -9,7 +9,6 @@ import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -45,11 +44,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withTimeout
-import org.junit.Rule
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
-import org.koin.core.component.getScopeId
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 
@@ -57,9 +54,9 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ConversationOverviewE2eTest : ConversationBaseTest() {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
-
+    /**
+     * Checks that conversations are correctly displayed.
+     */
     @Test
     fun `displays personal chat, group chat and channel`() {
         val channelName = "createdchannel"
@@ -187,6 +184,9 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         )
     }
 
+    /**
+     * Checks that updates to conversations are automatically received over the websocket connection.
+     */
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun `receives websocket conversation updates`() {
