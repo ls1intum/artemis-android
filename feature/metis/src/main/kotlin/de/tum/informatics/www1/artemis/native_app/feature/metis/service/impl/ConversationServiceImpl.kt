@@ -134,7 +134,8 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
                     CreateChannelData(
                         isPublic = isPublic,
                         isAnnouncementChannel = isAnnouncement,
-                        name = name
+                        name = name,
+                        description = description
                     )
                 )
                 contentType(ContentType.Application.Json)
@@ -150,7 +151,8 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         val type: String = "channel",
         val isPublic: Boolean,
         val isAnnouncementChannel: Boolean,
-        val name: String
+        val name: String,
+        val description: String
     )
 
     override suspend fun updateConversation(

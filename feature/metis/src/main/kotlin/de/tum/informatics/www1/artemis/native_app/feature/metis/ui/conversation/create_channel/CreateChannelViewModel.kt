@@ -17,13 +17,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.plus
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 internal class CreateChannelViewModel(
     private val courseId: Long,
     private val conversationService: ConversationService,
     private val accountService: AccountService,
     private val serverConfigurationService: ServerConfigurationService,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 
     private companion object {
@@ -42,20 +46,20 @@ internal class CreateChannelViewModel(
 
     val isNameIllegal: StateFlow<Boolean> = name
         .mapIsChannelNameIllegal()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     val isDescriptionIllegal: StateFlow<Boolean> = description
         .mapIsDescriptionOrTopicIllegal()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     val canCreate: StateFlow<Boolean> =
         combine(isNameIllegal, isDescriptionIllegal, name) { isNameIllegal, isDescriptionIllegal, name ->
             !isNameIllegal && !isDescriptionIllegal && name.isNotEmpty()
         }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     fun createChannel(): Deferred<ChannelChat?> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             val authToken = accountService.authToken.first()
             val serverUrl = serverConfigurationService.serverUrl.first()
 
