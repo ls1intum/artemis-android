@@ -6,7 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -43,7 +42,7 @@ class CourseRegistrationE2eTest : KoinTest {
     private val context: Context get() = InstrumentationRegistry.getInstrumentation().context
 
     @get:Rule
-    val composeTestRole = createComposeRule()
+    val composeTestRule = createComposeRule()
 
     @get:Rule
     val koinTestRule = KoinTestRule.create {
@@ -73,7 +72,7 @@ class CourseRegistrationE2eTest : KoinTest {
 
         var registeredCourseId: Long? = null
 
-        composeTestRole.setContent {
+        composeTestRule.setContent {
             RegisterForCourseScreen(
                 modifier = Modifier.fillMaxSize(),
                 onNavigateUp = { },
@@ -82,14 +81,14 @@ class CourseRegistrationE2eTest : KoinTest {
             )
         }
 
-        composeTestRole
+        composeTestRule
             .onNodeWithTag(TEST_TAG_REGISTRABLE_COURSE_LIST)
             .performScrollToKey(course.id!!)
 
-        composeTestRole.onNodeWithText(course.title)
+        composeTestRule.onNodeWithText(course.title)
             .assertExists("Could not find registrable course in list")
 
-        composeTestRole
+        composeTestRule
             .onNode(
                 hasParent(
                     hasTestTag(testTagForRegistrableCourse(course.id!!))
@@ -101,12 +100,12 @@ class CourseRegistrationE2eTest : KoinTest {
             )
             .performClick()
 
-        composeTestRole
+        composeTestRule
             .onNodeWithText(context.getString(R.string.course_registration_sign_up_dialog_positive_button))
             .performClick()
 
         // Wait until registered. Fails if not registered in time.
-        composeTestRole.waitUntil { registeredCourseId != null }
+        composeTestRule.waitUntil { registeredCourseId != null }
 
         assertEquals(course.id!!, registeredCourseId)
     }

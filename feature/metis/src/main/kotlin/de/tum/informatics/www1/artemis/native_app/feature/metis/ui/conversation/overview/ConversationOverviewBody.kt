@@ -39,7 +39,23 @@ fun ConversationOverviewBody(
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit
 ) {
-    val viewModel: ConversationOverviewViewModel = koinViewModel { parametersOf(courseId) }
+    ConversationOverviewBody(
+        modifier = modifier,
+        viewModel = koinViewModel { parametersOf(courseId) },
+        onNavigateToConversation = onNavigateToConversation,
+        onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
+        onRequestAddChannel = onRequestAddChannel
+    )
+}
+
+@Composable
+internal fun ConversationOverviewBody(
+    modifier: Modifier,
+    viewModel: ConversationOverviewViewModel,
+    onNavigateToConversation: (conversationId: Long) -> Unit,
+    onRequestCreatePersonalConversation: () -> Unit,
+    onRequestAddChannel: () -> Unit
+) {
     val conversationCollectionsDataState: DataState<ConversationCollections> by viewModel.conversations.collectAsState()
 
     val isConnected by viewModel.isConnected.collectAsState()

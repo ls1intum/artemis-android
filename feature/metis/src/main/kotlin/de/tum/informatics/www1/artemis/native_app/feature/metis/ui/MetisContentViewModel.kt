@@ -43,12 +43,14 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Common viewModel for metis viewModels that display live metis content.
@@ -63,13 +65,15 @@ abstract class MetisContentViewModel(
     private val accountService: AccountService,
     accountDataService: AccountDataService,
     networkStatusProvider: NetworkStatusProvider,
-    private val conversationService: ConversationService
+    private val conversationService: ConversationService,
+    private val coroutineContext: CoroutineContext
 ) : MetisViewModel(
     serverConfigurationService,
     accountService,
     accountDataService,
     networkStatusProvider,
-    websocketProvider
+    websocketProvider,
+    coroutineContext
 ) {
 
     protected val metisContext = MutableStateFlow(initialMetisContext)
@@ -100,6 +104,7 @@ abstract class MetisContentViewModel(
             else -> flowOf(false)
         }
     }
+        .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     /**
@@ -130,6 +135,7 @@ abstract class MetisContentViewModel(
                 }
             }
         }
+        .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val conversation: StateFlow<DataState<Conversation>> = flatMapLatest(
@@ -151,6 +157,7 @@ abstract class MetisContentViewModel(
             else -> flowOf(DataState.Failure(RuntimeException("Not a conversation")))
         }
     }
+        .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     val latestUpdatedConversation: StateFlow<DataState<Conversation>> = flatMapLatest(
@@ -163,6 +170,7 @@ abstract class MetisContentViewModel(
             .map<ConversationWebsocketDTO, DataState<Conversation>> { DataState.Success(it.conversation) }
             .onStart { emit(conversationDataState) }
     }
+        .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     /**
@@ -174,7 +182,7 @@ abstract class MetisContentViewModel(
         emojiId: String,
         create: Boolean
     ): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             if (create) {
                 createReactionImpl(emojiId, post.asAffectedPost)
             } else {
@@ -257,7 +265,7 @@ abstract class MetisContentViewModel(
     }
 
     fun deletePost(post: IBasePost): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             metisModificationService.deletePost(
                 metisContext.value,
                 post.asAffectedPost,
@@ -270,7 +278,7 @@ abstract class MetisContentViewModel(
     }
 
     fun editPost(post: Post, newText: String): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
 
@@ -294,7 +302,7 @@ abstract class MetisContentViewModel(
         post: AnswerPostDb,
         newText: String
     ): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
 
@@ -316,7 +324,7 @@ abstract class MetisContentViewModel(
      */
     override fun requestReload() {
         super.requestReload()
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext) {
             if (!websocketProvider.isConnected.first()) {
                 websocketProvider.requestTryReconnect()
             }

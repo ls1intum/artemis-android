@@ -1,5 +1,5 @@
 plugins {
-    id("artemis.android.library")
+    id("artemis.android.feature")
     id("artemis.android.library.compose")
     id("artemis.android.room")
     kotlin("plugin.serialization")
@@ -39,6 +39,9 @@ dependencies {
 
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)
+
+    testImplementation(project(":feature:login"))
+    testImplementation(project(":feature:login-test"))
 }
 
 tasks.register("fetchAndPrepareEmojis", emoji.FetchAndPrepareEmojisTask::class) {

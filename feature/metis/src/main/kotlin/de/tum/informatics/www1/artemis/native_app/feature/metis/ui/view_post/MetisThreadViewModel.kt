@@ -38,10 +38,13 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * ViewModel for the standalone view of communication posts. Handles loading of the singular post by the given post id.
@@ -59,7 +62,8 @@ internal class MetisThreadViewModel(
     metisContextManager: MetisContextManager,
     metisModificationService: MetisModificationService,
     accountDataService: AccountDataService,
-    conversationService: ConversationService
+    conversationService: ConversationService,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisContentViewModel(
     initialMetisContext,
     websocketProvider,
@@ -69,7 +73,8 @@ internal class MetisThreadViewModel(
     accountService,
     accountDataService,
     networkStatusProvider,
-    conversationService
+    conversationService,
+    coroutineContext
 ) {
 
     companion object {
@@ -115,6 +120,7 @@ internal class MetisThreadViewModel(
         }
     }
         .map { dataState -> dataState.bind { it } } // Type check adaption
+        .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     private suspend fun handleServerLoadedStandalonePost(
@@ -159,7 +165,7 @@ internal class MetisThreadViewModel(
      */
     init {
         if (subscribeToLiveUpdateService) {
-            viewModelScope.launch {
+            viewModelScope.launch(coroutineContext) {
                 combine(
                     serverConfigurationService.host,
                     metisContext,
@@ -169,7 +175,7 @@ internal class MetisThreadViewModel(
                 }
             }
 
-            viewModelScope.launch {
+            viewModelScope.launch(coroutineContext) {
                 combine(
                     metisContext,
                     postId,
@@ -216,7 +222,7 @@ internal class MetisThreadViewModel(
     }
 
     fun createReply(replyText: String): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             if (!post.value.isSuccess) return@async MetisModificationFailure.CREATE_POST
 
             val conversation =

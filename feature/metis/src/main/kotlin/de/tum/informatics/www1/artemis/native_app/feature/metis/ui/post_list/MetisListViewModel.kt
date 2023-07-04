@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
@@ -50,6 +51,8 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class MetisListViewModel(
@@ -63,7 +66,8 @@ internal class MetisListViewModel(
     websocketProvider: WebsocketProvider,
     accountDataService: AccountDataService,
     networkStatusProvider: NetworkStatusProvider,
-    conversationService: ConversationService
+    conversationService: ConversationService,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisContentViewModel(
     initialMetisContext,
     websocketProvider,
@@ -73,7 +77,8 @@ internal class MetisListViewModel(
     accountService,
     accountDataService,
     networkStatusProvider,
-    conversationService
+    conversationService,
+    coroutineContext
 ) {
 
     private val _filter = MutableStateFlow<List<MetisFilter>>(emptyList())
@@ -82,6 +87,7 @@ internal class MetisListViewModel(
     private val _query = MutableStateFlow<String?>(null)
     val query: StateFlow<String> = _query
         .map(String?::orEmpty)
+        .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     private val delayedQuery = _query.transformLatest { query ->
@@ -169,10 +175,11 @@ internal class MetisListViewModel(
                 .map { pagingList -> pagingList.map(ChatListItem::PostChatListItem) }
                 .map(::insertDateSeparators)
         }
+            .flowOn(coroutineContext)
             .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext) {
             combine(
                 serverConfigurationService.host,
                 metisContext,
@@ -184,7 +191,7 @@ internal class MetisListViewModel(
     }
 
     fun createPost(postText: String): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.CREATE_POST
 

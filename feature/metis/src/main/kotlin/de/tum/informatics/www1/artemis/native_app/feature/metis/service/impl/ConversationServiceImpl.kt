@@ -24,6 +24,7 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.serialization.Serializable
 
 class ConversationServiceImpl(private val ktorProvider: KtorProvider) : ConversationService {

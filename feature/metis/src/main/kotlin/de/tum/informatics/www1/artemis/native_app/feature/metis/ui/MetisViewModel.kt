@@ -16,11 +16,14 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Base view model which handles logic such as creating posts and reactions.
@@ -30,7 +33,8 @@ abstract class MetisViewModel(
     accountService: AccountService,
     private val accountDataService: AccountDataService,
     private val networkStatusProvider: NetworkStatusProvider,
-    websocketProvider: WebsocketProvider
+    websocketProvider: WebsocketProvider,
+    private val coroutineContext: CoroutineContext
 ) : ViewModel() {
 
     protected val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -46,6 +50,7 @@ abstract class MetisViewModel(
             }
             .map { } // Convert to Unit
     )
+        .flowOn(coroutineContext)
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 0)
         .onStart { emit(Unit) }
 
@@ -60,13 +65,21 @@ abstract class MetisViewModel(
             accountDataService.getAccountData(serverUrl, authToken).bind { it.id }
         }
     }
+        .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
 
     val clientIdOrDefault: StateFlow<Long> = clientId
         .map { it.orElse(0L) }
+        .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Lazily, 0L)
 
     open fun requestReload() {
         onRequestReload.tryEmit(Unit)
+    }
+
+    fun forceReload() {
+        viewModelScope.launch(coroutineContext) {
+            onRequestReload.emit(Unit)
+        }
     }
 }
