@@ -50,6 +50,7 @@ import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import kotlin.random.Random
 
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
@@ -60,7 +61,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
      */
     @Test
     fun `displays personal chat, group chat and channel`() {
-        val channelName = "createdchannel"
+        val channelName = "channel${Random.nextInt(10000)}"
 
         val (oneToOneChat, groupChat, channel) = runBlocking {
             val personal = conversationService.createOneToOneConversation(
@@ -81,7 +82,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             val channel = conversationService.createChannel(
                 courseId = course.id!!,
                 name = channelName,
-                description = "",
+                description = "some description",
                 isPublic = true,
                 isAnnouncement = false,
                 authToken = accessToken,
@@ -194,8 +195,8 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         val chat = runBlocking {
             conversationService.createChannel(
                 courseId = course.id!!,
-                name = "originalname",
-                description = "",
+                name = "channel${Random.nextInt(10000)}",
+                description = "some description",
                 isPublic = true,
                 isAnnouncement = false,
                 authToken = accessToken,
