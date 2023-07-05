@@ -22,8 +22,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginSer
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.LoginServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.impl.ServerProfileInfoServiceImpl
-import de.tum.informatics.www1.artemis.native_app.feature.login.test.testPassword
-import de.tum.informatics.www1.artemis.native_app.feature.login.test.testUsername
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Password
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -97,7 +97,7 @@ class LoginTest : KoinTest {
 
     @Test
     fun `test login is successful`() {
-        Log.i(TAG, "Logging in with user $testUsername and $testPassword to server $testServerUrl")
+        Log.i(TAG, "Logging in with user $user1Username and $user1Password to server $testServerUrl")
 
         var successfullyLoggedIn = false
 
@@ -117,12 +117,12 @@ class LoginTest : KoinTest {
         composeTestRule.onNodeWithText(
             context.getString(R.string.login_username_label)
         )
-            .performTextInput(testUsername)
+            .performTextInput(user1Username)
 
         composeTestRule.onNodeWithText(
             context.getString(R.string.login_password_label)
         )
-            .performTextInput(testPassword)
+            .performTextInput(user1Password)
 
         composeTestRule
             .onNodeWithText(context.getString(R.string.login_perform_login_button_text))

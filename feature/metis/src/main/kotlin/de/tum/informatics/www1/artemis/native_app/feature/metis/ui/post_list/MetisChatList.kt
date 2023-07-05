@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
@@ -21,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import androidx.paging.compose.itemsIndexed
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
@@ -50,6 +54,12 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toJavaInstant
 import java.text.SimpleDateFormat
 import java.util.Date
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+
+internal const val TEST_TAG_METIS_POST_LIST = "TEST_TAG_METIS_POST_LIST"
+
+internal fun testTagForPost(postId: Long) = "post$postId"
 
 @Composable
 internal fun MetisChatList(
@@ -118,7 +128,7 @@ internal fun MetisChatList(
                         ProvideMarkwon {
                             ProvideEmojis {
                                 ChatList(
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier.fillMaxSize().testTag("foo"),
                                     listContentPadding = listContentPadding,
                                     state = state,
                                     posts = posts,
@@ -137,7 +147,9 @@ internal fun MetisChatList(
 
             if (isReplyEnabled) {
                 ReplyTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(TEST_TAG_METIS_POST_LIST),
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate
                 )
@@ -166,16 +178,16 @@ private fun ChatList(
         state = state,
         reverseLayout = true
     ) {
-        itemsIndexed(
-            items = posts,
-            key = { _, chatListItem ->
+        items(
+            count = posts.itemCount,
+            key = posts.itemKey { chatListItem ->
                 when (chatListItem) {
                     is ChatListItem.DateDivider -> chatListItem.localDate.toEpochDays()
                     is ChatListItem.PostChatListItem -> chatListItem.post.clientPostId
                 }
             }
-        ) { index, chatListItem ->
-            when (chatListItem) {
+        ) { index ->
+            when (val chatListItem = posts[index]) {
                 is ChatListItem.DateDivider -> {
                     DateDivider(
                         modifier = Modifier.fillMaxWidth(),
@@ -191,7 +203,9 @@ private fun ChatList(
                         hasModerationRights = hasModerationRights,
                         clientId = clientId,
                         onRequestEdit = { onRequestEdit(post ?: return@rememberPostActions) },
-                        onRequestDelete = { onRequestDelete(post ?: return@rememberPostActions) },
+                        onRequestDelete = {
+                            onRequestDelete(post ?: return@rememberPostActions)
+                        },
                         onClickReaction = { id, create ->
                             onRequestReactWithEmoji(post ?: return@rememberPostActions, id, create)
                         },
@@ -203,7 +217,13 @@ private fun ChatList(
                     )
 
                     PostWithBottomSheet(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .let {
+                                if (post != null) {
+                                    it.testTag(testTagForPost(post.serverPostId))
+                                } else it
+                            },
                         post = post,
                         clientId = clientId,
                         postItemViewType = remember(post?.answers) {

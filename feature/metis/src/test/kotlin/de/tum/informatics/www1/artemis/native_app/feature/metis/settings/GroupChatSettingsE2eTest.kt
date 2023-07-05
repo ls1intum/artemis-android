@@ -3,7 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.settings
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
-import de.tum.informatics.www1.artemis.native_app.feature.login.test.testUsername
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -19,7 +19,7 @@ class GroupChatSettingsE2eTest : ConversationSettingsBaseE2eTest() {
         val groupChat = runBlocking {
             conversationService.createGroupChat(
                 courseId = course.id!!,
-                groupMembers = listOf(testUsername, user2Username, user3Username),
+                groupMembers = listOf(user1Username, user2Username, user3Username),
                 authToken = getAdminAccessToken(),
                 serverUrl = testServerUrl
             )
@@ -34,7 +34,7 @@ class GroupChatSettingsE2eTest : ConversationSettingsBaseE2eTest() {
         val groupChat = runBlocking {
             conversationService.createGroupChat(
                 courseId = course.id!!,
-                groupMembers = listOf(testUsername, user2Username, user3Username),
+                groupMembers = listOf(user1Username, user2Username, user3Username),
                 authToken = getAdminAccessToken(),
                 serverUrl = testServerUrl
             )

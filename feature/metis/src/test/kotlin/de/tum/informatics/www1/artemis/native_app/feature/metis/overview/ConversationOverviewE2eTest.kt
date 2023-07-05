@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis
+package de.tum.informatics.www1.artemis.native_app.feature.metis.overview
 
 import android.app.Application
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,16 +12,16 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.printToString
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
-import de.tum.informatics.www1.artemis.native_app.feature.login.test.testUsername
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
+import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
@@ -74,7 +74,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
 
             val groupChat = conversationService.createGroupChat(
                 courseId = course.id!!,
-                groupMembers = listOf(testUsername, user2Username),
+                groupMembers = listOf(user1Username, user2Username),
                 authToken = accessToken,
                 serverUrl = testServerUrl
             )

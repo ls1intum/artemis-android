@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -92,8 +93,8 @@ abstract class MetisContentViewModel(
                             .getConversation(
                                 courseId = metisContext.courseId,
                                 conversationId = metisContext.conversationId,
-                                authToken = serverUrl,
-                                serverUrl = authToken
+                                authToken = authToken,
+                                serverUrl = serverUrl
                             )
                             .bind { it.hasModerationRights }
                     }
@@ -104,8 +105,7 @@ abstract class MetisContentViewModel(
             else -> flowOf(false)
         }
     }
-        .flowOn(coroutineContext)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     /**
      * Emits true if the data may be outdated. Listens to the connection state of the websocket
@@ -135,8 +135,7 @@ abstract class MetisContentViewModel(
                 }
             }
         }
-        .flowOn(coroutineContext)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     val conversation: StateFlow<DataState<Conversation>> = flatMapLatest(
         metisContext,
@@ -157,8 +156,7 @@ abstract class MetisContentViewModel(
             else -> flowOf(DataState.Failure(RuntimeException("Not a conversation")))
         }
     }
-        .flowOn(coroutineContext)
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val latestUpdatedConversation: StateFlow<DataState<Conversation>> = flatMapLatest(
         metisContext,
@@ -170,8 +168,7 @@ abstract class MetisContentViewModel(
             .map<ConversationWebsocketDTO, DataState<Conversation>> { DataState.Success(it.conversation) }
             .onStart { emit(conversationDataState) }
     }
-        .flowOn(coroutineContext)
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     /**
      * Handles a reaction click. If the client has already reacted, it deletes the reaction.

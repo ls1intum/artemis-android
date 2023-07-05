@@ -11,10 +11,8 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
-import de.tum.informatics.www1.artemis.native_app.feature.login.test.testUsername
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Test
@@ -49,7 +47,7 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
                         conversationService.registerMembers(
                             courseId = course.id!!,
                             conversation = this,
-                            users = listOf(testUsername),
+                            users = listOf(user1Username),
                             authToken = accessToken,
                             serverUrl = testServerUrl
                         )

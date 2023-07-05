@@ -5,9 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasAnyChild
 import androidx.compose.ui.test.hasAnyDescendant
-import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -19,7 +17,7 @@ import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
-import de.tum.informatics.www1.artemis.native_app.feature.login.test.testUsername
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
@@ -78,10 +76,10 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
         setupUiAndViewModel()
 
         composeTestRule
-            .onNodeWithTag(testTagForMember(testUsername))
+            .onNodeWithTag(testTagForMember(user1Username))
             .performScrollTo()
             .assert(
-                hasAnyDescendant(hasText(testUsername)) and hasAnyDescendant(
+                hasAnyDescendant(hasText(user1Username)) and hasAnyDescendant(
                     hasContentDescription(context.getString(R.string.conversation_members_content_description_moderator))
                 )
             )

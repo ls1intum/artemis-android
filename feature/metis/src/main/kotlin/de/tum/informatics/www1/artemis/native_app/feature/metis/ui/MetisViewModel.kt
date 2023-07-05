@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -50,8 +51,7 @@ abstract class MetisViewModel(
             }
             .map { } // Convert to Unit
     )
-        .flowOn(coroutineContext)
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 0)
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 0)
         .onStart { emit(Unit) }
 
     val clientId: StateFlow<DataState<Long>> = flatMapLatest(
@@ -65,13 +65,11 @@ abstract class MetisViewModel(
             accountDataService.getAccountData(serverUrl, authToken).bind { it.id }
         }
     }
-        .flowOn(coroutineContext)
-        .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily, DataState.Loading())
 
     val clientIdOrDefault: StateFlow<Long> = clientId
         .map { it.orElse(0L) }
-        .flowOn(coroutineContext)
-        .stateIn(viewModelScope, SharingStarted.Lazily, 0L)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily, 0L)
 
     open fun requestReload() {
         onRequestReload.tryEmit(Unit)

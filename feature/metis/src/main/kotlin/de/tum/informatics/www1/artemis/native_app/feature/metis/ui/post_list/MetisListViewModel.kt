@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -47,6 +48,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -87,19 +89,11 @@ internal class MetisListViewModel(
     private val _query = MutableStateFlow<String?>(null)
     val query: StateFlow<String> = _query
         .map(String?::orEmpty)
-        .flowOn(coroutineContext)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, "")
 
-    private val delayedQuery = _query.transformLatest { query ->
-        /*
-         * Do not search every time the user enters a new character.
-         * Wait for 300 ms of the user not entering a char to search
-         */
-        if (query != null) {
-            delay(300.milliseconds)
-        }
-        emit(query)
-    }
+    private val delayedQuery = _query
+        .debounce(300.milliseconds)
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     private val _sortingStrategy = MutableStateFlow(MetisSortingStrategy.DATE_DESCENDING)
     val sortingStrategy: StateFlow<MetisSortingStrategy> = _sortingStrategy
@@ -122,6 +116,7 @@ internal class MetisListViewModel(
             courseWideContext = courseWideContext
         )
     }
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     private val pagingDataInput: Flow<PagingDataInput> = combine(
         accountService.authenticationData,
@@ -130,6 +125,7 @@ internal class MetisListViewModel(
         standaloneMetisContext,
         ::PagingDataInput
     )
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     private data class PagingDataInput(
         val authenticationData: AccountService.AuthenticationData,
@@ -171,12 +167,10 @@ internal class MetisListViewModel(
                 }
             )
                 .flow
-                .cachedIn(viewModelScope)
                 .map { pagingList -> pagingList.map(ChatListItem::PostChatListItem) }
                 .map(::insertDateSeparators)
         }
-            .flowOn(coroutineContext)
-            .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
+            .shareIn(viewModelScope + coroutineContext, SharingStarted.Lazily, replay = 1)
 
     init {
         viewModelScope.launch(coroutineContext) {

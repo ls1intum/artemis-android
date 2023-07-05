@@ -9,10 +9,10 @@ import org.koin.test.KoinTest
 import org.koin.test.get
 import kotlin.test.assertIs
 
-val testUsername: String
+val user1Username: String
     get() = System.getenv("username") ?: "test_user"
 
-val testPassword: String
+val user1Password: String
     get() = System.getenv("password") ?: "test_user_password"
 
 suspend fun KoinTest.performTestLogin(): String {
@@ -21,10 +21,10 @@ suspend fun KoinTest.performTestLogin(): String {
     val serverConfigurationService: ServerConfigurationService = get()
 
     val response = loginService.loginWithCredentials(
-        testUsername,
-        testPassword,
-        true,
-        serverConfigurationService.serverUrl.first()
+        username = user1Username,
+        password = user1Password,
+        rememberMe = true,
+        serverUrl = serverConfigurationService.serverUrl.first()
     )
     val loginResponse: NetworkResponse.Response<LoginService.LoginResponse> =
         assertIs(response, "Login not successful.")

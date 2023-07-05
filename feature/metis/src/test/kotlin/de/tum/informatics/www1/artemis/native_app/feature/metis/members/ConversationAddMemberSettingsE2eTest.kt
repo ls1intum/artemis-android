@@ -8,20 +8,17 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.printToString
 import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
-import de.tum.informatics.www1.artemis.native_app.feature.login.test.testUsername
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.testTagForPotentialRecipient
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.member_selection.TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD
@@ -69,7 +66,7 @@ class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
             withTimeout(DefaultTimeoutMillis) {
                 conversationService.createGroupChat(
                     courseId = course.id!!,
-                    groupMembers = listOf(testUsername, user2Username),
+                    groupMembers = listOf(user1Username, user2Username),
                     authToken = accessToken,
                     serverUrl = testServerUrl
                 ).orThrow("Could not create group chat")

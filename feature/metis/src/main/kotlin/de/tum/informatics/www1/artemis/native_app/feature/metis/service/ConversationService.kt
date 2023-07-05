@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.service
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
@@ -151,4 +152,5 @@ suspend fun ConversationService.getConversation(
                 NetworkResponse.Failure(RuntimeException("Conversation not found"))
             }
         }
+        .onFailure { it.printStackTrace() }
 }
