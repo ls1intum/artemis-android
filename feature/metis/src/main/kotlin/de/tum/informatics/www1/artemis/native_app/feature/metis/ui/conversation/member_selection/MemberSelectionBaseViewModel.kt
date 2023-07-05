@@ -64,7 +64,8 @@ internal abstract class MemberSelectionBaseViewModel(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
 
     private val recipientsFromServer: Flow<DataState<List<User>>> = flatMapLatest(
-        query.debounce(200),
+//        query.debounce(200),
+        query.onEach { println("new query: $it") },
         inclusionList,
         accountService.authToken,
         serverConfigurationService.serverUrl,
@@ -85,6 +86,7 @@ internal abstract class MemberSelectionBaseViewModel(
         } else flowOf(DataState.Success(emptyList()))
     }
         .onEach { println("Recipients: $it") }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val potentialRecipients: StateFlow<DataState<List<User>>> = combine(
         recipientsFromServer,
@@ -96,6 +98,7 @@ internal abstract class MemberSelectionBaseViewModel(
             recipientsFromServer.filter { it.username !in recipientsAsUsernames }
         }
     }
+        .onEach { println("new potential recipients $it") }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     fun updateQuery(query: String) {

@@ -36,7 +36,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextFi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.PotentialRecipientsUi
 
-internal const val TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD = "member selection search field"
+internal const val TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD = "TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD"
+internal const val TEST_TAG_RECIPIENTS_LIST = "TEST_TAG_RECIPIENTS_LIST"
+internal fun testTagForSelectedRecipient(username: String) = "selectedRecipient$username"
 
 @Composable
 internal fun MemberSelection(
@@ -105,7 +107,7 @@ private fun RecipientsTextField(
 
                 Column(modifier = Modifier.fillMaxWidth()) {
                     FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().testTag(TEST_TAG_RECIPIENTS_LIST),
                         mainAxisSpacing = 8.dp,
                         crossAxisSpacing = 8.dp
                     ) {
@@ -153,6 +155,7 @@ private fun RecipientChip(modifier: Modifier, recipient: Recipient, onClickRemov
             .border(1.dp, color = MaterialTheme.colorScheme.outline, CircleShape)
             .clip(CircleShape)
             .clickable(onClick = onClickRemove)
+            .testTag(testTagForSelectedRecipient(recipient.username))
     ) {
         Row(modifier = Modifier.padding(2.dp)) {
             Text(modifier = Modifier.padding(start = 8.dp), text = recipient.humanReadableName)
@@ -160,5 +163,4 @@ private fun RecipientChip(modifier: Modifier, recipient: Recipient, onClickRemov
             Icon(imageVector = Icons.Default.Close, contentDescription = null)
         }
     }
-
 }

@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
@@ -55,11 +57,12 @@ internal class ConversationMembersViewModel(
     val query: StateFlow<String> = savedStateHandle.getStateFlow(KEY_QUERY, "")
 
     val membersPagingData: Flow<PagingData<ConversationUser>> = flatMapLatest(
+        onRequestReload.onStart { emit(Unit) },
         conversationSettings,
         serverConfigurationService.serverUrl,
         accountService.authToken,
         query.debounce(200.milliseconds)
-    ) { conversationSettings, serverUrl, authToken, query ->
+    ) { _, conversationSettings, serverUrl, authToken, query ->
         Pager(
             config = PagingConfig(10)
         ) {

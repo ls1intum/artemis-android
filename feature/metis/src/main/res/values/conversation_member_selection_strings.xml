@@ -13,4 +13,6 @@
     <string name="conversation_member_selection_load_recipients_try_again">Try again</string>
 
     <string name="conversation_member_selection_recipients_empty">No users matching your input has been found.</string>
+
+    <string name="conversation_member_selection_content_description_add_recipient">Add recipient or member</string>
 </resources>

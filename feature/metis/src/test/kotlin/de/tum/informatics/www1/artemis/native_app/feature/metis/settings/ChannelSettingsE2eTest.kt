@@ -16,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -33,25 +34,27 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
     @Test
     fun `can leave channel`() {
         val channel = runBlocking {
-            conversationService.createChannel(
-                courseId = course.id!!,
-                name = "clcchannel",
-                description = "",
-                isPublic = true,
-                isAnnouncement = true,
-                authToken = getAdminAccessToken(),
-                serverUrl = testServerUrl
-            )
-                .orThrow("Could not create channel")
-                .apply {
-                    conversationService.registerMembers(
-                        courseId = course.id!!,
-                        conversation = this,
-                        users = listOf(testUsername),
-                        authToken = accessToken,
-                        serverUrl = testServerUrl
-                    )
-                }
+            withTimeout(DefaultTimeoutMillis) {
+                conversationService.createChannel(
+                    courseId = course.id!!,
+                    name = "clcchannel",
+                    description = "",
+                    isPublic = true,
+                    isAnnouncement = true,
+                    authToken = getAdminAccessToken(),
+                    serverUrl = testServerUrl
+                )
+                    .orThrow("Could not create channel")
+                    .apply {
+                        conversationService.registerMembers(
+                            courseId = course.id!!,
+                            conversation = this,
+                            users = listOf(testUsername),
+                            authToken = accessToken,
+                            serverUrl = testServerUrl
+                        )
+                    }
+            }
         }
 
         canLeaveConversationTestImpl(channel)
@@ -60,16 +63,18 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
     @Test
     fun `can archive channel`() {
         val channel = runBlocking {
-            conversationService.createChannel(
-                courseId = course.id!!,
-                name = "cacchannel",
-                description = "",
-                isPublic = true,
-                isAnnouncement = true,
-                authToken = accessToken,
-                serverUrl = testServerUrl
-            )
-                .orThrow("Could not create channel")
+            withTimeout(DefaultTimeoutMillis) {
+                conversationService.createChannel(
+                    courseId = course.id!!,
+                    name = "cacchannel",
+                    description = "",
+                    isPublic = true,
+                    isAnnouncement = true,
+                    authToken = accessToken,
+                    serverUrl = testServerUrl
+                )
+                    .orThrow("Could not create channel")
+            }
         }
 
         setupUiAndViewModel(channel)
@@ -80,20 +85,22 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
     @Test
     fun `can unarchive archived channel`() {
         val channel = runBlocking {
-            conversationService.createChannel(
-                courseId = course.id!!,
-                name = "cuacchannel",
-                description = "",
-                isPublic = true,
-                isAnnouncement = true,
-                authToken = accessToken,
-                serverUrl = testServerUrl
-            )
-                .orThrow("Could not create channel")
-                .apply {
-                    conversationService.archiveChannel(course.id!!, id, accessToken, testServerUrl)
-                        .orThrow("could not archive channel")
-                }
+            withTimeout(DefaultTimeoutMillis) {
+                conversationService.createChannel(
+                    courseId = course.id!!,
+                    name = "cuacchannel",
+                    description = "",
+                    isPublic = true,
+                    isAnnouncement = true,
+                    authToken = accessToken,
+                    serverUrl = testServerUrl
+                )
+                    .orThrow("Could not create channel")
+                    .apply {
+                        conversationService.archiveChannel(course.id!!, id, accessToken, testServerUrl)
+                            .orThrow("could not archive channel")
+                    }
+            }
 
         }
 
@@ -137,16 +144,18 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
     @Test
     fun `can change channel name, description and topic`() {
         val channel = runBlocking {
-            conversationService.createChannel(
-                courseId = course.id!!,
-                name = "ccndtchannel",
-                description = "some description",
-                isPublic = true,
-                isAnnouncement = true,
-                authToken = accessToken,
-                serverUrl = testServerUrl
-            )
-                .orThrow("Could not create channel")
+            withTimeout(DefaultTimeoutMillis) {
+                conversationService.createChannel(
+                    courseId = course.id!!,
+                    name = "ccndtchannel",
+                    description = "some description",
+                    isPublic = true,
+                    isAnnouncement = true,
+                    authToken = accessToken,
+                    serverUrl = testServerUrl
+                )
+                    .orThrow("Could not create channel")
+            }
         }
 
         changeConversationDetailsTestImpl(channel) {

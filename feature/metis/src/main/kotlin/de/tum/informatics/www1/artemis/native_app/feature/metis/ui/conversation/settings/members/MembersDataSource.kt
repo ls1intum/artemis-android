@@ -29,6 +29,7 @@ internal class MembersDataSource(
         val pageNum = params.key ?: 0
 
         val pageSize = params.loadSize.coerceAtMost(MAX_PAGE_SIZE)
+
         return when (
             val membersNetworkResponse = conversationService.getMembers(
                 courseId,
@@ -40,13 +41,19 @@ internal class MembersDataSource(
                 serverUrl
             )
         ) {
-            is NetworkResponse.Response -> LoadResult.Page(
-                membersNetworkResponse.data,
-                null,
-                if (membersNetworkResponse.data.size >= pageSize) pageNum + 1 else null
-            )
+            is NetworkResponse.Response -> {
+                println("loaded ${membersNetworkResponse.data}")
+                LoadResult.Page(
+                    membersNetworkResponse.data,
+                    null,
+                    if (membersNetworkResponse.data.size >= pageSize) pageNum + 1 else null
+                )
+            }
 
-            is NetworkResponse.Failure -> LoadResult.Error(membersNetworkResponse.exception)
+            is NetworkResponse.Failure -> {
+                println("failed loading ${membersNetworkResponse.exception}")
+                LoadResult.Error(membersNetworkResponse.exception)
+            }
         }
     }
 }

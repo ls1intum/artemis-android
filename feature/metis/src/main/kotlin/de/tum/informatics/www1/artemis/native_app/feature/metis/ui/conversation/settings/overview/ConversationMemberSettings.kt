@@ -107,6 +107,7 @@ private fun ConversationMemberPreviewList(
     Column(modifier = modifier) {
         members.fastForEach { member ->
             ConversationMemberListItem(
+                modifier = Modifier,
                 member = member,
                 clientUsername = clientUsername,
                 conversation = conversation,

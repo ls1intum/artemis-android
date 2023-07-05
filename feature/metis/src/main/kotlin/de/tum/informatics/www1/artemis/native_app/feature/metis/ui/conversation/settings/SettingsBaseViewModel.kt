@@ -95,9 +95,6 @@ abstract class SettingsBaseViewModel(
                 accountService.authToken.first(),
                 serverConfigurationService.serverUrl.first()
             )
-                .apply {
-                    println(this)
-                }
                 .or(false)
                 .also { successful ->
                     if (successful) {
