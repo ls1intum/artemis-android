@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.plus
+import kotlin.coroutines.CoroutineContext
 
 abstract class SettingsBaseViewModel(
     initialCourseId: Long,
@@ -34,7 +36,8 @@ abstract class SettingsBaseViewModel(
     protected val accountService: AccountService,
     protected val serverConfigurationService: ServerConfigurationService,
     protected val networkStatusProvider: NetworkStatusProvider,
-    accountDataService: AccountDataService
+    accountDataService: AccountDataService,
+    private val coroutineContext: CoroutineContext
 ) : ViewModel() {
 
     protected val conversationSettings = MutableStateFlow(ConversationSettings(initialCourseId, initialConversationId))
@@ -52,7 +55,7 @@ abstract class SettingsBaseViewModel(
                 .getConversation(convSettings.courseId, convSettings.conversationId, authToken, serverUrl)
         }
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val clientUsername: StateFlow<DataState<String>> = flatMapLatest(
         accountService.authToken,
@@ -64,7 +67,7 @@ abstract class SettingsBaseViewModel(
         }
             .map { accountDataState -> accountDataState.bind { it.username.orEmpty() } }
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     fun kickMember(username: String): Deferred<Boolean> {
         return performActionOnUser(username, ConversationService::kickMember)
@@ -82,7 +85,7 @@ abstract class SettingsBaseViewModel(
         username: String,
         action: suspend ConversationService.(Long, Conversation, String, String, String) -> NetworkResponse<Boolean>
     ): Deferred<Boolean> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             val conversation = loadedConversation.value.orNull() ?: return@async false
 
             conversationService.action(
@@ -92,6 +95,9 @@ abstract class SettingsBaseViewModel(
                 accountService.authToken.first(),
                 serverConfigurationService.serverUrl.first()
             )
+                .apply {
+                    println(this)
+                }
                 .or(false)
                 .also { successful ->
                     if (successful) {

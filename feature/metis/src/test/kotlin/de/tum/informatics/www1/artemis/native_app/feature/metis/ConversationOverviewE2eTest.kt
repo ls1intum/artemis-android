@@ -52,6 +52,7 @@ import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import kotlin.random.Random
 
+@OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
 class ConversationOverviewE2eTest : ConversationBaseTest() {
@@ -359,6 +360,11 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
                 onRequestAddChannel = {}
             )
         }
+
+        composeTestRule.waitUntilAtLeastOneExists(
+            hasText(context.getString(R.string.conversation_overview_section_channels)),
+            DefaultTimeoutMillis
+        )
 
         return viewModel
     }

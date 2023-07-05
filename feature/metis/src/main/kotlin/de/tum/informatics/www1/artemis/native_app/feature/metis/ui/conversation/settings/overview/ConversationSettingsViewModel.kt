@@ -33,6 +33,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.plus
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 internal class ConversationSettingsViewModel(
     initialCourseId: Long,
@@ -42,7 +45,8 @@ internal class ConversationSettingsViewModel(
     serverConfigurationService: ServerConfigurationService,
     networkStatusProvider: NetworkStatusProvider,
     accountDataService: AccountDataService,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : SettingsBaseViewModel(
     initialCourseId,
     initialConversationId,
@@ -50,7 +54,8 @@ internal class ConversationSettingsViewModel(
     accountService,
     serverConfigurationService,
     networkStatusProvider,
-    accountDataService
+    accountDataService,
+    coroutineContext
 ) {
 
     companion object {
@@ -67,17 +72,17 @@ internal class ConversationSettingsViewModel(
     val isNameIllegal: StateFlow<Boolean> = _name
         .map { it.orEmpty() }
         .mapIsChannelNameIllegal()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     val isDescriptionIllegal: StateFlow<Boolean> = _description
         .map { it.orEmpty() }
         .mapIsDescriptionOrTopicIllegal()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     val isTopicIllegal: StateFlow<Boolean> = _topic
         .map { it.orEmpty() }
         .mapIsDescriptionOrTopicIllegal()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     private val savedName = MutableStateFlow<String?>(null)
     private val savedDescription = MutableStateFlow<String?>(null)
@@ -93,7 +98,7 @@ internal class ConversationSettingsViewModel(
             copyConversationWithSavedValues(conversation, savedName, savedDescription, savedTopic)
         }
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val previewMembers: StateFlow<DataState<List<ConversationUser>>> = flatMapLatest(
         conversationSettings,
@@ -113,7 +118,7 @@ internal class ConversationSettingsViewModel(
             )
         }
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     private val isNameDirty = isDirtyFlow(_name) {
         when (this) {
@@ -149,7 +154,7 @@ internal class ConversationSettingsViewModel(
         ) { name, description, topic ->
             name || description || topic
         }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     /**
      * If no custom name is set displays the name of the conversation.
@@ -164,7 +169,7 @@ internal class ConversationSettingsViewModel(
             }
         }.orElse("")
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, "")
 
     val description: StateFlow<String> =
         combine(conversation, _description) { conversation, customDescription ->
@@ -176,7 +181,7 @@ internal class ConversationSettingsViewModel(
                 }
             }.orElse("")
         }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, "")
 
     val topic: StateFlow<String> = combine(conversation, _topic) { conversation, customTopic ->
         customTopic ?: conversation.bind {
@@ -187,7 +192,7 @@ internal class ConversationSettingsViewModel(
             }
         }.orElse("")
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, "")
 
     val canEdit: StateFlow<Boolean> = conversation.map { conversationDataState ->
         conversationDataState.bind { conversation ->
@@ -198,16 +203,16 @@ internal class ConversationSettingsViewModel(
             }
         }.orElse(false)
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     val canSave: StateFlow<Boolean> =
         combine(isNameIllegal, isDescriptionIllegal, isTopicIllegal) { a, b, c ->
             !a && !b && !c
         }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     fun saveChanges(): Deferred<Boolean> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             val conversation = conversation.value.orNull() ?: return@async false
 
             val newName = _name.value
@@ -237,14 +242,14 @@ internal class ConversationSettingsViewModel(
     }
 
     fun leaveConversation(): Deferred<Boolean> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             // Leaving the conversation is like kicking yourself
             kickMember(clientUsername.value.orNull() ?: return@async false).await()
         }
     }
 
     fun toggleChannelArchivation(): Deferred<Boolean> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             val conversation = conversation.value.orNull() as? ChannelChat ?: return@async false
 
             val result = if (conversation.isArchived) {

@@ -27,7 +27,6 @@ internal fun ConversationOtherSettings(
     onToggleChannelArchivation: () -> Unit
 ) {
     var displayArchiveChannelDialog by remember { mutableStateOf(false) }
-    var displayDeleteChannelDialog by remember { mutableStateOf(false) }
 
     val buttonModifier = Modifier.fillMaxWidth()
 
