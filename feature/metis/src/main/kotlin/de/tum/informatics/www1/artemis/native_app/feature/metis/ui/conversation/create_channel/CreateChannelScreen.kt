@@ -46,6 +46,12 @@ import org.koin.core.parameter.parametersOf
 
 internal const val TEST_TAG_CREATE_CHANNEL_BUTTON = "create channel button"
 
+internal const val TEST_TAG_SET_PUBLIC_BUTTON = "TEST_TAG_SET_PUBLIC_BUTTON"
+internal const val TEST_TAG_SET_PRIVATE_BUTTON = "TEST_TAG_SET_PRIVATE_BUTTON"
+
+internal const val TEST_TAG_SET_ANNOUNCEMENT_BUTTON = "TEST_TAG_SET_ANNOUNCEMENT_BUTTON"
+internal const val TEST_TAG_SET_UNRESTRICTED_BUTTON = "TEST_TAG_SET_UNRESTRICTED_BUTTON"
+
 fun NavController.navigateToCreateChannelScreen(
     courseId: Long,
     builder: NavOptionsBuilder.() -> Unit
@@ -187,6 +193,8 @@ internal fun CreateChannelScreen(
                 choiceOne = stringResource(id = R.string.create_channel_channel_accessibility_type_public),
                 choiceTwo = stringResource(id = R.string.create_channel_channel_accessibility_type_private),
                 choice = isPublic,
+                choiceOneButtonTestTag = TEST_TAG_SET_PUBLIC_BUTTON,
+                choiceTwoButtonTestTag = TEST_TAG_SET_PRIVATE_BUTTON,
                 updateChoice = viewModel::updatePublic
             )
 
@@ -197,6 +205,8 @@ internal fun CreateChannelScreen(
                 choiceOne = stringResource(id = R.string.create_channel_channel_announcement_type_announcement),
                 choiceTwo = stringResource(id = R.string.create_channel_channel_announcement_type_unrestricted),
                 choice = isAnnouncement,
+                choiceOneButtonTestTag = TEST_TAG_SET_ANNOUNCEMENT_BUTTON,
+                choiceTwoButtonTestTag = TEST_TAG_SET_UNRESTRICTED_BUTTON,
                 updateChoice = viewModel::updateAnnouncement
             )
 
@@ -224,6 +234,8 @@ private fun BinarySelection(
     choiceOne: String,
     choiceTwo: String,
     choice: Boolean,
+    choiceOneButtonTestTag: String,
+    choiceTwoButtonTestTag: String,
     updateChoice: (Boolean) -> Unit
 ) {
     Column(
@@ -239,6 +251,7 @@ private fun BinarySelection(
         Column {
             RadioButtonWithText(
                 modifier = Modifier.fillMaxWidth(),
+                buttonTestTag = choiceOneButtonTestTag,
                 isChecked = choice,
                 onClick = { updateChoice(true) },
                 text = choiceOne
@@ -246,8 +259,11 @@ private fun BinarySelection(
 
             RadioButtonWithText(
                 modifier = Modifier.fillMaxWidth(),
+                buttonTestTag = choiceTwoButtonTestTag,
                 isChecked = !choice,
-                onClick = { updateChoice(false) },
+                onClick = {
+                    updateChoice(false)
+                },
                 text = choiceTwo
             )
         }
@@ -262,6 +278,7 @@ private fun BinarySelection(
 @Composable
 private fun RadioButtonWithText(
     modifier: Modifier,
+    buttonTestTag: String,
     isChecked: Boolean,
     onClick: () -> Unit,
     text: String
@@ -270,7 +287,11 @@ private fun RadioButtonWithText(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RadioButton(selected = isChecked, onClick = onClick)
+        RadioButton(
+            modifier = Modifier.testTag(buttonTestTag),
+            selected = isChecked,
+            onClick = onClick
+        )
 
         Text(text = text)
     }

@@ -37,7 +37,7 @@ sealed class NetworkResponse<T> {
 
     fun orThrow(message: String = ""): T = when (this) {
         is Response -> data
-        is Failure -> throw RuntimeException("Network Response does not contain response: $message")
+        is Failure -> throw RuntimeException("Network Response does not contain response: $message; exception = $exception")
     }
 
     data class Response<T>(val data: T) : NetworkResponse<T>()
