@@ -171,7 +171,7 @@ internal class MetisThreadViewModel(
                     metisContext,
                     ::Pair
                 ).collectLatest { (host, metisContext) ->
-                    metisContextManager.updatePosts(host, metisContext)
+                    metisContextManager.updatePosts(host, metisContext, this@MetisThreadViewModel.coroutineContext)
                 }
             }
 

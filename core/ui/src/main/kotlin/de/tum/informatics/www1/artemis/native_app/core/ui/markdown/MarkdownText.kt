@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
@@ -104,7 +106,11 @@ fun MarkdownText(
 
     AndroidView(
         // Added semantics for ui testing.
-        modifier = modifier.semantics { text = AnnotatedString(markdown) },
+        modifier = modifier.semantics {
+            text = AnnotatedString(markdown)
+            onClick?.let { this.onClick(action = { onClick(); true }) }
+            onLongClick?.let { this.onLongClick(action = { onLongClick(); true }) }
+        },
         factory = { ctx ->
             createTextView(
                 context = ctx,
@@ -153,7 +159,12 @@ private fun createTextView(
     )
     return TextView(context).apply {
         onClick?.let { setOnClickListener { onClick() } }
-        onLongClick?.let { setOnLongClickListener { onLongClick(); true } }
+        onLongClick?.let {
+            setOnLongClickListener {
+                onLongClick()
+                true
+            }
+        }
         setTextColor(textColor.toArgb())
         setMaxLines(maxLines)
         setTextSize(TypedValue.COMPLEX_UNIT_DIP, mergedStyle.fontSize.value)

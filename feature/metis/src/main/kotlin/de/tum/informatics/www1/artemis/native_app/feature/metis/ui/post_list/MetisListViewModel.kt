@@ -167,6 +167,7 @@ internal class MetisListViewModel(
                 }
             )
                 .flow
+                .cachedIn(viewModelScope + coroutineContext)
                 .map { pagingList -> pagingList.map(ChatListItem::PostChatListItem) }
                 .map(::insertDateSeparators)
         }
@@ -179,7 +180,7 @@ internal class MetisListViewModel(
                 metisContext,
                 ::Pair
             ).collectLatest { (host, metisContext) ->
-                metisContextManager.updatePosts(host, metisContext)
+                metisContextManager.updatePosts(host, metisContext, this@MetisListViewModel.coroutineContext)
             }
         }
     }

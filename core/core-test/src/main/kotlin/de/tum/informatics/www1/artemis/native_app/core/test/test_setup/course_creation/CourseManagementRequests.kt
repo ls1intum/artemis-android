@@ -66,7 +66,7 @@ suspend fun KoinComponent.createCourse(
             title = courseName,
             shortName = courseShortName,
             testCourse = true,
-            courseInformationSharingConfiguration = Course.CourseInformationSharingConfiguration.MESSAGING_ONLY,
+            courseInformationSharingConfiguration = Course.CourseInformationSharingConfiguration.COMMUNICATION_AND_MESSAGING,
             studentGroupName = studentGroupName,
             teachingAssistantGroupName = teachingAssistantGroupName,
             editorGroupName = editorGroupName,

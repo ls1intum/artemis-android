@@ -7,7 +7,7 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val websocketModule = module {
-    singleOf(::WebsocketProvider)
+    single { WebsocketProvider(get(), get(), get(), get()) }
     single<LiveParticipationService> {
         LiveParticipationServiceImpl(
             get()

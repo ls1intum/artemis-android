@@ -19,6 +19,7 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertEquals
 
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
@@ -95,7 +96,12 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
                 )
                     .orThrow("Could not create channel")
                     .apply {
-                        conversationService.archiveChannel(course.id!!, id, accessToken, testServerUrl)
+                        conversationService.archiveChannel(
+                            course.id!!,
+                            id,
+                            accessToken,
+                            testServerUrl
+                        )
                             .orThrow("could not archive channel")
                     }
             }
@@ -156,21 +162,29 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
             }
         }
 
-        changeConversationDetailsTestImpl(channel) {
-            val newTitle = "ccndtchannel2"
-            val newDescription = "another description"
-            val newTopic = "new topic"
+        val newTitle = "ccndtchannel2"
+        val newDescription = "another description"
+        val newTopic = "new topic"
 
-            changeTitleText(channel.name, newTitle)
+        changeConversationDetailsTestImpl(
+            conversation = channel,
+            performChanges = {
+                changeTitleText(channel.name, newTitle)
 
-            changeDescriptionText(channel.description, newDescription)
+                changeDescriptionText(channel.description, newDescription)
 
-            changeConversationDetailsText(
-                channel.topic
-                    ?: context.getString(R.string.conversation_settings_basic_data_topic),
-                context.getString(R.string.conversation_settings_basic_data_topic_empty),
-                newTopic
-            )
-        }
+                changeConversationDetailsText(
+                    channel.topic
+                        ?: context.getString(R.string.conversation_settings_basic_data_topic),
+                    context.getString(R.string.conversation_settings_basic_data_topic_empty),
+                    newTopic
+                )
+            },
+            verifyChanges = { updatedChannel ->
+                assertEquals(newTitle, updatedChannel.name)
+                assertEquals(newDescription, updatedChannel.description)
+                assertEquals(newTopic, updatedChannel.topic)
+            }
+        )
     }
 }

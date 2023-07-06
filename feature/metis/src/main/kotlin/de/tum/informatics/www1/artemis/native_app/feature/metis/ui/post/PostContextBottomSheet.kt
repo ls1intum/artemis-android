@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
@@ -53,7 +54,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IReact
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.LocalEmojiProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.getUnicodeForEmojiId
 
-private val predefinedEmojiIds = listOf("heavy_plus_sign", "rocket", "tada", "recycle")
+internal const val TEST_TAG_POST_CONTEXT_BOTTOM_SHEET = "TEST_TAG_POST_CONTEXT_BOTTOM_SHEET"
+
+internal val predefinedEmojiIds = listOf("heavy_plus_sign", "rocket", "tada", "recycle")
 
 @Composable
 internal fun PostContextBottomSheet(
@@ -66,7 +69,7 @@ internal fun PostContextBottomSheet(
 
     if (!displayAllEmojis) {
         ModalBottomSheet(
-            modifier = Modifier,
+            modifier = Modifier.testTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET),
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = onDismissRequest
         ) {

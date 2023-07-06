@@ -12,21 +12,26 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.ConversationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.ConversationSettingsViewModel
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.withTimeout
 import org.koin.test.get
+import kotlin.test.assertIs
 
 @OptIn(ExperimentalTestApi::class)
 abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
 
-    protected fun changeConversationDetailsTestImpl(
-        conversation: Conversation,
-
-        performChanges: () -> Unit
+    protected inline fun <reified T : Conversation> changeConversationDetailsTestImpl(
+        conversation: T,
+        performChanges: () -> Unit,
+        verifyChanges: (T) -> Unit
     ) {
         setupUiAndViewModel(conversation)
 
@@ -42,6 +47,21 @@ abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
         // text was saved successfully when the button disappeared.
         composeTestRule
             .waitUntilDoesNotExist(hasText(context.getString(R.string.conversation_settings_basic_data_save)))
+
+        val updatedConversation = runBlocking {
+            withTimeout(DefaultTimeoutMillis) {
+                conversationService
+                    .getConversation(
+                        courseId = course.id!!,
+                        conversationId = conversation.id,
+                        authToken = accessToken,
+                        serverUrl = testServerUrl
+                    )
+                    .orThrow("Could not load updated conversation")
+            }
+        }
+
+        verifyChanges(assertIs(updatedConversation, "Loaded conversation is not of correct type"))
     }
 
     protected fun changeTitleText(currentTitle: String?, newTitle: String) {
@@ -126,7 +146,7 @@ abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
         }
     }
 
-    private fun awaitConversationLoaded() {
+    protected fun awaitConversationLoaded() {
         composeTestRule.waitUntilAtLeastOneExists(
             hasText(context.getString(R.string.conversation_settings_section_more_info)),
             DefaultTimeoutMillis

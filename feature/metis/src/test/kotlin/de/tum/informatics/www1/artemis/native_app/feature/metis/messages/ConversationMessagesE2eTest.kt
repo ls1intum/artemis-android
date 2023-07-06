@@ -3,32 +3,44 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.messages
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.printToString
-import androidx.paging.compose.collectAsLazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
-import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.TEST_TAG_POST_CONTEXT_BOTTOM_SHEET
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.predefinedEmojiIds
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.TEST_TAG_METIS_POST_LIST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.testTagForPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_REPLY_SEND_BUTTON
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_REPLY_TEXT_FIELD
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ProvideLocalVisibleMetisContextManager
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextManager
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -40,6 +52,7 @@ import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLog
 
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
@@ -50,6 +63,9 @@ class ConversationMessagesE2eTest : ConversationBaseTest() {
     private lateinit var metisContext: MetisContext
 
     private val metisModificationService: MetisModificationService get() = get()
+
+    private val replyTextFieldMatcher =
+        hasAnyAncestor(hasTestTag(TEST_TAG_REPLY_TEXT_FIELD)) and hasSetTextAction()
 
     @Before
     override fun setup() {
@@ -88,6 +104,11 @@ class ConversationMessagesE2eTest : ConversationBaseTest() {
 
         setupUiAndViewModel()
 
+        composeTestRule.waitUntilExactlyOneExists(
+            hasTestTag(TEST_TAG_METIS_POST_LIST),
+            DefaultTimeoutMillis
+        )
+
         posts.forEach { post ->
             composeTestRule.waitUntilExactlyOneExists(hasTestTag(testTagForPost(post.serverPostId)))
 
@@ -98,7 +119,186 @@ class ConversationMessagesE2eTest : ConversationBaseTest() {
         }
     }
 
-    private fun setupUiAndViewModel(dispatcher: TestDispatcher = UnconfinedTestDispatcher()): MetisListViewModel {
+    @Test
+    fun `can send new message`() {
+        setupUiAndViewModel()
+
+        val text = "test message"
+
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.create_answer_click_to_write))
+            .performClick()
+
+        composeTestRule
+            .onNode(replyTextFieldMatcher)
+            .performTextInput(text)
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_REPLY_SEND_BUTTON)
+            .performClick()
+
+        composeTestRule
+            .waitUntilExactlyOneExists(
+                hasAnyAncestor(hasTestTag(TEST_TAG_METIS_POST_LIST)) and hasText(
+                    text
+                ),
+                DefaultTimeoutMillis
+            )
+    }
+
+    @Test
+    fun `can react to message with emoji`() {
+        val post = postDefaultMessage()
+
+        setupUiAndViewModel()
+
+        val postTestTag = testTagForPost(post.id!!)
+
+        // Wait until post exists
+        composeTestRule.waitUntilExactlyOneExists(
+            hasTestTag(postTestTag),
+            DefaultTimeoutMillis
+        )
+
+        openPostBottomSheet(post.id!!)
+
+        // Wait for bottom sheet to appear
+        composeTestRule
+            .waitUntilExactlyOneExists(
+                hasTestTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET),
+                DefaultTimeoutMillis
+            )
+
+        val emojiToReactWithId = predefinedEmojiIds.first()
+        val emojiService: EmojiService = get()
+
+        val emojiText = runBlocking {
+            withTimeout(DefaultTimeoutMillis) {
+                emojiService.emojiIdToUnicode(emojiToReactWithId)
+            }
+        }
+
+        composeTestRule
+            .onNode(
+                hasAnyAncestor(hasTestTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET)) and hasText(
+                    emojiText
+                )
+            )
+            .performClick()
+
+        composeTestRule
+            .waitUntilExactlyOneExists(
+                hasTestTag(postTestTag) and hasAnyDescendant(
+                    hasText(emojiText)
+                ),
+                DefaultTimeoutMillis
+            )
+    }
+
+    @Test
+    fun `can delete existing reaction`() {
+        val emojiId = predefinedEmojiIds.first()
+
+        val post = setupUiAndViewModelWithPost { post ->
+            metisModificationService.createReaction(
+                context = metisContext,
+                post = MetisModificationService.AffectedPost.Standalone(post.id!!),
+                emojiId = emojiId,
+                serverUrl = testServerUrl,
+                authToken = accessToken
+            ).orThrow("Could not create reaction")
+        }
+
+        val emojiService: EmojiService = get()
+
+        val emojiText = runBlocking {
+            withTimeout(DefaultTimeoutMillis) {
+                emojiService.emojiIdToUnicode(emojiId)
+            }
+        }
+
+        composeTestRule
+            .onNode(hasAnyAncestor(hasTestTag(testTagForPost(post.id!!))) and hasText(emojiText))
+            .performClick()
+
+        composeTestRule
+            .waitUntilDoesNotExist(
+                hasAnyAncestor(hasTestTag(testTagForPost(post.id!!))) and hasText(emojiText),
+                DefaultTimeoutMillis
+            )
+    }
+
+    @Test
+    fun `can delete message`() {
+        val post = setupUiAndViewModelWithPost()
+
+        openPostBottomSheet(post.id!!)
+
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.post_delete))
+            .performClick()
+
+        composeTestRule
+            .waitUntilDoesNotExist(
+                hasTestTag(testTagForPost(post.id!!)),
+                DefaultTimeoutMillis
+            )
+    }
+
+    @Test
+    fun `can edit message`() {
+        val post = setupUiAndViewModelWithPost()
+
+        openPostBottomSheet(post.id!!)
+
+        composeTestRule
+            .onNodeWithText(context.getString(R.string.post_edit))
+            .performClick()
+
+        composeTestRule
+            .onNode(replyTextFieldMatcher)
+            .performTextClearance()
+
+        val newText = "updated post text"
+
+        composeTestRule
+            .onNode(replyTextFieldMatcher)
+            .performTextInput(newText)
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_REPLY_SEND_BUTTON)
+            .performClick()
+
+        composeTestRule
+            .waitUntilExactlyOneExists(
+                hasTestTag(testTagForPost(post.id!!)) and hasAnyDescendant(hasText(newText)),
+                DefaultTimeoutMillis
+            )
+    }
+
+    private fun setupUiAndViewModelWithPost(additionalSetup: suspend (StandalonePost) -> Unit = {}): StandalonePost {
+        val post = postDefaultMessage(additionalSetup)
+
+        val postTestTag = testTagForPost(post.id!!)
+
+        setupUiAndViewModel()
+
+        // Wait until post exists
+        composeTestRule.waitUntilExactlyOneExists(
+            hasTestTag(postTestTag),
+            DefaultTimeoutMillis
+        )
+
+        return post
+    }
+
+    private fun openPostBottomSheet(postId: Long) {
+        composeTestRule
+            .onNode(hasTestTag(testTagForPost(postId)) and hasClickAction())
+            .performTouchInput { longClick(Offset(0f, 0f)) }
+    }
+
+    private fun setupUiAndViewModel(): MetisListViewModel {
         val viewModel = MetisListViewModel(
             initialMetisContext = metisContext,
             metisService = get(),
@@ -111,7 +311,7 @@ class ConversationMessagesE2eTest : ConversationBaseTest() {
             accountDataService = get(),
             networkStatusProvider = get(),
             conversationService = get(),
-            coroutineContext = dispatcher
+            coroutineContext = testDispatcher
         )
 
         composeTestRule.setContent {
@@ -125,15 +325,23 @@ class ConversationMessagesE2eTest : ConversationBaseTest() {
             }
         }
 
-        dispatcher.scheduler.advanceTimeBy(20000)
-        dispatcher.scheduler.advanceUntilIdle()
-
-        composeTestRule.waitUntilExactlyOneExists(
-            hasTestTag(TEST_TAG_METIS_POST_LIST),
-            DefaultTimeoutMillis
-        )
+        testDispatcher.scheduler.advanceUntilIdle()
 
         return viewModel
+    }
+
+    private fun postDefaultMessage(additionalSetup: suspend (StandalonePost) -> Unit = {}): StandalonePost {
+        return runBlocking {
+            withTimeout(DefaultTimeoutMillis) {
+                metisModificationService.createPost(
+                    context = metisContext,
+                    post = createPost("test message"),
+                    serverUrl = testServerUrl,
+                    authToken = accessToken
+                ).orThrow("Could not create message")
+                    .also { additionalSetup(it) }
+            }
+        }
     }
 
     private fun createPost(content: String): StandalonePost {

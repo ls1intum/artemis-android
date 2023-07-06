@@ -194,7 +194,7 @@ class LectureE2eTest : KoinTest {
         composeTestRule.onNode(checkboxMatcher).performClick()
 
         // Wait until complete
-        composeTestRule.waitUntilAtLeastOneExists(checkboxMatcher)
+        composeTestRule.waitUntilAtLeastOneExists(checkboxMatcher, DefaultTimeoutMillis)
 
         // Check now actually completed.
         assertTrue(

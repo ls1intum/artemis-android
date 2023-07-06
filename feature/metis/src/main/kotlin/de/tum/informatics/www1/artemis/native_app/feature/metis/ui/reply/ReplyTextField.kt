@@ -197,7 +197,9 @@ private fun CreateReplyUi(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { displayTextField = true }
+                    .clickable {
+                        displayTextField = true
+                    }
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {

@@ -319,7 +319,9 @@ private fun CourseTopAppBar(
                 Text(
                     modifier = Modifier.placeholder(visible = courseDataState !is DataState.Success),
                     text = courseDataState.bind { it.title }
-                        .orElse("Placeholder course title")
+                        .orElse("Placeholder course title"),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             },
             navigationIcon = {

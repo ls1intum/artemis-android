@@ -31,7 +31,9 @@ internal fun PostWithBottomSheet(
         displayHeader = displayHeader,
         onClickOnReaction = postActions.onClickReaction,
         onClick = onClick,
-        onLongClick = { displayBottomSheet = true }
+        onLongClick = {
+            displayBottomSheet = true
+        }
     )
 
     if (displayBottomSheet && post != null) {

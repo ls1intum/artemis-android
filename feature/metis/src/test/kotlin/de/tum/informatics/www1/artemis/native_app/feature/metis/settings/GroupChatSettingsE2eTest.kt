@@ -9,6 +9,7 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertEquals
 
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
@@ -41,8 +42,15 @@ class GroupChatSettingsE2eTest : ConversationSettingsBaseE2eTest() {
                 .orThrow("Could not create group chat")
         }
 
-        changeConversationDetailsTestImpl(groupChat) {
-            changeTitleText(groupChat.name, "testgroupchat")
-        }
+        val newTitle = "testgroupchat"
+
+        changeConversationDetailsTestImpl(groupChat,
+            performChanges = {
+                changeTitleText(groupChat.name, newTitle)
+            },
+            verifyChanges = { updatedGroupChat ->
+                assertEquals(newTitle, updatedGroupChat.name)
+            }
+        )
     }
 }

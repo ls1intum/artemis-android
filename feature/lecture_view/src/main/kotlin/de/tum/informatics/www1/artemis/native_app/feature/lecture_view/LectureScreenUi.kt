@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -184,7 +185,9 @@ internal fun LectureScreen(
                     title = {
                         Text(
                             text = lectureTitle ?: "Placeholder",
-                            modifier = Modifier.placeholder(lectureTitle == null)
+                            modifier = Modifier.placeholder(lectureTitle == null),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
                         )
                     },
                     navigationIcon = {

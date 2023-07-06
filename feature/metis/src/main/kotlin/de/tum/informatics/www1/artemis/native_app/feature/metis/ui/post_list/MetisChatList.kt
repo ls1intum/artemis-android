@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
@@ -30,9 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
-import androidx.paging.compose.itemsIndexed
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
@@ -54,8 +51,6 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toJavaInstant
 import java.text.SimpleDateFormat
 import java.util.Date
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 internal const val TEST_TAG_METIS_POST_LIST = "TEST_TAG_METIS_POST_LIST"
 
@@ -128,7 +123,9 @@ internal fun MetisChatList(
                         ProvideMarkwon {
                             ProvideEmojis {
                                 ChatList(
-                                    modifier = Modifier.fillMaxSize().testTag("foo"),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .testTag(TEST_TAG_METIS_POST_LIST),
                                     listContentPadding = listContentPadding,
                                     state = state,
                                     posts = posts,
@@ -147,9 +144,7 @@ internal fun MetisChatList(
 
             if (isReplyEnabled) {
                 ReplyTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(TEST_TAG_METIS_POST_LIST),
+                    modifier = Modifier.fillMaxWidth(),
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate
                 )

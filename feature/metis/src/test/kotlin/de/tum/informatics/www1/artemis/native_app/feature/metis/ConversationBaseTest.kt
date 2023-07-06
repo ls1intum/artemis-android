@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
@@ -17,6 +18,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOne
 import de.tum.informatics.www1.artemis.native_app.feature.metis.db.MetisDatabaseProviderMock
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
 import org.junit.Rule
 import org.koin.android.ext.koin.androidContext
@@ -26,6 +28,8 @@ import org.koin.test.KoinTestRule
 import org.koin.test.get
 
 abstract class ConversationBaseTest : KoinTest {
+
+    protected val testDispatcher = UnconfinedTestDispatcher()
 
     protected val context: Context get() = InstrumentationRegistry.getInstrumentation().context
 
@@ -39,6 +43,15 @@ abstract class ConversationBaseTest : KoinTest {
         modules(coreTestModules)
         modules(loginModule, communicationModule, testLoginModule, module {
             single<MetisDatabaseProvider> { MetisDatabaseProviderMock(context) }
+            single<WebsocketProvider> {
+                WebsocketProvider(
+                    serverConfigurationService = get(),
+                    accountService = get(),
+                    jsonProvider = get(),
+                    networkStatusProvider = get(),
+                    coroutineContext = testDispatcher
+                )
+            }
         })
     }
 
