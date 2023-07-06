@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.CourseViewModel
@@ -20,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTest
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
 import org.koin.android.ext.koin.androidContext
@@ -51,24 +53,26 @@ abstract class BaseCourseTest : KoinTest {
     @Before
     fun setup() {
         runBlocking {
-            setTestServerUrl()
-            performTestLogin()
+            withTimeout(DefaultTimeoutMillis) {
+                setTestServerUrl()
+                performTestLogin()
 
-            course = createCourse(getAdminAccessToken())
+                course = createCourse(getAdminAccessToken())
+            }
         }
     }
 
     @OptIn(KoinInternalApi::class)
     internal fun setupAndDisplayCourseUi(): CourseViewModel {
         val viewModel = CourseViewModel(
-            course.id!!,
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            UnconfinedTestDispatcher()
+            courseId = course.id!!,
+            courseService = get(),
+            liveParticipationService = get(),
+            serverConfigurationService = get(),
+            accountService = get(),
+            courseExerciseService = get(),
+            networkStatusProvider = get(),
+            coroutineContext = UnconfinedTestDispatcher()
         )
 
         composeTestRule.setContent {

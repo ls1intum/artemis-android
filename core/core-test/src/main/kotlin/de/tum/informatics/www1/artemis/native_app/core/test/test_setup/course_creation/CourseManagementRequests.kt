@@ -122,6 +122,38 @@ suspend fun KoinComponent.createExercise(
         .body()
 }
 
+suspend fun KoinComponent.createExerciseFormBody(
+    accessToken: String,
+    courseId: Long,
+    exerciseName: String = "Exercise ${generateId()}",
+    endpoint: String,
+    creator: (String, Long) -> String
+): Exercise {
+    return ktorProvider.ktorClient.submitFormWithBinaryData(
+        formData {
+            append(
+                "exercise",
+                creator(exerciseName, courseId),
+                Headers.build {
+                    set("Content-Type", "application/json")
+                    set("filename", "blob")
+                }
+            )
+        }
+    ) {
+        url(serverConfigurationService.serverUrl.first())
+        url {
+            appendPathSegments("api", endpoint)
+        }
+
+        cookieAuth(accessToken)
+
+        contentType(ContentType.MultiPart.FormData)
+        accept(ContentType.Application.Json)
+    }
+        .body()
+}
+
 suspend fun KoinComponent.createLecture(
     accessToken: String,
     courseId: Long,

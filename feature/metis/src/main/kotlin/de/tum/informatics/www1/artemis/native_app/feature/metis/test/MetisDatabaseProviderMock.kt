@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.db
+package de.tum.informatics.www1.artemis.native_app.feature.metis.test
 
 import android.content.Context
 import androidx.room.Room
@@ -10,10 +10,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.dao.MetisDao
  */
 class MetisDatabaseProviderMock(context: Context) : MetisDatabaseProvider {
 
-    override val database: MetisDatabase = Room
+    override val database: MetisTestDatabase = Room
         .databaseBuilder(
             context,
-            MetisDatabase::class.java,
+            MetisTestDatabase::class.java,
             "metis_db"
         )
         .fallbackToDestructiveMigration()

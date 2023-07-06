@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.datetime.Clock
 import org.junit.Before
@@ -51,17 +52,19 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
     override fun setup() {
         super.setup()
         runBlocking {
-            val courseExerciseService: CourseExerciseService = get()
-            participation =
-                courseExerciseService
-                    .startExercise(exercise.id!!, testServerUrl, accessToken)
-                    .orThrow("Start text exercise participation")
+            withTimeout(DefaultTimeoutMillis) {
+                val courseExerciseService: CourseExerciseService = get()
+                participation =
+                    courseExerciseService
+                        .startExercise(exercise.id!!, testServerUrl, accessToken)
+                        .orThrow("Start text exercise participation")
 
-            val submissions = participation.submissions
-            assertNotNull(submissions, "Submissions are not given in participation")
-            assertFalse(submissions.isEmpty(), "Submissions must not be empty")
+                val submissions = participation.submissions
+                assertNotNull(submissions, "Submissions are not given in participation")
+                assertFalse(submissions.isEmpty(), "Submissions must not be empty")
 
-            initialSubmission = assertIs(submissions.first())
+                initialSubmission = assertIs(submissions.first())
+            }
         }
     }
 
@@ -70,19 +73,21 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
         val textSubmissionService: TextSubmissionService = get()
 
         runBlocking {
-            textSubmissionService.update(
-                TextSubmission(
-                    id = initialSubmission.id,
-                    submissionDate = Clock.System.now(),
-                    participation = StudentParticipation.StudentParticipationImpl(id = participation.id!!),
-                    submitted = true,
-                    text = textToEnter,
-                    submissionType = SubmissionType.MANUAL
-                ),
-                exercise.id!!,
-                testServerUrl,
-                accessToken
-            ).orThrow("Could no update text submission to set initial submission")
+            withTimeout(DefaultTimeoutMillis) {
+                textSubmissionService.update(
+                    TextSubmission(
+                        id = initialSubmission.id,
+                        submissionDate = Clock.System.now(),
+                        participation = StudentParticipation.StudentParticipationImpl(id = participation.id!!),
+                        submitted = true,
+                        text = textToEnter,
+                        submissionType = SubmissionType.MANUAL
+                    ),
+                    exercise.id!!,
+                    testServerUrl,
+                    accessToken
+                ).orThrow("Could no update text submission to set initial submission")
+            }
         }
 
         setupUi()
@@ -106,7 +111,7 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             .performClick()
 
         // Advance time to continue with the syncing
-        testDispatcher.scheduler.advanceTimeBy(TextExerciseParticipationViewModel.SyncDelay + 1.seconds)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         runBlocking {
             withTimeoutOrNull(DefaultTimeoutMillis) {

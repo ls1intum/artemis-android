@@ -65,6 +65,8 @@ import java.text.DecimalFormat
 const val DASHBOARD_DESTINATION = "dashboard"
 internal const val CourseListTestTag = "course list test tag"
 
+internal fun testTagForCourse(courseId: Long) = "Course$courseId"
+
 fun NavController.navigateToDashboard(builder: NavOptionsBuilder.() -> Unit) {
     navigate(DASHBOARD_DESTINATION, builder)
 }
@@ -185,7 +187,7 @@ private fun CourseList(
         courses = courses,
     ) { dashboardCourse, courseItemModifier, isCompact ->
         CourseItem(
-            modifier = courseItemModifier.testTag("CourseId${dashboardCourse.course.id}"),
+            modifier = courseItemModifier.testTag(testTagForCourse(dashboardCourse.course.id!!)),
             courseWithScore = dashboardCourse,
             serverUrl = serverUrl,
             authorizationToken = authorizationToken,

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.db
+package de.tum.informatics.www1.artemis.native_app.feature.metis.test
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -27,6 +27,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.Stand
     version = 1
 )
 @TypeConverters(RoomTypeConverters::class)
-abstract class MetisDatabase : RoomDatabase() {
+abstract class MetisTestDatabase : RoomDatabase() {
     abstract fun metisDao(): MetisDao
 }

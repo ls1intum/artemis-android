@@ -77,6 +77,7 @@ fun createTextExercise(title: String, courseId: Long): String = """
         "problemStatement": "Android Problem Statement",
         "exampleSolution": "Android Example Solution",
         "gradingInstructions": "Android Assessment Instructions",
+        "channelName": "${(title + "_c").take(30)}",
         "course": { "id": $courseId }
     }
 """.trimIndent()
@@ -115,6 +116,7 @@ fun createModelingExercise(title: String, courseId: Long): String = """
         "gradingInstructions": "Grading Instruction ",
         "exampleSolutionExplanation": "Example Solution Explanation",
         "course": { "id": $courseId },
+        "channelName": "${(title + "_c").take(30)}",
         "exampleSolutionModel": "{\"version\":\"2.0.0\",\"type\":\"ClassDiagram\",\"size\":{\"width\":640,\"height\":600},\"interactive\":{\"elements\":[],\"relationships\":[]},\"elements\":[{\"id\":\"6e1f57c6-cbc7-4b97-9df9-c5741dc905fa\",\"name\":\"Package\",\"type\":\"Package\",\"owner\":null,\"bounds\":{\"x\":230,\"y\":0,\"width\":200,\"height\":100}},{\"id\":\"ff7e3be0-9765-4301-baf5-cf9cf2f17c3c\",\"name\":\"Class\",\"type\":\"Class\",\"owner\":null,\"bounds\":{\"x\":0,\"y\":220,\"width\":200,\"height\":100},\"attributes\":[\"de2d464b-f969-4cf3-ac0d-2f300b3a6497\"],\"methods\":[\"084a59b9-3009-4ebd-885c-159b436581d9\"]},{\"id\":\"de2d464b-f969-4cf3-ac0d-2f300b3a6497\",\"name\":\"+ attribute: Type\",\"type\":\"ClassAttribute\",\"owner\":\"ff7e3be0-9765-4301-baf5-cf9cf2f17c3c\",\"bounds\":{\"x\":0,\"y\":260,\"width\":200,\"height\":30}},{\"id\":\"084a59b9-3009-4ebd-885c-159b436581d9\",\"name\":\"+ method()\",\"type\":\"ClassMethod\",\"owner\":\"ff7e3be0-9765-4301-baf5-cf9cf2f17c3c\",\"bounds\":{\"x\":0,\"y\":290,\"width\":200,\"height\":30}},{\"id\":\"1ad94aff-ee37-494f-8b99-9d861dc58e4a\",\"name\":\"Abstract\",\"type\":\"AbstractClass\",\"owner\":null,\"bounds\":{\"x\":380,\"y\":220,\"width\":200,\"height\":110},\"attributes\":[\"4d58287c-d4c0-42d1-9d02-ad239b701de6\"],\"methods\":[\"2de2a7c3-19c9-4534-8a71-f6607e93556c\"]},{\"id\":\"4d58287c-d4c0-42d1-9d02-ad239b701de6\",\"name\":\"+ attribute: Type\",\"type\":\"ClassAttribute\",\"owner\":\"1ad94aff-ee37-494f-8b99-9d861dc58e4a\",\"bounds\":{\"x\":380,\"y\":270,\"width\":200,\"height\":30}},{\"id\":\"2de2a7c3-19c9-4534-8a71-f6607e93556c\",\"name\":\"+ method()\",\"type\":\"ClassMethod\",\"owner\":\"1ad94aff-ee37-494f-8b99-9d861dc58e4a\",\"bounds\":{\"x\":380,\"y\":300,\"width\":200,\"height\":30}}],\"relationships\":[],\"assessments\":[]}"
     }
 
@@ -164,6 +166,7 @@ fun createProgramingExercise(title: String, courseId: Long): String = """
         "shortName": "<Insert programming exercise short name here>",
         "maxPoints": 10,
         "packageName": "<Insert package name here>",
+        "channelName": "${(title + "_c").take(30)}",
         "course": { "id": $courseId }
     }
 
@@ -332,7 +335,8 @@ fun createQuizExercise(title: String, courseId: Long): String = """
   "quizMode": "SYNCHRONIZED",
   "isActiveQuiz": false,
   "isPracticeModeAvailable": true,
-  "isEditable": true
+  "isEditable": true,
+  "channelName": "${(title + "_c").take(30)}"
 }
 """.trimIndent()
 

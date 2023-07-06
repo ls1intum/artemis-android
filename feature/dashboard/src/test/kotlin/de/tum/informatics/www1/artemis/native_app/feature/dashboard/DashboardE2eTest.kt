@@ -2,9 +2,15 @@ package de.tum.informatics.www1.artemis.native_app.feature.dashboard
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performScrollToKey
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -31,10 +37,12 @@ import org.junit.runner.RunWith
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.test.KoinTest
+import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertIs
 
+@OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
 class DashboardE2eTest : KoinTest {
@@ -42,32 +50,38 @@ class DashboardE2eTest : KoinTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    @get:Rule
+    val koinTestRule = KoinTestRule.create {
+        androidContext(InstrumentationRegistry.getInstrumentation().context)
+
+        modules(coreTestModules)
+        modules(loginModule, dashboardModule, testLoginModule)
+    }
+
     @Before
     fun setup() {
-        startKoin {
-            androidContext(InstrumentationRegistry.getInstrumentation().context)
-
-            modules(coreTestModules)
-            modules(loginModule, dashboardModule, testLoginModule)
-        }
-
-        runTest {
-            setTestServerUrl()
-            performTestLogin()
+        runBlocking {
+            withTimeout(DefaultTimeoutMillis) {
+                setTestServerUrl()
+                performTestLogin()
+            }
         }
     }
 
     @Test
     fun `shows created course in course list`() {
-        val createdCourse = runBlocking(UnconfinedTestDispatcher()) {
-            createCourse(getAdminAccessToken())
+        val createdCourse = runBlocking {
+            withTimeout(DefaultTimeoutMillis) {
+                createCourse(getAdminAccessToken())
+            }
         }
+
         val viewModel = CourseOverviewViewModel(
-            get(),
-            get(),
-            get(),
-            get(),
-            UnconfinedTestDispatcher()
+            dashboardService = get(),
+            accountService = get(),
+            serverConfigurationService = get(),
+            networkStatusProvider = get(),
+            coroutineContext = UnconfinedTestDispatcher()
         )
 
         composeTestRule.setContent {
@@ -80,22 +94,21 @@ class DashboardE2eTest : KoinTest {
             )
         }
 
-        runBlocking(UnconfinedTestDispatcher()) {
-            withTimeout(DefaultTimeoutMillis) {
-                viewModel.dashboard.filterSuccess().first()
-            }
-        }
+        val testTag = testTagForCourse(createdCourse.id!!)
 
-        val dashboard: DataState.Success<Dashboard> = assertIs(viewModel.dashboard.value)
-        assert(dashboard.data.courses.any { it.course.id == createdCourse.id }) { "Could not find created course in the dashboard " }
+        composeTestRule
+            .waitUntilExactlyOneExists(
+                hasTestTag(CourseListTestTag),
+                DefaultTimeoutMillis
+            )
 
-        val indexOfCreatedCourse =
-            dashboard.data.courses.indexOfFirst { it.course.id == createdCourse.id }
-        assert(indexOfCreatedCourse != -1) { "Could not find index of created course in the dashboard list" }
+        composeTestRule
+            .onNodeWithTag(CourseListTestTag)
+            .performScrollToKey(createdCourse.id!!)
 
-        // Scroll to item so that it is visible.
-        composeTestRule.onNodeWithTag(CourseListTestTag).performScrollToIndex(indexOfCreatedCourse)
-
-        composeTestRule.onNodeWithTag("CourseId${createdCourse.id}").assertExists()
+        composeTestRule
+            .onNodeWithTag(testTag)
+            .performScrollTo()
+            .assert(hasText(createdCourse.title))
     }
 }
