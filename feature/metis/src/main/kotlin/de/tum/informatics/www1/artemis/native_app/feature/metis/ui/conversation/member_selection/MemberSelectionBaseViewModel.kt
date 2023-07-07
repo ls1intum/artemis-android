@@ -24,9 +24,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.plus
 import kotlinx.parcelize.Parcelize
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 internal abstract class MemberSelectionBaseViewModel(
     protected val courseId: Long,
@@ -34,7 +38,8 @@ internal abstract class MemberSelectionBaseViewModel(
     protected val accountService: AccountService,
     protected val serverConfigurationService: ServerConfigurationService,
     protected val networkStatusProvider: NetworkStatusProvider,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    coroutineContext: CoroutineContext
 ) : ViewModel() {
 
     companion object {
@@ -56,10 +61,11 @@ internal abstract class MemberSelectionBaseViewModel(
 
     val recipients: StateFlow<List<Recipient>> = _recipients
         .map { it.recipients }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
 
     private val recipientsFromServer: Flow<DataState<List<User>>> = flatMapLatest(
-        query.debounce(200),
+//        query.debounce(200),
+        query.onEach { println("new query: $it") },
         inclusionList,
         accountService.authToken,
         serverConfigurationService.serverUrl,
@@ -79,6 +85,8 @@ internal abstract class MemberSelectionBaseViewModel(
             }
         } else flowOf(DataState.Success(emptyList()))
     }
+        .onEach { println("Recipients: $it") }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val potentialRecipients: StateFlow<DataState<List<User>>> = combine(
         recipientsFromServer,
@@ -90,7 +98,8 @@ internal abstract class MemberSelectionBaseViewModel(
             recipientsFromServer.filter { it.username !in recipientsAsUsernames }
         }
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .onEach { println("new potential recipients $it") }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     fun updateQuery(query: String) {
         savedStateHandle[KEY_QUERY] = query

@@ -2,21 +2,27 @@ package de.tum.informatics.www1.artemis.native_app.feature.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.service.DashboardService
+import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * View model that fetches the dashboard from the model and supports reloading of the dashboard.
@@ -24,7 +30,9 @@ import kotlinx.coroutines.flow.stateIn
 internal class CourseOverviewViewModel(
     private val dashboardService: DashboardService,
     private val accountService: AccountService,
-    serverConfigurationService: ServerConfigurationService
+    serverConfigurationService: ServerConfigurationService,
+    networkStatusProvider: NetworkStatusProvider,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 
     /**
@@ -37,19 +45,19 @@ internal class CourseOverviewViewModel(
      * the login status changes or the server is updated.
      */
     val dashboard: StateFlow<DataState<Dashboard>> =
-        transformLatest(
+        flatMapLatest(
             accountService.authToken,
             serverConfigurationService.serverUrl,
             reloadDashboard.onStart { emit(Unit) }
         ) { authToken, serverUrl, _ ->
-            //Called every time the authentication data changes, the server url changes or a reload is requested.
-            emitAll(
+            retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                 dashboardService.loadDashboard(
                     authToken,
                     serverUrl
                 )
-            )
+            }
         }
+            .flowOn(coroutineContext)
             //Store the loaded dashboard, so it is not loaded again when somebody collects this flow.
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 

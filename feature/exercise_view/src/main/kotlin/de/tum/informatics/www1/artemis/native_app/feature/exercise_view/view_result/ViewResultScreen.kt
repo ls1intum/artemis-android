@@ -67,7 +67,7 @@ internal fun ViewResultScreen(
                 val webViewState = getFeedbackViewWebViewState(
                     serverUrl = serverUrl,
                     courseId = exercise.course?.id ?: return@ProvideDefaultExerciseTemplateStatus,
-                    exerciseId = exercise.id,
+                    exerciseId = exercise.id ?: 0L,
                     participationId = exercise.latestParticipation?.id ?: return@ProvideDefaultExerciseTemplateStatus,
                     resultId = result?.id ?: return@ProvideDefaultExerciseTemplateStatus,
                     templateStatus = resultTemplateStatus ?: return@ProvideDefaultExerciseTemplateStatus

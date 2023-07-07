@@ -12,9 +12,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -39,10 +42,11 @@ class MetisContextManager(
      */
     suspend fun updatePosts(
         host: String,
-        context: MetisContext
+        context: MetisContext,
+        coroutineContext: CoroutineContext
     ) {
         val flow = mutex.withLock {
-            getMetisUpdateListenerFlow(context)
+            getMetisUpdateListenerFlow(context, coroutineContext)
         }
 
         flow.collect { websocketData ->
@@ -73,12 +77,12 @@ class MetisContextManager(
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun getMetisUpdateListenerFlow(metisContext: MetisContext): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>> =
+    private fun getMetisUpdateListenerFlow(metisContext: MetisContext, context: CoroutineContext = EmptyCoroutineContext): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>> =
         metisUpdateListenerMap
             .getOrPut(metisContext) {
                 metisService.subscribeToPostUpdates(metisContext)
                     .shareIn(
-                        GlobalScope,
+                        GlobalScope + context,
                         SharingStarted.WhileSubscribed(stopTimeout = 10.seconds),
                         replay = 1
                     )

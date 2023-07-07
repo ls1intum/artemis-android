@@ -13,13 +13,13 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.ExerciseScreen
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise.TextExerciseParticipationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.view_result.ViewResultScreen
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -74,7 +74,8 @@ fun NavGraphBuilder.exercise(
             },
             navArgument("viewMode") {
                 type = NavType.StringType
-                defaultValue = Json.encodeToString(ExerciseViewMode.serializer(), ExerciseViewMode.Overview)
+                defaultValue =
+                    Json.encodeToString(ExerciseViewMode.serializer(), ExerciseViewMode.Overview)
             }
         ),
         deepLinks = listOf(
@@ -164,12 +165,16 @@ fun NavGraphBuilder.exercise(
                 val participationId: Long = backStackEntry.arguments?.getLong("participationId")
                     ?: throw IllegalArgumentException()
 
-                TextExerciseParticipationScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = exerciseViewModel,
-                    participationId = participationId,
-                    onNavigateUp = nestedNavigateUp
-                )
+                val exerciseDataState by exerciseViewModel.exerciseDataState.collectAsState()
+
+                EmptyDataStateUi(dataState = exerciseDataState) { exercise ->
+                    TextExerciseParticipationScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        viewModel = koinViewModel { parametersOf(exercise.id, participationId) },
+                        exercise = exercise,
+                        onNavigateUp = nestedNavigateUp
+                    )
+                }
             }
         }
     }

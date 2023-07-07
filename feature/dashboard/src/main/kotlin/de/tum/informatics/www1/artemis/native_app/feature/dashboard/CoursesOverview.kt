@@ -35,7 +35,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -59,6 +63,9 @@ import org.koin.androidx.compose.getViewModel
 import java.text.DecimalFormat
 
 const val DASHBOARD_DESTINATION = "dashboard"
+internal const val CourseListTestTag = "course list test tag"
+
+internal fun testTagForCourse(courseId: Long) = "Course$courseId"
 
 fun NavController.navigateToDashboard(builder: NavOptionsBuilder.() -> Unit) {
     navigate(DASHBOARD_DESTINATION, builder)
@@ -152,11 +159,12 @@ internal fun CoursesOverview(
                 CourseList(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 8.dp),
+                        .padding(horizontal = 8.dp)
+                        .testTag(CourseListTestTag),
                     courses = dashboard.courses,
                     serverUrl = serverUrl,
                     authorizationToken = authToken,
-                    onClickOnCourse = { course -> onViewCourse(course.id) }
+                    onClickOnCourse = { course -> onViewCourse(course.id ?: 0L) }
                 )
             }
         }
@@ -179,7 +187,7 @@ private fun CourseList(
         courses = courses,
     ) { dashboardCourse, courseItemModifier, isCompact ->
         CourseItem(
-            modifier = courseItemModifier,
+            modifier = courseItemModifier.testTag(testTagForCourse(dashboardCourse.course.id!!)),
             courseWithScore = dashboardCourse,
             serverUrl = serverUrl,
             authorizationToken = authorizationToken,

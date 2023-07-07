@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
@@ -36,20 +37,24 @@ import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_u
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitVideoUi
 import kotlinx.coroutines.Job
 
+internal const val TEST_TAG_OVERVIEW_LIST = "overview_list"
+
+internal fun getLectureUnitTestTag(lectureUnitId: Long) = "LectureUnit$lectureUnitId"
+
 @Composable
 internal fun OverviewTab(
     modifier: Modifier,
     description: String?,
-    lectureUnits: List<LectureUnit>,
+    lectureUnits: List<LectureUnitData>,
     onViewExercise: (exerciseId: Long) -> Unit,
-    onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Job,
+    onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
     exerciseActions: BoundExerciseActions,
     state: LazyListState
 ) {
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.testTag(TEST_TAG_OVERVIEW_LIST),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         state = state
     ) {
@@ -95,9 +100,9 @@ private fun DescriptionSection(modifier: Modifier, description: String) {
 
 private fun LazyListScope.lectureUnitSection(
     modifier: Modifier,
-    lectureUnits: List<LectureUnit>,
+    lectureUnits: List<LectureUnitData>,
     onViewExercise: (exerciseId: Long) -> Unit,
-    onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Job,
+    onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
     exerciseActions: BoundExerciseActions
@@ -110,24 +115,15 @@ private fun LazyListScope.lectureUnitSection(
         )
     }
 
-    lectureUnits.forEachIndexed { index, lectureUnit ->
-        item {
-            var uploadJob: Job? by remember { mutableStateOf(null) }
-
-            LaunchedEffect(key1 = uploadJob) {
-                uploadJob?.let {
-                    it.join()
-                    uploadJob = null
-                }
-            }
-
+    lectureUnits.forEachIndexed { index, lectureUnitWithData ->
+        item(lectureUnitWithData.lectureUnit.id) {
             LectureUnitListItem(
-                modifier = modifier,
-                lectureUnit = lectureUnit,
-                isUploadingMarkedAsCompleted = uploadJob != null,
+                modifier = modifier.testTag(getLectureUnitTestTag(lectureUnitWithData.lectureUnit.id)),
+                lectureUnit = lectureUnitWithData.lectureUnit,
+                isUploadingMarkedAsCompleted = lectureUnitWithData.isUploadingChanges,
                 onViewExercise = onViewExercise,
                 onMarkAsCompleted = { isCompleted ->
-                    uploadJob = onMarkAsCompleted(lectureUnit.id, isCompleted)
+                    onMarkAsCompleted(lectureUnitWithData.lectureUnit.id, isCompleted)
                 },
                 onRequestViewLink = onRequestViewLink,
                 onRequestOpenAttachment = onRequestOpenAttachment,

@@ -14,8 +14,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.DeserializationStrategy
@@ -24,16 +26,20 @@ import org.hildan.krossbow.stomp.config.HeartBeat
 import org.hildan.krossbow.stomp.conversions.kxserialization.*
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.stomp.headers.StompSubscribeHeaders
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(DelicateCoroutinesApi::class)
 class WebsocketProvider(
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
     private val jsonProvider: JsonProvider,
-    private val networkStatusProvider: NetworkStatusProvider
+    private val networkStatusProvider: NetworkStatusProvider,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) {
 
     companion object {
@@ -65,7 +71,6 @@ class WebsocketProvider(
      * Connects a stomp session only if it is actually needed.
      * After 10 seconds of not having any subscribers, the session will be closes
      */
-    @OptIn(DelicateCoroutinesApi::class)
     val session: Flow<StompSessionWithKxSerialization> =
         combine(
             serverConfigurationService.serverUrl,
@@ -81,7 +86,7 @@ class WebsocketProvider(
                         val uri = Uri.parse(serverUrl)
 
                         val protocol = if (uri.scheme == "http") URLProtocol.WS else URLProtocol.WSS
-                        val port = when  {
+                        val port = when {
                             uri.port == -1 && protocol == URLProtocol.WS -> 80
                             uri.port == -1 && protocol == URLProtocol.WSS -> 443
                             else -> uri.port
@@ -129,14 +134,13 @@ class WebsocketProvider(
                 )
             }
             .shareIn(
-                scope = GlobalScope, // We share this is the app container
+                scope = GlobalScope + coroutineContext, // We share this is the app container
                 started = SharingStarted.WhileSubscribed(
                     stopTimeout = 1.seconds, replayExpiration = Duration.ZERO
                 ),
                 replay = 1
             )
 
-    @OptIn(DelicateCoroutinesApi::class)
     val connectionState: Flow<WebsocketConnectionState> =
         session.transformLatest<StompSessionWithKxSerialization, WebsocketConnectionState> { _ ->
             emit(WebsocketConnectionState.WithSession(true))
@@ -149,12 +153,18 @@ class WebsocketProvider(
         }
             .onStart { emit(WebsocketConnectionState.Empty) }
             .shareIn(
-                scope = GlobalScope,
+                scope = GlobalScope + coroutineContext,
                 started = SharingStarted.WhileSubscribed(),
                 replay = 1
             )
 
-    val isConnected: Flow<Boolean> = connectionState.map { it.isConnected }
+    val isConnected: Flow<Boolean> = connectionState
+        .map { it.isConnected }
+        .shareIn(
+            scope = GlobalScope + coroutineContext,
+            started = SharingStarted.WhileSubscribed(),
+            replay = 1
+        )
 
     /**
      * Returns a flow that automatically unsubscribes once the collector is inactive.
@@ -184,7 +194,9 @@ class WebsocketProvider(
                     .catch { e ->
                         Log.d(TAG, "Subscription $channel reported error: ${e.localizedMessage}")
                     }
-                    .map { Message(it) }
+                    .map {
+                        Message(it)
+                    }
 
                 emitAll(
                     merge(

@@ -10,11 +10,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import kotlinx.coroutines.Deferred
 
 @Composable
 fun AnimatedFloatingActionButton(
+    modifier: Modifier = Modifier,
     enabled: Boolean,
     onClick: () -> Unit,
     content: @Composable () -> Unit
@@ -25,6 +27,7 @@ fun AnimatedFloatingActionButton(
         exit = scaleOut(),
     ) {
         FloatingActionButton(
+            modifier = modifier,
             onClick = onClick,
             content = content
         )
@@ -36,6 +39,7 @@ fun AnimatedFloatingActionButton(
  */
 @Composable
 fun <T> JobAnimatedFloatingActionButton(
+    modifier: Modifier = Modifier,
     enabled: Boolean,
     startJob: () -> Deferred<T>,
     onJobCompleted: (T) -> Unit,
@@ -50,6 +54,7 @@ fun <T> JobAnimatedFloatingActionButton(
     }
 
     AnimatedFloatingActionButton(
+        modifier = modifier,
         enabled = enabled,
         onClick = {
             job?.cancel()

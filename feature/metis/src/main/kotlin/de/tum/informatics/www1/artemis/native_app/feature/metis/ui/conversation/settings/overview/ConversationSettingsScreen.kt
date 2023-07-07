@@ -71,9 +71,29 @@ internal fun ConversationSettingsScreen(
     onRequestViewAllMembers: () -> Unit,
     onConversationLeft: () -> Unit
 ) {
-    val viewModel: ConversationSettingsViewModel =
-        getViewModel { parametersOf(courseId, conversationId) }
+    ConversationSettingsScreen(
+        modifier = modifier,
+        viewModel = getViewModel { parametersOf(courseId, conversationId) },
+        courseId = courseId,
+        conversationId = conversationId,
+        onNavigateBack = onNavigateBack,
+        onRequestAddMembers = onRequestAddMembers,
+        onRequestViewAllMembers = onRequestViewAllMembers,
+        onConversationLeft = onConversationLeft
+    )
+}
 
+@Composable
+internal fun ConversationSettingsScreen(
+    modifier: Modifier,
+    viewModel: ConversationSettingsViewModel,
+    courseId: Long,
+    conversationId: Long,
+    onNavigateBack: () -> Unit,
+    onRequestAddMembers: () -> Unit,
+    onRequestViewAllMembers: () -> Unit,
+    onConversationLeft: () -> Unit
+) {
     LaunchedEffect(courseId, conversationId) {
         viewModel.updateConversation(courseId, conversationId)
     }

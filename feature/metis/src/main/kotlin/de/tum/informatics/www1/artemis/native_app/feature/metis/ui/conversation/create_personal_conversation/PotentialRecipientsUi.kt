@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -28,6 +29,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableName
+
+internal fun testTagForPotentialRecipient(username: String) = "potentialRecipient$username"
 
 @Composable
 internal fun PotentialRecipientsUi(
@@ -109,7 +112,9 @@ private fun PotentialRecipientsList(
         LazyColumn(modifier = modifier) {
             items(recipients) { user ->
                 ListItem(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(testTagForPotentialRecipient(user.username.orEmpty())),
                     headlineContent = {
                         val username = remember(user) { user.humanReadableName }
 
@@ -118,7 +123,12 @@ private fun PotentialRecipientsList(
                     supportingContent = user.username?.let { username -> { Text(username) } },
                     trailingContent = {
                         IconButton(onClick = { addRecipient(user) }) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(
+                                    id = R.string.conversation_member_selection_content_description_add_recipient
+                                )
+                            )
                         }
                     }
                 )

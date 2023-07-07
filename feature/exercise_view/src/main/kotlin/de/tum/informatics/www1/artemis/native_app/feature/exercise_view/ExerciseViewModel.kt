@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ExerciseService
@@ -18,6 +19,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,6 +29,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
@@ -34,6 +38,8 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 internal class ExerciseViewModel(
     private val exerciseId: Long,
@@ -42,7 +48,8 @@ internal class ExerciseViewModel(
     private val exerciseService: ExerciseService,
     private val liveParticipationService: LiveParticipationService,
     private val courseExerciseService: CourseExerciseService,
-    private val networkStatusProvider: NetworkStatusProvider
+    private val networkStatusProvider: NetworkStatusProvider,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 
     private val requestReloadExercise = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -58,6 +65,7 @@ internal class ExerciseViewModel(
         ) { serverUrl, authData, _ ->
             serverUrl to authData
         }
+            .flowOn(coroutineContext)
             .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
 
     private val fetchedExercise: Flow<DataState<Exercise>> =
@@ -71,6 +79,7 @@ internal class ExerciseViewModel(
                     )
                 }
             }
+            .flowOn(coroutineContext)
             .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
     /**
@@ -109,6 +118,7 @@ internal class ExerciseViewModel(
                     else -> emit(exercise)
                 }
             }
+            .flowOn(coroutineContext)
             .stateIn(viewModelScope, SharingStarted.Eagerly)
 
     /**
@@ -124,6 +134,7 @@ internal class ExerciseViewModel(
                     .firstOrNull()
             }
         }
+            .flowOn(coroutineContext)
             .stateIn(viewModelScope, SharingStarted.Lazily)
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
@@ -133,8 +144,11 @@ internal class ExerciseViewModel(
         requestReloadExercise.tryEmit(Unit)
     }
 
-    fun startExercise(onStartedSuccessfully: (participationId: Long) -> Unit) {
-        viewModelScope.launch {
+    /**
+     * Deferred returns the participation id if starting was successful.
+     */
+    fun startExercise(): Deferred<Long?> {
+        return viewModelScope.async(coroutineContext) {
             val serverUrl = serverConfigurationService.serverUrl.first()
             val authToken = accountService.authToken.first()
 
@@ -144,15 +158,12 @@ internal class ExerciseViewModel(
                 authToken
             )
 
-            when (response) {
-                is NetworkResponse.Response -> {
-                    val participation = response.data
-
-                    _gradedParticipation.emit(participation)
-                    onStartedSuccessfully(participation.id ?: return@launch)
+            response
+                .onSuccess {
+                    _gradedParticipation.emit(it)
                 }
-                is NetworkResponse.Failure -> {}
-            }
+                .bind { it.id ?: 0L }
+                .orNull()
         }
     }
 }

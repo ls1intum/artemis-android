@@ -39,6 +39,17 @@ fun <A, B, C, D> transformLatest(
         .transformLatest { (a, b, c) -> transform(a, b, c) }
 }
 
+fun <A, B, C, D, E> transformLatest(
+    flow1: Flow<A>,
+    flow2: Flow<B>,
+    flow3: Flow<C>,
+    flow4: Flow<D>,
+    transform: suspend FlowCollector<E>.(A, B, C, D) -> Unit
+): Flow<E> {
+    return combine(flow1, flow2, flow3, flow4) { a, b, c, d -> Quadruple(a, b, c, d) }
+        .transformLatest { (a, b, c, d) -> transform(a, b, c, d) }
+}
+
 fun <A, B, C> flatMapLatest(
     flow1: Flow<A>,
     flow2: Flow<B>,

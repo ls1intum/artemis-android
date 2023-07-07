@@ -17,6 +17,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.plus
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 internal class ConversationAddMembersViewModel(
     courseId: Long,
@@ -25,22 +28,24 @@ internal class ConversationAddMembersViewModel(
     accountService: AccountService,
     serverConfigurationService: ServerConfigurationService,
     networkStatusProvider: NetworkStatusProvider,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MemberSelectionBaseViewModel(
     courseId,
     conversationService,
     accountService,
     serverConfigurationService,
     networkStatusProvider,
-    savedStateHandle
+    savedStateHandle,
+    coroutineContext
 ) {
 
     val canAdd: StateFlow<Boolean> = recipients
         .map { it.isNotEmpty() }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     fun addMembers(): Deferred<Boolean> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             val conversation = loadConversation() ?: return@async false
 
             conversationService.registerMembers(

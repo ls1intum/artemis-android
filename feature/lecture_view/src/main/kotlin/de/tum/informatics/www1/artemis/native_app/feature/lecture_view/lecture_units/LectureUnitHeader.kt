@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
@@ -29,6 +30,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_uni
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitUnknown
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.R
+
+internal const val TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED = "Checkbox Lecture Unit Completed"
 
 /**
  * @param isUploadingMarkedAsCompleted if we are currently uploading this a change the user has requested
@@ -67,13 +70,20 @@ internal fun LectureUnitHeader(
         )
 
         if (lectureUnit !is LectureUnitExercise) {
-            Crossfade(targetState = isUploadingMarkedAsCompleted) { isUploadingState ->
+            Crossfade(
+                targetState = isUploadingMarkedAsCompleted,
+                label = "IsCompletedCheckbox <-> Updating"
+            ) { isUploadingState ->
                 if (isUploadingState) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(48.dp)
                     )
                 } else {
-                    Checkbox(checked = lectureUnit.completed, onCheckedChange = onMarkAsCompleted)
+                    Checkbox(
+                        modifier = Modifier.testTag(TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED),
+                        checked = lectureUnit.completed,
+                        onCheckedChange = onMarkAsCompleted
+                    )
                 }
             }
         }

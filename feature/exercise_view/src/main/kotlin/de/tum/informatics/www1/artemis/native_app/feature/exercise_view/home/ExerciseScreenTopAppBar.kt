@@ -31,6 +31,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
@@ -321,7 +325,7 @@ private fun TitleText(
             appendInlineContent("icon")
             append(" ")
             append(
-                exerciseDataState.bind { it.title }.orElse(null)
+                exerciseDataState.bind { it.title }.orNull()
                     ?: "Exercise name placeholder"
             )
         }
@@ -347,7 +351,9 @@ private fun TitleText(
     Text(
         text = titleText,
         inlineContent = inlineContent,
-        modifier = modifier.placeholder(exerciseDataState !is DataState.Success),
+        modifier = modifier
+            .placeholder(exerciseDataState !is DataState.Success)
+            .semantics { set(SemanticsProperties.Text, listOf(AnnotatedString(exerciseDataState.bind { it.title }.orNull().orEmpty()))) },
         style = style,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis

@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemsIndexed
+import androidx.paging.compose.itemKey
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
@@ -50,6 +51,10 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toJavaInstant
 import java.text.SimpleDateFormat
 import java.util.Date
+
+internal const val TEST_TAG_METIS_POST_LIST = "TEST_TAG_METIS_POST_LIST"
+
+internal fun testTagForPost(postId: Long) = "post$postId"
 
 @Composable
 internal fun MetisChatList(
@@ -118,7 +123,9 @@ internal fun MetisChatList(
                         ProvideMarkwon {
                             ProvideEmojis {
                                 ChatList(
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .testTag(TEST_TAG_METIS_POST_LIST),
                                     listContentPadding = listContentPadding,
                                     state = state,
                                     posts = posts,
@@ -166,16 +173,16 @@ private fun ChatList(
         state = state,
         reverseLayout = true
     ) {
-        itemsIndexed(
-            items = posts,
-            key = { _, chatListItem ->
+        items(
+            count = posts.itemCount,
+            key = posts.itemKey { chatListItem ->
                 when (chatListItem) {
                     is ChatListItem.DateDivider -> chatListItem.localDate.toEpochDays()
                     is ChatListItem.PostChatListItem -> chatListItem.post.clientPostId
                 }
             }
-        ) { index, chatListItem ->
-            when (chatListItem) {
+        ) { index ->
+            when (val chatListItem = posts[index]) {
                 is ChatListItem.DateDivider -> {
                     DateDivider(
                         modifier = Modifier.fillMaxWidth(),
@@ -191,7 +198,9 @@ private fun ChatList(
                         hasModerationRights = hasModerationRights,
                         clientId = clientId,
                         onRequestEdit = { onRequestEdit(post ?: return@rememberPostActions) },
-                        onRequestDelete = { onRequestDelete(post ?: return@rememberPostActions) },
+                        onRequestDelete = {
+                            onRequestDelete(post ?: return@rememberPostActions)
+                        },
                         onClickReaction = { id, create ->
                             onRequestReactWithEmoji(post ?: return@rememberPostActions, id, create)
                         },
@@ -203,7 +212,13 @@ private fun ChatList(
                     )
 
                     PostWithBottomSheet(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .let {
+                                if (post != null) {
+                                    it.testTag(testTagForPost(post.serverPostId))
+                                } else it
+                            },
                         post = post,
                         clientId = clientId,
                         postItemViewType = remember(post?.answers) {

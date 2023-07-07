@@ -19,10 +19,10 @@ internal fun LectureUnitExerciseUi(
         ExerciseListItem(
             modifier = modifier,
             exercise = exercise,
-            onClickExercise = { onClickExercise(exercise.id) },
+            onClickExercise = { onClickExercise(exercise.id ?: 0L) },
             exerciseActions = remember(exerciseActions, exercise) {
                 exerciseActions.getUnbound(
-                    exerciseId = exercise.id
+                    exerciseId = exercise.id ?: 0L
                 )
             }
         )

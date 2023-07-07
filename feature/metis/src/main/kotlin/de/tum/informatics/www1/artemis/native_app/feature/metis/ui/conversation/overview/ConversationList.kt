@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
@@ -50,17 +51,23 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.ExtraC
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.PrimaryChannelIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableTitle
 
-private const val SECTION_FAVORITES_KEY = "favorites"
-private const val SECTION_HIDDEN_KEY = "hidden"
-private const val SECTION_CHANNELS_KEY = "channels"
-private const val SECTION_GROUPS_KEY = "groups"
-private const val SECTION_DIRECT_MESSAGES_KEY = "direct-messages"
+internal const val TEST_TAG_CONVERSATION_LIST = "conversation list"
 
-private const val KEY_SUFFIX_FAVORITES = "_f"
-private const val KEY_SUFFIX_CHANNELS = "_c"
-private const val KEY_SUFFIX_GROUPS = "_g"
-private const val KEY_SUFFIX_PERSONAL = "_p"
-private const val KEY_SUFFIX_HIDDEN = "_h"
+internal const val TEST_TAG_HEADER_EXPAND_ICON = "expand icon"
+
+internal const val SECTION_FAVORITES_KEY = "favorites"
+internal const val SECTION_HIDDEN_KEY = "hidden"
+internal const val SECTION_CHANNELS_KEY = "channels"
+internal const val SECTION_GROUPS_KEY = "groups"
+internal const val SECTION_DIRECT_MESSAGES_KEY = "direct-messages"
+
+internal const val KEY_SUFFIX_FAVORITES = "_f"
+internal const val KEY_SUFFIX_CHANNELS = "_c"
+internal const val KEY_SUFFIX_GROUPS = "_g"
+internal const val KEY_SUFFIX_PERSONAL = "_p"
+internal const val KEY_SUFFIX_HIDDEN = "_h"
+
+internal fun tagForConversation(conversationId: Long, suffix: String) = "$conversationId$suffix"
 
 @Composable
 internal fun ConversationList(
@@ -92,7 +99,7 @@ internal fun ConversationList(
             )
         }
 
-    LazyColumn(modifier = modifier) {
+    LazyColumn(modifier = modifier.testTag(TEST_TAG_CONVERSATION_LIST)) {
         if (conversationCollections.favorites.conversations.isNotEmpty()) {
             listWithHeader(
                 conversationCollections.favorites,
@@ -152,14 +159,23 @@ private fun LazyListScope.conversationSectionHeader(
     toggleIsExpanded: () -> Unit
 ) {
     item(key = key) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(key)
+        ) {
             Divider()
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = toggleIsExpanded) {
+                IconButton(
+                    modifier = Modifier.testTag(TEST_TAG_HEADER_EXPAND_ICON),
+                    onClick = {
+                        toggleIsExpanded()
+                    }
+                ) {
                     Icon(
                         imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowRight,
                         contentDescription = null
@@ -201,9 +217,13 @@ private fun <T : Conversation> LazyListScope.conversationList(
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
 ) {
     if (!conversations.isExpanded) return
-    items(conversations.conversations, key = { "${it.id}$keySuffix" }) { conversation ->
+    items(
+        conversations.conversations,
+        key = { tagForConversation(it.id, keySuffix) }) { conversation ->
         ConversationListItem(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(tagForConversation(conversation.id, keySuffix)),
             conversation = conversation,
             onNavigateToConversation = { onNavigateToConversation(conversation.id) },
             onToggleMarkAsFavourite = {

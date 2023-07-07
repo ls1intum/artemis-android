@@ -19,10 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TextSubmission
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
+
+internal const val TEST_TAG_TEXT_FIELD_PARTICIPATION = "text field participation"
 
 @Composable
 internal fun TextExerciseParticipationUi(
@@ -34,7 +37,6 @@ internal fun TextExerciseParticipationUi(
     onUpdateText: (String) -> Unit,
     requestSubmit: () -> Unit
 ) {
-
     Column(modifier = modifier) {
         Header(
             modifier = Modifier.fillMaxWidth(),
@@ -43,7 +45,7 @@ internal fun TextExerciseParticipationUi(
         )
 
         OutlinedTextField(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().testTag(TEST_TAG_TEXT_FIELD_PARTICIPATION),
             value = text,
             onValueChange = onUpdateText,
             enabled = isActive && submission != null

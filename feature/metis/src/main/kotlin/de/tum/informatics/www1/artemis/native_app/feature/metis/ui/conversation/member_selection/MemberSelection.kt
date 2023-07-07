@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
@@ -34,6 +35,10 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.PotentialRecipientsUi
+
+internal const val TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD = "TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD"
+internal const val TEST_TAG_RECIPIENTS_LIST = "TEST_TAG_RECIPIENTS_LIST"
+internal fun testTagForSelectedRecipient(username: String) = "selectedRecipient$username"
 
 @Composable
 internal fun MemberSelection(
@@ -102,7 +107,7 @@ private fun RecipientsTextField(
 
                 Column(modifier = Modifier.fillMaxWidth()) {
                     FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().testTag(TEST_TAG_RECIPIENTS_LIST),
                         mainAxisSpacing = 8.dp,
                         crossAxisSpacing = 8.dp
                     ) {
@@ -131,7 +136,8 @@ private fun RecipientsTextField(
             BasicHintTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(focusRequester),
+                    .focusRequester(focusRequester)
+                    .testTag(TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD),
                 value = query,
                 onValueChange = onUpdateQuery,
                 hint = stringResource(id = R.string.conversation_member_selection_address_hint),
@@ -149,6 +155,7 @@ private fun RecipientChip(modifier: Modifier, recipient: Recipient, onClickRemov
             .border(1.dp, color = MaterialTheme.colorScheme.outline, CircleShape)
             .clip(CircleShape)
             .clickable(onClick = onClickRemove)
+            .testTag(testTagForSelectedRecipient(recipient.username))
     ) {
         Row(modifier = Modifier.padding(2.dp)) {
             Text(modifier = Modifier.padding(start = 8.dp), text = recipient.humanReadableName)
@@ -156,5 +163,4 @@ private fun RecipientChip(modifier: Modifier, recipient: Recipient, onClickRemov
             Icon(imageVector = Icons.Default.Close, contentDescription = null)
         }
     }
-
 }

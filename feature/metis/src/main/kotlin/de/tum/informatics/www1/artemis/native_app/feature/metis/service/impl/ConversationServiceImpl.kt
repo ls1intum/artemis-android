@@ -24,6 +24,7 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.serialization.Serializable
 
 class ConversationServiceImpl(private val ktorProvider: KtorProvider) : ConversationService {
@@ -133,7 +134,8 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
                     CreateChannelData(
                         isPublic = isPublic,
                         isAnnouncementChannel = isAnnouncement,
-                        name = name
+                        name = name,
+                        description = description.ifBlank { null }
                     )
                 )
                 contentType(ContentType.Application.Json)
@@ -149,7 +151,8 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         val type: String = "channel",
         val isPublic: Boolean,
         val isAnnouncementChannel: Boolean,
-        val name: String
+        val name: String,
+        val description: String?
     )
 
     override suspend fun updateConversation(

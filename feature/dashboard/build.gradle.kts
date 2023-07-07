@@ -1,6 +1,7 @@
 plugins {
     id("artemis.android.feature")
     id("artemis.android.library.compose")
+    kotlin("plugin.serialization")
 }
 
 android {
@@ -13,4 +14,6 @@ dependencies {
     implementation(project(":core:device"))
 
     implementation(libs.accompanist.swiperefresh)
+    testImplementation(project(":feature:login"))
+    testImplementation(project(":feature:login-test"))
 }

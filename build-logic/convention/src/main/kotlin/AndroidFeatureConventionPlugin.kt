@@ -39,12 +39,14 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 add("implementation", libs.findLibrary("kotlinx.coroutines.android").get())
                 add("implementation", libs.findLibrary("koin.core").get())
                 add("testImplementation", libs.findLibrary("koin.test").get())
+                add("testImplementation", libs.findLibrary("koin.test.junit4").get())
                 add("testImplementation", libs.findLibrary("koin.android.test").get())
                 add("testImplementation", libs.findLibrary("robolectric").get())
 
 
                 add("testImplementation", project(":core:common-test"))
                 add("testImplementation", project(":core:data-test"))
+                add("testImplementation", project(":core:core-test"))
             }
 
             afterEvaluate {

@@ -21,4 +21,6 @@ dependencies {
 
     implementation(libs.toolbar.compose)
 
+    testImplementation(project(":feature:login"))
+    testImplementation(project(":feature:login-test"))
 }

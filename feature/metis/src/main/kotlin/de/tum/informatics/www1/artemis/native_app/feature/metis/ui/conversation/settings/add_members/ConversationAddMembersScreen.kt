@@ -60,8 +60,19 @@ internal fun ConversationAddMembersScreen(
     courseId: Long,
     onNavigateBack: () -> Unit
 ) {
-    val viewModel: ConversationAddMembersViewModel = koinViewModel { parametersOf(courseId) }
+    ConversationAddMembersScreen(
+        modifier = modifier,
+        viewModel = koinViewModel { parametersOf(courseId) },
+        onNavigateBack
+    )
+}
 
+@Composable
+internal fun ConversationAddMembersScreen(
+    modifier: Modifier,
+    viewModel: ConversationAddMembersViewModel,
+    onNavigateBack: () -> Unit
+) {
     val canAdd by viewModel.canAdd.collectAsState()
     var addDeferred: Deferred<Boolean>? by remember { mutableStateOf(null) }
 

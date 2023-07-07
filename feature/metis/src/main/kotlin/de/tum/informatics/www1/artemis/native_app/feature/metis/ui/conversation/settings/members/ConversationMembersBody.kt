@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -19,12 +20,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import androidx.paging.compose.items
 import de.tum.informatics.www1.artemis.native_app.core.data.join
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
@@ -40,15 +44,22 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+internal const val TEST_TAG_MEMBERS_LIST = "TEST_TAG_MEMBERS_LIST"
+
+internal fun testTagForMember(username: String) = "member$username"
+
 @Composable
 internal fun ConversationMembersBody(
     modifier: Modifier,
     courseId: Long,
-    conversationId: Long
+    conversationId: Long,
+    viewModel: ConversationMembersViewModel = koinViewModel {
+        parametersOf(
+            courseId,
+            conversationId
+        )
+    }
 ) {
-    val viewModel: ConversationMembersViewModel =
-        koinViewModel { parametersOf(courseId, conversationId) }
-
     LaunchedEffect(courseId, conversationId) {
         viewModel.updateConversation(courseId, conversationId)
     }
@@ -156,11 +167,16 @@ private fun ConversationMembersList(
         }
 
         is LoadState.NotLoading -> {
-            LazyColumn(modifier = modifier) {
-                items(members) { conversationUser ->
-                    if (conversationUser != null) {
+            LazyColumn(modifier = modifier.testTag(TEST_TAG_MEMBERS_LIST)) {
+                items(
+                    count = members.itemCount,
+                    key = members.itemKey(key = { it.id })
+                ) { index ->
+                    val item = members[index]
+                    if (item != null) {
                         ConversationMemberListItem(
-                            member = conversationUser,
+                            modifier = Modifier.testTag(testTagForMember(item.username.orEmpty())),
+                            member = item,
                             clientUsername = clientUsername,
                             conversation = conversation,
                             onRequestKickMember = onRequestKickMember,

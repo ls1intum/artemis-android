@@ -14,6 +14,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
@@ -22,6 +25,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 
 @Composable
 internal fun ConversationMemberListItem(
+    modifier: Modifier,
     member: ConversationUser,
     clientUsername: String,
     conversation: Conversation,
@@ -30,6 +34,7 @@ internal fun ConversationMemberListItem(
     onRequestRevokeModerationPermission: (ConversationUser) -> Unit
 ) {
     ListItem(
+        modifier = modifier,
         headlineContent = {
             Text(text = member.humanReadableName)
         },
@@ -46,10 +51,23 @@ internal fun ConversationMemberListItem(
                     else -> Icons.Default.Person
                 }
 
-                Icon(imageVector = personIcon, contentDescription = null)
+                val contentDescription = when {
+                    member.isInstructor -> R.string.conversation_members_content_description_instructor
+                    member.isEditor -> R.string.conversation_members_content_description_editor
+                    member.isTeachingAssistant -> R.string.conversation_members_content_description_teaching_assistant
+                    else -> R.string.conversation_members_content_description_student
+                }
+
+                Icon(
+                    imageVector = personIcon,
+                    contentDescription = stringResource(id = contentDescription)
+                )
 
                 if (member.isChannelModerator) {
-                    Icon(imageVector = Icons.Default.Shield, contentDescription = null)
+                    Icon(
+                        imageVector = Icons.Default.Shield,
+                        contentDescription = stringResource(id = R.string.conversation_members_content_description_moderator)
+                    )
                 }
             }
         },
@@ -59,7 +77,7 @@ internal fun ConversationMemberListItem(
                     IconButton(onClick = { onRequestKickMember(member) }) {
                         Icon(
                             imageVector = Icons.Default.GroupRemove,
-                            contentDescription = null
+                            contentDescription = stringResource(id = R.string.conversation_members_content_description_kick_user)
                         )
                     }
 
@@ -75,7 +93,10 @@ internal fun ConversationMemberListItem(
                         ) {
                             Icon(
                                 imageVector = if (member.isChannelModerator) Icons.Default.RemoveModerator else Icons.Default.AddModerator,
-                                contentDescription = null
+                                contentDescription = stringResource(
+                                    id = if (member.isChannelModerator) R.string.conversation_members_content_description_remove_moderator
+                                    else R.string.conversation_members_content_description_add_moderator
+                                )
                             )
                         }
                     }

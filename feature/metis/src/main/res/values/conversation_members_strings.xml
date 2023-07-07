@@ -6,4 +6,15 @@
     <string name="conversation_members_loading">Loading conversation members…</string>
     <string name="conversation_members_failure">Something went wrong while loading conversation members.</string>
     <string name="conversation_members_try_again">Try again</string>
+
+    <string name="conversation_members_content_description_instructor">Instructor</string>
+    <string name="conversation_members_content_description_editor">Editor</string>
+    <string name="conversation_members_content_description_teaching_assistant">Teaching assistant</string>
+    <string name="conversation_members_content_description_student">Student</string>
+
+    <string name="conversation_members_content_description_moderator">Moderator</string>
+
+    <string name="conversation_members_content_description_kick_user">Remove user</string>
+    <string name="conversation_members_content_description_add_moderator">Add moderator</string>
+    <string name="conversation_members_content_description_remove_moderator">Remove moderator</string>
 </resources>

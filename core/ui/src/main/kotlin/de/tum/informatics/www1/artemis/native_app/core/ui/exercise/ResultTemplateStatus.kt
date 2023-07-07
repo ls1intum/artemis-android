@@ -96,7 +96,7 @@ fun computeTemplateStatus(
     personal: Boolean
 ): Flow<ResultTemplateStatus> {
     val participationId = participation.id ?: 0
-    val exerciseId = exercise.id
+    val exerciseId = exercise.id ?: 0
 
     val isBuildingFlow =
         service

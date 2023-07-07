@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState.Success
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.keepSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
@@ -34,6 +35,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_co
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextReporter
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,14 +49,20 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration.Companion.seconds
 
 internal class ConversationOverviewViewModel(
@@ -66,13 +74,15 @@ internal class ConversationOverviewViewModel(
     private val conversationPreferenceService: ConversationPreferenceService,
     websocketProvider: WebsocketProvider,
     networkStatusProvider: NetworkStatusProvider,
-    accountDataService: AccountDataService
+    accountDataService: AccountDataService,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
     serverConfigurationService,
     accountService,
     accountDataService,
     networkStatusProvider,
-    websocketProvider
+    websocketProvider,
+    coroutineContext
 ) {
 
     private val currentActivity: Flow<Activity?> =
@@ -86,6 +96,7 @@ internal class ConversationOverviewViewModel(
         .flatMapLatest { visibleMetisContextReporter ->
             visibleMetisContextReporter?.visibleMetisContexts ?: flowOf(emptyList())
         }
+        .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val _query = MutableStateFlow("")
@@ -96,6 +107,7 @@ internal class ConversationOverviewViewModel(
         .flatMapLatest { userId ->
             websocketProvider.subscribeToConversationUpdates(userId, courseId)
         }
+        .flowOn(coroutineContext)
         .shareIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(stopTimeout = 5.seconds),
@@ -117,7 +129,7 @@ internal class ConversationOverviewViewModel(
                 conversationService.getConversations(courseId, authToken, serverUrl)
             }
         }
-            .stateIn(viewModelScope, SharingStarted.Eagerly)
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     /**
      * Conversations of the server updates by the websocket.
@@ -131,10 +143,13 @@ internal class ConversationOverviewViewModel(
                 is DataState.Failure -> flowOf(DataState.Failure(loadedConversationsDataState.throwable))
             }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed())
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.WhileSubscribed())
 
     val isConnected: StateFlow<Boolean> =
-        websocketProvider.isConnected.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+        websocketProvider
+            .isConnected
+            .flowOn(coroutineContext)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     private val currentPreferences: Flow<ConversationPreferenceService.Preferences> =
         serverConfigurationService
@@ -142,7 +157,7 @@ internal class ConversationOverviewViewModel(
             .flatMapLatest { serverUrl ->
                 conversationPreferenceService.getPreferences(serverUrl, courseId)
             }
-            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+            .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     private val conversationsAsCollections: StateFlow<DataState<ConversationCollections>> =
         combine(
@@ -164,7 +179,7 @@ internal class ConversationOverviewViewModel(
                 )
             }
         }
-            .stateIn(viewModelScope, SharingStarted.Eagerly)
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     /**
      * Holds the latest conversations we could successfully load.
@@ -181,7 +196,7 @@ internal class ConversationOverviewViewModel(
                     conversationsAsCollections.keepSuccess()
                 )
             }
-            .stateIn(viewModelScope, SharingStarted.Eagerly)
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val conversations: StateFlow<DataState<ConversationCollections>> =
         combine(latestConversations, query) { latestConversationsDataState, query ->
@@ -193,7 +208,7 @@ internal class ConversationOverviewViewModel(
                 }
             }
         }
-            .stateIn(viewModelScope, SharingStarted.Eagerly)
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     private fun getUpdateConversationsFlow(loadedConversations: List<Conversation>): Flow<Success<List<Conversation>>> =
         flow {
@@ -260,7 +275,7 @@ internal class ConversationOverviewViewModel(
     }
 
     fun markConversationAsHidden(conversationId: Long, hidden: Boolean): Deferred<Boolean> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             conversationService.markConversationAsHidden(
                 courseId,
                 conversationId,
@@ -268,8 +283,8 @@ internal class ConversationOverviewViewModel(
                 accountService.authToken.first(),
                 serverConfigurationService.serverUrl.first()
             )
-                .onSuccess {
-                    if (it) {
+                .onSuccess { isSuccessful ->
+                    if (isSuccessful) {
                         onRequestReload.tryEmit(Unit)
                     }
                 }
@@ -278,16 +293,16 @@ internal class ConversationOverviewViewModel(
     }
 
     fun markConversationAsFavorite(conversationId: Long, favorite: Boolean): Deferred<Boolean> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             conversationService.markConversationAsFavorite(
-                courseId,
-                conversationId,
-                favorite,
-                accountService.authToken.first(),
-                serverConfigurationService.serverUrl.first()
+                courseId = courseId,
+                conversationId = conversationId,
+                favorite = favorite,
+                authToken = accountService.authToken.first(),
+                serverUrl = serverConfigurationService.serverUrl.first()
             )
-                .onSuccess {
-                    if (it) {
+                .onSuccess { successful ->
+                    if (successful) {
                         onRequestReload.tryEmit(Unit)
                     }
                 }
@@ -296,7 +311,7 @@ internal class ConversationOverviewViewModel(
     }
 
     fun setConversationMessagesRead(conversationId: Long) {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext) {
             manualConversationUpdates.emit(MarkMessagesRead(conversationId))
         }
     }
@@ -322,7 +337,7 @@ internal class ConversationOverviewViewModel(
     }
 
     private fun expandOrCollapseSection(update: ConversationPreferenceService.Preferences.() -> ConversationPreferenceService.Preferences) {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext) {
             conversationPreferenceService.updatePreferences(
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 courseId = courseId,
