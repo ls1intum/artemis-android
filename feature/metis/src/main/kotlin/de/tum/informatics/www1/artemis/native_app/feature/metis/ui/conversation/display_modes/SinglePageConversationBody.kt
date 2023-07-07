@@ -50,7 +50,7 @@ fun SinglePageConversationBody(
     }
 
     val openConversation = { conversationId: Long ->
-        configuration = when (val currentConfig = configuration) {
+        configuration = when (configuration) {
             is OpenedConversation -> OpenedConversation(conversationId, null)
             else -> OpenedConversation(conversationId, null)
         }

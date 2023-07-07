@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.EmojiService
 import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 
 internal val LocalEmojiProvider: ProvidableCompositionLocal<EmojiProvider> =
     compositionLocalOf { throw RuntimeException("No emoji provider set. Please call ProvideEmojis as a parent of your composable.") }
@@ -27,7 +28,7 @@ internal data class EmojiProvider(
  */
 @Composable
 fun ProvideEmojis(content: @Composable () -> Unit) {
-    val emojiService: EmojiService = get()
+    val emojiService: EmojiService = koinInject()
 
     val unicodeForEmojiIdMap: MutableState<Map<String, String>?> = remember { mutableStateOf(null) }
     val unicodeToEmojiIdMap: MutableState<Map<String, String>?> = remember { mutableStateOf(null) }

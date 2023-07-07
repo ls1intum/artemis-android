@@ -41,6 +41,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.SideBarMe
 // Ratio of metis content in contrast to the actual exercise content
 const val METIS_RATIO = 0.3f
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 internal fun ExerciseScreenBody(
     modifier: Modifier,
@@ -211,7 +212,7 @@ private fun BodyWithTabs(
                     }
                 }
 
-                if (metisContext != null) {
+//                if (metisContext != null) {
 //                    SmartphoneConversationUi(
 //                        modifier = Modifier
 //                            .fillMaxSize()
@@ -220,7 +221,7 @@ private fun BodyWithTabs(
 //                        navController = navController
 //                        // The FAB is displayed by the exercise screen itself.
 //                    )
-                }
+//                }
             }
         }
     }

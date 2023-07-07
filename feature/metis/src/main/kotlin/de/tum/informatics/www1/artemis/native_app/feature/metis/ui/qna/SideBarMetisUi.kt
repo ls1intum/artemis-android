@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna
 
 import androidx.compose.animation.AnimatedVisibility
@@ -37,6 +39,7 @@ import org.koin.core.parameter.parametersOf
 /**
  * Metis ui displayed on the right side of other content.
  */
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun SideBarMetisUi(
     modifier: Modifier,
