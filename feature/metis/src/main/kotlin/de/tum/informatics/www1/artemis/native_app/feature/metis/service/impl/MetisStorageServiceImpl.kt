@@ -75,7 +75,8 @@ class MetisStorageServiceImpl(
                 authorId = author?.id ?: return null,
                 creationDate = creationDate ?: Instant.fromEpochSeconds(0),
                 content = content,
-                authorRole = authorRole?.asDb ?: UserRole.USER
+                authorRole = authorRole?.asDb ?: UserRole.USER,
+                updatedDate = updatedDate
             )
 
             val standalone = StandalonePostingEntity(
@@ -102,7 +103,8 @@ class MetisStorageServiceImpl(
                 authorId = author?.id ?: return null,
                 creationDate = creationDate ?: Instant.fromEpochSeconds(0),
                 content = content,
-                authorRole = authorRole?.asDb ?: UserRole.USER
+                authorRole = authorRole?.asDb ?: UserRole.USER,
+                updatedDate = updatedDate
             )
 
             val answer = AnswerPostingEntity(
@@ -113,8 +115,8 @@ class MetisStorageServiceImpl(
 
             val user = MetisUserEntity(
                 serverId = serverId,
-                id = author?.id ?: return null,
-                displayName = author?.name ?: "NULL"
+                id = author.id,
+                displayName = author.name ?: "NULL"
             )
 
             return Triple(basePost, answer, user)
@@ -132,8 +134,8 @@ class MetisStorageServiceImpl(
                 id = id ?: return null
             ) to MetisUserEntity(
                 serverId = serverId,
-                id = user?.id ?: return null,
-                displayName = user?.name ?: return null
+                id = user.id,
+                displayName = user.name ?: return null
             )
         }
 
@@ -253,7 +255,7 @@ class MetisStorageServiceImpl(
         val postingAuthor = MetisUserEntity(
             serverId = host,
             id = sp.author?.id ?: return null,
-            displayName = sp.author?.name ?: return null
+            displayName = sp.author.name ?: return null
         )
 
         val clientSidePostId: String = queryClientPostId ?: UUID.randomUUID().toString()
@@ -294,7 +296,7 @@ class MetisStorageServiceImpl(
         if (queryClientPostId != null) {
             val isPostPresent = metisDao.isPostPresentInContext(
                 queryClientPostId,
-                sp.id ?: 0L,
+                sp.id,
                 courseId = postMetisContext.courseId,
                 exerciseId = postMetisContext.exerciseId,
                 lectureId = postMetisContext.lectureId
@@ -372,7 +374,7 @@ class MetisStorageServiceImpl(
                     metisContext.toPostMetisContext(
                         serverId = host,
                         clientSidePostId = answerClientSidePostId,
-                        serverSidePostId = ap.id ?: return null,
+                        serverSidePostId = ap.id,
                         postingType = BasePostingEntity.PostingType.ANSWER
                     )
                 )

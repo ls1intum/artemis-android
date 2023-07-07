@@ -4,4 +4,6 @@
     <string name="post_delete">Delete post</string>
     <string name="post_copy_text">Copy text</string>
     <string name="post_reply">Reply in thread</string>
+
+    <string name="post_edited_hint">(edited)</string>
 </resources>

@@ -22,7 +22,7 @@ data class AnswerPostDb(
         entity = BasePostingEntity::class,
         entityColumn = "id",
         parentColumn = "post_id",
-        projection = ["author_id", "creation_date", "content", "author_role"]
+        projection = ["author_id", "creation_date", "updated_date", "content", "author_role"]
     )
     private val basePostingCache: BasePostingCache,
     @Relation(
@@ -42,6 +42,9 @@ data class AnswerPostDb(
 ) : IAnswerPost {
     @Ignore
     override val creationDate: Instant = basePostingCache.creationDate
+
+    @Ignore
+    override val updatedDate: Instant? = basePostingCache.updatedDate
 
     @Ignore
     override val content: String? = basePostingCache.content
@@ -65,6 +68,8 @@ data class AnswerPostDb(
         val authorId: Long,
         @ColumnInfo(name = "creation_date")
         val creationDate: Instant,
+        @ColumnInfo(name = "updated_date")
+        val updatedDate: Instant?,
         @ColumnInfo(name = "content")
         val content: String?,
         @ColumnInfo(name = "author_role")

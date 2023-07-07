@@ -30,6 +30,8 @@ data class Post(
     override val authorId: Long,
     @ColumnInfo(name = "creation_date")
     override val creationDate: Instant,
+    @ColumnInfo(name = "updated_date")
+    override val updatedDate: Instant?,
     @ColumnInfo(name = "resolved")
     override val resolved: Boolean,
     @ColumnInfo(name = "context")

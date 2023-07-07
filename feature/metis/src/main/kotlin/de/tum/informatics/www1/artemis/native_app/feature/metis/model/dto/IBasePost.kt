@@ -7,6 +7,7 @@ sealed interface IBasePost {
     val authorId: Long?
     val authorRole: UserRole?
     val creationDate: Instant?
+    val updatedDate: Instant?
     val content: String?
     val reactions: List<IReaction>?
 }
