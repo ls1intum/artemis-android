@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.test
+package de.tum.informatics.www1.artemis.native_app.feature.metis
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

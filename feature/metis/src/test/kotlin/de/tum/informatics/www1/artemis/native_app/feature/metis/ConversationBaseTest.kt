@@ -15,7 +15,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAcc
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.test.MetisDatabaseProviderMock
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

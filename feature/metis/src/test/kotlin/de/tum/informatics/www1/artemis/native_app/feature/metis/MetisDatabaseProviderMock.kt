@@ -1,8 +1,7 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.test
+package de.tum.informatics.www1.artemis.native_app.feature.metis
 
 import android.content.Context
 import androidx.room.Room
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.dao.MetisDao
 
 /**
