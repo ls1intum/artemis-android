@@ -5,10 +5,29 @@ import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
-import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
 //Adapted from: https://github.com/android/nowinandroid/blob/bbc5460b624d67b64b5b5118f8a0e1763427e7e4/build-logic/convention/src/main/kotlin/com/google/samples/apps/nowinandroid/KotlinAndroid.kt
+
+object ProductFlavors {
+    object Dimensions {
+        object InstanceSelection {
+            const val Key = "instance-selection"
+
+            object Flavors {
+                const val FreeInstanceSelection = "unrestricted"
+
+                const val Tum = "tum"
+            }
+        }
+    }
+
+    object BuildConfigFields {
+        const val HasInstanceRestriction = "hasInstanceRestriction"
+
+        const val DefaultServerUrl = "defaultServerUrl"
+    }
+}
 
 /**
  * Configure base Kotlin with Android options
@@ -44,6 +63,24 @@ internal fun Project.configureKotlinAndroid(
         testOptions {
             unitTests {
                 isIncludeAndroidResources = true
+            }
+        }
+
+        flavorDimensions += ProductFlavors.Dimensions.InstanceSelection.Key
+
+        productFlavors {
+            create(ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection) {
+                dimension = ProductFlavors.Dimensions.InstanceSelection.Key
+
+                buildConfigField("boolean", ProductFlavors.BuildConfigFields.HasInstanceRestriction, "false")
+                buildConfigField("String", ProductFlavors.BuildConfigFields.DefaultServerUrl, "\"\"")
+            }
+
+            create(ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum) {
+                dimension = ProductFlavors.Dimensions.InstanceSelection.Key
+
+                buildConfigField("boolean", ProductFlavors.BuildConfigFields.HasInstanceRestriction, "true")
+                buildConfigField("String", ProductFlavors.BuildConfigFields.DefaultServerUrl, "\"https://artemis.cit.tum.de\"")
             }
         }
     }

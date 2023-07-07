@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true">
+
+            <!--     Begin deep links       -->
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="artemis" />
+
+                <data android:host="courses" />
+                <data android:host="metis_standalone_post" />
+                <data android:scheme="artemis" />
+                <data android:host="exercises" />
+                <data android:host="lectures" />
+                <data android:host="quiz_participation" />
+            </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https"/>
+                <data android:host="artemis.ase.in.tum.de"/>
+                <data android:host="artemis.cit.tum.de"/>
+                <data android:host="artemis.codeability.uibk.ac.at"/>
+                <data android:host="artemis.praktomat.cs.kit.edu"/>
+                <data android:host="artemis-test0.artemis.cit.tum.de"/>
+                <data android:host="artemis-test1.artemis.cit.tum.de"/>
+                <data android:host="artemis-test2.cit.tum.de"/>
+
+                <data android:pathPattern="/courses/.*" />
+                <data android:pathPattern="/courses/.*/exercises/.*/" />
+                <data android:pathPattern="/courses/.*/messages?conversationId=.*/" />
+                <data android:pathPattern="/courses/.*/lectures/.*/" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

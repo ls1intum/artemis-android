@@ -77,6 +77,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import java.io.IOException
 
@@ -121,6 +122,9 @@ fun NavController.navigateToLogin(
     }
 }
 
+/**
+ * Switch between actual login and notification configuration.
+ */
 fun NavGraphBuilder.loginScreen(
     onFinishedLoginFlow: (deepLink: String?) -> Unit,
     onRequestOpenSettings: () -> Unit
@@ -142,8 +146,8 @@ fun NavGraphBuilder.loginScreen(
         }
 
         val scope = rememberCoroutineScope()
-        val serverNotificationStorageService: ServerNotificationStorageService = get()
-        val serverConfigurationService: ServerConfigurationService = get()
+        val serverNotificationStorageService: ServerNotificationStorageService = koinInject()
+        val serverConfigurationService: ServerConfigurationService = koinInject()
 
         var currentContent by rememberSaveable { mutableStateOf(LoginScreenContent.LOGIN) }
 
@@ -158,7 +162,7 @@ fun NavGraphBuilder.loginScreen(
                 slideInHorizontally { width -> width } with
                         slideOutHorizontally { width -> -width }
             },
-            label = ""
+            label = "Login <-> Notification configuration"
         ) { content ->
             when (content) {
                 LoginScreenContent.LOGIN -> {
@@ -216,7 +220,7 @@ private fun LoginUiScreen(
     onNavigatedToInstanceSelection: () -> Unit
 ) {
     val nestedNavController = rememberNavController()
-    val serverConfigurationService: ServerConfigurationService = get()
+    val serverConfigurationService: ServerConfigurationService = koinInject()
 
     val hasSelectedInstance = serverConfigurationService
         .hasUserSelectedInstance
@@ -278,6 +282,7 @@ private fun LoginUiScreen(
             composable(NestedDestination.HOME.destination) {
                 AccountScreen(
                     modifier = Modifier.fillMaxSize(),
+                    canSwitchInstance = !BuildConfig.hasInstanceRestriction,
                     onNavigateToLoginScreen = {
                         nestedNavController.navigate(NestedDestination.LOGIN.destination)
                     },
@@ -393,6 +398,7 @@ private fun createSaml2LoginRoute(rememberMe: Boolean): String =
 private fun AccountScreen(
     modifier: Modifier,
     viewModel: AccountViewModel = koinViewModel(),
+    canSwitchInstance: Boolean,
     onNavigateToLoginScreen: () -> Unit,
     onNavigateToRegisterScreen: () -> Unit,
     onNavigateToInstanceSelection: () -> Unit,
@@ -404,6 +410,7 @@ private fun AccountScreen(
     AccountUi(
         modifier = modifier,
         serverProfileInfo = serverProfileInfo,
+        canSwitchInstance = canSwitchInstance,
         retryLoadServerProfileInfo = viewModel::requestReloadServerProfileInfo,
         onNavigateToLoginScreen = onNavigateToLoginScreen,
         onNavigateToRegisterScreen = onNavigateToRegisterScreen,
@@ -417,6 +424,7 @@ private fun AccountScreen(
 private fun AccountUi(
     modifier: Modifier,
     serverProfileInfo: DataState<ProfileInfo>,
+    canSwitchInstance: Boolean,
     retryLoadServerProfileInfo: () -> Unit,
     onNavigateToLoginScreen: () -> Unit,
     onNavigateToRegisterScreen: () -> Unit,
@@ -453,14 +461,16 @@ private fun AccountUi(
             onClickSaml2Login = onClickSaml2Login
         )
 
-        ClickableText(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(bottom = 8.dp),
-            text = AnnotatedString(stringResource(id = R.string.account_change_artemis_instance_label)),
-            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.linkTextColor),
-            onClick = { onNavigateToInstanceSelection() }
-        )
+        if (canSwitchInstance) {
+            ClickableText(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottom = 8.dp),
+                text = AnnotatedString(stringResource(id = R.string.account_change_artemis_instance_label)),
+                style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.linkTextColor),
+                onClick = { onNavigateToInstanceSelection() }
+            )
+        }
     }
 }
 
@@ -624,6 +634,7 @@ internal fun ArtemisHeader(modifier: Modifier) {
 fun AccountUiPreviewLoadingProfileInfo() {
     AccountUi(
         modifier = Modifier.fillMaxSize(),
+        canSwitchInstance = true,
         serverProfileInfo = DataState.Loading(),
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
@@ -639,6 +650,7 @@ fun AccountUiPreviewLoadingProfileInfo() {
 fun AccountUiPreviewFailedLoadingProfileInfo() {
     AccountUi(
         modifier = Modifier.fillMaxSize(),
+        canSwitchInstance = true,
         serverProfileInfo = DataState.Failure(IOException()),
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
@@ -654,6 +666,7 @@ fun AccountUiPreviewFailedLoadingProfileInfo() {
 fun AccountUiPreviewWithRegister() {
     AccountUi(
         modifier = Modifier.fillMaxSize(),
+        canSwitchInstance = true,
         serverProfileInfo = DataState.Success(
             ProfileInfo(
                 registrationEnabled = true
@@ -673,6 +686,7 @@ fun AccountUiPreviewWithRegister() {
 fun AccountUiPreviewWithoutRegister() {
     AccountUi(
         modifier = Modifier.fillMaxSize(),
+        canSwitchInstance = true,
         serverProfileInfo = DataState.Success(
             ProfileInfo(
                 registrationEnabled = false

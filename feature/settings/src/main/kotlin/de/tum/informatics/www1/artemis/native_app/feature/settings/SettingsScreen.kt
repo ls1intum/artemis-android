@@ -343,11 +343,13 @@ private fun AboutSection(
         modifier = modifier,
         title = stringResource(id = R.string.settings_about_section)
     ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            text = stringResource(id = R.string.settings_server_specifics_information),
-            style = MaterialTheme.typography.labelMedium
-        )
+        if (!BuildConfig.hasInstanceRestriction) {
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = stringResource(id = R.string.settings_server_specifics_information),
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
 
         if (hasUserSelectedInstance) {
             PreferenceEntry(

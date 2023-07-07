@@ -67,6 +67,16 @@ android {
             }
         }
     }
+
+    productFlavors {
+        getByName(ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection) {
+            versionNameSuffix = "-" + ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection
+        }
+
+        getByName(ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum) {
+            versionNameSuffix = "-" + ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum
+        }
+    }
 }
 
 dependencies {
