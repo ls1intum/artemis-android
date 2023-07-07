@@ -53,7 +53,7 @@ class CreateConversationE2eTest : ConversationBaseTest() {
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD)
-            .performTextInput(user2Name)
+            .performTextInput(user2DisplayName)
 
         testDispatcher.scheduler.advanceTimeBy(1000)
 
@@ -64,7 +64,7 @@ class CreateConversationE2eTest : ConversationBaseTest() {
         }
 
         composeTestRule.waitUntilAtLeastOneExists(
-            hasText(user2Name, substring = true) and !hasAnyAncestor(
+            hasText(user2DisplayName, substring = true) and !hasAnyAncestor(
                 hasTestTag(
                     TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD
                 )

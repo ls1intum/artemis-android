@@ -20,6 +20,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -46,6 +47,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.ReplyTe
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleStandalonePostDetails
 import kotlinx.coroutines.CompletableDeferred
+
+internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
+internal fun testTagForAnswerPost(answerPostId: Long) = "answerPost$answerPostId"
 
 /**
  * Displays a single post with its replies.
@@ -119,7 +123,9 @@ internal fun MetisThreadUi(
                             getItem = post.orderedAnswerPostings::get,
                         ) {
                             PostAndRepliesList(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .testTag(TEST_TAG_THREAD_LIST),
                                 post = post,
                                 hasModerationRights = hasModerationRights,
                                 clientId = clientId,
@@ -211,7 +217,9 @@ private fun PostAndRepliesList(
                 val postActions = rememberPostActions(answerPost)
 
                 PostWithBottomSheet(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(testTagForAnswerPost(answerPost.serverPostId)),
                     post = answerPost,
                     postActions = postActions,
                     postItemViewType = PostItemViewType.ThreadAnswerItem,

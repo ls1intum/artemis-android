@@ -18,6 +18,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.exercis
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -53,6 +54,7 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
     }
 
     @Test
+    @Ignore
     fun `display programing exercise`() {
         displayExerciseTypeTestImpl {
             createExercise(

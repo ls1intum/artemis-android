@@ -9,6 +9,7 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLog
 import kotlin.test.assertEquals
 
 @Category(EndToEndTest::class)
@@ -32,6 +33,8 @@ class GroupChatSettingsE2eTest : ConversationSettingsBaseE2eTest() {
 
     @Test
     fun `can change group chat name`() {
+        ShadowLog.stream = System.out
+
         val groupChat = runBlocking {
             conversationService.createGroupChat(
                 courseId = course.id!!,
@@ -44,7 +47,8 @@ class GroupChatSettingsE2eTest : ConversationSettingsBaseE2eTest() {
 
         val newTitle = "testgroupchat"
 
-        changeConversationDetailsTestImpl(groupChat,
+        changeConversationDetailsTestImpl(
+            conversation = groupChat,
             performChanges = {
                 changeTitleText(groupChat.name, newTitle)
             },

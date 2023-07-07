@@ -21,7 +21,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
 import org.junit.Rule
-import org.junit.rules.Timeout
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import org.koin.test.KoinTest
@@ -67,7 +66,7 @@ abstract class ConversationBaseTest : KoinTest {
 
     protected val user3Username: String = System.getenv("user3Username") ?: "test_user_3"
 
-    protected val user2Name: String = System.getenv("user2Name") ?: "Test User2"
+    protected val user2DisplayName: String = System.getenv("user2Name") ?: "Test User2"
 
     @Before
     open fun setup() {

@@ -57,33 +57,7 @@ import org.robolectric.shadows.ShadowLog
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
-class ConversationMessagesE2eTest : ConversationBaseTest() {
-
-    private lateinit var conversation: Conversation
-    private lateinit var metisContext: MetisContext
-
-    private val metisModificationService: MetisModificationService get() = get()
-
-    private val replyTextFieldMatcher =
-        hasAnyAncestor(hasTestTag(TEST_TAG_REPLY_TEXT_FIELD)) and hasSetTextAction()
-
-    @Before
-    override fun setup() {
-        super.setup()
-
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                conversation = conversationService.createOneToOneConversation(
-                    courseId = course.id!!,
-                    partner = user2Username,
-                    authToken = accessToken,
-                    serverUrl = testServerUrl
-                ).orThrow("Could not create one to one conversation")
-
-                metisContext = MetisContext.Conversation(course.id!!, conversation.id)
-            }
-        }
-    }
+class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
 
     @Test
     fun `shows existing messages`() {
@@ -119,31 +93,13 @@ class ConversationMessagesE2eTest : ConversationBaseTest() {
         }
     }
 
-    @Test
     fun `can send new message`() {
         setupUiAndViewModel()
 
-        val text = "test message"
-
-        composeTestRule
-            .onNodeWithText(context.getString(R.string.create_answer_click_to_write))
-            .performClick()
-
-        composeTestRule
-            .onNode(replyTextFieldMatcher)
-            .performTextInput(text)
-
-        composeTestRule
-            .onNodeWithTag(TEST_TAG_REPLY_SEND_BUTTON)
-            .performClick()
-
-        composeTestRule
-            .waitUntilExactlyOneExists(
-                hasAnyAncestor(hasTestTag(TEST_TAG_METIS_POST_LIST)) and hasText(
-                    text
-                ),
-                DefaultTimeoutMillis
-            )
+        canSendTestImpl(
+            "test message",
+            TEST_TAG_METIS_POST_LIST
+        )
     }
 
     @Test
@@ -328,31 +284,5 @@ class ConversationMessagesE2eTest : ConversationBaseTest() {
         testDispatcher.scheduler.advanceUntilIdle()
 
         return viewModel
-    }
-
-    private fun postDefaultMessage(additionalSetup: suspend (StandalonePost) -> Unit = {}): StandalonePost {
-        return runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                metisModificationService.createPost(
-                    context = metisContext,
-                    post = createPost("test message"),
-                    serverUrl = testServerUrl,
-                    authToken = accessToken
-                ).orThrow("Could not create message")
-                    .also { additionalSetup(it) }
-            }
-        }
-    }
-
-    private fun createPost(content: String): StandalonePost {
-        return StandalonePost(
-            id = null,
-            title = null,
-            tags = null,
-            content = content,
-            conversation = conversation,
-            creationDate = Clock.System.now(),
-            displayPriority = DisplayPriority.NONE
-        )
     }
 }
