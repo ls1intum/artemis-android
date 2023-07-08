@@ -42,6 +42,7 @@ dependencies {
 
     testImplementation(project(":feature:login"))
     testImplementation(project(":feature:login-test"))
+    testImplementation(project(":feature:metis_test"))
 }
 
 tasks.register("fetchAndPrepareEmojis", emoji.FetchAndPrepareEmojisTask::class) {

@@ -20,14 +20,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversa
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.TEST_TAG_METIS_POST_LIST
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_REPLY_SEND_BUTTON
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_REPLY_TEXT_FIELD
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.Clock
 import org.junit.Before
-import org.junit.Test
 import org.koin.test.get
 
 @OptIn(ExperimentalTestApi::class)
@@ -40,6 +39,8 @@ abstract class ConversationMessagesBaseTest : ConversationBaseTest() {
 
     protected lateinit var conversation: Conversation
     protected lateinit var metisContext: MetisContext
+
+    protected val metisService: MetisService get() = get()
 
     @Before
     override fun setup() {
@@ -63,7 +64,7 @@ abstract class ConversationMessagesBaseTest : ConversationBaseTest() {
      * Enters the given text into the reply text field and clicks send. Checks if the entered text
      * appears in the node specified by [listTestTag]
      */
-    fun canSendTestImpl(text: String, listTestTag: String) {
+    fun canSendTestImpl(text: String, listTestTag: String, forceRefresh: () -> Unit) {
         composeTestRule
             .onNodeWithText(context.getString(R.string.create_answer_click_to_write))
             .performClick()
@@ -75,6 +76,8 @@ abstract class ConversationMessagesBaseTest : ConversationBaseTest() {
         composeTestRule
             .onNodeWithTag(TEST_TAG_REPLY_SEND_BUTTON)
             .performClick()
+
+        forceRefresh()
 
         composeTestRule
             .waitUntilExactlyOneExists(

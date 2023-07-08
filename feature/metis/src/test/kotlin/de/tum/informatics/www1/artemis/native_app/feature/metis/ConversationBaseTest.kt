@@ -7,7 +7,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
@@ -16,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTest
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis_test.MetisDatabaseProviderMock
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
@@ -25,6 +25,7 @@ import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
 import org.koin.test.get
+import org.robolectric.shadows.ShadowLog
 
 abstract class ConversationBaseTest : KoinTest {
 
@@ -41,7 +42,11 @@ abstract class ConversationBaseTest : KoinTest {
 
         modules(coreTestModules)
         modules(loginModule, communicationModule, testLoginModule, module {
-            single<MetisDatabaseProvider> { MetisDatabaseProviderMock(context) }
+            single<MetisDatabaseProvider> {
+                MetisDatabaseProviderMock(
+                    context
+                )
+            }
             single<WebsocketProvider> {
                 WebsocketProvider(
                     serverConfigurationService = get(),
@@ -69,8 +74,9 @@ abstract class ConversationBaseTest : KoinTest {
 
     @Before
     open fun setup() {
+        ShadowLog.stream = System.out
+
         runBlocking {
-            setTestServerUrl()
             accessToken = performTestLogin()
 
             course = createCourse(getAdminAccessToken())

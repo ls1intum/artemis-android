@@ -26,6 +26,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.MultipleChoiceSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.SubmittedAnswer
+import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
+import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.AnswerOptionId
@@ -110,6 +112,9 @@ internal class QuizParticipationViewModel(
 
     private val submissionChannel = "/topic/quizExercise/$exerciseId/submission"
     private val quizExerciseChannel = "/topic/courses/$courseId/quizExercises"
+
+    val serverUrl = serverUrlStateFlow(serverConfigurationService)
+    val authToken = authTokenStateFlow(accountService)
 
     /**
      * Use server time for best time approximation.

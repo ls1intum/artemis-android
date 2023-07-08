@@ -17,7 +17,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
@@ -58,7 +57,6 @@ class CourseRegistrationE2eTest : KoinTest {
     @Before
     fun setup() {
         runBlocking {
-            setTestServerUrl()
             performTestLogin()
             course = createCourse(getAdminAccessToken(), forceSelfRegistration = true)
         }

@@ -44,6 +44,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 private val submitButtonColor: Color
@@ -93,7 +94,7 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
 
         val quizType: QuizType.WorkableQuizType = Json.decodeFromString(quizTypeString)
 
-        val jsonProvider: JsonProvider = get()
+        val jsonProvider: JsonProvider = koinInject()
 
         // When this is set, instead of participating a result screen is displayed
         var loadedViewableQuizType: QuizType.ViewableQuizType? by rememberSaveable(

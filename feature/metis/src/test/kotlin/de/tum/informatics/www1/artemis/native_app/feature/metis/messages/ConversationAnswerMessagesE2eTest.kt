@@ -1,44 +1,32 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.messages
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.printToString
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
-import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisChatList
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.TEST_TAG_METIS_POST_LIST
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.testTagForPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_REPLY_SEND_BUTTON
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.TEST_TAG_THREAD_LIST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.testTagForAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ProvideLocalVisibleMetisContextManager
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.Clock
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
+import org.koin.compose.LocalKoinApplication
+import org.koin.compose.LocalKoinScope
+import org.koin.core.annotation.KoinInternalApi
+import org.koin.mp.KoinPlatformTools
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 
@@ -47,7 +35,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
 
-    @Test
+    @Test(timeout = 10000)
     fun `shows existing message with answer posts`() {
         val answerPostContents = (0 until 3).map {
             "answer post content $it"
@@ -101,14 +89,19 @@ class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
     fun `can send new message`() {
         val post = postDefaultMessage()
 
-        setupUiAndViewModel(post.id!!)
+        val viewModel = setupUiAndViewModel(post.id!!)
 
         canSendTestImpl(
-            "test message",
+            "test answer message",
             TEST_TAG_THREAD_LIST
-        )
+        ) {
+            viewModel.forceReload()
+
+            testDispatcher.scheduler.advanceUntilIdle()
+        }
     }
 
+    @OptIn(KoinInternalApi::class)
     private fun setupUiAndViewModel(postId: Long): MetisThreadViewModel {
         val viewModel = MetisThreadViewModel(
             initialPostId = StandalonePostId.ServerSideId(postId),
@@ -128,11 +121,16 @@ class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
         )
 
         composeTestRule.setContent {
-            ProvideLocalVisibleMetisContextManager(visibleMetisContextManager = EmptyVisibleMetisContextManager) {
-                MetisThreadUi(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = viewModel
-                )
+            CompositionLocalProvider(
+                LocalKoinScope provides KoinPlatformTools.defaultContext().get().scopeRegistry.rootScope,
+                LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
+            ) {
+                ProvideLocalVisibleMetisContextManager(visibleMetisContextManager = EmptyVisibleMetisContextManager) {
+                    MetisThreadUi(
+                        modifier = Modifier.fillMaxSize(),
+                        viewModel = viewModel
+                    )
+                }
             }
         }
 
@@ -146,5 +144,4 @@ class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
 
         return viewModel
     }
-
 }

@@ -12,7 +12,7 @@ import javax.net.ssl.X509TrustManager
 import kotlin.time.Duration.Companion.seconds
 import io.ktor.client.engine.cio.CIO
 
-class TrustAllCertsKtorProvider(jsonProvider: JsonProvider) : KtorProvider {
+class TrustAllCertsKtorProvider(jsonProvider: JsonProvider, timeoutMillis: Long = 3000) : KtorProvider {
 
     private val trustAll = @SuppressLint("CustomX509TrustManager")
     object : X509TrustManager {
@@ -37,9 +37,9 @@ class TrustAllCertsKtorProvider(jsonProvider: JsonProvider) : KtorProvider {
         }
 
         install(HttpTimeout) {
-            requestTimeoutMillis = 1.seconds.inWholeMilliseconds
-            connectTimeoutMillis = 1.seconds.inWholeMilliseconds
-            socketTimeoutMillis = 1.seconds.inWholeMilliseconds
+            requestTimeoutMillis = timeoutMillis
+            connectTimeoutMillis = timeoutMillis
+            socketTimeoutMillis = timeoutMillis
         }
     }
 

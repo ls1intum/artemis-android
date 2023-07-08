@@ -34,7 +34,6 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_cr
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextLectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createVideoLectureUnit
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
@@ -81,7 +80,6 @@ class LectureE2eTest : KoinTest {
     @Before
     fun setup() {
         runBlocking {
-            setTestServerUrl()
             performTestLogin()
 
             course = createCourse(getAdminAccessToken())

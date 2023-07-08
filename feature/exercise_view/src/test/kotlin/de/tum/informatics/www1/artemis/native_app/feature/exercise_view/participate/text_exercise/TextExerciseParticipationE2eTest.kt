@@ -2,7 +2,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.partici
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -37,6 +39,7 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
 class TextExerciseParticipationE2eTest : BaseExerciseTest() {
@@ -144,6 +147,11 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
                 onNavigateUp = {}
             )
         }
+
+        composeTestRole.waitUntilAtLeastOneExists(
+            hasTestTag(TEST_TAG_TEXT_FIELD_PARTICIPATION),
+            DefaultTimeoutMillis
+        )
 
         return viewModel
     }

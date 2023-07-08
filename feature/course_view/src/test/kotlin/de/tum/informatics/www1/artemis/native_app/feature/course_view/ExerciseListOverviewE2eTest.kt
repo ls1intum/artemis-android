@@ -66,6 +66,7 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
         }
     }
 
+    @Ignore("TODO: quiz creation is currently undergoing changes. Fix once those are complete.")
     @Test
     fun `display quiz exercise`() {
         displayExerciseTypeTestImpl {

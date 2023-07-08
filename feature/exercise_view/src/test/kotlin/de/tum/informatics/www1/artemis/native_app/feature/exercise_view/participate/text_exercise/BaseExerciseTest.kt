@@ -10,7 +10,6 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTi
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextExercise
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exerciseModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
@@ -23,6 +22,7 @@ import org.junit.Rule
 import org.koin.android.ext.koin.androidContext
 import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
+import org.robolectric.shadows.ShadowLog
 
 abstract class BaseExerciseTest : KoinTest {
 
@@ -46,9 +46,10 @@ abstract class BaseExerciseTest : KoinTest {
 
     @Before
     open fun setup() {
+        ShadowLog.stream = System.out
+
         runBlocking {
             withTimeout(DefaultTimeoutMillis) {
-                setTestServerUrl()
                 accessToken = performTestLogin()
 
                 course = createCourse(getAdminAccessToken())

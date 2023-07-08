@@ -10,7 +10,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.setTestServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.course_overview.CourseUiScreen
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.course_overview.DEFAULT_CONVERSATION_ID
@@ -54,7 +53,6 @@ abstract class BaseCourseTest : KoinTest {
     fun setup() {
         runBlocking {
             withTimeout(DefaultTimeoutMillis) {
-                setTestServerUrl()
                 performTestLogin()
 
                 course = createCourse(getAdminAccessToken())

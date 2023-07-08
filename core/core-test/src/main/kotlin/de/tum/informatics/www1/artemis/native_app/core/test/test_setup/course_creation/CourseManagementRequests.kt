@@ -151,6 +151,9 @@ suspend fun KoinComponent.createExerciseFormBody(
         contentType(ContentType.MultiPart.FormData)
         accept(ContentType.Application.Json)
     }
+        .apply {
+            println(status)
+        }
         .body()
 }
 
