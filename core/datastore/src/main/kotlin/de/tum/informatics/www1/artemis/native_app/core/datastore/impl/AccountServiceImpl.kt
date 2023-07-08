@@ -7,7 +7,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.auth0.android.jwt.DecodeException
 import com.auth0.android.jwt.JWT
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay

@@ -1,7 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.dao
 
 import androidx.paging.PagingSource
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.RawQuery
+import androidx.room.Transaction
+import androidx.room.Update
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisFilter
@@ -16,7 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.PostR
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostTagEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostingEntity
 import kotlinx.coroutines.flow.Flow
-import java.util.*
+import java.util.Locale
 
 @Dao
 interface MetisDao {

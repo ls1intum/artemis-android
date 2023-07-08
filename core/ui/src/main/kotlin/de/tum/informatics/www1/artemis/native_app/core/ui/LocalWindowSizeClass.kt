@@ -1,8 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui
 
-import android.app.Activity
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember

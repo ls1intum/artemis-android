@@ -38,7 +38,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)

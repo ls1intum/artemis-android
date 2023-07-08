@@ -5,7 +5,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversa
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.humanReadableName
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableTitle
 
 data class ConversationCollections(
     val favorites: ConversationCollection<Conversation>,

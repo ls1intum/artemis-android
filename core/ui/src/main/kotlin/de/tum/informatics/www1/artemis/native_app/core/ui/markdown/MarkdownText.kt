@@ -38,7 +38,6 @@ import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.html.HtmlPlugin
 import io.noties.markwon.image.coil.CoilImagesPlugin
 import io.noties.markwon.linkify.LinkifyPlugin
-import org.koin.androidx.compose.get
 import org.koin.compose.koinInject
 
 // Copy from: https://github.com/jeziellago/compose-markdown

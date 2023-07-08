@@ -17,7 +17,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.MetisTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.NotificationTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.UnknownNotificationTarget
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 internal object NotificationTargetManager {

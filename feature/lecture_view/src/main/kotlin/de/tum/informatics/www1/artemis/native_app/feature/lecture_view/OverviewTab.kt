@@ -10,11 +10,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -35,7 +30,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_u
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitOnlineUi
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitTextUi
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lecture_units.LectureUnitVideoUi
-import kotlinx.coroutines.Job
 
 internal const val TEST_TAG_OVERVIEW_LIST = "overview_list"
 

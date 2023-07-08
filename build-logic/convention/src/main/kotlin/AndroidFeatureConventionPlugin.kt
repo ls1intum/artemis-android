@@ -8,6 +8,9 @@ import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
 import java.lang.Boolean
+import kotlin.Suppress
+import kotlin.apply
+import kotlin.with
 
 //Adapted from: https://github.com/android/nowinandroid/blob/bbc5460b624d67b64b5b5118f8a0e1763427e7e4/build-logic/convention/src/main/kotlin/AndroidFeatureConventionPlugin.kt
 class AndroidFeatureConventionPlugin : Plugin<Project> {

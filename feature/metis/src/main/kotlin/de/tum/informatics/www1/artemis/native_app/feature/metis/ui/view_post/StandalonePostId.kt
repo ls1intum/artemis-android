@@ -1,6 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post
 
 import android.os.Parcelable
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.StandalonePostId.ClientSideId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.StandalonePostId.ServerSideId
 import kotlinx.parcelize.Parcelize
 
 /**

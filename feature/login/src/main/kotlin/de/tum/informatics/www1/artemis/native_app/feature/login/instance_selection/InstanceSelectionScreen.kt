@@ -33,8 +33,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.feature.login.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.ArtemisHeader
+import de.tum.informatics.www1.artemis.native_app.feature.login.R
 
 @Composable
 internal fun InstanceSelectionScreen(

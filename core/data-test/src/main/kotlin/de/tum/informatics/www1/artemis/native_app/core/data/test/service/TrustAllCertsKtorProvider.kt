@@ -4,13 +4,12 @@ import android.annotation.SuppressLint
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import java.security.cert.X509Certificate
 import javax.net.ssl.X509TrustManager
-import kotlin.time.Duration.Companion.seconds
-import io.ktor.client.engine.cio.CIO
 
 class TrustAllCertsKtorProvider(jsonProvider: JsonProvider, timeoutMillis: Long = 3000) : KtorProvider {
 

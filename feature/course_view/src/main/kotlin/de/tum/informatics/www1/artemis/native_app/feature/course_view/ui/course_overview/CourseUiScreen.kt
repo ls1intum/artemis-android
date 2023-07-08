@@ -56,10 +56,10 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
-import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.CourseViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.exercise_list.ExerciseListUi
-import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.LectureListUi
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.R
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.CourseViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.LectureListUi
+import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.exercise_list.ExerciseListUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.OpenedConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.OpenedThread

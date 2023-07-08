@@ -3,9 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.data
 import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Wrapper around network responses. Used to propagate failures correctly.

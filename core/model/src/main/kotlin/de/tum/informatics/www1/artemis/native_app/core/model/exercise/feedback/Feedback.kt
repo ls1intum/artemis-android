@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.core.model.exercise.feedback
 
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 @Serializable

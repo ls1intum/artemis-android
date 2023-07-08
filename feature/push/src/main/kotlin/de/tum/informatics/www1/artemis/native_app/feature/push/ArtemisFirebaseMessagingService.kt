@@ -19,7 +19,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotif
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.NotificationTargetManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.koin.android.ext.android.get
 import java.security.NoSuchAlgorithmException

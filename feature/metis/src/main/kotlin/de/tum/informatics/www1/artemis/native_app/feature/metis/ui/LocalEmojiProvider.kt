@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.EmojiService
-import org.koin.androidx.compose.get
 import org.koin.compose.koinInject
 
 internal val LocalEmojiProvider: ProvidableCompositionLocal<EmojiProvider> =
