@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollToKey
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExerciseFormBody
@@ -29,7 +30,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ExerciseListOverviewE2eTest : BaseCourseTest() {
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `display text exercise`() {
         displayExerciseTypeTestImpl {
             createExercise(
@@ -41,7 +42,7 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
         }
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `display modeling exercise`() {
         displayExerciseTypeTestImpl {
             createExercise(
@@ -53,7 +54,7 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
         }
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     @Ignore
     fun `display programing exercise`() {
         displayExerciseTypeTestImpl {
@@ -67,7 +68,7 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
     }
 
     @Ignore("TODO: quiz creation is currently undergoing changes. Fix once those are complete.")
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `display quiz exercise`() {
         displayExerciseTypeTestImpl {
             createExerciseFormBody(

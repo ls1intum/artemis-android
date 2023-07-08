@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.members
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assert
@@ -15,6 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
@@ -32,6 +34,10 @@ import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
+import org.koin.compose.LocalKoinApplication
+import org.koin.compose.LocalKoinScope
+import org.koin.core.annotation.KoinInternalApi
+import org.koin.mp.KoinPlatformTools
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 
@@ -71,7 +77,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
         }
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `displays conversation members`() {
         setupUiAndViewModel()
 
@@ -103,14 +109,14 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
             )
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can promote user to moderator`() {
         setupUiAndViewModel()
 
         changeModeratorStatusTestImpl(true)
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can revoke moderation rights`() {
         runBlocking {
             withTimeout(DefaultTimeoutMillis) {
@@ -129,7 +135,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
         changeModeratorStatusTestImpl(false)
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can kick member`() {
         setupUiAndViewModel()
 
@@ -193,6 +199,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
         )
     }
 
+    @OptIn(KoinInternalApi::class)
     private fun setupUiAndViewModel(dispatcher: TestDispatcher = UnconfinedTestDispatcher()) {
         val viewModel = ConversationMembersViewModel(
             initialCourseId = course.id!!,
@@ -207,12 +214,17 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
         )
 
         composeTestRule.setContent {
-            ConversationMembersBody(
-                modifier = Modifier.fillMaxSize(),
-                courseId = course.id!!,
-                conversationId = channel.id,
-                viewModel = viewModel
-            )
+            CompositionLocalProvider(
+                LocalKoinScope provides KoinPlatformTools.defaultContext().get().scopeRegistry.rootScope,
+                LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
+            ) {
+                ConversationMembersBody(
+                    modifier = Modifier.fillMaxSize(),
+                    courseId = course.id!!,
+                    conversationId = channel.id,
+                    viewModel = viewModel
+                )
+            }
         }
 
         dispatcher.scheduler.advanceUntilIdle()

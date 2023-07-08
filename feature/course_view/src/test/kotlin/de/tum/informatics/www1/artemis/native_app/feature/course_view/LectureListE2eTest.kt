@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createLecture
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.TEST_TAG_LECTURE_LIST
@@ -19,7 +20,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class LectureListE2eTest : BaseCourseTest() {
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `displays created lecture`() {
         val lecture = runBlocking {
             createLecture(getAdminAccessToken(), course.id!!)

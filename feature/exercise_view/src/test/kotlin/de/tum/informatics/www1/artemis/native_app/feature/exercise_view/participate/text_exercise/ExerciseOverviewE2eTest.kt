@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.rememberNavController
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.home.ExerciseScreen
@@ -28,14 +29,14 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.R as CoreUiR
 @RunWith(RobolectricTestRunner::class)
 class ExerciseOverviewE2eTest : BaseExerciseTest() {
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `displays correct exercise data`() {
         setupUiAndViewModel()
 
         composeTestRole.onAllNodesWithText(exercise.title!!).onFirst().assertExists()
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can start text exercise`() {
         var participationId: Long? = null
 

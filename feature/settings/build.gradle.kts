@@ -16,4 +16,7 @@ dependencies {
 
     implementation(libs.accompanist.placeholder.material)
     implementation(libs.androidx.browser)
+
+    testImplementation(project(":feature:login"))
+    testImplementation(project(":feature:login-test"))
 }

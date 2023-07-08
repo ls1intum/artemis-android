@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.settings
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasSetTextAction
@@ -22,6 +23,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withTimeout
+import org.koin.compose.LocalKoinApplication
+import org.koin.compose.LocalKoinScope
+import org.koin.core.annotation.KoinInternalApi
+import org.koin.mp.KoinPlatformTools
 import org.koin.test.get
 import kotlin.test.assertIs
 
@@ -97,6 +102,7 @@ abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
             .performTextInput(newText)
     }
 
+    @OptIn(KoinInternalApi::class)
     protected fun setupUiAndViewModel(
         conversation: Conversation,
         onConversationLeft: () -> Unit = {}
@@ -114,16 +120,21 @@ abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
         )
 
         composeTestRule.setContent {
-            ConversationSettingsScreen(
-                modifier = Modifier.fillMaxSize(),
-                courseId = course.id!!,
-                conversationId = conversation.id,
-                viewModel = viewModel,
-                onNavigateBack = { },
-                onRequestAddMembers = { },
-                onRequestViewAllMembers = { },
-                onConversationLeft = onConversationLeft
-            )
+            CompositionLocalProvider(
+                LocalKoinScope provides KoinPlatformTools.defaultContext().get().scopeRegistry.rootScope,
+                LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
+            ) {
+                ConversationSettingsScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    courseId = course.id!!,
+                    conversationId = conversation.id,
+                    viewModel = viewModel,
+                    onNavigateBack = { },
+                    onRequestAddMembers = { },
+                    onRequestViewAllMembers = { },
+                    onConversationLeft = onConversationLeft
+                )
+            }
         }
     }
 

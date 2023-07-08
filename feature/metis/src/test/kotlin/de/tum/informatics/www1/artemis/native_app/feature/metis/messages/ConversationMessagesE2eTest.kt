@@ -20,6 +20,7 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
@@ -51,7 +52,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
 
-    @Test(timeout = 10000)
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows existing messages`() {
         val posts = runBlocking {
             withTimeout(DefaultTimeoutMillis) {
@@ -98,7 +99,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
         }
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can react to message with emoji`() {
         val post = postDefaultMessage()
 
@@ -147,7 +148,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             )
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can delete existing reaction`() {
         val emojiId = predefinedEmojiIds.first()
 
@@ -180,7 +181,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             )
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can delete message`() {
         val post = setupUiAndViewModelWithPost()
 
@@ -197,7 +198,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             )
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can edit message`() {
         val post = setupUiAndViewModelWithPost()
 

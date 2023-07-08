@@ -17,6 +17,7 @@ import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performTouchInput
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
@@ -60,7 +61,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
     /**
      * Checks that conversations are correctly displayed.
      */
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `displays personal chat, group chat and channel`() {
         val channelName = "channel${Random.nextInt(10000)}"
 
@@ -109,7 +110,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         verifyConversation(channel)
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can mark conversation as favorite`() {
         val chat = runBlocking { createPersonalConversation() }
 
@@ -121,7 +122,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         )
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can mark favorite conversation as not favorite`() {
         val chat = runBlocking {
             val chat = createPersonalConversation()
@@ -145,7 +146,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         )
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can mark conversation as hidden`() {
         val chat = runBlocking { createPersonalConversation() }
 
@@ -160,7 +161,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         )
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can mark hidden conversation as not hidden`() {
         val chat = runBlocking {
             val chat = createPersonalConversation()
@@ -191,7 +192,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
      * Checks that updates to conversations are automatically received over the websocket connection.
      */
     @OptIn(ExperimentalTestApi::class)
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `receives websocket conversation updates`() {
         val chat = runBlocking {
             conversationService.createChannel(

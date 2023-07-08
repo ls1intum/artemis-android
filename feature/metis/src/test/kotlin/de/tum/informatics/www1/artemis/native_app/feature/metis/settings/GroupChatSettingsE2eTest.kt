@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.settings
 
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
@@ -16,7 +17,7 @@ import kotlin.test.assertEquals
 @RunWith(RobolectricTestRunner::class)
 class GroupChatSettingsE2eTest : ConversationSettingsBaseE2eTest() {
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can leave group chat`() {
         val groupChat = runBlocking {
             conversationService.createGroupChat(
@@ -31,7 +32,7 @@ class GroupChatSettingsE2eTest : ConversationSettingsBaseE2eTest() {
         canLeaveConversationTestImpl(groupChat)
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can change group chat name`() {
         ShadowLog.stream = System.out
 

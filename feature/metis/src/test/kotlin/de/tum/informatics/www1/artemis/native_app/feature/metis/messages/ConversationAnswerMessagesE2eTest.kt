@@ -8,6 +8,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performScrollTo
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
@@ -35,7 +36,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
 
-    @Test(timeout = 10000)
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows existing message with answer posts`() {
         val answerPostContents = (0 until 3).map {
             "answer post content $it"
@@ -85,7 +86,7 @@ class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
         }
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can send new message`() {
         val post = postDefaultMessage()
 

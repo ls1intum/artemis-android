@@ -16,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participat
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.SubmissionType
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TextSubmission
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.R
@@ -71,7 +72,7 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
         }
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can view already entered text`() {
         val textSubmissionService: TextSubmissionService = get()
 
@@ -100,7 +101,7 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             .assert(hasText(textToEnter))
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can update text by entering new text`() {
         val testDispatcher = UnconfinedTestDispatcher()
         val viewModel = setupUi(testDispatcher)

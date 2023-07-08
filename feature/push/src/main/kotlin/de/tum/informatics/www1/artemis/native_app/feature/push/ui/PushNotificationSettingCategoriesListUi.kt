@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -21,6 +22,12 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.setting
+
+internal const val TEST_TAG_PUSH_CHECK_BOX = "TEST_TAG_PUSH_CHECK_BOX"
+
+internal fun testTagForSettingCategory(categoryId: String) = "notification category $categoryId"
+
+internal fun testTagForSetting(settingId: String) = "notification setting $settingId"
 
 @Composable
 internal fun PushNotificationSettingCategoriesListUi(
@@ -57,7 +64,9 @@ private fun PushNotificationSettingsList(
     ) {
         settingCategories.forEach { category ->
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(testTagForSettingCategory(category.categoryId)),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
@@ -67,7 +76,9 @@ private fun PushNotificationSettingsList(
 
                 category.settings.forEachIndexed { settingIndex, pushNotificationSetting ->
                     PushNotificationSettingEntry(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(testTagForSetting(pushNotificationSetting.settingId)),
                         setting = pushNotificationSetting,
                         onUpdate = { webapp, email, push ->
                             onUpdate(
@@ -136,7 +147,7 @@ private fun PushNotificationSettingEntry(
 
             if (setting.push != null) {
                 TextCheckBox(
-                    modifier = Modifier,
+                    modifier = Modifier.testTag(TEST_TAG_PUSH_CHECK_BOX),
                     isChecked = setting.push,
                     text = stringResource(id = R.string.push_notification_settings_label_push),
                     onCheckedChanged = { onUpdate(setting.webapp, setting.email, it) }

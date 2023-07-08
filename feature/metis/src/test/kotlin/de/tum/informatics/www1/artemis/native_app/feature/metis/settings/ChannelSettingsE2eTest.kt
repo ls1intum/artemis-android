@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
@@ -30,7 +31,7 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
     /**
      * Tests if we can leave a channel not created by ourselfes
      */
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can leave channel`() {
         val channel = runBlocking {
             withTimeout(DefaultTimeoutMillis) {
@@ -59,7 +60,7 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
         canLeaveConversationTestImpl(channel)
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can archive channel`() {
         val channel = runBlocking {
             withTimeout(DefaultTimeoutMillis) {
@@ -81,7 +82,7 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
         archiveOrUnarchiveChannelImpl(true)
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can unarchive archived channel`() {
         val channel = runBlocking {
             withTimeout(DefaultTimeoutMillis) {
@@ -145,7 +146,7 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
             .waitUntilExactlyOneExists(hasText(if (archive) doUnarchiveButtonText else doArchiveButtonText))
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can change channel name, description and topic`() {
         val channel = runBlocking {
             withTimeout(DefaultTimeoutMillis) {

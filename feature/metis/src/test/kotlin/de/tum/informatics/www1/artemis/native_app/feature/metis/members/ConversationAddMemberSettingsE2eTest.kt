@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
@@ -41,7 +42,7 @@ import kotlin.test.assertContains
 @RunWith(RobolectricTestRunner::class)
 class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can add members to channel`() {
         val conversation = runBlocking {
             withTimeout(DefaultTimeoutMillis) {
@@ -60,7 +61,7 @@ class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
         addRecipientsTestImpl(conversation, listOf(user2Username, user3Username))
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can add members to group chat`() {
         val conversation = runBlocking {
             withTimeout(DefaultTimeoutMillis) {

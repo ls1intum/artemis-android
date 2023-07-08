@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.test.testDataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.ui.uiModule
@@ -66,7 +67,7 @@ class LoginTest : KoinTest {
         modules(loginModule, pushModule)
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `test login is successful`() {
         Log.i(
             TAG,

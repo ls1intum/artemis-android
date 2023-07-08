@@ -1,10 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -30,14 +33,22 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 class PushNotificationSettingsViewModel internal constructor(
     private val notificationSettingsService: de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationSettingsService,
     networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
-    private val pushNotificationConfigurationService: PushNotificationConfigurationService
+    private val pushNotificationConfigurationService: PushNotificationConfigurationService,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "PushNotificationSettingsViewModel"
+    }
 
     internal val arePushNotificationsEnabled: StateFlow<Boolean> =
         serverConfigurationService
@@ -45,7 +56,7 @@ class PushNotificationSettingsViewModel internal constructor(
             .flatMapLatest { serverUrl ->
                 pushNotificationConfigurationService.getArePushNotificationsEnabledFlow(serverUrl)
             }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
 
     private val requestReloadSettings = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -64,7 +75,7 @@ class PushNotificationSettingsViewModel internal constructor(
                 }
             )
         }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     /**
      * Holds an entry for each updated setting (not synced with the server)
@@ -89,7 +100,7 @@ class PushNotificationSettingsViewModel internal constructor(
                 settings.applyChanges(syncedSettings + updatedSettings)
             }
         }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     internal val currentSettingsByGroup: StateFlow<DataState<List<NotificationCategory>>> =
         currentSettings
@@ -101,7 +112,7 @@ class PushNotificationSettingsViewModel internal constructor(
                         .sortedBy { it.categoryId }
                 }
             }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     /**
      * If there are unsynced changes with the server
@@ -142,7 +153,7 @@ class PushNotificationSettingsViewModel internal constructor(
         areEnabled: Boolean,
         onDone: (successful: Boolean) -> Unit
     ): Job {
-        return viewModelScope.launch {
+        return viewModelScope.launch(coroutineContext) {
             val serverUrl = serverConfigurationService.serverUrl.first()
             val authToken = accountService.authToken.first()
 
@@ -161,26 +172,28 @@ class PushNotificationSettingsViewModel internal constructor(
     }
 
     fun saveSettings(): Deferred<Boolean> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             val settingsToSync = currentSettings.value
             if (settingsToSync !is DataState.Success) {
                 return@async false
             }
 
-            val response = notificationSettingsService.updateNotificationSettings(
+            notificationSettingsService.updateNotificationSettings(
                 settingsToSync.data,
                 serverConfigurationService.serverUrl.first(),
                 accountService.authToken.first()
             )
-
-            if (response is NetworkResponse.Response) {
-                val newSyncedSettings = syncedSettings.value.toMutableMap()
-                newSyncedSettings += updatedSettings.value
-                syncedSettings.value = newSyncedSettings
-                updatedSettings.value = emptyMap()
-            }
-
-            response is NetworkResponse.Response
+                .onSuccess {
+                    val newSyncedSettings = syncedSettings.value.toMutableMap()
+                    newSyncedSettings += updatedSettings.value
+                    syncedSettings.value = newSyncedSettings
+                    updatedSettings.value = emptyMap()
+                }
+                .onFailure {
+                    Log.d(TAG, "Could not save notification settings", it)
+                }
+                .bind { true }
+                .or(false)
         }
     }
 

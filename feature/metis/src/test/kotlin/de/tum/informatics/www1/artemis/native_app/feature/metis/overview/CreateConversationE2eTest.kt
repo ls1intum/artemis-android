@@ -13,6 +13,7 @@ import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
@@ -45,7 +46,7 @@ class CreateConversationE2eTest : ConversationBaseTest() {
      * Tests that upon entering the name of user2 their name will be displayed in the potential recipients list.
      */
     @OptIn(ExperimentalTestApi::class)
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `displays users on search`() {
         val testDispatcher = UnconfinedTestDispatcher()
 
@@ -73,7 +74,7 @@ class CreateConversationE2eTest : ConversationBaseTest() {
         )
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can create personal conversation`() {
         val createdConversation = createConversationTestImpl(
             listOf(User(username = user2Username))
@@ -82,7 +83,7 @@ class CreateConversationE2eTest : ConversationBaseTest() {
         assertIs<OneToOneChat>(createdConversation, "Created conversation is not a OneToOneChat")
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can create group conversation`() {
         val createdConversation = createConversationTestImpl(
             listOf(

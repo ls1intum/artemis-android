@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
@@ -42,7 +43,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         private const val TAG = "CreateChannelE2eTest"
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can create channel`() {
         canCreateChannelTestImpl(
             channelName = "testchannel1",
@@ -52,7 +53,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         )
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `fun create channel without description`() {
         canCreateChannelTestImpl(
             channelName = "testchannel2",
@@ -62,7 +63,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         )
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `fun create private and unrestricted channel`() {
         canCreateChannelTestImpl(
             channelName = "testchannel3",

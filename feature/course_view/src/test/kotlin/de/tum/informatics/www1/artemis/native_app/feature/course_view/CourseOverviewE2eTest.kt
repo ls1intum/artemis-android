@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.course_view
 
 import androidx.compose.ui.test.onNodeWithText
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -11,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CourseOverviewE2eTest : BaseCourseTest() {
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `displays correct course title`() {
         setupAndDisplayCourseUi()
 

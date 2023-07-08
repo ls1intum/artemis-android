@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performScrollToKey
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
@@ -58,7 +59,7 @@ class DashboardE2eTest : KoinTest {
         }
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows created course in course list`() {
         val createdCourse = runBlocking {
             withTimeout(DefaultTimeoutMillis) {

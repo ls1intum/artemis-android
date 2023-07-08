@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.lecture_view
 
 import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasParent
@@ -22,6 +23,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createAttachment
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createAttachmentUnit
@@ -49,6 +51,10 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.koin.android.ext.koin.androidContext
+import org.koin.compose.LocalKoinApplication
+import org.koin.compose.LocalKoinScope
+import org.koin.core.annotation.KoinInternalApi
+import org.koin.mp.KoinPlatformTools
 import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
 import org.koin.test.get
@@ -57,6 +63,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
 class LectureE2eTest : KoinTest {
@@ -80,21 +87,23 @@ class LectureE2eTest : KoinTest {
     @Before
     fun setup() {
         runBlocking {
-            performTestLogin()
+            withTimeout(DefaultTestTimeoutMillis) {
+                performTestLogin()
 
-            course = createCourse(getAdminAccessToken())
-            lecture = createLecture(getAdminAccessToken(), course.id!!)
+                course = createCourse(getAdminAccessToken())
+                lecture = createLecture(getAdminAccessToken(), course.id!!)
+            }
         }
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows correct title in overview`() {
         setupViewModelAndUi()
 
         composeTestRule.onNodeWithText(lecture.title).assertExists()
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows lecture description`() {
         val description = lecture.description
         assertNotNull(description)
@@ -103,12 +112,12 @@ class LectureE2eTest : KoinTest {
         composeTestRule.onNodeWithText(description).assertExists()
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows text lecture unit`() {
         verifyLectureUnit(createLectureUnit("text-units", ::createTextLectureUnit))
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows exercise lecture unit`() {
         val exercise = runBlocking {
             createExercise(
@@ -127,17 +136,17 @@ class LectureE2eTest : KoinTest {
         }.let { verifyLectureUnit(it) }
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows video lecture unit`() {
         verifyLectureUnit(createLectureUnit("video-units", ::createVideoLectureUnit))
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows online lecture unit`() {
         verifyLectureUnit(createLectureUnit("online-units", ::createOnlineLectureUnit))
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows attachment lecture unit`() {
         val lectureUnit = runBlocking {
             createAttachmentUnit(getAdminAccessToken(), lecture.id!!)
@@ -146,7 +155,7 @@ class LectureE2eTest : KoinTest {
         verifyLectureUnit(lectureUnit)
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows attachments`() {
         val attachments = runBlocking {
             (0 until 3).map {
@@ -175,7 +184,7 @@ class LectureE2eTest : KoinTest {
     }
 
     @OptIn(ExperimentalTestApi::class)
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `mark lecture unit as completed is successful`() {
         val lectureUnit = createLectureUnit("text-units", ::createTextLectureUnit)
 
@@ -230,6 +239,7 @@ class LectureE2eTest : KoinTest {
         }
     }
 
+    @OptIn(KoinInternalApi::class)
     private fun setupViewModelAndUi(): LectureViewModel {
         val viewModel = LectureViewModel(
             lectureId = lecture.id!!,
@@ -245,20 +255,31 @@ class LectureE2eTest : KoinTest {
         )
 
         composeTestRule.setContent {
-            LectureScreen(
-                modifier = Modifier.fillMaxSize(),
-                courseId = course.id!!,
-                lectureId = lecture.id!!,
-                viewModel = viewModel,
-                navController = rememberNavController(),
-                onNavigateBack = { },
-                onViewExercise = {},
-                onNavigateToExerciseResultView = {},
-                onNavigateToTextExerciseParticipation = { _, _ -> },
-                onParticipateInQuiz = { _, _ -> },
-                onClickViewQuizResults = { _, _ -> }
-            )
+            CompositionLocalProvider(
+                LocalKoinScope provides KoinPlatformTools.defaultContext()
+                    .get().scopeRegistry.rootScope,
+                LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
+            ) {
+                LectureScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    courseId = course.id!!,
+                    lectureId = lecture.id!!,
+                    viewModel = viewModel,
+                    navController = rememberNavController(),
+                    onNavigateBack = { },
+                    onViewExercise = {},
+                    onNavigateToExerciseResultView = {},
+                    onNavigateToTextExerciseParticipation = { _, _ -> },
+                    onParticipateInQuiz = { _, _ -> },
+                    onClickViewQuizResults = { _, _ -> }
+                )
+            }
         }
+
+        composeTestRule.waitUntilAtLeastOneExists(
+            hasTestTag(TEST_TAG_OVERVIEW_LIST),
+            DefaultTimeoutMillis
+        )
 
         return viewModel
     }

@@ -32,4 +32,7 @@ dependencies {
 
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)
+
+    testImplementation(project(":feature:login"))
+    testImplementation(project(":feature:login-test"))
 }
