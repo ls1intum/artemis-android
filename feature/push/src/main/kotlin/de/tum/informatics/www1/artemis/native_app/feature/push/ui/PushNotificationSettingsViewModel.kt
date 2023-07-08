@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationSettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.group
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -38,7 +40,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 class PushNotificationSettingsViewModel internal constructor(
-    private val notificationSettingsService: de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationSettingsService,
+    private val notificationSettingsService: NotificationSettingsService,
     networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
@@ -64,7 +66,7 @@ class PushNotificationSettingsViewModel internal constructor(
         transformLatest(
             requestReloadSettings.onStart { emit(Unit) },
             serverConfigurationService.serverUrl,
-            accountService.authToken
+            accountService.authToken.filterNot { it.isBlank() }
         ) { _, serverUrl, authToken ->
             emitAll(
                 retryOnInternet(networkStatusProvider.currentNetworkStatus) {
