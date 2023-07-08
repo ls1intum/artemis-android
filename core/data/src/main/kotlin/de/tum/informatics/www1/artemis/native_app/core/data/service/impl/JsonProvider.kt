@@ -6,6 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.quizQ
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.submittedAnswerSerializerModule
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.submissionSerializerModule
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lectureSerializerModule
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 
@@ -14,6 +15,7 @@ class JsonProvider {
     /**
      * The response json configuration.
      */
+    @OptIn(ExperimentalSerializationApi::class)
     val applicationJsonConfiguration = Json {
         // Ignore unknown keys. If set to false, parsing JSON will throw an error when a new key is introduced.
         ignoreUnknownKeys = true

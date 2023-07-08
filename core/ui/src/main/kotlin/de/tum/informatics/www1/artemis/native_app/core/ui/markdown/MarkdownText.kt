@@ -39,6 +39,7 @@ import io.noties.markwon.html.HtmlPlugin
 import io.noties.markwon.image.coil.CoilImagesPlugin
 import io.noties.markwon.linkify.LinkifyPlugin
 import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 
 // Copy from: https://github.com/jeziellago/compose-markdown
 /*
@@ -89,7 +90,7 @@ fun MarkdownText(
         createMarkdownRender(context, imageLoader)
     }
 
-    val serverConfigurationService: ServerConfigurationService = get()
+    val serverConfigurationService: ServerConfigurationService = koinInject()
     val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
 
     val transformedMarkdown by remember(markdown, serverUrl) {

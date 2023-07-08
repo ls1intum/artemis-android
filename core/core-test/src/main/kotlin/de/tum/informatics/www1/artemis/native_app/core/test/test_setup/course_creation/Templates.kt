@@ -344,7 +344,7 @@ fun createTextLectureUnit(name: String) = """
     {"name":"$name","releaseDate":null,"competencies":[],"type":"text","content":"${generateId()}"}
 """.trimIndent()
 
-fun createExerciseLectureUnit(name: String, exerciseAsString: String) = """
+fun createExerciseLectureUnit(@Suppress("UNUSED_PARAMETER") name: String, exerciseAsString: String) = """
     {
       "type": "exercise",
       "exercise": $exerciseAsString
