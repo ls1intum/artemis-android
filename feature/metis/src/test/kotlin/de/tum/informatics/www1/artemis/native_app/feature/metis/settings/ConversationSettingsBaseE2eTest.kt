@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.service.getConve
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.ConversationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.ConversationSettingsViewModel
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withTimeout
 import org.koin.compose.LocalKoinApplication
@@ -105,6 +106,7 @@ abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
     @OptIn(KoinInternalApi::class)
     protected fun setupUiAndViewModel(
         conversation: Conversation,
+        testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),
         onConversationLeft: () -> Unit = {}
     ) {
         val viewModel = ConversationSettingsViewModel(
@@ -116,7 +118,7 @@ abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
             networkStatusProvider = get(),
             accountDataService = get(),
             savedStateHandle = SavedStateHandle(),
-            coroutineContext = UnconfinedTestDispatcher()
+            coroutineContext = testDispatcher
         )
 
         composeTestRule.setContent {

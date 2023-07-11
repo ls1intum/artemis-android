@@ -15,6 +15,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAcc
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -77,9 +79,11 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
             }
         }
 
-        setupUiAndViewModel(channel)
+        val testDispatcher = UnconfinedTestDispatcher()
 
-        archiveOrUnarchiveChannelImpl(true)
+        setupUiAndViewModel(channel, testDispatcher)
+
+        archiveOrUnarchiveChannelImpl(true, testDispatcher)
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
@@ -109,12 +113,13 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
 
         }
 
-        setupUiAndViewModel(channel)
+        val testDispatcher = UnconfinedTestDispatcher()
+        setupUiAndViewModel(channel, testDispatcher)
 
-        archiveOrUnarchiveChannelImpl(false)
+        archiveOrUnarchiveChannelImpl(false, testDispatcher)
     }
 
-    private fun archiveOrUnarchiveChannelImpl(archive: Boolean) {
+    private fun archiveOrUnarchiveChannelImpl(archive: Boolean, testDispatcher: TestDispatcher) {
         val doArchiveButtonText =
             context.getString(R.string.conversation_settings_section_other_archive_channel)
         val doUnarchiveButtonText =
@@ -141,6 +146,8 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
                 )
             )
             .performClick()
+
+        testDispatcher.scheduler.advanceUntilIdle()
 
         composeTestRule
             .waitUntilExactlyOneExists(
