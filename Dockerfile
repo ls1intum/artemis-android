@@ -24,5 +24,8 @@ RUN ./gradlew -p download-dependencies/ app:dependencies
 
 COPY . .
 
+ARG buildNumber=1
+ENV bamboo_buildNumber=$buildNumber
+
 ENTRYPOINT ["./gradlew"]
 RUN ./gradlew build -Dskip.e2e=true
