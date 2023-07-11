@@ -135,7 +135,7 @@ class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
             }
         }
 
-        testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.runCurrent()
 
         // Wait until post and answer posts are loaded
         composeTestRule.waitUntilExactlyOneExists(

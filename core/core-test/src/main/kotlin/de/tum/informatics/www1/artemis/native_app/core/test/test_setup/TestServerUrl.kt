@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 val testServerUrl: String
-    get() = System.getenv("SERVER_URL") ?: "http://localhost:9000"
+    get() = System.getenv("SERVER_URL") ?: "http://localhost:8080"
 
 class TestServerConfigurationProvider : ServerConfigurationService {
     override val serverUrl: Flow<String> = flowOf(testServerUrl)

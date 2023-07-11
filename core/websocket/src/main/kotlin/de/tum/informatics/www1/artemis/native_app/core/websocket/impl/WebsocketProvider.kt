@@ -38,7 +38,7 @@ class WebsocketProvider(
     accountService: AccountService,
     private val jsonProvider: JsonProvider,
     private val networkStatusProvider: NetworkStatusProvider,
-    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
+    coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) {
 
     companion object {

@@ -46,6 +46,7 @@ import org.koin.core.annotation.KoinInternalApi
 import org.koin.mp.KoinPlatformTools
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.Duration.Companion.minutes
 
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
@@ -270,7 +271,8 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
 
         composeTestRule.setContent {
             CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext().get().scopeRegistry.rootScope,
+                LocalKoinScope provides KoinPlatformTools.defaultContext()
+                    .get().scopeRegistry.rootScope,
                 LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
             ) {
                 ProvideLocalVisibleMetisContextManager(visibleMetisContextManager = EmptyVisibleMetisContextManager) {
@@ -284,7 +286,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             }
         }
 
-        testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceTimeBy(2.minutes)
 
         return viewModel
     }

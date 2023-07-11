@@ -10,13 +10,13 @@ import org.koin.test.get
 import kotlin.test.assertIs
 
 val user1Username: String
-    get() = System.getenv("USER_1_USERNAME") ?: "test_user"
+    get() = System.getenv("USER_1_USERNAME") ?: "aa01aaa"
 
 val user1Password: String
-    get() = System.getenv("USER_1_PASSWORD") ?: "test_user_password"
+    get() = System.getenv("USER_1_PASSWORD") ?: "test_user_1_password"
 
-val user2Username: String get() = System.getenv("USER_2_USERNAME") ?: "test_user_2"
-val user3Username: String get() = System.getenv("USER_3_USERNAME") ?: "test_user_3"
+val user2Username: String get() = System.getenv("USER_2_USERNAME") ?: "aa02aaa"
+val user3Username: String get() = System.getenv("USER_3_USERNAME") ?: "aa03aaa"
 val user2DisplayName: String get() = System.getenv("USER_2_DISPLAY_NAME") ?: "Test User2"
 
 suspend fun KoinTest.performTestLogin(): String {

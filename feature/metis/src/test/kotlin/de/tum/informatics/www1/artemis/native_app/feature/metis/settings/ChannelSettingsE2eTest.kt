@@ -2,18 +2,22 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.settings
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.ConversationSettingsViewModel
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -100,17 +104,16 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
                     serverUrl = testServerUrl
                 )
                     .orThrow("Could not create channel")
-                    .apply {
+                    .also { channel ->
                         conversationService.archiveChannel(
                             course.id!!,
-                            id,
+                            channel.id,
                             accessToken,
                             testServerUrl
                         )
                             .orThrow("could not archive channel")
                     }
             }
-
         }
 
         val testDispatcher = UnconfinedTestDispatcher()
