@@ -21,7 +21,7 @@ services:
       #     -  ADMIN_PASSWORD: ${bamboo_artemis_admin_password}
       - ADMIN_PASSWORD=artemis_admin
     command:
-      - test
+      - test -Dbamboo_buildNumber=${bamboo_buildNumber:-1}
     networks:
       - artemis
 
