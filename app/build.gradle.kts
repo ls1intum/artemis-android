@@ -25,7 +25,7 @@ android {
 
     val versionName = "0.7.2"
     val versionCode =
-        if (!System.getenv("\$bamboo_buildNumber").isNullOrEmpty()) System.getenv("\$bamboo_buildNumber")
+        if (!System.getenv("bamboo_buildNumber").isNullOrEmpty()) System.getenv("bamboo_buildNumber")
             ?.toString()
             ?.toIntOrNull() ?: deriveVersionCodeFromGit() else deriveVersionCodeFromGit()
 
