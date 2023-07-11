@@ -10,6 +10,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
+import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.course_overview.CourseUiScreen
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.course_overview.DEFAULT_CONVERSATION_ID
@@ -34,6 +35,8 @@ import org.koin.test.get
 
 abstract class BaseCourseTest : KoinTest {
 
+    protected val testDispatcher = UnconfinedTestDispatcher()
+
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -42,7 +45,7 @@ abstract class BaseCourseTest : KoinTest {
         androidContext(InstrumentationRegistry.getInstrumentation().context)
 
         modules(coreTestModules)
-        modules(loginModule, courseViewModule, testLoginModule)
+        modules(loginModule, courseViewModule, testLoginModule, testWebsocketModule(testDispatcher))
     }
 
     lateinit var course: Course
@@ -70,12 +73,13 @@ abstract class BaseCourseTest : KoinTest {
             accountService = get(),
             courseExerciseService = get(),
             networkStatusProvider = get(),
-            coroutineContext = UnconfinedTestDispatcher()
+            coroutineContext = testDispatcher
         )
 
         composeTestRule.setContent {
             CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext().get().scopeRegistry.rootScope,
+                LocalKoinScope provides KoinPlatformTools.defaultContext()
+                    .get().scopeRegistry.rootScope,
                 LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
             ) {
                 CourseUiScreen(

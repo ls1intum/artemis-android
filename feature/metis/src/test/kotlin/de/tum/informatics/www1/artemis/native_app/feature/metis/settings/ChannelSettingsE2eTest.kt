@@ -9,6 +9,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.printToLog
+import androidx.compose.ui.test.printToString
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
@@ -83,11 +85,9 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
             }
         }
 
-        val testDispatcher = UnconfinedTestDispatcher()
+        setupUiAndViewModel(channel)
 
-        setupUiAndViewModel(channel, testDispatcher)
-
-        archiveOrUnarchiveChannelImpl(true, testDispatcher)
+        archiveOrUnarchiveChannelImpl(true)
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
@@ -116,13 +116,12 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
             }
         }
 
-        val testDispatcher = UnconfinedTestDispatcher()
-        setupUiAndViewModel(channel, testDispatcher)
+        setupUiAndViewModel(channel)
 
-        archiveOrUnarchiveChannelImpl(false, testDispatcher)
+        archiveOrUnarchiveChannelImpl(false)
     }
 
-    private fun archiveOrUnarchiveChannelImpl(archive: Boolean, testDispatcher: TestDispatcher) {
+    private fun archiveOrUnarchiveChannelImpl(archive: Boolean) {
         val doArchiveButtonText =
             context.getString(R.string.conversation_settings_section_other_archive_channel)
         val doUnarchiveButtonText =
@@ -152,11 +151,16 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
 
         testDispatcher.scheduler.advanceUntilIdle()
 
-        composeTestRule
-            .waitUntilExactlyOneExists(
-                hasText(if (archive) doUnarchiveButtonText else doArchiveButtonText),
-                DefaultTimeoutMillis
-            )
+        try {
+            composeTestRule
+                .waitUntilExactlyOneExists(
+                    hasText(if (archive) doUnarchiveButtonText else doArchiveButtonText),
+                    DefaultTimeoutMillis
+                )
+        } catch (t: Throwable) {
+            println(composeTestRule.onRoot().printToString())
+            throw t
+        }
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)

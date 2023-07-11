@@ -339,7 +339,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         return tagForConversation(conversation.id, suffix)
     }
 
-    private fun setupUiAndViewModel(dispatcher: TestDispatcher = UnconfinedTestDispatcher()): ConversationOverviewViewModel {
+    private fun setupUiAndViewModel(): ConversationOverviewViewModel {
         val viewModel = ConversationOverviewViewModel(
             application = context.applicationContext as Application,
             courseId = course.id!!,
@@ -350,7 +350,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             websocketProvider = get(),
             networkStatusProvider = get(),
             accountDataService = get(),
-            coroutineContext = dispatcher
+            coroutineContext = testDispatcher
         )
 
         composeTestRule.setContent {

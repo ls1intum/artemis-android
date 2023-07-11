@@ -106,7 +106,6 @@ abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
     @OptIn(KoinInternalApi::class)
     protected fun setupUiAndViewModel(
         conversation: Conversation,
-        testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),
         onConversationLeft: () -> Unit = {}
     ) {
         val viewModel = ConversationSettingsViewModel(

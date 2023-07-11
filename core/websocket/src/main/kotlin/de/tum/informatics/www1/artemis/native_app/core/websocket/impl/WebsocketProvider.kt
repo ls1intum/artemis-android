@@ -38,7 +38,8 @@ class WebsocketProvider(
     accountService: AccountService,
     private val jsonProvider: JsonProvider,
     private val networkStatusProvider: NetworkStatusProvider,
-    coroutineContext: CoroutineContext = EmptyCoroutineContext
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
+    maxReconnects: Int? = null
 ) {
 
     companion object {
@@ -120,7 +121,7 @@ class WebsocketProvider(
                     }
                         .retryWhen { e, attempt ->
                             // Never retry on cancellation
-                            if (e !is CancellationException) {
+                            if (e !is CancellationException && (maxReconnects == null || attempt < maxReconnects)) {
                                 Log.d(TAG, "Websocket connection failure (attempt $attempt)", e)
                                 // Either we wait the specified time, or we immediately try again when we have internet
                                 withTimeoutOrNull(1.seconds * attempt.toInt()) {

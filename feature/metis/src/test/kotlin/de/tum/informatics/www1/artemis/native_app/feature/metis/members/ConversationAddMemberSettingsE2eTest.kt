@@ -80,8 +80,6 @@ class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
     }
 
     private fun addRecipientsTestImpl(conversation: Conversation, newUsers: List<String>) {
-        val dispatcher = UnconfinedTestDispatcher()
-
         val viewModel = ConversationAddMembersViewModel(
             courseId = course.id!!,
             conversationId = conversation.id,
@@ -90,7 +88,7 @@ class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
             serverConfigurationService = get(),
             networkStatusProvider = get(),
             savedStateHandle = SavedStateHandle(),
-            coroutineContext = dispatcher
+            coroutineContext = testDispatcher
         )
 
         var isDone = false
@@ -110,7 +108,7 @@ class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
         )
 
         newUsers.forEach { username ->
-            addMember(username, dispatcher)
+            addMember(username, testDispatcher)
         }
 
         newUsers.forEach { username ->

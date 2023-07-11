@@ -102,8 +102,7 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can update text by entering new text`() {
-        val testDispatcher = UnconfinedTestDispatcher()
-        val viewModel = setupUi(testDispatcher)
+        val viewModel = setupUi()
 
         composeTestRole
             .onNodeWithTag(TEST_TAG_TEXT_FIELD_PARTICIPATION)
@@ -127,7 +126,7 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             .assertExists()
     }
 
-    private fun setupUi(testDispatcher: TestDispatcher = UnconfinedTestDispatcher()): TextExerciseParticipationViewModel {
+    private fun setupUi(): TextExerciseParticipationViewModel {
         val viewModel = TextExerciseParticipationViewModel(
             exerciseId = exercise.id!!,
             participationId = participation.id!!,

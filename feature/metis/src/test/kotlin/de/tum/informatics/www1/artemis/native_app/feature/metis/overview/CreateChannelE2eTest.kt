@@ -90,7 +90,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             accountService = get(),
             serverConfigurationService = get(),
             savedStateHandle = SavedStateHandle(),
-            coroutineContext = UnconfinedTestDispatcher()
+            coroutineContext = testDispatcher
         )
 
         var createdConversationId: Long? = null

@@ -202,7 +202,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
     }
 
     @OptIn(KoinInternalApi::class)
-    private fun setupUiAndViewModel(dispatcher: TestDispatcher = UnconfinedTestDispatcher()) {
+    private fun setupUiAndViewModel() {
         val viewModel = ConversationMembersViewModel(
             initialCourseId = course.id!!,
             initialConversationId = channel.id,
@@ -212,7 +212,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
             networkStatusProvider = get(),
             accountDataService = get(),
             savedStateHandle = SavedStateHandle(),
-            coroutineContext = dispatcher
+            coroutineContext = testDispatcher
         )
 
         composeTestRule.setContent {
@@ -229,7 +229,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
             }
         }
 
-        dispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceUntilIdle()
 
         composeTestRule.waitUntilExactlyOneExists(
             hasTestTag(TEST_TAG_MEMBERS_LIST),

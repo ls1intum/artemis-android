@@ -1,9 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
@@ -62,6 +64,8 @@ internal class ConversationSettingsViewModel(
         private const val KEY_NAME = "name"
         private const val KEY_DESCRIPTION = "description"
         private const val KEY_TOPIC = "topic"
+
+        private const val TAG = "ConversationSettingsViewModel"
     }
 
     private val _name: StateFlow<String?> = savedStateHandle.getStateFlow(KEY_NAME, null)
@@ -267,6 +271,9 @@ internal class ConversationSettingsViewModel(
                     serverUrl = serverConfigurationService.serverUrl.first()
                 )
             }
+                .onFailure {
+                    Log.d(TAG, "Could not perform channel archivation", it)
+                }
                 .or(false)
 
             if (result) {

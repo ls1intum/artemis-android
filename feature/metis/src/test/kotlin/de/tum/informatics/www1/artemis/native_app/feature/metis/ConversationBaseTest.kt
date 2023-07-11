@@ -6,6 +6,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
+import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
@@ -19,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.service.Conversa
 import de.tum.informatics.www1.artemis.native_app.feature.metis_test.MetisDatabaseProviderMock
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
 import org.koin.android.ext.koin.androidContext
@@ -48,16 +51,7 @@ abstract class ConversationBaseTest : KoinTest {
                     context
                 )
             }
-            single<WebsocketProvider> {
-                WebsocketProvider(
-                    serverConfigurationService = get(),
-                    accountService = get(),
-                    jsonProvider = get(),
-                    networkStatusProvider = get(),
-                    coroutineContext = testDispatcher
-                )
-            }
-        })
+        }, testWebsocketModule(testDispatcher))
     }
 
     protected lateinit var accessToken: String
@@ -72,9 +66,11 @@ abstract class ConversationBaseTest : KoinTest {
         ShadowLog.stream = System.out
 
         runBlocking {
-            accessToken = performTestLogin()
+            withTimeout(DefaultTimeoutMillis) {
+                accessToken = performTestLogin()
 
-            course = createCourse(getAdminAccessToken())
+                course = createCourse(getAdminAccessToken())
+            }
         }
     }
 

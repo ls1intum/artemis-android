@@ -71,7 +71,7 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
             liveParticipationService = get(),
             courseExerciseService = get(),
             networkStatusProvider = get(),
-            coroutineContext = UnconfinedTestDispatcher()
+            coroutineContext = testDispatcher
         )
 
         composeTestRole.setContent {

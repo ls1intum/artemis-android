@@ -51,9 +51,7 @@ class CreateConversationE2eTest : ConversationBaseTest() {
     @OptIn(ExperimentalTestApi::class)
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `displays users on search`() {
-        val testDispatcher = UnconfinedTestDispatcher()
-
-        val viewModel = setupUiAndViewModel(testDispatcher)
+        val viewModel = setupUiAndViewModel()
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD)
@@ -102,7 +100,6 @@ class CreateConversationE2eTest : ConversationBaseTest() {
         var createdConversationId: Long? = null
 
         val viewModel = setupUiAndViewModel(
-            UnconfinedTestDispatcher(),
             onConversationCreated = { conversationId ->
                 createdConversationId = conversationId
             }
@@ -128,7 +125,6 @@ class CreateConversationE2eTest : ConversationBaseTest() {
     }
 
     private fun setupUiAndViewModel(
-        testDispatcher: TestDispatcher,
         onConversationCreated: (Long) -> Unit = {}
     ): CreatePersonalConversationViewModel {
         val viewModel = CreatePersonalConversationViewModel(

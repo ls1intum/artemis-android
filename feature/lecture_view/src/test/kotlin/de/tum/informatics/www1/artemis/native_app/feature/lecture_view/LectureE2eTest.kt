@@ -23,6 +23,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
+import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createAttachment
@@ -68,6 +69,8 @@ import kotlin.test.assertTrue
 @RunWith(RobolectricTestRunner::class)
 class LectureE2eTest : KoinTest {
 
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -76,7 +79,7 @@ class LectureE2eTest : KoinTest {
         androidContext(InstrumentationRegistry.getInstrumentation().context)
 
         modules(coreTestModules)
-        modules(loginModule, lectureModule, testLoginModule)
+        modules(loginModule, lectureModule, testLoginModule, testWebsocketModule(testDispatcher))
     }
 
     private val context: Context get() = InstrumentationRegistry.getInstrumentation().context
@@ -251,7 +254,7 @@ class LectureE2eTest : KoinTest {
             savedStateHandle = SavedStateHandle(),
             serverTimeService = get(),
             courseExerciseService = get(),
-            coroutineContext = UnconfinedTestDispatcher()
+            coroutineContext = testDispatcher
         )
 
         composeTestRule.setContent {
