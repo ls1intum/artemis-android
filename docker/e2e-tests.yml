@@ -4,7 +4,7 @@ services:
     build:
       context: ..
       args:
-        buildNumber: ${bamboo_buildNumber:1}
+        buildNumber: ${bamboo_buildNumber:-1}
     depends_on:
       artemis-app-setup:
         condition: service_started
