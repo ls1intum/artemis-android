@@ -21,8 +21,10 @@ android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
     val versionName = "0.7.2"
-    val versionCode = if (hasProperty("VERSION_CODE")) property("VERSION_CODE")?.toString()
-        ?.toIntOrNull() ?: deriveVersionCodeFromGit() else deriveVersionCodeFromGit()
+    val versionCode =
+        if (!System.getenv("bamboo.buildNumber").isNullOrEmpty()) System.getenv("bamboo.buildNumber")
+            ?.toString()
+            ?.toIntOrNull() ?: deriveVersionCodeFromGit() else deriveVersionCodeFromGit()
 
     setProperty("archivesBaseName", "artemis-android-$versionName-$versionCode")
 
@@ -70,7 +72,8 @@ android {
 
     productFlavors {
         getByName(ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection) {
-            versionNameSuffix = "-" + ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection
+            versionNameSuffix =
+                "-" + ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection
         }
 
         getByName(ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum) {
