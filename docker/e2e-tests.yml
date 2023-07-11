@@ -24,6 +24,8 @@ services:
       - test
     networks:
       - artemis
+    volumes:
+      - ../test-outputs/:/app/test-outputs/
 
   mysql:
     extends:

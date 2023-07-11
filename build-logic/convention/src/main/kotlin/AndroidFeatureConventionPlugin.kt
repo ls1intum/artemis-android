@@ -71,6 +71,8 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                             excludeCategories("de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest")
                         }
                     }
+
+                    reports.junitXml.outputLocation.set(rootProject.rootDir.resolve("test-outputs/"))
                 }
             }
         }
