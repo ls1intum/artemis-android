@@ -3,6 +3,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.partici
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
@@ -36,6 +38,7 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
         composeTestRole.onAllNodesWithText(exercise.title!!).onFirst().assertExists()
     }
 
+    @OptIn(ExperimentalTestApi::class)
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can start text exercise`() {
         var participationId: Long? = null
@@ -50,8 +53,10 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
         composeTestRole.waitUntil(DefaultTimeoutMillis) { participationId != null }
 
         composeTestRole
-            .onNodeWithText(context.getString(CoreUiR.string.exercise_actions_open_exercise_button))
-            .assertExists("After starting the exercise the button should now say \"open exercise\"")
+            .waitUntilExactlyOneExists(
+                hasText(context.getString(CoreUiR.string.exercise_actions_open_exercise_button)),
+                DefaultTimeoutMillis
+            )
     }
 
     @OptIn(KoinInternalApi::class)
@@ -71,7 +76,8 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
 
         composeTestRole.setContent {
             CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext().get().scopeRegistry.rootScope,
+                LocalKoinScope provides KoinPlatformTools.defaultContext()
+                    .get().scopeRegistry.rootScope,
                 LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
             ) {
                 ExerciseScreen(
