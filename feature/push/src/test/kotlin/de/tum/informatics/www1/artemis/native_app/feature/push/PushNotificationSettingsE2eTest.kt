@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -58,6 +59,10 @@ import kotlin.test.assertTrue
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
 class PushNotificationSettingsE2eTest : KoinTest {
+
+    companion object {
+        private const val TAG = "PushNotificationSettingsE2eTest"
+    }
 
     @get:Rule
     val composeTestRule = createComposeRule()
@@ -142,9 +147,16 @@ class PushNotificationSettingsE2eTest : KoinTest {
             }
         }
 
+        Log.i(TAG, "CurrentSettingsByGroup=$currentSettingsByGroup")
+
         val category =
             currentSettingsByGroup.first { category -> category.settings.isNotEmpty() && category.settings.any { it.push != null } }
+
+        Log.i(TAG, "Selected category for switch=$category")
+
         val setting = category.settings.first { it.push != null }
+
+        Log.i(TAG, "Selected setting for switch=$setting")
 
         // Click on push checkbox of setting
         composeTestRule
@@ -178,8 +190,12 @@ class PushNotificationSettingsE2eTest : KoinTest {
             } ?: throw RuntimeException("Could not load updated notification settings")
         }
 
+        Log.i(TAG, "Updated settings=$updatedSettings")
+
         val updatedSetting = updatedSettings
-            .first { it.group == setting.group && it.id == setting.id }
+            .first { it.group == setting.group && it.settingId == setting.settingId }
+
+        Log.i(TAG, "Updated setting=$updatedSetting")
 
         // Check that the new setting has been updated correctly
         assertEquals(!setting.push!!, updatedSetting.push!!)

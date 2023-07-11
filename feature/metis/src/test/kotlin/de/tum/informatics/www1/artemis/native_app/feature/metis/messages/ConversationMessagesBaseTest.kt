@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R

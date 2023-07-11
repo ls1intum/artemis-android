@@ -5,3 +5,4 @@ private_key.pepk
 **/build
 **/.gradle
 **/.idea
+/docker

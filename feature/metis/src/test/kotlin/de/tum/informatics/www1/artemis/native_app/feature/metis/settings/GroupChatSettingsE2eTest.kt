@@ -5,6 +5,8 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTe
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.experimental.categories.Category

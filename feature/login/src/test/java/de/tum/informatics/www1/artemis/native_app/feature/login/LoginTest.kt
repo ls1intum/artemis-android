@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Passwo
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -30,6 +31,7 @@ import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLog
 
 @RunWith(RobolectricTestRunner::class)
 @Category(EndToEndTest::class)
@@ -49,6 +51,11 @@ class LoginTest : KoinTest {
         androidContext(InstrumentationRegistry.getInstrumentation().context)
         modules(coreTestModules)
         modules(loginModule, pushModule)
+    }
+
+    @Before
+    fun setup() {
+        ShadowLog.stream = System.out
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)

@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis_test.MetisDatabaseProviderMock
@@ -65,12 +66,6 @@ abstract class ConversationBaseTest : KoinTest {
     protected lateinit var exercise: TextExercise
 
     protected val conversationService: ConversationService get() = get()
-
-    protected val user2Username: String = System.getenv("user2Username") ?: "test_user_2"
-
-    protected val user3Username: String = System.getenv("user3Username") ?: "test_user_3"
-
-    protected val user2DisplayName: String = System.getenv("user2Name") ?: "Test User2"
 
     @Before
     open fun setup() {

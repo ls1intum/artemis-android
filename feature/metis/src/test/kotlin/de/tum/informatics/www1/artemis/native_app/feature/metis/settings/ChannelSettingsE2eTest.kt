@@ -143,7 +143,10 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
             .performClick()
 
         composeTestRule
-            .waitUntilExactlyOneExists(hasText(if (archive) doUnarchiveButtonText else doArchiveButtonText))
+            .waitUntilExactlyOneExists(
+                hasText(if (archive) doUnarchiveButtonText else doArchiveButtonText),
+                DefaultTimeoutMillis
+            )
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)

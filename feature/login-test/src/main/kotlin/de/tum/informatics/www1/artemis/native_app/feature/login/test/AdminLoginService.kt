@@ -12,8 +12,8 @@ class AdminLoginService(
     private val loginService: LoginService,
     private val serverConfigurationService: ServerConfigurationService
 ) {
-    private val adminUsername: String get() = System.getenv("adminUsername") ?: "artemis_admin"
-    private val adminPassword: String get() = System.getenv("adminPassword") ?: "artemis_admin"
+    private val adminUsername: String get() = System.getenv("ADMIN_USERNAME") ?: "artemis_admin"
+    private val adminPassword: String get() = System.getenv("ADMIN_PASSWORD") ?: "artemis_admin"
 
     @Volatile
     private var cachedJwt: String? = null

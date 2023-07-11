@@ -1,0 +1,63 @@
+services:
+  artemis-android-e2e:
+    image: artemis-android
+    build:
+      context: ..
+    depends_on:
+      artemis-app-setup:
+        condition: service_started
+    environment:
+      - USER_1_USERNAME=aa01aaa
+      - USER_1_PASSWORD=test_user_1_password
+      - USER_2_USERNAME=aa02aaa
+      - USER_2_DISPLAY_NAME=Test User2
+      - USER_3_USERNAME=aa03aaa
+      - SERVER_URL=http://artemis-app:8080
+      - DEFAULT_TIMEOUT=10000
+      #     -  ADMIN_USERNAME: ${bamboo_artemis_admin_username}
+      - ADMIN_USERNAME=artemis_admin
+      #     -  ADMIN_PASSWORD: ${bamboo_artemis_admin_password}
+      - ADMIN_PASSWORD=artemis_admin
+    command:
+      - test
+    networks:
+      - artemis
+
+  mysql:
+    extends:
+      file: ./mysql.yml
+      service: mysql
+
+  artemis-app:
+    extends:
+      file: ./artemis.yml
+      service: artemis-app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    env_file:
+      - artemis_e2e_config.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8080:8080"
+    expose:
+      - "5005"
+    networks:
+      - artemis
+
+  artemis-app-setup:
+    image: ellerbrock/alpine-bash-curl-ssl:latest
+    depends_on:
+      artemis-app:
+        condition: service_healthy
+    volumes:
+      - ./create_test_users.sh:/create_test_users.sh
+    entrypoint: /bin/bash -c "/bin/bash /create_test_users.sh artemis-app:8080"
+    networks:
+      - artemis
+
+networks:
+  artemis:
+    driver: "bridge"
+    name: artemis

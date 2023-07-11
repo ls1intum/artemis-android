@@ -16,6 +16,9 @@ import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2DisplayName
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat

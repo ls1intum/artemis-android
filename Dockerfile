@@ -9,7 +9,7 @@
 
 FROM thyrlian/android-sdk:9.1 as builder
 
-RUN sdkmanager "build-tools;34.0.0" "build-tools;30.0.3" "platforms;android-34" "platform-tools" "emulator"
+RUN sdkmanager "build-tools;34.0.0" "build-tools;30.0.3" "platforms;android-33" "platform-tools" "emulator"
 
 WORKDIR /app
 COPY gradlew gradlew
@@ -25,4 +25,4 @@ RUN ./gradlew -p download-dependencies/ app:dependencies
 COPY . .
 
 ENTRYPOINT ["./gradlew"]
-RUN ./gradlew build -Dskip.tests=true
+RUN ./gradlew build -Dskip.e2e=true

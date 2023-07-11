@@ -4,6 +4,8 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
@@ -56,6 +58,12 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
 
             afterEvaluate {
                 tasks.withType(Test::class) {
+                    testLogging.setEvents(listOf(TestLogEvent.FAILED))
+
+                    testLogging.exceptionFormat = TestExceptionFormat.FULL
+                    testLogging.showExceptions = true
+                    testLogging.showCauses = true
+                    testLogging.showStackTraces = true
                     testLogging.showStandardStreams = true
 
                     if (Boolean.getBoolean("skip.e2e")) {
