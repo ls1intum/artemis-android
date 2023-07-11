@@ -20,9 +20,12 @@ plugins {
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
+    println("ENV")
+    println(System.getenv())
+
     val versionName = "0.7.2"
     val versionCode =
-        if (!System.getenv("bamboo_buildNumber").isNullOrEmpty()) System.getenv("bamboo_buildNumber")
+        if (!System.getenv("\$bamboo_buildNumber").isNullOrEmpty()) System.getenv("\$bamboo_buildNumber")
             ?.toString()
             ?.toIntOrNull() ?: deriveVersionCodeFromGit() else deriveVersionCodeFromGit()
 
