@@ -47,6 +47,7 @@ import org.koin.mp.KoinPlatformTools
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
@@ -87,6 +88,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
         }
     }
 
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can send new message`() {
         val viewModel = setupUiAndViewModel()
 
@@ -104,7 +106,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
     fun `can react to message with emoji`() {
         val post = postDefaultMessage()
 
-        setupUiAndViewModel()
+        val viewModel = setupUiAndViewModel()
 
         val postTestTag = testTagForPost(post.id!!)
 
@@ -140,6 +142,10 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             )
             .performClick()
 
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.forceReload()
+        testDispatcher.scheduler.advanceUntilIdle()
+
         composeTestRule
             .waitUntilExactlyOneExists(
                 hasTestTag(postTestTag) and hasAnyDescendant(
@@ -153,7 +159,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
     fun `can delete existing reaction`() {
         val emojiId = predefinedEmojiIds.first()
 
-        val post = setupUiAndViewModelWithPost { post ->
+        val (viewModel, post) = setupUiAndViewModelWithPost { post ->
             metisModificationService.createReaction(
                 context = metisContext,
                 post = MetisModificationService.AffectedPost.Standalone(post.id!!),
@@ -175,6 +181,10 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             .onNode(hasAnyAncestor(hasTestTag(testTagForPost(post.id!!))) and hasText(emojiText))
             .performClick()
 
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.forceReload()
+        testDispatcher.scheduler.advanceUntilIdle()
+
         composeTestRule
             .waitUntilDoesNotExist(
                 hasAnyAncestor(hasTestTag(testTagForPost(post.id!!))) and hasText(emojiText),
@@ -184,13 +194,17 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can delete message`() {
-        val post = setupUiAndViewModelWithPost()
+        val (viewModel, post) = setupUiAndViewModelWithPost()
 
         openPostBottomSheet(post.id!!)
 
         composeTestRule
             .onNodeWithText(context.getString(R.string.post_delete))
             .performClick()
+
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.forceReload()
+        testDispatcher.scheduler.advanceUntilIdle()
 
         composeTestRule
             .waitUntilDoesNotExist(
@@ -201,7 +215,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can edit message`() {
-        val post = setupUiAndViewModelWithPost()
+        val (viewModel, post) = setupUiAndViewModelWithPost()
 
         openPostBottomSheet(post.id!!)
 
@@ -223,6 +237,10 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             .onNodeWithTag(TEST_TAG_REPLY_SEND_BUTTON)
             .performClick()
 
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.forceReload()
+        testDispatcher.scheduler.advanceUntilIdle()
+
         composeTestRule
             .waitUntilExactlyOneExists(
                 hasTestTag(testTagForPost(post.id!!)) and hasAnyDescendant(hasText(newText)),
@@ -230,12 +248,12 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             )
     }
 
-    private fun setupUiAndViewModelWithPost(additionalSetup: suspend (StandalonePost) -> Unit = {}): StandalonePost {
+    private fun setupUiAndViewModelWithPost(additionalSetup: suspend (StandalonePost) -> Unit = {}): Pair<MetisListViewModel, StandalonePost> {
         val post = postDefaultMessage(additionalSetup)
 
         val postTestTag = testTagForPost(post.id!!)
 
-        setupUiAndViewModel()
+        val viewModel = setupUiAndViewModel()
 
         // Wait until post exists
         composeTestRule.waitUntilExactlyOneExists(
@@ -243,7 +261,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             DefaultTimeoutMillis
         )
 
-        return post
+        return viewModel to post
     }
 
     private fun openPostBottomSheet(postId: Long) {
@@ -286,7 +304,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             }
         }
 
-        testDispatcher.scheduler.advanceTimeBy(2.minutes)
+        testDispatcher.scheduler.advanceTimeBy(30.seconds)
 
         return viewModel
     }

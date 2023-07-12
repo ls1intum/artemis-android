@@ -5,6 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndefinetly
 import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
@@ -42,6 +43,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.datetime.Clock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -120,8 +122,7 @@ internal class MetisThreadViewModel(
         }
     }
         .map { dataState -> dataState.bind { it } } // Type check adaption
-        .flowOn(coroutineContext)
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     private suspend fun handleServerLoadedStandalonePost(
         metisContext: MetisContext,

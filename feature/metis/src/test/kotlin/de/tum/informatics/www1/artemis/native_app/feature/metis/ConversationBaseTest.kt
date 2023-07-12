@@ -10,7 +10,6 @@ import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
-import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
@@ -51,7 +50,7 @@ abstract class ConversationBaseTest : KoinTest {
                     context
                 )
             }
-        }, testWebsocketModule(testDispatcher))
+        }, testWebsocketModule)
     }
 
     protected lateinit var accessToken: String

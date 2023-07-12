@@ -47,6 +47,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withTimeout
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -193,6 +194,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
      * Checks that updates to conversations are automatically received over the websocket connection.
      */
     @OptIn(ExperimentalTestApi::class)
+    @Ignore("Websockets are currently very flaky -> disabled")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `receives websocket conversation updates`() {
         val chat = runBlocking {

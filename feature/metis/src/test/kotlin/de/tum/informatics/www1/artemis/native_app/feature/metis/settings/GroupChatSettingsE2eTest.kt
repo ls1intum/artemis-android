@@ -20,7 +20,7 @@ import kotlin.test.assertEquals
 
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
-class GroupChatSettingsE2eTest : ConversationSettingsBaseE2eTest() {
+internal class GroupChatSettingsE2eTest : ConversationSettingsBaseE2eTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can leave group chat`() {

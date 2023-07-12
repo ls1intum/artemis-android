@@ -32,7 +32,7 @@ import org.koin.test.get
 import kotlin.test.assertIs
 
 @OptIn(ExperimentalTestApi::class)
-abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
+internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
 
     protected inline fun <reified T : Conversation> changeConversationDetailsTestImpl(
         conversation: T,
@@ -107,7 +107,7 @@ abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
     protected fun setupUiAndViewModel(
         conversation: Conversation,
         onConversationLeft: () -> Unit = {}
-    ) {
+    ): ConversationSettingsViewModel {
         val viewModel = ConversationSettingsViewModel(
             initialCourseId = course.id!!,
             initialConversationId = conversation.id,
@@ -122,7 +122,8 @@ abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
 
         composeTestRule.setContent {
             CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext().get().scopeRegistry.rootScope,
+                LocalKoinScope provides KoinPlatformTools.defaultContext()
+                    .get().scopeRegistry.rootScope,
                 LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
             ) {
                 ConversationSettingsScreen(
@@ -137,6 +138,8 @@ abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
                 )
             }
         }
+
+        return viewModel
     }
 
     protected fun canLeaveConversationTestImpl(conversation: Conversation) {

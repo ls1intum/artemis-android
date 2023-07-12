@@ -40,7 +40,7 @@ abstract class BaseExerciseTest : KoinTest {
         androidContext(InstrumentationRegistry.getInstrumentation().context)
 
         modules(coreTestModules)
-        modules(loginModule, exerciseModule, testLoginModule, testWebsocketModule(testDispatcher))
+        modules(loginModule, exerciseModule, testLoginModule, testWebsocketModule)
     }
 
     protected lateinit var accessToken: String

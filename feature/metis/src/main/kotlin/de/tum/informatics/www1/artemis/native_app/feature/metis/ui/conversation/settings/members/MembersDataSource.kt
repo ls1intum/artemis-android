@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -17,6 +18,8 @@ internal class MembersDataSource(
 
     companion object {
         private const val MAX_PAGE_SIZE = 20
+
+        private const val TAG = "MembersDataSource"
     }
 
     override fun getRefreshKey(state: PagingState<Int, ConversationUser>): Int {
@@ -42,7 +45,8 @@ internal class MembersDataSource(
             )
         ) {
             is NetworkResponse.Response -> {
-                println("loaded ${membersNetworkResponse.data}")
+                Log.d(TAG, "loaded ${membersNetworkResponse.data}")
+
                 LoadResult.Page(
                     membersNetworkResponse.data,
                     null,
@@ -51,7 +55,8 @@ internal class MembersDataSource(
             }
 
             is NetworkResponse.Failure -> {
-                println("failed loading ${membersNetworkResponse.exception}")
+                Log.d(TAG, "failed loading ${membersNetworkResponse.exception}")
+
                 LoadResult.Error(membersNetworkResponse.exception)
             }
         }

@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -62,8 +63,7 @@ internal abstract class MemberSelectionBaseViewModel(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
 
     private val recipientsFromServer: Flow<DataState<List<User>>> = flatMapLatest(
-//        query.debounce(200),
-        query.onEach { println("new query: $it") },
+        query.debounce(200),
         inclusionList,
         accountService.authToken,
         serverConfigurationService.serverUrl,
@@ -83,7 +83,6 @@ internal abstract class MemberSelectionBaseViewModel(
             }
         } else flowOf(DataState.Success(emptyList()))
     }
-        .onEach { println("Recipients: $it") }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val potentialRecipients: StateFlow<DataState<List<User>>> = combine(
@@ -96,7 +95,6 @@ internal abstract class MemberSelectionBaseViewModel(
             recipientsFromServer.filter { it.username !in recipientsAsUsernames }
         }
     }
-        .onEach { println("new potential recipients $it") }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     fun updateQuery(query: String) {

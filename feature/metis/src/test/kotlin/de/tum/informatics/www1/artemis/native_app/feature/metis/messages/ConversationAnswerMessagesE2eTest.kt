@@ -30,6 +30,7 @@ import org.koin.core.annotation.KoinInternalApi
 import org.koin.mp.KoinPlatformTools
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
@@ -135,7 +136,7 @@ class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
             }
         }
 
-        testDispatcher.scheduler.runCurrent()
+        testDispatcher.scheduler.advanceTimeBy(30.seconds)
 
         // Wait until post and answer posts are loaded
         composeTestRule.waitUntilExactlyOneExists(

@@ -46,6 +46,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
+internal const val TEST_TAG_CAN_CREATE_REPLY = "TEST_TAG_CAN_CREATE_REPLY"
 internal const val TEST_TAG_REPLY_TEXT_FIELD = "TEST_TAG_REPLY_TEXT_FIELD"
 internal const val TEST_TAG_REPLY_SEND_BUTTON = "TEST_TAG_REPLY_SEND_BUTTON"
 
@@ -77,7 +78,7 @@ internal fun ReplyTextField(
                 when (targetReplyState) {
                     is ReplyState.CanCreate -> {
                         CreateReplyUi(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().testTag(TEST_TAG_CAN_CREATE_REPLY),
                             replyMode = replyMode,
                             onReply = { targetReplyState.onCreateReply() }
                         )

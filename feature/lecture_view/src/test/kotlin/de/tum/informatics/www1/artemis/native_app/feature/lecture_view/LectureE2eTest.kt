@@ -79,7 +79,7 @@ class LectureE2eTest : KoinTest {
         androidContext(InstrumentationRegistry.getInstrumentation().context)
 
         modules(coreTestModules)
-        modules(loginModule, lectureModule, testLoginModule, testWebsocketModule(testDispatcher))
+        modules(loginModule, lectureModule, testLoginModule, testWebsocketModule)
     }
 
     private val context: Context get() = InstrumentationRegistry.getInstrumentation().context

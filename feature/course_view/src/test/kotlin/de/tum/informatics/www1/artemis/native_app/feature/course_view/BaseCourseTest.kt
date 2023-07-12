@@ -45,7 +45,7 @@ abstract class BaseCourseTest : KoinTest {
         androidContext(InstrumentationRegistry.getInstrumentation().context)
 
         modules(coreTestModules)
-        modules(loginModule, courseViewModule, testLoginModule, testWebsocketModule(testDispatcher))
+        modules(loginModule, courseViewModule, testLoginModule, testWebsocketModule)
     }
 
     lateinit var course: Course

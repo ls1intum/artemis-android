@@ -33,7 +33,7 @@ import kotlin.test.assertEquals
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
-class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
+internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
 
 
     /**
@@ -85,9 +85,9 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
             }
         }
 
-        setupUiAndViewModel(channel)
+        val viewModel = setupUiAndViewModel(channel)
 
-        archiveOrUnarchiveChannelImpl(true)
+        archiveOrUnarchiveChannelImpl(true, viewModel)
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
@@ -116,12 +116,12 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
             }
         }
 
-        setupUiAndViewModel(channel)
+        val viewModel = setupUiAndViewModel(channel)
 
-        archiveOrUnarchiveChannelImpl(false)
+        archiveOrUnarchiveChannelImpl(false, viewModel)
     }
 
-    private fun archiveOrUnarchiveChannelImpl(archive: Boolean) {
+    private fun archiveOrUnarchiveChannelImpl(archive: Boolean, viewModel: ConversationSettingsViewModel) {
         val doArchiveButtonText =
             context.getString(R.string.conversation_settings_section_other_archive_channel)
         val doUnarchiveButtonText =
@@ -150,17 +150,14 @@ class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
             .performClick()
 
         testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.requestReload()
+        testDispatcher.scheduler.advanceUntilIdle()
 
-        try {
-            composeTestRule
-                .waitUntilExactlyOneExists(
-                    hasText(if (archive) doUnarchiveButtonText else doArchiveButtonText),
-                    DefaultTimeoutMillis
-                )
-        } catch (t: Throwable) {
-            println(composeTestRule.onRoot().printToString())
-            throw t
-        }
+        composeTestRule
+            .waitUntilExactlyOneExists(
+                hasText(if (archive) doUnarchiveButtonText else doArchiveButtonText),
+                DefaultTimeoutMillis
+            )
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)

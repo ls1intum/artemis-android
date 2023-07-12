@@ -20,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisConte
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_CAN_CREATE_REPLY
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_REPLY_SEND_BUTTON
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_REPLY_TEXT_FIELD
 import kotlinx.coroutines.runBlocking
@@ -76,7 +77,14 @@ abstract class ConversationMessagesBaseTest : ConversationBaseTest() {
             .onNodeWithTag(TEST_TAG_REPLY_SEND_BUTTON)
             .performClick()
 
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        composeTestRule
+            .waitUntilExactlyOneExists(hasTestTag(TEST_TAG_CAN_CREATE_REPLY), DefaultTimeoutMillis)
+
         forceRefresh()
+
+        testDispatcher.scheduler.advanceUntilIdle()
 
         composeTestRule
             .waitUntilExactlyOneExists(
