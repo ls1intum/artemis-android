@@ -44,5 +44,9 @@ gradlePlugin {
             id = "artemis.android.room"
             implementationClass = "AndroidRoomConventionPlugin"
         }
+        register("androidLibraryInstanceSelectionFlavor") {
+            id = "artemis.android.flavor.library.instanceSelection"
+            implementationClass = "AndroidLibraryInstanceSelectionFlavorConventionPlugin"
+        }
     }
 }

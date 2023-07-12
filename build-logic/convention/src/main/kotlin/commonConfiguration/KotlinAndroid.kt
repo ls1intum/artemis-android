@@ -65,7 +65,19 @@ internal fun Project.configureKotlinAndroid(
                 isIncludeAndroidResources = true
             }
         }
+    }
 
+    val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+
+    dependencies {
+        add("coreLibraryDesugaring", libs.findLibrary("android.desugarJdkLibs").get())
+    }
+}
+
+internal fun Project.configureInstanceSelectionFlavor(
+    commonExtension: CommonExtension<*, *, *, *>,
+) {
+    commonExtension.apply {
         flavorDimensions += ProductFlavors.Dimensions.InstanceSelection.Key
 
         productFlavors {
@@ -83,12 +95,6 @@ internal fun Project.configureKotlinAndroid(
                 buildConfigField("String", ProductFlavors.BuildConfigFields.DefaultServerUrl, "\"https://artemis.cit.tum.de\"")
             }
         }
-    }
-
-    val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
-
-    dependencies {
-        add("coreLibraryDesugaring", libs.findLibrary("android.desugarJdkLibs").get())
     }
 }
 

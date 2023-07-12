@@ -16,9 +16,7 @@ services:
       - USER_3_USERNAME=aa03aaa
       - SERVER_URL=http://artemis-app:8080
       - DEFAULT_TIMEOUT=10000
-      #     -  ADMIN_USERNAME: ${bamboo_artemis_admin_username}
       - ADMIN_USERNAME=artemis_admin
-      #     -  ADMIN_PASSWORD: ${bamboo_artemis_admin_password}
       - ADMIN_PASSWORD=artemis_admin
     command:
       - test

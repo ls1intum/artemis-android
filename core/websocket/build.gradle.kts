@@ -1,6 +1,7 @@
 plugins {
     id("artemis.android.library")
     kotlin("plugin.serialization")
+    id("artemis.android.flavor.library.instanceSelection")
 }
 
 android {

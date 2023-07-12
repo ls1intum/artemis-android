@@ -1,11 +1,14 @@
 @file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
@@ -20,6 +23,10 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
         with(target) {
             pluginManager.apply {
                 apply("artemis.android.library")
+            }
+
+            extensions.configure<LibraryExtension> {
+                configureInstanceSelectionFlavor(this)
             }
 
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
@@ -73,9 +80,6 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                     }
 
                     reports.junitXml.outputLocation.set(rootProject.rootDir.resolve("test-outputs/"))
-                    
-                    maxParallelForks = 8
-                    forkEvery = 2
                 }
             }
         }

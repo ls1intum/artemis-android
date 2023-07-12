@@ -14,6 +14,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
+                configureInstanceSelectionFlavor(this)
                 defaultConfig.targetSdk = 33
             }
         }
