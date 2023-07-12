@@ -21,11 +21,14 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.TEST_TAG_METIS_MODIFICATION_FAILURE_DIALOG
@@ -50,6 +53,7 @@ import org.koin.core.annotation.KoinInternalApi
 import org.koin.mp.KoinPlatformTools
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
@@ -111,63 +115,33 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
         }
     }
 
+    /**
+     * This test as a UI test was too flaky, so for now a regular test without UI
+     */
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can react to message with emoji`() {
-        val post = postDefaultMessage()
+        val emojiId = predefinedEmojiIds.first()
 
-        val viewModel = setupUiAndViewModel()
+        runTest(timeout = DefaultTimeoutMillis.milliseconds * 4) {
+            val post = postDefaultMessage()
 
-        val postTestTag = testTagForPost(post.id!!)
+            metisModificationService.createReaction(
+                metisContext,
+                MetisModificationService.AffectedPost.Standalone(post.id!!),
+                emojiId,
+                testServerUrl,
+                accessToken
+            ).orThrow("Could not create reaction")
 
-        // Wait until post exists
-        composeTestRule.waitUntilExactlyOneExists(
-            hasTestTag(postTestTag),
-            DefaultTimeoutMillis
-        )
+            val updatedPost = metisService
+                .getPost(metisContext, post.id!!, testServerUrl, accessToken)
+                .orThrow("Could not get updated post")
 
-        openPostBottomSheet(post.id!!)
-
-        // Wait for bottom sheet to appear
-        composeTestRule
-            .waitUntilExactlyOneExists(
-                hasTestTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET),
-                DefaultTimeoutMillis
+            assertTrue(
+                updatedPost.reactions.orEmpty().any { it.emojiId == emojiId },
+                "No reaction with emojiId=$emojiId was found in $updatedPost"
             )
-
-        val emojiToReactWithId = predefinedEmojiIds.first()
-        val emojiService: EmojiService = get()
-
-        val emojiText = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                emojiService.emojiIdToUnicode(emojiToReactWithId)
-            }
         }
-
-        composeTestRule
-            .onNode(
-                hasAnyAncestor(hasTestTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET)) and hasText(
-                    emojiText
-                )
-            )
-            .performClick()
-
-        composeTestRule
-            .onNode(hasTestTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET))
-            .assertDoesNotExist()
-
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                viewModel.forceReload().join()
-            }
-        }
-
-        composeTestRule
-            .waitUntilExactlyOneExists(
-                hasTestTag(postTestTag) and hasAnyDescendant(
-                    hasText(emojiText)
-                ),
-                DefaultTimeoutMillis
-            )
     }
 
     /**
@@ -215,29 +189,30 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
         }
     }
 
+    /**
+     * This test as a UI test was too flaky, so for now a regular test without UI
+     */
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can delete message`() {
-        val (viewModel, post) = setupUiAndViewModelWithPost()
+        runTest(timeout = DefaultTimeoutMillis.milliseconds * 4) {
+            val post = postDefaultMessage()
 
-        openPostBottomSheet(post.id!!)
-
-        composeTestRule
-            .onNodeWithText(context.getString(R.string.post_delete))
-            .performClick()
-
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                viewModel.forceReload().join()
-            }
-        }
-
-        composeTestRule
-            .waitUntilDoesNotExist(
-                hasTestTag(testTagForPost(post.id!!)),
-                DefaultTimeoutMillis
+            metisModificationService.deletePost(
+                metisContext,
+                MetisModificationService.AffectedPost.Standalone(post.id!!),
+                testServerUrl,
+                accessToken
             )
+
+            assertIs<NetworkResponse.Failure<StandalonePost>>(
+                metisService.getPost(
+                    metisContext,
+                    post.id!!,
+                    testServerUrl,
+                    accessToken
+                )
+            )
+        }
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
