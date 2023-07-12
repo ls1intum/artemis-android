@@ -73,6 +73,9 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                     }
 
                     reports.junitXml.outputLocation.set(rootProject.rootDir.resolve("test-outputs/"))
+                    
+                    maxParallelForks = 8
+                    forkEvery = 2
                 }
             }
         }

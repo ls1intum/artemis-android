@@ -6,6 +6,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasClickAction
@@ -27,15 +28,18 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificatio
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.TEST_TAG_METIS_MODIFICATION_FAILURE_DIALOG
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.TEST_TAG_POST_CONTEXT_BOTTOM_SHEET
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.predefinedEmojiIds
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.TEST_TAG_METIS_POST_LIST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.testTagForPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_CAN_CREATE_REPLY
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_REPLY_SEND_BUTTON
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ProvideLocalVisibleMetisContextManager
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -46,6 +50,9 @@ import org.koin.core.annotation.KoinInternalApi
 import org.koin.mp.KoinPlatformTools
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
@@ -96,9 +103,11 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             "test message",
             TEST_TAG_METIS_POST_LIST
         ) {
-            viewModel.forceReload()
-
-            testDispatcher.scheduler.advanceUntilIdle()
+            runBlocking {
+                withTimeout(DefaultTimeoutMillis) {
+                    viewModel.forceReload().join()
+                }
+            }
         }
     }
 
@@ -142,9 +151,15 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             )
             .performClick()
 
-        testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.forceReload()
-        testDispatcher.scheduler.advanceUntilIdle()
+        composeTestRule
+            .onNode(hasTestTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET))
+            .assertDoesNotExist()
+
+        runBlocking {
+            withTimeout(DefaultTimeoutMillis) {
+                viewModel.forceReload().join()
+            }
+        }
 
         composeTestRule
             .waitUntilExactlyOneExists(
@@ -155,41 +170,49 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             )
     }
 
+    /**
+     * This test as a UI test was too flaky, so for now a regular test without UI
+     */
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can delete existing reaction`() {
         val emojiId = predefinedEmojiIds.first()
 
-        val (viewModel, post) = setupUiAndViewModelWithPost { post ->
-            metisModificationService.createReaction(
-                context = metisContext,
-                post = MetisModificationService.AffectedPost.Standalone(post.id!!),
-                emojiId = emojiId,
-                serverUrl = testServerUrl,
-                authToken = accessToken
-            ).orThrow("Could not create reaction")
-        }
-
-        val emojiService: EmojiService = get()
-
-        val emojiText = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                emojiService.emojiIdToUnicode(emojiId)
+        runTest(timeout = DefaultTimeoutMillis.milliseconds * 4) {
+            val post = postDefaultMessage { post ->
+                metisModificationService.createReaction(
+                    context = metisContext,
+                    post = MetisModificationService.AffectedPost.Standalone(post.id!!),
+                    emojiId = emojiId,
+                    serverUrl = testServerUrl,
+                    authToken = accessToken
+                ).orThrow("Could not create reaction")
             }
-        }
 
-        composeTestRule
-            .onNode(hasAnyAncestor(hasTestTag(testTagForPost(post.id!!))) and hasText(emojiText))
-            .performClick()
+            val newPost =
+                metisService.getPost(metisContext, post.id!!, testServerUrl, accessToken)
+                    .orThrow("Could not load new post")
 
-        testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.forceReload()
-        testDispatcher.scheduler.advanceUntilIdle()
+            val reaction = newPost.reactions.orEmpty().first { it.emojiId == emojiId }
 
-        composeTestRule
-            .waitUntilDoesNotExist(
-                hasAnyAncestor(hasTestTag(testTagForPost(post.id!!))) and hasText(emojiText),
-                DefaultTimeoutMillis
+            assertTrue(
+                metisModificationService.deleteReaction(
+                    metisContext,
+                    reaction.id!!,
+                    testServerUrl,
+                    accessToken
+                ).or(false),
+                "Could not delete reaction"
             )
+
+            val finalPost =
+                metisService.getPost(metisContext, post.id!!, testServerUrl, accessToken)
+                    .orThrow("Could not load final post")
+
+            assertNull(
+                finalPost.reactions.orEmpty().firstOrNull { it.emojiId == emojiId },
+                "Emoji id still present"
+            )
+        }
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
@@ -203,8 +226,12 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             .performClick()
 
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.forceReload()
-        testDispatcher.scheduler.advanceUntilIdle()
+
+        runBlocking {
+            withTimeout(DefaultTimeoutMillis) {
+                viewModel.forceReload().join()
+            }
+        }
 
         composeTestRule
             .waitUntilDoesNotExist(
@@ -238,8 +265,21 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             .performClick()
 
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.forceReload()
-        testDispatcher.scheduler.advanceUntilIdle()
+
+        composeTestRule.waitUntilExactlyOneExists(
+            hasTestTag(TEST_TAG_CAN_CREATE_REPLY),
+            DefaultTimeoutMillis
+        )
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_METIS_MODIFICATION_FAILURE_DIALOG)
+            .assertDoesNotExist()
+
+        runBlocking {
+            withTimeout(DefaultTimeoutMillis) {
+                viewModel.forceReload().join()
+            }
+        }
 
         composeTestRule
             .waitUntilExactlyOneExists(

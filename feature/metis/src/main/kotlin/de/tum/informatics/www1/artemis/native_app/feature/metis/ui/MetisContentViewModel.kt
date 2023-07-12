@@ -6,6 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.holdLatestLoaded
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
@@ -182,8 +183,10 @@ abstract class MetisContentViewModel(
             if (create) {
                 createReactionImpl(emojiId, post.asAffectedPost)
             } else {
-                val clientId =
-                    clientId.value.orNull() ?: return@async MetisModificationFailure.DELETE_REACTION
+                val clientId = clientId.value.orNull()
+                    ?: return@async MetisModificationFailure.DELETE_REACTION
+
+                println("clientId=$clientId")
 
                 val exitingReactionId = post
                     .reactions
@@ -220,7 +223,11 @@ abstract class MetisContentViewModel(
             reactionId = reactionId,
             serverUrl = serverConfigurationService.serverUrl.first(),
             authToken = accountService.authToken.first()
-        ).or(false)
+        )
+            .onFailure {
+                println("Could not delete $it")
+            }
+            .or(false)
 
         return if (success) null else MetisModificationFailure.DELETE_REACTION
     }

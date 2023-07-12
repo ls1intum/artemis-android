@@ -77,14 +77,14 @@ abstract class ConversationMessagesBaseTest : ConversationBaseTest() {
             .onNodeWithTag(TEST_TAG_REPLY_SEND_BUTTON)
             .performClick()
 
-        testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.runCurrent()
 
         composeTestRule
             .waitUntilExactlyOneExists(hasTestTag(TEST_TAG_CAN_CREATE_REPLY), DefaultTimeoutMillis)
 
         forceRefresh()
 
-        testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.runCurrent()
 
         composeTestRule
             .waitUntilExactlyOneExists(

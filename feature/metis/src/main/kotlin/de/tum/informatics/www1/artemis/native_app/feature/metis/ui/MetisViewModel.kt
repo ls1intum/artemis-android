@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -74,8 +75,8 @@ abstract class MetisViewModel(
         onRequestReload.tryEmit(Unit)
     }
 
-    fun forceReload() {
-        viewModelScope.launch(coroutineContext) {
+    fun forceReload(): Job {
+        return viewModelScope.launch(coroutineContext) {
             onRequestReload.emit(Unit)
         }
     }
