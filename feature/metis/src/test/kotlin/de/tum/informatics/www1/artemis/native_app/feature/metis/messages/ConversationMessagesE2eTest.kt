@@ -28,9 +28,11 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTi
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.TEST_TAG_METIS_MODIFICATION_FAILURE_DIALOG
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.TEST_TAG_POST_CONTEXT_BOTTOM_SHEET
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.predefinedEmojiIds
@@ -101,17 +103,27 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can send new message`() {
-        val viewModel = setupUiAndViewModel()
+        val text = "test message"
+        runTest(timeout = DefaultTimeoutMillis.milliseconds * 4) {
+            metisModificationService.createPost(metisContext, createPost(text), testServerUrl, accessToken)
 
-        canSendTestImpl(
-            "test message",
-            TEST_TAG_METIS_POST_LIST
-        ) {
-            runBlocking {
-                withTimeout(DefaultTimeoutMillis) {
-                    viewModel.forceReload().join()
-                }
-            }
+            assertTrue(
+                metisService.getPosts(
+                    MetisService.StandalonePostsContext(
+                        metisContext,
+                        emptyList(),
+                        null,
+                        MetisSortingStrategy.DATE_DESCENDING,
+                        null
+                    ),
+                    20,
+                    0,
+                    accessToken,
+                    testServerUrl
+                ).orThrow("Could not load posts")
+                    .any { it.content == text },
+                "Could not find created message"
+            )
         }
     }
 

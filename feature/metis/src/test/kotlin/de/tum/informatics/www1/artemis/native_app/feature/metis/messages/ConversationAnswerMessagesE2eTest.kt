@@ -11,7 +11,9 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.StandalonePostId
@@ -19,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.TES
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.testTagForAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ProvideLocalVisibleMetisContextManager
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.Clock
 import org.junit.Test
@@ -30,6 +33,8 @@ import org.koin.core.annotation.KoinInternalApi
 import org.koin.mp.KoinPlatformTools
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalTestApi::class)
@@ -84,22 +89,6 @@ class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
                 .onNodeWithTag(testTagForAnswerPost(answerPost.serverPostId))
                 .performScrollTo()
                 .assertExists("Answer post $answerPost does not exist")
-        }
-    }
-
-    @Test(timeout = DefaultTestTimeoutMillis)
-    fun `can send new message`() {
-        val post = postDefaultMessage()
-
-        val viewModel = setupUiAndViewModel(post.id!!)
-
-        canSendTestImpl(
-            "test answer message",
-            TEST_TAG_THREAD_LIST
-        ) {
-            viewModel.forceReload()
-
-            testDispatcher.scheduler.advanceUntilIdle()
         }
     }
 

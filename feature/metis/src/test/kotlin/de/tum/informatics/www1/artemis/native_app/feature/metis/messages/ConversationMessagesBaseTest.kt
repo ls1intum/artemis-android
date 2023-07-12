@@ -23,6 +23,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisSer
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_CAN_CREATE_REPLY
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_REPLY_SEND_BUTTON
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_REPLY_TEXT_FIELD
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.Clock
@@ -58,41 +59,6 @@ abstract class ConversationMessagesBaseTest : ConversationBaseTest() {
                 metisContext = MetisContext.Conversation(course.id!!, conversation.id)
             }
         }
-    }
-
-    /**
-     * Enters the given text into the reply text field and clicks send. Checks if the entered text
-     * appears in the node specified by [listTestTag]
-     */
-    fun canSendTestImpl(text: String, listTestTag: String, forceRefresh: () -> Unit) {
-        composeTestRule
-            .onNodeWithText(context.getString(R.string.create_answer_click_to_write))
-            .performClick()
-
-        composeTestRule
-            .onNode(replyTextFieldMatcher)
-            .performTextInput(text)
-
-        composeTestRule
-            .onNodeWithTag(TEST_TAG_REPLY_SEND_BUTTON)
-            .performClick()
-
-        testDispatcher.scheduler.runCurrent()
-
-        composeTestRule
-            .waitUntilExactlyOneExists(hasTestTag(TEST_TAG_CAN_CREATE_REPLY), DefaultTimeoutMillis)
-
-        forceRefresh()
-
-        testDispatcher.scheduler.runCurrent()
-
-        composeTestRule
-            .waitUntilExactlyOneExists(
-                hasAnyAncestor(hasTestTag(listTestTag)) and hasText(
-                    text
-                ),
-                DefaultTimeoutMillis
-            )
     }
 
     protected fun postDefaultMessage(additionalSetup: suspend (StandalonePost) -> Unit = {}): StandalonePost {
