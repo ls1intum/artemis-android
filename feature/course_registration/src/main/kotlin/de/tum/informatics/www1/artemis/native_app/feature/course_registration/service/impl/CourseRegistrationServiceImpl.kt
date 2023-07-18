@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.data.service.impl.courses
+package de.tum.informatics.www1.artemis.native_app.feature.course_registration.service.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.Flow
 internal class CourseRegistrationServiceImpl(
     private val ktorProvider: KtorProvider,
     private val networkStatusProvider: NetworkStatusProvider
-) : de.tum.informatics.www1.artemis.native_app.core.data.service.CourseRegistrationService {
+) : de.tum.informatics.www1.artemis.native_app.feature.course_registration.service.CourseRegistrationService {
 
     override suspend fun fetchRegistrableCourses(
         serverUrl: String,

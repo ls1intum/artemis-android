@@ -1,7 +1,9 @@
 @file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 
-import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
+import com.android.build.gradle.internal.coverage.JacocoReportTask
+import commonConfiguration.configureJacoco
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
@@ -12,6 +14,7 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
+import org.gradle.testing.jacoco.tasks.JacocoReport
 import java.lang.Boolean
 import kotlin.Suppress
 import kotlin.apply
@@ -23,11 +26,20 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
         with(target) {
             pluginManager.apply {
                 apply("artemis.android.library")
+                apply("org.gradle.jacoco")
             }
 
             extensions.configure<LibraryExtension> {
                 configureInstanceSelectionFlavor(this)
+
+                buildTypes {
+                    all {
+                        enableUnitTestCoverage = true
+                    }
+                }
             }
+
+            configureJacoco(extensions.getByType<LibraryAndroidComponentsExtension>())
 
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
