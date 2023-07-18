@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.hasPassedFlow
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.service.ParticipationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -40,7 +41,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.ShortAnswerStorageData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizParticipationService
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -68,12 +71,15 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.parcelize.Parcelize
 import org.hildan.krossbow.stomp.headers.StompSendHeaders
 import java.util.UUID
 import kotlin.Result
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration.Companion.seconds
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result as SubmissionResult
 
@@ -93,7 +99,8 @@ internal class QuizParticipationViewModel(
     private val websocketProvider: WebsocketProvider,
     networkStatusProvider: NetworkStatusProvider,
     participationService: ParticipationService,
-    serverTimeService: ServerTimeService
+    serverTimeService: ServerTimeService,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : BaseQuizViewModel<QuizParticipationViewModel.DirectShortAnswerStorageData, QuizParticipationViewModel.DirectDragAndDropStorageData, QuizParticipationViewModel.DirectMultipleChoiceStorageData>(
     exerciseId,
     quizType,
@@ -101,7 +108,8 @@ internal class QuizParticipationViewModel(
     networkStatusProvider,
     serverConfigurationService,
     accountService,
-    participationService
+    participationService,
+    coroutineContext
 ) {
 
     private companion object {
@@ -122,7 +130,7 @@ internal class QuizParticipationViewModel(
      */
     val serverClock: Flow<ClockWithOffset> = serverTimeService
         .serverClock
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     private val participationUpdater: Flow<Participation> = when (quizType) {
         QuizType.Live -> {
@@ -130,7 +138,7 @@ internal class QuizParticipationViewModel(
                 "/user/topic/exercise/$exerciseId/participation",
                 Participation.serializer()
             )
-                .shareIn(viewModelScope, SharingStarted.Eagerly)
+                .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
         }
 
         QuizType.Practice -> emptyFlow()
@@ -148,11 +156,11 @@ internal class QuizParticipationViewModel(
     }
 
     val isConnected: Flow<Boolean> = websocketProvider.isConnected
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     private val latestParticipation: Flow<Participation> = participationUpdater
         .onStart { emit(initialParticipation.first()) }
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     private val initialSubmission: Flow<QuizSubmission> = latestParticipation
         .map { latestParticipation ->
@@ -226,7 +234,7 @@ internal class QuizParticipationViewModel(
 
         QuizType.Practice -> emptyFlow()
     }
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     /**
      * Everything depends on this quiz exercise
@@ -236,18 +244,18 @@ internal class QuizParticipationViewModel(
         exerciseUpdater,
         batchUpdater
     )
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     val overallPoints: Flow<Int> = quizExercise.map { exercise ->
         exercise.quizQuestions.sumOf { it.points ?: 0 }
     }
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     val quizBatch: Flow<QuizExercise.QuizBatch?> = merge(
         quizExercise.map { it.quizBatches.orEmpty().firstOrNull() },
         joinBatchFlow
     )
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     /**
      * The start date of the quiz in server time.
@@ -276,7 +284,7 @@ internal class QuizParticipationViewModel(
             quizExercise.map { Clock.System.now() }
         }
     }
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     val endDate: Flow<Instant> = combine(startDate, quizExercise) { startDate, quizExercise ->
         startDate + (quizExercise.duration ?: 0).seconds
@@ -366,7 +374,7 @@ internal class QuizParticipationViewModel(
 
         emitAll(submissionFlow)
     }
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     /**
      * Set when the user has uploaded a submission using the submit button
@@ -389,7 +397,7 @@ internal class QuizParticipationViewModel(
             QuizType.Practice -> emitAll(uploadedSubmission.filterNotNull())
         }
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, QuizSubmission())
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, QuizSubmission())
 
     val quizEndedStatus: Flow<Boolean> =
         when (quizType) {
@@ -419,10 +427,10 @@ internal class QuizParticipationViewModel(
             latestParticipation.map { it.results.orEmpty().firstOrNull() },
             resultFromSubmission
         )
-            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, null)
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext) {
             combine(waitingForQuizStart, quizBatch) { a, b -> a to b }
                 .collectLatest { (isWaitingForQuizStart, batch) ->
                     val startTime = batch?.startTime
@@ -439,7 +447,7 @@ internal class QuizParticipationViewModel(
 
         // For batched quizzes, the logic simply swaps from waiting to not waiting
         // Therefore, in these cases we need to trigger a reload
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext) {
             waitingForQuizStart.withPrevious().collectLatest { (previouslyWaiting, nowWaiting) ->
                 if (previouslyWaiting == true && !nowWaiting) {
 
@@ -449,7 +457,7 @@ internal class QuizParticipationViewModel(
         }
 
         // Handle disconnects in quiz waiting screen
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext) {
             combine(
                 waitingForQuizStart,
                 websocketProvider.connectionState
@@ -466,7 +474,7 @@ internal class QuizParticipationViewModel(
                 }
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext) {
             // First wait for the initial submission to load. Then fill the savedStateHandle with it
             val initialSubmission = initialSubmission.first()
             fillSavedStateHandleFromSubmission(initialSubmission)
@@ -475,7 +483,7 @@ internal class QuizParticipationViewModel(
         }
 
         if (quizType is QuizType.Practice) {
-            viewModelScope.launch {
+            viewModelScope.launch(coroutineContext) {
                 // Wait for the quiz to end
                 quizEndedStatus.first { it }
 
@@ -497,7 +505,7 @@ internal class QuizParticipationViewModel(
     }
 
     fun submit(onResponse: (successful: Boolean) -> Unit): Job {
-        return viewModelScope.launch {
+        return viewModelScope.launch(coroutineContext) {
             val submission = buildAndUploadSubmission(
                 questions = quizQuestionsRandomOrder.first(),
                 isFinalSubmission = true,
@@ -685,37 +693,36 @@ internal class QuizParticipationViewModel(
     }
 
     fun reconnectWebsocket() {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext) {
             websocketProvider.requestTryReconnect()
         }
     }
 
-    fun joinBatch(passcode: String, onDone: (successful: Boolean) -> Unit): Job {
-        return viewModelScope.launch {
+    fun joinBatch(passcode: String): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
             val serverUrl = serverConfigurationService.serverUrl.first()
             val authToken = accountService.authToken.first()
 
-            when (val response = quizExerciseService.join(
+            quizExerciseService.join(
                 exerciseId = exerciseId,
                 password = passcode,
                 serverUrl = serverUrl,
                 authToken = authToken
-            )) {
-                is NetworkResponse.Failure -> onDone(false)
-                is NetworkResponse.Response -> {
-                    joinBatchFlow.emit(response.data)
+            )
+                .onSuccess { quizBatch ->
+                    joinBatchFlow.emit(quizBatch)
 
-                    if (response.data.started == true) {
+                    if (quizBatch.started == true) {
                         retryLoadExercise.emit(Unit)
                     }
-                    onDone(true)
                 }
-            }
+                .bind { true }
+                .or(false)
         }
     }
 
-    fun startBatch(onDone: (successful: Boolean) -> Unit): Job {
-        return joinBatch("", onDone)
+    fun startBatch(): Deferred<Boolean> {
+        return joinBatch("")
     }
 
     override fun constructDragAndDropData(

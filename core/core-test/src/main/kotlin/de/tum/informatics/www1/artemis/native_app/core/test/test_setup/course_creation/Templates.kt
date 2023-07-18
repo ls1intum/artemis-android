@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation
 
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -172,7 +173,7 @@ fun createProgramingExercise(title: String, courseId: Long): String = """
 
 """.trimIndent()
 
-fun createQuizExercise(title: String, courseId: Long): String = """
+fun createQuizExercise(title: String, courseId: Long, mode: QuizExercise.QuizMode = QuizExercise.QuizMode.INDIVIDUAL): String = """
 {
   "title": "$title",
   "bonusPoints": 0,
@@ -332,7 +333,7 @@ fun createQuizExercise(title: String, courseId: Long): String = """
       "similarityValue": 85
     }
   ],
-  "quizMode": "SYNCHRONIZED",
+  "quizMode": "${mode.name}",
   "isActiveQuiz": false,
   "isPracticeModeAvailable": true,
   "isEditable": true,

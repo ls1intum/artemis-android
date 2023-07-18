@@ -35,6 +35,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
+import kotlin.coroutines.CoroutineContext
 
 internal abstract class BaseQuizViewModel<
         ShortAnswerStorageDataT : ShortAnswerStorageData,
@@ -47,6 +49,7 @@ internal abstract class BaseQuizViewModel<
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
     private val participationService: ParticipationService,
+    private val coroutineContext: CoroutineContext
 ) : ViewModel() {
 
     protected val retryLoadExercise = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -73,11 +76,11 @@ internal abstract class BaseQuizViewModel<
 
             QuizType.Practice, is QuizType.PracticeResults -> emptyFlow()
         }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     protected val initialParticipation: Flow<Participation> = initialParticipationDataState
         .filterSuccess()
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     val quizExerciseDataState: StateFlow<DataState<QuizExercise>> = when (quizType) {
         QuizType.Live, QuizType.ViewResults -> {
@@ -113,7 +116,7 @@ internal abstract class BaseQuizViewModel<
 
         is QuizType.PracticeResults -> flowOf(DataState.Success(quizType.quizExercise))
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     /**
      * The maximum of points achievable
@@ -124,7 +127,7 @@ internal abstract class BaseQuizViewModel<
                 quizExercise.quizQuestions.sumOf { it.points ?: 0 }
             }
         }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     protected val quizQuestionsRandomOrder: Flow<List<QuizQuestion>> = quizExerciseDataState
         .filterSuccess()
@@ -135,7 +138,7 @@ internal abstract class BaseQuizViewModel<
                 quizExercise.quizQuestions
             }
         }
-        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     /**
      * Map the question id to the data
@@ -169,10 +172,10 @@ internal abstract class BaseQuizViewModel<
             }
         )
     }
-        .stateIn(viewModelScope, SharingStarted.Lazily)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
     fun retryLoadExercise() {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext) {
             retryLoadExercise.emit(Unit)
         }
     }

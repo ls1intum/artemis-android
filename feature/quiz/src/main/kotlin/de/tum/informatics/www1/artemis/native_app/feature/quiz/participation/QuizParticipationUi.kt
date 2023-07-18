@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
@@ -25,6 +26,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizEnded
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizEndedScreenType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.WaitForQuizStartScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.WorkOnQuizQuestionsScreen
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
@@ -59,8 +61,8 @@ internal fun QuizParticipationUi(
 
     var joinBatchError: JoinBatchErrorType? by rememberSaveable { mutableStateOf(null) }
 
-    var startBatchJob: Job? by remember { mutableStateOf(null) }
-    var joinBatchJob: Job? by remember { mutableStateOf(null) }
+    var startBatchDeferred: Deferred<Boolean>? by remember { mutableStateOf(null) }
+    var joinBatchDeferred: Deferred<Boolean>? by remember { mutableStateOf(null) }
 
     LaunchedEffect(result, exerciseDataState) {
         val currentResult = result
@@ -80,6 +82,20 @@ internal fun QuizParticipationUi(
         }
     }
 
+    AwaitDeferredCompletion(job = startBatchDeferred) { successful ->
+        if (!successful) {
+            joinBatchError = JoinBatchErrorType.START
+        }
+        startBatchDeferred = null
+    }
+
+    AwaitDeferredCompletion(job = joinBatchDeferred) { successful ->
+        if (!successful) {
+            joinBatchError = JoinBatchErrorType.JOIN
+        }
+        joinBatchDeferred = null
+    }
+
     BasicDataStateUi(
         modifier = modifier,
         dataState = exerciseDataState,
@@ -95,25 +111,16 @@ internal fun QuizParticipationUi(
                 isConnected = isConnected,
                 batch = batch,
                 clock = serverClock,
+                isStartingOrJoiningQuiz = startBatchDeferred != null || joinBatchDeferred != null,
                 onRequestRefresh = {
                     viewModel.retryLoadExercise()
                     viewModel.reconnectWebsocket()
                 },
                 onClickStartQuiz = {
-                    startBatchJob = viewModel.startBatch { successful ->
-                        if (!successful) {
-                            joinBatchError = JoinBatchErrorType.START
-                        }
-                        startBatchJob = null
-                    }
+                    startBatchDeferred = viewModel.startBatch()
                 },
                 onClickJoinBatch = { passcode ->
-                    joinBatchJob = viewModel.joinBatch(passcode) { successful ->
-                        if (!successful) {
-                            joinBatchError = JoinBatchErrorType.JOIN
-                        }
-                        joinBatchJob = null
-                    }
+                    joinBatchDeferred = viewModel.joinBatch(passcode)
                 }
             )
         } else if (hasQuizEnded) {
@@ -125,6 +132,7 @@ internal fun QuizParticipationUi(
                     QuizType.Live -> QuizEndedScreenType.Live(
                         onRequestLeave = onNavigateUp
                     )
+
                     QuizType.Practice -> QuizEndedScreenType.Practice(
                         onRequestSubmit = {
                             submittingJob = viewModel.submit {
@@ -187,24 +195,24 @@ internal fun QuizParticipationUi(
         )
     }
 
-    if (joinBatchJob != null) {
+    if (joinBatchDeferred != null) {
         BatchJobDialog(
             message = stringResource(id = R.string.quiz_participation_wait_for_start_join_batch_dialog_message),
             confirmText = stringResource(id = R.string.quiz_participation_wait_for_start_join_batch_dialog_negative),
             onDismiss = {
-                joinBatchJob?.cancel()
-                joinBatchJob = null
+                joinBatchDeferred?.cancel()
+                joinBatchDeferred = null
             }
         )
     }
 
-    if (startBatchJob != null) {
+    if (startBatchDeferred != null) {
         BatchJobDialog(
             message = stringResource(id = R.string.quiz_participation_wait_for_start_start_batch_dialog_message),
             confirmText = stringResource(id = R.string.quiz_participation_wait_for_start_start_batch_dialog_negative),
             onDismiss = {
-                startBatchJob?.cancel()
-                startBatchJob = null
+                startBatchDeferred?.cancel()
+                startBatchDeferred = null
             }
         )
     }

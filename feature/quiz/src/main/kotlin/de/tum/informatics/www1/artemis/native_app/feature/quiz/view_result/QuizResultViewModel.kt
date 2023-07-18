@@ -38,6 +38,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.plus
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 internal class QuizResultViewModel(
     exerciseId: Long,
@@ -46,7 +49,8 @@ internal class QuizResultViewModel(
     networkStatusProvider: NetworkStatusProvider,
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
-    participationService: ParticipationService
+    participationService: ParticipationService,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : BaseQuizViewModel<QuizResultViewModel.ResultShortAnswerStorageData, QuizResultViewModel.ResultDragAndDropStorageData, QuizResultViewModel.ResultMultipleChoiceStorageData>(
     exerciseId,
     quizType,
@@ -54,7 +58,8 @@ internal class QuizResultViewModel(
     networkStatusProvider,
     serverConfigurationService,
     accountService,
-    participationService
+    participationService,
+    coroutineContext
 ) {
 
     val submission: StateFlow<DataState<QuizSubmission>> = when (quizType) {
@@ -77,7 +82,7 @@ internal class QuizResultViewModel(
                 }
             }
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val result: StateFlow<DataState<Result>> = when (quizType) {
         is QuizType.PracticeResults -> flowOf(DataState.Success(quizType.result))
@@ -94,7 +99,7 @@ internal class QuizResultViewModel(
             }
         }
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     private val submissionAndQuizExerciseDataState: Flow<DataState<Pair<QuizSubmission, List<QuizQuestion>>>> =
         combine(submission, quizExerciseDataState) { submission, quizExercise ->
@@ -136,7 +141,7 @@ internal class QuizResultViewModel(
                     }
             }
             .filterSuccess()
-            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+            .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     override val multipleChoiceData: Flow<Map<Long, ResultMultipleChoiceStorageData>> =
         submissionAndQuizExerciseDataState
@@ -167,7 +172,7 @@ internal class QuizResultViewModel(
                 }
             }
             .filterSuccess()
-            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+            .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     override val shortAnswerData: Flow<Map<Long, ResultShortAnswerStorageData>> =
         submissionAndQuizExerciseDataState
@@ -201,7 +206,7 @@ internal class QuizResultViewModel(
                 }
             }
             .filterSuccess()
-            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+            .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
     val authToken: StateFlow<String> = authTokenStateFlow(accountService)

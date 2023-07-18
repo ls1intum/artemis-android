@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -17,10 +19,12 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,35 +41,45 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.minutes
 
+internal const val TEST_TAG_WAIT_FOR_QUIZ_START_SCREEN = "TEST_TAG_WAIT_FOR_QUIZ_START_SCREEN"
+internal const val TEST_TAG_TEXT_FIELD_BATCH_PASSWORD = "TEST_TAG_TEXT_FIELD_BATCH_PASSWORD"
+
+/**
+ * @param isStartingOrJoiningQuiz if the user is currently requesting to start their quiz run or joining a batch. True while this requests is firing.
+ */
 @Composable
 internal fun WaitForQuizStartScreen(
     modifier: Modifier,
     exercise: QuizExercise,
     isConnected: Boolean,
+    isStartingOrJoiningQuiz: Boolean,
     batch: QuizExercise.QuizBatch?,
     clock: Clock,
     onRequestRefresh: () -> Unit,
     onClickJoinBatch: (passcode: String) -> Unit,
     onClickStartQuiz: () -> Unit
 ) {
-    val waitingStatus: WaitingStatus = when {
-        batch != null || exercise.quizMode == QuizExercise.QuizMode.SYNCHRONIZED ->
-            WaitingStatus.Synchronized(batch?.startTime)
+    val waitingStatus: WaitingStatus = remember(batch, exercise) {
+        when {
+            batch != null || exercise.quizMode == QuizExercise.QuizMode.SYNCHRONIZED ->
+                WaitingStatus.Synchronized(batch?.startTime)
 
-        exercise.quizMode == QuizExercise.QuizMode.BATCHED && (exercise.remainingNumberOfAttempts
-            ?: 1) > 0 ->
-            WaitingStatus.JoinBatched
+            exercise.quizMode == QuizExercise.QuizMode.BATCHED && (exercise.remainingNumberOfAttempts
+                ?: 1) > 0 ->
+                WaitingStatus.JoinBatched
 
-        exercise.quizMode == QuizExercise.QuizMode.INDIVIDUAL && (exercise.remainingNumberOfAttempts
-            ?: 1) > 0 ->
-            WaitingStatus.StartNow
+            exercise.quizMode == QuizExercise.QuizMode.INDIVIDUAL && (exercise.remainingNumberOfAttempts
+                ?: 1) > 0 ->
+                WaitingStatus.StartNow
 
-        else -> WaitingStatus.NoMoreAttempts(exercise.allowedNumberOfAttempts ?: 1)
+            else -> WaitingStatus.NoMoreAttempts(exercise.allowedNumberOfAttempts ?: 1)
+        }
     }
 
     WaitForQuizStartScreen(
         modifier = modifier,
         waitingStatus = waitingStatus,
+        isStartingOrJoiningQuiz = isStartingOrJoiningQuiz,
         isConnected = isConnected,
         clock = clock,
         onRequestRefresh = onRequestRefresh,
@@ -78,13 +92,14 @@ internal fun WaitForQuizStartScreen(
 private fun WaitForQuizStartScreen(
     modifier: Modifier,
     waitingStatus: WaitingStatus,
+    isStartingOrJoiningQuiz: Boolean,
     isConnected: Boolean,
     clock: Clock,
     onRequestRefresh: () -> Unit,
     onClickJoinBatch: (passcode: String) -> Unit,
     onClickStartQuiz: () -> Unit
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier.testTag(TEST_TAG_WAIT_FOR_QUIZ_START_SCREEN)) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -98,6 +113,7 @@ private fun WaitForQuizStartScreen(
             when (waitingStatus) {
                 is WaitingStatus.JoinBatched -> BodyJoinBatched(
                     modifier = bodyModifier,
+                    isJoining = isStartingOrJoiningQuiz,
                     onClickJoinBatch = onClickJoinBatch
                 )
 
@@ -108,6 +124,7 @@ private fun WaitForQuizStartScreen(
 
                 is WaitingStatus.StartNow -> BodyStartNow(
                     modifier = bodyModifier,
+                    isStarting = isStartingOrJoiningQuiz,
                     onClickStartNow = onClickStartQuiz
                 )
 
@@ -167,7 +184,6 @@ private fun BodySynchronized(
         )
 
         if (waitingStatus.startDate != null) {
-
             Spacer(modifier = Modifier.height(8.dp))
 
             val timeUntilStart =
@@ -180,7 +196,7 @@ private fun BodySynchronized(
             )
 
             Text(
-                text = timeUntilStart.toString(),
+                text = timeUntilStart,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 fontSize = 24.sp
@@ -192,6 +208,7 @@ private fun BodySynchronized(
 @Composable
 private fun BodyJoinBatched(
     modifier: Modifier,
+    isJoining: Boolean,
     onClickJoinBatch: (passcode: String) -> Unit
 ) {
     var passcode by rememberSaveable { mutableStateOf("") }
@@ -213,22 +230,21 @@ private fun BodyJoinBatched(
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .widthIn(max = 600.dp)
+                .testTag(TEST_TAG_TEXT_FIELD_BATCH_PASSWORD)
         )
 
-        Button(
-            modifier = Modifier,
+        StartButton(
+            isStarting = isJoining,
+            text = stringResource(id = R.string.quiz_participation_wait_for_start_join_button),
             onClick = { onClickJoinBatch(passcode) }
-        ) {
-            Text(
-                text = stringResource(id = R.string.quiz_participation_wait_for_start_join_button)
-            )
-        }
+        )
     }
 }
 
 @Composable
 private fun BodyStartNow(
     modifier: Modifier,
+    isStarting: Boolean,
     onClickStartNow: () -> Unit
 ) {
     Column(
@@ -241,13 +257,11 @@ private fun BodyStartNow(
             style = MaterialTheme.typography.headlineLarge
         )
 
-        Button(
-            onClick = onClickStartNow
-        ) {
-            Text(
-                text = stringResource(id = R.string.quiz_participation_wait_for_start_start_now_button)
-            )
-        }
+        StartButton(
+            isStarting = isStarting,
+            onClick = onClickStartNow,
+            text = stringResource(id = R.string.quiz_participation_wait_for_start_start_now_button)
+        )
     }
 }
 
@@ -265,6 +279,28 @@ private fun BodyNoMoreAttempts(modifier: Modifier, waitingStatus: WaitingStatus.
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center
         )
+    }
+}
+
+@Composable
+private fun StartButton(
+    modifier: Modifier = Modifier,
+    isStarting: Boolean,
+    text: String,
+    onClick: () -> Unit
+) {
+    Button(
+        modifier = modifier,
+        enabled = !isStarting,
+        onClick = onClick
+    ) {
+        Crossfade(targetState = isStarting, label = "is loading animation") { isStartingState ->
+            if (isStartingState) {
+                CircularProgressIndicator()
+            } else {
+                Text(text = text)
+            }
+        }
     }
 }
 
@@ -300,7 +336,8 @@ private fun WaitForQuizStartScreenPreview(
             clock = Clock.System,
             onRequestRefresh = {},
             onClickStartQuiz = {},
-            onClickJoinBatch = {}
+            onClickJoinBatch = {},
+            isStartingOrJoiningQuiz = false
         )
     }
 }

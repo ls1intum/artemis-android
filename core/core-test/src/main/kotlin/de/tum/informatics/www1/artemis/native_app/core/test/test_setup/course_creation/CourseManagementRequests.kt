@@ -7,6 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonPro
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
@@ -18,6 +19,7 @@ import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.http.ContentType
@@ -301,4 +303,30 @@ suspend fun KoinComponent.createAttachment(
         accept(ContentType.Application.Json)
     }
         .body()
+}
+
+suspend fun KoinComponent.addQuizExerciseBatch(accessToken: String, exerciseId: Long): QuizExercise.QuizBatch {
+    return ktorProvider.ktorClient.put(serverConfigurationService.serverUrl.first()) {
+        url {
+            appendPathSegments("api", "quiz-exercises", exerciseId.toString(), "add-batch")
+        }
+
+        cookieAuth(accessToken)
+
+        contentType(ContentType.Application.Json)
+    }.body()
+}
+
+suspend fun KoinComponent.startQuizExerciseBatch(accessToken: String, exerciseId: Long, batch: QuizExercise.QuizBatch) {
+    return ktorProvider.ktorClient.put(serverConfigurationService.serverUrl.first()) {
+        url {
+            appendPathSegments("api", "quiz-exercises", exerciseId.toString(), "start-batch")
+        }
+
+        setBody(batch)
+
+        cookieAuth(accessToken)
+
+        contentType(ContentType.Application.Json)
+    }.body()
 }
