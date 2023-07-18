@@ -24,6 +24,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.plus
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 internal class BrowseChannelsViewModel(
     private val courseId: Long,
@@ -32,7 +35,8 @@ internal class BrowseChannelsViewModel(
     private val channelService: ChannelService,
     private val networkStatusProvider: NetworkStatusProvider,
     accountDataService: AccountDataService,
-    courseService: CourseService
+    courseService: CourseService,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 
     private val requestRefresh = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -48,7 +52,7 @@ internal class BrowseChannelsViewModel(
                 .bind { channels -> channels.filter { !it.isMember } }
         }
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val canCreateChannel: StateFlow<Boolean> = flatMapLatest(
         serverConfigurationService.serverUrl,
@@ -65,13 +69,13 @@ internal class BrowseChannelsViewModel(
         }.map { it.orElse(false) }
 
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     /**
      * Returns the id of the channel on registration success or null if any error occurred
      */
     fun registerInChannel(channelChat: ChannelChat): Deferred<Long?> {
-        return viewModelScope.async {
+        return viewModelScope.async(coroutineContext) {
             val username = when (val authData = accountService.authenticationData.first()) {
                 is AccountService.AuthenticationData.LoggedIn -> authData.username
                 AccountService.AuthenticationData.NotLoggedIn -> return@async null

@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -43,6 +44,8 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 internal const val BrowseChannelsRoute = "course/{courseId}/browse_channel"
+
+internal fun testTagForBrowsedChannelItem(channelId: Long) = "browsedChannel$channelId"
 
 fun NavController.navigateToBrowseChannelsScreen(
     courseId: Long,
@@ -79,8 +82,23 @@ internal fun BrowseChannelsScreen(
     onNavigateToCreateChannel: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    val viewModel: BrowseChannelsViewModel = koinViewModel { parametersOf(courseId) }
+    BrowseChannelsScreen(
+        modifier = modifier,
+        viewModel = koinViewModel { parametersOf(courseId) },
+        onNavigateToConversation = onNavigateToConversation,
+        onNavigateToCreateChannel = onNavigateToCreateChannel,
+        onNavigateBack = onNavigateBack
+    )
+}
 
+@Composable
+internal fun BrowseChannelsScreen(
+    modifier: Modifier,
+    viewModel: BrowseChannelsViewModel,
+    onNavigateToConversation: (conversationId: Long) -> Unit,
+    onNavigateToCreateChannel: () -> Unit,
+    onNavigateBack: () -> Unit
+) {
     val canCreateChannel: Boolean by viewModel.canCreateChannel.collectAsState()
 
     val channelsDataState by viewModel.channels.collectAsState()
@@ -170,7 +188,8 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
     ListItem(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .testTag(testTagForBrowsedChannelItem(channelChat.id)),
         leadingContent = {
             ChannelIcons(channelChat)
         },
