@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
@@ -12,13 +13,14 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ConversationUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.SettingsBaseViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.cache
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
@@ -75,6 +77,7 @@ internal class ConversationMembersViewModel(
             )
         }
             .flow
+            .cachedIn(viewModelScope + coroutineContext)
     }
         .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 

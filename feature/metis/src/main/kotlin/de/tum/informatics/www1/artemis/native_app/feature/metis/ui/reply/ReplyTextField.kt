@@ -38,7 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.MarkdownTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.ReplyState

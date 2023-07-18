@@ -283,9 +283,9 @@ internal fun CourseUiScreen(
                             }
 
                             SinglePageConversationBody(
-                                metisModifier,
-                                courseId,
-                                initialConfiguration
+                                modifier = metisModifier,
+                                courseId = courseId,
+                                initialConfiguration = initialConfiguration
                             )
                         } else {
                             Box(modifier = metisModifier) {

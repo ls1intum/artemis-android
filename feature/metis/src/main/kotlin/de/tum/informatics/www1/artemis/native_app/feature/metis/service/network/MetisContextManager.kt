@@ -1,11 +1,10 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl
+package de.tum.informatics.www1.artemis.native_app.feature.metis.service.network
 
 import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostDTO
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.storage.MetisStorageService
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow

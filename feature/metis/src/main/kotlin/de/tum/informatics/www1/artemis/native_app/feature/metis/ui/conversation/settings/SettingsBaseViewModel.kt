@@ -13,10 +13,10 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.getConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ConversationUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.getConversation
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow

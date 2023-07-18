@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisModificationFailureDialog
 import kotlinx.coroutines.Deferred

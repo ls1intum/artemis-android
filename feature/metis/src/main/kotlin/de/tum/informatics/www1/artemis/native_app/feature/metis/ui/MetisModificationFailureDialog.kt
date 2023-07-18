@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 
 internal const val TEST_TAG_METIS_MODIFICATION_FAILURE_DIALOG = "TEST_TAG_METIS_MODIFICATION_FAILURE_DIALOG"

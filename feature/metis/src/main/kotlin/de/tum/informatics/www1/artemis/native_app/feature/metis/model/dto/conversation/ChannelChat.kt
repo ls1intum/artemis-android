@@ -1,12 +1,12 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.content
+package de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation
 
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("groupChat")
-data class GroupChat(
+@SerialName("channel")
+data class ChannelChat(
     override val id: Long = 0,
     override val creationDate: Instant? = null,
     override val lastMessageDate: Instant? = null,
@@ -18,11 +18,18 @@ data class GroupChat(
     override val isCreator: Boolean = false,
     override val isMember: Boolean = false,
     override val numberOfMembers: Int = 0,
-    val name: String? = null,
-    val members: List<ConversationUser> = emptyList()
+    val name: String = "",
+    val description: String? = null,
+    val topic: String? = null,
+    val isPublic: Boolean = true,
+    val isAnnouncementChannel: Boolean = false,
+    val isArchived: Boolean = false,
+    val hasChannelModerationRights: Boolean = false,
+    val isChannelModerator: Boolean = false,
+    val tutorialGroupId: Long? = null,
+    val tutorialGroupTitle: String? = null
 ) : Conversation() {
-
-    override val typeAsString: String = "groupChat"
+    override val typeAsString: String = "channel"
 
     override fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation =
         copy(unreadMessagesCount = unreadMessagesCount)

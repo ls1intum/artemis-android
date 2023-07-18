@@ -1,10 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation
 
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.humanReadableName
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.humanReadableName
 
 data class ConversationCollections(
     val favorites: ConversationCollection<Conversation>,

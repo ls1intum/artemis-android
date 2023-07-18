@@ -20,10 +20,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Displa
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.OneToOneChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.getConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.CreatePersonalConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.CreatePersonalConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON
@@ -31,8 +31,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.experimental.categories.Category

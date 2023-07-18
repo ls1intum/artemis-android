@@ -17,10 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ConversationUser
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.hasModerationRights
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ConversationUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.hasModerationRights
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableName
 
 @Composable

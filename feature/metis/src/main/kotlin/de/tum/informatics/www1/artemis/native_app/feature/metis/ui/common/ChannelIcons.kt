@@ -8,7 +8,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
 
 @Composable
 internal fun ChannelIcons(channelChat: ChannelChat) {

@@ -1,11 +1,11 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl
+package de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ChannelService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ChannelService
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post

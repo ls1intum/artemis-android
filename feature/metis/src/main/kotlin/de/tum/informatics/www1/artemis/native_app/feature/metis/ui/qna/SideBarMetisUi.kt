@@ -81,12 +81,6 @@ fun SideBarMetisUi(
         ) { clientSidePostId ->
             if (clientSidePostId == null) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    ViewModelMetisFilterHeaderImpl(
-                        modifier = Modifier.fillMaxWidth(),
-                        metisContext = metisContext,
-                        viewModel = viewModel
-                    )
-
                     MetisChatList(
                         modifier = Modifier
                             .fillMaxWidth()

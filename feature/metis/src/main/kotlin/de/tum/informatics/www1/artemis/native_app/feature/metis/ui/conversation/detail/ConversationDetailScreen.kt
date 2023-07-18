@@ -26,58 +26,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptionsBuilder
 import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.humanReadableName
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.conversationNavGraphBuilderExtension
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.isReplyEnabled
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.navigateToConversationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list.MetisListViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.navigateToStandalonePostScreen
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 internal const val ConversationDetailsRoute = "course/{courseId}/conversations/{conversationId}"
-
-fun NavController.navigateToConversationDetailScreen(
-    courseId: Long,
-    conversationId: Long,
-    builder: NavOptionsBuilder.() -> Unit
-) {
-    navigate("course/$courseId/conversations/$conversationId", builder)
-}
-
-fun NavGraphBuilder.conversationDetailScreen(
-    navController: NavController,
-    onNavigateBack: () -> Unit
-) {
-    conversationNavGraphBuilderExtension(
-        route = ConversationDetailsRoute,
-        deepLink = "artemis://courses/{courseId}/conversations/{conversationId}"
-    ) { courseId, conversationId ->
-        ConversationScreen(
-            modifier = Modifier.fillMaxSize(),
-            onNavigateBack = onNavigateBack,
-            courseId = courseId,
-            conversationId = conversationId,
-            onNavigateToSettings = {
-                navController.navigateToConversationSettingsScreen(courseId, conversationId) {}
-            },
-            onClickViewPost = { clientPostId ->
-                navController.navigateToStandalonePostScreen(
-                    clientPostId = clientPostId,
-                    metisContext = MetisContext.Conversation(courseId, conversationId)
-                ) {}
-            }
-        )
-    }
-}
 
 @Composable
 fun ConversationScreen(

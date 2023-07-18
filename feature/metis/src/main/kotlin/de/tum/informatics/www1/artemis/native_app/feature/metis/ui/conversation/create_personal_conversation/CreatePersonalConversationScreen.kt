@@ -19,46 +19,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptionsBuilder
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFloatingActionButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.courseNavGraphBuilderExtensions
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.member_selection.MemberSelection
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 internal const val TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON = "create personal conversation button"
-
-fun NavController.navigateToCreatePersonalConversationScreen(
-    courseId: Long,
-    builder: NavOptionsBuilder.() -> Unit
-) {
-    navigate("course/$courseId/create_personal_conversation", builder)
-}
-
-fun NavGraphBuilder.createPersonalConversationScreen(
-    navController: NavController,
-    onNavigateBack: () -> Unit
-) {
-    courseNavGraphBuilderExtensions(
-        route = "course/{courseId}/create_personal_conversation"
-    ) { courseId ->
-        CreatePersonalConversationScreen(
-            modifier = Modifier.fillMaxSize(),
-            courseId = courseId,
-            onConversationCreated = { conversationId ->
-                navController.popBackStack()
-                navController.navigateToConversationDetailScreen(courseId, conversationId) { }
-            },
-            onNavigateBack = onNavigateBack
-        )
-    }
-}
 
 @Composable
 fun CreatePersonalConversationScreen(

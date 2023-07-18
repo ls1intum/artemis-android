@@ -12,12 +12,12 @@ import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.service.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.ConversationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.getConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider

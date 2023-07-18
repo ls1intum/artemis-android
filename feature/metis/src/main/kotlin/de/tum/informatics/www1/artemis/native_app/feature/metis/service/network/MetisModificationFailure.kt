@@ -1,6 +1,7 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis
+package de.tum.informatics.www1.artemis.native_app.feature.metis.service.network
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 
 enum class MetisModificationFailure(val messageRes: Int) {
     CREATE_REACTION(R.string.metis_modification_failure_dialog_message_create_reaction),

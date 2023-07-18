@@ -354,45 +354,6 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
                     onNavigateUp = navController::navigateUp
                 )
 
-                conversationDetailScreen(
-                    navController = navController,
-                    onNavigateBack = navController::navigateUp
-                )
-
-                conversationSettingsScreen(
-                    navController = navController,
-                    onNavigateBack = navController::navigateUp
-                )
-
-                conversationMembersScreen(
-                    onNavigateBack = navController::navigateUp
-                )
-
-                conversationAddMembersScreen(
-                    onNavigateBack = navController::navigateUp
-                )
-
-                createPersonalConversationScreen(
-                    navController = navController,
-                    onNavigateBack = navController::navigateUp
-                )
-
-                createChannelScreen(
-                    navController = navController,
-                    onNavigateBack = navController::navigateUp
-                )
-
-                browseChannelsScreen(
-                    onNavigateToConversation = { courseId, convId ->
-                        navController.popBackStack()
-                        navController.navigateToConversationDetailScreen(courseId, convId) { }
-                    },
-                    onNavigateToCreateChannel = { courseId ->
-                        navController.navigateToCreateChannelScreen(courseId) {}
-                    },
-                    onNavigateBack = navController::navigateUp
-                )
-
                 quizParticipation(
                     onLeaveQuiz = {
                         val previousBackStackEntry = navController.previousBackStackEntry

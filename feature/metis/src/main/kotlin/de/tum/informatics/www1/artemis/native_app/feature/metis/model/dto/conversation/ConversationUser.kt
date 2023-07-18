@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.content
+package de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation
 
 import de.tum.informatics.www1.artemis.native_app.core.model.account.BaseAccount
 import kotlinx.serialization.SerialName

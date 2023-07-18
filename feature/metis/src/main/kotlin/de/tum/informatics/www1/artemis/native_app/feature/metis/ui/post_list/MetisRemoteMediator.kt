@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl
+package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post_list
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
@@ -6,9 +6,9 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.Post
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisService.StandalonePostsContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.MetisService.StandalonePostsContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.storage.MetisStorageService
 
 @OptIn(ExperimentalPagingApi::class)
 class MetisRemoteMediator(

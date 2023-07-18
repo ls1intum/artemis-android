@@ -24,14 +24,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Userna
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.ConversationMembersBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.ConversationMembersViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.TEST_TAG_MEMBERS_LIST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.testTagForMember
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -42,6 +40,7 @@ import org.koin.core.annotation.KoinInternalApi
 import org.koin.mp.KoinPlatformTools
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
@@ -65,13 +64,13 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
                     serverUrl = testServerUrl
                 )
                     .orThrow("could not create group chat")
-                    .apply {
+                    .also { channelChat ->
                         conversationService.registerMembers(
-                            course.id!!,
-                            this,
-                            listOf(user2Username, user3Username),
-                            accessToken,
-                            testServerUrl
+                            courseId = course.id!!,
+                            conversation = channelChat,
+                            users = listOf(user2Username, user3Username),
+                            authToken = accessToken,
+                            serverUrl = testServerUrl
                         )
                             .orThrow("Could not register additional members")
                     }
@@ -217,7 +216,8 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
 
         composeTestRule.setContent {
             CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext().get().scopeRegistry.rootScope,
+                LocalKoinScope provides KoinPlatformTools.defaultContext()
+                    .get().scopeRegistry.rootScope,
                 LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
             ) {
                 ConversationMembersBody(
@@ -229,7 +229,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
             }
         }
 
-        testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceTimeBy(2.seconds)
 
         composeTestRule.waitUntilExactlyOneExists(
             hasTestTag(TEST_TAG_MEMBERS_LIST),

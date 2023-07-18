@@ -38,9 +38,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFlo
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.PotentiallyIllegalTextField
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.browse_channels.BrowseChannelsRoute
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.courseNavGraphBuilderExtensions
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -51,35 +48,6 @@ internal const val TEST_TAG_SET_PRIVATE_BUTTON = "TEST_TAG_SET_PRIVATE_BUTTON"
 
 internal const val TEST_TAG_SET_ANNOUNCEMENT_BUTTON = "TEST_TAG_SET_ANNOUNCEMENT_BUTTON"
 internal const val TEST_TAG_SET_UNRESTRICTED_BUTTON = "TEST_TAG_SET_UNRESTRICTED_BUTTON"
-
-fun NavController.navigateToCreateChannelScreen(
-    courseId: Long,
-    builder: NavOptionsBuilder.() -> Unit
-) {
-    navigate("course/$courseId/create_channel", builder)
-}
-
-fun NavGraphBuilder.createChannelScreen(
-    navController: NavController,
-    onNavigateBack: () -> Unit
-) {
-    courseNavGraphBuilderExtensions(
-        route = "course/{courseId}/create_channel"
-    ) { courseId ->
-        CreateChannelScreen(
-            modifier = Modifier.fillMaxSize(),
-            courseId = courseId,
-            onConversationCreated = { conversationId ->
-                navController.navigateToConversationDetailScreen(courseId, conversationId) {
-                    popUpTo(BrowseChannelsRoute) {
-                        inclusive = true
-                    }
-                }
-            },
-            onNavigateBack = onNavigateBack
-        )
-    }
-}
 
 @Composable
 fun CreateChannelScreen(

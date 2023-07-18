@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl
+package de.tum.informatics.www1.artemis.native_app.feature.metis.service.storage.impl
 
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
@@ -21,7 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.Metis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.PostReactionEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostTagEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.room.StandalonePostingEntity
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.service.storage.MetisStorageService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
 import java.util.UUID
