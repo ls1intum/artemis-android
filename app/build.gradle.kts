@@ -1,5 +1,8 @@
+@file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+
 import java.io.FileInputStream
 import java.util.Properties
+import java.lang.Boolean as JavaBoolean
 
 // https://developer.android.com/studio/publish/app-signing#secure-shared-keystore
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -22,7 +25,9 @@ android {
 
     val versionName = "0.7.2"
     val versionCode =
-        if (!System.getenv("bamboo_buildNumber").isNullOrEmpty()) System.getenv("bamboo_buildNumber")
+        if (!System.getenv("bamboo_buildNumber")
+                .isNullOrEmpty()
+        ) System.getenv("bamboo_buildNumber")
             ?.toString()
             ?.toIntOrNull() ?: deriveVersionCodeFromGit() else deriveVersionCodeFromGit()
 

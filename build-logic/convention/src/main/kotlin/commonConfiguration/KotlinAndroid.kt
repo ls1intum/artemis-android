@@ -1,4 +1,7 @@
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
@@ -6,6 +9,7 @@ import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
+import java.lang.Boolean
 
 //Adapted from: https://github.com/android/nowinandroid/blob/bbc5460b624d67b64b5b5118f8a0e1763427e7e4/build-logic/convention/src/main/kotlin/com/google/samples/apps/nowinandroid/KotlinAndroid.kt
 
@@ -65,6 +69,14 @@ internal fun Project.configureKotlinAndroid(
                 isIncludeAndroidResources = true
             }
         }
+
+        extensions.getByType(AndroidComponentsExtension::class).apply {
+            if (Boolean.getBoolean("skip.debugVariants")) {
+                beforeVariants(selector().withBuildType("debug")) { variantBuilder ->
+                    variantBuilder.enable = false
+                }
+            }
+        }
     }
 
     val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
@@ -84,15 +96,31 @@ internal fun Project.configureInstanceSelectionFlavor(
             create(ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection) {
                 dimension = ProductFlavors.Dimensions.InstanceSelection.Key
 
-                buildConfigField("boolean", ProductFlavors.BuildConfigFields.HasInstanceRestriction, "false")
-                buildConfigField("String", ProductFlavors.BuildConfigFields.DefaultServerUrl, "\"\"")
+                buildConfigField(
+                    "boolean",
+                    ProductFlavors.BuildConfigFields.HasInstanceRestriction,
+                    "false"
+                )
+                buildConfigField(
+                    "String",
+                    ProductFlavors.BuildConfigFields.DefaultServerUrl,
+                    "\"\""
+                )
             }
 
             create(ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum) {
                 dimension = ProductFlavors.Dimensions.InstanceSelection.Key
 
-                buildConfigField("boolean", ProductFlavors.BuildConfigFields.HasInstanceRestriction, "true")
-                buildConfigField("String", ProductFlavors.BuildConfigFields.DefaultServerUrl, "\"https://artemis.cit.tum.de\"")
+                buildConfigField(
+                    "boolean",
+                    ProductFlavors.BuildConfigFields.HasInstanceRestriction,
+                    "true"
+                )
+                buildConfigField(
+                    "String",
+                    ProductFlavors.BuildConfigFields.DefaultServerUrl,
+                    "\"https://artemis.cit.tum.de\""
+                )
             }
         }
     }
