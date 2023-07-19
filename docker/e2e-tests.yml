@@ -19,7 +19,8 @@ services:
       - ADMIN_USERNAME=artemis_admin
       - ADMIN_PASSWORD=artemis_admin
     command:
-      - test -Dskip.debugVariants=true
+      - test
+      - -Dskip.debugVariants=true
     networks:
       - artemis
     volumes:
