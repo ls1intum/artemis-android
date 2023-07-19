@@ -1,13 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.register
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,17 +16,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
-import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitJobCompletion
+import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadingAnimation
 import de.tum.informatics.www1.artemis.native_app.feature.login.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.PasswordTextField
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.getViewModel
 
+internal const val TEST_TAG_TEXT_FIELD_FIRST_NAME = "TEST_TAG_TEXT_FIELD_FIRST_NAME"
+internal const val TEST_TAG_TEXT_FIELD_LAST_NAME = "TEST_TAG_TEXT_FIELD_LAST_NAME"
+internal const val TEST_TAG_TEXT_FIELD_LOGIN_NAME = "TEST_TAG_TEXT_FIELD_LOGIN_NAME"
+internal const val TEST_TAG_TEXT_FIELD_EMAIL = "TEST_TAG_TEXT_FIELD_EMAIL"
+internal const val TEST_TAG_TEXT_FIELD_PASSWORD = "TEST_TAG_TEXT_FIELD_PASSWORD"
+internal const val TEST_TAG_TEXT_FIELD_CONFIRM_PASSWORD = "TEST_TAG_TEXT_FIELD_CONFIRM_PASSWORD"
 
 /**
  * Extension that returns the localized string if [RegisterViewModel.Status.errorText] is set.
@@ -64,13 +69,24 @@ internal fun RegisterUi(
 
     val isRegistrationAvailable by viewModel.isRegistrationAvailable.collectAsState()
 
-    var registerJob: Job? by remember { mutableStateOf(null) }
-    AwaitJobCompletion(job = registerJob) {
-        registerJob = null
+    var registerDeferred: Deferred<RegisterViewModel.RegistrationResponse>? by remember {
+        mutableStateOf(
+            null
+        )
     }
 
     var displayPasswordMismatchDialog: Boolean by remember { mutableStateOf(false) }
     var displayRegisterFailedDialog: Boolean by remember { mutableStateOf(false) }
+
+    AwaitDeferredCompletion(job = registerDeferred) { response ->
+        when (response) {
+            RegisterViewModel.RegistrationResponse.PASSWORD_MISMATCH -> displayPasswordMismatchDialog = true
+            RegisterViewModel.RegistrationResponse.SUCCESS -> onRegistered()
+            RegisterViewModel.RegistrationResponse.FAILURE -> displayRegisterFailedDialog = true
+        }
+
+        registerDeferred = null
+    }
 
     Column(
         modifier = modifier,
@@ -80,7 +96,7 @@ internal fun RegisterUi(
         val dividerModifier = Modifier
 
         ErrorTextField(
-            modifier = textFieldModifier,
+            modifier = textFieldModifier.testTag(TEST_TAG_TEXT_FIELD_FIRST_NAME),
             value = firstName,
             onValueChange = viewModel::updateFirstName,
             label = stringResource(id = R.string.register_label_first_name),
@@ -89,7 +105,7 @@ internal fun RegisterUi(
         )
 
         ErrorTextField(
-            modifier = textFieldModifier,
+            modifier = textFieldModifier.testTag(TEST_TAG_TEXT_FIELD_LAST_NAME),
             value = lastName,
             onValueChange = viewModel::updateLastName,
             label = stringResource(id = R.string.register_label_last_name),
@@ -98,7 +114,7 @@ internal fun RegisterUi(
         )
 
         ErrorTextField(
-            modifier = textFieldModifier,
+            modifier = textFieldModifier.testTag(TEST_TAG_TEXT_FIELD_LOGIN_NAME),
             value = username,
             onValueChange = viewModel::updateUsername,
             label = stringResource(id = R.string.register_label_username),
@@ -117,7 +133,7 @@ internal fun RegisterUi(
         )
 
         ErrorTextField(
-            modifier = textFieldModifier,
+            modifier = textFieldModifier.testTag(TEST_TAG_TEXT_FIELD_EMAIL),
             value = email,
             onValueChange = viewModel::updateEmail,
             label = stringResource(id = R.string.register_label_email),
@@ -128,7 +144,7 @@ internal fun RegisterUi(
         Divider(modifier = dividerModifier)
 
         ErrorTextField(
-            modifier = textFieldModifier,
+            modifier = textFieldModifier.testTag(TEST_TAG_TEXT_FIELD_PASSWORD),
             value = password,
             onValueChange = viewModel::updatePassword,
             label = stringResource(id = R.string.register_label_password),
@@ -137,7 +153,7 @@ internal fun RegisterUi(
         )
 
         ErrorTextField(
-            modifier = textFieldModifier,
+            modifier = textFieldModifier.testTag(TEST_TAG_TEXT_FIELD_CONFIRM_PASSWORD),
             value = confirmPassword,
             onValueChange = viewModel::updateConfirmPassword,
             label = stringResource(id = R.string.register_label_confirm_password),
@@ -145,24 +161,13 @@ internal fun RegisterUi(
             isPassword = true
         )
 
-        Button(
+        ButtonWithLoadingAnimation(
             modifier = Modifier,
-            onClick = {
-                registerJob = viewModel.register(
-                    onPasswordMismatch = { displayPasswordMismatchDialog = true },
-                    onSuccess = onRegistered,
-                    onFailure = { displayRegisterFailedDialog = true }
-                )
-            },
+            onClick = { registerDeferred = viewModel.register() },
+            isLoading = registerDeferred != null,
             enabled = isRegistrationAvailable
         ) {
-            Crossfade(targetState = registerJob != null) { isRegistering ->
-                if (isRegistering) {
-                    CircularProgressIndicator()
-                } else {
-                    Text(text = stringResource(id = R.string.register_button_register))
-                }
-            }
+            Text(text = stringResource(id = R.string.register_button_register))
         }
     }
 

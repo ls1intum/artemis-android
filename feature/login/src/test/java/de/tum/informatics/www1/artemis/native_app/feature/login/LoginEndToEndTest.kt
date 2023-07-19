@@ -35,7 +35,7 @@ import org.robolectric.shadows.ShadowLog
 
 @RunWith(RobolectricTestRunner::class)
 @Category(EndToEndTest::class)
-class LoginTest : KoinTest {
+class LoginEndToEndTest : KoinTest {
 
     companion object {
         private const val TAG = "LoginTest"

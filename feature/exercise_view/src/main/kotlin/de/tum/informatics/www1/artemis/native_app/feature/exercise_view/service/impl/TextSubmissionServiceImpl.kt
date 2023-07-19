@@ -18,23 +18,6 @@ import io.ktor.http.contentType
 class TextSubmissionServiceImpl(
     private val ktorProvider: KtorProvider
 ) : TextSubmissionService {
-    override suspend fun create(
-        textSubmission: TextSubmission,
-        exerciseId: Long,
-        serverUrl: String,
-        authToken: String
-    ): NetworkResponse<TextSubmission> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.post(serverUrl) {
-                url {
-                    appendPathSegments("api", "exercises", exerciseId.toString(), "text-submissions")
-                }
-                contentType(ContentType.Application.Json)
-                setBody(textSubmission)
-                cookieAuth(authToken)
-            }.body()
-        }
-    }
 
     override suspend fun update(
         textSubmission: TextSubmission,
@@ -45,7 +28,12 @@ class TextSubmissionServiceImpl(
         return performNetworkCall {
             ktorProvider.ktorClient.put(serverUrl) {
                 url {
-                    appendPathSegments("api", "exercises", exerciseId.toString(), "text-submissions")
+                    appendPathSegments(
+                        "api",
+                        "exercises",
+                        exerciseId.toString(),
+                        "text-submissions"
+                    )
                 }
                 contentType(ContentType.Application.Json)
                 setBody<Submission>(textSubmission)

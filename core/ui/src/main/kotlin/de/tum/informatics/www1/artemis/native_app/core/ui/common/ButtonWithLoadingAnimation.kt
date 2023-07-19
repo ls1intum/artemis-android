@@ -16,12 +16,13 @@ fun ButtonWithLoadingAnimation(
     modifier: Modifier,
     isLoading: Boolean,
     onClick: () -> Unit,
+    enabled: Boolean = true,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     content: @Composable () -> Unit
 ) {
     Button(
         modifier = modifier,
-        enabled = !isLoading,
+        enabled = enabled && !isLoading,
         onClick = onClick,
         colors = colors
     ) {

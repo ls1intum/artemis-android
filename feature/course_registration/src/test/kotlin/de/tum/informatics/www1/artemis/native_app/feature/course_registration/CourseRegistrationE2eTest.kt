@@ -24,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTest
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -34,6 +35,7 @@ import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.util.Logger
 import kotlin.test.assertEquals
 
 @Category(EndToEndTest::class)
@@ -58,8 +60,10 @@ class CourseRegistrationE2eTest : KoinTest {
     @Before
     fun setup() {
         runBlocking {
-            performTestLogin()
-            course = createCourse(getAdminAccessToken(), forceSelfRegistration = true)
+            withTimeout(DefaultTimeoutMillis) {
+                performTestLogin()
+                course = createCourse(getAdminAccessToken(), forceSelfRegistration = true)
+            }
         }
     }
 
@@ -68,7 +72,7 @@ class CourseRegistrationE2eTest : KoinTest {
      */
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can successfully register in course`() {
-        val viewModel = RegisterForCourseViewModel(get(), get(), get(), UnconfinedTestDispatcher())
+        val viewModel = RegisterForCourseViewModel(get(), get(), get(), get(), UnconfinedTestDispatcher())
 
         var registeredCourseId: Long? = null
 

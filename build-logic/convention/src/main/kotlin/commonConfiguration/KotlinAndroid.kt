@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.LintOptions
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
@@ -68,6 +69,12 @@ internal fun Project.configureKotlinAndroid(
             unitTests {
                 isIncludeAndroidResources = true
             }
+        }
+
+        // As of now, we can skip the linter on release builds.
+        lint {
+            checkReleaseBuilds = false
+            checkTestSources = false
         }
 
         extensions.getByType(AndroidComponentsExtension::class).apply {

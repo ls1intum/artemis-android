@@ -24,17 +24,19 @@ suspend fun KoinTest.performTestLogin(): String {
     val accountService: AccountService = get()
     val serverConfigurationService: ServerConfigurationService = get()
 
+    val serverUrl = serverConfigurationService.serverUrl.first()
+
+    println("Logging in with credentials: username=$user1Username; password=$user1Password; serverUrl=$serverUrl")
     val response = loginService.loginWithCredentials(
         username = user1Username,
         password = user1Password,
         rememberMe = true,
-        serverUrl = serverConfigurationService.serverUrl.first()
+        serverUrl = serverUrl
     )
-    val loginResponse: NetworkResponse.Response<LoginService.LoginResponse> =
-        assertIs(response, "Login not successful.")
-    accountService.storeAccessToken(loginResponse.data.idToken, true)
+    val loginResponse = response.orThrow("Login not successful")
+    accountService.storeAccessToken(loginResponse.idToken, true)
 
-    return loginResponse.data.idToken
+    return loginResponse.idToken
 }
 
 suspend fun KoinTest.getAdminAccessToken(): String {

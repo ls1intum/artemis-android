@@ -6,6 +6,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.Constants
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
@@ -15,7 +17,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.RegisterService
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerProfileInfoService
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +28,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import java.util.Locale
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * Handle the registration ui.
@@ -34,8 +41,13 @@ internal class RegisterViewModel(
     private val registerService: RegisterService,
     private val serverConfigurationService: ServerConfigurationService,
     serverProfileInfoService: ServerProfileInfoService,
-    networkStatusProvider: NetworkStatusProvider
-) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverProfileInfoService) {
+    networkStatusProvider: NetworkStatusProvider,
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
+) : BaseAccountViewModel(
+    serverConfigurationService,
+    networkStatusProvider,
+    serverProfileInfoService
+) {
 
     private companion object {
         private val usernameRegex = "^[a-zA-Z0-9]*".toRegex()
@@ -86,12 +98,14 @@ internal class RegisterViewModel(
     val emailStatus: Flow<EmailStatus> =
         combine(email, serverProfileInfo.filterSuccess()) { email, serverProfileInfo ->
             val matchesAllowedEmailPattern =
-                serverProfileInfo.allowedEmailPattern?.toPattern()?.matcher(email)?.matches() ?: true
+                serverProfileInfo.allowedEmailPattern?.toPattern()?.matcher(email)?.matches()
+                    ?: true
 
             when {
                 email.isEmpty() -> EmailStatus.NOT_PRESENT
                 !Patterns.EMAIL_ADDRESS.matcher(email)
                     .matches() || !matchesAllowedEmailPattern -> EmailStatus.INVALID
+
                 else -> EmailStatus.OK
             }
         }
@@ -131,7 +145,7 @@ internal class RegisterViewModel(
             .map { it.errorText == null }
             .fold(true, Boolean::and)
     }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     fun updateUsername(newUsername: String) {
         savedStateHandle[USERNAME_KEY] = newUsername
@@ -157,18 +171,13 @@ internal class RegisterViewModel(
         savedStateHandle[CONFIRM_PASSWORD_KEY] = newConfirmPassword
     }
 
-    fun register(
-        onPasswordMismatch: () -> Unit,
-        onSuccess: () -> Unit,
-        onFailure: () -> Unit
-    ): Job {
-        return viewModelScope.launch {
+    fun register(): Deferred<RegistrationResponse> {
+        return viewModelScope.async(coroutineContext) {
             if (password.value != confirmPassword.value) {
-                onPasswordMismatch()
-                return@launch
+                return@async RegistrationResponse.PASSWORD_MISMATCH
             }
 
-            val response = registerService.register(
+            registerService.register(
                 account = User(
                     firstName = firstName.value,
                     lastName = lastName.value,
@@ -179,12 +188,15 @@ internal class RegisterViewModel(
                 ),
                 serverUrl = serverConfigurationService.serverUrl.first()
             )
-
-            if (response is NetworkResponse.Response && response.data.isSuccess()) {
-                onSuccess()
-            } else {
-                onFailure()
-            }
+                .onFailure {
+                    println(it)
+                }
+                .onSuccess {
+                    println(it)
+                }
+                .bind { it.isSuccess() }
+                .or(false)
+                .let { if (it) RegistrationResponse.SUCCESS else RegistrationResponse.FAILURE }
         }
     }
 
@@ -234,5 +246,11 @@ internal class RegisterViewModel(
         NOT_PRESENT(R.string.register_error_text_confirmation_password_not_present),
         SHORT(R.string.register_error_text_confirmation_password_short),
         LONG(R.string.register_error_text_confirmation_password_long),
+    }
+
+    enum class RegistrationResponse {
+        PASSWORD_MISMATCH,
+        SUCCESS,
+        FAILURE
     }
 }

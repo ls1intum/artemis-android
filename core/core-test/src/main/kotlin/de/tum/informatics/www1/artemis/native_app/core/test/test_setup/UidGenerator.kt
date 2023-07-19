@@ -2,4 +2,4 @@ package de.tum.informatics.www1.artemis.native_app.core.test.test_setup
 
 import java.util.UUID
 
-internal fun generateId(): String = UUID.randomUUID().toString().replace('-', '1')
+fun generateId(): String = UUID.randomUUID().toString().replace('-', '1')
