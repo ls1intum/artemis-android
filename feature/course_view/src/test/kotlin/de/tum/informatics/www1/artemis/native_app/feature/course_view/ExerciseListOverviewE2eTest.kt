@@ -70,14 +70,14 @@ class ExerciseListOverviewE2eTest : BaseCourseTest() {
     @Ignore("TODO: quiz creation is currently undergoing changes. Fix once those are complete.")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `display quiz exercise`() {
-        displayExerciseTypeTestImpl {
-            createExerciseFormBody(
-                getAdminAccessToken(),
-                course.id!!,
-                endpoint = "quiz-exercises",
-                creator = ::createQuizExercise
-            )
-        }
+//        displayExerciseTypeTestImpl {
+//            createExerciseFormBody(
+//                getAdminAccessToken(),
+//                course.id!!,
+//                endpoint = "quiz-exercises",
+//                creator = { ::createQuizExercise }
+//            )
+//        }
     }
 
 

@@ -92,6 +92,8 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                     }
 
                     reports.junitXml.outputLocation.set(rootProject.rootDir.resolve("test-outputs/"))
+
+                    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
                 }
             }
         }

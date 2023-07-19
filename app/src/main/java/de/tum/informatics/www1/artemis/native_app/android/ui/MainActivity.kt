@@ -52,15 +52,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATIO
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.browse_channels.browseChannelsScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel.createChannelScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel.navigateToCreateChannelScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.createPersonalConversationScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.conversationDetailScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.navigateToConversationDetailScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.add_members.conversationAddMembersScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.conversationMembersScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.conversationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.standalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ProvideLocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContext
