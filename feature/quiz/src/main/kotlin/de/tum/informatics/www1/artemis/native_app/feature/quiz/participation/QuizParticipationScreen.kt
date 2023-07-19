@@ -33,11 +33,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.DestructiveMarkdownTextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadingAnimation
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.ViewQuizResultScreen
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -73,7 +76,8 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
             },
             navArgument("quizType") {
                 type = NavType.StringType
-                defaultValue = Json.encodeToString(QuizType.WorkableQuizType.serializer(), QuizType.Live)
+                defaultValue =
+                    Json.encodeToString(QuizType.WorkableQuizType.serializer(), QuizType.Live)
             }
         ),
         deepLinks = listOf(
@@ -126,7 +130,7 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
 }
 
 @Composable
-private fun QuizParticipationScreen(
+internal fun QuizParticipationScreen(
     modifier: Modifier,
     viewModel: QuizParticipationViewModel,
     onNavigateToInspectResult: (QuizType.ViewableQuizType) -> Unit,
@@ -143,32 +147,25 @@ private fun QuizParticipationScreen(
     var displayLeaveQuizDialog by rememberSaveable { mutableStateOf(false) }
 
     var displaySubmitDialog: Boolean by rememberSaveable { mutableStateOf(false) }
-    var submissionJob: Job? by remember { mutableStateOf(null) }
+    var submissionDeferred: Deferred<Boolean>? by remember { mutableStateOf(null) }
     var displaySubmissionFailedDialog by rememberSaveable {
         mutableStateOf(false)
     }
 
     val latestWebsocketSubmission by viewModel.latestWebsocketSubmission.collectAsState(initial = null)
 
-    LaunchedEffect(key1 = submissionJob) {
-        val job = submissionJob
-        if (job != null) {
-            try {
-                job.join()
-            } finally {
-                submissionJob = null
-            }
+    AwaitDeferredCompletion(job = submissionDeferred) { successful ->
+        if (!successful) {
+            displaySubmissionFailedDialog = true
         }
+
+        submissionDeferred = null
     }
 
     val initSubmit = {
         displaySubmitDialog = false
 
-        submissionJob = viewModel.submit { successful ->
-            if (!successful) {
-                displaySubmissionFailedDialog = true
-            }
-        }
+        submissionDeferred = viewModel.submit()
     }
 
     // Called when the user tries to leave this quiz
@@ -193,7 +190,9 @@ private fun QuizParticipationScreen(
                 },
                 actions = {
                     if (!isWaitingForQuizStart && !hasQuizEnded) {
-                        Button(
+                        ButtonWithLoadingAnimation(
+                            modifier = Modifier,
+                            isLoading = submissionDeferred != null,
                             onClick = { displaySubmitDialog = true },
                             colors = ButtonDefaults.filledTonalButtonColors(
                                 containerColor = submitButtonColor,
@@ -227,14 +226,15 @@ private fun QuizParticipationScreen(
                 confirmButtonText = stringResource(id = R.string.quiz_participation_submit_dialog_positive),
                 dismissButtonText = stringResource(id = R.string.quiz_participation_submit_dialog_negative),
                 onPressPositiveButton = initSubmit,
-                onDismissRequest = { displaySubmitDialog = false })
+                onDismissRequest = { displaySubmitDialog = false }
+            )
         }
 
-        if (submissionJob != null) {
+        if (submissionDeferred != null) {
             AlertDialog(
                 onDismissRequest = {
-                    submissionJob?.cancel()
-                    submissionJob = null
+                    submissionDeferred?.cancel()
+                    submissionDeferred = null
                 },
                 text = {
                     Text(text = stringResource(id = R.string.quiz_participation_submitting_dialog_message))

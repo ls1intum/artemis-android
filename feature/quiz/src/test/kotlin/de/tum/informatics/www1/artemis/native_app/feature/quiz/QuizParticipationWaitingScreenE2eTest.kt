@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
@@ -10,10 +9,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addQuizExerciseBatch
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExercise
@@ -22,7 +21,6 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_cr
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationUi
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.TEST_TAG_TEXT_FIELD_BATCH_PASSWORD
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.TEST_TAG_WAIT_FOR_QUIZ_START_SCREEN
 import kotlinx.coroutines.runBlocking
@@ -30,11 +28,6 @@ import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
-import org.koin.compose.LocalKoinApplication
-import org.koin.compose.LocalKoinScope
-import org.koin.core.annotation.KoinInternalApi
-import org.koin.mp.KoinPlatformTools
-import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -42,26 +35,35 @@ import kotlin.test.assertNotNull
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
-class QuizParticipationWaitingScreenE2eTest : QuizParticipationBaseE2eTest() {
+internal class QuizParticipationWaitingScreenE2eTest : QuizParticipationBaseE2eTest() {
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can start individual quiz`() {
         val quiz: QuizExercise = runBlocking {
             withTimeout(DefaultTimeoutMillis) {
+                val path = uploadBackgroundImage()
+
                 assertIs(
                     createExercise(
                         getAdminAccessToken(),
                         courseId,
                         endpoint = "quiz-exercises",
                         creator = { name, courseId ->
-                            createQuizExercise(name, courseId, QuizExercise.QuizMode.INDIVIDUAL)
+                            createQuizExercise(name, courseId, path, QuizExercise.QuizMode.INDIVIDUAL)
                         }
                     )
                 )
             }
         }
 
-        setupUi(quiz.id)
+        setupUi(quiz.id) { viewModel ->
+            QuizParticipationUi(
+                modifier = Modifier.fillMaxSize(),
+                viewModel = viewModel,
+                onNavigateToInspectResult = {},
+                onNavigateUp = {}
+            )
+        }
 
         composeTestRule.waitUntilExactlyOneExists(
             hasTestTag(TEST_TAG_WAIT_FOR_QUIZ_START_SCREEN),
@@ -94,17 +96,19 @@ class QuizParticipationWaitingScreenE2eTest : QuizParticipationBaseE2eTest() {
         assertIs<StudentParticipation>(participation)
     }
 
-    @Test
+    @Test(timeout = DefaultTestTimeoutMillis)
     fun `can start batched quiz`() {
         val (quiz, batch) = runBlocking {
             withTimeout(DefaultTimeoutMillis) {
+                val path = uploadBackgroundImage()
+
                 val quiz: QuizExercise = assertIs(
                     createExercise(
                         getAdminAccessToken(),
                         courseId,
                         endpoint = "quiz-exercises",
                         creator = { name, courseId ->
-                            createQuizExercise(name, courseId, QuizExercise.QuizMode.BATCHED)
+                            createQuizExercise(name, courseId, path, QuizExercise.QuizMode.BATCHED)
                         }
                     )
                 )
@@ -115,7 +119,15 @@ class QuizParticipationWaitingScreenE2eTest : QuizParticipationBaseE2eTest() {
             }
         }
 
-        setupUi(quiz.id)
+        setupUi(quiz.id) { viewModel ->
+            QuizParticipationUi(
+                modifier = Modifier.fillMaxSize(),
+                viewModel = viewModel,
+                onNavigateToInspectResult = {},
+                onNavigateUp = {}
+            )
+        }
+
 
         composeTestRule.waitUntilExactlyOneExists(
             hasTestTag(TEST_TAG_WAIT_FOR_QUIZ_START_SCREEN),
@@ -153,40 +165,5 @@ class QuizParticipationWaitingScreenE2eTest : QuizParticipationBaseE2eTest() {
         }
 
         assertIs<StudentParticipation>(participation)
-    }
-
-    @OptIn(KoinInternalApi::class)
-    private fun setupUi(exerciseId: Long): QuizParticipationViewModel {
-        val viewModel = QuizParticipationViewModel(
-            courseId = courseId,
-            exerciseId = exerciseId,
-            quizType = QuizType.Live,
-            savedStateHandle = SavedStateHandle(),
-            quizExerciseService = get(),
-            serverConfigurationService = get(),
-            accountService = get(),
-            quizParticipationService = get(),
-            websocketProvider = get(),
-            networkStatusProvider = get(),
-            participationService = get(),
-            serverTimeService = get()
-        )
-
-        composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext()
-                    .get().scopeRegistry.rootScope,
-                LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
-            ) {
-                QuizParticipationUi(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = viewModel,
-                    onNavigateToInspectResult = {},
-                    onNavigateUp = {}
-                )
-            }
-        }
-
-        return viewModel
     }
 }

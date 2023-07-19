@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
@@ -19,6 +20,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.Qui
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizQuestionBody
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+
+internal const val TEST_TAG_WORK_ON_QUIZ_QUESTIONS_SCREEN = "TEST_TAG_WORK_ON_QUIZ_QUESTIONS_SCREEN"
 
 @Composable
 internal fun WorkOnQuizQuestionsScreen(
@@ -39,7 +42,7 @@ internal fun WorkOnQuizQuestionsScreen(
 
     val currentQuestion = questionsWithData.getOrNull(selectedQuestionIndex)
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier.testTag(TEST_TAG_WORK_ON_QUIZ_QUESTIONS_SCREEN)) {
         WorkOnQuizHeader(
             modifier = Modifier.fillMaxWidth(),
             questions = questionsWithData.map { it.question },

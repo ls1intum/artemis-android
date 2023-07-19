@@ -488,7 +488,7 @@ internal class QuizParticipationViewModel(
                 quizEndedStatus.first { it }
 
                 // Submit to display results. The ui handles displaying the results automatically
-                submit { }
+                submit().await()
             }
         }
     }
@@ -504,8 +504,8 @@ internal class QuizParticipationViewModel(
         }
     }
 
-    fun submit(onResponse: (successful: Boolean) -> Unit): Job {
-        return viewModelScope.launch(coroutineContext) {
+    fun submit(): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
             val submission = buildAndUploadSubmission(
                 questions = quizQuestionsRandomOrder.first(),
                 isFinalSubmission = true,
@@ -518,7 +518,7 @@ internal class QuizParticipationViewModel(
             val serverUrl = serverConfigurationService.serverUrl.first()
             val authToken = accountService.authToken.first()
 
-            val successful = when (quizType) {
+            when (quizType) {
                 QuizType.Live -> quizParticipationService.submitForLiveMode(
                     submission, exerciseId, serverUrl, authToken
                 )
@@ -534,13 +534,12 @@ internal class QuizParticipationViewModel(
 
                     resultResponse
                 }
-            } is NetworkResponse.Response
-
-            if (successful) {
-                uploadedSubmission.value = submission
             }
-
-            onResponse(successful)
+                .onSuccess {
+                    uploadedSubmission.value = submission
+                }
+                .bind { true }
+                .or(false)
         }
     }
 

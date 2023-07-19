@@ -5,18 +5,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExerci
 
 internal interface QuizExerciseService {
 
-    suspend fun start(
-        exerciseId: Long,
-        serverUrl: String,
-        authToken: String
-    ): NetworkResponse<QuizExercise>
-
-    suspend fun end(
-        exerciseId: Long,
-        serverUrl: String,
-        authToken: String
-    ): NetworkResponse<QuizExercise>
-
     /**
      * Find the quiz exercise with the given id, with information filtered for students
      * @param exerciseId the id of the quiz exercise that should be loaded

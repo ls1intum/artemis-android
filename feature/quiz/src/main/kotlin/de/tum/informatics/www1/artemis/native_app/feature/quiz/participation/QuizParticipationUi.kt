@@ -27,7 +27,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizEnded
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.WaitForQuizStartScreen
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.WorkOnQuizQuestionsScreen
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
@@ -124,7 +123,11 @@ internal fun QuizParticipationUi(
                 }
             )
         } else if (hasQuizEnded) {
-            var submittingJob: Job? by remember { mutableStateOf(null) }
+            var submittingDeferred: Deferred<Boolean>? by remember { mutableStateOf(null) }
+
+            AwaitDeferredCompletion(job = submittingDeferred) {
+                submittingDeferred = null
+            }
 
             QuizEndedScreen(
                 modifier = Modifier.fillMaxSize(),
@@ -135,11 +138,9 @@ internal fun QuizParticipationUi(
 
                     QuizType.Practice -> QuizEndedScreenType.Practice(
                         onRequestSubmit = {
-                            submittingJob = viewModel.submit {
-                                submittingJob = null
-                            }
+                            submittingDeferred = viewModel.submit()
                         },
-                        isSubmitting = submittingJob != null
+                        isSubmitting = submittingDeferred != null
                     )
                 }
             )
@@ -154,7 +155,6 @@ internal fun QuizParticipationUi(
             EmptyDataStateUi(
                 dataState = questionWithDataDataState
             ) { questionsWithData ->
-
                 WorkOnQuizQuestionsScreen(
                     modifier = Modifier.fillMaxSize(),
                     quizType = viewModel.quizType,

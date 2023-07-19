@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation
 
 import android.util.Log
+import androidx.annotation.RawRes
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
@@ -28,6 +29,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import kotlinx.coroutines.flow.first
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -305,7 +307,10 @@ suspend fun KoinComponent.createAttachment(
         .body()
 }
 
-suspend fun KoinComponent.addQuizExerciseBatch(accessToken: String, exerciseId: Long): QuizExercise.QuizBatch {
+suspend fun KoinComponent.addQuizExerciseBatch(
+    accessToken: String,
+    exerciseId: Long
+): QuizExercise.QuizBatch {
     return ktorProvider.ktorClient.put(serverConfigurationService.serverUrl.first()) {
         url {
             appendPathSegments("api", "quiz-exercises", exerciseId.toString(), "add-batch")
@@ -317,7 +322,11 @@ suspend fun KoinComponent.addQuizExerciseBatch(accessToken: String, exerciseId: 
     }.body()
 }
 
-suspend fun KoinComponent.startQuizExerciseBatch(accessToken: String, exerciseId: Long, batch: QuizExercise.QuizBatch) {
+suspend fun KoinComponent.startQuizExerciseBatch(
+    accessToken: String,
+    exerciseId: Long,
+    batch: QuizExercise.QuizBatch
+) {
     return ktorProvider.ktorClient.put(serverConfigurationService.serverUrl.first()) {
         url {
             appendPathSegments("api", "quiz-exercises", exerciseId.toString(), "start-batch")
@@ -330,3 +339,37 @@ suspend fun KoinComponent.startQuizExerciseBatch(accessToken: String, exerciseId
         contentType(ContentType.Application.Json)
     }.body()
 }
+
+/**
+ * @return path of the created file
+ */
+suspend fun KoinComponent.fileUpload(accessToken: String, byteArray: ByteArray): String {
+    val response: FileUploadResponse = ktorProvider.ktorClient.submitFormWithBinaryData(
+        url = serverConfigurationService.serverUrl.first(),
+        formData = formData {
+            append(
+                "file",
+                byteArray,
+                headers = Headers.build {
+                    set(HttpHeaders.ContentType, ContentType.Image.PNG.contentType)
+                }
+            )
+        }
+    ) {
+        url {
+            appendPathSegments("api", "fileUpload")
+
+            parameter("keepFileName", false)
+        }
+
+        cookieAuth(accessToken)
+
+        contentType(ContentType.MultiPart.FormData)
+        accept(ContentType.Application.Json)
+    }.body()
+
+    return response.path
+}
+
+@Serializable
+private data class FileUploadResponse(val path: String)

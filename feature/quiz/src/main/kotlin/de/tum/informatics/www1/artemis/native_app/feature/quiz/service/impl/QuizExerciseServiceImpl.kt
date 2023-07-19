@@ -24,44 +24,6 @@ internal class QuizExerciseServiceImpl(
         private val resourcePathSegments = listOf("api", "quiz-exercises")
     }
 
-    override suspend fun start(
-        exerciseId: Long,
-        serverUrl: String,
-        authToken: String
-    ): NetworkResponse<QuizExercise> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.put(serverUrl) {
-                url {
-                    appendPathSegments(resourcePathSegments)
-                    appendPathSegments(exerciseId.toString(), "start-now")
-                }
-
-                contentType(ContentType.Application.Json)
-                cookieAuth(authToken)
-                setBody<QuizExercise?>(null)
-            }.body()
-        }
-    }
-
-    override suspend fun end(
-        exerciseId: Long,
-        serverUrl: String,
-        authToken: String
-    ): NetworkResponse<QuizExercise> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.put(serverUrl) {
-                url {
-                    appendPathSegments(resourcePathSegments)
-                    appendPathSegments(exerciseId.toString(), "end-now")
-                }
-
-                contentType(ContentType.Application.Json)
-                cookieAuth(authToken)
-                setBody<QuizExercise?>(null)
-            }.body()
-        }
-    }
-
     override suspend fun findForStudent(
         exerciseId: Long,
         serverUrl: String,

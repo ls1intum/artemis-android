@@ -173,7 +173,12 @@ fun createProgramingExercise(title: String, courseId: Long): String = """
 
 """.trimIndent()
 
-fun createQuizExercise(title: String, courseId: Long, mode: QuizExercise.QuizMode = QuizExercise.QuizMode.INDIVIDUAL): String = """
+fun createQuizExercise(
+    title: String,
+    courseId: Long,
+    backgroundFilePath: String,
+    mode: QuizExercise.QuizMode = QuizExercise.QuizMode.INDIVIDUAL
+): String = """
 {
   "title": "$title",
   "bonusPoints": 0,
@@ -331,6 +336,82 @@ fun createQuizExercise(title: String, courseId: Long, mode: QuizExercise.QuizMod
       ],
       "matchLetterCase": false,
       "similarityValue": 85
+    },
+    {
+      "title": "Dnd Question",
+      "text": "Enter your long question if needed",
+      "hint": "Add a hint here (visible during the quiz via ?-Button)",
+      "points": 1,
+      "scoringType": "PROPORTIONAL_WITH_PENALTY",
+      "randomizeOrder": true,
+      "invalid": false,
+      "exportQuiz": false,
+      "type": "drag-and-drop",
+      "backgroundFilePath": "$backgroundFilePath",
+      "dropLocations": [
+        {
+          "tempID": 7167046265873659,
+          "posX": 22,
+          "posY": 57,
+          "width": 23,
+          "height": 23,
+          "invalid": false
+        },
+        {
+          "tempID": 7845820172921351,
+          "posX": 94,
+          "posY": 55,
+          "width": 26,
+          "height": 20,
+          "invalid": false
+        }
+      ],
+      "dragItems": [
+        {
+          "tempID": 1600501544974459,
+          "text": "item1",
+          "invalid": false
+        },
+        {
+          "tempID": 3318321452932735,
+          "text": "item2",
+          "invalid": false
+        }
+      ],
+      "correctMappings": [
+        {
+          "invalid": false,
+          "dragItem": {
+            "tempID": 1600501544974459,
+            "text": "item1",
+            "invalid": false
+          },
+          "dropLocation": {
+            "tempID": 7167046265873659,
+            "posX": 22,
+            "posY": 57,
+            "width": 23,
+            "height": 23,
+            "invalid": false
+          }
+        },
+        {
+          "invalid": false,
+          "dragItem": {
+            "tempID": 3318321452932735,
+            "text": "item2",
+            "invalid": false
+          },
+          "dropLocation": {
+            "tempID": 7845820172921351,
+            "posX": 94,
+            "posY": 55,
+            "width": 26,
+            "height": 20,
+            "invalid": false
+          }
+        }
+      ]
     }
   ],
   "quizMode": "${mode.name}",
@@ -345,7 +426,10 @@ fun createTextLectureUnit(name: String) = """
     {"name":"$name","releaseDate":null,"competencies":[],"type":"text","content":"${generateId()}"}
 """.trimIndent()
 
-fun createExerciseLectureUnit(@Suppress("UNUSED_PARAMETER") name: String, exerciseAsString: String) = """
+fun createExerciseLectureUnit(
+    @Suppress("UNUSED_PARAMETER") name: String,
+    exerciseAsString: String
+) = """
     {
       "type": "exercise",
       "exercise": $exerciseAsString

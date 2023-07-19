@@ -22,3 +22,7 @@ dependencies {
     testImplementation(project(":feature:login-test"))
     testImplementation(project(":core:core-test"))
 }
+
+tasks.withType(Test::class) {
+    android.sourceSets.getByName("main").res.srcDirs("src/test/res")
+}

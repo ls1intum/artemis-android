@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadingAnimation
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.ConnectionStatusUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.getFormattedRelativeToFutureTimeQuizStyle
@@ -289,18 +290,12 @@ private fun StartButton(
     text: String,
     onClick: () -> Unit
 ) {
-    Button(
+    ButtonWithLoadingAnimation(
         modifier = modifier,
-        enabled = !isStarting,
+        isLoading = isStarting,
         onClick = onClick
     ) {
-        Crossfade(targetState = isStarting, label = "is loading animation") { isStartingState ->
-            if (isStartingState) {
-                CircularProgressIndicator()
-            } else {
-                Text(text = text)
-            }
-        }
+        Text(text = text)
     }
 }
 
