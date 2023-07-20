@@ -91,7 +91,7 @@ class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
     private fun setupUiAndViewModel(postId: Long): MetisThreadViewModel {
         val viewModel = MetisThreadViewModel(
             initialPostId = StandalonePostId.ServerSideId(postId),
-            subscribeToLiveUpdateService = true,
+            subscribeToLiveUpdateService = false,
             initialMetisContext = metisContext,
             metisService = get(),
             metisStorageService = get(),
