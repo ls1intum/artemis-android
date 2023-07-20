@@ -28,4 +28,4 @@ ARG buildNumber=1
 ENV bamboo_buildNumber=$buildNumber
 
 ENTRYPOINT ["./gradlew"]
-RUN ./gradlew build -Dskip.e2e=true -Dskip.debugVariants=true
+RUN ./gradlew build -Dskip.e2e=true -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true

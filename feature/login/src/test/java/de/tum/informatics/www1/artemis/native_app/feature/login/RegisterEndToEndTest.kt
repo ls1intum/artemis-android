@@ -4,33 +4,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.printToString
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.Constants
+import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
+import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.ktorProvider
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.TEST_TAG_BUTTON_WITH_LOADING_ANIMATION_LOADING
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.RegisterUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.RegisterViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.TEST_TAG_TEXT_FIELD_CONFIRM_PASSWORD
@@ -39,12 +31,15 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.register.TEST_TA
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.TEST_TAG_TEXT_FIELD_LAST_NAME
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.TEST_TAG_TEXT_FIELD_LOGIN_NAME
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.TEST_TAG_TEXT_FIELD_PASSWORD
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginService
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
-import io.ktor.client.request.put
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
+import io.ktor.http.contentType
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -54,6 +49,8 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.util.Logger
+import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 @Category(EndToEndTest::class)
@@ -64,10 +61,9 @@ class RegisterEndToEndTest : BaseComposeTest() {
         androidContext(InstrumentationRegistry.getInstrumentation().context)
 
         modules(coreTestModules)
-        modules(loginModule, pushModule)
+        modules(loginModule, pushModule, testLoginModule)
     }
 
-    @Ignore("Server throws an exception as mail service does not work.")
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can register to server`() {
         val id = generateId().take(10)
@@ -82,10 +78,9 @@ class RegisterEndToEndTest : BaseComposeTest() {
             registerService = get(),
             serverConfigurationService = get(),
             serverProfileInfoService = get(),
-            networkStatusProvider = get()
+            networkStatusProvider = get(),
+            coroutineContext = testDispatcher
         )
-
-        var hasRegistered = false
 
         composeTestRule.setContent {
             RegisterUi(
@@ -93,7 +88,7 @@ class RegisterEndToEndTest : BaseComposeTest() {
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState()),
                 viewModel = viewModel,
-                onRegistered = { hasRegistered = true }
+                onRegistered = { }
             )
         }
 
@@ -114,13 +109,36 @@ class RegisterEndToEndTest : BaseComposeTest() {
         performTextInput(TEST_TAG_TEXT_FIELD_PASSWORD, password)
         performTextInput(TEST_TAG_TEXT_FIELD_CONFIRM_PASSWORD, password)
 
-        composeTestRule
-            .onNodeWithText(context.getString(R.string.register_button_register))
-            .assertIsEnabled()
-            .performScrollTo()
-            .performClick()
+        runBlockingWithTestTimeout {
+            viewModel.register().await()
 
+            val users: List<User> = getUsers(loginName)
+            Logger.debug("Loaded users are $users")
 
-        composeTestRule.waitUntil { hasRegistered }
+            assertTrue(users.any { it.username == loginName }, "Could not find registered user")
+        }
+    }
+
+    private suspend fun getUsers(loginName: String): List<User> {
+        return ktorProvider.ktorClient.get(testServerUrl) {
+            url {
+                appendPathSegments("api", "admin", "users")
+
+                parameter("page", 0)
+                parameter("pageSize", 10)
+                parameter("searchTerm", loginName)
+                parameter("sortingOrder", "ASCENDING")
+                parameter("sortedColumn", "id")
+                parameter("filters", "")
+                parameter("authorities", "")
+                parameter("origins", "")
+                parameter("registrationNumbers", "")
+                parameter("status", "")
+                parameter("courseIds", "")
+            }
+
+            cookieAuth(getAdminAccessToken())
+            contentType(ContentType.Application.Json)
+        }.body()
     }
 }

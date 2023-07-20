@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push
 
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -8,21 +7,23 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
+import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationSettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.PushNotificationConfigurationServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.TEST_TAG_PUSH_CHECK_BOX
@@ -32,8 +33,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.ui.testTagForSett
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Before
@@ -47,25 +46,22 @@ import org.koin.compose.LocalKoinScope
 import org.koin.core.annotation.KoinInternalApi
 import org.koin.dsl.module
 import org.koin.mp.KoinPlatformTools
-import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLog
+import org.robolectric.util.Logger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
-class PushNotificationSettingsE2eTest : KoinTest {
+class PushNotificationSettingsE2eTest : BaseComposeTest() {
 
     companion object {
         private const val TAG = "PushNotificationSettingsE2eTest"
     }
-
-    @get:Rule
-    val composeTestRule = createComposeRule()
 
     @get:Rule
     val koinTestRule = KoinTestRule.create {
@@ -85,19 +81,14 @@ class PushNotificationSettingsE2eTest : KoinTest {
     fun setup() {
         ShadowLog.stream = System.out
 
-        accessToken = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                performTestLogin()
-            }
-        }
+        accessToken = runBlockingWithTestTimeout { performTestLogin() }
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can retrieve notification settings`() {
-        val dispatcher = UnconfinedTestDispatcher()
-        val viewModel = setupUiAndViewModel(dispatcher)
+        val viewModel = setupUiAndViewModel()
 
-        dispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceUntilIdle()
 
         val currentSettingsByGroup = runBlocking {
             withTimeout(DefaultTimeoutMillis) {
@@ -133,10 +124,9 @@ class PushNotificationSettingsE2eTest : KoinTest {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can update notification settings`() {
-        val dispatcher = UnconfinedTestDispatcher()
-        val viewModel = setupUiAndViewModel(dispatcher)
+        val viewModel = setupUiAndViewModel()
 
-        dispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceUntilIdle()
 
         val currentSettingsByGroup = runBlocking {
             withTimeout(DefaultTimeoutMillis) {
@@ -147,16 +137,16 @@ class PushNotificationSettingsE2eTest : KoinTest {
             }
         }
 
-        Log.i(TAG, "CurrentSettingsByGroup=$currentSettingsByGroup")
+        Logger.info("CurrentSettingsByGroup=$currentSettingsByGroup")
 
         val category =
             currentSettingsByGroup.first { category -> category.settings.isNotEmpty() && category.settings.any { it.push != null } }
 
-        Log.i(TAG, "Selected category for switch=$category")
+        Logger.info("Selected category for switch=$category")
 
         val setting = category.settings.first { it.push != null }
 
-        Log.i(TAG, "Selected setting for switch=$setting")
+        Logger.info("Selected setting for switch=$setting")
 
         // Click on push checkbox of setting
         composeTestRule
@@ -190,19 +180,42 @@ class PushNotificationSettingsE2eTest : KoinTest {
             } ?: throw RuntimeException("Could not load updated notification settings")
         }
 
-        Log.i(TAG, "Updated settings=$updatedSettings")
+        Logger.info("Updated settings=$updatedSettings")
 
         val updatedSetting = updatedSettings
             .first { it.group == setting.group && it.settingId == setting.settingId }
 
-        Log.i(TAG, "Updated setting=$updatedSetting")
+        Logger.info("Updated setting=$updatedSetting")
 
         // Check that the new setting has been updated correctly
         assertEquals(!setting.push!!, updatedSetting.push!!)
     }
 
+    @Test(timeout = DefaultTestTimeoutMillis)
+    fun `can register for and unregister from push notifications`() {
+        val pushNotificationConfigurationService: PushNotificationConfigurationService =
+            PushNotificationConfigurationServiceImpl(
+                context,
+                get()
+            )
+
+        runBlockingWithTestTimeout {
+            pushNotificationConfigurationService.uploadPushNotificationDeviceConfigurationsToServer(
+                serverUrl = testServerUrl,
+                authToken = accessToken,
+                firebaseToken = generateId()
+            ).orThrow("Could not register for push notifications")
+
+            pushNotificationConfigurationService.unsubscribeFromNotifications(
+                serverUrl = testServerUrl,
+                authToken = accessToken,
+                firebaseToken = generateId()
+            ).orThrow("Could not unregister from push notifications")
+        }
+    }
+
     @OptIn(KoinInternalApi::class)
-    private fun setupUiAndViewModel(testDispatcher: TestDispatcher = UnconfinedTestDispatcher()): PushNotificationSettingsViewModel {
+    private fun setupUiAndViewModel(): PushNotificationSettingsViewModel {
         val viewModel = PushNotificationSettingsViewModel(
             notificationSettingsService = get(),
             networkStatusProvider = get(),

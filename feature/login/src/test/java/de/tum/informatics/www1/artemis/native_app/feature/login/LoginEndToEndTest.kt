@@ -32,6 +32,7 @@ import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLog
+import org.robolectric.util.Logger
 
 @RunWith(RobolectricTestRunner::class)
 @Category(EndToEndTest::class)
@@ -60,10 +61,7 @@ class LoginEndToEndTest : KoinTest {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `test login is successful`() {
-        Log.i(
-            TAG,
-            "Logging in with user $user1Username and $user1Password to server $testServerUrl"
-        )
+        Logger.debug("Logging in with user $user1Username and $user1Password to server $testServerUrl")
 
         val viewModel = LoginViewModel(
             savedStateHandle = SavedStateHandle(),

@@ -76,13 +76,14 @@ android {
     }
 
     productFlavors {
-        getByName(ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection) {
+        findByName(ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection)?.apply {
             versionNameSuffix =
                 "-" + ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection
         }
 
-        getByName(ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum) {
-            versionNameSuffix = "-" + ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum
+        findByName(ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum)?.apply {
+            versionNameSuffix =
+                "-" + ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum
         }
     }
 }

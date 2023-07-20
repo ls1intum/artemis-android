@@ -1,8 +1,7 @@
+@file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+
 import com.android.build.api.dsl.CommonExtension
-import com.android.build.api.dsl.LintOptions
 import com.android.build.api.variant.AndroidComponentsExtension
-import com.android.build.api.variant.ApplicationAndroidComponentsExtension
-import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
@@ -11,6 +10,8 @@ import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 import java.lang.Boolean
+import kotlin.Unit
+import kotlin.apply
 
 //Adapted from: https://github.com/android/nowinandroid/blob/bbc5460b624d67b64b5b5118f8a0e1763427e7e4/build-logic/convention/src/main/kotlin/com/google/samples/apps/nowinandroid/KotlinAndroid.kt
 
@@ -100,34 +101,38 @@ internal fun Project.configureInstanceSelectionFlavor(
         flavorDimensions += ProductFlavors.Dimensions.InstanceSelection.Key
 
         productFlavors {
-            create(ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection) {
-                dimension = ProductFlavors.Dimensions.InstanceSelection.Key
+            if (!Boolean.getBoolean("skip.flavor.${ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection}")) {
+                create(ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection) {
+                    dimension = ProductFlavors.Dimensions.InstanceSelection.Key
 
-                buildConfigField(
-                    "boolean",
-                    ProductFlavors.BuildConfigFields.HasInstanceRestriction,
-                    "false"
-                )
-                buildConfigField(
-                    "String",
-                    ProductFlavors.BuildConfigFields.DefaultServerUrl,
-                    "\"\""
-                )
+                    buildConfigField(
+                        "boolean",
+                        ProductFlavors.BuildConfigFields.HasInstanceRestriction,
+                        "false"
+                    )
+                    buildConfigField(
+                        "String",
+                        ProductFlavors.BuildConfigFields.DefaultServerUrl,
+                        "\"\""
+                    )
+                }
             }
 
-            create(ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum) {
-                dimension = ProductFlavors.Dimensions.InstanceSelection.Key
+            if (!Boolean.getBoolean("skip.flavor.${ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum}")) {
+                create(ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum) {
+                    dimension = ProductFlavors.Dimensions.InstanceSelection.Key
 
-                buildConfigField(
-                    "boolean",
-                    ProductFlavors.BuildConfigFields.HasInstanceRestriction,
-                    "true"
-                )
-                buildConfigField(
-                    "String",
-                    ProductFlavors.BuildConfigFields.DefaultServerUrl,
-                    "\"https://artemis.cit.tum.de\""
-                )
+                    buildConfigField(
+                        "boolean",
+                        ProductFlavors.BuildConfigFields.HasInstanceRestriction,
+                        "true"
+                    )
+                    buildConfigField(
+                        "String",
+                        ProductFlavors.BuildConfigFields.DefaultServerUrl,
+                        "\"https://artemis.cit.tum.de\""
+                    )
+                }
             }
         }
     }

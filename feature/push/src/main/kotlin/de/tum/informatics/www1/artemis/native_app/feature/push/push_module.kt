@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.noti
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.MiscNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.NotificationManagerImpl
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.ReplyWorker
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationSettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -37,7 +38,7 @@ val pushModule = module {
     workerOf(::UnsubscribeFromNotificationsWorker)
     workerOf(::ReplyWorker)
 
-    single<de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationSettingsService> {
+    single<NotificationSettingsService> {
         de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.NotificationSettingsServiceImpl(
             get()
         )

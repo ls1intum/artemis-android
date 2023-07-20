@@ -21,6 +21,7 @@ services:
     command:
       - test
       - -Dskip.debugVariants=true
+      - -Dskip.flavor.unrestricted=true
     networks:
       - artemis
     volumes:

@@ -14,7 +14,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 
-internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorProvider) : NotificationSettingsService {
+internal class NotificationSettingsServiceImpl(private val ktorProvider: KtorProvider) :
+    NotificationSettingsService {
 
     private companion object {
         private val pushNotificationSettingsResourcePathSegments = listOf("api", "notification-settings")

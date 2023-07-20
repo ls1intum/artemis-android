@@ -41,8 +41,7 @@
 
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
-            android:theme="@style/AppThemeActionBar"
-            tools:replace="android:theme" />
+            android:theme="@style/AppThemeActionBar" />
 
         <meta-data
             android:name="io.sentry.auto-init"
