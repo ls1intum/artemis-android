@@ -152,5 +152,4 @@ suspend fun ConversationService.getConversation(
                 NetworkResponse.Failure(RuntimeException("Conversation not found"))
             }
         }
-        .onFailure { it.printStackTrace() }
 }

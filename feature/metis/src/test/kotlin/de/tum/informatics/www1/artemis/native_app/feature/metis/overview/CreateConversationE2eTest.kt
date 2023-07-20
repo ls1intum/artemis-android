@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.overview
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -27,6 +28,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.CreatePersonalConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.CreatePersonalConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.member_selection.MemberSelectionBaseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.member_selection.TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -55,12 +57,10 @@ class CreateConversationE2eTest : ConversationBaseTest() {
             .onNodeWithTag(TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD)
             .performTextInput(user2DisplayName)
 
-        testDispatcher.scheduler.advanceTimeBy(1000)
+        testDispatcher.scheduler.advanceTimeBy(MemberSelectionBaseViewModel.QUERY_DEBOUNCE_TIME * 2)
 
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                viewModel.potentialRecipients.filterSuccess().filter { it.isNotEmpty() }.first()
-            }
+        runBlockingWithTestTimeout {
+            viewModel.potentialRecipients.filterSuccess().filter { it.isNotEmpty() }.first()
         }
 
         composeTestRule.waitUntilAtLeastOneExists(
@@ -107,11 +107,12 @@ class CreateConversationE2eTest : ConversationBaseTest() {
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON)
+            .assertIsDisplayed()
             .performClick()
 
         composeTestRule.waitUntil(DefaultTimeoutMillis) { createdConversationId != null }
 
-        return runBlocking {
+        return runBlockingWithTestTimeout {
             conversationService.getConversation(
                 course.id!!,
                 createdConversationId!!,
