@@ -92,7 +92,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                     }
 
                     reports.junitXml.required.set(true)
-                    reports.junitXml.outputLocation.set(rootProject.rootDir.resolve("test-outputs/$name/"))
+                    reports.junitXml.outputLocation.set(rootProject.rootDir.resolve("test-outputs/${project.name}/$name/"))
 
                     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
                 }
