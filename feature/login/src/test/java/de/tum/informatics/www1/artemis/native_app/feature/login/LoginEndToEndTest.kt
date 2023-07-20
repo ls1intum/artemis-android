@@ -38,10 +38,6 @@ import org.robolectric.util.Logger
 @Category(EndToEndTest::class)
 class LoginEndToEndTest : KoinTest {
 
-    companion object {
-        private const val TAG = "LoginTest"
-    }
-
     private val context: Context get() = InstrumentationRegistry.getInstrumentation().targetContext
 
     @get:Rule

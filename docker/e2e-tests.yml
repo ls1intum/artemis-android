@@ -22,6 +22,7 @@ services:
       - test
       - -Dskip.debugVariants=true
       - -Dskip.flavor.unrestricted=true
+      - -Probolectric.logging.enabled=true
     networks:
       - artemis
     volumes:

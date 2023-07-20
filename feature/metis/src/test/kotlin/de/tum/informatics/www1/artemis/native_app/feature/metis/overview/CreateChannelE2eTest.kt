@@ -31,16 +31,13 @@ import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.util.Logger
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
 class CreateChannelE2eTest : ConversationBaseTest() {
-
-    companion object {
-        private const val TAG = "CreateChannelE2eTest"
-    }
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can create channel`() {
@@ -78,8 +75,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         isPublic: Boolean,
         isAnnouncement: Boolean
     ) {
-        Log.i(
-            TAG,
+        Logger.info(
             "Testing create channel with properties: channelname=$channelName, channelDescription$channelDescription, isPublic=$isPublic, isAnnouncement=$isAnnouncement"
         )
 

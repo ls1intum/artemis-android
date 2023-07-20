@@ -31,8 +31,6 @@ internal class GroupChatSettingsE2eTest : ConversationSettingsBaseE2eTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can change group chat name`() {
-        ShadowLog.stream = System.out
-
         val groupChat = createGroupChat()
 
         val newTitle = "testgroupchat"

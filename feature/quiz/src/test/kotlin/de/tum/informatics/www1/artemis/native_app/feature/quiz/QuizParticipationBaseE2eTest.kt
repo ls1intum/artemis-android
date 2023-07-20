@@ -53,15 +53,13 @@ internal abstract class QuizParticipationBaseE2eTest : BaseComposeTest() {
     fun setup() {
         ShadowLog.stream = System.out
 
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                course = createCourse(getAdminAccessToken())
-                courseId = course.id!!
+        runBlockingWithTestTimeout {
+            course = createCourse(getAdminAccessToken())
+            courseId = course.id!!
 
-                accessToken = performTestLogin()
+            accessToken = performTestLogin()
 
-                setupHook()
-            }
+            setupHook()
         }
     }
 

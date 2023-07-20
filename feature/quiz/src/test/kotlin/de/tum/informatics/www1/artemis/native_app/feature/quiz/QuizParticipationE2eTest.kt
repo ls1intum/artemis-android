@@ -33,6 +33,7 @@ import kotlinx.coroutines.withTimeout
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.util.Logger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -246,7 +247,7 @@ internal class QuizParticipationE2eTest : QuizParticipationBaseE2eTest() {
                             "Submission in result is not a QuizSubmission"
                         )
 
-                    println("Loaded submitted submission: $submission")
+                    Logger.info("Loaded submitted submission: $submission")
 
                     submission
                 }
