@@ -24,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.testTagForPotentialRecipient
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.member_selection.MemberSelectionBaseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.member_selection.TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.member_selection.testTagForSelectedRecipient
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.add_members.ConversationAddMembersScreen
@@ -143,8 +144,7 @@ class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
             .onNodeWithTag(TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD)
             .performTextInput(username)
 
-        dispatcher.scheduler.advanceUntilIdle()
-        dispatcher.scheduler.advanceTimeBy(20000)
+        dispatcher.scheduler.advanceTimeBy(MemberSelectionBaseViewModel.QUERY_DEBOUNCE_TIME * 2)
 
         composeTestRule.waitUntilAtLeastOneExists(
             hasTestTag(testTagForPotentialRecipient(username)),

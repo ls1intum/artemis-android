@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.plus
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.milliseconds
 
 internal abstract class MemberSelectionBaseViewModel(
     protected val courseId: Long,
@@ -44,6 +45,8 @@ internal abstract class MemberSelectionBaseViewModel(
         private const val KEY_QUERY = "query"
         private const val KEY_INCLUSION_LIST = "inclusion_list"
         private const val KEY_RECIPIENTS = "recipients"
+
+        val QUERY_DEBOUNCE_TIME = 200.milliseconds
     }
 
     private val onRequestReloadPotentialRecipients =
@@ -62,7 +65,7 @@ internal abstract class MemberSelectionBaseViewModel(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
 
     private val recipientsFromServer: Flow<DataState<List<User>>> = flatMapLatest(
-        query.debounce(200),
+        query.debounce(QUERY_DEBOUNCE_TIME),
         inclusionList,
         accountService.authToken,
         serverConfigurationService.serverUrl,

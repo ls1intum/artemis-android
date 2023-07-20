@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.settings
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
@@ -136,6 +137,7 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
         composeTestRule
             .onNodeWithText(if (archive) doArchiveButtonText else doUnarchiveButtonText)
             .performScrollTo()
+            .assertIsDisplayed()
             .performClick()
 
         composeTestRule
@@ -147,11 +149,8 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
                     )
                 )
             )
+            .assertExists()
             .performClick()
-
-        testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.requestReload()
-        testDispatcher.scheduler.advanceUntilIdle()
 
         composeTestRule
             .waitUntilExactlyOneExists(

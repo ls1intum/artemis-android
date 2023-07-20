@@ -113,7 +113,7 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             .performClick()
 
         // Advance time to continue with the syncing
-        testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceTimeBy(TextExerciseParticipationViewModel.SyncDelay * 2)
 
         runBlocking {
             withTimeoutOrNull(DefaultTimeoutMillis) {

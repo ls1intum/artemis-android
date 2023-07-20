@@ -88,8 +88,6 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
     fun `can retrieve notification settings`() {
         val viewModel = setupUiAndViewModel()
 
-        testDispatcher.scheduler.advanceUntilIdle()
-
         val currentSettingsByGroup = runBlocking {
             withTimeout(DefaultTimeoutMillis) {
                 viewModel
@@ -125,8 +123,6 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can update notification settings`() {
         val viewModel = setupUiAndViewModel()
-
-        testDispatcher.scheduler.advanceUntilIdle()
 
         val currentSettingsByGroup = runBlocking {
             withTimeout(DefaultTimeoutMillis) {

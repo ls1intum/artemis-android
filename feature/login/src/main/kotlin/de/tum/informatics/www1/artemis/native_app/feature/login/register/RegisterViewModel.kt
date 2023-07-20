@@ -188,12 +188,6 @@ internal class RegisterViewModel(
                 ),
                 serverUrl = serverConfigurationService.serverUrl.first()
             )
-                .onFailure {
-                    println(it)
-                }
-                .onSuccess {
-                    println(it)
-                }
                 .bind { it.isSuccess() }
                 .or(false)
                 .let { if (it) RegistrationResponse.SUCCESS else RegistrationResponse.FAILURE }

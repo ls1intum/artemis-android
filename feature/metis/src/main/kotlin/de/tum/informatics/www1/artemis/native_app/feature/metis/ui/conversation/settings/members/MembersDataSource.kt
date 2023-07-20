@@ -18,8 +18,6 @@ internal class MembersDataSource(
 
     companion object {
         private const val MAX_PAGE_SIZE = 20
-
-        private const val TAG = "MembersDataSource"
     }
 
     override fun getRefreshKey(state: PagingState<Int, ConversationUser>): Int {
@@ -45,8 +43,6 @@ internal class MembersDataSource(
             )
         ) {
             is NetworkResponse.Response -> {
-                Log.d(TAG, "loaded ${membersNetworkResponse.data}")
-
                 LoadResult.Page(
                     membersNetworkResponse.data,
                     null,
@@ -55,8 +51,6 @@ internal class MembersDataSource(
             }
 
             is NetworkResponse.Failure -> {
-                Log.d(TAG, "failed loading ${membersNetworkResponse.exception}")
-
                 LoadResult.Error(membersNetworkResponse.exception)
             }
         }

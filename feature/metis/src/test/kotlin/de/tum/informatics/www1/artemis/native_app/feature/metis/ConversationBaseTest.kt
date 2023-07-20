@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
+import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
@@ -30,14 +31,7 @@ import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.shadows.ShadowLog
 
-abstract class ConversationBaseTest : KoinTest {
-
-    protected val testDispatcher = UnconfinedTestDispatcher()
-
-    protected val context: Context get() = InstrumentationRegistry.getInstrumentation().context
-
-    @get:Rule
-    val composeTestRule = createComposeRule()
+abstract class ConversationBaseTest : BaseComposeTest() {
 
     @get:Rule
     val koinTestRule = KoinTestRule.create {
@@ -64,12 +58,10 @@ abstract class ConversationBaseTest : KoinTest {
     open fun setup() {
         ShadowLog.stream = System.out
 
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                accessToken = performTestLogin()
+        runBlockingWithTestTimeout {
+            accessToken = performTestLogin()
 
-                course = createCourse(getAdminAccessToken())
-            }
+            course = createCourse(getAdminAccessToken())
         }
     }
 

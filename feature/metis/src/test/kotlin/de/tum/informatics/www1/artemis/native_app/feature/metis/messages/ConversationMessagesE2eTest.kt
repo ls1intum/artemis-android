@@ -244,8 +244,6 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             .onNodeWithTag(TEST_TAG_REPLY_SEND_BUTTON)
             .performClick()
 
-        testDispatcher.scheduler.advanceUntilIdle()
-
         composeTestRule.waitUntilExactlyOneExists(
             hasTestTag(TEST_TAG_CAN_CREATE_REPLY),
             DefaultTimeoutMillis
@@ -255,10 +253,8 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             .onNodeWithTag(TEST_TAG_METIS_MODIFICATION_FAILURE_DIALOG)
             .assertDoesNotExist()
 
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                viewModel.forceReload().join()
-            }
+        runBlockingWithTestTimeout {
+            viewModel.forceReload().join()
         }
 
         composeTestRule
