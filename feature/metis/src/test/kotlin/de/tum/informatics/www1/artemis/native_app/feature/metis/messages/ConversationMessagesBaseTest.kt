@@ -53,16 +53,14 @@ abstract class ConversationMessagesBaseTest : ConversationBaseTest() {
     }
 
     protected fun postDefaultMessage(additionalSetup: suspend (StandalonePost) -> Unit = {}): StandalonePost {
-        return runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                metisModificationService.createPost(
-                    context = metisContext,
-                    post = createPost("test message"),
-                    serverUrl = testServerUrl,
-                    authToken = accessToken
-                ).orThrow("Could not create message")
-                    .also { additionalSetup(it) }
-            }
+        return runBlockingWithTestTimeout {
+            metisModificationService.createPost(
+                context = metisContext,
+                post = createPost("test message"),
+                serverUrl = testServerUrl,
+                authToken = accessToken
+            ).orThrow("Could not create message")
+                .also { additionalSetup(it) }
         }
     }
 

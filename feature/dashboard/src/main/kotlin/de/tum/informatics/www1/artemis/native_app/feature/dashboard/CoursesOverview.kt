@@ -60,7 +60,7 @@ import org.koin.androidx.compose.getViewModel
 import java.text.DecimalFormat
 
 const val DASHBOARD_DESTINATION = "dashboard"
-internal const val CourseListTestTag = "course list test tag"
+internal const val TEST_TAG_COURSE_LIST = "TEST_TAG_COURSE_LIST"
 
 internal fun testTagForCourse(courseId: Long) = "Course$courseId"
 
@@ -157,7 +157,7 @@ internal fun CoursesOverview(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 8.dp)
-                        .testTag(CourseListTestTag),
+                        .testTag(TEST_TAG_COURSE_LIST),
                     courses = dashboard.courses,
                     serverUrl = serverUrl,
                     authorizationToken = authToken,

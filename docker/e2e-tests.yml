@@ -18,11 +18,11 @@ services:
       - DEFAULT_TIMEOUT=10000
       - ADMIN_USERNAME=artemis_admin
       - ADMIN_PASSWORD=artemis_admin
+      - robolectric.logging.enabled=true
     command:
       - test
       - -Dskip.debugVariants=true
       - -Dskip.flavor.unrestricted=true
-      - -Probolectric.logging.enabled=true
     networks:
       - artemis
     volumes:

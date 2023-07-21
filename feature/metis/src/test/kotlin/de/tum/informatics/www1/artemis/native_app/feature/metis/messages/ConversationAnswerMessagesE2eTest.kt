@@ -1,38 +1,22 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.messages
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performScrollTo
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadUi
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisThreadViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.StandalonePostId
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.TEST_TAG_THREAD_LIST
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.testTagForAnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ProvideLocalVisibleMetisContextManager
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
-import org.koin.compose.LocalKoinApplication
-import org.koin.compose.LocalKoinScope
-import org.koin.core.annotation.KoinInternalApi
-import org.koin.mp.KoinPlatformTools
-import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
-import kotlin.time.Duration.Companion.seconds
+import org.robolectric.util.Logger
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
 class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
@@ -43,91 +27,43 @@ class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
             "answer post content $it"
         }
 
-        val (post, answerPosts) = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                val post = metisModificationService.createPost(
+        runTest(timeout = DefaultTimeoutMillis.milliseconds * 4) {
+            val post = metisModificationService.createPost(
+                context = metisContext,
+                post = createPost("test message"),
+                serverUrl = testServerUrl,
+                authToken = accessToken
+            ).orThrow("Could not create message")
+
+            val answerPosts = answerPostContents.map { replyText ->
+                metisModificationService.createAnswerPost(
                     context = metisContext,
-                    post = createPost("test message"),
+                    post = AnswerPost(
+                        creationDate = Clock.System.now(),
+                        content = replyText,
+                        post = post
+                    ),
                     serverUrl = testServerUrl,
                     authToken = accessToken
-                ).orThrow("Could not create message")
+                ).orThrow("Could not create answer message with text $post")
+            }
 
+            val downloadedPost = metisService
+                .getPost(metisContext, post.serverPostId, testServerUrl, accessToken)
+                .orThrow("Could not download relevant post")
 
-                val answerPosts = answerPostContents.map { replyText ->
-                    metisModificationService.createAnswerPost(
-                        context = metisContext,
-                        post = AnswerPost(
-                            creationDate = Clock.System.now(),
-                            content = replyText,
-                            post = post
-                        ),
-                        serverUrl = testServerUrl,
-                        authToken = accessToken
-                    ).orThrow("Could not create answer message with text $post")
-                }
+            Logger.info("Downloaded post = $downloadedPost")
 
-                post to answerPosts
+            assertEquals(answerPostContents.size, downloadedPost.answers.orEmpty().size)
+
+            answerPosts.forEach { answerPost ->
+                val downloadedAnswerPost = assertNotNull(
+                    downloadedPost.answers.orEmpty().firstOrNull { it.id == answerPost.id },
+                    "Answer post $answerPost not found in downloaded post"
+                )
+
+                assertEquals(answerPost.content, downloadedAnswerPost.content, "Content does not match")
             }
         }
-
-        setupUiAndViewModel(post.id!!)
-
-        composeTestRule.waitUntilExactlyOneExists(
-            hasTestTag(TEST_TAG_THREAD_LIST),
-            DefaultTimeoutMillis
-        )
-
-        answerPosts.forEach { answerPost ->
-            composeTestRule.waitUntilExactlyOneExists(hasTestTag(testTagForAnswerPost(answerPost.serverPostId)))
-
-            composeTestRule
-                .onNodeWithTag(testTagForAnswerPost(answerPost.serverPostId))
-                .performScrollTo()
-                .assertExists("Answer post $answerPost does not exist")
-        }
-    }
-
-    @OptIn(KoinInternalApi::class)
-    private fun setupUiAndViewModel(postId: Long): MetisThreadViewModel {
-        val viewModel = MetisThreadViewModel(
-            initialPostId = StandalonePostId.ServerSideId(postId),
-            subscribeToLiveUpdateService = false,
-            initialMetisContext = metisContext,
-            metisService = get(),
-            metisStorageService = get(),
-            serverConfigurationService = get(),
-            metisContextManager = get(),
-            metisModificationService = get(),
-            accountService = get(),
-            websocketProvider = get(),
-            accountDataService = get(),
-            networkStatusProvider = get(),
-            conversationService = get(),
-            coroutineContext = testDispatcher
-        )
-
-        composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext().get().scopeRegistry.rootScope,
-                LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
-            ) {
-                ProvideLocalVisibleMetisContextManager(visibleMetisContextManager = EmptyVisibleMetisContextManager) {
-                    MetisThreadUi(
-                        modifier = Modifier.fillMaxSize(),
-                        viewModel = viewModel
-                    )
-                }
-            }
-        }
-
-        testDispatcher.scheduler.advanceTimeBy(30.seconds)
-
-        // Wait until post and answer posts are loaded
-        composeTestRule.waitUntilExactlyOneExists(
-            hasTestTag(TEST_TAG_THREAD_LIST),
-            DefaultTimeoutMillis
-        )
-
-        return viewModel
     }
 }

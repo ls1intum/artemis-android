@@ -6,12 +6,12 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToKey
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
@@ -20,27 +20,21 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.koin.android.ext.koin.androidContext
-import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.util.Logger
 
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
-class DashboardE2eTest : KoinTest {
-
-    @get:Rule
-    val composeTestRule = createComposeRule()
+class DashboardE2eTest : BaseComposeTest() {
 
     @get:Rule
     val koinTestRule = KoinTestRule.create {
@@ -52,19 +46,15 @@ class DashboardE2eTest : KoinTest {
 
     @Before
     fun setup() {
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                performTestLogin()
-            }
+        runBlockingWithTestTimeout {
+            performTestLogin()
         }
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `shows created course in course list`() {
-        val createdCourse = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                createCourse(getAdminAccessToken())
-            }
+        val createdCourse = runBlockingWithTestTimeout {
+            createCourse(getAdminAccessToken())
         }
 
         val viewModel = CourseOverviewViewModel(
@@ -72,7 +62,7 @@ class DashboardE2eTest : KoinTest {
             accountService = get(),
             serverConfigurationService = get(),
             networkStatusProvider = get(),
-            coroutineContext = UnconfinedTestDispatcher()
+            coroutineContext = testDispatcher
         )
 
         composeTestRule.setContent {
@@ -89,12 +79,12 @@ class DashboardE2eTest : KoinTest {
 
         composeTestRule
             .waitUntilExactlyOneExists(
-                hasTestTag(CourseListTestTag),
+                hasTestTag(TEST_TAG_COURSE_LIST),
                 DefaultTimeoutMillis
             )
 
         composeTestRule
-            .onNodeWithTag(CourseListTestTag)
+            .onNodeWithTag(TEST_TAG_COURSE_LIST)
             .performScrollToKey(createdCourse.id!!)
 
         composeTestRule

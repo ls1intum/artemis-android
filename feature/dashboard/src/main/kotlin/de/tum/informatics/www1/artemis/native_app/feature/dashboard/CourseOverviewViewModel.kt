@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -55,9 +56,8 @@ internal class CourseOverviewViewModel(
                 )
             }
         }
-            .flowOn(coroutineContext)
             //Store the loaded dashboard, so it is not loaded again when somebody collects this flow.
-            .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     /**
      * The client needs access to this url, to load the course icon.
@@ -65,7 +65,7 @@ internal class CourseOverviewViewModel(
      */
     val serverUrl: StateFlow<String> = serverConfigurationService.serverUrl
         .map { it.dropLast(1) } //Remove the /
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, "")
 
     /**
      * Emits the current authentication bearer in the form: "Bearer $token"
