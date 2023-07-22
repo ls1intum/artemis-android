@@ -76,7 +76,7 @@ android {
 
             firebaseAppDistribution {
                 artifactType = "APK"
-                //groups = "artemis-android-testers"
+                groups = "artemis-android-testers"
                 serviceCredentialsFile = rootProject.projectDir.resolve("serviceCredentials.json").absolutePath
             }
         }
