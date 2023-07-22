@@ -7,3 +7,4 @@ private_key.pepk
 **/.idea
 /docker
 test-outputs
+serviceCredentials.json
