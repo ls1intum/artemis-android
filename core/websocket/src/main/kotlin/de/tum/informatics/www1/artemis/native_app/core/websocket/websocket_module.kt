@@ -7,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketP
 import org.koin.dsl.module
 
 val websocketModule = module {
-    single { WebsocketProviderImpl(get(), get(), get(), get()) }
+    single<WebsocketProvider> { WebsocketProviderImpl(get(), get(), get(), get()) }
     single<LiveParticipationService> {
         LiveParticipationServiceImpl(
             get()

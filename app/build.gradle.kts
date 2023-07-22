@@ -1,5 +1,6 @@
 @file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 
+import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
 import java.io.FileInputStream
 import java.util.Properties
 import java.lang.Boolean as JavaBoolean
@@ -23,7 +24,7 @@ plugins {
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
-    val versionName = "0.7.2"
+    val versionName = "0.7.3"
     val versionCode =
         if (!System.getenv("bamboo_buildNumber")
                 .isNullOrEmpty()
@@ -71,6 +72,11 @@ android {
             getByName("release") {
                 isMinifyEnabled = false
                 signingConfig = signingConfigs.getByName("release")
+            }
+
+            firebaseAppDistribution {
+                artifactType = "APK"
+                groups = "artemis-android-testers"
             }
         }
     }
