@@ -19,7 +19,8 @@ private val coverageExclusions = listOf(
     "**/R.class",
     "**/R\$*.class",
     "**/BuildConfig.*",
-    "**/Manifest*.*"
+    "**/Manifest*.*",
+    "**/*serializer*"
 )
 
 private fun String.capitalize() = replaceFirstChar {
@@ -30,7 +31,7 @@ internal fun Project.configureJacoco(
     androidComponentsExtension: AndroidComponentsExtension<*, *, *>,
 ) {
     configure<JacocoPluginExtension> {
-        toolVersion = "0.8.7"
+        toolVersion = "0.8.10"
     }
 
     val jacocoTestReport = tasks.create("jacocoTestReport")

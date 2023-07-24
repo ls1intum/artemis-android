@@ -35,7 +35,7 @@ import kotlin.test.assertNotNull
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
-internal class QuizParticipationWaitingScreenE2eTest : QuizParticipationBaseE2eTest() {
+internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can start individual quiz`() {
