@@ -16,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.post
@@ -40,9 +41,9 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
 @OptIn(DelicateCoroutinesApi::class)
-class PushNotificationConfigurationServiceImpl(
+class PushNotificationConfigurationServiceImpl internal constructor(
     private val context: Context,
-    private val ktorProvider: KtorProvider
+    private val notificationSettingsService: NotificationSettingsService
 ) : PushNotificationConfigurationService {
 
     companion object {
@@ -101,7 +102,7 @@ class PushNotificationConfigurationServiceImpl(
             storeFirebaseToken(fireBaseToken)
 
             val secretKeyResponse =
-                uploadPushNotificationDeviceConfigurationsToServer(
+                notificationSettingsService.uploadPushNotificationDeviceConfigurationsToServer(
                     serverUrl = serverUrl,
                     authToken = authToken,
                     firebaseToken = fireBaseToken
@@ -125,7 +126,7 @@ class PushNotificationConfigurationServiceImpl(
                     storeFirebaseToken(null)
 
                     // The result does not matter. This device does no longer receive notifications
-                    unsubscribeFromNotifications(
+                    notificationSettingsService.unsubscribeFromNotifications(
                         serverUrl = serverUrl,
                         authToken = authToken,
                         firebaseToken = currentToken
@@ -192,68 +193,6 @@ class PushNotificationConfigurationServiceImpl(
         load(null)
     }
 
-    override suspend fun uploadPushNotificationDeviceConfigurationsToServer(
-        serverUrl: String,
-        authToken: String,
-        firebaseToken: String
-    ): NetworkResponse<SecretKey> {
-        return performNetworkCall {
-            val response: RegisterResponseBody = ktorProvider.ktorClient.post(serverUrl) {
-                url {
-                    appendPathSegments("api", "push_notification", "register")
-                }
-
-                cookieAuth(authToken)
-
-                contentType(ContentType.Application.Json)
-                setBody(RegisterRequestBody(token = firebaseToken))
-            }.body()
-
-            val keyBytes = Base64.decode(
-                response.secretKey.toByteArray(Charsets.ISO_8859_1),
-                Base64.DEFAULT
-            )
-
-            SecretKeySpec(keyBytes, "AES")
-        }
-    }
-
-    override suspend fun unsubscribeFromNotifications(
-        serverUrl: String,
-        authToken: String,
-        firebaseToken: String
-    ): NetworkResponse<HttpStatusCode> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.delete(serverUrl) {
-                url {
-                    appendPathSegments("api", "push_notification", "unregister")
-                }
-
-                cookieAuth(authToken)
-                setBody(UnregisterRequestBody(firebaseToken))
-                contentType(ContentType.Application.Json)
-            }.status
-        }
-    }
-
     private fun getPushNotificationEnabledKeyForServer(serverUrl: String) =
         booleanPreferencesKey("push_enabled_$serverUrl")
-
-    @Serializable
-    private data class RegisterRequestBody(
-        val token: String,
-        val deviceType: String = "FIREBASE"
-    )
-
-    @Serializable
-    private data class RegisterResponseBody(
-        val secretKey: String,
-        val algorithm: String
-    )
-
-    @Serializable
-    private data class UnregisterRequestBody(
-        val token: String,
-        val deviceType: String = "FIREBASE"
-    )
 }

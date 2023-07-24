@@ -17,6 +17,7 @@ plugins {
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.google.firebase.appdistribution) apply false
     alias(libs.plugins.github.benManes.versions) apply true
+    alias(libs.plugins.kover) apply true
 }
 
 tasks.register("clean", Delete::class) {

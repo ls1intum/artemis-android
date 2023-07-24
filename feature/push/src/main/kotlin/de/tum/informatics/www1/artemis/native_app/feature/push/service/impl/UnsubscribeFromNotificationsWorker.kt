@@ -7,12 +7,13 @@ import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
 import io.ktor.http.isSuccess
 
 internal class UnsubscribeFromNotificationsWorker(
     appContext: Context,
     params: WorkerParameters,
-    private val pushNotificationConfigurationService: PushNotificationConfigurationService
+    private val notificationSettingsService: NotificationSettingsService
 ) :
     CoroutineWorker(appContext, params) {
 
@@ -32,7 +33,7 @@ internal class UnsubscribeFromNotificationsWorker(
         val firebaseToken = inputData.getString(FIREBASE_TOKEN_KEY)
         if (serverUrl == null || authToken == null || firebaseToken == null) return Result.failure()
 
-        return pushNotificationConfigurationService
+        return notificationSettingsService
             .unsubscribeFromNotifications(serverUrl, authToken, firebaseToken)
             .onSuccess {
                 if (it.isSuccess()) {

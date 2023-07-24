@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.login.test
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.LoginService
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

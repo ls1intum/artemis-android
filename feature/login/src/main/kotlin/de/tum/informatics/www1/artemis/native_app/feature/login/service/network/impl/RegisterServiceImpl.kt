@@ -1,10 +1,10 @@
-package de.tum.informatics.www1.artemis.native_app.feature.login.service.impl
+package de.tum.informatics.www1.artemis.native_app.feature.login.service.network.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.RegisterService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.RegisterService
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType

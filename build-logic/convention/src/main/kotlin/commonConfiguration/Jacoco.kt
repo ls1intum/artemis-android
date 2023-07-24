@@ -1,9 +1,12 @@
 package commonConfiguration
 
 import com.android.build.api.variant.AndroidComponentsExtension
+import kotlinx.kover.gradle.plugin.dsl.KoverReportExtension
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
@@ -63,12 +66,36 @@ internal fun Project.configureJacoco(
     tasks.withType<Test>().configureEach {
         configure<JacocoTaskExtension> {
             // Required for JaCoCo + Robolectric
-            // https://github.com/robolectric/robolectric/issues/2230
+            // https://github.com/rob#olectric/robolectric/issues/2230
             isIncludeNoLocationClasses = true
 
             // Required for JDK 11 with the above
             // https://github.com/gradle/gradle/issues/5184#issuecomment-391982009
             excludes = listOf("jdk.internal.*")
         }
+    }
+
+    extensions.getByType(KoverReportExtension::class).apply {
+        androidComponentsExtension.onVariants { variant ->
+            androidReports(variant.name) {
+                filters {
+                    includes {
+                        //packages("de.tum.informatics.www1.artemis.native_app.feature.*")
+                        packages("de.tum.informatics.www1.artemis.native_app.core.data.*")
+                    }
+                    excludes {
+                        classes("*.BuildConfig")
+                    }
+                }
+
+                html {
+                    onCheck = false
+                }
+            }
+        }
+    }
+
+    dependencies {
+//        add("kover", project(":core:data"))
     }
 }

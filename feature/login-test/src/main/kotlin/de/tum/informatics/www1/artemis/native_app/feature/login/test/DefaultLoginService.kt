@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.test
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.LoginService
 import io.ktor.client.statement.HttpResponse
 
 class DefaultLoginService() : LoginService {

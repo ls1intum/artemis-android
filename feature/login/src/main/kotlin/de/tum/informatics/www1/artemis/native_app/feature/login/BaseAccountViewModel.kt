@@ -7,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerProfileInfoService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.ServerProfileInfoService
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

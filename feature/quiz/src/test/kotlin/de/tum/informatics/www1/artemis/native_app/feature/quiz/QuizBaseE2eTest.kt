@@ -3,7 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.quiz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.SavedStateHandle
-import de.tum.informatics.www1.artemis.native_app.core.data.service.ParticipationService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ParticipationService
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules

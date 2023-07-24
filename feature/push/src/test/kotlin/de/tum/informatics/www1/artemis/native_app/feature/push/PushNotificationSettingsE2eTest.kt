@@ -21,9 +21,10 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServe
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationSettingsService
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.PushNotificationConfigurationServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.impl.NotificationSettingsServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.TEST_TAG_PUSH_CHECK_BOX
@@ -189,20 +190,17 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can register for and unregister from push notifications`() {
-        val pushNotificationConfigurationService: PushNotificationConfigurationService =
-            PushNotificationConfigurationServiceImpl(
-                context,
-                get()
-            )
+        val pushNotificationSettingsService: NotificationSettingsService =
+            NotificationSettingsServiceImpl(get())
 
         runBlockingWithTestTimeout {
-            pushNotificationConfigurationService.uploadPushNotificationDeviceConfigurationsToServer(
+            pushNotificationSettingsService.uploadPushNotificationDeviceConfigurationsToServer(
                 serverUrl = testServerUrl,
                 authToken = accessToken,
                 firebaseToken = generateId()
             ).orThrow("Could not register for push notifications")
 
-            pushNotificationConfigurationService.unsubscribeFromNotifications(
+            pushNotificationSettingsService.unsubscribeFromNotifications(
                 serverUrl = testServerUrl,
                 authToken = accessToken,
                 firebaseToken = generateId()

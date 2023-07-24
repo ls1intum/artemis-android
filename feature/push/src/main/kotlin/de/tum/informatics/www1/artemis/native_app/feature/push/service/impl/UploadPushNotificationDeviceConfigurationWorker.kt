@@ -9,13 +9,15 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 
 internal class UploadPushNotificationDeviceConfigurationWorker(
     appContext: Context,
     params: WorkerParameters,
-    private val pushNotificationConfigurationService: PushNotificationConfigurationService,
+    private val notificationConfigurationService: PushNotificationConfigurationService,
+    private val notificationSettingsService: NotificationSettingsService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService
 ) : CoroutineWorker(appContext, params) {
@@ -43,7 +45,7 @@ internal class UploadPushNotificationDeviceConfigurationWorker(
             }
         }
 
-        val secretKeyResponse = pushNotificationConfigurationService
+        val secretKeyResponse = notificationSettingsService
             .uploadPushNotificationDeviceConfigurationsToServer(
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = authToken,
@@ -54,7 +56,7 @@ internal class UploadPushNotificationDeviceConfigurationWorker(
             // Network request failed, try again!
             is NetworkResponse.Failure -> Result.retry()
             is NetworkResponse.Response -> {
-                pushNotificationConfigurationService.storeAESKey(secretKeyResponse.data)
+                notificationConfigurationService.storeAESKey(secretKeyResponse.data)
                 Result.success()
             }
         }

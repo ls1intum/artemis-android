@@ -1,13 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.test
 
-import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.LoginService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.LoginService
 import kotlinx.coroutines.flow.first
 import org.koin.test.KoinTest
 import org.koin.test.get
-import kotlin.test.assertIs
 
 val user1Username: String
     get() = System.getenv("USER_1_USERNAME") ?: "aa01aaa"

@@ -4,8 +4,8 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
-import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseExerciseService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.CourseService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken

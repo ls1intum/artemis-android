@@ -28,7 +28,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.login.R
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerProfileInfoService
+import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.ServerProfileInfoService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

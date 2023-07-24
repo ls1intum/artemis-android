@@ -39,8 +39,6 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 }
             }
 
-            configureJacoco(extensions.getByType<LibraryAndroidComponentsExtension>())
-
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
             dependencies {

@@ -19,4 +19,6 @@ dependencies {
 
     testImplementation(project(":feature:login"))
     testImplementation(project(":feature:login-test"))
+
+    kover(project(":core:data"))
 }
