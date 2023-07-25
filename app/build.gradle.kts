@@ -132,6 +132,7 @@ dependencies {
     kover(project(":feature:quiz"))
     kover(project(":feature:push"))
     kover(project(":feature:metis"))
+    kover(project(":feature:core-modules-test"))
 
     implementation(libs.play.services.oss.licences)
 

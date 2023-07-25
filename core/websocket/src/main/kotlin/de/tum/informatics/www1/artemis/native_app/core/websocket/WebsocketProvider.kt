@@ -1,10 +1,9 @@
-package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
+package de.tum.informatics.www1.artemis.native_app.core.websocket
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import org.hildan.krossbow.stomp.StompReceipt
-import org.hildan.krossbow.stomp.headers.StompReceiptHeaders
 import org.hildan.krossbow.stomp.headers.StompSendHeaders
 
 interface WebsocketProvider {

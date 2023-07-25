@@ -81,6 +81,7 @@ internal fun Project.configureJacoco(
                 filters {
                     includes {
                         //packages("de.tum.informatics.www1.artemis.native_app.feature.*")
+                        packages("de.tum.informatics.www1.artemis.native_app.core.data")
                         packages("de.tum.informatics.www1.artemis.native_app.core.data.*")
                     }
                     excludes {
@@ -93,9 +94,5 @@ internal fun Project.configureJacoco(
                 }
             }
         }
-    }
-
-    dependencies {
-//        add("kover", project(":core:data"))
     }
 }

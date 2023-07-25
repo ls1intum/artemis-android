@@ -62,36 +62,10 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
 
                 add("implementation", libs.findLibrary("kotlinx.coroutines.android").get())
                 add("implementation", libs.findLibrary("koin.core").get())
-                add("testImplementation", libs.findLibrary("koin.test").get())
-                add("testImplementation", libs.findLibrary("koin.test.junit4").get())
-                add("testImplementation", libs.findLibrary("koin.android.test").get())
-                add("testImplementation", libs.findLibrary("robolectric").get())
-
 
                 add("testImplementation", project(":core:common-test"))
                 add("testImplementation", project(":core:data-test"))
                 add("testImplementation", project(":core:core-test"))
-            }
-
-            afterEvaluate {
-                tasks.withType(Test::class) {
-                    testLogging.setEvents(listOf(TestLogEvent.FAILED))
-
-                    testLogging.exceptionFormat = TestExceptionFormat.FULL
-                    testLogging.showExceptions = true
-                    testLogging.showCauses = true
-                    testLogging.showStackTraces = true
-                    testLogging.showStandardStreams = true
-
-                    if (Boolean.getBoolean("skip.e2e")) {
-                        useJUnit {
-                            excludeCategories("de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest")
-                        }
-                    }
-
-                    reports.junitXml.required.set(true)
-                    reports.junitXml.outputLocation.set(rootProject.rootDir.resolve("test-outputs/${project.name}/$name/"))
-                }
             }
         }
     }

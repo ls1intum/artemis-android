@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.lecture_view
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
@@ -20,7 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BaseExerciseListViewModel
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
-import de.tum.informatics.www1.artemis.native_app.core.websocket.ServerTimeService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.service.LectureService
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -39,9 +41,12 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
+import kotlinx.datetime.Clock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 internal class LectureViewModel(
     private val lectureId: Long,
@@ -77,8 +82,10 @@ internal class LectureViewModel(
                     )
                 }
             }
-            .flowOn(coroutineContext)
-            .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
+
+    val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
+    val authToken: StateFlow<String> = authTokenStateFlow(accountService)
 
     /**
      * The lecture with updated participations as they arrive.
@@ -128,8 +135,12 @@ internal class LectureViewModel(
                 else -> emit(lectureDataState)
             }
         }
-            .flowOn(coroutineContext)
-            .stateIn(viewModelScope, SharingStarted.Eagerly)
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+    private val serverClock: Flow<Clock> = flatMapLatest(serverUrl, authToken) { serverUrl, authToken ->
+        serverTimeService.getServerClock(authToken, serverUrl)
+    }
+        .shareIn(viewModelScope + coroutineContext, SharingStarted.WhileSubscribed(1.seconds), replay = 1)
 
     /**
      * Only emits the lecture units that are already released.
@@ -137,7 +148,7 @@ internal class LectureViewModel(
     private val visibleLectureUnits: Flow<List<LectureUnit>> =
         transformLatest(
             latestLectureDataState.filterSuccess(),
-            serverTimeService.serverClock
+            serverClock
         ) { lecture, serverClock ->
             val now = serverClock.now()
 
@@ -166,8 +177,7 @@ internal class LectureViewModel(
                 }
             }
         }
-            .flowOn(coroutineContext)
-            .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+            .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
     val lectureUnits: StateFlow<List<LectureUnit>> = combine(
         visibleLectureUnits,
@@ -178,14 +188,10 @@ internal class LectureViewModel(
             lectureUnit.withCompleted(isCompleted)
         }
     }
-        .flowOn(coroutineContext)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
-    val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
-    val authToken: StateFlow<String> = authTokenStateFlow(accountService)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext) {
             // Fill the completed map with the values from the http request
             lectureDataState.filterSuccess().collect { lecture ->
                 savedStateHandle[LECTURE_UNIT_COMPLETED_MAP_TAG] =

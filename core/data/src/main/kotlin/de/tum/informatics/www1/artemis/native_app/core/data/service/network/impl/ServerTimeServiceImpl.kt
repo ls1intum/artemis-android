@@ -1,32 +1,25 @@
-package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
+package de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.common.ClockWithOffset
 import de.tum.informatics.www1.artemis.native_app.core.common.offsetBy
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.retryNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
-import de.tum.informatics.www1.artemis.native_app.core.websocket.ServerTimeService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.WhileSubscribed
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.retryWhen
-import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.flow.transformLatest
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.math.abs
@@ -38,59 +31,55 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Implements the time sync logic using the stackoverflow answer given here: https://gamedev.stackexchange.com/a/93662
  */
-internal class ServerTimeServiceImpl(
-    private val ktorProvider: KtorProvider,
-    serverConfigurationService: ServerConfigurationService,
-    accountService: AccountService
-) :
-    ServerTimeService {
+internal class ServerTimeServiceImpl(private val ktorProvider: KtorProvider) : ServerTimeService {
 
-    @OptIn(DelicateCoroutinesApi::class)
-    override val serverClock: Flow<ClockWithOffset> = combine(
-        serverConfigurationService.serverUrl,
-        accountService.authToken
-    ) { serverUrl, authToken ->
-        serverUrl to authToken
-    }
-        .transformLatest { (serverUrl, authToken) ->
-            // Logic of implementation taken from: https://gamedev.stackexchange.com/a/93662
+    override fun getServerClock(authToken: String, serverUrl: String): Flow<ClockWithOffset> = flow {
+        // Logic of implementation taken from: https://gamedev.stackexchange.com/a/93662
 
-            val firstResponse = performClockSync(Clock.System, serverUrl, authToken)
+        val firstResponse = performClockSync(
+            clock = Clock.System,
+            serverUrl = serverUrl,
+            authToken = authToken
+        )
+            ?: throw TimeSyncFailedException()
+
+        val initiallyAdjustedClock =
+            Clock.System.offsetBy(firstResponse.improvedDelta.milliseconds)
+        emit(initiallyAdjustedClock)
+
+        val results = mutableListOf<SyncResult>()
+
+        // Sync clock up to 5 times, emitting a new value every time.
+        for (i in 0 until 5) {
+            delay(1.seconds)
+            results += performClockSync(
+                clock = initiallyAdjustedClock,
+                serverUrl = serverUrl,
+                authToken = authToken
+            )
                 ?: throw TimeSyncFailedException()
 
-            val initiallyAdjustedClock =
-                Clock.System.offsetBy(firstResponse.improvedDelta.milliseconds)
-            emit(initiallyAdjustedClock)
+            val sortedResults = results.sortedBy { it.latencyInMs }
 
-            val results = mutableListOf<SyncResult>()
+            val median = sortedResults[results.size / 2]
 
-            // Sync clock up to 5 times, emitting a new value every time.
-            for (i in 0 until 5) {
-                delay(1.seconds)
-                results += performClockSync(initiallyAdjustedClock, serverUrl, authToken)
-                    ?: throw TimeSyncFailedException()
+            if (results.size >= 1) {
+                val stdDeviation = sqrt(results.sumOf {
+                    val t = it.latencyInMs - median.latencyInMs
+                    t * t
+                }.toFloat() / results.size.toFloat())
 
-                val sortedResults = results.sortedBy { it.latencyInMs }
+                // 0.01f rounding error tolerance.
+                val remainingPackets =
+                    sortedResults.filter { abs(it.latencyInMs - median.latencyInMs) < stdDeviation + 0.01f }
 
-                val median = sortedResults[results.size / 2]
-
-                if (results.size >= 1) {
-                    val stdDeviation = sqrt(results.sumOf {
-                        val t = it.latencyInMs - median.latencyInMs
-                        t * t
-                    }.toFloat() / results.size.toFloat())
-
-                    // 0.01f rounding error tolerance.
-                    val remainingPackets =
-                        sortedResults.filter { abs(it.latencyInMs - median.latencyInMs) < stdDeviation + 0.01f }
-
-                    val delta = remainingPackets.sumOf { it.improvedDelta } / remainingPackets.size
-                    emit(initiallyAdjustedClock.offsetBy(delta.milliseconds))
-                } else {
-                    emit(initiallyAdjustedClock.offsetBy(median.improvedDelta.milliseconds))
-                }
+                val delta = remainingPackets.sumOf { it.improvedDelta } / remainingPackets.size
+                emit(initiallyAdjustedClock.offsetBy(delta.milliseconds))
+            } else {
+                emit(initiallyAdjustedClock.offsetBy(median.improvedDelta.milliseconds))
             }
         }
+    }
         .onStart { emit(Clock.System.offsetBy(Duration.ZERO)) }
         .retryWhen { cause, attempt ->
             // Only retry when a time sync exception happened
@@ -99,14 +88,17 @@ internal class ServerTimeServiceImpl(
                 true
             } else false
         }
-        .shareIn(GlobalScope, SharingStarted.WhileSubscribed(1.seconds), replay = 1)
 
     private suspend fun performClockSync(
         clock: Clock,
         serverUrl: String,
         authToken: String
     ): SyncResult? {
-        return when (val serverTimeResponse = requestServerTime(clock, serverUrl, authToken)) {
+        return when (val serverTimeResponse = requestServerTime(
+            clock = clock,
+            serverUrl = serverUrl,
+            authToken = authToken
+        )) {
             is NetworkResponse.Response -> {
                 val sentTime = serverTimeResponse.data.sentTime
                 val serverTime = serverTimeResponse.data.serverTime

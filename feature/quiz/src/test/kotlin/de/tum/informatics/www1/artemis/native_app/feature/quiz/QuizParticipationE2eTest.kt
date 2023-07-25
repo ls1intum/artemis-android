@@ -1,8 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz
 
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

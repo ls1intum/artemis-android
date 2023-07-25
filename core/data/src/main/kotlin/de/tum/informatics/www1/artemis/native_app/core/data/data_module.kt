@@ -10,9 +10,11 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.CourseExerciseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.KtorProviderImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ParticipationServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.CourseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ExerciseServiceImpl
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ServerTimeServiceImpl
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
@@ -25,4 +27,5 @@ val dataModule = module {
     single<AccountDataService> { AccountDataServiceImpl(get()) }
     single<CourseExerciseService> { CourseExerciseServiceImpl(get()) }
     single<ParticipationService> { ParticipationServiceImpl(get()) }
+    single<ServerTimeService> { ServerTimeServiceImpl(get()) }
 }

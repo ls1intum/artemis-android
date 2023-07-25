@@ -17,7 +17,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.GroupChat

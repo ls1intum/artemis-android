@@ -1,6 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.service.network
 
-import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostDTO

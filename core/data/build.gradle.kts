@@ -8,11 +8,12 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:common"))
     implementation(project(":core:model"))
     implementation(project(":core:device"))
 
     implementation(libs.kotlinx.coroutines.android)
-
+    implementation(libs.kotlinx.coroutines.core.jvm)
     implementation(libs.kotlinx.serialization.json)
 
     api(libs.ktor.client.core)
@@ -26,4 +27,8 @@ dependencies {
     implementation(libs.kotlinx.datetime)
 
     debugImplementation(libs.ktor.client.cio)
+
+    testImplementation(project(":core:common-test"))
+    testImplementation(project(":core:data-test"))
+    testImplementation(libs.kotlinx.coroutines.test)
 }

@@ -1,10 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.messages
 
-import androidx.compose.ui.test.ExperimentalTestApi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTestTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
