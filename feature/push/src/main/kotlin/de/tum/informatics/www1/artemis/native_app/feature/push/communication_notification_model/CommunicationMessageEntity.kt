@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.communication_no
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.datetime.Instant
 
@@ -14,6 +15,13 @@ import kotlinx.datetime.Instant
             parentColumns = ["parent_id", "type"],
             childColumns = ["communication_parent_id", "communication_type"],
             onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [
+        Index(
+            "communication_parent_id",
+            "communication_type",
+            name = "i_communication_parent_id_communication_type"
         )
     ]
 )

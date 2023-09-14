@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.android
 import android.app.Activity
 import android.app.Application
 import android.app.NotificationChannel
-import android.os.Build
 import android.os.Bundle
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
@@ -16,11 +15,11 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
 import de.tum.informatics.www1.artemis.native_app.core.ui.uiModule
 import de.tum.informatics.www1.artemis.native_app.core.websocket.websocketModule
-import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistrationModule
-import de.tum.informatics.www1.artemis.native_app.feature.course_view.courseViewModule
+import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.courseRegistrationModule
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.courseViewModule
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboardModule
-import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exerciseModule
-import de.tum.informatics.www1.artemis.native_app.feature.lecture_view.lectureModule
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.exerciseModule
+import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lectureModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
@@ -69,19 +68,17 @@ class ArtemisApplication : Application(), ImageLoaderFactory, CurrentActivityLis
             )
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ArtemisNotificationChannel.values().forEach { notificationChannel ->
-                val channel = NotificationChannel(
-                    notificationChannel.id,
-                    getString(notificationChannel.title),
-                    notificationChannel.importance
-                )
-                channel.description = getString(notificationChannel.description)
+        ArtemisNotificationChannel.entries.forEach { notificationChannel ->
+            val channel = NotificationChannel(
+                notificationChannel.id,
+                getString(notificationChannel.title),
+                notificationChannel.importance
+            )
+            channel.description = getString(notificationChannel.description)
 
-                NotificationManagerCompat
-                    .from(this)
-                    .createNotificationChannel(channel)
-            }
+            NotificationManagerCompat
+                .from(this)
+                .createNotificationChannel(channel)
         }
 
         registerActivityLifecycleCallbacks(this)
