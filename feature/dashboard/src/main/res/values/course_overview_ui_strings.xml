@@ -15,4 +15,10 @@
 
     <string name="courses_empty_text">You are not registered to a course yet. Do you want to sign up for one now?</string>
     <string name="courses_empty_register_now_button">Sign up now</string>
+
+    <string name="dashboard_title_beta">Beta</string>
+    <string name="dashboard_dialog_beta_title">Beta Version</string>
+    <string name="dashboard_dialog_beta_message">You are using a beta version of Artemis Learning. It may not work as intended and you may start having issues at any point. Please go to settings/about to report any issues you may encounter.</string>
+    <string name="dashboard_dialog_beta_do_not_show_again">Do not show again</string>
+    <string name="dashboard_dialog_beta_positive">Understood</string>
 </resources>

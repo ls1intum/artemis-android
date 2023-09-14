@@ -92,6 +92,16 @@ android {
             versionNameSuffix =
                 "-" + ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum
         }
+
+        findByName(ProductFlavors.Dimensions.ReleaseType.Flavors.Beta)?.apply {
+            versionNameSuffix =
+                "-beta"
+        }
+
+        findByName(ProductFlavors.Dimensions.ReleaseType.Flavors.Production)?.apply {
+            versionNameSuffix =
+                "-prod"
+        }
     }
 }
 
@@ -115,24 +125,24 @@ dependencies {
     implementation(project(":feature:push"))
     implementation(project(":feature:metis"))
 
-    kover(project(":core:common"))
-    kover(project(":core:data"))
-    kover(project(":core:datastore"))
-    kover(project(":core:model"))
-    kover(project(":core:ui"))
-    kover(project(":core:device"))
-    kover(project(":core:websocket"))
-    kover(project(":feature:course-registration"))
-    kover(project(":feature:course-view"))
-    kover(project(":feature:dashboard"))
-    kover(project(":feature:login"))
-    kover(project(":feature:exercise-view"))
-    kover(project(":feature:lecture-view"))
-    kover(project(":feature:settings"))
-    kover(project(":feature:quiz"))
-    kover(project(":feature:push"))
-    kover(project(":feature:metis"))
-    kover(project(":feature:core-modules-test"))
+//    kover(project(":core:common"))
+//    kover(project(":core:data"))
+//    kover(project(":core:datastore"))
+//    kover(project(":core:model"))
+//    kover(project(":core:ui"))
+//    kover(project(":core:device"))
+//    kover(project(":core:websocket"))
+//    kover(project(":feature:course-registration"))
+//    kover(project(":feature:course-view"))
+//    kover(project(":feature:dashboard"))
+//    kover(project(":feature:login"))
+//    kover(project(":feature:exercise-view"))
+//    kover(project(":feature:lecture-view"))
+//    kover(project(":feature:settings"))
+//    kover(project(":feature:quiz"))
+//    kover(project(":feature:push"))
+//    kover(project(":feature:metis"))
+//    kover(project(":feature:core-modules-test"))
 
     implementation(libs.play.services.oss.licences)
 

@@ -7,7 +7,7 @@ class AndroidLibraryInstanceSelectionFlavorConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             extensions.configure<LibraryExtension> {
-                configureInstanceSelectionFlavor(this)
+                configureInstanceSelectionFlavors(this)
             }
         }
     }

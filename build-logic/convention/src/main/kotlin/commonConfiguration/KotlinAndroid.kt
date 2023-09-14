@@ -1,8 +1,10 @@
 @file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.ProductFlavor
 import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.JavaVersion
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.plugins.ExtensionAware
@@ -26,12 +28,24 @@ object ProductFlavors {
                 const val Tum = "tum"
             }
         }
+
+        object ReleaseType {
+            const val Key = "release-type"
+
+            object Flavors {
+                const val Beta = "beta"
+
+                const val Production = "production"
+            }
+        }
     }
 
     object BuildConfigFields {
         const val HasInstanceRestriction = "hasInstanceRestriction"
 
         const val DefaultServerUrl = "defaultServerUrl"
+
+        const val IsBeta = "isBeta"
     }
 }
 
@@ -92,48 +106,101 @@ internal fun Project.configureKotlinAndroid(
     dependencies {
         add("coreLibraryDesugaring", libs.findLibrary("android.desugarJdkLibs").get())
     }
+
+    configureReleaseTypeFlavors(commonExtension)
 }
 
-internal fun Project.configureInstanceSelectionFlavor(
+internal fun Project.configureReleaseTypeFlavors(
+    commonExtension: CommonExtension<*, *, *, *, *>,
+) {
+    commonExtension.apply {
+        flavorDimensions += ProductFlavors.Dimensions.ReleaseType.Key
+
+//        buildTypes {
+//            getByName("release") {
+//                buildConfigField("boolean", ProductFlavors.BuildConfigFields.IsBeta, "false")
+//            }
+//
+//            getByName("debug") {
+//                buildConfigField("boolean", ProductFlavors.BuildConfigFields.IsBeta, "false")
+//            }
+//
+//            create("beta") {
+//                initWith(getByName("release"))
+//                buildConfigField("boolean", ProductFlavors.BuildConfigFields.IsBeta, "true")
+//            }
+//        }
+
+        productFlavors {
+            createFlavor(
+                ProductFlavors.Dimensions.ReleaseType.Key,
+                ProductFlavors.Dimensions.ReleaseType.Flavors.Beta
+            ) {
+                buildConfigField("boolean", ProductFlavors.BuildConfigFields.IsBeta, "true")
+            }
+
+            createFlavor(
+                ProductFlavors.Dimensions.ReleaseType.Key,
+                ProductFlavors.Dimensions.ReleaseType.Flavors.Production
+            ) {
+                buildConfigField("boolean", ProductFlavors.BuildConfigFields.IsBeta, "false")
+            }
+        }
+    }
+}
+
+internal fun Project.configureInstanceSelectionFlavors(
     commonExtension: CommonExtension<*, *, *, *, *>,
 ) {
     commonExtension.apply {
         flavorDimensions += ProductFlavors.Dimensions.InstanceSelection.Key
 
         productFlavors {
-            if (!Boolean.getBoolean("skip.flavor.${ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection}")) {
-                create(ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection) {
-                    dimension = ProductFlavors.Dimensions.InstanceSelection.Key
-
-                    buildConfigField(
-                        "boolean",
-                        ProductFlavors.BuildConfigFields.HasInstanceRestriction,
-                        "false"
-                    )
-                    buildConfigField(
-                        "String",
-                        ProductFlavors.BuildConfigFields.DefaultServerUrl,
-                        "\"\""
-                    )
-                }
+            createFlavor(
+                ProductFlavors.Dimensions.InstanceSelection.Key,
+                ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection
+            ) {
+                buildConfigField(
+                    "boolean",
+                    ProductFlavors.BuildConfigFields.HasInstanceRestriction,
+                    "false"
+                )
+                buildConfigField(
+                    "String",
+                    ProductFlavors.BuildConfigFields.DefaultServerUrl,
+                    "\"\""
+                )
             }
 
-            if (!Boolean.getBoolean("skip.flavor.${ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum}")) {
-                create(ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum) {
-                    dimension = ProductFlavors.Dimensions.InstanceSelection.Key
-
-                    buildConfigField(
-                        "boolean",
-                        ProductFlavors.BuildConfigFields.HasInstanceRestriction,
-                        "true"
-                    )
-                    buildConfigField(
-                        "String",
-                        ProductFlavors.BuildConfigFields.DefaultServerUrl,
-                        "\"https://artemis.cit.tum.de\""
-                    )
-                }
+            createFlavor(
+                ProductFlavors.Dimensions.InstanceSelection.Key,
+                ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum
+            ) {
+                buildConfigField(
+                    "boolean",
+                    ProductFlavors.BuildConfigFields.HasInstanceRestriction,
+                    "true"
+                )
+                buildConfigField(
+                    "String",
+                    ProductFlavors.BuildConfigFields.DefaultServerUrl,
+                    "\"https://artemis.cit.tum.de\""
+                )
             }
+        }
+    }
+}
+
+private fun NamedDomainObjectContainer<out ProductFlavor>.createFlavor(
+    dimensionKey: String,
+    name: String,
+    configure: ProductFlavor.() -> Unit
+) {
+    if (!Boolean.getBoolean("skip.flavor.$name")) {
+        create(name) {
+            dimension = dimensionKey
+
+            configure()
         }
     }
 }
