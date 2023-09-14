@@ -14,7 +14,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginMo
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ConversationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis_test.MetisDatabaseProviderMock
+import de.tum.informatics.www1.artemis.native_app.feature.metistest.MetisDatabaseProviderMock
 import org.junit.Before
 import org.junit.Rule
 import org.koin.android.ext.koin.androidContext
