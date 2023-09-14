@@ -1,3 +1,5 @@
+@file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.android.build.gradle.LibraryExtension
 import commonConfiguration.configureJacoco
@@ -28,10 +30,9 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
-                defaultConfig.targetSdk = 33
+                defaultConfig.targetSdk = 34
             }
 
-            // val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
             configurations.configureEach {
                 resolutionStrategy {
                     // Temporary workaround for https://issuetracker.google.com/174733673

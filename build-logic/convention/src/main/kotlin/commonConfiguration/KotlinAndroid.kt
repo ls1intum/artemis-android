@@ -39,13 +39,13 @@ object ProductFlavors {
  * Configure base Kotlin with Android options
  */
 internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension<*, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *, *>,
 ) {
     commonExtension.apply {
-        compileSdk = 33
+        compileSdk = 34
 
         defaultConfig {
-            minSdk = 23
+            minSdk = 30
         }
 
         compileOptions {
@@ -95,7 +95,7 @@ internal fun Project.configureKotlinAndroid(
 }
 
 internal fun Project.configureInstanceSelectionFlavor(
-    commonExtension: CommonExtension<*, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *, *>,
 ) {
     commonExtension.apply {
         flavorDimensions += ProductFlavors.Dimensions.InstanceSelection.Key
@@ -138,6 +138,6 @@ internal fun Project.configureInstanceSelectionFlavor(
     }
 }
 
-fun CommonExtension<*, *, *, *>.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
+fun CommonExtension<*, *, *, *, *>.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
     (this as ExtensionAware).extensions.configure("kotlinOptions", block)
 }

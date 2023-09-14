@@ -69,19 +69,17 @@ class ArtemisApplication : Application(), ImageLoaderFactory, CurrentActivityLis
             )
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ArtemisNotificationChannel.values().forEach { notificationChannel ->
-                val channel = NotificationChannel(
-                    notificationChannel.id,
-                    getString(notificationChannel.title),
-                    notificationChannel.importance
-                )
-                channel.description = getString(notificationChannel.description)
+        ArtemisNotificationChannel.entries.forEach { notificationChannel ->
+            val channel = NotificationChannel(
+                notificationChannel.id,
+                getString(notificationChannel.title),
+                notificationChannel.importance
+            )
+            channel.description = getString(notificationChannel.description)
 
-                NotificationManagerCompat
-                    .from(this)
-                    .createNotificationChannel(channel)
-            }
+            NotificationManagerCompat
+                .from(this)
+                .createNotificationChannel(channel)
         }
 
         registerActivityLifecycleCallbacks(this)
