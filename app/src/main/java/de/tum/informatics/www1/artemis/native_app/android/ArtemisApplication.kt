@@ -16,7 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
 import de.tum.informatics.www1.artemis.native_app.core.ui.uiModule
 import de.tum.informatics.www1.artemis.native_app.core.websocket.websocketModule
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.courseRegistrationModule
-import de.tum.informatics.www1.artemis.native_app.feature.course_view.courseViewModule
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.courseViewModule
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboardModule
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.exerciseModule
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lectureModule
