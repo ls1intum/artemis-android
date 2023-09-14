@@ -35,8 +35,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.WindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
-import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistration
-import de.tum.informatics.www1.artemis.native_app.feature.course_registration.navigateToCourseRegistration
+import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.courseRegistration
+import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.navigateToCourseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.course_overview.course
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.ui.course_overview.navigateToCourse
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.DASHBOARD_DESTINATION

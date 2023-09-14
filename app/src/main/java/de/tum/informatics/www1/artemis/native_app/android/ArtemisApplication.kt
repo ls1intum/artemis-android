@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.android
 import android.app.Activity
 import android.app.Application
 import android.app.NotificationChannel
-import android.os.Build
 import android.os.Bundle
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
@@ -16,7 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
 import de.tum.informatics.www1.artemis.native_app.core.device.deviceModule
 import de.tum.informatics.www1.artemis.native_app.core.ui.uiModule
 import de.tum.informatics.www1.artemis.native_app.core.websocket.websocketModule
-import de.tum.informatics.www1.artemis.native_app.feature.course_registration.courseRegistrationModule
+import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.courseRegistrationModule
 import de.tum.informatics.www1.artemis.native_app.feature.course_view.courseViewModule
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboardModule
 import de.tum.informatics.www1.artemis.native_app.feature.exercise_view.exerciseModule
