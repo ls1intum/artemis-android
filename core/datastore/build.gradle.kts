@@ -32,11 +32,7 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.android.compat)
 
-    implementation(libs.androidx.room.runtime)
-    annotationProcessor(libs.androidx.room.compiler)
-    kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.paging)
-    implementation(libs.androidx.room.ktx)
 
     implementation(libs.kotlinx.datetime)
 

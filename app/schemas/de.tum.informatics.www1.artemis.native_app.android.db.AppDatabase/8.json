@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "0a3eaa65bed798703dbadb2d9c8a2d7e",
+    "identityHash": "ed80dd34c5897ffd7c84d07ee9bf3d60",
     "entities": [
       {
         "tableName": "users",
@@ -565,7 +565,18 @@
             "id"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "i_communication_parent_id_communication_type",
+            "unique": false,
+            "columnNames": [
+              "communication_parent_id",
+              "communication_type"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `i_communication_parent_id_communication_type` ON `${TABLE_NAME}` (`communication_parent_id`, `communication_type`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "push_communication",
@@ -586,7 +597,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0a3eaa65bed798703dbadb2d9c8a2d7e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ed80dd34c5897ffd7c84d07ee9bf3d60')"
     ]
   }
 }

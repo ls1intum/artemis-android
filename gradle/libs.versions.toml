@@ -12,7 +12,7 @@ androidxPaging = "3.2.1"
 androidxPagingCompose = "3.2.1"
 coil = "2.4.0"
 emoji2 = "1.4.0"
-kotlin = "1.9.0"
+kotlin = "1.9.10"
 kotlinxCoroutines = "1.7.3"
 kotlinxDatetime = "0.4.0"
 kotlinxSerializationJson = "1.5.1"
@@ -23,12 +23,12 @@ ktor = "2.3.1"
 krossbow = "5.2.0"
 markwon = "4.6.2"
 ossLicensesPlugin = "0.10.6"
-room = "2.5.2"
+room = "2.5.1"
 sentry-android = "6.22.0"
 work = "2.8.1"
 
 # Used indirecly in the build config -> Do not remove without double checking.
-androidxComposeCompiler = "1.4.7"
+androidxComposeCompiler = "1.5.3"
 androidxCore = "1.9.0"
 
 [libraries]
@@ -119,7 +119,7 @@ toolbar-compose = { group = "me.onebone", name = "toolbar-compose", version = "2
 
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlin-kover = { group = "org.jetbrains.kotlinx", name = "kover-gradle-plugin", version.ref="kover" }
+kotlin-kover = { group = "org.jetbrains.kotlinx", name = "kover-gradle-plugin", version.ref = "kover" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -129,4 +129,5 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 google-services = { id = "com.google.gms.google-services", version = "4.3.15" }
 google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.0.0" }
 github-benManes-versions = { id = "com.github.ben-manes.versions", version = "0.47.0" }
-kover = { id = "org.jetbrains.kotlinx.kover", version.ref="kover" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+google-ksp = { id = "com.google.devtools.ksp", version = "1.9.10-1.0.13" }

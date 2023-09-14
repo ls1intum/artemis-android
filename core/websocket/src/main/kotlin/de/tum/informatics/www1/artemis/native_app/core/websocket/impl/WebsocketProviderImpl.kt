@@ -54,6 +54,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(DelicateCoroutinesApi::class)
 class WebsocketProviderImpl(
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
@@ -92,7 +93,6 @@ class WebsocketProviderImpl(
      * Connects a stomp session only if it is actually needed.
      * After 10 seconds of not having any subscribers, the session will be closes
      */
-    @OptIn(DelicateCoroutinesApi::class)
     private val session: Flow<StompSessionWithKxSerialization> =
         combine(
             serverConfigurationService.serverUrl,

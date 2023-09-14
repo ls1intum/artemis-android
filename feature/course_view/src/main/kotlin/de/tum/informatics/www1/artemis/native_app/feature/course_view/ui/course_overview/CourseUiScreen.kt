@@ -4,7 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -198,10 +198,10 @@ internal fun CourseUiScreen(
                 targetState = selectedTabIndex,
                 transitionSpec = {
                     if (targetState > initialState) {
-                        slideInHorizontally { width -> width } with
+                        slideInHorizontally { width -> width } togetherWith
                                 slideOutHorizontally { width -> -width }
                     } else {
-                        slideInHorizontally { width -> -width } with
+                        slideInHorizontally { width -> -width } togetherWith
                                 slideOutHorizontally { width -> width }
                     }.using(
                         SizeTransform(clip = false)
