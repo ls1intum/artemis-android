@@ -43,7 +43,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisOutdatedBanner
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -162,9 +162,9 @@ private fun ChatList(
     hasModerationRights: Boolean,
     clientId: Long,
     onClickViewPost: (clientPostId: String) -> Unit,
-    onRequestEdit: (Post) -> Unit,
-    onRequestDelete: (Post) -> Unit,
-    onRequestReactWithEmoji: (Post, emojiId: String, create: Boolean) -> Unit
+    onRequestEdit: (PostPojo) -> Unit,
+    onRequestDelete: (PostPojo) -> Unit,
+    onRequestReactWithEmoji: (PostPojo, emojiId: String, create: Boolean) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,

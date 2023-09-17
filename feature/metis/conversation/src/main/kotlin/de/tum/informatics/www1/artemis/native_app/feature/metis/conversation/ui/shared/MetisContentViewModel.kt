@@ -32,8 +32,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.hasModerationRights
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostDb
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
@@ -280,7 +280,7 @@ internal abstract class MetisContentViewModel(
         }
     }
 
-    fun editPost(post: Post, newText: String): Deferred<MetisModificationFailure?> {
+    fun editPost(post: PostPojo, newText: String): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
@@ -301,8 +301,8 @@ internal abstract class MetisContentViewModel(
     }
 
     fun editAnswerPost(
-        parentPost: Post,
-        post: AnswerPostDb,
+        parentPost: PostPojo,
+        post: AnswerPostPojo,
         newText: String
     ): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {

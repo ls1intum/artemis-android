@@ -44,8 +44,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostDb
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.CompletableDeferred
 
 internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
@@ -59,7 +59,7 @@ internal fun MetisThreadUi(
     modifier: Modifier,
     viewModel: MetisThreadViewModel
 ) {
-    val postDataState: DataState<Post> by viewModel.post.collectAsState()
+    val postDataState: DataState<PostPojo> by viewModel.post.collectAsState()
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
 
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
@@ -89,14 +89,14 @@ internal fun MetisThreadUi(
                 val parentPost = postDataState.orNull()
 
                 when (post) {
-                    is AnswerPostDb -> {
+                    is AnswerPostPojo -> {
                         if (parentPost == null) return@MetisReplyHandler CompletableDeferred(
                             MetisModificationFailure.UPDATE_POST
                         )
                         viewModel.editAnswerPost(parentPost, post, newText)
                     }
 
-                    is Post -> viewModel.editPost(post, newText)
+                    is PostPojo -> viewModel.editPost(post, newText)
                     else -> throw NotImplementedError()
                 }
             },
@@ -156,7 +156,7 @@ internal fun MetisThreadUi(
 private fun PostAndRepliesList(
     modifier: Modifier,
     state: LazyListState,
-    post: Post,
+    post: PostPojo,
     hasModerationRights: Boolean,
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,

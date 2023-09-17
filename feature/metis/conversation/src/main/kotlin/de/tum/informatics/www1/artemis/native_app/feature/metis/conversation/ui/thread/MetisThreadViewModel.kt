@@ -24,7 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -78,7 +78,7 @@ internal class MetisThreadViewModel(
 ) {
 
     companion object {
-        fun Flow<Post?>.asDataStateFlow(): Flow<DataState<Post>> = map { post ->
+        fun Flow<PostPojo?>.asDataStateFlow(): Flow<DataState<PostPojo>> = map { post ->
             if (post != null) {
                 DataState.Success(post)
             } else DataState.Failure(RuntimeException("Post not found"))
@@ -90,7 +90,7 @@ internal class MetisThreadViewModel(
     /**
      * The post data state flow as loading from the server.
      */
-    val post: StateFlow<DataState<Post>> = postId.flatMapLatest { postId ->
+    val post: StateFlow<DataState<PostPojo>> = postId.flatMapLatest { postId ->
         when (postId) {
             is StandalonePostId.ClientSideId -> metisStorageService
                 .getStandalonePost(postId.clientSideId)
@@ -125,8 +125,8 @@ internal class MetisThreadViewModel(
     private suspend fun handleServerLoadedStandalonePost(
         metisContext: MetisContext,
         standalonePostDataState: DataState<StandalonePost>
-    ): Flow<DataState<Post>> {
-        val failureFlow: Flow<DataState<Post>> =
+    ): Flow<DataState<PostPojo>> {
+        val failureFlow: Flow<DataState<PostPojo>> =
             flowOf(DataState.Failure(RuntimeException("Something went wrong while loading the post.")))
 
         return when (standalonePostDataState) {

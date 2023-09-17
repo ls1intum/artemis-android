@@ -8,7 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService.StandalonePostsContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 
 @OptIn(ExperimentalPagingApi::class)
 internal class MetisRemoteMediator(
@@ -19,7 +19,7 @@ internal class MetisRemoteMediator(
     private val serverUrl: String,
     private val host: String,
     private val performInitialRefresh: Boolean
-) : RemoteMediator<Int, Post>() {
+) : RemoteMediator<Int, PostPojo>() {
 
     override suspend fun initialize(): InitializeAction {
         return if (performInitialRefresh) {
@@ -27,7 +27,7 @@ internal class MetisRemoteMediator(
         } else InitializeAction.SKIP_INITIAL_REFRESH
     }
 
-    override suspend fun load(loadType: LoadType, state: PagingState<Int, Post>): MediatorResult {
+    override suspend fun load(loadType: LoadType, state: PagingState<Int, PostPojo>): MediatorResult {
         val pageSize = state.config.pageSize
 
         val nextPageIndex = when (loadType) {

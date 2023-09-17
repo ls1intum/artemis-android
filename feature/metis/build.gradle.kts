@@ -33,7 +33,7 @@ dependencies {
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)
 
-    testImplementation(project(":feature:login"))
-    testImplementation(project(":feature:login-test"))
-    testImplementation(project(":feature:metis-test"))
+    kover(project(":feature:metis:shared"))
+    kover(project(":feature:metis:conversation"))
+    kover(project(":feature:metis:manage-conversations"))
 }

@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.
 
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -27,7 +27,7 @@ data class StandalonePost(
     override val resolved: Boolean? = null
 ) : BasePost(), IStandalonePost {
 
-    constructor(post: Post, conversation: Conversation) : this(
+    constructor(post: PostPojo, conversation: Conversation) : this(
         id = post.serverPostId,
         author = User(
             id = post.authorId

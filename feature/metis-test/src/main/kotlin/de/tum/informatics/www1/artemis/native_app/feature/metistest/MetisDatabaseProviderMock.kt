@@ -3,13 +3,13 @@ package de.tum.informatics.www1.artemis.native_app.feature.metistest
 import android.content.Context
 import androidx.room.Room
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.dao.MetisDao
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.MetisDao
 
 /**
  * Database provider for metis unit tests
  */
 class MetisDatabaseProviderMock(context: Context) :
-    de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider {
+    MetisDatabaseProvider {
 
     override val database: MetisTestDatabase = Room
         .databaseBuilder(
@@ -20,5 +20,5 @@ class MetisDatabaseProviderMock(context: Context) :
         .fallbackToDestructiveMigration()
         .build()
 
-    override val metisDao: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.dao.MetisDao get() = database.metisDao()
+    override val metisDao: MetisDao get() = database.metisDao()
 }

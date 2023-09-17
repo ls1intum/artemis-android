@@ -18,5 +18,7 @@ dependencies {
 
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
+
+    testImplementation(project(":feature:metis-test"))
 }
 

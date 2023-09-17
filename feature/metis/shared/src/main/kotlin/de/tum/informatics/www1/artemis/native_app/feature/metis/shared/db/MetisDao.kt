@@ -20,7 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entiti
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.PostReactionEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostTagEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostingEntity
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.flow.Flow
 import java.util.Locale
 
@@ -180,7 +180,7 @@ interface MetisDao {
             u.id = p.author_id
     """
     )
-    fun queryStandalonePost(clientPostId: String): Flow<Post?>
+    fun queryStandalonePost(clientPostId: String): Flow<PostPojo?>
 
     fun queryCoursePosts(
         serverId: String,
@@ -191,7 +191,7 @@ interface MetisDao {
         metisFilter: List<MetisFilter>,
         metisSortingStrategy: MetisSortingStrategy,
         query: String?
-    ): PagingSource<Int, Post> {
+    ): PagingSource<Int, PostPojo> {
         val queryReplyCount =
             "(select count(*) from answer_postings ap where ap.parent_post_id = sp.post_id)"
         val queryEmojiCount = "(select count(*) from reactions r where r.post_id = p.id)"
@@ -300,7 +300,7 @@ interface MetisDao {
             MetisPostContextEntity::class
         ]
     )
-    fun queryCoursePosts(query: SupportSQLiteQuery): PagingSource<Int, Post>
+    fun queryCoursePosts(query: SupportSQLiteQuery): PagingSource<Int, PostPojo>
 
     @Transaction
     @Query(

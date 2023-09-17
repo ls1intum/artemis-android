@@ -6,7 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -51,13 +51,13 @@ internal interface MetisStorageService {
         sortingStrategy: MetisSortingStrategy,
         query: String?,
         metisContext: MetisContext
-    ): PagingSource<Int, Post>
+    ): PagingSource<Int, PostPojo>
 
     /**
      * Query the given post with the given client post id.
      * Automatically emits when the post may have changed.
      */
-    fun getStandalonePost(clientPostId: String): Flow<Post?>
+    fun getStandalonePost(clientPostId: String): Flow<PostPojo?>
 
     /**
      * Return the amount of posts cached from the rest calls.

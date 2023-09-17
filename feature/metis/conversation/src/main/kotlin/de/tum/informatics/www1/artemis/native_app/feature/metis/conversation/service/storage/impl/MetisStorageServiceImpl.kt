@@ -21,7 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entiti
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.PostReactionEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostTagEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostingEntity
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.Post
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
 import java.util.UUID
@@ -421,7 +421,7 @@ internal class MetisStorageServiceImpl(
         sortingStrategy: MetisSortingStrategy,
         query: String?,
         metisContext: MetisContext
-    ): PagingSource<Int, Post> {
+    ): PagingSource<Int, PostPojo> {
         return databaseProvider.metisDao.queryCoursePosts(
             serverId = serverId,
             clientId = clientId,
@@ -434,7 +434,7 @@ internal class MetisStorageServiceImpl(
         )
     }
 
-    override fun getStandalonePost(clientPostId: String): Flow<Post?> {
+    override fun getStandalonePost(clientPostId: String): Flow<PostPojo?> {
         return databaseProvider.metisDao.queryStandalonePost(clientPostId)
     }
 

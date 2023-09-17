@@ -49,7 +49,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostDb
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
@@ -59,7 +59,7 @@ private val EditedGray: Color
 sealed class PostItemViewType {
 
     data class ChatListItem(
-        val answerPosts: List<AnswerPostDb>
+        val answerPosts: List<AnswerPostPojo>
     ) : PostItemViewType()
 
     object ThreadContextPostItem : PostItemViewType()

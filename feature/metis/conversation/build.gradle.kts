@@ -28,6 +28,8 @@ dependencies {
     implementation(libs.androidx.emoji2.views)
     implementation(libs.androidx.emoji2.views.helper)
     implementation(libs.androidx.emoji2.emojiPicker)
+
+    testImplementation(project(":feature:metis-test"))
 }
 
 tasks.register("fetchAndPrepareEmojis", emoji.FetchAndPrepareEmojisTask::class) {
