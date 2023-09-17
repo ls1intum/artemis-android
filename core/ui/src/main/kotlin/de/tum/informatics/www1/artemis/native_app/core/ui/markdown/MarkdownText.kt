@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
@@ -66,6 +67,8 @@ import org.koin.compose.koinInject
  * SOFTWARE.
  */
 
+private const val PreviewModeServerUrl = "http://example.com"
+
 @Composable
 fun MarkdownText(
     markdown: String,
@@ -89,8 +92,13 @@ fun MarkdownText(
         createMarkdownRender(context, imageLoader)
     }
 
-    val serverConfigurationService: ServerConfigurationService = koinInject()
-    val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
+    // Without this, we cannot render markdown text in @Preview composable.
+    val serverUrl = if (LocalInspectionMode.current) {
+        PreviewModeServerUrl
+    } else {
+        val serverConfigurationService: ServerConfigurationService = koinInject()
+        serverConfigurationService.serverUrl.collectAsState(initial = "").value
+    }
 
     val transformedMarkdown by remember(markdown, serverUrl) {
         derivedStateOf {
