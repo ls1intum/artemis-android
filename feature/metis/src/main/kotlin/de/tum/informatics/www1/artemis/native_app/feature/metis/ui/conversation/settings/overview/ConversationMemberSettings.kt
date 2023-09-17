@@ -20,25 +20,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ConversationUser
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.OneToOneChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.hasModerationRights
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.hasModerationRights
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.ConversationMemberListItem
 
 @Composable
 internal fun ConversationMemberSettings(
     modifier: Modifier,
-    conversation: Conversation,
+    conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation,
     clientUsername: String,
     memberCount: Int,
-    members: List<ConversationUser>,
+    members: List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser>,
     hasMoreMembers: Boolean,
     onRequestAddMembers: () -> Unit,
     onRequestViewAllMembers: () -> Unit,
-    onRequestKickMember: (ConversationUser) -> Unit,
-    onRequestGiveModerationRights: (ConversationUser) -> Unit,
-    onRequestRevokeModerationRights: (ConversationUser) -> Unit
+    onRequestKickMember: (de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser) -> Unit,
+    onRequestGiveModerationRights: (de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser) -> Unit,
+    onRequestRevokeModerationRights: (de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser) -> Unit
 ) {
     // ListItem applies its own padding, therefore, we need to pad the other items ourselves
 
@@ -69,7 +69,7 @@ internal fun ConversationMemberSettings(
                 )
             )
 
-            if (conversation !is OneToOneChat && conversation.hasModerationRights) {
+            if (conversation !is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat && conversation.hasModerationRights) {
                 Button(onClick = onRequestAddMembers) {
                     Icon(imageVector = Icons.Default.PersonAdd, contentDescription = null)
 
@@ -95,14 +95,14 @@ internal fun ConversationMemberSettings(
 @Composable
 private fun ConversationMemberPreviewList(
     modifier: Modifier,
-    conversation: Conversation,
+    conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation,
     clientUsername: String,
-    members: List<ConversationUser>,
+    members: List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser>,
     hasMoreMembers: Boolean,
     onRequestViewAllMembers: () -> Unit,
-    onRequestKickMember: (ConversationUser) -> Unit,
-    onRequestGrantModerationPermission: (ConversationUser) -> Unit,
-    onRequestRevokeModerationPermission: (ConversationUser) -> Unit
+    onRequestKickMember: (de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser) -> Unit,
+    onRequestGrantModerationPermission: (de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser) -> Unit,
+    onRequestRevokeModerationPermission: (de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser) -> Unit
 ) {
     Column(modifier = modifier) {
         members.fastForEach { member ->

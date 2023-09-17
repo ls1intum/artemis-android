@@ -16,8 +16,8 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.getConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.ConversationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.ConversationSettingsViewModel
 import kotlinx.coroutines.runBlocking
@@ -32,7 +32,7 @@ import kotlin.test.assertIs
 @OptIn(ExperimentalTestApi::class)
 internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest() {
 
-    protected inline fun <reified T : Conversation> changeConversationDetailsTestImpl(
+    protected inline fun <reified T : de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation> changeConversationDetailsTestImpl(
         conversation: T,
         performChanges: () -> Unit,
         verifyChanges: (T) -> Unit
@@ -103,7 +103,7 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
 
     @OptIn(KoinInternalApi::class)
     protected fun setupUiAndViewModel(
-        conversation: Conversation,
+        conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation,
         onConversationLeft: () -> Unit = {}
     ): ConversationSettingsViewModel {
         val viewModel = ConversationSettingsViewModel(
@@ -140,7 +140,7 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
         return viewModel
     }
 
-    protected fun canLeaveConversationTestImpl(conversation: Conversation) {
+    protected fun canLeaveConversationTestImpl(conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation) {
         var hasLeftConversation = false
 
         setupUiAndViewModel(conversation, onConversationLeft = {

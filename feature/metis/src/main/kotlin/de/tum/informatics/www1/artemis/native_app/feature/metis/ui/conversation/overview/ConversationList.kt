@@ -40,10 +40,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.ExtraChannelIcons
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.PrimaryChannelIcon
@@ -207,7 +207,7 @@ private fun LazyListScope.conversationSectionHeader(
     }
 }
 
-private fun <T : Conversation> LazyListScope.conversationList(
+private fun <T : de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation> LazyListScope.conversationList(
     keySuffix: String,
     conversations: ConversationCollections.ConversationCollection<T>,
     onNavigateToConversation: (conversationId: Long) -> Unit,
@@ -235,7 +235,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
                 val unreadMessagesCount = conversation.unreadMessagesCount ?: 0
 
                 when (conversation) {
-                    is ChannelChat -> {
+                    is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> {
                         val channelName = if (conversation.isArchived) {
                             stringResource(
                                 id = R.string.conversation_overview_archived_channel_name,
@@ -261,7 +261,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
                         )
                     }
 
-                    is GroupChat -> {
+                    is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat -> {
                         ListItem(
                             modifier = contentModifier,
                             headlineContent = { Text(conversation.humanReadableTitle) },
@@ -274,7 +274,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
                         )
                     }
 
-                    is OneToOneChat -> {
+                    is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat -> {
                         ListItem(
                             modifier = contentModifier,
                             headlineContent = { Text(conversation.humanReadableTitle) },
@@ -313,7 +313,7 @@ private fun UnreadMessages(modifier: Modifier = Modifier, unreadMessagesCount: L
 @Composable
 private fun ConversationListItem(
     modifier: Modifier = Modifier,
-    conversation: Conversation,
+    conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation,
     onNavigateToConversation: () -> Unit,
     onToggleMarkAsFavourite: () -> Unit,
     onToggleHidden: () -> Unit,

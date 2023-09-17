@@ -15,8 +15,8 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.getConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel.CreateChannelScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel.CreateChannelViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel.TEST_TAG_CREATE_CHANNEL_BUTTON
@@ -140,7 +140,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         }
 
         val channel =
-            assertIs<ChannelChat>(createdConversation, "Created conversation is not a channel")
+            assertIs<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat>(createdConversation, "Created conversation is not a channel")
         assertEquals(channelName, channel.name, "Name not set correctly")
         assertEquals(channelDescription.ifBlank { null }, channel.description, "Description not set correctly")
         assertEquals(isPublic, channel.isPublic, "Public property not set correctly")

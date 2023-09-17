@@ -13,10 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.PotentiallyIllegalTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableName
 import kotlinx.datetime.toJavaInstant
@@ -26,7 +26,7 @@ import java.util.Date
 @Composable
 internal fun ConversationInfoSettings(
     modifier: Modifier,
-    conversation: Conversation,
+    conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation,
     editableConversationInfo: EditableConversationInfo
 ) {
     Column(
@@ -34,7 +34,7 @@ internal fun ConversationInfoSettings(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         when (conversation) {
-            is ChannelChat -> {
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> {
                 SectionBasicData(
                     modifier = Modifier.fillMaxWidth(),
                     editableConversationInfo = editableConversationInfo,
@@ -43,7 +43,7 @@ internal fun ConversationInfoSettings(
                 )
             }
 
-            is GroupChat -> {
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat -> {
                 SectionBasicData(
                     modifier = Modifier.fillMaxWidth(),
                     editableConversationInfo = editableConversationInfo,
@@ -52,7 +52,7 @@ internal fun ConversationInfoSettings(
                 )
             }
 
-            is OneToOneChat -> {
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat -> {
                 // No editable data
             }
         }
@@ -132,7 +132,7 @@ private fun SectionBasicData(
 }
 
 @Composable
-internal fun SectionMoreInfo(modifier: Modifier, conversation: Conversation) {
+internal fun SectionMoreInfo(modifier: Modifier, conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation) {
     val creator = conversation.creator
     val creatorText: Pair<String, String>? = remember(creator) {
         if (creator != null) {

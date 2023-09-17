@@ -24,7 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Userna
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.ConversationMembersBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.ConversationMembersViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.TEST_TAG_MEMBERS_LIST
@@ -47,7 +47,7 @@ import kotlin.time.Duration.Companion.seconds
 @RunWith(RobolectricTestRunner::class)
 class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
 
-    private lateinit var channel: ChannelChat
+    private lateinit var channel: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 
     override fun setup() {
         super.setup()

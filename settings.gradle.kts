@@ -39,6 +39,10 @@ include(":feature:lecture-view")
 include(":feature:quiz")
 include(":feature:settings")
 include(":feature:push")
+
 include(":feature:metis")
+include(":feature:metis:shared")
+include(":feature:metis:conversation")
 include(":feature:metis-test")
+
 include(":feature:core-modules-test")

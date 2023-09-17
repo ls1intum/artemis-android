@@ -5,11 +5,10 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisSortingStrategy
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.MetisModificationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.MetisService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.post.predefinedEmojiIds
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.predefinedEmojiIds
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -187,7 +186,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
                 accessToken
             )
 
-            assertIs<NetworkResponse.Failure<StandalonePost>>(
+            assertIs<NetworkResponse.Failure<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost>>(
                 metisService.getPost(
                     metisContext,
                     post.id!!,

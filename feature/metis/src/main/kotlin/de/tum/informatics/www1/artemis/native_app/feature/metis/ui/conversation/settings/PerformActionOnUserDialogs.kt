@@ -9,10 +9,10 @@ import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableTitle
 import kotlinx.coroutines.Deferred
@@ -23,7 +23,7 @@ import kotlinx.coroutines.Deferred
  */
 @Composable
 internal fun PerformActionOnUserDialogs(
-    conversation: Conversation,
+    conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation,
     performActionOnUserData: PerformActionOnUserData?,
     viewModel: SettingsBaseViewModel,
     onDismiss: () -> Unit
@@ -72,14 +72,14 @@ internal fun PerformActionOnUserDialogs(
 
 @Composable
 private fun PerformActionOnUserDialogs(
-    conversation: Conversation,
+    conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation,
     performActionOnUserData: PerformActionOnUserData,
     onKickUser: () -> Unit,
     onGiveModerationRights: () -> Unit,
     onRevokeModerationRights: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    val channelName = (conversation as? ChannelChat)?.name.orEmpty()
+    val channelName = (conversation as? de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat)?.name.orEmpty()
 
     val humanReadableName = performActionOnUserData.user.humanReadableName
     val username = performActionOnUserData.user.username.orEmpty()
@@ -87,7 +87,7 @@ private fun PerformActionOnUserDialogs(
     when (performActionOnUserData.userAction) {
         UserAction.KICK -> {
             when (conversation) {
-                is ChannelChat -> KickUserFromChannelDialog(
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> KickUserFromChannelDialog(
                     humanReadableName = humanReadableName,
                     username = username,
                     channelName = conversation.name,
@@ -95,7 +95,7 @@ private fun PerformActionOnUserDialogs(
                     onDismissRequest = onDismiss
                 )
 
-                is GroupChat -> KickUserFromChannelDialog(
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat -> KickUserFromChannelDialog(
                     humanReadableName = humanReadableName,
                     username = username,
                     channelName = conversation.humanReadableTitle,
@@ -103,7 +103,7 @@ private fun PerformActionOnUserDialogs(
                     onDismissRequest = onDismiss
                 )
 
-                is OneToOneChat -> {}
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat -> {}
             }
         }
 

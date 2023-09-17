@@ -8,21 +8,21 @@ import androidx.compose.material.icons.filled.Support
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.CourseWideContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext
 
-fun getIconForCourseWideContext(courseWideContext: CourseWideContext) = when (courseWideContext) {
-    CourseWideContext.TECH_SUPPORT -> Icons.Default.Support
-    CourseWideContext.ORGANIZATION -> Icons.Default.CalendarMonth
-    CourseWideContext.RANDOM -> Icons.Default.QuestionMark
-    CourseWideContext.ANNOUNCEMENT -> Icons.Default.Campaign
+fun getIconForCourseWideContext(courseWideContext: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext) = when (courseWideContext) {
+    de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext.TECH_SUPPORT -> Icons.Default.Support
+    de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext.ORGANIZATION -> Icons.Default.CalendarMonth
+    de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext.RANDOM -> Icons.Default.QuestionMark
+    de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext.ANNOUNCEMENT -> Icons.Default.Campaign
 }
 
 @Composable
-fun getHumanReadableTextForCourseWideContext(courseWideContext: CourseWideContext) = stringResource(
+fun getHumanReadableTextForCourseWideContext(courseWideContext: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext) = stringResource(
     id = when (courseWideContext) {
-        CourseWideContext.TECH_SUPPORT -> R.string.course_wide_context_tech_support
-        CourseWideContext.ORGANIZATION -> R.string.course_wide_context_organization
-        CourseWideContext.RANDOM -> R.string.course_wide_context_random
-        CourseWideContext.ANNOUNCEMENT -> R.string.course_wide_context_announcement
+        de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext.TECH_SUPPORT -> R.string.course_wide_context_tech_support
+        de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext.ORGANIZATION -> R.string.course_wide_context_organization
+        de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext.RANDOM -> R.string.course_wide_context_random
+        de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext.ANNOUNCEMENT -> R.string.course_wide_context_announcement
     }
 )

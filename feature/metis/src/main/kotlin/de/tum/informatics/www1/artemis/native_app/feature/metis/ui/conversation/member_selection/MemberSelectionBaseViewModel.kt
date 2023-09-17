@@ -13,7 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.InclusionList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableName
 import kotlinx.coroutines.flow.Flow
@@ -33,7 +33,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 internal abstract class MemberSelectionBaseViewModel(
     protected val courseId: Long,
-    protected val conversationService: ConversationService,
+    protected val conversationService: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService,
     protected val accountService: AccountService,
     protected val serverConfigurationService: ServerConfigurationService,
     protected val networkStatusProvider: NetworkStatusProvider,

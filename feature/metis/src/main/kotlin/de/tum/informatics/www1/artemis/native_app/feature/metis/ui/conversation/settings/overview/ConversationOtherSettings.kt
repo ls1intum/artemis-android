@@ -15,14 +15,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.MarkdownTextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.hasModerationRights
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.hasModerationRights
 
 @Composable
 internal fun ConversationOtherSettings(
     modifier: Modifier,
-    conversation: Conversation,
+    conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation,
     onLeaveConversation: () -> Unit,
     onToggleChannelArchivation: () -> Unit
 ) {
@@ -39,7 +39,7 @@ internal fun ConversationOtherSettings(
             style = ConversationSettingsSectionTextStyle
         )
 
-        if (conversation !is ChannelChat || !conversation.isCreator) {
+        if (conversation !is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat || !conversation.isCreator) {
             OutlinedButton(
                 modifier = buttonModifier,
                 onClick = onLeaveConversation
@@ -48,7 +48,7 @@ internal fun ConversationOtherSettings(
             }
         }
 
-        if (conversation.hasModerationRights && conversation is ChannelChat) {
+        if (conversation.hasModerationRights && conversation is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat) {
             OutlinedButton(
                 modifier = buttonModifier,
                 onClick = { displayArchiveChannelDialog = true }
@@ -68,12 +68,12 @@ internal fun ConversationOtherSettings(
 
     if (displayArchiveChannelDialog) {
         val channelName = when (conversation) {
-            is ChannelChat -> conversation.name
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> conversation.name
             else -> ""
         }
 
         val doArchive = when (conversation) {
-            is ChannelChat -> !conversation.isArchived
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> !conversation.isArchived
             else -> false
         }
 

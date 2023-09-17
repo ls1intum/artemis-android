@@ -18,20 +18,20 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollections
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationWebsocketDTO
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisPostAction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.dto.ConversationWebsocketDto
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisPostAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.storage.ConversationPreferenceService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ConversationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.MetisViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.subscribeToConversationUpdates
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextReporter
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.subscribeToConversationUpdates
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleMetisContextReporter
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -64,7 +64,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class ConversationOverviewViewModel(
     application: Application,
     private val courseId: Long,
-    private val conversationService: ConversationService,
+    private val conversationService: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val conversationPreferenceService: ConversationPreferenceService,
@@ -72,7 +72,7 @@ internal class ConversationOverviewViewModel(
     networkStatusProvider: NetworkStatusProvider,
     accountDataService: AccountDataService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : MetisViewModel(
+) : de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel(
     serverConfigurationService,
     accountService,
     accountDataService,
@@ -98,7 +98,7 @@ internal class ConversationOverviewViewModel(
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query
 
-    private val conversationUpdates: Flow<ConversationWebsocketDTO> = clientId
+    private val conversationUpdates: Flow<ConversationWebsocketDto> = clientId
         .filterSuccess()
         .flatMapLatest { userId ->
             websocketProvider.subscribeToConversationUpdates(userId, courseId)
@@ -115,7 +115,7 @@ internal class ConversationOverviewViewModel(
     /**
      * Conversations as loaded from the server.
      */
-    private val loadedConversations: StateFlow<DataState<List<Conversation>>> =
+    private val loadedConversations: StateFlow<DataState<List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation>>> =
         flatMapLatest(
             serverConfigurationService.serverUrl,
             accountService.authToken,
@@ -130,7 +130,7 @@ internal class ConversationOverviewViewModel(
     /**
      * Conversations of the server updates by the websocket.
      */
-    private val updatedConversations: StateFlow<DataState<List<Conversation>>> = loadedConversations
+    private val updatedConversations: StateFlow<DataState<List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation>>> = loadedConversations
         .flatMapLatest { loadedConversationsDataState ->
             when (loadedConversationsDataState) {
                 is Success -> getUpdateConversationsFlow(loadedConversationsDataState.data)
@@ -162,11 +162,11 @@ internal class ConversationOverviewViewModel(
         ) { conversationsDataState, preferences ->
             conversationsDataState.bind { conversations ->
                 ConversationCollections(
-                    channels = conversations.filterNotHiddenNorFavourite<ChannelChat>()
+                    channels = conversations.filterNotHiddenNorFavourite<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat>()
                         .asCollection(preferences.channelsExpanded),
-                    groupChats = conversations.filterNotHiddenNorFavourite<GroupChat>()
+                    groupChats = conversations.filterNotHiddenNorFavourite<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat>()
                         .asCollection(preferences.groupChatsExpanded),
-                    directChats = conversations.filterNotHiddenNorFavourite<OneToOneChat>()
+                    directChats = conversations.filterNotHiddenNorFavourite<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat>()
                         .asCollection(preferences.personalConversationsExpanded),
                     favorites = conversations.filter { it.isFavorite }
                         .asCollection(preferences.favouritesExpanded),
@@ -206,7 +206,7 @@ internal class ConversationOverviewViewModel(
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    private fun getUpdateConversationsFlow(loadedConversations: List<Conversation>): Flow<Success<List<Conversation>>> =
+    private fun getUpdateConversationsFlow(loadedConversations: List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation>): Flow<Success<List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation>>> =
         flow {
             val currentConversations =
                 loadedConversations.associateBy { it.id }.toMutableMap()
@@ -342,11 +342,11 @@ internal class ConversationOverviewViewModel(
         }
     }
 
-    private inline fun <reified T : Conversation> List<*>.filterNotHiddenNorFavourite(): List<T> {
+    private inline fun <reified T : de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation> List<*>.filterNotHiddenNorFavourite(): List<T> {
         return filterIsInstance<T>()
             .filter { !it.isHidden && !it.isFavorite }
     }
 
-    private fun <T : Conversation> List<T>.asCollection(isExpanded: Boolean) =
+    private fun <T : de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation> List<T>.asCollection(isExpanded: Boolean) =
         ConversationCollections.ConversationCollection(this, isExpanded)
 }

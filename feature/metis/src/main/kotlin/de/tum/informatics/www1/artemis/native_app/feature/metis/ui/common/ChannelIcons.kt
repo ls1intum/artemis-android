@@ -8,10 +8,10 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 
 @Composable
-internal fun ChannelIcons(channelChat: ChannelChat) {
+internal fun ChannelIcons(channelChat: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat) {
     Row {
         PrimaryChannelIcon(channelChat)
 
@@ -20,7 +20,7 @@ internal fun ChannelIcons(channelChat: ChannelChat) {
 }
 
 @Composable
-internal fun ExtraChannelIcons(channelChat: ChannelChat) {
+internal fun ExtraChannelIcons(channelChat: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat) {
     Row {
         if (channelChat.isArchived) {
             Icon(
@@ -40,7 +40,7 @@ internal fun ExtraChannelIcons(channelChat: ChannelChat) {
 }
 
 @Composable
-internal fun PrimaryChannelIcon(channelChat: ChannelChat) {
+internal fun PrimaryChannelIcon(channelChat: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat) {
     Icon(
         imageVector = if (channelChat.isPublic) Icons.Default.Numbers else Icons.Default.Lock,
         contentDescription = null

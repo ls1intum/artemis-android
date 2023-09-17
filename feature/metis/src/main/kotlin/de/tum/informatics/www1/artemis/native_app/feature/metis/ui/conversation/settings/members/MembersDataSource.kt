@@ -1,11 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members
 
-import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ConversationUser
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 
 internal class MembersDataSource(
     private val courseId: Long,
@@ -13,20 +12,20 @@ internal class MembersDataSource(
     private val serverUrl: String,
     private val authToken: String,
     private val query: String,
-    private val conversationService: ConversationService
-) : PagingSource<Int, ConversationUser>() {
+    private val conversationService: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
+) : PagingSource<Int, de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser>() {
 
     companion object {
         private const val MAX_PAGE_SIZE = 20
     }
 
-    override fun getRefreshKey(state: PagingState<Int, ConversationUser>): Int {
+    override fun getRefreshKey(state: PagingState<Int, de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser>): Int {
         return state.anchorPosition?.let { anchorPosition ->
             (anchorPosition / state.config.pageSize) + 1
         } ?: 0
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, ConversationUser> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser> {
         val pageNum = params.key ?: 0
 
         val pageSize = params.loadSize.coerceAtMost(MAX_PAGE_SIZE)

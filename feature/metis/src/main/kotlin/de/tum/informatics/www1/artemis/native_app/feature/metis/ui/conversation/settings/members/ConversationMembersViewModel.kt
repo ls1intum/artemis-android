@@ -13,9 +13,9 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ConversationUser
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.SettingsBaseViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,7 +31,7 @@ import kotlin.time.Duration.Companion.milliseconds
 internal class ConversationMembersViewModel(
     initialCourseId: Long,
     initialConversationId: Long,
-    conversationService: ConversationService,
+    conversationService: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService,
     accountService: AccountService,
     serverConfigurationService: ServerConfigurationService,
     networkStatusProvider: NetworkStatusProvider,
@@ -52,11 +52,11 @@ internal class ConversationMembersViewModel(
         private const val KEY_QUERY = "query"
     }
 
-    val conversation: StateFlow<DataState<Conversation>> = loadedConversation
+    val conversation: StateFlow<DataState<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation>> = loadedConversation
 
     val query: StateFlow<String> = savedStateHandle.getStateFlow(KEY_QUERY, "")
 
-    val membersPagingData: Flow<PagingData<ConversationUser>> = flatMapLatest(
+    val membersPagingData: Flow<PagingData<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser>> = flatMapLatest(
         onRequestReload.onStart { emit(Unit) },
         conversationSettings,
         serverConfigurationService.serverUrl,

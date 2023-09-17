@@ -15,14 +15,14 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ConversationUser
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.OneToOneChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ConversationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.mapIsChannelNameIllegal
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.mapIsDescriptionOrTopicIllegal
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.mapIsChannelNameIllegal
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.mapIsDescriptionOrTopicIllegal
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.SettingsBaseViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -42,7 +42,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 internal class ConversationSettingsViewModel(
     initialCourseId: Long,
     initialConversationId: Long,
-    conversationService: ConversationService,
+    conversationService: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService,
     accountService: AccountService,
     serverConfigurationService: ServerConfigurationService,
     networkStatusProvider: NetworkStatusProvider,
@@ -92,7 +92,7 @@ internal class ConversationSettingsViewModel(
     private val savedDescription = MutableStateFlow<String?>(null)
     private val savedTopic = MutableStateFlow<String?>(null)
 
-    val conversation: StateFlow<DataState<Conversation>> = combine(
+    val conversation: StateFlow<DataState<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation>> = combine(
         loadedConversation,
         savedName,
         savedDescription,
@@ -104,7 +104,7 @@ internal class ConversationSettingsViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    val previewMembers: StateFlow<DataState<List<ConversationUser>>> = flatMapLatest(
+    val previewMembers: StateFlow<DataState<List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser>>> = flatMapLatest(
         conversationSettings,
         accountService.authToken,
         serverConfigurationService.serverUrl,
@@ -126,24 +126,24 @@ internal class ConversationSettingsViewModel(
 
     private val isNameDirty = isDirtyFlow(_name) {
         when (this) {
-            is ChannelChat -> name
-            is GroupChat -> name
-            is OneToOneChat -> null
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> name
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat -> name
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat -> null
         }
     }
     private val isDescriptionDirty = isDirtyFlow(_description) {
         when (this) {
-            is ChannelChat -> description
-            is GroupChat -> null
-            is OneToOneChat -> null
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> description
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat -> null
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat -> null
         }
     }
 
     private val isTopicDirty = isDirtyFlow(_topic) {
         when (this) {
-            is ChannelChat -> topic
-            is GroupChat -> null
-            is OneToOneChat -> null
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> topic
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat -> null
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat -> null
         }
     }
 
@@ -167,9 +167,9 @@ internal class ConversationSettingsViewModel(
     val name: StateFlow<String> = combine(conversation, _name) { conversation, customName ->
         customName ?: conversation.bind {
             when (it) {
-                is ChannelChat -> it.name
-                is GroupChat -> it.name.orEmpty()
-                is OneToOneChat -> ""
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> it.name
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat -> it.name.orEmpty()
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat -> ""
             }
         }.orElse("")
     }
@@ -179,9 +179,9 @@ internal class ConversationSettingsViewModel(
         combine(conversation, _description) { conversation, customDescription ->
             customDescription ?: conversation.bind {
                 when (it) {
-                    is ChannelChat -> it.description.orEmpty()
-                    is GroupChat -> ""
-                    is OneToOneChat -> ""
+                    is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> it.description.orEmpty()
+                    is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat -> ""
+                    is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat -> ""
                 }
             }.orElse("")
         }
@@ -190,9 +190,9 @@ internal class ConversationSettingsViewModel(
     val topic: StateFlow<String> = combine(conversation, _topic) { conversation, customTopic ->
         customTopic ?: conversation.bind {
             when (it) {
-                is ChannelChat -> it.topic.orEmpty()
-                is GroupChat -> ""
-                is OneToOneChat -> ""
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> it.topic.orEmpty()
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat -> ""
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat -> ""
             }
         }.orElse("")
     }
@@ -201,9 +201,9 @@ internal class ConversationSettingsViewModel(
     val canEdit: StateFlow<Boolean> = conversation.map { conversationDataState ->
         conversationDataState.bind { conversation ->
             when (conversation) {
-                is ChannelChat -> conversation.hasChannelModerationRights
-                is GroupChat -> conversation.isMember
-                is OneToOneChat -> false
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> conversation.hasChannelModerationRights
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat -> conversation.isMember
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat -> false
             }
         }.orElse(false)
     }
@@ -254,7 +254,8 @@ internal class ConversationSettingsViewModel(
 
     fun toggleChannelArchivation(): Deferred<Boolean> {
         return viewModelScope.async(coroutineContext) {
-            val conversation = conversation.value.orNull() as? ChannelChat ?: return@async false
+            val conversation = conversation.value.orNull() as? de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+                ?: return@async false
 
             val result = if (conversation.isArchived) {
                 conversationService.unarchiveChannel(
@@ -318,19 +319,19 @@ internal class ConversationSettingsViewModel(
 
     private fun <T> isDirtyFlow(
         localValueFlow: Flow<T>,
-        getCurrentValue: Conversation.() -> T
+        getCurrentValue: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation.() -> T
     ): Flow<Boolean> = combine(localValueFlow, conversation) { localValue, conversationDataState ->
         conversationDataState.bind(getCurrentValue).bind { localValue != null && it != localValue }
             .orElse(false)
     }
 
     private fun copyConversationWithSavedValues(
-        conversation: Conversation,
+        conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation,
         savedName: String?,
         savedDescription: String?,
         savedTopic: String?
     ) = when (conversation) {
-        is ChannelChat -> {
+        is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> {
             conversation
                 .let {
                     if (savedName != null) {
@@ -349,7 +350,7 @@ internal class ConversationSettingsViewModel(
                 }
         }
 
-        is GroupChat -> {
+        is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat -> {
             conversation
                 .let {
                     if (savedName != null) {
@@ -358,6 +359,6 @@ internal class ConversationSettingsViewModel(
                 }
         }
 
-        is OneToOneChat -> conversation
+        is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat -> conversation
     }
 }

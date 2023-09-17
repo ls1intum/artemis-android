@@ -28,7 +28,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletio
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
 import kotlinx.coroutines.Deferred
 
 @Suppress("UNUSED_PARAMETER")
@@ -45,7 +45,7 @@ internal fun LectureScreenBody(
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     courseId: Long,
     overviewListState: LazyListState,
-    metisContext: MetisContext.Lecture,
+    metisContext: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext.Lecture,
     navController: NavController,
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,

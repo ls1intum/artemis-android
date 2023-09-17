@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.service.network
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 
 interface ChannelService {
 
@@ -9,7 +9,7 @@ interface ChannelService {
         courseId: Long,
         serverUrl: String,
         authToken: String
-    ): NetworkResponse<List<ChannelChat>>
+    ): NetworkResponse<List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat>>
 
     suspend fun registerInChannel(
         courseId: Long,

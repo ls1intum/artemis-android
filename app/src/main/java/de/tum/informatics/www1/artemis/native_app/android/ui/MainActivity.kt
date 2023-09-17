@@ -51,13 +51,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.lectureview.navigateTo
 import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATION
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.standalonePostScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ProvideLocalVisibleMetisContextManager
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextManager
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextReporter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleStandalonePostDetails
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.standalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.ProvideLocalVisibleMetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleMetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleMetisContextReporter
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
@@ -79,13 +79,14 @@ import org.koin.android.ext.android.get
  * Main and only activity used in the android app.
  * Navigation is handled by decompose and jetpack compose.
  */
-class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
+class MainActivity : AppCompatActivity(),
+    de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleMetisContextReporter {
 
     private val serverConfigurationService: ServerConfigurationService = get()
     private val accountService: AccountService = get()
     private val communicationNotificationManager: CommunicationNotificationManager = get()
 
-    override val visibleMetisContexts: MutableStateFlow<List<VisibleMetisContext>> =
+    override val visibleMetisContexts: MutableStateFlow<List<de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleMetisContext>> =
         MutableStateFlow(
             emptyList()
         )
@@ -101,14 +102,15 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
             }
         }
 
-        val visibleMetisContextManager = object : VisibleMetisContextManager {
-            override fun registerMetisContext(metisContext: VisibleMetisContext) {
+        val visibleMetisContextManager = object :
+            de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleMetisContextManager {
+            override fun registerMetisContext(metisContext: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleMetisContext) {
                 visibleMetisContexts.value = visibleMetisContexts.value + metisContext
 
                 cancelCommunicationNotifications(metisContext)
             }
 
-            override fun unregisterMetisContext(metisContext: VisibleMetisContext) {
+            override fun unregisterMetisContext(metisContext: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleMetisContext) {
                 visibleMetisContexts.value = visibleMetisContexts.value - metisContext
             }
         }
@@ -132,7 +134,9 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
 
         setContent {
             AppTheme {
-                ProvideLocalVisibleMetisContextManager(visibleMetisContextManager = visibleMetisContextManager) {
+                de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.ProvideLocalVisibleMetisContextManager(
+                    visibleMetisContextManager = visibleMetisContextManager
+                ) {
                     val navController = rememberNavController()
 
                     val navigateToDeepLinkLogin = {
@@ -390,14 +394,14 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
         visibleMetisContexts.value.forEach(::cancelCommunicationNotifications)
     }
 
-    private fun cancelCommunicationNotifications(visibleMetisContext: VisibleMetisContext) {
-        if (visibleMetisContext is VisibleStandalonePostDetails) {
+    private fun cancelCommunicationNotifications(visibleMetisContext: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleMetisContext) {
+        if (visibleMetisContext is de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleStandalonePostDetails) {
             val parentId = visibleMetisContext.postId
             val communicationType: CommunicationType = when (visibleMetisContext.metisContext) {
-                is MetisContext.Course -> CommunicationType.QNA_COURSE
-                is MetisContext.Exercise -> CommunicationType.QNA_EXERCISE
-                is MetisContext.Lecture -> CommunicationType.QNA_LECTURE
-                is MetisContext.Conversation -> CommunicationType.CONVERSATION
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext.Course -> CommunicationType.QNA_COURSE
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext.Exercise -> CommunicationType.QNA_EXERCISE
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext.Lecture -> CommunicationType.QNA_LECTURE
+                is de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext.Conversation -> CommunicationType.CONVERSATION
             }
 
             lifecycleScope.launch {

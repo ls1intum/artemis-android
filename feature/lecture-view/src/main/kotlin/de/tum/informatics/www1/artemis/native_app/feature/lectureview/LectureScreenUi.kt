@@ -40,8 +40,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.canDisplayMetisOnDisplaySide
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
@@ -140,7 +140,7 @@ internal fun LectureScreen(
     var displaySetCompletedFailureDialog: Boolean by remember { mutableStateOf(false) }
 
     val metisContext = remember(courseId, lectureId) {
-        MetisContext.Lecture(courseId = courseId, lectureId = lectureId)
+        de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext.Lecture(courseId = courseId, lectureId = lectureId)
     }
 
     val overviewListState = rememberLazyListState()

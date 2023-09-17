@@ -39,8 +39,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.courseId
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.getProblemStatementWebViewState
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.qna.canDisplayMetisOnDisplaySide
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import kotlinx.coroutines.Deferred
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ExperimentalToolbarApi
@@ -93,7 +93,7 @@ internal fun ExerciseScreen(
         derivedStateOf {
             val currentExerciseId = exerciseId
             if (courseId != null && currentExerciseId != null) {
-                MetisContext.Exercise(courseId = courseId, exerciseId = currentExerciseId)
+                de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext.Exercise(courseId = courseId, exerciseId = currentExerciseId)
             } else null
         }
     }

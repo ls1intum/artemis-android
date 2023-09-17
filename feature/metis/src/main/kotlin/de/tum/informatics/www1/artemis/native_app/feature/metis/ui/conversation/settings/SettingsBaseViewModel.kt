@@ -13,10 +13,10 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ConversationUser
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ConversationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.getConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -32,7 +32,7 @@ import kotlin.coroutines.CoroutineContext
 abstract class SettingsBaseViewModel(
     initialCourseId: Long,
     initialConversationId: Long,
-    protected val conversationService: ConversationService,
+    protected val conversationService: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService,
     protected val accountService: AccountService,
     protected val serverConfigurationService: ServerConfigurationService,
     protected val networkStatusProvider: NetworkStatusProvider,
@@ -44,7 +44,7 @@ abstract class SettingsBaseViewModel(
 
     protected val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    protected val loadedConversation: StateFlow<DataState<Conversation>> = flatMapLatest(
+    protected val loadedConversation: StateFlow<DataState<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation>> = flatMapLatest(
         conversationSettings,
         accountService.authToken,
         serverConfigurationService.serverUrl,
@@ -70,20 +70,20 @@ abstract class SettingsBaseViewModel(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     fun kickMember(username: String): Deferred<Boolean> {
-        return performActionOnUser(username, ConversationService::kickMember)
+        return performActionOnUser(username, de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService::kickMember)
     }
 
-    fun grantModerationRights(conversationUser: ConversationUser): Deferred<Boolean> {
-        return performActionOnUser(conversationUser.username.orEmpty(), ConversationService::grantModerationRights)
+    fun grantModerationRights(conversationUser: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser): Deferred<Boolean> {
+        return performActionOnUser(conversationUser.username.orEmpty(), de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService::grantModerationRights)
     }
 
-    fun revokeModerationRights(conversationUser: ConversationUser): Deferred<Boolean> {
-        return performActionOnUser(conversationUser.username.orEmpty(), ConversationService::revokeModerationRights)
+    fun revokeModerationRights(conversationUser: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser): Deferred<Boolean> {
+        return performActionOnUser(conversationUser.username.orEmpty(), de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService::revokeModerationRights)
     }
 
     private fun performActionOnUser(
         username: String,
-        action: suspend ConversationService.(Long, Conversation, String, String, String) -> NetworkResponse<Boolean>
+        action: suspend de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService.(Long, de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation, String, String, String) -> NetworkResponse<Boolean>
     ): Deferred<Boolean> {
         return viewModelScope.async(coroutineContext) {
             val conversation = loadedConversation.value.orNull() ?: return@async false

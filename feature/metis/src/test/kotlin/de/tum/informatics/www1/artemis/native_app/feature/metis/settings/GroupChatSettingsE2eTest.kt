@@ -8,7 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAcc
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Test
@@ -45,7 +45,7 @@ internal class GroupChatSettingsE2eTest : ConversationSettingsBaseE2eTest() {
         )
     }
 
-    private fun createGroupChat(): GroupChat {
+    private fun createGroupChat(): de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat {
         return runBlocking {
             withTimeout(DefaultTimeoutMillis) {
                 conversationService.createGroupChat(

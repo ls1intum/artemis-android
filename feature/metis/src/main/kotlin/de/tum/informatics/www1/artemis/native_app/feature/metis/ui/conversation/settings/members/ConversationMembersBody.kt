@@ -31,9 +31,9 @@ import de.tum.informatics.www1.artemis.native_app.core.data.join
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ConversationUser
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.PagingStateError
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.ConversationMemberListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.PerformActionOnUserData
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.PerformActionOnUserDialogs
@@ -122,12 +122,12 @@ internal fun ConversationMembersBody(
 @Composable
 private fun ConversationMembersList(
     modifier: Modifier,
-    members: LazyPagingItems<ConversationUser>,
+    members: LazyPagingItems<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser>,
     clientUsername: String,
-    conversation: Conversation,
-    onRequestKickMember: (ConversationUser) -> Unit,
-    onRequestGrantModerationPermission: (ConversationUser) -> Unit,
-    onRequestRevokeModerationPermission: (ConversationUser) -> Unit
+    conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation,
+    onRequestKickMember: (de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser) -> Unit,
+    onRequestGrantModerationPermission: (de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser) -> Unit,
+    onRequestRevokeModerationPermission: (de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser) -> Unit
 ) {
     when (members.loadState.refresh) {
         LoadState.Loading -> {
@@ -154,7 +154,7 @@ private fun ConversationMembersList(
                 modifier = modifier.padding(horizontal = Spacings.ScreenHorizontalSpacing),
                 contentAlignment = Alignment.Center
             ) {
-                PagingStateError(
+                de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError(
                     modifier = Modifier,
                     errorText = R.string.conversation_members_failure,
                     buttonText = R.string.conversation_members_try_again,
@@ -196,7 +196,7 @@ private fun ConversationMembersList(
 
                     is LoadState.Error -> {
                         item {
-                            PagingStateError(
+                            de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = Spacings.ScreenHorizontalSpacing),

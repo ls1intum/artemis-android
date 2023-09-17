@@ -24,12 +24,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Userna
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollections
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.humanReadableName
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.KEY_SUFFIX_CHANNELS
@@ -97,7 +97,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
 
         setupUiAndViewModel()
 
-        val verifyConversation = { conversation: Conversation ->
+        val verifyConversation = { conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation ->
             scrollToConversation(conversation)
 
             composeTestRule
@@ -323,17 +323,17 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         }
     }
 
-    private fun scrollToConversation(conversation: Conversation) {
+    private fun scrollToConversation(conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation) {
         composeTestRule
             .onNodeWithTag(TEST_TAG_CONVERSATION_LIST)
             .performScrollToKey(getTagForConversation(conversation))
     }
 
-    private fun getTagForConversation(conversation: Conversation): String {
+    private fun getTagForConversation(conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation): String {
         val suffix = when (conversation) {
-            is ChannelChat -> KEY_SUFFIX_CHANNELS
-            is GroupChat -> KEY_SUFFIX_GROUPS
-            is OneToOneChat -> KEY_SUFFIX_PERSONAL
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat -> KEY_SUFFIX_CHANNELS
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat -> KEY_SUFFIX_GROUPS
+            is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat -> KEY_SUFFIX_PERSONAL
         }
 
         return tagForConversation(conversation.id, suffix)

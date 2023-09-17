@@ -6,9 +6,9 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ConversationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.getConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.member_selection.MemberSelectionBaseViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -24,7 +24,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 internal class ConversationAddMembersViewModel(
     courseId: Long,
     private val conversationId: Long,
-    conversationService: ConversationService,
+    conversationService: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService,
     accountService: AccountService,
     serverConfigurationService: ServerConfigurationService,
     networkStatusProvider: NetworkStatusProvider,
@@ -59,7 +59,7 @@ internal class ConversationAddMembersViewModel(
         }
     }
 
-    private suspend fun loadConversation(): Conversation? {
+    private suspend fun loadConversation(): de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation? {
         return conversationService
             .getConversation(
                 courseId,

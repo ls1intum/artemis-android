@@ -4,7 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ChannelService
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -21,7 +21,7 @@ class ChannelServiceImpl(private val ktorProvider: KtorProvider) : ChannelServic
         courseId: Long,
         serverUrl: String,
         authToken: String
-    ): NetworkResponse<List<ChannelChat>> {
+    ): NetworkResponse<List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat>> {
         return performNetworkCall {
             ktorProvider.ktorClient.get(serverUrl) {
                 url {

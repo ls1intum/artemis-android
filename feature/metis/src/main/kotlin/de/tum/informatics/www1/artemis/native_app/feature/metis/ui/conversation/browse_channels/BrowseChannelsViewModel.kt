@@ -13,7 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.isAtLeastTutorInCourse
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ChannelService
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -41,7 +41,7 @@ internal class BrowseChannelsViewModel(
 
     private val requestRefresh = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    val channels: StateFlow<DataState<List<ChannelChat>>> = flatMapLatest(
+    val channels: StateFlow<DataState<List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat>>> = flatMapLatest(
         serverConfigurationService.serverUrl,
         accountService.authToken,
         requestRefresh.onStart { emit(Unit) }
@@ -74,7 +74,7 @@ internal class BrowseChannelsViewModel(
     /**
      * Returns the id of the channel on registration success or null if any error occurred
      */
-    fun registerInChannel(channelChat: ChannelChat): Deferred<Long?> {
+    fun registerInChannel(channelChat: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat): Deferred<Long?> {
         return viewModelScope.async(coroutineContext) {
             val username = when (val authData = accountService.authenticationData.first()) {
                 is AccountService.AuthenticationData.LoggedIn -> authData.username

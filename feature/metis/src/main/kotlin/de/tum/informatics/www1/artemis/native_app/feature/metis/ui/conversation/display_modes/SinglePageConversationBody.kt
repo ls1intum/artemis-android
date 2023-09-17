@@ -23,17 +23,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.browse_channels.BrowseChannelsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_channel.CreateChannelScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.CreatePersonalConversationScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.detail.ConversationScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.add_members.ConversationAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.members.ConversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.settings.overview.ConversationSettingsScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.MetisStandalonePostScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisStandalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.StandalonePostId
 import kotlinx.parcelize.Parcelize
 
 private const val ConversationOverviewMaxWeight = 0.3f

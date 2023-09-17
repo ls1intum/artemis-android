@@ -22,7 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Userna
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.testTagForPotentialRecipient
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.member_selection.MemberSelectionBaseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.member_selection.TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD
@@ -79,7 +79,7 @@ class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
         addRecipientsTestImpl(conversation, listOf(user3Username))
     }
 
-    private fun addRecipientsTestImpl(conversation: Conversation, newUsers: List<String>) {
+    private fun addRecipientsTestImpl(conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation, newUsers: List<String>) {
         val viewModel = ConversationAddMembersViewModel(
             courseId = course.id!!,
             conversationId = conversation.id,

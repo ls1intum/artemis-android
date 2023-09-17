@@ -64,7 +64,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.OpenedConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.OpenedThread
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.display_modes.SinglePageConversationBody
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.StandalonePostId
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -269,7 +269,7 @@ internal fun CourseUiScreen(
                                         conversationId,
                                         OpenedThread(
                                             conversationId,
-                                            StandalonePostId.ServerSideId(postId)
+                                            de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.StandalonePostId.ServerSideId(postId)
                                         )
                                     )
 

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.FloatingActionButton
@@ -36,7 +35,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.common.ChannelIcons
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.courseNavGraphBuilderExtensions
 import kotlinx.coroutines.Deferred
@@ -184,7 +183,7 @@ internal fun BrowseChannelsScreen(
 }
 
 @Composable
-private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
+private fun ChannelChatItem(channelChat: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat, onClick: () -> Unit) {
     ListItem(
         modifier = Modifier
             .fillMaxWidth()

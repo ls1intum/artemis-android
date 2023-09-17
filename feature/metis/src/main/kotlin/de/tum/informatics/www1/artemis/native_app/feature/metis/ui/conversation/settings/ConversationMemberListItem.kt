@@ -17,21 +17,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.ConversationUser
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.hasModerationRights
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.hasModerationRights
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.humanReadableName
 
 @Composable
 internal fun ConversationMemberListItem(
     modifier: Modifier,
-    member: ConversationUser,
+    member: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser,
     clientUsername: String,
-    conversation: Conversation,
-    onRequestKickMember: (ConversationUser) -> Unit,
-    onRequestGrantModerationPermission: (ConversationUser) -> Unit,
-    onRequestRevokeModerationPermission: (ConversationUser) -> Unit
+    conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation,
+    onRequestKickMember: (de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser) -> Unit,
+    onRequestGrantModerationPermission: (de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser) -> Unit,
+    onRequestRevokeModerationPermission: (de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser) -> Unit
 ) {
     ListItem(
         modifier = modifier,
@@ -81,7 +81,7 @@ internal fun ConversationMemberListItem(
                         )
                     }
 
-                    if (conversation is ChannelChat) {
+                    if (conversation is de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat) {
                         IconButton(
                             onClick = {
                                 if (member.isChannelModerator) {

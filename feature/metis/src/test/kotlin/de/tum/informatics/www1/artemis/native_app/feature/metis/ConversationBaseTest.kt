@@ -12,8 +12,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAcc
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.OneToOneChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.MetisDatabaseProviderMock
 import org.junit.Before
 import org.junit.Rule
@@ -31,7 +31,7 @@ abstract class ConversationBaseTest : BaseComposeTest() {
 
         modules(coreTestModules)
         modules(loginModule, communicationModule, testLoginModule, module {
-            single<MetisDatabaseProvider> {
+            single<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider> {
                 MetisDatabaseProviderMock(
                     context
                 )
@@ -44,7 +44,7 @@ abstract class ConversationBaseTest : BaseComposeTest() {
     protected lateinit var course: Course
     protected lateinit var exercise: TextExercise
 
-    protected val conversationService: ConversationService get() = get()
+    protected val conversationService: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService get() = get()
 
     @Before
     open fun setup() {
@@ -57,7 +57,7 @@ abstract class ConversationBaseTest : BaseComposeTest() {
         }
     }
 
-    protected suspend fun createPersonalConversation(): OneToOneChat =
+    protected suspend fun createPersonalConversation(): de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat =
         conversationService.createOneToOneConversation(
             course.id!!,
             user2Username,

@@ -21,10 +21,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Displa
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.OneToOneChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.getConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.CreatePersonalConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.CreatePersonalConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.create_personal_conversation.TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON
@@ -77,7 +77,7 @@ class CreateConversationE2eTest : ConversationBaseTest() {
             listOf(User(username = user2Username))
         )
 
-        assertIs<OneToOneChat>(createdConversation, "Created conversation is not a OneToOneChat")
+        assertIs<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat>(createdConversation, "Created conversation is not a OneToOneChat")
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
@@ -89,10 +89,10 @@ class CreateConversationE2eTest : ConversationBaseTest() {
             )
         )
 
-        assertIs<GroupChat>(createdConversation, "Created conversation is not a group conversation")
+        assertIs<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat>(createdConversation, "Created conversation is not a group conversation")
     }
 
-    private fun createConversationTestImpl(recipients: List<User>): Conversation {
+    private fun createConversationTestImpl(recipients: List<User>): de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation {
         var createdConversationId: Long? = null
 
         val viewModel = setupUiAndViewModel(

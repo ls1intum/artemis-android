@@ -8,13 +8,13 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.MetisModificationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.DisplayPriority
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.MetisService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.reply.TEST_TAG_REPLY_TEXT_FIELD
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.TEST_TAG_REPLY_TEXT_FIELD
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.Clock
@@ -29,7 +29,7 @@ abstract class ConversationMessagesBaseTest : ConversationBaseTest() {
     protected val replyTextFieldMatcher =
         hasAnyAncestor(hasTestTag(TEST_TAG_REPLY_TEXT_FIELD)) and hasSetTextAction()
 
-    protected lateinit var conversation: Conversation
+    protected lateinit var conversation: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
     protected lateinit var metisContext: MetisContext
 
     protected val metisService: MetisService get() = get()
@@ -52,7 +52,7 @@ abstract class ConversationMessagesBaseTest : ConversationBaseTest() {
         }
     }
 
-    protected fun postDefaultMessage(additionalSetup: suspend (StandalonePost) -> Unit = {}): StandalonePost {
+    protected fun postDefaultMessage(additionalSetup: suspend (de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost) -> Unit = {}): de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost {
         return runBlockingWithTestTimeout {
             metisModificationService.createPost(
                 context = metisContext,
@@ -64,15 +64,15 @@ abstract class ConversationMessagesBaseTest : ConversationBaseTest() {
         }
     }
 
-    protected fun createPost(content: String): StandalonePost {
-        return StandalonePost(
+    protected fun createPost(content: String): de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost {
+        return de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost(
             id = null,
             title = null,
             tags = null,
             content = content,
             conversation = conversation,
             creationDate = Clock.System.now(),
-            displayPriority = DisplayPriority.NONE
+            displayPriority = de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority.NONE
         )
     }
 }
