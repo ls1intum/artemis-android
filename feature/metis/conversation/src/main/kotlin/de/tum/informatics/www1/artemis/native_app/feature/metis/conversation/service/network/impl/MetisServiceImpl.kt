@@ -5,9 +5,9 @@ import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisPostDTO
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostDTO
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.RESOURCE_PATH_SEGMENTS

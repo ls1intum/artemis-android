@@ -41,8 +41,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisOutdatedBanner
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.ReportVisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisiblePostList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.Post
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
 import kotlinx.datetime.LocalDate

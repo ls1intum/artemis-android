@@ -1,6 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target
 
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -23,5 +23,5 @@ class CommunicationPostTarget(
         const val MESSAGE_NEW_REPLY = "new-reply"
     }
 
-    override val metisContext: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext.Conversation(courseId, conversationId)
+    override val metisContext: MetisContext = MetisContext.Conversation(courseId, conversationId)
 }

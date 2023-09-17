@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation
 
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableTitle
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -24,4 +25,6 @@ data class OneToOneChat(
 
     override fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation =
         copy(unreadMessagesCount = unreadMessagesCount)
+
+    override fun filterPredicate(query: String): Boolean = query in humanReadableTitle
 }

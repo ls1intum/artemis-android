@@ -1,9 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network
 
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisPostAction
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisPostDTO
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostAction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostDTO
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -23,7 +23,7 @@ import kotlin.time.Duration.Companion.seconds
  * Manages metis updates across the application.
  * Use this service to get access to the live metis updates and to apply changes sent by the server to the database.
  */
-class MetisContextManager(
+internal class MetisContextManager(
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService
 ) {

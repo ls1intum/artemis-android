@@ -12,11 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationManager
@@ -62,7 +58,7 @@ internal class ReplyWorker(
             ) ?: return Result.failure()
         )
 
-        val (metisContext: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext, postId: Long) = pushCommunicationDatabaseProvider.database.withTransaction {
+        val (metisContext: MetisContext, postId: Long) = pushCommunicationDatabaseProvider.database.withTransaction {
             val communication =
                 pushCommunicationDatabaseProvider.pushCommunicationDao.getCommunication(
                     parentId,
@@ -88,7 +84,7 @@ internal class ReplyWorker(
                 val serverUrl = serverConfigurationService.serverUrl.first()
 
                 val conversation = when (metisContext) {
-                    is de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext.Conversation -> conversationService
+                    is MetisContext.Conversation -> conversationService
                         .getConversation(
                             metisContext.courseId,
                             metisContext.conversationId,

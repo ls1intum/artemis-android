@@ -20,6 +20,7 @@ dependencies {
 
     api(project(":feature:metis:shared"))
     api(project(":feature:metis:conversation"))
+    api(project(":feature:metis:manage-conversations"))
 
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.paging.runtime)

@@ -27,15 +27,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-
-internal const val ConversationDetailsRoute = "course/{courseId}/conversations/{conversationId}"
 
 @Composable
 fun ConversationScreen(

@@ -26,7 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisOutdatedBanner
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -127,7 +127,7 @@ fun NavGraphBuilder.standalonePostScreen(onNavigateUp: () -> Unit) {
  * Display the post and its replied. If metis may be outdated, a banner will be displayed to the user.
  */
 @Composable
-internal fun MetisStandalonePostScreen(
+fun MetisStandalonePostScreen(
     modifier: Modifier,
     standalonePostId: StandalonePostId,
     metisContext: MetisContext,

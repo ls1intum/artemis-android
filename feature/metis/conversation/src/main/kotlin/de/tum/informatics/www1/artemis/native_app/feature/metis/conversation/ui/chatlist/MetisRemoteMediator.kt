@@ -11,7 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.Post
 
 @OptIn(ExperimentalPagingApi::class)
-class MetisRemoteMediator(
+internal class MetisRemoteMediator(
     private val context: StandalonePostsContext,
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,

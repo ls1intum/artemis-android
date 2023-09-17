@@ -4,7 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.RESOURCE_PATH_SEGMENTS
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost

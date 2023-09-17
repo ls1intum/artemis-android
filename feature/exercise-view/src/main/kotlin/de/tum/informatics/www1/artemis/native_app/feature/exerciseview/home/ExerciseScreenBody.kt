@@ -29,7 +29,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.overview.ExerciseOverviewTab
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 
 // Ratio of metis content in contrast to the actual exercise content
 const val METIS_RATIO = 0.3f
@@ -41,7 +41,7 @@ internal fun ExerciseScreenBody(
     exerciseDataState: DataState<Exercise>,
     displayCommunicationOnSide: Boolean,
     navController: NavController,
-    metisContext: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext?,
+    metisContext: MetisContext?,
     serverUrl: String,
     authToken: String,
     actions: ExerciseActions,
@@ -153,7 +153,7 @@ internal fun ExerciseScreenBody(
 @Composable
 private fun BodyWithTabs(
     modifier: Modifier,
-    metisContext: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext?,
+    metisContext: MetisContext?,
     navController: NavController,
     exerciseOverviewTab: @Composable () -> Unit
 ) {

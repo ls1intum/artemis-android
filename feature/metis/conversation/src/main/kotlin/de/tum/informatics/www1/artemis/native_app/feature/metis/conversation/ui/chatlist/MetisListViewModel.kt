@@ -15,7 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure

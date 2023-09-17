@@ -9,10 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.TEST_TAG_REPLY_TEXT_FIELD
 import kotlinx.coroutines.runBlocking

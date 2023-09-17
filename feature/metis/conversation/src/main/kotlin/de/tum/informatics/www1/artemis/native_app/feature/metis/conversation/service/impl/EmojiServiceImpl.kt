@@ -23,7 +23,7 @@ import kotlinx.serialization.json.decodeFromStream
 /**
  * Loads the emojis from the generated file
  */
-class EmojiServiceImpl(context: Context) : EmojiService {
+internal class EmojiServiceImpl(context: Context) : EmojiService {
 
     @OptIn(ExperimentalSerializationApi::class, DelicateCoroutinesApi::class)
     private val input: Flow<Input> = flow<Input> {

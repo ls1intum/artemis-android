@@ -20,6 +20,7 @@ sealed class Conversation {
     abstract val typeAsString: String
 
     abstract fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation
+    abstract fun filterPredicate(query: String): Boolean
 }
 
 val Conversation.hasModerationRights: Boolean

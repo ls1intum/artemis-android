@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
@@ -29,7 +29,7 @@ import java.util.UUID
 /**
  * This implementation only displays live created posts, but ignores them when counting the posts for the next page request.
  */
-class MetisStorageServiceImpl(
+internal class MetisStorageServiceImpl(
     private val databaseProvider: MetisDatabaseProvider
 ) : MetisStorageService {
 

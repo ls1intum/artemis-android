@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage
 
 import androidx.paging.PagingSource
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
  * Permanently store metis communication entities. Also allows reading from the metis storage service.
  * This class does not perform any networking.
  */
-interface MetisStorageService {
+internal interface MetisStorageService {
 
     /**
      * Permanently store the given posts. If a post with an identical id already exists, the existing post is updated.

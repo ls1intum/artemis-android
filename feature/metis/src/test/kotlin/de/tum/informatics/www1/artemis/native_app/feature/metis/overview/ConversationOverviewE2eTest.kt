@@ -24,11 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Userna
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.content.conversation.ConversationCollections
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.conversation.overview.ConversationOverviewViewModel
@@ -269,7 +265,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         originalTag: String,
         newTag: String,
         textToClick: String,
-        checkExists: ConversationCollections.() -> Boolean,
+        checkExists: de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.() -> Boolean,
         doInitially: (ConversationOverviewViewModel) -> Unit = {},
         doAfterAvailable: (ConversationOverviewViewModel) -> Unit = {}
     ) {

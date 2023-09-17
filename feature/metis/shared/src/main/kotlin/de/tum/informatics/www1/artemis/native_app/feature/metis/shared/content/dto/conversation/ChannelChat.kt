@@ -33,4 +33,6 @@ data class ChannelChat(
 
     override fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation =
         copy(unreadMessagesCount = unreadMessagesCount)
+
+    override fun filterPredicate(query: String): Boolean = query in name
 }

@@ -2,9 +2,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisPostDTO
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostDTO
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost

@@ -16,13 +16,13 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisPostAction
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.dto.ConversationWebsocketDto
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostAction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ConversationWebsocketDto
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.subscribeToConversationUpdates
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToConversationUpdates
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
@@ -59,7 +59,7 @@ import kotlin.coroutines.CoroutineContext
  * Common viewModel for metis viewModels that display live metis content.
  * Live metis content is content that is being permanently updated by websockets.
  */
-abstract class MetisContentViewModel(
+internal abstract class MetisContentViewModel(
     initialMetisContext: MetisContext,
     private val websocketProvider: WebsocketProvider,
     private val metisModificationService: MetisModificationService,

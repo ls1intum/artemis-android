@@ -1,6 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target
 
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -11,7 +11,7 @@ data class CoursePostTarget(
     @SerialName("course")
     val courseId: Long
 ) : MetisTarget {
-    override val metisContext: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.content.MetisContext.Course(
+    override val metisContext: MetisContext = MetisContext.Course(
         courseId
     )
 }

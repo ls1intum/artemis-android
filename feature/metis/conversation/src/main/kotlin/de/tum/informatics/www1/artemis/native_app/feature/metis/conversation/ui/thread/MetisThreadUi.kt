@@ -41,8 +41,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.ReportVisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.visiblemetiscontextreporter.VisibleStandalonePostDetails
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostDb
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.Post
