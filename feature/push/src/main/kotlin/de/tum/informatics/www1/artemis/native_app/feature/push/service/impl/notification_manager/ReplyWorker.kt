@@ -12,12 +12,8 @@ import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.MetisModificationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.dto.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.ConversationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.network.getConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
@@ -36,13 +32,13 @@ import kotlinx.datetime.Clock
 internal class ReplyWorker(
     appContext: Context,
     params: WorkerParameters,
-    private val metisModificationService: MetisModificationService,
+    private val metisModificationService: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val pushCommunicationDatabaseProvider: PushCommunicationDatabaseProvider,
     private val communicationNotificationManager: CommunicationNotificationManager,
     private val accountDataService: AccountDataService,
-    private val conversationService: ConversationService
+    private val conversationService: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 ) :
     CoroutineWorker(appContext, params) {
 
@@ -103,9 +99,9 @@ internal class ReplyWorker(
 
                 metisModificationService.createAnswerPost(
                     metisContext,
-                    AnswerPost(
+                    de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost(
                         content = replyContent,
-                        post = StandalonePost(
+                        post = de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost(
                             id = postId,
                             conversation = conversation
                         ),

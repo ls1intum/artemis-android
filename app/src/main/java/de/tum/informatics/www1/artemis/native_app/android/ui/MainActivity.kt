@@ -51,13 +51,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.lectureview.navigateTo
 import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATION
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.view_post.standalonePostScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.ProvideLocalVisibleMetisContextManager
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextManager
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleMetisContextReporter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.visible_metis_context_reporter.VisibleStandalonePostDetails
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.standalonePostScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ProvideLocalVisibleMetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextReporter
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
@@ -79,7 +79,8 @@ import org.koin.android.ext.android.get
  * Main and only activity used in the android app.
  * Navigation is handled by decompose and jetpack compose.
  */
-class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
+class MainActivity : AppCompatActivity(),
+    VisibleMetisContextReporter {
 
     private val serverConfigurationService: ServerConfigurationService = get()
     private val accountService: AccountService = get()
@@ -101,7 +102,8 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
             }
         }
 
-        val visibleMetisContextManager = object : VisibleMetisContextManager {
+        val visibleMetisContextManager = object :
+            VisibleMetisContextManager {
             override fun registerMetisContext(metisContext: VisibleMetisContext) {
                 visibleMetisContexts.value = visibleMetisContexts.value + metisContext
 
@@ -132,7 +134,9 @@ class MainActivity : AppCompatActivity(), VisibleMetisContextReporter {
 
         setContent {
             AppTheme {
-                ProvideLocalVisibleMetisContextManager(visibleMetisContextManager = visibleMetisContextManager) {
+                ProvideLocalVisibleMetisContextManager(
+                    visibleMetisContextManager = visibleMetisContextManager
+                ) {
                     val navController = rememberNavController()
 
                     val navigateToDeepLinkLogin = {

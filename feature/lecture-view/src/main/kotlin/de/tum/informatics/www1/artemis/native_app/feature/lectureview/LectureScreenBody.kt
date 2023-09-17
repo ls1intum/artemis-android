@@ -28,7 +28,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletio
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import kotlinx.coroutines.Deferred
 
 @Suppress("UNUSED_PARAMETER")

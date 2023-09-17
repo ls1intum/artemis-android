@@ -49,15 +49,6 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 add("implementation", project(":core:common"))
                 add("implementation", project(":core:websocket"))
 
-//                add("testImplementation", kotlin("test"))
-//                add("testImplementation", project(":core:testing"))
-//                add("androidTestImplementation", kotlin("test"))
-//                add("androidTestImplementation", project(":core:testing"))
-
-//                add("implementation", libs.findLibrary("coil.kt").get())
-//                add("implementation", libs.findLibrary("coil.kt.compose").get())
-
-//                add("implementation", libs.findLibrary("androidx.lifecycle.runtimeCompose").get())
                 add("implementation", libs.findLibrary("androidx.lifecycle.viewModelCompose").get())
 
                 add("implementation", libs.findLibrary("kotlinx.coroutines.android").get())

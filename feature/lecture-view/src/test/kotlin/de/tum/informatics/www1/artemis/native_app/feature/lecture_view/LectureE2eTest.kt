@@ -68,6 +68,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import de.tum.informatics.www1.artemis.native_app.feature.lectureview.R
 
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)

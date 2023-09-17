@@ -29,7 +29,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.overview.ExerciseOverviewTab
-import de.tum.informatics.www1.artemis.native_app.feature.metis.model.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 
 // Ratio of metis content in contrast to the actual exercise content
 const val METIS_RATIO = 0.3f

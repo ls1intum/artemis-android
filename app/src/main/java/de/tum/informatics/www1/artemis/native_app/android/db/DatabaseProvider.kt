@@ -3,8 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.android.db
 import android.content.Context
 import androidx.room.Room
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.BaseDatabaseProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.MetisDatabaseProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.dao.MetisDao
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.MetisDao
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.PushCommunicationDao
 
@@ -21,7 +20,7 @@ internal class DatabaseProvider(context: Context) : BaseDatabaseProvider {
 }
 
 internal class MetisDatabaseProviderImpl(private val databaseProvider: DatabaseProvider) :
-    MetisDatabaseProvider, BaseDatabaseProvider by databaseProvider {
+    de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider, BaseDatabaseProvider by databaseProvider {
     override val metisDao: MetisDao
         get() = databaseProvider.database.metisDao()
     }
