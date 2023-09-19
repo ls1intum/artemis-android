@@ -15,7 +15,7 @@ services:
       - USER_2_DISPLAY_NAME=Test User2
       - USER_3_USERNAME=aa03aaa
       - SERVER_URL=http://artemis-app:8080
-      - DEFAULT_TIMEOUT=10000
+      - DEFAULT_TIMEOUT=30000
       - ADMIN_USERNAME=artemis_admin
       - ADMIN_PASSWORD=artemis_admin
       - robolectric.logging.enabled=true
