@@ -52,29 +52,27 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
     override fun setup() {
         super.setup()
 
-        channel = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                conversationService.createChannel(
-                    courseId = course.id!!,
-                    name = "test-channel",
-                    description = "",
-                    isPublic = true,
-                    isAnnouncement = true,
-                    authToken = accessToken,
-                    serverUrl = testServerUrl
-                )
-                    .orThrow("could not create group chat")
-                    .also { channelChat ->
-                        conversationService.registerMembers(
-                            courseId = course.id!!,
-                            conversation = channelChat,
-                            users = listOf(user2Username, user3Username),
-                            authToken = accessToken,
-                            serverUrl = testServerUrl
-                        )
-                            .orThrow("Could not register additional members")
-                    }
-            }
+        channel = runBlockingWithTestTimeout {
+            conversationService.createChannel(
+                courseId = course.id!!,
+                name = "test-channel",
+                description = "",
+                isPublic = true,
+                isAnnouncement = true,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            )
+                .orThrow("could not create group chat")
+                .also { channelChat ->
+                    conversationService.registerMembers(
+                        courseId = course.id!!,
+                        conversation = channelChat,
+                        users = listOf(user2Username, user3Username),
+                        authToken = accessToken,
+                        serverUrl = testServerUrl
+                    )
+                        .orThrow("Could not register additional members")
+                }
         }
     }
 

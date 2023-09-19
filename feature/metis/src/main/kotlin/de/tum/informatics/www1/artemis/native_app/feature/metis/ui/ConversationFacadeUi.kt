@@ -26,6 +26,28 @@ fun ConversationFacadeUi(
 ) {
     val codeOfConductViewModel: CodeOfConductViewModel = koinViewModel { parametersOf(courseId) }
 
+    ConversationFacadeUi(
+        modifier = modifier,
+        codeOfConductViewModel = codeOfConductViewModel,
+        codeOfConductAcceptedContent = {
+            SinglePageConversationBody(
+                modifier = Modifier.fillMaxSize(),
+                courseId = courseId,
+                initialConfiguration = initialConfiguration
+            )
+        }
+    )
+}
+
+/**
+ * Wrapper that either displays the code of conduct if it has not yet been accepted, or the [codeOfConductAcceptedContent] otherwise.
+ */
+@Composable
+internal fun ConversationFacadeUi(
+    modifier: Modifier,
+    codeOfConductViewModel: CodeOfConductViewModel,
+    codeOfConductAcceptedContent: @Composable () -> Unit
+) {
     val isCodeOfConductAcceptedDataState by codeOfConductViewModel.isCodeOfConductAccepted.collectAsState()
 
     CodeOfConductDataStateUi(
@@ -34,11 +56,7 @@ fun ConversationFacadeUi(
         onClickRetry = codeOfConductViewModel::requestReload
     ) { isCodeOfConductAccepted ->
         if (isCodeOfConductAccepted) {
-            SinglePageConversationBody(
-                modifier = Modifier.fillMaxSize(),
-                courseId = courseId,
-                initialConfiguration = initialConfiguration
-            )
+            codeOfConductAcceptedContent()
         } else {
             val codeOfConductDataState by codeOfConductViewModel.codeOfConduct.collectAsState()
             val responsibleUsersDataState by codeOfConductViewModel.responsibleUsers.collectAsState()
