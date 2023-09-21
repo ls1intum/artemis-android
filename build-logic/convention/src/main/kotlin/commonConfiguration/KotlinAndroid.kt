@@ -116,21 +116,6 @@ internal fun Project.configureReleaseTypeFlavors(
     commonExtension.apply {
         flavorDimensions += ProductFlavors.Dimensions.ReleaseType.Key
 
-//        buildTypes {
-//            getByName("release") {
-//                buildConfigField("boolean", ProductFlavors.BuildConfigFields.IsBeta, "false")
-//            }
-//
-//            getByName("debug") {
-//                buildConfigField("boolean", ProductFlavors.BuildConfigFields.IsBeta, "false")
-//            }
-//
-//            create("beta") {
-//                initWith(getByName("release"))
-//                buildConfigField("boolean", ProductFlavors.BuildConfigFields.IsBeta, "true")
-//            }
-//        }
-
         productFlavors {
             createFlavor(
                 ProductFlavors.Dimensions.ReleaseType.Key,
