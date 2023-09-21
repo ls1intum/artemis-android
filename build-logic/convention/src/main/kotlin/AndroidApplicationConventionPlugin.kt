@@ -1,6 +1,5 @@
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
-import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import commonConfiguration.configureJacoco
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -20,7 +19,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
-                configureInstanceSelectionFlavor(this)
+                configureInstanceSelectionFlavors(this)
                 defaultConfig.targetSdk = 33
             }
 

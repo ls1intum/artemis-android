@@ -92,6 +92,16 @@ android {
             versionNameSuffix =
                 "-" + ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum
         }
+
+        findByName(ProductFlavors.Dimensions.ReleaseType.Flavors.Beta)?.apply {
+            versionNameSuffix =
+                "-beta"
+        }
+
+        findByName(ProductFlavors.Dimensions.ReleaseType.Flavors.Production)?.apply {
+            versionNameSuffix =
+                "-prod"
+        }
     }
 }
 

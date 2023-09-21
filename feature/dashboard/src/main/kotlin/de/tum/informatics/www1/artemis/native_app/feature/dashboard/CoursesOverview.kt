@@ -1,20 +1,25 @@
 package de.tum.informatics.www1.artemis.native_app.feature.dashboard
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,13 +27,20 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,6 +61,7 @@ import androidx.navigation.compose.composable
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
+import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseHeaderViewMode
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseItemHeader
@@ -56,7 +69,10 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseEx
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseItemGrid
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.ExpandedCourseItemHeader
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.CoursePointsDecimalFormat
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.BetaHintService
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
+import org.koin.compose.koinInject
 import java.text.DecimalFormat
 
 const val DASHBOARD_DESTINATION = "dashboard"
@@ -96,6 +112,8 @@ internal fun CoursesOverview(
     onClickRegisterForCourse: () -> Unit,
     onViewCourse: (courseId: Long) -> Unit
 ) {
+    val betaHintService: BetaHintService = koinInject()
+
     val coursesDataState by viewModel.dashboard.collectAsState()
 
     //The course composable needs the serverUrl to build the correct url to fetch the course icon from.
@@ -109,11 +127,42 @@ internal fun CoursesOverview(
         topAppBarState
     )
 
+    val shouldDisplayBetaDialog by betaHintService.shouldShowBetaHint.collectAsState(initial = false)
+    var displayBetaDialog by rememberSaveable { mutableStateOf(false) }
+
+    // Trigger the dialog if service sets value to true
+    LaunchedEffect(shouldDisplayBetaDialog) {
+        if (shouldDisplayBetaDialog) displayBetaDialog = true
+    }
+
     Scaffold(
         modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(id = R.string.course_overview_title)) },
+                title = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            modifier = Modifier.weight(1f, fill = false),
+                            text = stringResource(id = R.string.course_overview_title),
+                            maxLines = 1
+                        )
+
+                        if (BuildConfig.isBeta) {
+                            Text(
+                                modifier = Modifier
+                                    .border(
+                                        1.dp,
+                                        color = MaterialTheme.colorScheme.outline,
+                                        shape = RoundedCornerShape(percent = 50)
+                                    )
+                                    .padding(horizontal = 8.dp),
+                                text = stringResource(id = R.string.dashboard_title_beta),
+                                color = MaterialTheme.colorScheme.outline,
+                                maxLines = 1
+                            )
+                        }
+                    }
+                },
                 actions = {
                     IconButton(onClick = viewModel::requestReloadDashboard) {
                         Icon(
@@ -166,6 +215,63 @@ internal fun CoursesOverview(
             }
         }
     }
+
+    if (displayBetaDialog) {
+        val scope = rememberCoroutineScope()
+
+        BetaHintDialog { dismissPermanently ->
+            if (dismissPermanently) {
+                scope.launch {
+                    betaHintService.dismissBetaHintPermanently()
+
+                    displayBetaDialog = false
+                }
+            } else {
+                displayBetaDialog = false
+            }
+        }
+    }
+}
+
+@Composable
+private fun BetaHintDialog(
+    dismiss: (dismissPermanently: Boolean) -> Unit
+) {
+    var isDismissPersistentlyChecked by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = { dismiss(false) },
+        title = { Text(text = stringResource(id = R.string.dashboard_dialog_beta_title)) },
+        text = {
+            Column(
+                modifier = Modifier,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(text = stringResource(id = R.string.dashboard_dialog_beta_message))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        modifier = Modifier,
+                        checked = isDismissPersistentlyChecked,
+                        onCheckedChange = { isDismissPersistentlyChecked = it }
+                    )
+
+                    Text(text = stringResource(id = R.string.dashboard_dialog_beta_do_not_show_again))
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { dismiss(isDismissPersistentlyChecked) }
+            ) {
+                Text(text = stringResource(id = R.string.dashboard_dialog_beta_positive))
+            }
+        }
+    )
 }
 
 /**
