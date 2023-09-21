@@ -33,7 +33,6 @@ private fun String.capitalize() = replaceFirstChar {
 internal fun Project.configureJacoco(
     androidComponentsExtension: AndroidComponentsExtension<*, *, *>,
 ) {
-    return
     configure<JacocoPluginExtension> {
         toolVersion = "0.8.10"
     }
