@@ -24,6 +24,7 @@ services:
       - -Dskip.debugVariants=true
       - -Dskip.flavor.unrestricted=true
       - -Dskip.flavor.beta=true
+      - --max-workers 4
     networks:
       - artemis
     volumes:
