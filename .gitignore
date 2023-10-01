@@ -7,9 +7,9 @@ captures
 .externalNativeBuild
 .cxx
 local.properties
-artemis-native-keystore.jks
+*.jks
 passwords
-private_key.pepk
+*.pepk
 keystore.properties
 *.aab
 *.apk
