@@ -23,7 +23,7 @@ services:
       - test
       - -Dskip.debugVariants=true
       - -Dskip.flavor.unrestricted=true
-      - -Dslip.flavor.beta=true
+      - -Dskip.flavor.beta=true
     networks:
       - artemis
     volumes:
