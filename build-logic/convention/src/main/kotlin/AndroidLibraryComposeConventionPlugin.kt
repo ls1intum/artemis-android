@@ -11,13 +11,6 @@ class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
 
             val extension = extensions.getByType<LibraryExtension>()
             configureCompose(extension)
-
-            extension.apply {
-                sourceSets.getByName("test") {
-                    java.srcDir("src/playStoreScreenshots/java")
-                    kotlin.srcDir("src/playStoreScreenshots/kotlin")
-                }
-            }
         }
     }
 }

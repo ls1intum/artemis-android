@@ -49,6 +49,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalCourseImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
@@ -176,39 +177,13 @@ private fun getCourseIconPainter(
     serverUrl: String,
     authorizationToken: String
 ): Painter {
-    val painter = if (course.courseIconPath != null) {
-        rememberAsyncImagePainter(
-            model = getCourseIconRequest(
-                serverUrl = serverUrl,
-                course = course,
-                authorizationToken = authorizationToken
-            )
+    return if (course.courseIconPath != null) {
+        LocalCourseImageProvider.current.rememberCourseImagePainter(
+            courseIconPath = course.courseIconPath.orEmpty(),
+            serverUrl = serverUrl,
+            authorizationToken = authorizationToken
         )
     } else rememberVectorPainter(image = Icons.Default.QuestionMark)
-    return painter
-}
-
-@Composable
-private fun getCourseIconRequest(
-    serverUrl: String,
-    course: Course,
-    authorizationToken: String
-): ImageRequest {
-    val courseIconUrl = remember {
-        URLBuilder(serverUrl)
-            .appendPathSegments(course.courseIconPath.orEmpty())
-            .buildString()
-    }
-
-    val context = LocalContext.current
-
-    //Authorization needed
-    return remember {
-        ImageRequest.Builder(context)
-            .addHeader(HttpHeaders.Cookie, "jwt=$authorizationToken")
-            .data(courseIconUrl)
-            .build()
-    }
 }
 
 @Composable
