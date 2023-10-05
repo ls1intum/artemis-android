@@ -2,6 +2,7 @@ plugins {
     id("artemis.android.library")
     kotlin("plugin.serialization")
     id("artemis.android.flavor.library.instanceSelection")
+    id("app.cash.paparazzi")
 }
 
 android {
@@ -27,4 +28,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.test.junit4)
 
     api(libs.koin.test.junit4)
+
+    implementation(libs.cashapp.paparazzi)
 }

@@ -19,6 +19,7 @@ plugins {
     alias(libs.plugins.github.benManes.versions) apply true
     alias(libs.plugins.kover) apply true
     alias(libs.plugins.google.ksp) apply false
+    alias(libs.plugins.cashapp.paparazzi) apply false
 }
 
 tasks.register("clean", Delete::class) {

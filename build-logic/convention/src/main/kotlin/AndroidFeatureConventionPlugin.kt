@@ -47,7 +47,9 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
 
                 add("testImplementation", project(":core:common-test"))
                 add("testImplementation", project(":core:data-test"))
+                add("testImplementation", project(":core:datastore-test"))
                 add("testImplementation", project(":core:core-test"))
+                add("testImplementation", project(":core:websocket-test"))
             }
         }
     }
