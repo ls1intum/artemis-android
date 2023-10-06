@@ -24,6 +24,7 @@ import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -54,6 +55,18 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
             .orThrow(ERROR_MESSAGE_COC)
 
         assertTrue(newIsCocAccepted, "Code of conduct is still not accepted.")
+    }
+
+    @Test(timeout = DefaultTestTimeoutMillis)
+    fun `test fetches correct responsible users`() = runTest(testDispatcher) {
+        val codeOfConductService: CodeOfConductService = CodeOfConductServiceImpl(get())
+
+        val responsibleUsers = codeOfConductService
+            .getResponsibleUsers(course.id!!, testServerUrl, accessToken)
+            .orThrow("Could not fetch responsible users")
+
+        // Expect Test User 1, 2 and 3
+        assertEquals(3, responsibleUsers.size, "Expected three responsible users, but got wrong amount")
     }
 
     @OptIn(ExperimentalTestApi::class)

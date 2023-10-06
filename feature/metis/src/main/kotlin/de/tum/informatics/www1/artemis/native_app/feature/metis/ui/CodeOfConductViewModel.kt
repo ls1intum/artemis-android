@@ -91,23 +91,9 @@ class CodeOfConductViewModel(
         serverConfigurationService.serverUrl,
         requestReload.onStart { emit(Unit) }
     ) { authToken, serverUrl, _ ->
-        // TODO: Fix
-        flowOf(
-            DataState.Success(
-                listOf(
-                    User(
-                        firstName = "John",
-                        lastName = "Appleseed",
-                        email = "john.appleseed@example.com"
-                    ),
-                    User(
-                        firstName = "Kate",
-                        lastName = "Bell",
-                        email = "kate.bell@example.com"
-                    ),
-                )
-            )
-        )
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            codeOfConductService.getResponsibleUsers(courseId, serverUrl, authToken)
+        }
     }
         // Delay until actually needed
         .stateIn(viewModelScope, SharingStarted.Lazily)
