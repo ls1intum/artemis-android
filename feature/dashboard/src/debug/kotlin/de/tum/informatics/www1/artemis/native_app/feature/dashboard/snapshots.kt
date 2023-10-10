@@ -19,13 +19,14 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExerci
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.CourseImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalCourseImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardService
 
 private const val IMAGE_MARS = "mars"
 private const val IMAGE_SATURN_5 = "saturn5"
 
-@Preview(widthDp = 500, heightDp = 900)
+@PlayStoreScreenshots
 @Composable
 fun `Dashboard - Exercise List`() {
     val viewModel = CourseOverviewViewModel(

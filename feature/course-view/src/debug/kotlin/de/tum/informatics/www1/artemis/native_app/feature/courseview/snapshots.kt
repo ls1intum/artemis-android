@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ModelingEx
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
+import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import de.tum.informatics.www1.artemis.native_app.core.websocket.test.LiveParticipationServiceStub
@@ -25,7 +26,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_o
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
-@Preview(widthDp = 500, heightDp = 900)
+@PlayStoreScreenshots
 @Composable
 fun `Course View - Exercise List`() {
     startKoin {

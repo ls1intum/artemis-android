@@ -10,6 +10,7 @@ import androidx.annotation.IdRes
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
@@ -89,18 +91,22 @@ fun MarkdownText(
         createMarkdownRender(context, imageLoader)
     }
 
-    val serverConfigurationService: ServerConfigurationService = koinInject()
-    val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
+    val transformedMarkdown by if (LocalInspectionMode.current) {
+        remember { derivedStateOf { markdown } }
+    } else {
+        val serverConfigurationService: ServerConfigurationService = koinInject()
+        val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
 
-    val transformedMarkdown by remember(markdown, serverUrl) {
-        derivedStateOf {
-            val strippedServerUrl =
-                if (serverUrl.endsWith("/")) serverUrl.substring(
-                    0,
-                    serverUrl.length - 1
-                ) else serverUrl
+        remember(markdown, serverUrl) {
+            derivedStateOf {
+                val strippedServerUrl =
+                    if (serverUrl.endsWith("/")) serverUrl.substring(
+                        0,
+                        serverUrl.length - 1
+                    ) else serverUrl
 
-            ArtemisMarkdownTransformer.transformMarkdown(markdown, strippedServerUrl)
+                ArtemisMarkdownTransformer.transformMarkdown(markdown, strippedServerUrl)
+            }
         }
     }
 
