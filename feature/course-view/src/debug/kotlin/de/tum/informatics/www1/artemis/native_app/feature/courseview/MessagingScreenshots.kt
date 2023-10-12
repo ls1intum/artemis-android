@@ -55,9 +55,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atTime
+import kotlinx.datetime.toInstant
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import java.lang.RuntimeException
+import kotlin.time.Duration.Companion.minutes
 
 private val sharedConversation = ChannelChat(
     id = 1L,
@@ -160,7 +166,7 @@ fun `Metis - Conversation Overview`() {
 
 @PlayStoreScreenshots
 @Composable
-fun `MetisConversationChannel`() {
+fun `Metis - Conversation Channel`() {
     val context = LocalContext.current
     val emojiService = remember { EmojiServiceImpl(context) }
 
@@ -170,26 +176,40 @@ fun `MetisConversationChannel`() {
         })
     }
 
+    val date = LocalDate(2023, 7, 29)
+    val firstMessageTime = date.atTime(13, 34).toInstant(TimeZone.UTC)
+
     val posts = listOf(
-        ChatListItem.PostChatListItem(
-            PostPojo(
-                clientPostId = "1",
-                serverPostId = 0L,
-                title = null,
-                content = "A post",
-                authorName = "test",
-                authorRole = UserRole.USER,
-                authorId = 0L,
-                creationDate = Clock.System.now(),
-                updatedDate = null,
-                resolved = false,
-                courseWideContext = null,
-                tags = emptyList(),
-                answers = emptyList(),
-                reactions = emptyList()
-            )
-        )
-    )
+        ChatListItem.DateDivider(date),
+        generateMessage(
+            name = "Sam",
+            text = "Hey, folks! What are the big advantages of solid chemical propellants in rockets?",
+            time = firstMessageTime,
+            id = "1",
+            authorId = 0L
+        ),
+        generateMessage(
+            name = "Mia",
+            text = "Hey, Sam! Solid propellants are known for their simplicity and reliability. They're easy to handle.",
+            time = firstMessageTime + 3.minutes,
+            id = "2",
+            authorId = 1L
+        ),
+        generateMessage(
+            name = "Ethan",
+            text = "That's right, Mia. They have a consistent burn rate and a good thrust-to-weight ratio, which makes them handy for various missions.",
+            time = firstMessageTime + 12.minutes,
+            id = "3",
+            authorId = 2L
+        ),
+        generateMessage(
+            name = "Sam",
+            text = " Thanks, Mia and Ethan! So, they're like the dependable workhorses of rocket propellants, huh?",
+            time = firstMessageTime + 15.minutes,
+            id = "4",
+            authorId = 0L
+        ),
+    ).reversed()
 
     ScreenshotFrame(title = "Send and receive messages directly from the app") {
         CourseUiScreen(
@@ -223,7 +243,10 @@ fun `MetisConversationChannel`() {
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(padding),
-                                posts = PostsDataState.Loaded.WithList(posts, PostsDataState.NotLoading),
+                                posts = PostsDataState.Loaded.WithList(
+                                    posts,
+                                    PostsDataState.NotLoading
+                                ),
                                 isDataOutdated = false,
                                 clientId = 0L,
                                 hasModerationRights = true,
@@ -245,4 +268,31 @@ fun `MetisConversationChannel`() {
             onReloadCourse = {}
         )
     }
+}
+
+private fun generateMessage(
+    name: String,
+    text: String,
+    time: Instant,
+    id: String,
+    authorId: Long
+): ChatListItem.PostChatListItem {
+    return ChatListItem.PostChatListItem(
+        PostPojo(
+            clientPostId = id,
+            serverPostId = 0L,
+            title = null,
+            content = text,
+            authorName = name,
+            authorRole = UserRole.USER,
+            authorId = authorId,
+            creationDate = time,
+            updatedDate = null,
+            resolved = false,
+            courseWideContext = null,
+            tags = emptyList(),
+            answers = emptyList(),
+            reactions = emptyList()
+        )
+    )
 }

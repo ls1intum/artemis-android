@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -21,13 +22,24 @@ import androidx.compose.ui.unit.dp
 fun ScreenshotFrame(title: String, content: @Composable () -> Unit) {
     ScreenshotTheme {
         Surface {
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xff89cff0),
+                                Color(0xFF6FC7F0)
+                            )
+                        )
+                    )
+            ) {
                 Text(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(16.dp)
                         .background(
-                            MaterialTheme.colorScheme.primaryContainer,
+                            Color.White,
                             RoundedCornerShape(25)
                         )
                         .padding(16.dp),

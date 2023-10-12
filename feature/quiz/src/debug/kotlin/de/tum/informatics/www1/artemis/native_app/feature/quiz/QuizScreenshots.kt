@@ -29,7 +29,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizParti
 
 @PlayStoreScreenshots
 @Composable
-private fun `QuizMultipleChoice`() {
+private fun `Quiz - Multiple Choice Question`() {
     val viewModel = QuizParticipationViewModel(
         courseId = 0L,
         exerciseId = 0L,

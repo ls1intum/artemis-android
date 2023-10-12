@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.date
 
+import android.icu.text.SimpleDateFormat
 import android.text.format.DateUtils
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -10,6 +11,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
+import java.util.Date
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -22,9 +26,11 @@ import kotlin.time.Duration.Companion.seconds
 fun getRelativeTime(
     to: Instant,
     clock: Clock = Clock.System,
-    formatSeconds: Boolean = false
+    formatSeconds: Boolean = false,
+    showDate: Boolean = true
 ): CharSequence {
-    val timeDifferenceBelowOneMinuteString = stringResource(id = R.string.time_difference_under_one_minute)
+    val timeDifferenceBelowOneMinuteString =
+        stringResource(id = R.string.time_difference_under_one_minute)
 
     val flow = remember(to, clock, timeDifferenceBelowOneMinuteString) {
         flow {
@@ -33,7 +39,12 @@ fun getRelativeTime(
 
                 val timeDifference = (now - to).absoluteValue
 
-                if (formatSeconds || timeDifference >= 1.minutes) {
+                if (timeDifference >= 1.days && !showDate) {
+                    emit(
+                        SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT)
+                            .format(Date.from(to.toJavaInstant()))
+                    )
+                } else if (formatSeconds || timeDifference >= 1.minutes) {
                     emit(
                         DateUtils.getRelativeTimeSpanString(
                             to.toEpochMilliseconds(),
