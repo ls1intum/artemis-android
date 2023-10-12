@@ -54,9 +54,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SinglePageCon
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-private const val TAB_EXERCISES = 0
-private const val TAB_LECTURES = 1
-private const val TAB_COMMUNICATION = 2
+internal const val TAB_EXERCISES = 0
+internal const val TAB_LECTURES = 1
+internal const val TAB_COMMUNICATION = 2
 
 internal const val DEFAULT_CONVERSATION_ID = -1L
 internal const val DEFAULT_POST_ID = -1L
@@ -188,12 +188,6 @@ internal fun CourseUiScreen(
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit
 ) {
-    val topAppBarState = rememberTopAppBarState()
-
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-        topAppBarState
-    )
-
     var selectedTabIndex by rememberSaveable(conversationId) {
         val initialTab = when {
             conversationId != DEFAULT_CONVERSATION_ID -> TAB_COMMUNICATION
@@ -203,6 +197,113 @@ internal fun CourseUiScreen(
         mutableIntStateOf(initialTab)
     }
 
+    CourseUiScreen(
+        modifier = modifier,
+        courseDataState = courseDataState,
+        selectedTabIndex = selectedTabIndex,
+        updateSelectedTabIndex = { selectedTabIndex = it },
+        exerciseTabContent = {
+            EmptyDataStateUi(dataState = weeklyExercisesDataState) { weeklyExercises ->
+                ExerciseListUi(
+                    modifier = Modifier.fillMaxSize(),
+                    weeklyExercises = weeklyExercises,
+                    onClickExercise = onNavigateToExercise,
+                    actions = BoundExerciseActions(
+                        onClickStartTextExercise = onClickStartTextExercise,
+                        onClickOpenQuiz = { exerciseId ->
+                            onParticipateInQuiz(exerciseId, false)
+                        },
+                        onClickPracticeQuiz = { exerciseId ->
+                            onParticipateInQuiz(exerciseId, true)
+                        },
+                        onClickStartQuiz = { exerciseId ->
+                            onParticipateInQuiz(exerciseId, false)
+                        },
+                        onClickOpenTextExercise = onNavigateToTextExerciseParticipation,
+                        onClickViewResult = onNavigateToExerciseResultView,
+                        onClickViewQuizResults = { exerciseId ->
+                            onClickViewQuizResults(
+                                courseId,
+                                exerciseId
+                            )
+                        }
+                    )
+                )
+            }
+        },
+        lectureTabContent = {
+            EmptyDataStateUi(dataState = weeklyLecturesDataState) { weeklyLectures ->
+                LectureListUi(
+                    modifier = Modifier.fillMaxSize(),
+                    lectures = weeklyLectures,
+                    onClickLecture = { onNavigateToLecture(it.id ?: 0L) }
+                )
+            }
+        },
+        communicationTabContent = { course ->
+            val metisModifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 8.dp)
+
+            if (course.courseInformationSharingConfiguration.supportsMessaging) {
+                val initialConfiguration = remember(conversationId, postId) {
+                    when {
+                        conversationId != DEFAULT_CONVERSATION_ID && postId != DEFAULT_POST_ID -> OpenedConversation(
+                            conversationId,
+                            OpenedThread(
+                                conversationId,
+                                StandalonePostId.ServerSideId(postId)
+                            )
+                        )
+
+                        conversationId != DEFAULT_CONVERSATION_ID -> OpenedConversation(
+                            conversationId,
+                            null
+                        )
+
+                        else -> NothingOpened
+                    }
+                }
+
+                SinglePageConversationBody(
+                    modifier = metisModifier,
+                    courseId = courseId,
+                    initialConfiguration = initialConfiguration
+                )
+            } else {
+                Box(modifier = metisModifier) {
+                    Text(
+                        modifier = Modifier.align(Alignment.Center),
+                        text = stringResource(id = R.string.course_ui_communication_disabled),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+        },
+        onNavigateBack = onNavigateBack,
+        onReloadCourse = onReloadCourse
+    )
+}
+
+@Composable
+internal fun CourseUiScreen(
+    modifier: Modifier,
+    courseDataState: DataState<Course>,
+    selectedTabIndex: Int,
+    updateSelectedTabIndex: (Int) -> Unit,
+    exerciseTabContent: @Composable () -> Unit,
+    lectureTabContent: @Composable () -> Unit,
+    communicationTabContent: @Composable (Course) -> Unit,
+    onNavigateBack: () -> Unit,
+    onReloadCourse: () -> Unit
+) {
+    val topAppBarState = rememberTopAppBarState()
+
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
+        topAppBarState
+    )
+
     Scaffold(
         modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
         topBar = {
@@ -211,7 +312,7 @@ internal fun CourseUiScreen(
                 onNavigateBack = onNavigateBack,
                 scrollBehavior = scrollBehavior,
                 selectedTabIndex = selectedTabIndex,
-                changeTab = { selectedTabIndex = it },
+                changeTab = updateSelectedTabIndex,
                 onReloadCourse = onReloadCourse
             )
         }
@@ -242,87 +343,11 @@ internal fun CourseUiScreen(
                 label = "Switch Course Tab"
             ) { tabIndex ->
                 when (tabIndex) {
-                    TAB_EXERCISES -> {
-                        EmptyDataStateUi(dataState = weeklyExercisesDataState) { weeklyExercises ->
-                            ExerciseListUi(
-                                modifier = Modifier.fillMaxSize(),
-                                weeklyExercises = weeklyExercises,
-                                onClickExercise = onNavigateToExercise,
-                                actions = BoundExerciseActions(
-                                    onClickStartTextExercise = onClickStartTextExercise,
-                                    onClickOpenQuiz = { exerciseId ->
-                                        onParticipateInQuiz(exerciseId, false)
-                                    },
-                                    onClickPracticeQuiz = { exerciseId ->
-                                        onParticipateInQuiz(exerciseId, true)
-                                    },
-                                    onClickStartQuiz = { exerciseId ->
-                                        onParticipateInQuiz(exerciseId, false)
-                                    },
-                                    onClickOpenTextExercise = onNavigateToTextExerciseParticipation,
-                                    onClickViewResult = onNavigateToExerciseResultView,
-                                    onClickViewQuizResults = { exerciseId ->
-                                        onClickViewQuizResults(
-                                            courseId,
-                                            exerciseId
-                                        )
-                                    }
-                                )
-                            )
-                        }
-                    }
+                    TAB_EXERCISES -> exerciseTabContent()
 
-                    TAB_LECTURES -> {
-                        EmptyDataStateUi(dataState = weeklyLecturesDataState) { weeklyLectures ->
-                            LectureListUi(
-                                modifier = Modifier.fillMaxSize(),
-                                lectures = weeklyLectures,
-                                onClickLecture = { onNavigateToLecture(it.id ?: 0L) }
-                            )
-                        }
-                    }
+                    TAB_LECTURES -> lectureTabContent()
 
-                    TAB_COMMUNICATION -> {
-                        val metisModifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp)
-
-                        if (course.courseInformationSharingConfiguration.supportsMessaging) {
-                            val initialConfiguration = remember(conversationId, postId) {
-                                when {
-                                    conversationId != DEFAULT_CONVERSATION_ID && postId != DEFAULT_POST_ID -> OpenedConversation(
-                                        conversationId,
-                                        OpenedThread(
-                                            conversationId,
-                                            StandalonePostId.ServerSideId(postId)
-                                        )
-                                    )
-
-                                    conversationId != DEFAULT_CONVERSATION_ID -> OpenedConversation(
-                                        conversationId,
-                                        null
-                                    )
-
-                                    else -> NothingOpened
-                                }
-                            }
-
-                            SinglePageConversationBody(
-                                modifier = metisModifier,
-                                courseId = courseId,
-                                initialConfiguration = initialConfiguration
-                            )
-                        } else {
-                            Box(modifier = metisModifier) {
-                                Text(
-                                    modifier = Modifier.align(Alignment.Center),
-                                    text = stringResource(id = R.string.course_ui_communication_disabled),
-                                    textAlign = TextAlign.Center,
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                            }
-                        }
-                    }
+                    TAB_COMMUNICATION -> communicationTabContent(course)
                 }
             }
         }

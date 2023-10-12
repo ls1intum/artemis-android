@@ -26,9 +26,7 @@ internal data class EmojiProvider(
  * You cannot use the communication emojis outside of children of this composable.
  */
 @Composable
-fun ProvideEmojis(content: @Composable () -> Unit) {
-    val emojiService: EmojiService = koinInject()
-
+fun ProvideEmojis(emojiService: EmojiService = koinInject(), content: @Composable () -> Unit) {
     val unicodeForEmojiIdMap: MutableState<Map<String, String>?> = remember { mutableStateOf(null) }
     val unicodeToEmojiIdMap: MutableState<Map<String, String>?> = remember { mutableStateOf(null) }
 

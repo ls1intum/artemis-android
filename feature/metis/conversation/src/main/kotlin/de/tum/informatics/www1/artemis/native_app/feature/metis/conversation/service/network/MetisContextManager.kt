@@ -23,7 +23,7 @@ import kotlin.time.Duration.Companion.seconds
  * Manages metis updates across the application.
  * Use this service to get access to the live metis updates and to apply changes sent by the server to the database.
  */
-internal class MetisContextManager(
+class MetisContextManager(
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService
 ) {

@@ -59,8 +59,8 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration.Companion.seconds
 
-internal class ConversationOverviewViewModel(
-    application: Application,
+class ConversationOverviewViewModel(
+    currentActivityListener: CurrentActivityListener?,
     private val courseId: Long,
     private val conversationService: ConversationService,
     private val serverConfigurationService: ServerConfigurationService,
@@ -79,8 +79,32 @@ internal class ConversationOverviewViewModel(
     coroutineContext
 ) {
 
+    constructor(
+        application: Application,
+        courseId: Long,
+        conversationService: ConversationService,
+        serverConfigurationService: ServerConfigurationService,
+        accountService: AccountService,
+        conversationPreferenceService: ConversationPreferenceService,
+        websocketProvider: WebsocketProvider,
+        networkStatusProvider: NetworkStatusProvider,
+        accountDataService: AccountDataService,
+        coroutineContext: CoroutineContext = EmptyCoroutineContext
+    ) : this(
+        application as? CurrentActivityListener,
+        courseId,
+        conversationService,
+        serverConfigurationService,
+        accountService,
+        conversationPreferenceService,
+        websocketProvider,
+        networkStatusProvider,
+        accountDataService,
+        coroutineContext
+    )
+
     private val currentActivity: Flow<Activity?> =
-        (application as? CurrentActivityListener)?.currentActivity ?: flowOf(null)
+        currentActivityListener?.currentActivity ?: flowOf(null)
 
     /**
      * The metis contexts that are currently visible. Used to check if we have to increase the unread messages count on a conversation.
@@ -128,16 +152,17 @@ internal class ConversationOverviewViewModel(
     /**
      * Conversations of the server updates by the websocket.
      */
-    private val updatedConversations: StateFlow<DataState<List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation>>> = loadedConversations
-        .flatMapLatest { loadedConversationsDataState ->
-            when (loadedConversationsDataState) {
-                is Success -> getUpdateConversationsFlow(loadedConversationsDataState.data)
+    private val updatedConversations: StateFlow<DataState<List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation>>> =
+        loadedConversations
+            .flatMapLatest { loadedConversationsDataState ->
+                when (loadedConversationsDataState) {
+                    is Success -> getUpdateConversationsFlow(loadedConversationsDataState.data)
 
-                is DataState.Loading -> flowOf(DataState.Loading())
-                is DataState.Failure -> flowOf(DataState.Failure(loadedConversationsDataState.throwable))
+                    is DataState.Loading -> flowOf(DataState.Loading())
+                    is DataState.Failure -> flowOf(DataState.Failure(loadedConversationsDataState.throwable))
+                }
             }
-        }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.WhileSubscribed())
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.WhileSubscribed())
 
     val isConnected: StateFlow<Boolean> =
         websocketProvider
@@ -345,6 +370,11 @@ internal class ConversationOverviewViewModel(
             .filter { !it.isHidden && !it.isFavorite }
     }
 
-    private fun <T : de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation> List<T>.asCollection(isExpanded: Boolean) =
-        de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection(this, isExpanded)
+    private fun <T : de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation> List<T>.asCollection(
+        isExpanded: Boolean
+    ) =
+        de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection(
+            this,
+            isExpanded
+        )
 }

@@ -59,7 +59,7 @@ import kotlin.coroutines.CoroutineContext
  * Common viewModel for metis viewModels that display live metis content.
  * Live metis content is content that is being permanently updated by websockets.
  */
-internal abstract class MetisContentViewModel(
+abstract class MetisContentViewModel(
     initialMetisContext: MetisContext,
     private val websocketProvider: WebsocketProvider,
     private val metisModificationService: MetisModificationService,

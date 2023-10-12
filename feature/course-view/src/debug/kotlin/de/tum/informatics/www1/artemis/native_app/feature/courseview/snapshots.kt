@@ -39,25 +39,7 @@ fun `Course View - Exercise List`() {
 
     val courseViewModel = CourseViewModel(
         courseId = 0L,
-        courseService = CourseServiceFake(
-            Course(
-                title = "Advanced Aerospace Engineering \uD83D\uDE80",
-                exercises = listOf(
-                    ModelingExercise(
-                        id = 1,
-                        title = "Designing a rocket engine"
-                    ),
-                    TextExercise(
-                        id = 2,
-                        title = "Sending a rover to saturn \uD83E\uDE90"
-                    ),
-                    ProgrammingExercise(
-                        id = 3,
-                        title = "Heat control on atmospheric entry \uD83D\uDD25"
-                    )
-                )
-            )
-        ),
+        courseService = CourseServiceFake(ScreenshotCourse),
         liveParticipationService = LiveParticipationServiceStub(),
         serverConfigurationService = ServerConfigurationServiceStub(),
         accountService = AccountServiceStub(),

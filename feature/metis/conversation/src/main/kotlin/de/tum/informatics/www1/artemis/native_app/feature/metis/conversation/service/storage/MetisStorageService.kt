@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
  * Permanently store metis communication entities. Also allows reading from the metis storage service.
  * This class does not perform any networking.
  */
-internal interface MetisStorageService {
+interface MetisStorageService {
 
     /**
      * Permanently store the given posts. If a post with an identical id already exists, the existing post is updated.

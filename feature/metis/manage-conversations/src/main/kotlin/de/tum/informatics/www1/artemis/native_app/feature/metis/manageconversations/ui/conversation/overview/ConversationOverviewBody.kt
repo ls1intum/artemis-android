@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -48,14 +49,14 @@ fun ConversationOverviewBody(
 }
 
 @Composable
-internal fun ConversationOverviewBody(
+fun ConversationOverviewBody(
     modifier: Modifier,
     viewModel: ConversationOverviewViewModel,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit
 ) {
-    val conversationCollectionsDataState: DataState<de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections> by viewModel.conversations.collectAsState()
+    val conversationCollectionsDataState: DataState<ConversationCollections> by viewModel.conversations.collectAsState()
 
     val isConnected by viewModel.isConnected.collectAsState()
 
