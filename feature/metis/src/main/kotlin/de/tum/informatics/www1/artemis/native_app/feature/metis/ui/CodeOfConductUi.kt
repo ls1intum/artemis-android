@@ -17,14 +17,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -162,6 +166,35 @@ internal fun AcceptCodeOfConductUi(
     }
 }
 
+@Composable
+internal fun NoCodeOfConductUi(modifier: Modifier) {
+    Box(modifier = modifier) {
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                modifier = Modifier.size(48.dp),
+                imageVector = Icons.Default.ReportProblem,
+                contentDescription = null
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(id = R.string.code_of_conduct_feature_not_available_title),
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center
+            )
+
+            Text(
+                text = stringResource(id = R.string.code_of_conduct_feature_not_available_message),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
 private const val PreviewCodeOfConductText = """
 # Code of Conduct Template: Adapt to your demands
 
@@ -193,5 +226,13 @@ private fun AcceptCodeOfConductUiPreview() {
             ),
             onRequestAccept = ::CompletableDeferred
         )
+    }
+}
+
+@Composable
+@Preview
+private fun NoCodeOfConductUiPreview() {
+    Surface {
+        NoCodeOfConductUi(modifier = Modifier.fillMaxSize())
     }
 }

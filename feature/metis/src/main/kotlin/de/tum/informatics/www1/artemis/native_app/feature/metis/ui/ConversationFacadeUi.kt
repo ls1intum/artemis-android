@@ -49,29 +49,37 @@ internal fun ConversationFacadeUi(
     codeOfConductAcceptedContent: @Composable () -> Unit
 ) {
     val isCodeOfConductAcceptedDataState by codeOfConductViewModel.isCodeOfConductAccepted.collectAsState()
+    val codeOfConductDataState by codeOfConductViewModel.codeOfConduct.collectAsState()
 
     CodeOfConductDataStateUi(
         modifier = modifier,
-        dataState = isCodeOfConductAcceptedDataState,
+        dataState = isCodeOfConductAcceptedDataState join codeOfConductDataState,
         onClickRetry = codeOfConductViewModel::requestReload
-    ) { isCodeOfConductAccepted ->
-        if (isCodeOfConductAccepted) {
-            codeOfConductAcceptedContent()
-        } else {
-            val codeOfConductDataState by codeOfConductViewModel.codeOfConduct.collectAsState()
-            val responsibleUsersDataState by codeOfConductViewModel.responsibleUsers.collectAsState()
+    ) { (isCodeOfConductAccepted, codeOfConduct) ->
+        when {
+            codeOfConduct.isBlank() -> {
+                NoCodeOfConductUi(modifier = Modifier.fillMaxSize())
+            }
 
-            CodeOfConductDataStateUi(
-                modifier = Modifier.fillMaxSize(),
-                dataState = codeOfConductDataState join responsibleUsersDataState,
-                onClickRetry = codeOfConductViewModel::requestReload
-            ) { (codeOfConduct, responsibleUsers) ->
-                AcceptCodeOfConductUi(
+            isCodeOfConductAccepted -> {
+                codeOfConductAcceptedContent()
+            }
+
+            else -> {
+                val responsibleUsersDataState by codeOfConductViewModel.responsibleUsers.collectAsState()
+
+                CodeOfConductDataStateUi(
                     modifier = Modifier.fillMaxSize(),
-                    codeOfConductText = codeOfConduct,
-                    responsibleUsers = responsibleUsers,
-                    onRequestAccept = codeOfConductViewModel::acceptCodeOfConduct
-                )
+                    dataState = responsibleUsersDataState,
+                    onClickRetry = codeOfConductViewModel::requestReload
+                ) { responsibleUsers ->
+                    AcceptCodeOfConductUi(
+                        modifier = Modifier.fillMaxSize(),
+                        codeOfConductText = codeOfConduct,
+                        responsibleUsers = responsibleUsers,
+                        onRequestAccept = codeOfConductViewModel::acceptCodeOfConduct
+                    )
+                }
             }
         }
     }
