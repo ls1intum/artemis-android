@@ -117,7 +117,7 @@ private fun `Quiz - Multiple Choice Question`() {
         serverTimeService = ServerTimeServiceStub()
     )
 
-    ScreenshotFrame(title = "Participate in your quizzes") {
+    ScreenshotFrame(title = "Participate in your course quizzes") {
         QuizParticipationScreen(
             modifier = Modifier.fillMaxSize(),
             viewModel = viewModel,

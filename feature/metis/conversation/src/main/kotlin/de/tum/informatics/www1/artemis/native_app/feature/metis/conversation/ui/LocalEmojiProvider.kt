@@ -10,7 +10,9 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalInspectionMode
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import org.koin.compose.koinInject
 
 internal val LocalEmojiProvider: ProvidableCompositionLocal<EmojiProvider> =
@@ -26,7 +28,10 @@ internal data class EmojiProvider(
  * You cannot use the communication emojis outside of children of this composable.
  */
 @Composable
-fun ProvideEmojis(emojiService: EmojiService = koinInject(), content: @Composable () -> Unit) {
+fun ProvideEmojis(
+    emojiService: EmojiService = if (LocalInspectionMode.current) EmojiServiceStub else koinInject(),
+    content: @Composable () -> Unit
+) {
     val unicodeForEmojiIdMap: MutableState<Map<String, String>?> = remember { mutableStateOf(null) }
     val unicodeToEmojiIdMap: MutableState<Map<String, String>?> = remember { mutableStateOf(null) }
 

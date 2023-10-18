@@ -170,12 +170,6 @@ fun `Metis - Conversation Channel`() {
     val context = LocalContext.current
     val emojiService = remember { EmojiServiceImpl(context) }
 
-    startKoin {
-        modules(module {
-            single<EmojiService> { emojiService }
-        })
-    }
-
     val date = LocalDate(2023, 7, 29)
     val firstMessageTime = date.atTime(13, 34).toInstant(TimeZone.UTC)
 
