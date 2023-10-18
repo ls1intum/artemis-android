@@ -166,35 +166,6 @@ internal fun AcceptCodeOfConductUi(
     }
 }
 
-@Composable
-internal fun NoCodeOfConductUi(modifier: Modifier) {
-    Box(modifier = modifier) {
-        Column(
-            modifier = Modifier.align(Alignment.Center),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                modifier = Modifier.size(48.dp),
-                imageVector = Icons.Default.ReportProblem,
-                contentDescription = null
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = stringResource(id = R.string.code_of_conduct_feature_not_available_title),
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center
-            )
-
-            Text(
-                text = stringResource(id = R.string.code_of_conduct_feature_not_available_message),
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
 private const val PreviewCodeOfConductText = """
 # Code of Conduct Template: Adapt to your demands
 
@@ -226,13 +197,5 @@ private fun AcceptCodeOfConductUiPreview() {
             ),
             onRequestAccept = ::CompletableDeferred
         )
-    }
-}
-
-@Composable
-@Preview
-private fun NoCodeOfConductUiPreview() {
-    Surface {
-        NoCodeOfConductUi(modifier = Modifier.fillMaxSize())
     }
 }

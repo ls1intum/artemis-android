@@ -18,6 +18,25 @@ import io.ktor.http.isSuccess
 class CodeOfConductServiceImpl(
     private val ktorProvider: KtorProvider
 ) : CodeOfConductService {
+
+    override suspend fun getCodeOfConductTemplate(
+        courseId: Long,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<String> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.get(serverUrl) {
+                url {
+                    appendPathSegments("api", "files", "templates", "code-of-conduct")
+                }
+
+                cookieAuth(authToken)
+                contentType(ContentType.Text.Html)
+            }
+                .body()
+        }
+    }
+
     override suspend fun getIsCodeOfConductAccepted(
         courseId: Long,
         serverUrl: String,

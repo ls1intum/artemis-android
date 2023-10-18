@@ -6,9 +6,6 @@
 
     <string name="code_of_conduct_button_accept">Accept</string>
 
-    <string name="code_of_conduct_feature_not_available_title">No Code of Conduct</string>
-    <string name="code_of_conduct_feature_not_available_message">Messages are only available if a code of conduct is set up.</string>
-
     <string name="code_of_conduct_accept_failed_dialog_title">Could not accept code of conduct</string>
     <string name="code_of_conduct_accept_failed_dialog_message">Something went wrong while accepting the code of conduct. Please try again later.</string>
     <string name="code_of_conduct_accept_failed_dialog_positive">@android:string/ok</string>

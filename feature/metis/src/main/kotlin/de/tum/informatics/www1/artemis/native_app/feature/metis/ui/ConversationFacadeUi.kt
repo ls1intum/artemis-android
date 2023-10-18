@@ -57,10 +57,6 @@ internal fun ConversationFacadeUi(
         onClickRetry = codeOfConductViewModel::requestReload
     ) { (isCodeOfConductAccepted, codeOfConduct) ->
         when {
-            codeOfConduct.isBlank() -> {
-                NoCodeOfConductUi(modifier = Modifier.fillMaxSize())
-            }
-
             isCodeOfConductAccepted -> {
                 codeOfConductAcceptedContent()
             }
