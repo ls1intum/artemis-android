@@ -1,14 +1,34 @@
 package de.tum.informatics.www1.artemis.native_app.core.common.markdown
 
-object ArtemisMarkdownTransformer {
+abstract class ArtemisMarkdownTransformer {
 
-    private val customMarkdownPattern = "\\[(text|quiz|lecture|modeling|file-upload|programing)](.*)\\(((?:/|\\w|\\d)+)\\)\\[/\\1]".toRegex()
+    private val exerciseMarkdownPattern =
+        "\\[(text|quiz|lecture|modeling|file-upload|programing)](.*)\\(((?:/|\\w|\\d)+)\\)\\[/\\1]".toRegex()
+    private val userMarkdownPattern = "\\[user](.*?)\\((.*?)\\)\\[/user]".toRegex()
 
-    fun transformMarkdown(markdown: String, serverUrl: String): String {
-        return customMarkdownPattern.replace(markdown) { matchResult ->
+    fun transformMarkdown(markdown: String): String {
+        return exerciseMarkdownPattern.replace(markdown) { matchResult ->
             val title = matchResult.groups[2]?.value.orEmpty()
             val url = matchResult.groups[3]?.value.orEmpty()
-            "[$title]($serverUrl$url)"
+            transformExerciseMarkdown(title, url)
+        }.let {
+            userMarkdownPattern.replace(it) { matchResult ->
+                val fullName = matchResult.groups[1]?.value.orEmpty()
+                val userName = matchResult.groups[2]?.value.orEmpty()
+                transformUserMentionMarkdown(
+                    text = matchResult.groups[0]?.value.orEmpty(),
+                    fullName = fullName,
+                    userName = userName
+                )
+            }
         }
     }
+
+    protected abstract fun transformExerciseMarkdown(title: String, url: String): String
+
+    protected abstract fun transformUserMentionMarkdown(
+        text: String,
+        fullName: String,
+        userName: String
+    ): String
 }

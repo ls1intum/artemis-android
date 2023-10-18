@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import android.content.Context
 import android.text.method.LinkMovementMethod
+import android.text.style.StrikethroughSpan
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
@@ -30,7 +31,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
 import coil.ImageLoader
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
@@ -92,15 +93,19 @@ fun MarkdownText(
     val serverConfigurationService: ServerConfigurationService = koinInject()
     val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
 
-    val transformedMarkdown by remember(markdown, serverUrl) {
-        derivedStateOf {
-            val strippedServerUrl =
-                if (serverUrl.endsWith("/")) serverUrl.substring(
-                    0,
-                    serverUrl.length - 1
-                ) else serverUrl
+    val markdownTransformer = remember(serverUrl) {
+        val strippedServerUrl =
+            if (serverUrl.endsWith("/")) serverUrl.substring(
+                0,
+                serverUrl.length - 1
+            ) else serverUrl
 
-            ArtemisMarkdownTransformer.transformMarkdown(markdown, strippedServerUrl)
+        PostArtemisMarkdownTransformer(strippedServerUrl)
+    }
+
+    val transformedMarkdown by remember(markdown, markdownTransformer) {
+        derivedStateOf {
+            markdownTransformer.transformMarkdown(markdown)
         }
     }
 
@@ -192,6 +197,7 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?): Markwon {
         .usePlugin(StrikethroughPlugin.create())
         .usePlugin(TablePlugin.create(context))
         .usePlugin(LinkifyPlugin.create())
+        .usePlugin(UserTagPlugin())
         .apply {
             if (imageLoader != null) {
                 usePlugin(CoilImagesPlugin.create(context, imageLoader))
