@@ -5,5 +5,5 @@ class PostArtemisMarkdownTransformer(val serverUrl: String) : ArtemisMarkdownTra
         return "[$title]($serverUrl$url)"
     }
 
-    override fun transformUserMentionMarkdown(text: String, fullName: String, userName: String): String = text
+    override fun transformUserMentionMarkdown(text: String, fullName: String, userName: String): String = "|||@$fullName|||"
 }
