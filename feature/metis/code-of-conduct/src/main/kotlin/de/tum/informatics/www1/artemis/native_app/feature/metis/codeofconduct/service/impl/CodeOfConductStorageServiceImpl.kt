@@ -1,11 +1,11 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl
+package de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.impl
 
 import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.CodeOfConductStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.CodeOfConductStorageService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 

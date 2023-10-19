@@ -13,9 +13,9 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.CodeOfConductService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.impl.CodeOfConductServiceImpl
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.CodeOfConductViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.CodeOfConductService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.impl.CodeOfConductServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ConversationFacadeUi
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
 import kotlinx.coroutines.test.runTest
@@ -38,7 +38,10 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `test can accept code of conduct without ui`() = runTest(testDispatcher) {
-        val codeOfConductService: CodeOfConductService = CodeOfConductServiceImpl(get())
+        val codeOfConductService: de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.CodeOfConductService =
+            de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.impl.CodeOfConductServiceImpl(
+                get()
+            )
 
         val isCocAccepted = codeOfConductService
             .getIsCodeOfConductAccepted(course.id!!, testServerUrl, accessToken)
@@ -59,7 +62,10 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `test fetches correct responsible users`() = runTest(testDispatcher) {
-        val codeOfConductService: CodeOfConductService = CodeOfConductServiceImpl(get())
+        val codeOfConductService: de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.CodeOfConductService =
+            de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.impl.CodeOfConductServiceImpl(
+                get()
+            )
 
         val responsibleUsers = codeOfConductService
             .getResponsibleUsers(course.id!!, testServerUrl, accessToken)
@@ -72,15 +78,16 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
     @OptIn(ExperimentalTestApi::class)
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `test can accept code of conduct in ui`() {
-        val viewModel = CodeOfConductViewModel(
-            courseId = course.id!!,
-            codeOfConductService = get(),
-            networkStatusProvider = get(),
-            serverConfigurationService = get(),
-            accountService = get(),
-            courseService = get(),
-            coroutineContext = testDispatcher
-        )
+        val viewModel =
+            de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductViewModel(
+                courseId = course.id!!,
+                codeOfConductService = get(),
+                networkStatusProvider = get(),
+                serverConfigurationService = get(),
+                accountService = get(),
+                courseService = get(),
+                coroutineContext = testDispatcher
+            )
 
         val testTagAccepted = "accepted"
 

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
+package de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui
 
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -17,17 +17,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -50,14 +46,12 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletio
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadingAnimation
-import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
-import de.tum.informatics.www1.artemis.native_app.feature.metis.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
+import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.R
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 
 @Composable
-internal fun AcceptCodeOfConductUi(
+fun AcceptCodeOfConductUi(
     modifier: Modifier,
     codeOfConductText: String,
     responsibleUsers: List<User>,
@@ -70,16 +64,6 @@ internal fun AcceptCodeOfConductUi(
         acceptDeferred = null
 
         if (!successful) displayAcceptFailedDialog = true
-    }
-
-    // Simply display responsible users by appending corresponding markdown
-    val codeOfConductTextWithResponsibleUsers: String = remember(responsibleUsers) {
-        val responsibleUsersText =
-            responsibleUsers.joinToString(separator = "\n") { responsibleUser ->
-                "- ${responsibleUser.humanReadableName} (${responsibleUser.email})"
-            }
-
-        codeOfConductText + "\n" + responsibleUsersText
     }
 
     Box(modifier = modifier) {
@@ -103,9 +87,10 @@ internal fun AcceptCodeOfConductUi(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MarkdownText(
-                modifier = Modifier.fillMaxWidth(),
-                markdown = codeOfConductTextWithResponsibleUsers
+            CodeOfConductUi(
+                modifier = Modifier.fillMaxSize(),
+                codeOfConductText = codeOfConductText,
+                responsibleUsers = responsibleUsers
             )
 
             ButtonWithLoadingAnimation(

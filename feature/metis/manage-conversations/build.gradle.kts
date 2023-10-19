@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":core:device"))
 
     implementation(project(":feature:metis:shared"))
+    implementation(project(":feature:metis:code-of-conduct"))
 
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)

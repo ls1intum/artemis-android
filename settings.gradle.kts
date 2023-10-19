@@ -42,6 +42,7 @@ include(":feature:push")
 
 include(":feature:metis")
 include(":feature:metis:shared")
+include(":feature:metis:code-of-conduct")
 include(":feature:metis:conversation")
 include(":feature:metis:manage-conversations")
 include(":feature:metis-test")

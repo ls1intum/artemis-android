@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.service
+package de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service
 
 import kotlinx.coroutines.flow.Flow
 

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
+package de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,8 +14,8 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.CodeOfConductService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.service.CodeOfConductStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.CodeOfConductService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.CodeOfConductStorageService
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -37,7 +36,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  * CoC is blank, we instead fetch the template code of conduct. However, we need to store locally if we have
  * accepted the code of conduct, for which we use [CodeOfConductStorageService].
  */
-class CodeOfConductViewModel(
+internal class CodeOfConductViewModel(
     private val courseId: Long,
     private val codeOfConductService: CodeOfConductService,
     private val codeOfConductStorageService: CodeOfConductStorageService,
