@@ -128,6 +128,6 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version = "4.3.15" }
 google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.0.0" }
-github-benManes-versions = { id = "com.github.ben-manes.versions", version = "0.47.0" }
+github-benManes-versions = { id = "com.github.ben-manes.versions", version = "0.48.0" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 google-ksp = { id = "com.google.devtools.ksp", version = "1.9.10-1.0.13" }

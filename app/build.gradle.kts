@@ -24,7 +24,7 @@ plugins {
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
-    val versionName = "0.7.3"
+    val versionName = "0.8.0"
     val versionCode =
         if (!System.getenv("bamboo_buildNumber")
                 .isNullOrEmpty()
@@ -91,6 +91,16 @@ android {
         findByName(ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum)?.apply {
             versionNameSuffix =
                 "-" + ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum
+        }
+
+        findByName(ProductFlavors.Dimensions.ReleaseType.Flavors.Beta)?.apply {
+            versionNameSuffix =
+                "-beta"
+        }
+
+        findByName(ProductFlavors.Dimensions.ReleaseType.Flavors.Production)?.apply {
+            versionNameSuffix =
+                "-prod"
         }
     }
 }

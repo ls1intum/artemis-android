@@ -353,6 +353,7 @@ suspend fun KoinComponent.fileUpload(accessToken: String, byteArray: ByteArray):
                 byteArray,
                 headers = Headers.build {
                     set(HttpHeaders.ContentType, ContentType.Image.PNG.contentType)
+                    set(HttpHeaders.ContentDisposition, "filename=\"example.png\"")
                 }
             )
         }

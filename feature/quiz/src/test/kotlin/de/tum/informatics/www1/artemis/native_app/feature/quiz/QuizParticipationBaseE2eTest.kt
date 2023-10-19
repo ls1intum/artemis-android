@@ -186,68 +186,66 @@ internal abstract class QuizParticipationBaseE2eTest(quizType: QuizType.Workable
             )
         }
 
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                setupAndVerify(viewModel) {
-                    // Lambda to submit
+        runBlockingWithTestTimeout {
+            setupAndVerify(viewModel) {
+                // Lambda to submit
 
-                    composeTestRule.waitUntilExactlyOneExists(
-                        hasTestTag(TEST_TAG_WORK_ON_QUIZ_QUESTIONS_SCREEN),
+                composeTestRule.waitUntilExactlyOneExists(
+                    hasTestTag(TEST_TAG_WORK_ON_QUIZ_QUESTIONS_SCREEN),
+                    DefaultTimeoutMillis
+                )
+
+                composeTestRule
+                    .onNodeWithText(context.getString(R.string.quiz_participation_submit_button))
+                    .performClick()
+
+                composeTestRule
+                    .onNode(hasAnyAncestor(isDialog()) and hasText(context.getString(R.string.quiz_participation_submit_dialog_positive)))
+                    .performClick()
+
+                // Wait until loading is complete
+                composeTestRule
+                    .waitUntilDoesNotExist(
+                        hasTestTag(TEST_TAG_BUTTON_WITH_LOADING_ANIMATION_LOADING),
                         DefaultTimeoutMillis
                     )
 
-                    composeTestRule
-                        .onNodeWithText(context.getString(R.string.quiz_participation_submit_button))
-                        .performClick()
+                val result = runBlockingWithTestTimeout {
+                    when (quizType) {
+                        QuizType.Live -> {
+                            val participation = participationService
+                                .findParticipation(quiz.id, testServerUrl, accessToken)
+                                .orThrow("Could not load submitted participation")
 
-                    composeTestRule
-                        .onNode(hasAnyAncestor(isDialog()) and hasText(context.getString(R.string.quiz_participation_submit_dialog_positive)))
-                        .performClick()
-
-                    // Wait until loading is complete
-                    composeTestRule
-                        .waitUntilDoesNotExist(
-                            hasTestTag(TEST_TAG_BUTTON_WITH_LOADING_ANIMATION_LOADING),
-                            DefaultTimeoutMillis
-                        )
-
-                    val result = runBlockingWithTestTimeout {
-                        when (quizType) {
-                            QuizType.Live -> {
-                                val participation = participationService
-                                    .findParticipation(quiz.id, testServerUrl, accessToken)
-                                    .orThrow("Could not load submitted participation")
-
-                                val results =
-                                    assertNotNull(
-                                        participation.results,
-                                        "Results is null on participation"
-                                    )
-                                assertTrue(
-                                    results.isNotEmpty(),
-                                    "Results does not contain any element"
+                            val results =
+                                assertNotNull(
+                                    participation.results,
+                                    "Results is null on participation"
                                 )
-                                results.first()
-                            }
+                            assertTrue(
+                                results.isNotEmpty(),
+                                "Results does not contain any element"
+                            )
+                            results.first()
+                        }
 
-                            QuizType.Practice -> {
-                                viewModel.result.first()
-                            }
+                        QuizType.Practice -> {
+                            viewModel.result.first()
                         }
                     }
-
-                    assertNotNull(result, "Result is null")
-
-                    val submission: QuizSubmission =
-                        assertIs(
-                            result.submission,
-                            "Submission in result is not a QuizSubmission"
-                        )
-
-                    Logger.info("Loaded submitted submission: $submission")
-
-                    submission
                 }
+
+                assertNotNull(result, "Result is null")
+
+                val submission: QuizSubmission =
+                    assertIs(
+                        result.submission,
+                        "Submission in result is not a QuizSubmission"
+                    )
+
+                Logger.info("Loaded submitted submission: $submission")
+
+                submission
             }
         }
     }
