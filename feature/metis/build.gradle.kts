@@ -29,6 +29,4 @@ dependencies {
     kover(project(":feature:metis:shared"))
     kover(project(":feature:metis:conversation"))
     kover(project(":feature:metis:manage-conversations"))
-
-    testImplementation(project(":feature:metis-test"))
 }

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis
+package de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,9 +15,9 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.CodeOfConductService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.impl.CodeOfConductServiceImpl
-import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ConversationFacadeUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductFacadeUi
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
+import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductViewModel
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -38,8 +38,8 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `test can accept code of conduct without ui`() = runTest(testDispatcher) {
-        val codeOfConductService: de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.CodeOfConductService =
-            de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.impl.CodeOfConductServiceImpl(
+        val codeOfConductService: CodeOfConductService =
+            CodeOfConductServiceImpl(
                 get()
             )
 
@@ -62,8 +62,8 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `test fetches correct responsible users`() = runTest(testDispatcher) {
-        val codeOfConductService: de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.CodeOfConductService =
-            de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.impl.CodeOfConductServiceImpl(
+        val codeOfConductService: CodeOfConductService =
+            CodeOfConductServiceImpl(
                 get()
             )
 
@@ -72,15 +72,20 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
             .orThrow("Could not fetch responsible users")
 
         // Expect Test User 1, 2 and 3
-        assertEquals(3, responsibleUsers.size, "Expected three responsible users, but got wrong amount")
+        assertEquals(
+            3,
+            responsibleUsers.size,
+            "Expected three responsible users, but got wrong amount"
+        )
     }
 
     @OptIn(ExperimentalTestApi::class)
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `test can accept code of conduct in ui`() {
         val viewModel =
-            de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductViewModel(
+            CodeOfConductViewModel(
                 courseId = course.id!!,
+                codeOfConductStorageService = get(),
                 codeOfConductService = get(),
                 networkStatusProvider = get(),
                 serverConfigurationService = get(),
@@ -92,7 +97,7 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
         val testTagAccepted = "accepted"
 
         composeTestRule.setContent {
-            ConversationFacadeUi(
+            CodeOfConductFacadeUi(
                 modifier = Modifier.fillMaxSize(),
                 codeOfConductViewModel = viewModel,
                 codeOfConductAcceptedContent = {

@@ -20,6 +20,19 @@ fun CodeOfConductFacadeUi(
 ) {
     val codeOfConductViewModel: CodeOfConductViewModel = koinViewModel { parametersOf(courseId) }
 
+    CodeOfConductFacadeUi(
+        modifier = modifier,
+        codeOfConductViewModel = codeOfConductViewModel,
+        codeOfConductAcceptedContent = codeOfConductAcceptedContent
+    )
+}
+
+@Composable
+internal fun CodeOfConductFacadeUi(
+    modifier: Modifier,
+    codeOfConductViewModel: CodeOfConductViewModel,
+    codeOfConductAcceptedContent: @Composable () -> Unit
+) {
     val isCodeOfConductAcceptedDataState by codeOfConductViewModel.isCodeOfConductAccepted.collectAsState()
     val codeOfConductDataState by codeOfConductViewModel.codeOfConduct.collectAsState()
 

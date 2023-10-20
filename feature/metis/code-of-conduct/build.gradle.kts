@@ -13,4 +13,6 @@ dependencies {
 
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)
+
+    testImplementation(project(":feature:metis-test"))
 }
