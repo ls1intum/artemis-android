@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonPro
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.data.test.service.TrustAllCertsKtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
@@ -42,20 +43,18 @@ class SyncServerTimeE2eTest : KoinTest {
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
-    fun `sync server time`() {
+    fun `sync server time`() = runTest(timeout = DefaultTimeoutMillis.milliseconds) {
         val serverTimeService: ServerTimeService = koinRule.koin.get()
 
-        runTest {
-            val accessToken = performTestLogin()
+        val accessToken = performTestLogin()
 
-            val secondClock = async {
-                serverTimeService.getServerClock(authToken = accessToken, serverUrl = testServerUrl)
-                    .drop(3).first()
-            }
-
-            testScheduler.advanceTimeBy(5.seconds)
-
-            secondClock.await()
+        val secondClock = async {
+            serverTimeService.getServerClock(authToken = accessToken, serverUrl = testServerUrl)
+                .drop(3).first()
         }
+
+        testScheduler.advanceTimeBy(5.seconds)
+
+        secondClock.await()
     }
 }

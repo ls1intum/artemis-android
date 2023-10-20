@@ -9,7 +9,7 @@
 
 FROM thyrlian/android-sdk:9.1 as builder
 
-RUN sdkmanager "build-tools;34.0.0" "build-tools;30.0.3" "platforms;android-33" "platform-tools" "emulator"
+RUN sdkmanager "build-tools;34.0.0" "build-tools;30.0.3" "platforms;android-34" "platform-tools" "emulator"
 
 WORKDIR /app
 COPY gradlew gradlew

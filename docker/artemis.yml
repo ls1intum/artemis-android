@@ -8,6 +8,7 @@ services:
     # look in the docs for more information about how to build your Artemis code with Docker
     # https://docs.artemis.cit.tum.de/dev/setup/#
     image: ghcr.io/ls1intum/artemis:latest
+    pull_policy: always
     # system environments are the default way for custom configuration overrides in the containerized artemis setups
     # either add them in the environments or env_file section (alternative to application-local.yml)
     env_file:
