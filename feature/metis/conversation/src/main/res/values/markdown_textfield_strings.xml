@@ -2,4 +2,6 @@
 <resources>
     <string name="markdown_textfield_tab_text">Edit</string>
     <string name="markdown_textfield_tab_preview">Preview</string>
+
+    <string name="markdown_textfield_autocomplete_category_users">Users</string>
 </resources>

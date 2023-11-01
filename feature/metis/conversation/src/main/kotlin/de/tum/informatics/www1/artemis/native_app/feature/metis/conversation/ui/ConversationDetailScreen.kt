@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -30,6 +31,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextFi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisListViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import org.koin.androidx.compose.koinViewModel
@@ -127,14 +129,16 @@ fun ConversationScreen(
     ) { padding ->
         val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
-        MetisChatList(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            viewModel = viewModel,
-            listContentPadding = PaddingValues(),
-            onClickViewPost = onClickViewPost,
-            isReplyEnabled = isReplyEnabled
-        )
+        CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides viewModel) {
+            MetisChatList(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                viewModel = viewModel,
+                listContentPadding = PaddingValues(),
+                onClickViewPost = onClickViewPost,
+                isReplyEnabled = isReplyEnabled
+            )
+        }
     }
 }

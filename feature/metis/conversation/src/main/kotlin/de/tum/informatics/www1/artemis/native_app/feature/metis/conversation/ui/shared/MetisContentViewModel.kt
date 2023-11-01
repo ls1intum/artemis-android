@@ -16,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ConversationWebsocketDto
@@ -24,6 +25,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToConversationUpdates
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteCategory
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteHint
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -39,6 +43,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -66,8 +71,8 @@ internal abstract class MetisContentViewModel(
     private val metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
-    accountDataService: AccountDataService,
-    networkStatusProvider: NetworkStatusProvider,
+    private val accountDataService: AccountDataService,
+    private val networkStatusProvider: NetworkStatusProvider,
     private val conversationService: ConversationService,
     private val coroutineContext: CoroutineContext
 ) : MetisViewModel(
@@ -77,7 +82,7 @@ internal abstract class MetisContentViewModel(
     networkStatusProvider,
     websocketProvider,
     coroutineContext
-) {
+), ReplyAutoCompleteHintProvider {
 
     protected val metisContext = MutableStateFlow(initialMetisContext)
     val currentMetisContext: StateFlow<MetisContext> = metisContext
@@ -171,6 +176,8 @@ internal abstract class MetisContentViewModel(
             .onStart { emit(conversationDataState) }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+    override val legalTagChars: List<Char> = listOf('@')
 
     /**
      * Handles a reaction click. If the client has already reacted, it deletes the reaction.
@@ -319,6 +326,42 @@ internal abstract class MetisContentViewModel(
                 authToken = accountService.authToken.first()
             )
                 .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
+        }
+    }
+
+    override fun produceAutoCompleteHints(
+        tagChar: Char,
+        query: String
+    ): Flow<DataState<List<AutoCompleteCategory>>> = flatMapLatest(
+        metisContext,
+        accountService.authToken,
+        serverConfigurationService.serverUrl
+    ) { metisContext, authToken, serverUrl ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            conversationService
+                .searchForPotentialCommunicationParticipants(
+                    courseId = metisContext.courseId,
+                    query = query,
+                    includeStudents = true,
+                    includeTutors = true,
+                    includeInstructors = true,
+                    authToken = authToken,
+                    serverUrl = serverUrl
+                )
+                .bind { users ->
+                    AutoCompleteCategory(
+                        name = R.string.markdown_textfield_autocomplete_category_users,
+                        items = users.map {
+                            AutoCompleteHint(
+                                it.name.orEmpty(),
+                                replacementText = "[user]${it.name}(${it.username})[/user]",
+                                id = it.username.orEmpty()
+                            )
+                        }
+                    )
+                        .let(::listOf)
+                }
+
         }
     }
 

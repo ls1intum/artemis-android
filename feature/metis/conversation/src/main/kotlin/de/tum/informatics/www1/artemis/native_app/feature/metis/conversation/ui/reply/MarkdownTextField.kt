@@ -22,6 +22,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -32,13 +33,15 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 @Composable
 internal fun MarkdownTextField(
     modifier: Modifier,
-    text: String,
+    textFieldValue: TextFieldValue,
     focusRequester: FocusRequester = remember { FocusRequester() },
     sendButton: @Composable () -> Unit = {},
     topRightButton: @Composable RowScope.() -> Unit = {},
     onFocusLost: () -> Unit = {},
-    onTextChanged: (String) -> Unit
+    onTextChanged: (TextFieldValue) -> Unit
 ) {
+    val text = textFieldValue.text
+
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
     var hadFocus by remember { mutableStateOf(false) }
 
@@ -88,7 +91,7 @@ internal fun MarkdownTextField(
                                     hadFocus = false
                                 }
                             },
-                        value = text,
+                        value = textFieldValue,
                         onValueChange = onTextChanged
                     )
                 }

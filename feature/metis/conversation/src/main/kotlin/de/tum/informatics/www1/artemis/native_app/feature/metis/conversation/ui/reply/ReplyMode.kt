@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisModificationFailureDialog
@@ -14,17 +15,18 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import kotlinx.coroutines.Deferred
 
 internal sealed class ReplyMode(initialText: String) {
-    val currentText: MutableState<String> = mutableStateOf(initialText)
+    val currentText: MutableState<TextFieldValue> =
+        mutableStateOf(TextFieldValue(text = initialText))
 
-    fun onUpdateText(newText: String) {
-        currentText.value = newText
+    fun onUpdate(new: TextFieldValue) {
+        currentText.value = new
     }
 
     data class NewMessage(
         private val onCreateNewMessage: (String) -> Deferred<MetisModificationFailure?>,
     ) : ReplyMode("") {
         fun onCreateNewMessage(): Deferred<MetisModificationFailure?> =
-            onCreateNewMessage(currentText.value)
+            onCreateNewMessage(currentText.value.text)
     }
 
     data class EditMessage(
@@ -32,7 +34,7 @@ internal sealed class ReplyMode(initialText: String) {
         private val onEditMessage: (String) -> Deferred<MetisModificationFailure?>,
         val onCancelEditMessage: () -> Unit
     ) : ReplyMode(post.content.orEmpty()) {
-        fun onEditMessage(): Deferred<MetisModificationFailure?> = onEditMessage(currentText.value)
+        fun onEditMessage(): Deferred<MetisModificationFailure?> = onEditMessage(currentText.value.text)
     }
 }
 
