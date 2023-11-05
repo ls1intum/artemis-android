@@ -74,7 +74,8 @@ suspend fun KoinComponent.createCourse(
             studentGroupName = studentGroupName,
             teachingAssistantGroupName = teachingAssistantGroupName,
             editorGroupName = editorGroupName,
-            instructorGroupName = instructorGroupName
+            instructorGroupName = instructorGroupName,
+            courseInformationSharingMessagingCodeOfConduct = "Code of conduct…"
         )
         jsonProvider.applicationJsonConfiguration.encodeToString(course)
     }

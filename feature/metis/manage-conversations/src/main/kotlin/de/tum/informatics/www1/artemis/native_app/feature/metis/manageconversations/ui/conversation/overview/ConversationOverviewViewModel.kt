@@ -61,7 +61,7 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class ConversationOverviewViewModel(
     application: Application,
-    private val courseId: Long,
+    val courseId: Long,
     private val conversationService: ConversationService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
