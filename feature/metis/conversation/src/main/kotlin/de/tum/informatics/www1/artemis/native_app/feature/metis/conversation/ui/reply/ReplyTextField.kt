@@ -194,7 +194,7 @@ private fun CreateReplyUi(
             var textFieldWidth by remember { mutableIntStateOf(0) }
             var popupMaxHeight by remember { mutableIntStateOf(0) }
 
-            if (autoCompleteHints.orEmpty().isNotEmpty() && mayShowAutoCompletePopup) {
+            if (autoCompleteHints.orEmpty().flatMap { it.items }.isNotEmpty() && mayShowAutoCompletePopup) {
                 ReplyAutoCompletePopup(
                     autoCompleteCategories = autoCompleteHints.orEmpty(),
                     targetWidth = with(LocalDensity.current) { textFieldWidth.toDp() },
