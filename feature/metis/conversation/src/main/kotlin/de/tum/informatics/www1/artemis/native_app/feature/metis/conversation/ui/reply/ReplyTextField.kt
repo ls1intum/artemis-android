@@ -28,17 +28,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.getTextAfterSelection
 import androidx.compose.ui.text.input.getTextBeforeSelection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -155,6 +159,9 @@ private fun CreateReplyUi(
 
     val currentTextFieldValue by replyMode.currentText
 
+    var mayShowAutoCompletePopup by remember { mutableStateOf(true) }
+    var requestDismissAutoCompletePopup by remember { mutableStateOf(false) }
+
     LaunchedEffect(displayTextField, currentTextFieldValue) {
         if (!displayTextField && currentTextFieldValue.text.isNotBlank() && prevReplyContent.isBlank()) {
             focusRequester.requestFocus()
@@ -162,72 +169,48 @@ private fun CreateReplyUi(
         }
 
         prevReplyContent = currentTextFieldValue.text
+        mayShowAutoCompletePopup = true
+        requestDismissAutoCompletePopup = false
     }
 
-    val replyAutoCompleteHintProvider = LocalReplyAutoCompleteHintProvider.current
-    var replyAutoCompleteHintProducer: Flow<DataState<List<AutoCompleteCategory>>>? by remember {
-        mutableStateOf(
-            null
-        )
-    }
-
-    val tagChars = replyAutoCompleteHintProvider.legalTagChars
-    LaunchedEffect(currentTextFieldValue, replyAutoCompleteHintProvider) {
-        // Check that no text is selected, and instead we have a simple cursor
-        replyAutoCompleteHintProducer = if (currentTextFieldValue.selection.collapsed) {
-            // Gather the last word, meaning the characters from the last whitespace until the cursor.
-            val lastWord = currentTextFieldValue
-                .getTextBeforeSelection(Int.MAX_VALUE)
-                .takeLastWhileTag(tagChars)
-
-            if (tagChars.any { lastWord.startsWith(it) }) {
-                replyAutoCompleteHintProvider.produceAutoCompleteHints(
-                    lastWord.first(),
-                    lastWord.substring(1)
-                )
-            } else null
-        } else null
+    // Quite hacky!
+    /*
+    We do not want to dismiss the popup when the user pressed on their keyboard, so we wait
+    100 ms before we actually dismiss the popup. If in the meantime, the user entered a key again
+    we keep showing the popup.
+     */
+    LaunchedEffect(requestDismissAutoCompletePopup) {
+        if (requestDismissAutoCompletePopup) {
+            delay(100)
+            mayShowAutoCompletePopup = false
+        }
     }
 
     Box(modifier = modifier) {
         if (displayTextField || currentTextFieldValue.text.isNotBlank()) {
-            val replyAutoCompleteHints = replyAutoCompleteHintProducer
-                ?.collectAsState(DataState.Loading())
-                ?.value
-                ?.orElse(emptyList())
-                .orEmpty()
+            val tagChars = LocalReplyAutoCompleteHintProvider.current.legalTagChars
+            val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue)
 
-            var latestValidAutoCompleteHints: List<AutoCompleteCategory>? by remember {
-                mutableStateOf(null)
-            }
+            var textFieldWidth by remember { mutableIntStateOf(0) }
+            var popupMaxHeight by remember { mutableIntStateOf(0) }
 
-            LaunchedEffect(replyAutoCompleteHintProducer, replyAutoCompleteHints) {
-                if (replyAutoCompleteHintProducer == null) {
-                    latestValidAutoCompleteHints = null
-                } else if (replyAutoCompleteHints.isNotEmpty()) {
-                    latestValidAutoCompleteHints = replyAutoCompleteHints
-                }
-            }
-
-            if (latestValidAutoCompleteHints.orEmpty().isNotEmpty()) {
+            if (autoCompleteHints.orEmpty().isNotEmpty() && mayShowAutoCompletePopup) {
                 ReplyAutoCompletePopup(
-                    autoCompleteCategories = latestValidAutoCompleteHints.orEmpty(),
+                    autoCompleteCategories = autoCompleteHints.orEmpty(),
+                    targetWidth = with(LocalDensity.current) { textFieldWidth.toDp() },
+                    maxHeight = with(LocalDensity.current) { popupMaxHeight.toDp() },
+                    popupPositionProvider = ReplyAutoCompletePopupPositionProvider,
                     performAutoComplete = { replacement ->
-                        val replacementStart = currentTextFieldValue
-                            .getTextBeforeSelection(Int.MAX_VALUE)
-                            .indexOfLastWhileTag(tagChars)
-
-                        val replacementEnd = currentTextFieldValue.selection.min
-
-                        val newText = currentTextFieldValue
-                            .text
-                            .replaceRange(replacementStart, replacementEnd, replacement)
-
-                        replyMode.currentText.value = currentTextFieldValue.copy(
-                            text = newText,
-                            // Put cursor after replacement.
-                            selection = TextRange(replacementStart + replacement.length)
+                        replyMode.onUpdate(
+                            performAutoComplete(
+                                currentTextFieldValue,
+                                tagChars,
+                                replacement
+                            )
                         )
+                    },
+                    onDismissRequest = {
+                        requestDismissAutoCompletePopup = true
                     }
                 )
             }
@@ -235,7 +218,12 @@ private fun CreateReplyUi(
             MarkdownTextField(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .onSizeChanged { textFieldWidth = it.width }
                     .padding(vertical = 8.dp, horizontal = 8.dp)
+                    .onGloballyPositioned { coordinates ->
+                        val textFieldWindowTopLeft = coordinates.localToWindow(Offset.Zero)
+                        popupMaxHeight = textFieldWindowTopLeft.y.toInt()
+                    }
                     .testTag(TEST_TAG_REPLY_TEXT_FIELD),
                 textFieldValue = currentTextFieldValue,
                 onTextChanged = replyMode::onUpdate,
@@ -273,30 +261,57 @@ private fun CreateReplyUi(
                 focusRequester.requestFocus()
             }
         } else {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        displayTextField = true
-                    }
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(id = R.string.create_answer_click_to_write),
-                    modifier = Modifier
-                        .padding(vertical = 8.dp)
-                        .weight(1f)
-                )
-
-                Icon(
-                    imageVector = Icons.Default.Send,
-                    contentDescription = null,
-                    tint = LocalContentColor.current.copy(alpha = DisabledContentAlpha)
-                )
-            }
+            UnfocusedPreviewReplyTextField { displayTextField = true }
         }
     }
+}
+
+@Composable
+private fun UnfocusedPreviewReplyTextField(onRequestShowTextField: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onRequestShowTextField)
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(id = R.string.create_answer_click_to_write),
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .weight(1f)
+        )
+
+        Icon(
+            imageVector = Icons.Default.Send,
+            contentDescription = null,
+            tint = LocalContentColor.current.copy(alpha = DisabledContentAlpha)
+        )
+    }
+}
+
+private fun performAutoComplete(
+    textFieldValue: TextFieldValue,
+    tagChars: List<Char>,
+    replacement: String
+): TextFieldValue {
+    // Perform replace in text
+    val replacementStart = textFieldValue
+        .getTextBeforeSelection(Int.MAX_VALUE)
+        .indexOfLastWhileTag(tagChars)
+        ?: return textFieldValue
+
+    val replacementEnd = textFieldValue.selection.min
+
+    val newText = textFieldValue
+        .text
+        .replaceRange(replacementStart, replacementEnd, replacement)
+
+    return textFieldValue.copy(
+        text = newText,
+        // Put cursor after replacement.
+        selection = TextRange(replacementStart + replacement.length)
+    )
 }
 
 /**
@@ -348,6 +363,70 @@ private fun rememberReplyState(
     }
 }
 
+/**
+ * @return a list of auto complete hints that should be displayed, or null if no auto complete hints are to be displayed.
+ */
+@Composable
+private fun manageAutoCompleteHints(textFieldValue: TextFieldValue): List<AutoCompleteCategory>? {
+    val replyAutoCompleteHintProvider = LocalReplyAutoCompleteHintProvider.current
+    var replyAutoCompleteHintProducer: Flow<DataState<List<AutoCompleteCategory>>>? by remember {
+        mutableStateOf(
+            null
+        )
+    }
+
+    val tagChars = replyAutoCompleteHintProvider.legalTagChars
+    LaunchedEffect(textFieldValue, replyAutoCompleteHintProvider) {
+        // Check that no text is selected, and instead we have a simple cursor
+        replyAutoCompleteHintProducer =
+            textFieldValue.getAutoCompleteReplacementTextFirstIndex(tagChars)?.let { tagIndex ->
+                val tagChar = textFieldValue.text[tagIndex]
+                val replacementWord = if (textFieldValue.text.length > tagIndex + 1) {
+                    textFieldValue.text.substring(tagIndex + 1).takeWhileTag()
+                } else ""
+
+                replyAutoCompleteHintProvider.produceAutoCompleteHints(tagChar, replacementWord)
+            }
+    }
+
+    val replyAutoCompleteHints = replyAutoCompleteHintProducer
+        ?.collectAsState(DataState.Loading())
+        ?.value
+        ?.orElse(emptyList())
+        .orEmpty()
+
+    var latestValidAutoCompleteHints: List<AutoCompleteCategory>? by remember {
+        mutableStateOf(null)
+    }
+
+    LaunchedEffect(replyAutoCompleteHintProducer, replyAutoCompleteHints) {
+        if (replyAutoCompleteHintProducer == null) {
+            latestValidAutoCompleteHints = null
+        } else if (replyAutoCompleteHints.isNotEmpty()) {
+            latestValidAutoCompleteHints = replyAutoCompleteHints
+        }
+    }
+
+    return latestValidAutoCompleteHints
+}
+
+/**
+ * @return the index of the tagging char of the current replacement text, or null if the user is currently
+ * not entering a replaceable text.
+ */
+private fun TextFieldValue.getAutoCompleteReplacementTextFirstIndex(tagChars: List<Char>): Int? {
+    return if (selection.collapsed) {
+        // Gather the last word, meaning the characters from the last whitespace until the cursor.
+        val tagCharIndex = getTextBeforeSelection(Int.MAX_VALUE)
+            .indexOfLastWhileTag(tagChars)
+            ?: return null
+
+        val tagChar = text[tagCharIndex]
+
+        if (tagChar in tagChars) tagCharIndex else null
+    } else null
+}
+
 @Composable
 @Preview
 private fun ReplyTextFieldPreview() {
@@ -362,14 +441,7 @@ private fun ReplyTextFieldPreview() {
     }
 }
 
-/**
- * Custom implementation that takes until either the second whitespace has been found or a tag character has been found
- */
-private fun CharSequence.takeLastWhileTag(tagChars: List<Char>): CharSequence {
-    return subSequence(indexOfLastWhileTag(tagChars), length)
-}
-
-private fun CharSequence.indexOfLastWhileTag(tagChars: List<Char>): Int {
+private fun CharSequence.indexOfLastWhileTag(tagChars: List<Char>): Int? {
     var foundWhitespace = false
 
     for (index in lastIndex downTo 0) {
@@ -383,5 +455,25 @@ private fun CharSequence.indexOfLastWhileTag(tagChars: List<Char>): Int {
             foundWhitespace = true
         }
     }
-    return 0
+
+    return if (isEmpty()) null else 0
+}
+
+/**
+ * Takes characters until the end of the string or a second whitespace has been found
+ */
+private fun String.takeWhileTag(): String {
+    var foundWhitespace = false
+
+    for (index in indices) {
+        val currentChar = this[index]
+
+        if (currentChar.isWhitespace() && foundWhitespace) {
+            return substring(0, index)
+        } else if (currentChar.isWhitespace()) {
+            foundWhitespace = true
+        }
+    }
+
+    return this
 }

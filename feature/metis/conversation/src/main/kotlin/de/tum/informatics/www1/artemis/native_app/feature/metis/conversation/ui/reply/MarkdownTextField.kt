@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -22,6 +23,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
@@ -37,6 +39,7 @@ internal fun MarkdownTextField(
     focusRequester: FocusRequester = remember { FocusRequester() },
     sendButton: @Composable () -> Unit = {},
     topRightButton: @Composable RowScope.() -> Unit = {},
+    onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit
 ) {
@@ -84,6 +87,7 @@ internal fun MarkdownTextField(
                             .onFocusChanged { focusState ->
                                 if (focusState.hasFocus) {
                                     hadFocus = true
+                                    onFocusAcquired()
                                 }
 
                                 if (!focusState.hasFocus && hadFocus) {
@@ -92,7 +96,8 @@ internal fun MarkdownTextField(
                                 }
                             },
                         value = textFieldValue,
-                        onValueChange = onTextChanged
+                        onValueChange = onTextChanged,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
                     )
                 }
 
