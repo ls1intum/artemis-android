@@ -136,11 +136,8 @@ fun MetisStandalonePostScreen(
     val viewModel: MetisThreadViewModel =
         getViewModel(parameters = { parametersOf(standalonePostId, metisContext, true) })
 
-    LaunchedEffect(metisContext) {
+    LaunchedEffect(metisContext, standalonePostId) {
         viewModel.updateMetisContext(metisContext)
-    }
-
-    LaunchedEffect(standalonePostId) {
         viewModel.updatePostId(standalonePostId)
     }
 

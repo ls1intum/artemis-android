@@ -262,7 +262,6 @@ internal class MetisThreadViewModel(
     }
 
     fun updatePostId(newPostId: StandalonePostId) {
-        println("Set post id $newPostId")
         postId.value = newPostId
 
         viewModelScope.launch(coroutineContext) {

@@ -408,7 +408,6 @@ internal abstract class MetisContentViewModel(
     protected suspend fun retrieveNewMessageText(metisContext: MetisContext, postId: Long?): String {
         return when (metisContext) {
             is MetisContext.Conversation -> {
-                println("Retrieve for $metisContext and $postId")
                 replyTextStorageService.getStoredReplyText(
                     serverHost = serverConfigurationService.host.first(),
                     courseId = metisContext.courseId,
