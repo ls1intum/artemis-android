@@ -16,6 +16,7 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -87,37 +88,41 @@ fun SinglePageConversationBody(
                 MetisContext.Conversation(courseId, openedThread.conversationId)
             }
 
-            MetisStandalonePostScreen(
-                modifier = m,
-                standalonePostId = openedThread.postId,
-                metisContext = metisContext,
-                onNavigateUp = {
-                    configuration = OpenedConversation(parent.conversationId, null)
-                }
-            )
+            key(metisContext, openedThread) {
+                MetisStandalonePostScreen(
+                    modifier = m,
+                    standalonePostId = openedThread.postId,
+                    metisContext = metisContext,
+                    onNavigateUp = {
+                        configuration = OpenedConversation(parent.conversationId, null)
+                    }
+                )
+            }
         }
 
     val ConversationDetails: @Composable (Modifier, OpenedConversation, canNavigateBack: Boolean) -> Unit =
         { m, conf, canNavigateBack ->
-            ConversationScreen(
-                modifier = m,
-                courseId = courseId,
-                conversationId = conf.conversationId,
-                onNavigateBack = if (canNavigateBack) {
-                    {
-                        configuration = NothingOpened
+            key(conf.conversationId) {
+                ConversationScreen(
+                    modifier = m,
+                    courseId = courseId,
+                    conversationId = conf.conversationId,
+                    onNavigateBack = if (canNavigateBack) {
+                        {
+                            configuration = NothingOpened
+                        }
+                    } else null,
+                    onNavigateToSettings = {
+                        configuration = ConversationSettings(conf.conversationId, conf)
+                    },
+                    onClickViewPost = {
+                        configuration = OpenedConversation(
+                            conf.conversationId,
+                            OpenedThread(conf.conversationId, StandalonePostId.ClientSideId(it))
+                        )
                     }
-                } else null,
-                onNavigateToSettings = {
-                    configuration = ConversationSettings(conf.conversationId, conf)
-                },
-                onClickViewPost = {
-                    configuration = OpenedConversation(
-                        conf.conversationId,
-                        OpenedThread(conf.conversationId, StandalonePostId.ClientSideId(it))
-                    )
-                }
-            )
+                )
+            }
         }
 
     when (val config = configuration) {
@@ -292,7 +297,7 @@ private fun VerticalDivider() {
 sealed interface ConversationConfiguration : Parcelable
 
 @Parcelize
-object NothingOpened : ConversationConfiguration
+data object NothingOpened : ConversationConfiguration
 
 @Parcelize
 data class OpenedConversation(val conversationId: Long, val openedThread: OpenedThread?) :

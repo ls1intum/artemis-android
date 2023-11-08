@@ -26,7 +26,7 @@ dependencies {
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
     implementation(libs.kotlinx.datetime)
-    implementation(libs.accompanist.placeholder.material)
+    implementation(libs.placeholder.material)
     implementation(libs.accompanist.flowlayout)
     implementation(libs.androidx.appcompat)
 

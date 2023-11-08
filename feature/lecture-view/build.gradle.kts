@@ -15,7 +15,7 @@ dependencies {
     implementation(project(":feature:metis"))
 
     implementation(libs.kotlinx.datetime)
-    implementation(libs.accompanist.placeholder.material)
+    implementation(libs.placeholder.material)
     implementation(libs.accompanist.swiperefresh)
 
     testImplementation(project(":feature:login"))

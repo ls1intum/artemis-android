@@ -78,7 +78,9 @@ internal fun ReplyTextField(
                 when (targetReplyState) {
                     is ReplyState.CanCreate -> {
                         CreateReplyUi(
-                            modifier = Modifier.fillMaxWidth().testTag(TEST_TAG_CAN_CREATE_REPLY),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag(TEST_TAG_CAN_CREATE_REPLY),
                             replyMode = replyMode,
                             onReply = { targetReplyState.onCreateReply() }
                         )
@@ -140,12 +142,12 @@ private fun CreateReplyUi(
 ) {
     var prevReplyContent by remember { mutableStateOf("") }
     var displayTextField: Boolean by remember { mutableStateOf(false) }
+    var requestFocus: Boolean by remember { mutableStateOf(false) }
 
     val currentText by replyMode.currentText
 
     LaunchedEffect(displayTextField, currentText) {
         if (!displayTextField && currentText.isNotBlank() && prevReplyContent.isBlank()) {
-            focusRequester.requestFocus()
             displayTextField = true
         }
 
@@ -191,8 +193,11 @@ private fun CreateReplyUi(
                 }
             )
 
-            LaunchedEffect(key1 = displayTextField) {
-                focusRequester.requestFocus()
+            LaunchedEffect(requestFocus) {
+                if (requestFocus) {
+                    focusRequester.requestFocus()
+                    requestFocus = false
+                }
             }
         } else {
             Row(
@@ -200,6 +205,7 @@ private fun CreateReplyUi(
                     .fillMaxWidth()
                     .clickable {
                         displayTextField = true
+                        requestFocus = true
                     }
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically

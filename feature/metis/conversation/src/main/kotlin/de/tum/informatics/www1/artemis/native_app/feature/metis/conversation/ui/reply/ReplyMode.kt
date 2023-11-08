@@ -1,7 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,38 +14,58 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import kotlinx.coroutines.Deferred
 
-internal sealed class ReplyMode(initialText: String) {
-    val currentText: MutableState<String> = mutableStateOf(initialText)
+internal sealed class ReplyMode {
 
-    fun onUpdateText(newText: String) {
-        currentText.value = newText
-    }
+    abstract val currentText: State<String>
+
+    abstract fun onUpdateText(newText: String)
 
     data class NewMessage(
-        private val onCreateNewMessage: (String) -> Deferred<MetisModificationFailure?>,
-    ) : ReplyMode("") {
-        fun onCreateNewMessage(): Deferred<MetisModificationFailure?> =
-            onCreateNewMessage(currentText.value)
+        override val currentText: State<String>,
+        private val onUpdateTextUpstream: (String) -> Unit,
+        val onCreateNewMessage: () -> Deferred<MetisModificationFailure?>,
+    ) : ReplyMode() {
+
+
+        override fun onUpdateText(newText: String) {
+            onUpdateTextUpstream(newText)
+        }
     }
 
     data class EditMessage(
         val post: IBasePost,
         private val onEditMessage: (String) -> Deferred<MetisModificationFailure?>,
         val onCancelEditMessage: () -> Unit
-    ) : ReplyMode(post.content.orEmpty()) {
+    ) : ReplyMode() {
+        override val currentText = mutableStateOf("")
+
+        override fun onUpdateText(newText: String) {
+            currentText.value = newText
+        }
+
         fun onEditMessage(): Deferred<MetisModificationFailure?> = onEditMessage(currentText.value)
     }
 }
 
 @Composable
-internal fun <T : IBasePost> rememberReplyMode(
+private fun <T : IBasePost> rememberReplyMode(
+    initialReplyTextProvider: InitialReplyTextProvider,
     editingPost: T?,
     onClearEditingPost: () -> Unit,
-    onCreatePost: (String) -> Deferred<MetisModificationFailure?>,
+    onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (T, String) -> Deferred<MetisModificationFailure?>
 ): ReplyMode {
-    val replyModeNewMessage = remember { ReplyMode.NewMessage(onCreatePost) }
-    var editingPostJob: Deferred<MetisModificationFailure?>? by remember { mutableStateOf(null) }
+    val newMessageText = initialReplyTextProvider.newMessageText.collectAsState(initial = "")
+
+    val replyModeNewMessage =
+        remember(initialReplyTextProvider::updateInitialReplyText, onCreatePost) {
+            ReplyMode.NewMessage(
+                currentText = newMessageText,
+                onUpdateTextUpstream = initialReplyTextProvider::updateInitialReplyText,
+                onCreateNewMessage = onCreatePost
+            )
+        }
+    var editingPostJob: Deferred<MetisModificationFailure?>? by remember() { mutableStateOf(null) }
 
     AwaitDeferredCompletion(job = editingPostJob) {
         onClearEditingPost()
@@ -77,7 +98,8 @@ internal fun <T : IBasePost> rememberReplyMode(
  */
 @Composable
 internal fun <T : IBasePost> MetisReplyHandler(
-    onCreatePost: (String) -> Deferred<MetisModificationFailure?>,
+    initialReplyTextProvider: InitialReplyTextProvider,
+    onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (T, String) -> Deferred<MetisModificationFailure?>,
     onDeletePost: (T) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (T, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
@@ -89,11 +111,11 @@ internal fun <T : IBasePost> MetisReplyHandler(
         updateFailureStateDelegate: (MetisModificationFailure?) -> Unit
     ) -> Unit
 ) {
-    var metisFailure: MetisModificationFailure? by remember {
+    var metisFailure: MetisModificationFailure? by remember() {
         mutableStateOf(null)
     }
 
-    var metisModificationTask: Deferred<MetisModificationFailure?>? by remember {
+    var metisModificationTask: Deferred<MetisModificationFailure?>? by remember() {
         mutableStateOf(null)
     }
 
@@ -103,6 +125,7 @@ internal fun <T : IBasePost> MetisReplyHandler(
 
     var editingPost: T? by remember { mutableStateOf(null) }
     val replyMode = rememberReplyMode(
+        initialReplyTextProvider = initialReplyTextProvider,
         editingPost = editingPost,
         onClearEditingPost = { editingPost = null },
         onCreatePost = onCreatePost,
