@@ -16,9 +16,10 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.MultipleChoiceSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createQuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExerciseFormBodyWithPng
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.TEST_TAG_BUTTON_WITH_LOADING_ANIMATION_LOADING
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationScreen
@@ -26,8 +27,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.Qui
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.work.TEST_TAG_WORK_ON_QUIZ_QUESTIONS_SCREEN
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.robolectric.util.Logger
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -43,15 +42,17 @@ internal abstract class QuizParticipationBaseE2eTest(quizType: QuizType.Workable
     override suspend fun setupHook() {
         super.setupHook()
 
-        val path = uploadBackgroundImage()
+        val filePath = "/api/files/drag-and-drop/backgrounds/$courseId/${generateId()}/dndbackground.png"
 
         quiz = assertIs(
-            createExercise(
+            createExerciseFormBodyWithPng(
                 accessToken = getAdminAccessToken(),
                 courseId = courseId,
                 endpoint = "quiz-exercises",
+                pngByteArray = getBackgroundImageBytes(),
+                pngFilePath = filePath,
                 creator = { name, courseId ->
-                    createQuizExercise(name, courseId, path)
+                    createQuizExercise(name, courseId, filePath)
                 }
             )
         )
