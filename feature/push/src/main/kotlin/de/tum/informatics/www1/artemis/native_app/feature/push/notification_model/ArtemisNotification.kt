@@ -22,6 +22,7 @@ sealed interface ArtemisNotification<T : NotificationType> {
     val notificationPlaceholders: List<String>
     val target: String
     val date: Instant
+    val version: Int
 }
 
 @Serializable
@@ -29,7 +30,8 @@ data class MiscArtemisNotification(
     override val type: MiscNotificationType,
     override val notificationPlaceholders: List<String>,
     override val target: String,
-    override val date: Instant
+    override val date: Instant,
+    override val version: Int
 ) : ArtemisNotification<MiscNotificationType>
 
 @Serializable
@@ -38,7 +40,8 @@ data class CommunicationArtemisNotification(
     override val type: CommunicationNotificationType,
     override val notificationPlaceholders: List<String>,
     override val target: String,
-    override val date: Instant
+    override val date: Instant,
+    override val version: Int
 ) : ArtemisNotification<CommunicationNotificationType>
 
 @Serializable
@@ -46,14 +49,15 @@ data class UnknownArtemisNotification(
     override val type: UnknownNotificationType,
     override val notificationPlaceholders: List<String>,
     override val target: String,
-    override val date: Instant
+    override val date: Instant,
+    override val version: Int
 ) : ArtemisNotification<UnknownNotificationType>
 
 private val nameToTypeMapping: Map<String, NotificationType> = (
-        StandalonePostCommunicationNotificationType.values().toList() +
-                ReplyPostCommunicationNotificationType.values().toList() +
-                MiscNotificationType.values().toList() +
-                ConversationNotificationType.values().toList()
+        StandalonePostCommunicationNotificationType.entries +
+                ReplyPostCommunicationNotificationType.entries +
+                MiscNotificationType.entries +
+                ConversationNotificationType.entries
         ).associateBy { it.name }
 
 object ArtemisNotificationDeserializer :
