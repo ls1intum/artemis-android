@@ -41,7 +41,7 @@ private const val ConversationOverviewMaxWeight = 0.3f
 private val ConversationOverviewMaxWidth = 600.dp
 
 @Composable
-fun SinglePageConversationBody(
+internal fun SinglePageConversationBody(
     modifier: Modifier,
     courseId: Long,
     initialConfiguration: ConversationConfiguration = NothingOpened
