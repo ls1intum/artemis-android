@@ -67,6 +67,12 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                         }
                     }
 
+                    if (Boolean.getBoolean("skip.unit-tests")) {
+                        useJUnit {
+                            excludeCategories("de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest")
+                        }
+                    }
+
                     reports.junitXml.required.set(true)
                     reports.junitXml.outputLocation.set(rootProject.rootDir.resolve("test-outputs/${project.name}/$name/"))
                 }
