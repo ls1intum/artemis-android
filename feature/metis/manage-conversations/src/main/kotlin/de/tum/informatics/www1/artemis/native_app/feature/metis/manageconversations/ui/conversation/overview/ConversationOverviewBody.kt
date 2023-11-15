@@ -9,16 +9,26 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.WifiOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,9 +36,13 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+
+private const val KEY_BUTTON_SHOW_COC = "KEY_BUTTON_SHOW_COC"
 
 @Composable
 fun ConversationOverviewBody(
@@ -55,7 +69,8 @@ internal fun ConversationOverviewBody(
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit
 ) {
-    val conversationCollectionsDataState: DataState<de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections> by viewModel.conversations.collectAsState()
+    var showCodeOfConduct by rememberSaveable { mutableStateOf(false) }
+    val conversationCollectionsDataState: DataState<ConversationCollections> by viewModel.conversations.collectAsState()
 
     val isConnected by viewModel.isConnected.collectAsState()
 
@@ -103,8 +118,7 @@ internal fun ConversationOverviewBody(
             )
 
             ConversationList(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
                 conversationCollections = conversationCollection,
                 onNavigateToConversation = { conversationId ->
@@ -114,7 +128,40 @@ internal fun ConversationOverviewBody(
                 onToggleMarkAsFavourite = viewModel::markConversationAsFavorite,
                 onToggleHidden = viewModel::markConversationAsHidden,
                 onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
-                onRequestAddChannel = onRequestAddChannel
+                onRequestAddChannel = onRequestAddChannel,
+                trailingContent = {
+                    item { Divider() }
+
+                    item(key = KEY_BUTTON_SHOW_COC) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
+                        ) {
+                            OutlinedButton(
+                                modifier = Modifier.align(Alignment.Center),
+                                onClick = { showCodeOfConduct = true }
+                            ) {
+                                Text(text = stringResource(id = R.string.conversation_overview_button_show_code_of_conduct))
+                            }
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    if (showCodeOfConduct) {
+        ModalBottomSheet(
+            onDismissRequest = { showCodeOfConduct = false }
+        ) {
+            CodeOfConductUi(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp)
+                    .padding(bottom = 32.dp),
+                courseId = viewModel.courseId
             )
         }
     }

@@ -24,4 +24,6 @@
     <string name="conversation_overview_loading_try_again">Try again.</string>
 
     <string name="conversation_overview_not_connected_banner">Not connected to server</string>
+
+    <string name="conversation_overview_button_show_code_of_conduct">Code of Conduct</string>
 </resources>

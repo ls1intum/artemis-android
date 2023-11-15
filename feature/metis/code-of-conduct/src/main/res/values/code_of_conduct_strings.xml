@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="code_of_conduct_loading">Loading conversations…</string>
+    <string name="code_of_conduct_failure">Something went wrong while loading the code of conduct state.</string>
+    <string name="code_of_conduct_try_again">Try again</string>
+
+    <string name="code_of_conduct_button_accept">Accept</string>
+
+    <string name="code_of_conduct_accept_failed_dialog_title">Could not accept code of conduct</string>
+    <string name="code_of_conduct_accept_failed_dialog_message">Something went wrong while accepting the code of conduct. Please try again later.</string>
+    <string name="code_of_conduct_accept_failed_dialog_positive">@android:string/ok</string>
+</resources>

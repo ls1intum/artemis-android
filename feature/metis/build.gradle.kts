@@ -19,16 +19,9 @@ dependencies {
     implementation(project(":core:device"))
 
     api(project(":feature:metis:shared"))
+    api(project(":feature:metis:code-of-conduct"))
     api(project(":feature:metis:conversation"))
     api(project(":feature:metis:manage-conversations"))
-
-    implementation(libs.androidx.compose.material)
-    implementation(libs.androidx.paging.runtime)
-    implementation(libs.androidx.paging.compose)
-    implementation(libs.kotlinx.datetime)
-    implementation(libs.accompanist.placeholder.material)
-    implementation(libs.accompanist.flowlayout)
-    implementation(libs.androidx.appcompat)
 
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)
