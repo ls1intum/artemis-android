@@ -23,15 +23,14 @@ internal sealed class ReplyMode() {
     data class NewMessage(
         override val currentText: State<TextFieldValue>,
         private val onUpdateTextUpstream: (TextFieldValue) -> Unit,
-        private val onCreateNewMessage: (String) -> Deferred<MetisModificationFailure?>,
+        private val onCreateNewMessageUpstream: () -> Deferred<MetisModificationFailure?>,
     ) : ReplyMode() {
 
         override fun onUpdate(new: TextFieldValue) {
             onUpdateTextUpstream(new)
         }
 
-        fun onCreateNewMessage(): Deferred<MetisModificationFailure?> =
-            onCreateNewMessage(currentText.value.text)
+        fun onCreateNewMessage(): Deferred<MetisModificationFailure?> = onCreateNewMessageUpstream()
     }
 
     data class EditMessage(
@@ -45,7 +44,7 @@ internal sealed class ReplyMode() {
             currentText.value = new
         }
 
-        fun onEditMessage(): Deferred<MetisModificationFailure?> = onEditMessage(currentText.value)
+        fun onEditMessage(): Deferred<MetisModificationFailure?> = onEditMessage(currentText.value.text)
     }
 }
 
@@ -57,14 +56,14 @@ private fun <T : IBasePost> rememberReplyMode(
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (T, String) -> Deferred<MetisModificationFailure?>
 ): ReplyMode {
-    val newMessageText = initialReplyTextProvider.newMessageText.collectAsState(initial = "")
+    val newMessageText = initialReplyTextProvider.newMessageText.collectAsState(initial = TextFieldValue())
 
     val replyModeNewMessage =
         remember(initialReplyTextProvider::updateInitialReplyText, onCreatePost) {
             ReplyMode.NewMessage(
                 currentText = newMessageText,
                 onUpdateTextUpstream = initialReplyTextProvider::updateInitialReplyText,
-                onCreateNewMessage = onCreatePost
+                onCreateNewMessageUpstream = onCreatePost
             )
         }
     var editingPostJob: Deferred<MetisModificationFailure?>? by remember() { mutableStateOf(null) }

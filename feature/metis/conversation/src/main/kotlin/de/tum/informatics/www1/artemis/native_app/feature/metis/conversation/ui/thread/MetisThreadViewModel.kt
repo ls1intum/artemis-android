@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread
 
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -243,7 +244,7 @@ internal class MetisThreadViewModel(
 
             val replyPost = AnswerPost(
                 creationDate = Clock.System.now(),
-                content = newMessageText.first(),
+                content = newMessageText.first().text,
                 post = StandalonePost(
                     id = when (val postId = postId.value) {
                         is StandalonePostId.ClientSideId -> metisStorageService.getServerSidePostId(
@@ -265,7 +266,7 @@ internal class MetisThreadViewModel(
         postId.value = newPostId
 
         viewModelScope.launch(coroutineContext) {
-            newMessageText.value = retrieveNewMessageText(metisContext.value, getPostId())
+            newMessageText.value = TextFieldValue(retrieveNewMessageText(metisContext.value, getPostId()))
         }
     }
 }

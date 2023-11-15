@@ -165,7 +165,6 @@ private fun CreateReplyUi(
 
     LaunchedEffect(displayTextField, currentTextFieldValue) {
         if (!displayTextField && currentTextFieldValue.text.isNotBlank() && prevReplyContent.isBlank()) {
-            focusRequester.requestFocus()
             displayTextField = true
         }
 
@@ -438,12 +437,19 @@ private fun TextFieldValue.getAutoCompleteReplacementTextFirstIndex(tagChars: Li
 @Composable
 @Preview
 private fun ReplyTextFieldPreview() {
+    val text = remember { mutableStateOf(TextFieldValue()) }
+
     Box(modifier = Modifier.fillMaxSize()) {
         ReplyTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter),
-            replyMode = ReplyMode.NewMessage { CompletableDeferred() },
+            replyMode = ReplyMode.NewMessage(
+                text,
+                onUpdateTextUpstream = { text.value = it }
+            ) {
+                CompletableDeferred()
+            },
             updateFailureState = {}
         )
     }

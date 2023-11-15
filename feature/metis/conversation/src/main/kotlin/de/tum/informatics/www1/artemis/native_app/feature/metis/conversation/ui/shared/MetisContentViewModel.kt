@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared
 
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -59,6 +60,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
@@ -184,7 +186,7 @@ internal abstract class MetisContentViewModel(
 
     override val legalTagChars: List<Char> = listOf('@')
 
-    override val newMessageText: MutableStateFlow<String> = MutableStateFlow("")
+    override val newMessageText: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue(""))
 
     init {
         viewModelScope.launch(coroutineContext) {
@@ -192,7 +194,7 @@ internal abstract class MetisContentViewModel(
             newMessageText
                 .debounce(500L)
                 .collect { textToStore ->
-                    storeNewMessageText(textToStore)
+                    storeNewMessageText(textToStore.text)
                 }
         }
     }
@@ -396,7 +398,7 @@ internal abstract class MetisContentViewModel(
         }
     }
 
-    override fun updateInitialReplyText(text: String) {
+    override fun updateInitialReplyText(text: TextFieldValue) {
         newMessageText.value = text
     }
 
@@ -427,7 +429,7 @@ internal abstract class MetisContentViewModel(
         metisContext.value = newMetisContext
 
         viewModelScope.launch(coroutineContext) {
-            newMessageText.value = retrieveNewMessageText(newMetisContext, getPostId())
+            newMessageText.value = TextFieldValue(text = retrieveNewMessageText(newMetisContext, getPostId()))
         }
     }
 

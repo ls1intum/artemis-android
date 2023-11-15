@@ -186,7 +186,7 @@ internal class MetisListViewModel(
 
     fun createPost(): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
-            val postText = newMessageText.first()
+            val postText = newMessageText.first().text
 
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.CREATE_POST
