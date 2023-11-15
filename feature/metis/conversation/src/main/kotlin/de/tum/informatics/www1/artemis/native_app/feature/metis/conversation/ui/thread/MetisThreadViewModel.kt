@@ -20,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisContentViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
@@ -63,6 +64,7 @@ internal class MetisThreadViewModel(
     metisModificationService: MetisModificationService,
     accountDataService: AccountDataService,
     conversationService: ConversationService,
+    replyTextStorageService: ReplyTextStorageService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisContentViewModel(
     initialMetisContext,
@@ -74,6 +76,7 @@ internal class MetisThreadViewModel(
     accountDataService,
     networkStatusProvider,
     conversationService,
+    replyTextStorageService,
     coroutineContext
 ) {
 
@@ -121,6 +124,13 @@ internal class MetisThreadViewModel(
     }
         .map { dataState -> dataState.bind { it } } // Type check adaption
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+    override suspend fun getPostId(): Long = when (val postId = postId.value) {
+        is StandalonePostId.ClientSideId -> metisStorageService.getStandalonePost(postId.clientSideId)
+            .filterNotNull().first().serverPostId
+
+        is StandalonePostId.ServerSideId -> postId.serverSidePostId
+    }
 
     private suspend fun handleServerLoadedStandalonePost(
         metisContext: MetisContext,
@@ -170,7 +180,11 @@ internal class MetisThreadViewModel(
                     metisContext,
                     ::Pair
                 ).collectLatest { (host, metisContext) ->
-                    metisContextManager.updatePosts(host, metisContext, this@MetisThreadViewModel.coroutineContext)
+                    metisContextManager.updatePosts(
+                        host,
+                        metisContext,
+                        this@MetisThreadViewModel.coroutineContext
+                    )
                 }
             }
 
@@ -220,7 +234,7 @@ internal class MetisThreadViewModel(
         }
     }
 
-    fun createReply(replyText: String): Deferred<MetisModificationFailure?> {
+    fun createReply(): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             if (!post.value.isSuccess) return@async MetisModificationFailure.CREATE_POST
 
@@ -229,7 +243,7 @@ internal class MetisThreadViewModel(
 
             val replyPost = AnswerPost(
                 creationDate = Clock.System.now(),
-                content = replyText,
+                content = newMessageText.first(),
                 post = StandalonePost(
                     id = when (val postId = postId.value) {
                         is StandalonePostId.ClientSideId -> metisStorageService.getServerSidePostId(
@@ -249,5 +263,9 @@ internal class MetisThreadViewModel(
 
     fun updatePostId(newPostId: StandalonePostId) {
         postId.value = newPostId
+
+        viewModelScope.launch(coroutineContext) {
+            newMessageText.value = retrieveNewMessageText(metisContext.value, getPostId())
+        }
     }
 }

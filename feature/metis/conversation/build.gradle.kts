@@ -23,11 +23,14 @@ dependencies {
 
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
+    implementation(libs.placeholder.material)
 
     implementation(libs.androidx.emoji2)
     implementation(libs.androidx.emoji2.views)
     implementation(libs.androidx.emoji2.views.helper)
     implementation(libs.androidx.emoji2.emojiPicker)
+
+    implementation(libs.androidx.dataStore.preferences)
 
     testImplementation(project(":feature:metis-test"))
 }

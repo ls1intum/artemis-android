@@ -24,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService.StandalonePostsContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisContentViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
@@ -65,6 +67,7 @@ internal class MetisListViewModel(
     accountDataService: AccountDataService,
     networkStatusProvider: NetworkStatusProvider,
     conversationService: ConversationService,
+    replyTextStorageService: ReplyTextStorageService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisContentViewModel(
     initialMetisContext,
@@ -76,9 +79,9 @@ internal class MetisListViewModel(
     accountDataService,
     networkStatusProvider,
     conversationService,
+    replyTextStorageService,
     coroutineContext
 ) {
-
     private val _filter = MutableStateFlow<List<MetisFilter>>(emptyList())
     val filter: StateFlow<List<MetisFilter>> = _filter
 
@@ -181,8 +184,10 @@ internal class MetisListViewModel(
         }
     }
 
-    fun createPost(postText: String): Deferred<MetisModificationFailure?> {
+    fun createPost(): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
+            val postText = newMessageText.first()
+
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.CREATE_POST
 
@@ -200,25 +205,11 @@ internal class MetisListViewModel(
         }
     }
 
-    fun addMetisFilter(metisFilter: MetisFilter) {
-        _filter.value = _filter.value + metisFilter
-    }
-
-    fun removeMetisFilter(metisFilter: MetisFilter) {
-        _filter.value = _filter.value.filterNot { it == metisFilter }
-    }
-
-    fun updateCourseWideContext(new: CourseWideContext?) {
-        _courseWideContext.value = new
-    }
-
     fun updateQuery(new: String) {
         _query.value = new.ifEmpty { null }
     }
 
-    fun updateSortingStrategy(new: MetisSortingStrategy) {
-        _sortingStrategy.value = new
-    }
+    override suspend fun getPostId(): Long? = null // by definition we are list, so no post
 
     private fun insertDateSeparators(pagingList: PagingData<ChatListItem.PostChatListItem>) =
         pagingList.insertSeparators { before: ChatListItem.PostChatListItem?, after: ChatListItem.PostChatListItem? ->

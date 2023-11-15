@@ -14,7 +14,7 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(project(":feature:push"))
 
-    implementation(libs.accompanist.placeholder.material)
+    implementation(libs.placeholder.material)
     implementation(libs.androidx.browser)
 
     testImplementation(project(":feature:login"))
