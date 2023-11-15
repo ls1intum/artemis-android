@@ -20,7 +20,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowRight
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Groups2
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -338,6 +342,12 @@ private fun ConversationListItem(
             onDismissRequest = onDismissRequest
         ) {
             DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (conversation.isFavorite) Icons.Default.FavoriteBorder else Icons.Default.Favorite,
+                        contentDescription = null
+                    )
+                },
                 text = {
                     Text(
                         text = stringResource(
@@ -353,6 +363,12 @@ private fun ConversationListItem(
             )
 
             DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (conversation.isHidden) Icons.Default.NotificationsActive else Icons.Default.NotificationsOff,
+                        contentDescription = null
+                    )
+                },
                 text = {
                     Text(
                         text = stringResource(

@@ -258,9 +258,7 @@ internal fun CourseUiScreen(
                     }
 
                     TAB_COMMUNICATION -> {
-                        val metisModifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp)
+                        val metisModifier = Modifier.fillMaxSize()
 
                         if (course.courseInformationSharingConfiguration.supportsMessaging) {
                             val initialConfiguration = remember(conversationId, postId) {

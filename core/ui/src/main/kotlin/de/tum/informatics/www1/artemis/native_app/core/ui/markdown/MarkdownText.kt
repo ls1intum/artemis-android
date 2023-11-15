@@ -2,6 +2,8 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import android.content.Context
 import android.text.method.LinkMovementMethod
+import android.text.style.ForegroundColorSpan
+import android.text.style.StrikethroughSpan
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
@@ -31,7 +33,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
 import coil.ImageLoader
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
@@ -39,6 +41,7 @@ import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.html.HtmlPlugin
 import io.noties.markwon.image.coil.CoilImagesPlugin
 import io.noties.markwon.linkify.LinkifyPlugin
+import io.noties.markwon.simple.ext.SimpleExtPlugin
 import org.koin.compose.koinInject
 
 // Copy from: https://github.com/jeziellago/compose-markdown
@@ -100,15 +103,19 @@ fun MarkdownText(
         serverConfigurationService.serverUrl.collectAsState(initial = "").value
     }
 
-    val transformedMarkdown by remember(markdown, serverUrl) {
-        derivedStateOf {
-            val strippedServerUrl =
-                if (serverUrl.endsWith("/")) serverUrl.substring(
-                    0,
-                    serverUrl.length - 1
-                ) else serverUrl
+    val markdownTransformer = remember(serverUrl) {
+        val strippedServerUrl =
+            if (serverUrl.endsWith("/")) serverUrl.substring(
+                0,
+                serverUrl.length - 1
+            ) else serverUrl
 
-            ArtemisMarkdownTransformer.transformMarkdown(markdown, strippedServerUrl)
+        PostArtemisMarkdownTransformer(strippedServerUrl)
+    }
+
+    val transformedMarkdown by remember(markdown, markdownTransformer) {
+        derivedStateOf {
+            markdownTransformer.transformMarkdown(markdown)
         }
     }
 
@@ -200,6 +207,12 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?): Markwon {
         .usePlugin(StrikethroughPlugin.create())
         .usePlugin(TablePlugin.create(context))
         .usePlugin(LinkifyPlugin.create())
+        // User mentions are transformed to |||@full name|||
+        .usePlugin(SimpleExtPlugin.create { p ->
+            p.addExtension(3, '|') { _, _ ->
+                arrayOf(ForegroundColorSpan(0xff3e8acc.toInt()))
+            }
+        })
         .apply {
             if (imageLoader != null) {
                 usePlugin(CoilImagesPlugin.create(context, imageLoader))

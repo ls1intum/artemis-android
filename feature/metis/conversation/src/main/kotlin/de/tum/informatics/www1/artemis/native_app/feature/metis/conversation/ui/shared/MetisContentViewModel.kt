@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared
 
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -16,6 +17,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ConversationWebsocketDto
@@ -26,6 +28,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteCategory
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteHint
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -55,6 +60,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
@@ -71,8 +77,8 @@ internal abstract class MetisContentViewModel(
     private val metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
-    accountDataService: AccountDataService,
-    networkStatusProvider: NetworkStatusProvider,
+    private val accountDataService: AccountDataService,
+    private val networkStatusProvider: NetworkStatusProvider,
     private val conversationService: ConversationService,
     private val replyTextStorageService: ReplyTextStorageService,
     private val coroutineContext: CoroutineContext
@@ -83,7 +89,7 @@ internal abstract class MetisContentViewModel(
     networkStatusProvider,
     websocketProvider,
     coroutineContext
-), InitialReplyTextProvider {
+), InitialReplyTextProvider, ReplyAutoCompleteHintProvider {
 
     protected val metisContext = MutableStateFlow(initialMetisContext)
     val currentMetisContext: StateFlow<MetisContext> = metisContext
@@ -178,7 +184,9 @@ internal abstract class MetisContentViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    override val newMessageText: MutableStateFlow<String> = MutableStateFlow("")
+    override val legalTagChars: List<Char> = listOf('@')
+
+    override val newMessageText: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue(""))
 
     init {
         viewModelScope.launch(coroutineContext) {
@@ -186,7 +194,7 @@ internal abstract class MetisContentViewModel(
             newMessageText
                 .debounce(500L)
                 .collect { textToStore ->
-                    storeNewMessageText(textToStore)
+                    storeNewMessageText(textToStore.text)
                 }
         }
     }
@@ -341,6 +349,42 @@ internal abstract class MetisContentViewModel(
         }
     }
 
+    override fun produceAutoCompleteHints(
+        tagChar: Char,
+        query: String
+    ): Flow<DataState<List<AutoCompleteCategory>>> = flatMapLatest(
+        metisContext,
+        accountService.authToken,
+        serverConfigurationService.serverUrl
+    ) { metisContext, authToken, serverUrl ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            conversationService
+                .searchForPotentialCommunicationParticipants(
+                    courseId = metisContext.courseId,
+                    query = query,
+                    includeStudents = true,
+                    includeTutors = true,
+                    includeInstructors = true,
+                    authToken = authToken,
+                    serverUrl = serverUrl
+                )
+                .bind { users ->
+                    AutoCompleteCategory(
+                        name = R.string.markdown_textfield_autocomplete_category_users,
+                        items = users.map {
+                            AutoCompleteHint(
+                                it.name.orEmpty(),
+                                replacementText = "[user]${it.name}(${it.username})[/user]",
+                                id = it.username.orEmpty()
+                            )
+                        }
+                    )
+                        .let(::listOf)
+                }
+
+        }
+    }
+
     /**
      * Emits to onRequestReload. If the websocket is currently not connected, requests a reconnect to the websocket
      */
@@ -354,7 +398,7 @@ internal abstract class MetisContentViewModel(
         }
     }
 
-    override fun updateInitialReplyText(text: String) {
+    override fun updateInitialReplyText(text: TextFieldValue) {
         newMessageText.value = text
     }
 
@@ -385,7 +429,7 @@ internal abstract class MetisContentViewModel(
         metisContext.value = newMetisContext
 
         viewModelScope.launch(coroutineContext) {
-            newMessageText.value = retrieveNewMessageText(newMetisContext, getPostId())
+            newMessageText.value = TextFieldValue(text = retrieveNewMessageText(newMetisContext, getPostId()))
         }
     }
 
