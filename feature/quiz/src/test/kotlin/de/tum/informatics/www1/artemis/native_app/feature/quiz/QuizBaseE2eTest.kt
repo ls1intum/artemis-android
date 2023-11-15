@@ -9,7 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.fileUpload
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
@@ -92,11 +92,9 @@ internal abstract class QuizBaseE2eTest(protected val quizType: QuizType.Workabl
         return viewModel
     }
 
-    protected suspend fun uploadBackgroundImage(): String {
-        val byteArray = context.resources.openRawResource(R.raw.dndbackground).use { inputStream ->
-            inputStream.readBytes()
-        }
+    protected fun getBackgroundImageFilePath() = "/api/files/drag-and-drop/backgrounds/${generateId()}/dndbackground.png"
 
-        return fileUpload(getAdminAccessToken(), byteArray)
+    protected fun getBackgroundImageBytes(): ByteArray = context.resources.openRawResource(R.raw.dndbackground).use { inputStream ->
+        inputStream.readBytes()
     }
 }
