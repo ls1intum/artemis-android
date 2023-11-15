@@ -80,7 +80,8 @@ internal fun ConversationList(
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
-    onRequestAddChannel: () -> Unit
+    onRequestAddChannel: () -> Unit,
+    trailingContent: LazyListScope.() -> Unit
 ) {
     val listWithHeader: LazyListScope.(ConversationCollections.ConversationCollection<*>, String, String, Int, ConversationSectionHeaderAction, () -> Unit) -> Unit =
         { collection, key, suffix, textRes, action, toggleIsExpanded ->
@@ -150,6 +151,8 @@ internal fun ConversationList(
                 viewModel::toggleHiddenExpanded
             )
         }
+
+        trailingContent()
     }
 }
 

@@ -45,7 +45,8 @@ fun createCourseWithSelfRegistration(
   "timeZone": null,
   "courseInformationSharingConfiguration": "DISABLED",
   "enrollmentEnabled": true,
-  "enrollmentConfirmationMessage": "course enrollment message"
+  "enrollmentConfirmationMessage": "course enrollment message",
+  "courseInformationSharingMessagingCodeOfConduct": "Code of conduct…"
 }
 """.trimIndent()
 
