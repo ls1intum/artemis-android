@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
@@ -34,6 +35,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
+import io.github.fornewid.placeholder.material3.placeholder
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -95,7 +97,11 @@ fun ConversationScreen(
                             hintStyle = MaterialTheme.typography.bodyMedium
                         )
                     } else {
-                        Text(text = title, maxLines = 1)
+                        Text(
+                            modifier = Modifier.placeholder(!conversationDataState.isSuccess),
+                            text = title,
+                            maxLines = 1
+                        )
                     }
                 },
                 navigationIcon = {
@@ -129,16 +135,18 @@ fun ConversationScreen(
     ) { padding ->
         val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
-        CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides viewModel) {
-            MetisChatList(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                viewModel = viewModel,
-                listContentPadding = PaddingValues(),
-                onClickViewPost = onClickViewPost,
-                isReplyEnabled = isReplyEnabled
-            )
+        if (conversationDataState.isSuccess) {
+            CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides viewModel) {
+                MetisChatList(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    viewModel = viewModel,
+                    listContentPadding = PaddingValues(),
+                    onClickViewPost = onClickViewPost,
+                    isReplyEnabled = isReplyEnabled
+                )
+            }
         }
     }
 }

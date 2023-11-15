@@ -23,6 +23,14 @@ dependencies {
     api(project(":feature:metis:conversation"))
     api(project(":feature:metis:manage-conversations"))
 
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
+    implementation(libs.kotlinx.datetime)
+    implementation(libs.placeholder.material)
+    implementation(libs.accompanist.flowlayout)
+    implementation(libs.androidx.appcompat)
+
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)
 

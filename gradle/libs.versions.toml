@@ -22,7 +22,9 @@ kover = "0.7.2"
 ktor = "2.3.1"
 krossbow = "5.2.0"
 markwon = "4.6.2"
+mockk = "1.13.8"
 ossLicensesPlugin = "0.10.6"
+placeholderMaterial = "1.0.1"
 room = "2.5.2"
 sentry-android = "6.22.0"
 work = "2.8.1"
@@ -103,6 +105,8 @@ krossbow-stomp-core = { group = "org.hildan.krossbow", name = "krossbow-stomp-co
 krossbow-websocket-ktor = { group = "org.hildan.krossbow", name = "krossbow-websocket-ktor", version.ref = "krossbow" }
 krossbow-websocket-okhttp = { group = "org.hildan.krossbow", name = "krossbow-websocket-okhttp", version.ref = "krossbow" }
 krossbow-stomp-kxserialization-json = { group = "org.hildan.krossbow", name = "krossbow-stomp-kxserialization-json", version.ref = "krossbow" }
+mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
+mockk-agent = { group = "io.mockk", name = "mockk-agent", version.ref = "mockk" }
 noties-markwon-core = { group = "io.noties.markwon", name = "core", version.ref = "markwon" }
 noties-markwon-ext-strikethrough = { group = "io.noties.markwon", name = "ext-strikethrough", version.ref = "markwon" }
 noties-markwon-ext-tables = { group = "io.noties.markwon", name = "ext-tables", version.ref = "markwon" }
@@ -111,6 +115,7 @@ noties-markwon-linkify = { group = "io.noties.markwon", name = "linkify", versio
 noties-markwon-simple-ext = { group = "io.noties.markwon", name = "simple-ext", version.ref = "markwon" }
 noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", version.ref = "markwon" }
 oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
+placeholder-material = { group = "io.github.fornewid", name = "placeholder-material3", version.ref = "placeholderMaterial" }
 play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.0.1" }
 robolectric = { group = "org.robolectric", name = "robolectric", version = "4.10.3" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }

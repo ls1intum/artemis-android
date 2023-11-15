@@ -156,6 +156,7 @@ private fun CreateReplyUi(
 ) {
     var prevReplyContent by remember { mutableStateOf("") }
     var displayTextField: Boolean by remember { mutableStateOf(false) }
+    var requestFocus: Boolean by remember { mutableStateOf(false) }
 
     val currentTextFieldValue by replyMode.currentText
 
@@ -194,7 +195,8 @@ private fun CreateReplyUi(
             var textFieldWidth by remember { mutableIntStateOf(0) }
             var popupMaxHeight by remember { mutableIntStateOf(0) }
 
-            if (autoCompleteHints.orEmpty().flatMap { it.items }.isNotEmpty() && mayShowAutoCompletePopup) {
+            if (autoCompleteHints.orEmpty().flatMap { it.items }
+                    .isNotEmpty() && mayShowAutoCompletePopup) {
                 ReplyAutoCompletePopup(
                     autoCompleteCategories = autoCompleteHints.orEmpty(),
                     targetWidth = with(LocalDensity.current) { textFieldWidth.toDp() },
@@ -257,11 +259,17 @@ private fun CreateReplyUi(
                 }
             )
 
-            LaunchedEffect(key1 = displayTextField) {
-                focusRequester.requestFocus()
+            LaunchedEffect(requestFocus) {
+                if (requestFocus) {
+                    focusRequester.requestFocus()
+                    requestFocus = false
+                }
             }
         } else {
-            UnfocusedPreviewReplyTextField { displayTextField = true }
+            UnfocusedPreviewReplyTextField {
+                displayTextField = true
+                requestFocus = true
+            }
         }
     }
 }

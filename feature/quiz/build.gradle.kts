@@ -15,7 +15,7 @@ dependencies {
     implementation(project(":core:device"))
 
     implementation(libs.kotlinx.datetime)
-    implementation(libs.accompanist.placeholder.material)
+    implementation(libs.placeholder.material)
     implementation(libs.accompanist.flowlayout)
 
     testImplementation(project(":feature:login"))

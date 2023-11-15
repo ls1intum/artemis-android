@@ -76,6 +76,7 @@ internal fun MetisChatList(
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
 
     MetisReplyHandler(
+        initialReplyTextProvider = viewModel,
         onCreatePost = viewModel::createPost,
         onEditPost = viewModel::editPost,
         onDeletePost = viewModel::deletePost,
