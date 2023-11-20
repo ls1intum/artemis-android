@@ -7,6 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.holdLatestLoaded
+import de.tum.informatics.www1.artemis.native_app.core.data.join
 import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
@@ -45,6 +46,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.Reaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.hasModerationRights
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
@@ -192,11 +194,12 @@ internal abstract class MetisContentViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    val course: StateFlow<DataState<Course>> = flatMapLatest(
+    private val course: StateFlow<DataState<Course>> = flatMapLatest(
         metisContext,
         serverConfigurationService.serverUrl,
-        accountService.authToken
-    ) { metisContext, serverUrl, authToken ->
+        accountService.authToken,
+        onRequestReload.onStart { emit(Unit) }
+    ) { metisContext, serverUrl, authToken, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             courseService.getCourse(
                 metisContext.courseId,
@@ -205,7 +208,20 @@ internal abstract class MetisContentViewModel(
             ).bind { it.course }
         }
     }
-        .stateIn(viewModelScope, SharingStarted.Lazily)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
+
+    private val conversations: StateFlow<DataState<List<Conversation>>> = flatMapLatest(
+        metisContext,
+        serverConfigurationService.serverUrl,
+        accountService.authToken,
+        onRequestReload.onStart { emit(Unit) }
+    ) { metisContext, serverUrl, authToken, _ ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            conversationService
+                .getConversations(metisContext.courseId, authToken, serverUrl)
+        }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
     override val legalTagChars: List<Char> = listOf('@', '#')
 
@@ -382,43 +398,50 @@ internal abstract class MetisContentViewModel(
         }
 
         '#' -> {
-            produceExerciseAndLectureAutoCompleteHints()
+            combine(
+                produceExerciseAndLectureAutoCompleteHints(),
+                produceConversationAutoCompleteHints()
+            ) { exerciseAndLectureHints, conversationHints ->
+                (exerciseAndLectureHints join conversationHints)
+                    .bind { (a, b) -> a + b }
+            }
         }
 
         else -> flowOf(DataState.Success(emptyList()))
     }
 
-    private fun produceUserMentionAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteCategory>>> = flatMapLatest(
-        metisContext,
-        accountService.authToken,
-        serverConfigurationService.serverUrl
-    ) { metisContext, authToken, serverUrl ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            conversationService
-                .searchForPotentialCommunicationParticipants(
-                    courseId = metisContext.courseId,
-                    query = query,
-                    includeStudents = true,
-                    includeTutors = true,
-                    includeInstructors = true,
-                    authToken = authToken,
-                    serverUrl = serverUrl
-                )
-                .bind { users ->
-                    AutoCompleteCategory(
-                        name = R.string.markdown_textfield_autocomplete_category_users,
-                        items = users.map {
-                            AutoCompleteHint(
-                                it.name.orEmpty(),
-                                replacementText = "[user]${it.name}(${it.username})[/user]",
-                                id = it.username.orEmpty()
-                            )
-                        }
+    private fun produceUserMentionAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteCategory>>> =
+        flatMapLatest(
+            metisContext,
+            accountService.authToken,
+            serverConfigurationService.serverUrl
+        ) { metisContext, authToken, serverUrl ->
+            retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                conversationService
+                    .searchForPotentialCommunicationParticipants(
+                        courseId = metisContext.courseId,
+                        query = query,
+                        includeStudents = true,
+                        includeTutors = true,
+                        includeInstructors = true,
+                        authToken = authToken,
+                        serverUrl = serverUrl
                     )
-                        .let(::listOf)
-                }
+                    .bind { users ->
+                        AutoCompleteCategory(
+                            name = R.string.markdown_textfield_autocomplete_category_users,
+                            items = users.map {
+                                AutoCompleteHint(
+                                    it.name.orEmpty(),
+                                    replacementText = "[user]${it.name}(${it.username})[/user]",
+                                    id = it.username.orEmpty()
+                                )
+                            }
+                        )
+                            .let(::listOf)
+                    }
+            }
         }
-    }
 
     private fun produceExerciseAndLectureAutoCompleteHints(): Flow<DataState<List<AutoCompleteCategory>>> =
         combine(course, metisContext) { courseDataState, metisContext ->
@@ -460,6 +483,28 @@ internal abstract class MetisContentViewModel(
                     AutoCompleteCategory(
                         name = R.string.markdown_textfield_autocomplete_category_lectures,
                         items = lectureAutoCompleteItems
+                    )
+                )
+            }
+        }
+
+    private fun produceConversationAutoCompleteHints(): Flow<DataState<List<AutoCompleteCategory>>> =
+        conversations.map { conversationsDataState ->
+            conversationsDataState.bind { conversations ->
+                val conversationAutoCompleteItems = conversations
+                    .filterIsInstance<ChannelChat>()
+                    .map { channel ->
+                        AutoCompleteHint(
+                            hint = channel.name,
+                            replacementText = "[channel]${channel.name}(${channel.id})[/channel]",
+                            id = "Channel:${channel.id}"
+                        )
+                    }
+
+                listOf(
+                    AutoCompleteCategory(
+                        name = R.string.markdown_textfield_autocomplete_category_channels,
+                        items = conversationAutoCompleteItems
                     )
                 )
             }
