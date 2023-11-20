@@ -290,11 +290,7 @@ internal abstract class MetisContentViewModel(
             reactionId = reactionId,
             serverUrl = serverConfigurationService.serverUrl.first(),
             authToken = accountService.authToken.first()
-        )
-            .onFailure {
-                println("Could not delete $it")
-            }
-            .or(false)
+        ).or(false)
 
         return if (success) null else MetisModificationFailure.DELETE_REACTION
     }
@@ -399,8 +395,8 @@ internal abstract class MetisContentViewModel(
 
         '#' -> {
             combine(
-                produceExerciseAndLectureAutoCompleteHints(),
-                produceConversationAutoCompleteHints()
+                produceExerciseAndLectureAutoCompleteHints(query),
+                produceConversationAutoCompleteHints(query)
             ) { exerciseAndLectureHints, conversationHints ->
                 (exerciseAndLectureHints join conversationHints)
                     .bind { (a, b) -> a + b }
@@ -409,6 +405,13 @@ internal abstract class MetisContentViewModel(
 
         else -> flowOf(DataState.Success(emptyList()))
     }
+        // Only display categories with at least 1 hint.
+        .map { autoCompleteCategoriesDataState ->
+            autoCompleteCategoriesDataState.bind { autoCompleteCategories ->
+                autoCompleteCategories
+                    .filter { it.items.isNotEmpty() }
+            }
+        }
 
     private fun produceUserMentionAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteCategory>>> =
         flatMapLatest(
@@ -443,37 +446,43 @@ internal abstract class MetisContentViewModel(
             }
         }
 
-    private fun produceExerciseAndLectureAutoCompleteHints(): Flow<DataState<List<AutoCompleteCategory>>> =
+    private fun produceExerciseAndLectureAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteCategory>>> =
         combine(course, metisContext) { courseDataState, metisContext ->
             courseDataState.bind { course ->
                 val exerciseAutoCompleteItems =
-                    course.exercises.mapNotNull { exercise ->
-                        val exerciseTag = when (exercise) {
-                            is FileUploadExercise -> "file-upload"
-                            is ModelingExercise -> "modeling"
-                            is ProgrammingExercise -> "programming"
-                            is QuizExercise -> "quiz"
-                            is TextExercise -> "text"
-                            is UnknownExercise -> return@mapNotNull null
+                    course
+                        .exercises
+                        .filter { query in it.title.orEmpty() }
+                        .mapNotNull { exercise ->
+                            val exerciseTag = when (exercise) {
+                                is FileUploadExercise -> "file-upload"
+                                is ModelingExercise -> "modeling"
+                                is ProgrammingExercise -> "programming"
+                                is QuizExercise -> "quiz"
+                                is TextExercise -> "text"
+                                is UnknownExercise -> return@mapNotNull null
+                            }
+
+                            val exerciseTitle = exercise.title ?: return@mapNotNull null
+
+                            AutoCompleteHint(
+                                hint = exerciseTitle,
+                                replacementText = "[$exerciseTag]${exercise.title}(/courses/${metisContext.courseId}/exercises/${exercise.id})[/$exerciseTag]",
+                                id = "Exercise:${exercise.id ?: return@mapNotNull null}"
+                            )
                         }
 
-                        val exerciseTitle = exercise.title ?: return@mapNotNull null
-
-                        AutoCompleteHint(
-                            hint = exerciseTitle,
-                            replacementText = "[$exerciseTag]${exercise.title}(/courses/${metisContext.courseId}/exercises/${exercise.id})[/$exerciseTag]",
-                            id = "Exercise:${exercise.id ?: return@mapNotNull null}"
-                        )
-                    }
-
                 val lectureAutoCompleteItems =
-                    course.lectures.mapNotNull { lecture ->
-                        AutoCompleteHint(
-                            hint = lecture.title,
-                            replacementText = "[lecture]${lecture.title}(/courses/${metisContext.courseId}/lectures/${lecture.id})[/lecture]",
-                            id = "Lecture:${lecture.id ?: return@mapNotNull null}"
-                        )
-                    }
+                    course
+                        .lectures
+                        .filter { query in it.title }
+                        .mapNotNull { lecture ->
+                            AutoCompleteHint(
+                                hint = lecture.title,
+                                replacementText = "[lecture]${lecture.title}(/courses/${metisContext.courseId}/lectures/${lecture.id})[/lecture]",
+                                id = "Lecture:${lecture.id ?: return@mapNotNull null}"
+                            )
+                        }
 
                 listOf(
                     AutoCompleteCategory(
@@ -488,11 +497,12 @@ internal abstract class MetisContentViewModel(
             }
         }
 
-    private fun produceConversationAutoCompleteHints(): Flow<DataState<List<AutoCompleteCategory>>> =
+    private fun produceConversationAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteCategory>>> =
         conversations.map { conversationsDataState ->
             conversationsDataState.bind { conversations ->
                 val conversationAutoCompleteItems = conversations
                     .filterIsInstance<ChannelChat>()
+                    .filter { query in it.name }
                     .map { channel ->
                         AutoCompleteHint(
                             hint = channel.name,
