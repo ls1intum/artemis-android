@@ -6,4 +6,9 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
     }
 
     override fun transformUserMentionMarkdown(text: String, fullName: String, userName: String): String = "[@$fullName](artemis://courses/$courseId/messages?username=$userName)"
+
+    override fun transformChannelMentionMarkdown(
+        channelName: String,
+        conversationId: Long
+    ): String = "[#$channelName](artemis://courses/$courseId/messages?conversationId=$conversationId)"
 }

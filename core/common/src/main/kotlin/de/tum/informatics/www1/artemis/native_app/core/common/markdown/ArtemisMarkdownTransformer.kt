@@ -13,11 +13,17 @@ abstract class ArtemisMarkdownTransformer {
             fullName: String,
             userName: String
         ): String = ""
+
+        override fun transformChannelMentionMarkdown(
+            channelName: String,
+            conversationId: Long
+        ): String = ""
     }
 
     private val exerciseMarkdownPattern =
         "\\[(text|quiz|lecture|modeling|file-upload|programing)](.*)\\(((?:/|\\w|\\d)+)\\)\\[/\\1]".toRegex()
     private val userMarkdownPattern = "\\[user](.*?)\\((.*?)\\)\\[/user]".toRegex()
+    private val channelMarkdownPattern = "\\[channel](.*?)\\((\\d+?)\\)\\[/channel]".toRegex()
 
     fun transformMarkdown(markdown: String): String {
         return exerciseMarkdownPattern.replace(markdown) { matchResult ->
@@ -34,6 +40,15 @@ abstract class ArtemisMarkdownTransformer {
                     userName = userName
                 )
             }
+        }.let {
+            channelMarkdownPattern.replace(it) { matchResult ->
+                val channelName = matchResult.groups[1]?.value.orEmpty()
+                val conversationId = matchResult.groups[2]?.value.orEmpty().toLong()
+                transformChannelMentionMarkdown(
+                    channelName = channelName,
+                    conversationId = conversationId
+                )
+            }
         }
     }
 
@@ -43,5 +58,10 @@ abstract class ArtemisMarkdownTransformer {
         text: String,
         fullName: String,
         userName: String
+    ): String
+
+    protected abstract fun transformChannelMentionMarkdown(
+        channelName: String,
+        conversationId: Long
     ): String
 }
