@@ -7,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.Artemi
 
 private const val LegacyArtemisInstanceHost = "artemis.ase.in.tum.de"
 
-private val supportedUrls = ArtemisInstances.instances.map { it.host } + LegacyArtemisInstanceHost
+private val supportedUrls = ArtemisInstances.instances.map { it.host } + LegacyArtemisInstanceHost + "artemis:/"
 
 fun generateLinks(
     path: String,

@@ -63,6 +63,8 @@ internal fun MetisThreadUi(
     val postDataState: DataState<PostPojo> by viewModel.post.collectAsState()
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
 
+    val serverUrl by viewModel.serverUrl.collectAsState()
+
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
 
     val metisContext by viewModel.currentMetisContext.collectAsState()
@@ -119,6 +121,8 @@ internal fun MetisThreadUi(
                     ) { post ->
                         MetisPostListHandler(
                             modifier = Modifier.fillMaxSize(),
+                            serverUrl = serverUrl,
+                            courseId = metisContext.courseId,
                             state = listState,
                             itemCount = post.orderedAnswerPostings.size,
                             order = DisplayPostOrder.REGULAR,

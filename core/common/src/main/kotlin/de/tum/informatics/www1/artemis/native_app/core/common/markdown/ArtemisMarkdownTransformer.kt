@@ -2,6 +2,19 @@ package de.tum.informatics.www1.artemis.native_app.core.common.markdown
 
 abstract class ArtemisMarkdownTransformer {
 
+    /**
+     * Empty markdown transformer.
+     */
+    companion object : ArtemisMarkdownTransformer() {
+        override fun transformExerciseMarkdown(title: String, url: String): String = ""
+
+        override fun transformUserMentionMarkdown(
+            text: String,
+            fullName: String,
+            userName: String
+        ): String = ""
+    }
+
     private val exerciseMarkdownPattern =
         "\\[(text|quiz|lecture|modeling|file-upload|programing)](.*)\\(((?:/|\\w|\\d)+)\\)\\[/\\1]".toRegex()
     private val userMarkdownPattern = "\\[user](.*?)\\((.*?)\\)\\[/user]".toRegex()

@@ -75,6 +75,8 @@ internal fun MetisChatList(
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
 
+    val serverUrl by viewModel.serverUrl.collectAsState()
+
     MetisReplyHandler(
         initialReplyTextProvider = viewModel,
         onCreatePost = viewModel::createPost,
@@ -97,6 +99,8 @@ internal fun MetisChatList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
+                serverUrl = serverUrl,
+                courseId = metisContext.courseId,
                 state = state,
                 itemCount = posts.itemCount,
                 order = DisplayPostOrder.REVERSED,
@@ -121,24 +125,20 @@ internal fun MetisChatList(
                     }
 
                     else -> {
-                        ProvideMarkwon {
-                            ProvideEmojis {
-                                ChatList(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .testTag(TEST_TAG_METIS_POST_LIST),
-                                    listContentPadding = listContentPadding,
-                                    state = state,
-                                    posts = posts,
-                                    clientId = clientId,
-                                    onClickViewPost = onClickViewPost,
-                                    hasModerationRights = hasModerationRights,
-                                    onRequestEdit = onEditPostDelegate,
-                                    onRequestDelete = onDeletePostDelegate,
-                                    onRequestReactWithEmoji = onRequestReactWithEmojiDelegate
-                                )
-                            }
-                        }
+                        ChatList(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .testTag(TEST_TAG_METIS_POST_LIST),
+                            listContentPadding = listContentPadding,
+                            state = state,
+                            posts = posts,
+                            clientId = clientId,
+                            onClickViewPost = onClickViewPost,
+                            hasModerationRights = hasModerationRights,
+                            onRequestEdit = onEditPostDelegate,
+                            onRequestDelete = onDeletePostDelegate,
+                            onRequestReactWithEmoji = onRequestReactWithEmojiDelegate
+                        )
                     }
                 }
             }

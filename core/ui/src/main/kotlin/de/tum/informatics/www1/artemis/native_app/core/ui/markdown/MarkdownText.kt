@@ -2,8 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import android.content.Context
 import android.text.method.LinkMovementMethod
-import android.text.style.ForegroundColorSpan
-import android.text.style.StrikethroughSpan
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
@@ -12,7 +10,7 @@ import androidx.annotation.IdRes
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -21,7 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
@@ -33,16 +30,13 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
 import coil.ImageLoader
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.html.HtmlPlugin
 import io.noties.markwon.image.coil.CoilImagesPlugin
 import io.noties.markwon.linkify.LinkifyPlugin
-import io.noties.markwon.simple.ext.SimpleExtPlugin
-import org.koin.compose.koinInject
 
 // Copy from: https://github.com/jeziellago/compose-markdown
 /*
@@ -70,7 +64,7 @@ import org.koin.compose.koinInject
  * SOFTWARE.
  */
 
-private const val PreviewModeServerUrl = "http://example.com"
+val LocalMarkdownTransformer = compositionLocalOf<ArtemisMarkdownTransformer> { ArtemisMarkdownTransformer }
 
 @Composable
 fun MarkdownText(
@@ -95,23 +89,7 @@ fun MarkdownText(
         createMarkdownRender(context, imageLoader)
     }
 
-    // Without this, we cannot render markdown text in @Preview composable.
-    val serverUrl = if (LocalInspectionMode.current) {
-        PreviewModeServerUrl
-    } else {
-        val serverConfigurationService: ServerConfigurationService = koinInject()
-        serverConfigurationService.serverUrl.collectAsState(initial = "").value
-    }
-
-    val markdownTransformer = remember(serverUrl) {
-        val strippedServerUrl =
-            if (serverUrl.endsWith("/")) serverUrl.substring(
-                0,
-                serverUrl.length - 1
-            ) else serverUrl
-
-        PostArtemisMarkdownTransformer(strippedServerUrl)
-    }
+    val markdownTransformer = LocalMarkdownTransformer.current
 
     val transformedMarkdown by remember(markdown, markdownTransformer) {
         derivedStateOf {
@@ -207,12 +185,6 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?): Markwon {
         .usePlugin(StrikethroughPlugin.create())
         .usePlugin(TablePlugin.create(context))
         .usePlugin(LinkifyPlugin.create())
-        // User mentions are transformed to |||@full name|||
-        .usePlugin(SimpleExtPlugin.create { p ->
-            p.addExtension(3, '|') { _, _ ->
-                arrayOf(ForegroundColorSpan(0xff3e8acc.toInt()))
-            }
-        })
         .apply {
             if (imageLoader != null) {
                 usePlugin(CoilImagesPlugin.create(context, imageLoader))
