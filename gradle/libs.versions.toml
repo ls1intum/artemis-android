@@ -1,18 +1,18 @@
 [versions]
 accompanist = "0.30.1"
-androidDesugarJdkLibs = "2.0.3"
-androidxActivity = "1.7.2"
+androidDesugarJdkLibs = "2.0.4"
+androidxActivity = "1.8.1"
 androidxAppCompat = "1.6.1"
-androidxComposeBom = "2023.10.00"
+androidxComposeBom = "2023.10.01"
 androidxLifecycle = "2.6.2"
-androidxNavigation = "2.7.2"
-androidGradlePlugin = "8.1.1"
+androidxNavigation = "2.7.5"
+androidGradlePlugin = "8.1.4"
 androidxDataStore = "1.0.0"
 androidxPaging = "3.2.1"
 androidxPagingCompose = "3.2.1"
 coil = "2.4.0"
 emoji2 = "1.4.0"
-kotlin = "1.9.10"
+kotlin = "1.9.20"
 kotlinxCoroutines = "1.7.3"
 kotlinxDatetime = "0.4.0"
 kotlinxSerializationJson = "1.5.1"
@@ -25,13 +25,13 @@ markwon = "4.6.2"
 mockk = "1.13.8"
 ossLicensesPlugin = "0.10.6"
 placeholderMaterial = "1.0.1"
-room = "2.5.2"
+room = "2.6.0"
 sentry-android = "6.22.0"
 work = "2.8.1"
 
 # Used indirecly in the build config -> Do not remove without double checking.
-androidxComposeCompiler = "1.5.3"
-androidxCore = "1.9.0"
+androidxComposeCompiler = "1.5.4"
+androidxCore = "1.12.0"
 
 [libraries]
 accompanist-placeholder-material = { group = "com.google.accompanist", name = "accompanist-placeholder-material", version.ref = "accompanist" }
@@ -43,7 +43,7 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJdkLibs" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
-androidx-browser = { group = "androidx.browser", name = "browser", version = "1.6.0" }
+androidx-browser = { group = "androidx.browser", name = "browser", version = "1.7.0" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout" }
@@ -75,7 +75,7 @@ androidx-security-crypto = { group = "androidx.security", name = "security-crypt
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 auth0-java-jwt = { group = "com.auth0.android", name = "jwtdecode", version = "2.0.2" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "32.2.3" }
+google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "32.6.0" }
 google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
@@ -131,8 +131,7 @@ android-application = { id = "com.android.application", version.ref = "androidGr
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-google-services = { id = "com.google.gms.google-services", version = "4.3.15" }
-google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.0.0" }
-github-benManes-versions = { id = "com.github.ben-manes.versions", version = "0.48.0" }
+google-services = { id = "com.google.gms.google-services", version = "4.4.0" }
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.0.1" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
-google-ksp = { id = "com.google.devtools.ksp", version = "1.9.10-1.0.13" }
+google-ksp = { id = "com.google.devtools.ksp", version = "1.9.20-1.0.14" }
