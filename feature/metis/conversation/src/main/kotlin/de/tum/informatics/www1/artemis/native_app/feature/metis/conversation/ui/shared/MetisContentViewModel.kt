@@ -25,6 +25,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Programmin
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
@@ -227,6 +228,8 @@ internal abstract class MetisContentViewModel(
 
     override val newMessageText: MutableStateFlow<TextFieldValue> =
         MutableStateFlow(TextFieldValue(""))
+
+    val serverUrl = serverUrlStateFlow(serverConfigurationService)
 
     init {
         viewModelScope.launch(coroutineContext) {
