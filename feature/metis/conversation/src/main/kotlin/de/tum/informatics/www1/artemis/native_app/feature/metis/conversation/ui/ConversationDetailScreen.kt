@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -26,12 +27,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisListViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
+import io.github.fornewid.placeholder.material3.placeholder
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -98,15 +102,19 @@ fun ConversationScreen(
     ) { padding ->
         val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
-        MetisChatList(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            viewModel = viewModel,
-            listContentPadding = PaddingValues(),
-            onClickViewPost = onClickViewPost,
-            isReplyEnabled = isReplyEnabled
-        )
+        if (conversationDataState.isSuccess) {
+            CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides viewModel) {
+                MetisChatList(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    viewModel = viewModel,
+                    listContentPadding = PaddingValues(),
+                    onClickViewPost = onClickViewPost,
+                    isReplyEnabled = isReplyEnabled
+                )
+            }
+        }
     }
 }
 
@@ -152,7 +160,11 @@ fun ConversationScreen(
                             hintStyle = MaterialTheme.typography.bodyMedium
                         )
                     } else {
-                        Text(text = conversationTitle, maxLines = 1)
+                        Text(
+                            modifier = Modifier.placeholder(!conversationDataState.isSuccess),
+                            text = conversationTitle,
+                            maxLines = 1
+                        )
                     }
                 },
                 navigationIcon = {

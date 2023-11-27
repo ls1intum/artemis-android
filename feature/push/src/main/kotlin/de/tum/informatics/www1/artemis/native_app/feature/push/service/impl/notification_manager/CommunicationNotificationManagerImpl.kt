@@ -9,6 +9,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.room.withTransaction
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PushNotificationArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
@@ -181,7 +182,7 @@ internal class CommunicationNotificationManagerImpl(
         messages.forEach { message ->
             style.addMessage(
                 NotificationCompat.MessagingStyle.Message(
-                    message.text,
+                    PushNotificationArtemisMarkdownTransformer.transformMarkdown(message.text),
                     message.date.toEpochMilliseconds(),
                     Person.Builder()
                         .setName(message.authorName)

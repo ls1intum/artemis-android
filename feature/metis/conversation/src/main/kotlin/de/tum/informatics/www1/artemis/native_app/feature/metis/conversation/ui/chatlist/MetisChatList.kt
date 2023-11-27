@@ -77,6 +77,7 @@ internal fun MetisChatList(
 
     MetisChatList(
         modifier = modifier,
+        initialReplyTextProvider = viewModel,
         state = state,
         isReplyEnabled = isReplyEnabled,
         posts = posts.asPostsDataState(),
@@ -96,6 +97,7 @@ internal fun MetisChatList(
 @Composable
 fun MetisChatList(
     modifier: Modifier,
+    initialReplyTextProvider: InitialReplyTextProvider,
     posts: PostsDataState,
     isDataOutdated: Boolean,
     clientId: Long,
@@ -111,6 +113,7 @@ fun MetisChatList(
     onRequestReload: () -> Unit
 ) {
     MetisReplyHandler(
+        initialReplyTextProvider = viewModel,
         onCreatePost = onCreatePost,
         onEditPost = onEditPost,
         onDeletePost = onDeletePost,

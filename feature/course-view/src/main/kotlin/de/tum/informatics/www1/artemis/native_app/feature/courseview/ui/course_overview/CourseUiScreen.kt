@@ -33,6 +33,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import io.github.fornewid.placeholder.material3.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
@@ -47,10 +48,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseVi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.LectureListUi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ConversationFacadeUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.OpenedConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.OpenedThread
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SinglePageConversationBody
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -265,7 +266,7 @@ internal fun CourseUiScreen(
                     }
                 }
 
-                SinglePageConversationBody(
+                ConversationFacadeUi(
                     modifier = metisModifier,
                     courseId = courseId,
                     initialConfiguration = initialConfiguration

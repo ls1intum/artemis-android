@@ -13,6 +13,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTest
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import org.junit.Before
 import org.junit.Rule
 import org.koin.android.ext.koin.androidContext
@@ -29,7 +32,7 @@ abstract class ConversationBaseTest : BaseComposeTest() {
 
         modules(coreTestModules)
         modules(loginModule, communicationModule, testLoginModule, module {
-            single<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider> {
+            single<MetisDatabaseProvider> {
                 MetisDatabaseProviderMock(
                     context
                 )
@@ -42,7 +45,7 @@ abstract class ConversationBaseTest : BaseComposeTest() {
     protected lateinit var course: Course
     protected lateinit var exercise: TextExercise
 
-    protected val conversationService: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService get() = get()
+    protected val conversationService: ConversationService get() = get()
 
     @Before
     open fun setup() {
@@ -55,7 +58,7 @@ abstract class ConversationBaseTest : BaseComposeTest() {
         }
     }
 
-    protected suspend fun createPersonalConversation(): de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat =
+    protected suspend fun createPersonalConversation(): OneToOneChat =
         conversationService.createOneToOneConversation(
             course.id!!,
             user2Username,

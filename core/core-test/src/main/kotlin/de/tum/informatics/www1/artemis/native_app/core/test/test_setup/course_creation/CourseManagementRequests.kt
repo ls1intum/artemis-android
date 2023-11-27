@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation
 
 import android.util.Log
-import androidx.annotation.RawRes
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
@@ -74,7 +73,8 @@ suspend fun KoinComponent.createCourse(
             studentGroupName = studentGroupName,
             teachingAssistantGroupName = teachingAssistantGroupName,
             editorGroupName = editorGroupName,
-            instructorGroupName = instructorGroupName
+            instructorGroupName = instructorGroupName,
+            courseInformationSharingMessagingCodeOfConduct = "Code of conduct…"
         )
         jsonProvider.applicationJsonConfiguration.encodeToString(course)
     }
@@ -126,10 +126,12 @@ suspend fun KoinComponent.createExercise(
         .body()
 }
 
-suspend fun KoinComponent.createExerciseFormBody(
+suspend fun KoinComponent.createExerciseFormBodyWithPng(
     accessToken: String,
     courseId: Long,
     exerciseName: String = "Exercise ${generateId()}",
+    pngByteArray: ByteArray,
+    pngFilePath: String,
     endpoint: String,
     creator: (String, Long) -> String
 ): Exercise {
@@ -141,6 +143,14 @@ suspend fun KoinComponent.createExerciseFormBody(
                 Headers.build {
                     set("Content-Type", "application/json")
                     set("filename", "blob")
+                }
+            )
+            append(
+                "files",
+                pngByteArray,
+                headers = Headers.build {
+                    set(HttpHeaders.ContentType, ContentType.Image.PNG.contentType)
+                    set(HttpHeaders.ContentDisposition, "filename=\"$pngFilePath\"")
                 }
             )
         }
@@ -338,37 +348,6 @@ suspend fun KoinComponent.startQuizExerciseBatch(
 
         contentType(ContentType.Application.Json)
     }.body()
-}
-
-/**
- * @return path of the created file
- */
-suspend fun KoinComponent.fileUpload(accessToken: String, byteArray: ByteArray): String {
-    val response: FileUploadResponse = ktorProvider.ktorClient.submitFormWithBinaryData(
-        url = serverConfigurationService.serverUrl.first(),
-        formData = formData {
-            append(
-                "file",
-                byteArray,
-                headers = Headers.build {
-                    set(HttpHeaders.ContentType, ContentType.Image.PNG.contentType)
-                }
-            )
-        }
-    ) {
-        url {
-            appendPathSegments("api", "fileUpload")
-
-            parameter("keepFileName", false)
-        }
-
-        cookieAuth(accessToken)
-
-        contentType(ContentType.MultiPart.FormData)
-        accept(ContentType.Application.Json)
-    }.body()
-
-    return response.path
 }
 
 @Serializable

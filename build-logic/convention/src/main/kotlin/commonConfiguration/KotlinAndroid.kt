@@ -73,8 +73,7 @@ internal fun Project.configureKotlinAndroid(
                 "-opt-in=kotlin.RequiresOptIn",
                 // Enable experimental coroutines APIs, including Flow
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                "-opt-in=kotlinx.coroutines.FlowPreview",
-                "-opt-in=kotlin.Experimental",
+                "-opt-in=kotlinx.coroutines.FlowPreview"
             )
 
             jvmTarget = JavaVersion.VERSION_17.toString()
