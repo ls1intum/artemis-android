@@ -20,10 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
+import io.github.fornewid.placeholder.material3.placeholder
 
 @Composable
 internal fun CourseTopAppBar(
@@ -38,7 +39,7 @@ internal fun CourseTopAppBar(
         TopAppBar(
             title = {
                 Text(
-                    modifier = Modifier.placeholder(visible = courseDataState !is DataState.Success),
+                    modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
                     text = courseDataState.bind { it.title }
                         .orElse("Placeholder course title"),
                     maxLines = 2,

@@ -1,6 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage
 
-internal interface ReplyTextStorageService {
+interface ReplyTextStorageService {
 
     suspend fun getStoredReplyText(
         serverHost: String,

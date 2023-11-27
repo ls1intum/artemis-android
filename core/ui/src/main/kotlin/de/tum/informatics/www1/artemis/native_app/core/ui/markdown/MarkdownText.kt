@@ -114,7 +114,7 @@ fun MarkdownText(
             derivedStateOf {
                 markdownTransformer.transformMarkdown(markdown)
             }
-        }.value
+        }
     }
 
     AndroidView(

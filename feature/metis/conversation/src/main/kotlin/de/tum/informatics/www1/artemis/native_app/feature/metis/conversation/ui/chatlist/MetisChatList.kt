@@ -37,6 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.rememberPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.shouldDisplayHeader
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisOutdatedBanner
@@ -105,7 +106,7 @@ fun MetisChatList(
     listContentPadding: PaddingValues,
     state: LazyListState,
     isReplyEnabled: Boolean,
-    onCreatePost: (String) -> Deferred<MetisModificationFailure?>,
+    onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (PostPojo, String) -> Deferred<MetisModificationFailure?>,
     onDeletePost: (PostPojo) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (PostPojo, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
@@ -113,7 +114,7 @@ fun MetisChatList(
     onRequestReload: () -> Unit
 ) {
     MetisReplyHandler(
-        initialReplyTextProvider = viewModel,
+        initialReplyTextProvider = initialReplyTextProvider,
         onCreatePost = onCreatePost,
         onEditPost = onEditPost,
         onDeletePost = onDeletePost,

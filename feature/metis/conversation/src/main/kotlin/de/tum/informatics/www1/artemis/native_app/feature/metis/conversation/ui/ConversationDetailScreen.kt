@@ -94,6 +94,7 @@ fun ConversationScreen(
         modifier = modifier,
         courseId = courseId,
         conversationId = conversationId,
+        isConversationLoaded = conversationDataState.isSuccess,
         query = query,
         conversationTitle = title,
         onNavigateBack = onNavigateBack,
@@ -125,6 +126,7 @@ fun ConversationScreen(
     conversationId: Long,
     conversationTitle: String,
     query: String,
+    isConversationLoaded: Boolean,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onUpdateQuery: (String) -> Unit,
@@ -161,7 +163,7 @@ fun ConversationScreen(
                         )
                     } else {
                         Text(
-                            modifier = Modifier.placeholder(!conversationDataState.isSuccess),
+                            modifier = Modifier.placeholder(!isConversationLoaded),
                             text = conversationTitle,
                             maxLines = 1
                         )

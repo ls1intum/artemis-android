@@ -38,7 +38,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf

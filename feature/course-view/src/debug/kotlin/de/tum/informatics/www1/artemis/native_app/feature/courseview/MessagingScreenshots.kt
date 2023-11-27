@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.data.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -33,6 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewBody
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewViewModel
@@ -228,6 +230,7 @@ fun `Metis - Conversation Channel`() {
                         courseId = ScreenshotCourse.id!!,
                         conversationId = sharedConversation.id,
                         conversationTitle = sharedConversation.humanReadableName,
+                        isConversationLoaded = true,
                         query = "",
                         onUpdateQuery = {},
                         onNavigateBack = {},
@@ -252,7 +255,14 @@ fun `Metis - Conversation Channel`() {
                                 onDeletePost = { CompletableDeferred() },
                                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                                 onClickViewPost = {},
-                                onRequestReload = {}
+                                onRequestReload = {},
+                                initialReplyTextProvider = object : InitialReplyTextProvider {
+                                    override val newMessageText: Flow<TextFieldValue> = flowOf(
+                                        TextFieldValue()
+                                    )
+
+                                    override fun updateInitialReplyText(text: TextFieldValue) = Unit
+                                }
                             )
                         }
                     )
