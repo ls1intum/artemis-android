@@ -10,6 +10,7 @@ import androidx.paging.insertSeparators
 import androidx.paging.map
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -68,6 +69,7 @@ internal class MetisListViewModel(
     networkStatusProvider: NetworkStatusProvider,
     conversationService: ConversationService,
     replyTextStorageService: ReplyTextStorageService,
+    courseService: CourseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisContentViewModel(
     initialMetisContext,
@@ -80,6 +82,7 @@ internal class MetisListViewModel(
     networkStatusProvider,
     conversationService,
     replyTextStorageService,
+    courseService,
     coroutineContext
 ) {
     private val _filter = MutableStateFlow<List<MetisFilter>>(emptyList())

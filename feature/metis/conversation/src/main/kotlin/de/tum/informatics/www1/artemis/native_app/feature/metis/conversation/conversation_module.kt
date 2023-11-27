@@ -41,6 +41,7 @@ val conversationModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
@@ -50,6 +51,7 @@ val conversationModule = module {
             params[0],
             params[1],
             params[2],
+            get(),
             get(),
             get(),
             get(),

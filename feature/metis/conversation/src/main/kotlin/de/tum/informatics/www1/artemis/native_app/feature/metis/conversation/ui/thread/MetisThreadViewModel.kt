@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndefinetly
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -66,6 +67,7 @@ internal class MetisThreadViewModel(
     accountDataService: AccountDataService,
     conversationService: ConversationService,
     replyTextStorageService: ReplyTextStorageService,
+    courseService: CourseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisContentViewModel(
     initialMetisContext,
@@ -78,6 +80,7 @@ internal class MetisThreadViewModel(
     networkStatusProvider,
     conversationService,
     replyTextStorageService,
+    courseService,
     coroutineContext
 ) {
 

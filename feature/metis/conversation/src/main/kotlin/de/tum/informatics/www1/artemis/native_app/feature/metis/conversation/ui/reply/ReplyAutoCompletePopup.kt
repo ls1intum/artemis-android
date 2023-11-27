@@ -3,8 +3,10 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -16,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -42,7 +45,9 @@ internal fun ReplyAutoCompletePopup(
         onDismissRequest = onDismissRequest
     ) {
         ReplyAutoCompletePopupBody(
-            modifier = Modifier.heightIn(max = maxHeight).width(targetWidth),
+            modifier = Modifier
+                .heightIn(max = maxHeight)
+                .width(targetWidth),
             autoCompleteCategories = autoCompleteCategories,
             performAutoComplete = performAutoComplete
         )
@@ -63,7 +68,7 @@ private fun ReplyAutoCompletePopupBody(
             )
             .padding(top = 8.dp)
     ) {
-        autoCompleteCategories.forEach { category ->
+        autoCompleteCategories.forEachIndexed { categoryIndex, category ->
             item {
                 AutoCompleteCategoryComposable(
                     modifier = Modifier.fillMaxWidth(),
@@ -84,6 +89,16 @@ private fun ReplyAutoCompletePopupBody(
                     item { Divider() }
                 }
             }
+
+            if (categoryIndex != autoCompleteCategories.lastIndex) {
+                item {
+                    Column {
+                        Divider()
+
+                        Box(modifier = Modifier.height(8.dp))
+                    }
+                }
+            }
         }
     }
 }
@@ -96,7 +111,8 @@ private fun AutoCompleteCategoryComposable(modifier: Modifier, name: String) {
                 .fillMaxWidth()
                 .padding(horizontal = HintHorizontalPadding),
             text = name,
-            style = MaterialTheme.typography.titleSmall
+            style = MaterialTheme.typography.labelLarge,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -125,11 +141,31 @@ private fun ReplyAutoCompletePopupBodyPreview() {
         autoCompleteCategories = listOf(
             AutoCompleteCategory(
                 name = R.string.markdown_textfield_autocomplete_category_users,
-                items = (0 until 10).map {
+                items = (0 until 1).map {
                     AutoCompleteHint(
                         hint = "Hint $it",
                         replacementText = "",
-                        id = it.toString()
+                        id = it.toString() + "a"
+                    )
+                }
+            ),
+            AutoCompleteCategory(
+                name = R.string.markdown_textfield_autocomplete_category_users,
+                items = (0 until 1).map {
+                    AutoCompleteHint(
+                        hint = "Hint $it",
+                        replacementText = "",
+                        id = it.toString() + "b"
+                    )
+                }
+            ),
+            AutoCompleteCategory(
+                name = R.string.markdown_textfield_autocomplete_category_users,
+                items = (0 until 1).map {
+                    AutoCompleteHint(
+                        hint = "Hint $it",
+                        replacementText = "",
+                        id = it.toString() + "c"
                     )
                 }
             )
