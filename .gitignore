@@ -16,4 +16,3 @@ keystore.properties
 /app/release/output-metadata.json
 test-outputs
 serviceCredentials.json
-playStoreScreenshots
