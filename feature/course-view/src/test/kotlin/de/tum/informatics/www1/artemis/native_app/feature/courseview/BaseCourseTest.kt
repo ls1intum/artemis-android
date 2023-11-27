@@ -88,6 +88,7 @@ abstract class BaseCourseTest : KoinTest {
                     courseId = course.id!!,
                     conversationId = DEFAULT_CONVERSATION_ID,
                     postId = DEFAULT_POST_ID,
+                    username = "",
                     onNavigateToExercise = {},
                     onNavigateToExerciseResultView = {},
                     onNavigateToTextExerciseParticipation = { _, _ -> },
