@@ -18,11 +18,13 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ConversationWebsocketDto
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
@@ -137,7 +139,7 @@ class ConversationOverviewViewModel(
     /**
      * Conversations as loaded from the server.
      */
-    private val loadedConversations: StateFlow<DataState<List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation>>> =
+    private val loadedConversations: StateFlow<DataState<List<Conversation>>> =
         flatMapLatest(
             serverConfigurationService.serverUrl,
             accountService.authToken,
@@ -152,7 +154,7 @@ class ConversationOverviewViewModel(
     /**
      * Conversations of the server updates by the websocket.
      */
-    private val updatedConversations: StateFlow<DataState<List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation>>> =
+    private val updatedConversations: StateFlow<DataState<List<Conversation>>> =
         loadedConversations
             .flatMapLatest { loadedConversationsDataState ->
                 when (loadedConversationsDataState) {
@@ -229,7 +231,7 @@ class ConversationOverviewViewModel(
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    private fun getUpdateConversationsFlow(loadedConversations: List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation>): Flow<Success<List<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation>>> =
+    private fun getUpdateConversationsFlow(loadedConversations: List<Conversation>): Flow<Success<List<Conversation>>> =
         flow {
             val currentConversations =
                 loadedConversations.associateBy { it.id }.toMutableMap()
@@ -365,16 +367,12 @@ class ConversationOverviewViewModel(
         }
     }
 
-    private inline fun <reified T : de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation> List<*>.filterNotHiddenNorFavourite(): List<T> {
+    private inline fun <reified T : Conversation> List<*>.filterNotHiddenNorFavourite(): List<T> {
         return filterIsInstance<T>()
             .filter { !it.isHidden && !it.isFavorite }
     }
 
-    private fun <T : de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation> List<T>.asCollection(
+    private fun <T : Conversation> List<T>.asCollection(
         isExpanded: Boolean
-    ) =
-        de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection(
-            this,
-            isExpanded
-        )
+    ) = ConversationCollection(this, isExpanded)
 }
