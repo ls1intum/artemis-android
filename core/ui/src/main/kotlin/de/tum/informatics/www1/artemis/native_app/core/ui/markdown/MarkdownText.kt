@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 import android.content.Context
 import android.text.method.LinkMovementMethod
 import android.text.style.ForegroundColorSpan
-import android.text.style.StrikethroughSpan
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
@@ -95,27 +94,26 @@ fun MarkdownText(
         createMarkdownRender(context, imageLoader)
     }
 
-    // Without this, we cannot render markdown text in @Preview composable.
-    val serverUrl = if (LocalInspectionMode.current) {
-        PreviewModeServerUrl
+    val transformedMarkdown by if (LocalInspectionMode.current) {
+        remember { derivedStateOf { markdown } }
     } else {
         val serverConfigurationService: ServerConfigurationService = koinInject()
-        serverConfigurationService.serverUrl.collectAsState(initial = "").value
-    }
+        val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
 
-    val markdownTransformer = remember(serverUrl) {
-        val strippedServerUrl =
-            if (serverUrl.endsWith("/")) serverUrl.substring(
-                0,
-                serverUrl.length - 1
-            ) else serverUrl
+        val markdownTransformer = remember(serverUrl) {
+            val strippedServerUrl =
+                if (serverUrl.endsWith("/")) serverUrl.substring(
+                    0,
+                    serverUrl.length - 1
+                ) else serverUrl
 
-        PostArtemisMarkdownTransformer(strippedServerUrl)
-    }
+            PostArtemisMarkdownTransformer(strippedServerUrl)
+        }
 
-    val transformedMarkdown by remember(markdown, markdownTransformer) {
-        derivedStateOf {
-            markdownTransformer.transformMarkdown(markdown)
+        remember(markdown, markdownTransformer) {
+            derivedStateOf {
+                markdownTransformer.transformMarkdown(markdown)
+            }
         }
     }
 

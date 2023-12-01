@@ -56,7 +56,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
-internal class MetisListViewModel(
+class MetisListViewModel(
     initialMetisContext: MetisContext,
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,

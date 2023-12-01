@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 
 import kotlinx.coroutines.flow.Flow
 
-internal interface ConversationPreferenceService {
+interface ConversationPreferenceService {
 
     fun getPreferences(serverUrl: String, courseId: Long): Flow<Preferences>
 

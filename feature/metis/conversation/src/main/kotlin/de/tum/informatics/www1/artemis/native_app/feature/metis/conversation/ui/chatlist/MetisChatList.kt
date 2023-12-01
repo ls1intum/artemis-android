@@ -26,25 +26,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.rememberPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.shouldDisplayHeader
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisOutdatedBanner
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
+import kotlinx.coroutines.Deferred
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -75,18 +76,55 @@ internal fun MetisChatList(
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
 
-    MetisReplyHandler(
+    MetisChatList(
+        modifier = modifier,
         initialReplyTextProvider = viewModel,
+        state = state,
+        isReplyEnabled = isReplyEnabled,
+        posts = posts.asPostsDataState(),
+        isDataOutdated = isDataOutdated,
+        clientId = clientId,
+        hasModerationRights = hasModerationRights,
+        listContentPadding = listContentPadding,
         onCreatePost = viewModel::createPost,
         onEditPost = viewModel::editPost,
         onDeletePost = viewModel::deletePost,
-        onRequestReactWithEmoji = viewModel::createOrDeleteReaction
+        onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
+        onClickViewPost = onClickViewPost,
+        onRequestReload = viewModel::requestReload
+    )
+}
+
+@Composable
+fun MetisChatList(
+    modifier: Modifier,
+    initialReplyTextProvider: InitialReplyTextProvider,
+    posts: PostsDataState,
+    isDataOutdated: Boolean,
+    clientId: Long,
+    hasModerationRights: Boolean,
+    listContentPadding: PaddingValues,
+    state: LazyListState,
+    isReplyEnabled: Boolean,
+    onCreatePost: () -> Deferred<MetisModificationFailure?>,
+    onEditPost: (PostPojo, String) -> Deferred<MetisModificationFailure?>,
+    onDeletePost: (PostPojo) -> Deferred<MetisModificationFailure?>,
+    onRequestReactWithEmoji: (PostPojo, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
+    onClickViewPost: (clientPostId: String) -> Unit,
+    onRequestReload: () -> Unit
+) {
+    MetisReplyHandler(
+        initialReplyTextProvider = initialReplyTextProvider,
+        onCreatePost = onCreatePost,
+        onEditPost = onEditPost,
+        onDeletePost = onDeletePost,
+        onRequestReactWithEmoji = onRequestReactWithEmoji
     ) { replyMode, onEditPostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, updateFailureStateDelegate ->
         Column(modifier = modifier) {
             MetisOutdatedBanner(
                 modifier = Modifier.fillMaxWidth(),
                 isOutdated = isDataOutdated,
-                requestRefresh = viewModel::requestReload
+                requestRefresh = onRequestReload
             )
 
             val informationModifier = Modifier
@@ -102,25 +140,25 @@ internal fun MetisChatList(
                 order = DisplayPostOrder.REVERSED,
                 getItem = posts::peek
             ) {
-                when {
-                    posts.itemCount == 0 -> {
+                when (posts) {
+                    PostsDataState.Empty -> {
                         NoPostsFoundInformation(modifier = informationModifier)
                     }
 
-                    posts.loadState.refresh is LoadState.Loading -> {
+                    PostsDataState.Loading -> {
                         LoadingPostsInformation(informationModifier)
                     }
 
-                    posts.loadState.refresh is LoadState.Error -> {
+                    is PostsDataState.Error -> {
                         PagingStateError(
                             modifier = informationModifier,
                             errorText = R.string.metis_post_list_error,
                             buttonText = R.string.metis_post_list_error_try_again,
-                            retry = posts::retry
+                            retry = posts.retry
                         )
                     }
 
-                    else -> {
+                    is PostsDataState.Loaded -> {
                         ProvideMarkwon {
                             ProvideEmojis {
                                 ChatList(
@@ -159,7 +197,7 @@ private fun ChatList(
     modifier: Modifier,
     listContentPadding: PaddingValues,
     state: LazyListState,
-    posts: LazyPagingItems<ChatListItem>,
+    posts: PostsDataState.Loaded,
     hasModerationRights: Boolean,
     clientId: Long,
     onClickViewPost: (clientPostId: String) -> Unit,
@@ -176,12 +214,7 @@ private fun ChatList(
     ) {
         items(
             count = posts.itemCount,
-            key = posts.itemKey { chatListItem ->
-                when (chatListItem) {
-                    is ChatListItem.DateDivider -> chatListItem.localDate.toEpochDays()
-                    is ChatListItem.PostChatListItem -> chatListItem.post.clientPostId
-                }
-            }
+            key = posts::getItemKey
         ) { index ->
             when (val chatListItem = posts[index]) {
                 is ChatListItem.DateDivider -> {
@@ -252,19 +285,21 @@ private fun ChatList(
             }
         }
 
-        if (posts.loadState.append is LoadState.Loading) {
+        val appendState = posts.appendState
+
+        if (appendState is PostsDataState.Loading) {
             item {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth(0.4f))
             }
         }
 
-        if (posts.loadState.append is LoadState.Error) {
+        if (appendState is PostsDataState.Error) {
             item {
                 PagingStateError(
                     modifier = Modifier.fillMaxWidth(),
                     errorText = R.string.metis_post_list_error,
                     buttonText = R.string.metis_post_list_error_try_again,
-                    retry = posts::retry
+                    retry = appendState.retry
                 )
             }
         }

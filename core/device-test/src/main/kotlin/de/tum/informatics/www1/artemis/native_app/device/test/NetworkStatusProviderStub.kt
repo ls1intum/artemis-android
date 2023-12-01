@@ -4,7 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
-class MockNetworkStatusProvider : NetworkStatusProvider {
+class NetworkStatusProviderStub : NetworkStatusProvider {
     override val currentNetworkStatus: Flow<NetworkStatusProvider.NetworkStatus> =
         flowOf(NetworkStatusProvider.NetworkStatus.Internet)
 }

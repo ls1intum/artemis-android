@@ -15,7 +15,6 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsViewModel
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Test
@@ -79,9 +78,9 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
             }
         }
 
-        val viewModel = setupUiAndViewModel(channel)
+        setupUiAndViewModel(channel)
 
-        archiveOrUnarchiveChannelImpl(true, viewModel)
+        archiveOrUnarchiveChannelImpl(true)
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
@@ -110,12 +109,12 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
             }
         }
 
-        val viewModel = setupUiAndViewModel(channel)
+        setupUiAndViewModel(channel)
 
-        archiveOrUnarchiveChannelImpl(false, viewModel)
+        archiveOrUnarchiveChannelImpl(false)
     }
 
-    private fun archiveOrUnarchiveChannelImpl(archive: Boolean, viewModel: ConversationSettingsViewModel) {
+    private fun archiveOrUnarchiveChannelImpl(archive: Boolean) {
         val doArchiveButtonText =
             context.getString(R.string.conversation_settings_section_other_archive_channel)
         val doUnarchiveButtonText =
