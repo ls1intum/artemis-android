@@ -38,6 +38,7 @@ jobs:
         with:
           file: Dockerfile
           push: true
+          target: builder
           tags: ${{ secrets.REGISTRY_HOST }}/artemis_android_build_image:${{ steps.calc_tag.outputs.image_tag }}
 
       - name: Run end to end tests.
