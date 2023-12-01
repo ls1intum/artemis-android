@@ -142,7 +142,7 @@ fun MetisChatList(
                     .fillMaxWidth()
                     .weight(1f),
                 serverUrl = serverUrl,
-                courseId = metisContext.courseId,
+                courseId = courseId,
                 state = state,
                 itemCount = posts.itemCount,
                 order = DisplayPostOrder.REVERSED,

@@ -51,7 +51,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ConversationFacadeUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NavigateToUserConversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NavigateToUserConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.OpenedConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.OpenedThread
