@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
@@ -52,7 +53,9 @@ internal fun WorkOnQuizQuestionFooter(
     onRequestNextQuestion: () -> Unit,
     onRequestRetrySave: () -> Unit
 ) {
-    var displayButtonText by remember { mutableStateOf(true) }
+    val isPreview = LocalInspectionMode.current
+
+    var displayButtonText by remember { mutableStateOf(!isPreview) }
     val onTextLayout = { result: TextLayoutResult ->
         if (result.hasVisualOverflow) displayButtonText = false
     }

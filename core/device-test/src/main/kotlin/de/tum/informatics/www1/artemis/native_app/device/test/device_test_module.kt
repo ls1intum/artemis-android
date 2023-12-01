@@ -4,5 +4,5 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import org.koin.dsl.module
 
 val deviceTestModule = module {
-    single<NetworkStatusProvider> { MockNetworkStatusProvider() }
+    single<NetworkStatusProvider> { NetworkStatusProviderStub() }
 }

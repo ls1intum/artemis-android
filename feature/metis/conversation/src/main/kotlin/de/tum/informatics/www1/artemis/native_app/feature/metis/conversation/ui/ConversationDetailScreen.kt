@@ -54,20 +54,91 @@ fun ConversationScreen(
 
     val viewModel = koinViewModel<MetisListViewModel> { parametersOf(metisContext) }
 
+    ConversationScreen(
+        modifier = modifier,
+        courseId = courseId,
+        conversationId = conversationId,
+        metisContext = metisContext,
+        viewModel = viewModel,
+        onNavigateBack = onNavigateBack,
+        onNavigateToSettings = onNavigateToSettings,
+        onClickViewPost = onClickViewPost
+    )
+}
+
+@Composable
+fun ConversationScreen(
+    modifier: Modifier,
+    courseId: Long,
+    conversationId: Long,
+    metisContext: MetisContext,
+    viewModel: MetisListViewModel,
+    onNavigateBack: (() -> Unit)?,
+    onNavigateToSettings: () -> Unit,
+    onClickViewPost: (clientPostId: String) -> Unit
+) {
     LaunchedEffect(metisContext) {
         viewModel.updateMetisContext(metisContext)
     }
 
+    val query by viewModel.query.collectAsState()
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
 
+    val title by remember(conversationDataState) {
+        derivedStateOf {
+            conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
+        }
+    }
+
+    ConversationScreen(
+        modifier = modifier,
+        courseId = courseId,
+        conversationId = conversationId,
+        isConversationLoaded = conversationDataState.isSuccess,
+        query = query,
+        conversationTitle = title,
+        onNavigateBack = onNavigateBack,
+        onNavigateToSettings = onNavigateToSettings,
+        onUpdateQuery = viewModel::updateQuery
+    ) { padding ->
+        val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
+
+        if (conversationDataState.isSuccess) {
+            CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides viewModel) {
+                MetisChatList(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    viewModel = viewModel,
+                    listContentPadding = PaddingValues(),
+                    onClickViewPost = onClickViewPost,
+                    isReplyEnabled = isReplyEnabled
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ConversationScreen(
+    modifier: Modifier,
+    courseId: Long,
+    conversationId: Long,
+    conversationTitle: String,
+    query: String,
+    isConversationLoaded: Boolean,
+    onNavigateBack: (() -> Unit)?,
+    onNavigateToSettings: () -> Unit,
+    onUpdateQuery: (String) -> Unit,
+    content: @Composable (PaddingValues) -> Unit
+) {
     var isSearchBarOpen by rememberSaveable(courseId, conversationId) { mutableStateOf(false) }
-    val query by viewModel.query.collectAsState()
 
     val searchBarFocusRequester = remember { FocusRequester() }
 
     val closeSearch = {
         isSearchBarOpen = false
-        viewModel.updateQuery("")
+        onUpdateQuery("")
     }
 
     BackHandler(isSearchBarOpen, closeSearch)
@@ -75,12 +146,6 @@ fun ConversationScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            val title by remember(conversationDataState) {
-                derivedStateOf {
-                    conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
-                }
-            }
-
             TopAppBar(
                 title = {
                     if (isSearchBarOpen) {
@@ -91,15 +156,15 @@ fun ConversationScreen(
                         BasicHintTextField(
                             modifier = Modifier.focusRequester(searchBarFocusRequester),
                             value = query,
-                            onValueChange = viewModel::updateQuery,
+                            onValueChange = onUpdateQuery,
                             hint = "",
                             maxLines = 1,
                             hintStyle = MaterialTheme.typography.bodyMedium
                         )
                     } else {
                         Text(
-                            modifier = Modifier.placeholder(!conversationDataState.isSuccess),
-                            text = title,
+                            modifier = Modifier.placeholder(!isConversationLoaded),
+                            text = conversationTitle,
                             maxLines = 1
                         )
                     }
@@ -131,22 +196,7 @@ fun ConversationScreen(
                     }
                 }
             )
-        }
-    ) { padding ->
-        val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
-
-        if (conversationDataState.isSuccess) {
-            CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides viewModel) {
-                MetisChatList(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    viewModel = viewModel,
-                    listContentPadding = PaddingValues(),
-                    onClickViewPost = onClickViewPost,
-                    isReplyEnabled = isReplyEnabled
-                )
-            }
-        }
-    }
+        },
+        content = content
+    )
 }

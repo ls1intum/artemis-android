@@ -39,7 +39,7 @@ import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-internal class CourseViewModel(
+class CourseViewModel(
     private val courseId: Long,
     private val courseService: CourseService,
     private val liveParticipationService: LiveParticipationService,
@@ -113,7 +113,7 @@ internal class CourseViewModel(
                 }
             }
 
-    val exercisesGroupedByWeek: StateFlow<DataState<List<GroupedByWeek<Exercise>>>> =
+    internal val exercisesGroupedByWeek: StateFlow<DataState<List<GroupedByWeek<Exercise>>>> =
         exerciseWithParticipationStatusFlow.map { exercisesDataState ->
             exercisesDataState.bind { exercisesWithParticipationState ->
                 exercisesWithParticipationState
@@ -124,7 +124,7 @@ internal class CourseViewModel(
             .flowOn(coroutineContext)
             .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
 
-    val lecturesGroupedByWeek: StateFlow<DataState<List<GroupedByWeek<Lecture>>>> =
+    internal val lecturesGroupedByWeek: StateFlow<DataState<List<GroupedByWeek<Lecture>>>> =
         course.map { courseDataState ->
             courseDataState.bind { course ->
                 course
