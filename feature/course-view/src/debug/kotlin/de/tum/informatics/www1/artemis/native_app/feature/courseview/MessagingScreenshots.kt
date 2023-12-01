@@ -244,6 +244,8 @@ fun `Metis - Conversation Channel`() {
                                     posts,
                                     PostsDataState.NotLoading
                                 ),
+                                serverUrl = "",
+                                courseId = 0,
                                 isDataOutdated = false,
                                 clientId = 0L,
                                 hasModerationRights = true,
