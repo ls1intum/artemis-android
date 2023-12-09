@@ -11,6 +11,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +19,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import kotlinx.coroutines.launch
 
@@ -29,6 +34,8 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun <T : Any> MetisPostListHandler(
     modifier: Modifier,
+    serverUrl: String,
+    courseId: Long,
     state: LazyListState,
     itemCount: Int,
     getItem: (Int) -> T?,
@@ -99,7 +106,23 @@ internal fun <T : Any> MetisPostListHandler(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            content()
+            val markdownTransformer = remember(serverUrl, courseId) {
+                val strippedServerUrl =
+                    if (serverUrl.endsWith("/")) serverUrl.substring(
+                        0,
+                        serverUrl.length - 1
+                    ) else serverUrl
+
+                PostArtemisMarkdownTransformer(serverUrl = strippedServerUrl, courseId = courseId)
+            }
+
+            ProvideMarkwon {
+                ProvideEmojis {
+                    CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
+                        content()
+                    }
+                }
+            }
         }
     }
 }

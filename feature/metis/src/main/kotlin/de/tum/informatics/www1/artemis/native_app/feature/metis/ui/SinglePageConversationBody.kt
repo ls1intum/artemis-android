@@ -64,6 +64,8 @@ internal fun SinglePageConversationBody(
             is CreatePersonalConversation -> configuration = config.prevConfiguration
             is OpenedConversation -> configuration =
                 if (config.openedThread != null) config.copy(openedThread = null) else NothingOpened
+
+            is NavigateToUserConversation -> configuration = NothingOpened
             NothingOpened -> {}
         }
     }
@@ -268,10 +270,16 @@ internal fun SinglePageConversationBody(
                         conversationId = config.conversationId,
                         onNavigateBack = { configuration = config.prevConfiguration },
                         onRequestAddMembers = {
-                            configuration = config.copy(isAddingMembers = true, prevConfiguration = configuration)
+                            configuration = config.copy(
+                                isAddingMembers = true,
+                                prevConfiguration = configuration
+                            )
                         },
                         onRequestViewAllMembers = {
-                            configuration = config.copy(isViewingAllMembers = true, prevConfiguration = configuration)
+                            configuration = config.copy(
+                                isViewingAllMembers = true,
+                                prevConfiguration = configuration
+                            )
                         },
                         onConversationLeft = {
                             configuration = NothingOpened
@@ -279,6 +287,18 @@ internal fun SinglePageConversationBody(
                     )
                 }
             }
+        }
+
+        is NavigateToUserConversation -> {
+            NavigateToUserConversationUi(
+                modifier = modifier,
+                courseId = courseId,
+                username = config.username,
+                onNavigateToConversation = { conversationId ->
+                    configuration = OpenedConversation(conversationId, null)
+                },
+                onNavigateBack = { configuration = NothingOpened }
+            )
         }
     }
 }
@@ -305,6 +325,13 @@ data class OpenedConversation(val conversationId: Long, val openedThread: Opened
 
 @Parcelize
 data class OpenedThread(val conversationId: Long, val postId: StandalonePostId) : Parcelable
+
+/**
+ * Special configuration in which we want to navigate to the 1-to-1 conversation with the user with the specified username.
+ * In this configuration, we simply show a loading bar while we load the necessary data to show the chat.
+ */
+@Parcelize
+data class NavigateToUserConversation(val username: String) : ConversationConfiguration
 
 @Parcelize
 private data class AddChannelConfiguration(

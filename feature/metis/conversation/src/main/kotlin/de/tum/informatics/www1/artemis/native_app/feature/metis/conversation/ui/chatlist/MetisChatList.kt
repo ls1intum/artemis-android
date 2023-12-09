@@ -78,6 +78,8 @@ internal fun MetisChatList(
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
 
+    val serverUrl by viewModel.serverUrl.collectAsState()
+
     MetisChatList(
         modifier = modifier,
         initialReplyTextProvider = viewModel,
@@ -88,6 +90,8 @@ internal fun MetisChatList(
         clientId = clientId,
         hasModerationRights = hasModerationRights,
         listContentPadding = listContentPadding,
+        serverUrl = serverUrl,
+        courseId = metisContext.courseId,
         onCreatePost = viewModel::createPost,
         onEditPost = viewModel::editPost,
         onDeletePost = viewModel::deletePost,
@@ -106,6 +110,8 @@ fun MetisChatList(
     clientId: Long,
     hasModerationRights: Boolean,
     listContentPadding: PaddingValues,
+    serverUrl: String,
+    courseId: Long,
     state: LazyListState,
     isReplyEnabled: Boolean,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
@@ -137,6 +143,8 @@ fun MetisChatList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
+                serverUrl = serverUrl,
+                courseId = courseId,
                 state = state,
                 itemCount = posts.itemCount,
                 order = DisplayPostOrder.REVERSED,
@@ -161,24 +169,20 @@ fun MetisChatList(
                     }
 
                     is PostsDataState.Loaded -> {
-                        ProvideMarkwon {
-                            ProvideEmojis {
-                                ChatList(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .testTag(TEST_TAG_METIS_POST_LIST),
-                                    listContentPadding = listContentPadding,
-                                    state = state,
-                                    posts = posts,
-                                    clientId = clientId,
-                                    onClickViewPost = onClickViewPost,
-                                    hasModerationRights = hasModerationRights,
-                                    onRequestEdit = onEditPostDelegate,
-                                    onRequestDelete = onDeletePostDelegate,
-                                    onRequestReactWithEmoji = onRequestReactWithEmojiDelegate
-                                )
-                            }
-                        }
+                        ChatList(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .testTag(TEST_TAG_METIS_POST_LIST),
+                            listContentPadding = listContentPadding,
+                            state = state,
+                            posts = posts,
+                            clientId = clientId,
+                            onClickViewPost = onClickViewPost,
+                            hasModerationRights = hasModerationRights,
+                            onRequestEdit = onEditPostDelegate,
+                            onRequestDelete = onDeletePostDelegate,
+                            onRequestReactWithEmoji = onRequestReactWithEmojiDelegate
+                        )
                     }
                 }
             }

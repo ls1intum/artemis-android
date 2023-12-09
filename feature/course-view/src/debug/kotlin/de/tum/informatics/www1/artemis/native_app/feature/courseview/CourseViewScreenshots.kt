@@ -52,6 +52,7 @@ fun `Course View - Exercise List`() {
         CourseUiScreen(
             modifier = Modifier.fillMaxSize(),
             viewModel = courseViewModel,
+            username = "",
             courseId = 0L,
             conversationId = DEFAULT_CONVERSATION_ID,
             postId = DEFAULT_POST_ID,
