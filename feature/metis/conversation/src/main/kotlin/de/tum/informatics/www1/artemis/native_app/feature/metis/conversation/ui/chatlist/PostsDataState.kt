@@ -47,7 +47,7 @@ sealed interface PostsDataState {
             override val itemCount: Int
                 get() = posts.itemCount
 
-            override fun getItemKey(index: Int): Any = posts.itemKey { it.getItemKey() }
+            override fun getItemKey(index: Int): Any = posts[index]?.getItemKey() ?: index
 
             override fun get(index: Int): ChatListItem? = posts[index]
 

@@ -16,6 +16,11 @@ sealed class NetworkResponse<T> {
         }
     }
 
+    inline fun <K> map(mapSuccess: (T) -> K, mapFailure: (Exception) -> K): K = when(this) {
+        is Failure -> mapFailure(exception)
+        is Response -> mapSuccess(data)
+    }
+
     inline fun <K> then(transform: (T) -> NetworkResponse<K>): NetworkResponse<K> {
         return when (this) {
             is Response -> transform(data)
