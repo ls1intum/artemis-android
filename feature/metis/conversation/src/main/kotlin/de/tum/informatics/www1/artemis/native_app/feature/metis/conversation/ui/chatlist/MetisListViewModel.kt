@@ -31,7 +31,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -154,7 +153,7 @@ class MetisListViewModel(
                 Pager(
                     config = config,
                     remoteMediator = MetisRemoteMediator(
-                        context = pagingDataInput.standalonePostsContext,
+                        context = pagingDataInput.standalonePostsContext.metisContext,
                         metisService = metisService,
                         metisStorageService = metisStorageService,
                         authToken = authToken,
@@ -165,10 +164,6 @@ class MetisListViewModel(
                     pagingSourceFactory = {
                         metisStorageService.getStoredPosts(
                             serverId = pagingDataInput.host,
-                            clientId = clientId,
-                            filter = pagingDataInput.standalonePostsContext.filter,
-                            sortingStrategy = pagingDataInput.standalonePostsContext.sortingStrategy,
-                            query = pagingDataInput.standalonePostsContext.query,
                             metisContext = pagingDataInput.standalonePostsContext.metisContext
                         )
                     }

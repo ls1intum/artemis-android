@@ -220,10 +220,7 @@ private fun ChatList(
     ) {
         items(
             count = posts.itemCount,
-            key = { index ->
-                val foo = posts.getItemKey(index)
-                foo
-            }
+            key = posts::getItemKey
         ) { index ->
             when (val chatListItem = posts[index]) {
                 is ChatListItem.DateDivider -> {

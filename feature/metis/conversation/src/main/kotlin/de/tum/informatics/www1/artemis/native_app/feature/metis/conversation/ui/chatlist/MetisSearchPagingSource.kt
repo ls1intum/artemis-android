@@ -29,11 +29,11 @@ class MetisSearchPagingSource(
             serverUrl = serverUrl
         )
             .map(
-                mapSuccess = {
+                mapSuccess = { loadedPosts ->
                     LoadResult.Page(
-                        it,
+                        data = loadedPosts,
                         prevKey = if (page > 0) page - 1 else null,
-                        nextKey = page + 1
+                        nextKey = if (loadedPosts.size == params.loadSize) page + 1 else null
                     )
                 },
                 mapFailure = { LoadResult.Error(it) }
