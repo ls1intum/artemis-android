@@ -2,11 +2,11 @@
 The native android client for Artemis, an interactive learning platform with individual feedback. 
 
 ## Screenshots
-<img src="/home/tim/Code/artemis-native-client/playStoreScreenshots/smartphone/dashboard.png" width="300"/>
-<img src="/home/tim/Code/artemis-native-client/playStoreScreenshots/smartphone/exerciseList.png" width="300"/>
-<img src="/home/tim/Code/artemis-native-client/playStoreScreenshots/smartphone/lecture.png" width="300"/>
-<img src="/home/tim/Code/artemis-native-client/playStoreScreenshots/smartphone/quiz.png" width="300"/>
-<img src="/home/tim/Code/artemis-native-client/playStoreScreenshots/smartphone/conversationOverview.png" width="300"/>
+<img src="playStoreScreenshots/smartphone/dashboard.png" width="300"/>
+<img src="playStoreScreenshots/smartphone/exerciseList.png" width="300"/>
+<img src="playStoreScreenshots/smartphone/lecture.png" width="300"/>
+<img src="playStoreScreenshots/smartphone/quiz.png" width="300"/>
+<img src="playStoreScreenshots/smartphone/conversationOverview.png" width="300"/>
 
 ## Project structure
 The project structure is heavily inspired by [nowinandroid](https://github.com/android/nowinandroid). 
