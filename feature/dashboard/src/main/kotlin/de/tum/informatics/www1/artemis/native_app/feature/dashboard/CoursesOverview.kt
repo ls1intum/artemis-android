@@ -110,10 +110,10 @@ internal fun CoursesOverview(
     viewModel: CourseOverviewViewModel,
     onOpenSettings: () -> Unit,
     onClickRegisterForCourse: () -> Unit,
-    onViewCourse: (courseId: Long) -> Unit
+    onViewCourse: (courseId: Long) -> Unit,
+    isBeta: Boolean = BuildConfig.isBeta,
+    betaHintService: BetaHintService = koinInject()
 ) {
-    val betaHintService: BetaHintService = koinInject()
-
     val coursesDataState by viewModel.dashboard.collectAsState()
 
     //The course composable needs the serverUrl to build the correct url to fetch the course icon from.
@@ -147,7 +147,7 @@ internal fun CoursesOverview(
                             maxLines = 1
                         )
 
-                        if (BuildConfig.isBeta) {
+                        if (isBeta) {
                             Text(
                                 modifier = Modifier
                                     .border(

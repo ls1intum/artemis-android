@@ -62,7 +62,7 @@ fun ConversationOverviewBody(
 }
 
 @Composable
-internal fun ConversationOverviewBody(
+fun ConversationOverviewBody(
     modifier: Modifier,
     viewModel: ConversationOverviewViewModel,
     onNavigateToConversation: (conversationId: Long) -> Unit,

@@ -408,9 +408,9 @@ internal class QuizParticipationViewModel(
                 endDate.flatMapLatest { it.hasPassedFlow() },
                 latestParticipation,
                 latestSubmission
-            ) { quizEnded, batch, endDataHasPassed, latestParticipation, latestSubmission ->
+            ) { quizEnded, batch, endDateHasPassed, latestParticipation, latestSubmission ->
                 ((quizEnded) || (batch != null && batch.ended == true))
-                        || endDataHasPassed
+                        || endDateHasPassed
                         || latestParticipation.initializationState == Participation.InitializationState.FINISHED
                         || latestSubmission.submitted == true
             }

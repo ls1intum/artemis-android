@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="navigate_to_user_conversation_ui_loading">Loading…</string>
+    <string name="navigate_to_user_conversation_ui_failed">Could not load conversation with user.</string>
+    <string name="navigate_to_user_conversation_ui_try_again">Try again</string>
+</resources>

@@ -228,7 +228,7 @@ private fun HeadlineAuthorInfo(
     }
 
     val creationDateContent: @Composable () -> Unit = {
-        val relativeTime = getRelativeTime(to = relativeTimeTo)
+        val relativeTime = getRelativeTime(to = relativeTimeTo, showDate = false)
 
         Text(
             modifier = Modifier.fillMaxWidth(),
