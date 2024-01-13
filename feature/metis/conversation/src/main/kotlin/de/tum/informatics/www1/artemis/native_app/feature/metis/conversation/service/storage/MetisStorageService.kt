@@ -2,8 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 
 import androidx.paging.PagingSource
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -46,10 +44,6 @@ interface MetisStorageService {
 
     fun getStoredPosts(
         serverId: String,
-        clientId: Long,
-        filter: List<MetisFilter>,
-        sortingStrategy: MetisSortingStrategy,
-        query: String?,
         metisContext: MetisContext
     ): PagingSource<Int, PostPojo>
 

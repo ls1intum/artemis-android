@@ -27,7 +27,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisStandalonePostScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.browse_channels.BrowseChannelsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.CreateChannelScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.CreatePersonalConversationScreen
@@ -117,10 +117,10 @@ internal fun SinglePageConversationBody(
                     onNavigateToSettings = {
                         configuration = ConversationSettings(conf.conversationId, conf)
                     },
-                    onClickViewPost = {
+                    onClickViewPost = { postId ->
                         configuration = OpenedConversation(
                             conf.conversationId,
-                            OpenedThread(conf.conversationId, StandalonePostId.ClientSideId(it))
+                            OpenedThread(conf.conversationId, postId)
                         )
                     }
                 )

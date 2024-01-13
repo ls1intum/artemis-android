@@ -3,8 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
@@ -416,21 +414,13 @@ internal class MetisStorageServiceImpl(
 
     override fun getStoredPosts(
         serverId: String,
-        clientId: Long,
-        filter: List<MetisFilter>,
-        sortingStrategy: MetisSortingStrategy,
-        query: String?,
         metisContext: MetisContext
     ): PagingSource<Int, PostPojo> {
         return databaseProvider.metisDao.queryCoursePosts(
             serverId = serverId,
-            clientId = clientId,
             courseId = metisContext.courseId,
             exerciseId = metisContext.exerciseId,
-            lectureId = metisContext.lectureId,
-            metisFilter = filter,
-            metisSortingStrategy = sortingStrategy,
-            query = query
+            lectureId = metisContext.lectureId
         )
     }
 

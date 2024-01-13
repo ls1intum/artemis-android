@@ -34,6 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import io.github.fornewid.placeholder.material3.placeholder
 import org.koin.androidx.compose.koinViewModel
@@ -46,7 +47,7 @@ fun ConversationScreen(
     conversationId: Long,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
-    onClickViewPost: (clientPostId: String) -> Unit
+    onClickViewPost: (StandalonePostId) -> Unit
 ) {
     val metisContext = remember(courseId, conversationId) {
         MetisContext.Conversation(courseId, conversationId)
@@ -75,7 +76,7 @@ fun ConversationScreen(
     viewModel: MetisListViewModel,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
-    onClickViewPost: (clientPostId: String) -> Unit
+    onClickViewPost: (StandalonePostId) -> Unit
 ) {
     LaunchedEffect(metisContext) {
         viewModel.updateMetisContext(metisContext)

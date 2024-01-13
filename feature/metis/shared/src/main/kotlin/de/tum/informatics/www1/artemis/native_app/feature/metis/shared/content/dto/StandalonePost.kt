@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto
 
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.datetime.Instant
@@ -45,4 +46,10 @@ data class StandalonePost(
 
     @Transient
     override val serverPostId: Long = id ?: 0L
+
+    @Transient
+    override val key: Any = id ?: hashCode()
+    
+    @Transient
+    override val standalonePostId = StandalonePostId.ServerSideId(serverPostId)
 }

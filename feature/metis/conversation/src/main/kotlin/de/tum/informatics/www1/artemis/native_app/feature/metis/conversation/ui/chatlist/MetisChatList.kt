@@ -41,6 +41,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisOutdatedBanner
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
@@ -64,7 +66,7 @@ internal fun MetisChatList(
     listContentPadding: PaddingValues,
     state: LazyListState = rememberLazyListState(),
     isReplyEnabled: Boolean = true,
-    onClickViewPost: (clientPostId: String) -> Unit
+    onClickViewPost: (StandalonePostId) -> Unit
 ) {
     val metisContext by viewModel.currentMetisContext.collectAsState()
 
@@ -113,10 +115,10 @@ fun MetisChatList(
     state: LazyListState,
     isReplyEnabled: Boolean,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
-    onEditPost: (PostPojo, String) -> Deferred<MetisModificationFailure?>,
-    onDeletePost: (PostPojo) -> Deferred<MetisModificationFailure?>,
-    onRequestReactWithEmoji: (PostPojo, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
-    onClickViewPost: (clientPostId: String) -> Unit,
+    onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
+    onDeletePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
+    onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
+    onClickViewPost: (StandalonePostId) -> Unit,
     onRequestReload: () -> Unit
 ) {
     MetisReplyHandler(
@@ -204,10 +206,10 @@ private fun ChatList(
     posts: PostsDataState.Loaded,
     hasModerationRights: Boolean,
     clientId: Long,
-    onClickViewPost: (clientPostId: String) -> Unit,
-    onRequestEdit: (PostPojo) -> Unit,
-    onRequestDelete: (PostPojo) -> Unit,
-    onRequestReactWithEmoji: (PostPojo, emojiId: String, create: Boolean) -> Unit
+    onClickViewPost: (StandalonePostId) -> Unit,
+    onRequestEdit: (IStandalonePost) -> Unit,
+    onRequestDelete: (IStandalonePost) -> Unit,
+    onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
@@ -243,9 +245,7 @@ private fun ChatList(
                             onRequestReactWithEmoji(post ?: return@rememberPostActions, id, create)
                         },
                         onReplyInThread = {
-                            onClickViewPost(
-                                post?.clientPostId ?: return@rememberPostActions
-                            )
+                            onClickViewPost(post?.standalonePostId ?: return@rememberPostActions)
                         }
                     )
 
@@ -260,9 +260,7 @@ private fun ChatList(
                         post = post,
                         clientId = clientId,
                         postItemViewType = remember(post?.answers) {
-                            PostItemViewType.ChatListItem(
-                                post?.answers.orEmpty()
-                            )
+                            PostItemViewType.ChatListItem(post?.answers.orEmpty())
                         },
                         postActions = postActions,
                         displayHeader = shouldDisplayHeader(
@@ -279,7 +277,7 @@ private fun ChatList(
                         ),
                         onClick = {
                             if (post != null) {
-                                onClickViewPost(post.clientPostId)
+                                onClickViewPost(post.standalonePostId)
                             }
                         }
                     )
