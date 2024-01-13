@@ -16,8 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.StandalonePostId
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import org.koin.androidx.compose.getViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -58,8 +57,6 @@ fun ConversationScreen(
                 ConversationThreadScreen(
                     modifier = modifier,
                     viewModel = viewModel,
-                    standalonePostId = threadPostId,
-                    metisContext = metisContext,
                     onNavigateUp = onCloseThread
                 )
             } else {
@@ -70,7 +67,7 @@ fun ConversationScreen(
                     conversationId = conversationId,
                     onNavigateBack = onCloseConversation,
                     onNavigateToSettings = onNavigateToSettings,
-                    onClickViewPost = { clientPostId -> onOpenThread(StandalonePostId.ClientSideId(clientPostId)) }
+                    onClickViewPost = { clientPostId -> onOpenThread(clientPostId) }
                 )
             }
         }
@@ -122,7 +119,7 @@ fun ConversationScreen(
                     conversationId = conversationId,
                     onNavigateBack = onCloseConversation,
                     onNavigateToSettings = onNavigateToSettings,
-                    onClickViewPost = { clientPostId -> onOpenThread(StandalonePostId.ClientSideId(clientPostId)) }
+                    onClickViewPost = { clientPostId -> onOpenThread(clientPostId) }
                 )
 
 
@@ -132,8 +129,6 @@ fun ConversationScreen(
                     ConversationThreadScreen(
                         modifier = otherModifier,
                         viewModel = viewModel,
-                        standalonePostId = threadPostId,
-                        metisContext = metisContext,
                         onNavigateUp = onCloseThread
                     )
                 }
