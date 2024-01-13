@@ -15,6 +15,8 @@ interface WebsocketProvider {
     /**
      * Returns a flow that automatically unsubscribes once the collector is inactive.
      * The given flow can only be subscribed to once.
+     *
+     * Performs automatic reconnects.
      */
     fun <T : Any> subscribe(
         channel: String,

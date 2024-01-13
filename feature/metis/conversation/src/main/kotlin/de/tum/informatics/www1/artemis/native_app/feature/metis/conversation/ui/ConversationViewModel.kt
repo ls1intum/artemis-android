@@ -87,14 +87,14 @@ internal open class ConversationViewModel(
     initialPostId: StandalonePostId?,
     private val websocketProvider: WebsocketProvider,
     private val metisModificationService: MetisModificationService,
-    protected val metisStorageService: MetisStorageService,
+    private val metisStorageService: MetisStorageService,
     protected val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
-    accountDataService: AccountDataService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val conversationService: ConversationService,
     private val replyTextStorageService: ReplyTextStorageService,
     private val courseService: CourseService,
+    accountDataService: AccountDataService,
     metisService: MetisService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
@@ -133,6 +133,14 @@ internal open class ConversationViewModel(
         serverConfigurationService = serverConfigurationService,
         accountService = accountService,
         coroutineContext = coroutineContext
+    )
+
+    /**
+     * Manages updating from the websocket.
+     */
+    private val webSocketUpdateUseCase = ConversationWebSocketUpdateUseCase(
+        metisService = metisService,
+        metisStorageService = metisStorageService
     )
 
     val hasModerationRights: StateFlow<Boolean> = flatMapLatest(
@@ -250,6 +258,16 @@ internal open class ConversationViewModel(
                 .collect { textToStore ->
                     storeNewMessageText(textToStore.text)
                 }
+        }
+
+        // Receive websocket updates and store them in the db.
+        viewModelScope.launch(coroutineContext) {
+            serverConfigurationService.host.collect { host ->
+                webSocketUpdateUseCase.updatePosts(
+                    host = host,
+                    context = MetisContext.Conversation(courseId, conversationId)
+                )
+            }
         }
     }
 
@@ -614,13 +632,14 @@ internal open class ConversationViewModel(
         }
     }
 
-    private suspend fun getPostId(postId: StandalonePostId? = _postId.value): Long? = when (postId) {
-        is StandalonePostId.ClientSideId -> metisStorageService.getStandalonePost(postId.clientSideId)
-            .filterNotNull().first().serverPostId
+    private suspend fun getPostId(postId: StandalonePostId? = _postId.value): Long? =
+        when (postId) {
+            is StandalonePostId.ClientSideId -> metisStorageService.getStandalonePost(postId.clientSideId)
+                .filterNotNull().first().serverPostId
 
-        is StandalonePostId.ServerSideId -> postId.serverSidePostId
-        null -> null
-    }
+            is StandalonePostId.ServerSideId -> postId.serverSidePostId
+            null -> null
+        }
 
     fun createPost(): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
