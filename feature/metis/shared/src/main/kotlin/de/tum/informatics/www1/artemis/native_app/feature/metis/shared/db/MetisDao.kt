@@ -182,62 +182,8 @@ interface MetisDao {
     )
     fun queryStandalonePost(clientPostId: String): Flow<PostPojo?>
 
-    fun queryCoursePosts(
-        serverId: String,
-        courseId: Long,
-        exerciseId: Long,
-        lectureId: Long,
-        clientId: Long,
-        metisFilter: List<MetisFilter>,
-        metisSortingStrategy: MetisSortingStrategy,
-        query: String?
-    ): PagingSource<Int, PostPojo> {
-        val queryReplyCount =
-            "(select count(*) from answer_postings ap where ap.parent_post_id = sp.post_id)"
-        val queryEmojiCount = "(select count(*) from reactions r where r.post_id = p.id)"
-
-        val orderBy = when (metisSortingStrategy) {
-            MetisSortingStrategy.DATE_ASCENDING -> "order by p.creation_date asc"
-            MetisSortingStrategy.DATE_DESCENDING -> "order by p.creation_date desc"
-            MetisSortingStrategy.REPLIES_ASCENDING -> "order by $queryReplyCount asc"
-            MetisSortingStrategy.REPLIES_DESCENDING -> "order by $queryReplyCount desc"
-            MetisSortingStrategy.VOTES_ASCENDING -> "order by $queryEmojiCount asc"
-            MetisSortingStrategy.VOTES_DESCENDING -> "order by $queryEmojiCount desc"
-        }
-
-        val metisFilterSql = buildString {
-            if (MetisFilter.UNRESOLVED in metisFilter) {
-                append("and sp.resolved = 0 \n")
-            }
-            if (MetisFilter.CREATED_BY_CLIENT in metisFilter) {
-                append("and p.author_id = ? \n")
-            }
-            if (MetisFilter.WITH_REACTION in metisFilter) {
-                append("and ($queryReplyCount > 0 or \n")
-                append("(select count(*) from reactions r where r.post_id = p.id) > 0)  \n")
-            }
-        }
-
-        val bindServerPostId =
-            query != null && query.startsWith("#") && query.substring(1).isNotBlank()
-        val queryServerPostId =
-            if (query != null && bindServerPostId) query.substring(1).toIntOrNull() ?: "" else ""
-
-        val likeQueryLiteral = "%${query?.lowercase(Locale.getDefault())}%"
-
-        val querySql = buildString {
-            if (query != null) {
-                if (bindServerPostId) {
-                    append("and mpc.server_post_id = ?  \n")
-                } else {
-                    append("and (sp.title like ? or p.content like ? or \n")
-                    append("exists (select * from post_tags pt where pt.tag like ?))")
-                }
-            }
-        }
-
-        val baseQuery = """
-            select
+    @Query("""
+        select
                 mpc.client_post_id,
                 mpc.server_post_id,
                 p.content,
@@ -255,52 +201,23 @@ interface MetisDao {
                 standalone_postings sp,
                 users u
             where
-                mpc.server_id = ? and
-                mpc.course_id = ? and
-                mpc.exercise_id = ? and
-                mpc.lecture_id = ? and
+                mpc.server_id = :serverId and
+                mpc.course_id = :courseId and
+                mpc.exercise_id = :exerciseId and
+                mpc.lecture_id = :lectureId and
                 p.id = mpc.client_post_id and
                 p.type = 'STANDALONE' and
                 sp.post_id = p.id and
                 u.server_id = mpc.server_id and
                 u.id = p.author_id
-                $metisFilterSql
-                $querySql
-            $orderBy
-        """.trimIndent()
-
-        val constructedQuery = SimpleSQLiteQuery(
-            baseQuery,
-            arrayOf(
-                serverId,
-                courseId,
-                exerciseId,
-                lectureId
-            )
-                    + (if (MetisFilter.CREATED_BY_CLIENT in metisFilter) arrayOf(clientId) else emptyArray())
-                    + (if (bindServerPostId) arrayOf(queryServerPostId) else emptyArray())
-                    + if (!bindServerPostId && query != null) arrayOf(
-                likeQueryLiteral,
-                likeQueryLiteral,
-                likeQueryLiteral
-            ) else emptyArray()
-        )
-
-        return queryCoursePosts(constructedQuery)
-    }
-
-    @RawQuery(
-        observedEntities = [
-            BasePostingEntity::class,
-            StandalonePostingEntity::class,
-            AnswerPostingEntity::class,
-            PostReactionEntity::class,
-            StandalonePostTagEntity::class,
-            MetisUserEntity::class,
-            MetisPostContextEntity::class
-        ]
-    )
-    fun queryCoursePosts(query: SupportSQLiteQuery): PagingSource<Int, PostPojo>
+            order by p.creation_date desc
+    """)
+    fun queryCoursePosts(
+        serverId: String,
+        courseId: Long,
+        exerciseId: Long,
+        lectureId: Long
+    ): PagingSource<Int, PostPojo>
 
     @Transaction
     @Query(
@@ -329,38 +246,6 @@ interface MetisDao {
 
     @Query("select author_role from postings where id = :clientPostId")
     suspend fun queryPostAuthorRole(clientPostId: String): UserRole
-
-//    @Query(
-//        """
-//                select
-//                    mpc.client_post_id,
-//                    mpc.server_post_id,
-//                    p.content,
-//                    sp.title,
-//                    sp.resolved,
-//                    u.name as author_name,
-//                    p.author_role
-//                from
-//                    metis_post_context mpc,
-//                    postings p,
-//                    standalone_postings sp,
-//                    users u
-//                where
-//                    mpc.server_id = :serverId and
-//                    mpc.course_id = :courseId and
-//                    mpc.exercise_id = :exerciseId and
-//                    mpc.lecture_id = :lectureId and
-//                    p.id = mpc.client_post_id and
-//                    p.type = 'standalone' and
-//                    sp.post_id = p.id and
-//                    u.server_id = mpc.server_id and
-//                    u.id = p.author_id and
-//                    sp.resolved = 1 and
-//                    exists (select count(*) from reactions r where r.post_id = p.id )
-//                order by (select count(*) from reactions r where r.post_id = p.id) desc
-//    """
-//    )
-//    fun foo(serverId: String, courseId: Long, exerciseId: Long, lectureId: Long)
 
     @Query("select server_post_id from metis_post_context where server_id = :serverId and client_post_id = :clientPostId")
     suspend fun queryServerSidePostId(serverId: String, clientPostId: String): Long

@@ -27,8 +27,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisContentViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -115,32 +116,48 @@ class ConversationChatListUseCase(
             clientIdOrDefault,
             onRequestReload.onStart { emit(Unit) }
         ) { pagingDataInput, authToken, clientId, _ ->
-            Pager(
-                config = PagingConfig(
-                    pageSize = 20
-                ),
-                remoteMediator = MetisRemoteMediator(
-                    context = pagingDataInput.standalonePostsContext,
-                    metisService = metisService,
-                    metisStorageService = metisStorageService,
-                    authToken = authToken,
-                    serverUrl = pagingDataInput.serverUrl,
-                    host = pagingDataInput.host,
-                    performInitialRefresh = true
-                ),
-                pagingSourceFactory = {
-                    metisStorageService.getStoredPosts(
-                        serverId = pagingDataInput.host,
-                        clientId = clientId,
-                        filter = pagingDataInput.standalonePostsContext.filter,
-                        sortingStrategy = pagingDataInput.standalonePostsContext.sortingStrategy,
-                        query = pagingDataInput.standalonePostsContext.query,
-                        metisContext = pagingDataInput.standalonePostsContext.metisContext
-                    )
-                }
+            val config = PagingConfig(
+                pageSize = 20
             )
-                .flow
-                .cachedIn(viewModelScope + coroutineContext)
+
+            if (pagingDataInput.standalonePostsContext.query.isNullOrBlank()) {
+                Pager(
+                    config = config,
+                    remoteMediator = MetisRemoteMediator(
+                        context = pagingDataInput.standalonePostsContext.metisContext,
+                        metisService = metisService,
+                        metisStorageService = metisStorageService,
+                        authToken = authToken,
+                        serverUrl = pagingDataInput.serverUrl,
+                        host = pagingDataInput.host,
+                        performInitialRefresh = true
+                    ),
+                    pagingSourceFactory = {
+                        metisStorageService.getStoredPosts(
+                            serverId = pagingDataInput.host,
+                            metisContext = pagingDataInput.standalonePostsContext.metisContext
+                        )
+                    }
+                )
+                    .flow
+                    .cachedIn(viewModelScope + coroutineContext)
+            } else {
+                Pager(
+                    config = config,
+                    initialKey = 0,
+                    remoteMediator = null,
+                    pagingSourceFactory = {
+                        MetisSearchPagingSource(
+                            metisService = metisService,
+                            context = pagingDataInput.standalonePostsContext,
+                            authToken = authToken,
+                            serverUrl = pagingDataInput.serverUrl
+                        )
+                    }
+                )
+                    .flow
+                    .cachedIn(viewModelScope + coroutineContext)
+            }
                 .map { pagingList -> pagingList.map(ChatListItem::PostChatListItem) }
                 .map(::insertDateSeparators)
         }
@@ -171,5 +188,7 @@ class ConversationChatListUseCase(
             }
         }
 
-    private val PostPojo.creationLocalDate: LocalDate get() = creationDate.toLocalDateTime(TimeZone.currentSystemDefault()).date
+    private val IStandalonePost.creationLocalDate: LocalDate
+        get() = (creationDate ?: Instant.fromEpochMilliseconds(0))
+            .toLocalDateTime(TimeZone.currentSystemDefault()).date
 }

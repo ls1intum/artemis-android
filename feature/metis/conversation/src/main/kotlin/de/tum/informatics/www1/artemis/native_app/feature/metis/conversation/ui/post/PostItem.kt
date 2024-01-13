@@ -46,6 +46,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
@@ -59,7 +60,7 @@ private val EditedGray: Color
 sealed class PostItemViewType {
 
     data class ChatListItem(
-        val answerPosts: List<AnswerPostPojo>
+        val answerPosts: List<IAnswerPost>
     ) : PostItemViewType()
 
     object ThreadContextPostItem : PostItemViewType()

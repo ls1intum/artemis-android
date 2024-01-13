@@ -32,6 +32,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextFi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import io.github.fornewid.placeholder.material3.placeholder
 
@@ -41,7 +42,7 @@ internal fun ConversationChatListScreen(
     viewModel: ConversationViewModel,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
-    onClickViewPost: (clientPostId: String) -> Unit
+    onClickViewPost: (StandalonePostId) -> Unit
 ) {
     ConversationChatListScreen(
         modifier = modifier,
@@ -62,7 +63,7 @@ internal fun ConversationChatListScreen(
     viewModel: ConversationViewModel,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
-    onClickViewPost: (clientPostId: String) -> Unit
+    onClickViewPost: (StandalonePostId) -> Unit
 ) {
     val query by viewModel.chatListUseCase.query.collectAsState()
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()

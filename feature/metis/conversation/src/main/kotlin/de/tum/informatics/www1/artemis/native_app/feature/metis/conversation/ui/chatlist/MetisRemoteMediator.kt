@@ -8,11 +8,13 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService.StandalonePostsContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 
 @OptIn(ExperimentalPagingApi::class)
 internal class MetisRemoteMediator(
-    private val context: StandalonePostsContext,
+    private val context: MetisContext,
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,
     private val authToken: String,
@@ -27,7 +29,10 @@ internal class MetisRemoteMediator(
         } else InitializeAction.SKIP_INITIAL_REFRESH
     }
 
-    override suspend fun load(loadType: LoadType, state: PagingState<Int, PostPojo>): MediatorResult {
+    override suspend fun load(
+        loadType: LoadType,
+        state: PagingState<Int, PostPojo>
+    ): MediatorResult {
         val pageSize = state.config.pageSize
 
         val nextPageIndex = when (loadType) {
@@ -39,14 +44,20 @@ internal class MetisRemoteMediator(
             LoadType.APPEND -> {
                 if (state.isEmpty()) return MediatorResult.Success(endOfPaginationReached = true)
                 val loadedItemsCount =
-                    metisStorageService.getCachedPostCount(host, context.metisContext)
+                    metisStorageService.getCachedPostCount(host, context)
                 (loadedItemsCount - (loadedItemsCount % pageSize)) / pageSize
             }
         }
 
         val loadedPosts = when (val networkResponse =
             metisService.getPosts(
-                standalonePostsContext = context,
+                standalonePostsContext = StandalonePostsContext(
+                    metisContext = context,
+                    filter = emptyList(),
+                    query = null,
+                    sortingStrategy = MetisSortingStrategy.DATE_DESCENDING,
+                    courseWideContext = null
+                ),
                 pageSize = pageSize,
                 pageNum = nextPageIndex,
                 authToken = authToken,
@@ -59,7 +70,7 @@ internal class MetisRemoteMediator(
 
         metisStorageService.insertOrUpdatePosts(
             host = host,
-            metisContext = context.metisContext,
+            metisContext = context,
             posts = loadedPosts,
             clearPreviousPosts = loadType == LoadType.REFRESH
         )

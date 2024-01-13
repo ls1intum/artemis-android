@@ -333,15 +333,20 @@ abstract class MetisContentViewModel(
         }
     }
 
-    fun editPost(post: PostPojo, newText: String): Deferred<MetisModificationFailure?> {
+    fun editPost(post: IStandalonePost, newText: String): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
 
-            val newPost = StandalonePost(
-                post = post.copy(content = newText),
-                conversation = conversation
-            )
+            val newPost = when (post) {
+                is StandalonePost -> post.copy(content = newText)
+                is PostPojo -> StandalonePost(
+                    post = post.copy(content = newText),
+                    conversation = conversation
+                )
+
+                else -> throw IllegalArgumentException()
+            }
 
             metisModificationService.updateStandalonePost(
                 context = metisContext,
