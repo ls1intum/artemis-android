@@ -29,36 +29,24 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import io.github.fornewid.placeholder.material3.placeholder
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 @Composable
-fun ConversationScreen(
+internal fun ConversationChatListScreen(
     modifier: Modifier,
-    courseId: Long,
-    conversationId: Long,
+    viewModel: ConversationViewModel,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onClickViewPost: (clientPostId: String) -> Unit
 ) {
-    val metisContext = remember(courseId, conversationId) {
-        MetisContext.Conversation(courseId, conversationId)
-    }
-
-    val viewModel = koinViewModel<MetisListViewModel> { parametersOf(metisContext) }
-
-    ConversationScreen(
+    ConversationChatListScreen(
         modifier = modifier,
-        courseId = courseId,
-        conversationId = conversationId,
-        metisContext = metisContext,
+        courseId = viewModel.courseId,
+        conversationId = viewModel.conversationId,
         viewModel = viewModel,
         onNavigateBack = onNavigateBack,
         onNavigateToSettings = onNavigateToSettings,
@@ -67,21 +55,16 @@ fun ConversationScreen(
 }
 
 @Composable
-fun ConversationScreen(
+internal fun ConversationChatListScreen(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,
-    metisContext: MetisContext,
-    viewModel: MetisListViewModel,
+    viewModel: ConversationViewModel,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onClickViewPost: (clientPostId: String) -> Unit
 ) {
-    LaunchedEffect(metisContext) {
-        viewModel.updateMetisContext(metisContext)
-    }
-
-    val query by viewModel.query.collectAsState()
+    val query by viewModel.chatListUseCase.query.collectAsState()
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
 
     val title by remember(conversationDataState) {
@@ -90,7 +73,7 @@ fun ConversationScreen(
         }
     }
 
-    ConversationScreen(
+    ConversationChatListScreen(
         modifier = modifier,
         courseId = courseId,
         conversationId = conversationId,
@@ -99,7 +82,7 @@ fun ConversationScreen(
         conversationTitle = title,
         onNavigateBack = onNavigateBack,
         onNavigateToSettings = onNavigateToSettings,
-        onUpdateQuery = viewModel::updateQuery
+        onUpdateQuery = viewModel.chatListUseCase::updateQuery
     ) { padding ->
         val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
@@ -120,7 +103,7 @@ fun ConversationScreen(
 }
 
 @Composable
-fun ConversationScreen(
+fun ConversationChatListScreen(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,

@@ -18,7 +18,6 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
@@ -27,14 +26,15 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisContentViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -56,34 +56,16 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
-class MetisListViewModel(
-    initialMetisContext: MetisContext,
+class ConversationChatListUseCase(
+    private val viewModelScope: CoroutineScope,
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val metisContextManager: MetisContextManager,
-    metisModificationService: MetisModificationService,
+    metisContext: MetisContext,
+    onRequestReload: MutableSharedFlow<Unit>,
+    clientIdOrDefault: Flow<Long>,
+    serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
-    websocketProvider: WebsocketProvider,
-    accountDataService: AccountDataService,
-    networkStatusProvider: NetworkStatusProvider,
-    conversationService: ConversationService,
-    replyTextStorageService: ReplyTextStorageService,
-    courseService: CourseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : MetisContentViewModel(
-    initialMetisContext,
-    websocketProvider,
-    metisModificationService,
-    metisStorageService,
-    serverConfigurationService,
-    accountService,
-    accountDataService,
-    networkStatusProvider,
-    conversationService,
-    replyTextStorageService,
-    courseService,
-    coroutineContext
 ) {
     private val _filter = MutableStateFlow<List<MetisFilter>>(emptyList())
     val filter: StateFlow<List<MetisFilter>> = _filter
@@ -97,25 +79,14 @@ class MetisListViewModel(
         .debounce(300.milliseconds)
         .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
-    private val _sortingStrategy = MutableStateFlow(MetisSortingStrategy.DATE_DESCENDING)
-    val sortingStrategy: StateFlow<MetisSortingStrategy> = _sortingStrategy
-
-    private val _courseWideContext = MutableStateFlow<CourseWideContext?>(null)
-    val courseWideContext: StateFlow<CourseWideContext?> = _courseWideContext
-
     private val standaloneMetisContext: Flow<StandalonePostsContext> = combine(
-        metisContext,
         _filter,
-        delayedQuery,
-        _sortingStrategy,
-        _courseWideContext
-    ) { metisContext, filter, query, sortingStrategy, courseWideContext ->
+        delayedQuery
+    ) { filter, query ->
         StandalonePostsContext(
             metisContext = metisContext,
             filter = filter,
-            query = query,
-            sortingStrategy = sortingStrategy,
-            courseWideContext = courseWideContext
+            query = query
         )
     }
         .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
@@ -125,7 +96,7 @@ class MetisListViewModel(
         serverConfigurationService.serverUrl,
         serverConfigurationService.host,
         standaloneMetisContext,
-        MetisListViewModel::PagingDataInput
+        ConversationChatListUseCase::PagingDataInput
     )
         .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
@@ -175,44 +146,9 @@ class MetisListViewModel(
         }
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Lazily, replay = 1)
 
-    init {
-        viewModelScope.launch(coroutineContext) {
-            combine(
-                serverConfigurationService.host,
-                metisContext,
-                ::Pair
-            ).collectLatest { (host, metisContext) ->
-                metisContextManager.updatePosts(host, metisContext, this@MetisListViewModel.coroutineContext)
-            }
-        }
-    }
-
-    fun createPost(): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async(coroutineContext) {
-            val postText = newMessageText.first().text
-
-            val conversation =
-                loadConversation() ?: return@async MetisModificationFailure.CREATE_POST
-
-            val post = StandalonePost(
-                id = null,
-                title = null,
-                tags = null,
-                content = postText,
-                conversation = conversation,
-                creationDate = Clock.System.now(),
-                displayPriority = DisplayPriority.NONE
-            )
-
-            createStandalonePostImpl(post)
-        }
-    }
-
     fun updateQuery(new: String) {
         _query.value = new.ifEmpty { null }
     }
-
-    override suspend fun getPostId(): Long? = null // by definition we are list, so no post
 
     private fun insertDateSeparators(pagingList: PagingData<ChatListItem.PostChatListItem>) =
         pagingList.insertSeparators { before: ChatListItem.PostChatListItem?, after: ChatListItem.PostChatListItem? ->

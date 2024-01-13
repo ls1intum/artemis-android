@@ -29,9 +29,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -52,36 +54,17 @@ import kotlin.coroutines.EmptyCoroutineContext
 /**
  * ViewModel for the standalone view of communication posts. Handles loading of the singular post by the given post id.
  */
-internal class MetisThreadViewModel(
-    initialPostId: StandalonePostId,
-    initialMetisContext: MetisContext,
-    subscribeToLiveUpdateService: Boolean,
+internal class ConversationThreadUseCase(
+    metisContext: MetisContext,
+    postId: Flow<StandalonePostId>,
+    onRequestReload: MutableSharedFlow<Unit>,
+    viewModelScope: CoroutineScope,
     private val metisStorageService: MetisStorageService,
     private val metisService: MetisService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
-    websocketProvider: WebsocketProvider,
-    metisContextManager: MetisContextManager,
-    metisModificationService: MetisModificationService,
-    accountDataService: AccountDataService,
-    conversationService: ConversationService,
-    replyTextStorageService: ReplyTextStorageService,
-    courseService: CourseService,
-    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : MetisContentViewModel(
-    initialMetisContext,
-    websocketProvider,
-    metisModificationService,
-    metisStorageService,
-    serverConfigurationService,
-    accountService,
-    accountDataService,
-    networkStatusProvider,
-    conversationService,
-    replyTextStorageService,
-    courseService,
-    coroutineContext
+    coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) {
 
     companion object {
@@ -91,8 +74,6 @@ internal class MetisThreadViewModel(
             } else DataState.Failure(RuntimeException("Post not found"))
         }
     }
-
-    private val postId = MutableStateFlow(initialPostId)
 
     /**
      * The post data state flow as loading from the server.
@@ -104,11 +85,10 @@ internal class MetisThreadViewModel(
                 .asDataStateFlow()
 
             is StandalonePostId.ServerSideId -> flatMapLatest(
-                metisContext,
                 serverConfigurationService.serverUrl,
                 accountService.authToken,
                 onRequestReload.onStart { emit(Unit) }
-            ) { metisContext, serverUrl, authToken, _ ->
+            ) { serverUrl, authToken, _ ->
                 retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                     metisService.getPost(
                         metisContext,
@@ -119,22 +99,13 @@ internal class MetisThreadViewModel(
                 }
             }
                 .flatMapLatest { standalonePostDataState ->
-                    currentMetisContext.flatMapLatest { metisContext ->
-                        handleServerLoadedStandalonePost(metisContext, standalonePostDataState)
-                    }
+                    handleServerLoadedStandalonePost(metisContext, standalonePostDataState)
                 }
                 .onStart { emit(DataState.Loading()) }
         }
     }
         .map { dataState -> dataState.bind { it } } // Type check adaption
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
-
-    override suspend fun getPostId(): Long = when (val postId = postId.value) {
-        is StandalonePostId.ClientSideId -> metisStorageService.getStandalonePost(postId.clientSideId)
-            .filterNotNull().first().serverPostId
-
-        is StandalonePostId.ServerSideId -> postId.serverSidePostId
-    }
 
     private suspend fun handleServerLoadedStandalonePost(
         metisContext: MetisContext,
@@ -170,106 +141,6 @@ internal class MetisThreadViewModel(
 
             is DataState.Failure -> flowOf(DataState.Failure(standalonePostDataState.throwable))
             is DataState.Loading -> flowOf(DataState.Loading())
-        }
-    }
-
-    /**
-     * Wait for the metis context manager to request a refresh. Then load the post from the server.
-     */
-    init {
-        if (subscribeToLiveUpdateService) {
-            viewModelScope.launch(coroutineContext) {
-                combine(
-                    serverConfigurationService.host,
-                    metisContext,
-                    ::Pair
-                ).collectLatest { (host, metisContext) ->
-                    metisContextManager.updatePosts(
-                        host,
-                        metisContext,
-                        this@MetisThreadViewModel.coroutineContext
-                    )
-                }
-            }
-
-            viewModelScope.launch(coroutineContext) {
-                combine(
-                    metisContext,
-                    postId,
-                    onRequestReload
-                ) { a, b, _ -> a to b }
-                    .collect { (metisContext, postId) ->
-                        val serverSidePostId = when (postId) {
-                            is StandalonePostId.ClientSideId -> {
-                                post.filterSuccess().filterNotNull().first().serverPostId
-                            }
-
-                            is StandalonePostId.ServerSideId -> postId.serverSidePostId
-                        }
-
-                        val serverUrl = serverConfigurationService.serverUrl.first()
-                        val host = serverConfigurationService.host.first()
-                        val authToken = when (val authData =
-                            accountService.authenticationData.first()) {
-                            is AccountService.AuthenticationData.LoggedIn -> authData.authToken
-                            AccountService.AuthenticationData.NotLoggedIn -> return@collect
-                        }
-
-                        retryOnInternetIndefinetly(
-                            networkStatusProvider.currentNetworkStatus,
-                        ) {
-                            metisService.getPost(
-                                metisContext,
-                                serverSidePostId,
-                                serverUrl,
-                                authToken
-                            )
-                        }
-                            .filterSuccess()
-                            .collect { post ->
-                                metisStorageService.updatePost(
-                                    host,
-                                    metisContext,
-                                    post
-                                )
-                            }
-                    }
-            }
-        }
-    }
-
-    fun createReply(): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async(coroutineContext) {
-            if (!post.value.isSuccess) return@async MetisModificationFailure.CREATE_POST
-
-            val conversation =
-                loadConversation() ?: return@async MetisModificationFailure.CREATE_POST
-
-            val replyPost = AnswerPost(
-                creationDate = Clock.System.now(),
-                content = newMessageText.first().text,
-                post = StandalonePost(
-                    id = when (val postId = postId.value) {
-                        is StandalonePostId.ClientSideId -> metisStorageService.getServerSidePostId(
-                            serverConfigurationService.host.first(),
-                            postId.clientSideId
-                        )
-
-                        is StandalonePostId.ServerSideId -> postId.serverSidePostId
-                    },
-                    conversation = conversation
-                )
-            )
-
-            createAnswerPostImpl(replyPost)
-        }
-    }
-
-    fun updatePostId(newPostId: StandalonePostId) {
-        postId.value = newPostId
-
-        viewModelScope.launch(coroutineContext) {
-            newMessageText.value = TextFieldValue(retrieveNewMessageText(metisContext.value, getPostId()))
         }
     }
 }

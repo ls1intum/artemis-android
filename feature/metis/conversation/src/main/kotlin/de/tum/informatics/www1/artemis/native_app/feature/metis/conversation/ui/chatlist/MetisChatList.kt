@@ -28,10 +28,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
@@ -60,17 +59,16 @@ internal fun testTagForPost(postId: Long) = "post$postId"
 @Composable
 internal fun MetisChatList(
     modifier: Modifier,
-    viewModel: MetisListViewModel,
+    viewModel: ConversationViewModel,
     listContentPadding: PaddingValues,
     state: LazyListState = rememberLazyListState(),
     isReplyEnabled: Boolean = true,
     onClickViewPost: (clientPostId: String) -> Unit
 ) {
-    val metisContext by viewModel.currentMetisContext.collectAsState()
+    ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
 
-    ReportVisibleMetisContext(remember(metisContext) { VisiblePostList(metisContext) })
-
-    val posts: LazyPagingItems<ChatListItem> = viewModel.postPagingData.collectAsLazyPagingItems()
+    val posts: LazyPagingItems<ChatListItem> =
+        viewModel.chatListUseCase.postPagingData.collectAsLazyPagingItems()
     val isDataOutdated by viewModel.isDataOutdated.collectAsState(initial = false)
 
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
@@ -89,7 +87,7 @@ internal fun MetisChatList(
         hasModerationRights = hasModerationRights,
         listContentPadding = listContentPadding,
         serverUrl = serverUrl,
-        courseId = metisContext.courseId,
+        courseId = viewModel.courseId,
         onCreatePost = viewModel::createPost,
         onEditPost = viewModel::editPost,
         onDeletePost = viewModel::deletePost,
