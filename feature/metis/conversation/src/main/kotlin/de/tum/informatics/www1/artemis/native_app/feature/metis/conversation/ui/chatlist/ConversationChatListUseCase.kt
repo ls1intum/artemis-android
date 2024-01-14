@@ -1,13 +1,16 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist
 
+import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -16,8 +19,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService.StandalonePostsContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,30 +33,40 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import java.lang.RuntimeException
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.math.max
 import kotlin.time.Duration.Companion.milliseconds
 
 class ConversationChatListUseCase(
     private val viewModelScope: CoroutineScope,
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,
-    metisContext: MetisContext,
-    onRequestReload: MutableSharedFlow<Unit>,
-    clientIdOrDefault: Flow<Long>,
-    serverConfigurationService: ServerConfigurationService,
-    accountService: AccountService,
+    private val metisContext: MetisContext,
+    onRequestHardRefresh: Flow<Unit>,
+    onRequestSoftReload: Flow<Unit>,
+    private val serverConfigurationService: ServerConfigurationService,
+    private val accountService: AccountService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) {
+    companion object {
+        private const val TAG = "ConversationChatListUseCase"
+    }
+
     private val _filter = MutableStateFlow<List<MetisFilter>>(emptyList())
     val filter: StateFlow<List<MetisFilter>> = _filter
 
@@ -89,14 +107,14 @@ class ConversationChatListUseCase(
         val standalonePostsContext: StandalonePostsContext
     )
 
+    private val highestVisiblePostIndex = MutableStateFlow(0)
+
     @OptIn(ExperimentalPagingApi::class)
     val postPagingData: Flow<PagingData<ChatListItem>> =
         flatMapLatest(
             pagingDataInput,
-            accountService.authToken,
-            clientIdOrDefault,
-            onRequestReload.onStart { emit(Unit) }
-        ) { pagingDataInput, authToken, clientId, _ ->
+            accountService.authToken
+        ) { pagingDataInput, authToken ->
             val config = PagingConfig(
                 pageSize = 20
             )
@@ -105,18 +123,26 @@ class ConversationChatListUseCase(
                 Pager(
                     config = config,
                     remoteMediator = MetisRemoteMediator(
-                        context = pagingDataInput.standalonePostsContext.metisContext,
+                        context = metisContext,
                         metisService = metisService,
                         metisStorageService = metisStorageService,
                         authToken = authToken,
                         serverUrl = pagingDataInput.serverUrl,
-                        host = pagingDataInput.host,
-                        performInitialRefresh = true
+                        host = pagingDataInput.host
                     ),
                     pagingSourceFactory = {
-                        metisStorageService.getStoredPosts(
-                            serverId = pagingDataInput.host,
-                            metisContext = pagingDataInput.standalonePostsContext.metisContext
+                        // We use a wrapper paging source that reports which page has been loaded and shown to the user.
+                        // This way, we know which page to refresh next.
+                        RefreshablePagingSource(
+                            delegate = metisStorageService.getStoredPosts(
+                                serverId = pagingDataInput.host,
+                                metisContext = metisContext
+                            ),
+                            onPageLoaded = { offset, size ->
+                                highestVisiblePostIndex.update { currentHighestIndex ->
+                                    max(currentHighestIndex, offset + size)
+                                }
+                            }
                         )
                     }
                 )
@@ -144,6 +170,45 @@ class ConversationChatListUseCase(
         }
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Lazily, replay = 1)
 
+    /**
+     * This flow handles reloading the visible posts from the server.
+     * It is invoked when a soft reload is requested.
+     *
+     * It loads the necessary data from the server and updates the db.
+     */
+    val softReloadDataStatus: Flow<DataStatus> = onRequestSoftReload
+        .transformLatest {
+            emit(DataStatus.Loading)
+            val successfullyLoadedNewPosts =
+                loadNewlyCreatedPosts(pageSize = 20) is NetworkResponse.Response
+
+            val highestVisiblePostIndex = highestVisiblePostIndex.value
+            val successfullyLoadedExistingPosts = refreshExistingVisiblePosts(
+                highestVisibleIndex = highestVisiblePostIndex,
+                pageSize = 20
+            )
+
+            val resultStatus =
+                if (successfullyLoadedNewPosts && successfullyLoadedExistingPosts) DataStatus.UpToDate else DataStatus.Outdated
+
+            emit(resultStatus)
+        }
+        .onStart { emit(DataStatus.Outdated) }
+        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+
+    /**
+     * The combined data status of the chat list data. Tells the UI if we are in sync with the server or not.
+     */
+    val dataStatus: Flow<DataStatus> = softReloadDataStatus
+
+    init {
+        viewModelScope.launch(coroutineContext) {
+            onRequestSoftReload.collect {
+
+            }
+        }
+    }
+
     fun updateQuery(new: String) {
         _query.value = new.ifEmpty { null }
     }
@@ -168,6 +233,191 @@ class ConversationChatListUseCase(
                 else -> null
             }
         }
+
+    /**
+     * Tries to load all posts that have been added in the meantime.
+     */
+    private suspend fun loadNewlyCreatedPosts(pageSize: Int): NetworkResponse<Unit> {
+        val serverUrl = serverConfigurationService.serverUrl.first()
+        val host = serverConfigurationService.host.first()
+        val authToken = accountService.authToken.first()
+
+        Log.d(TAG, "Loading newly created posts")
+        val latestKnownPost = metisStorageService.getLatestKnownPost(host, metisContext)
+
+        return if (latestKnownPost == null) {
+            Log.d(TAG, "There is no latest known post -> loading all posts.")
+
+            // We have no posts, just load the first page.
+            loadAndStorePosts(
+                host = host,
+                serverUrl = serverUrl,
+                authToken = authToken,
+                pageSize = pageSize,
+                pageNum = 0,
+                clearPreviousPosts = false
+            ).bind { }
+        } else {
+            // Load posts until we find the first post that matches,
+            val maxPageNum = 10
+            var currentPageNum = 0
+
+            val loadedPosts = mutableListOf<StandalonePost>()
+
+            while (true) {
+                if (currentPageNum > maxPageNum) {
+                    Log.d(
+                        TAG,
+                        "Reached maximum look back. Performing hard refresh."
+                    )
+
+                    // This did not work. Perform hard reset.
+                    return loadAndStorePosts(
+                        host = host,
+                        serverUrl = serverUrl,
+                        authToken = authToken,
+                        pageNum = 0, pageSize = pageSize,
+                        clearPreviousPosts = true
+                    ).bind { }
+                }
+
+                when (val postResult = MetisRemoteMediator.loadPosts(
+                    serverUrl = serverUrl,
+                    authToken = authToken,
+                    metisService = metisService,
+                    pageSize = pageSize,
+                    pageNum = currentPageNum,
+                    context = metisContext
+                )) {
+                    is NetworkResponse.Response -> {
+                        loadedPosts += postResult.data
+
+                        val reachedEndOfPagination = postResult.data.size < pageSize
+
+                        // Check if the date of any of the loaded posts is smaller than a date we already know.
+                        // if this is the case, we are done loading.
+                        if (postResult.data.mapNotNull { it.creationDate }
+                                .any { it <= latestKnownPost.creationDate } || reachedEndOfPagination) {
+                            Log.d(
+                                TAG,
+                                "Found known anchor. Storing newly created posts. reachedEndOfPagination=$reachedEndOfPagination"
+                            )
+
+                            // We have loaded all missing posts. Insert into db.
+                            metisStorageService.insertOrUpdatePosts(
+                                host = host,
+                                metisContext = metisContext,
+                                posts = loadedPosts,
+                                clearPreviousPosts = reachedEndOfPagination
+                            )
+
+                            return NetworkResponse.Response(Unit)
+                        }
+                    }
+
+                    is NetworkResponse.Failure -> {
+                        return NetworkResponse.Failure(postResult.exception)
+                    }
+                }
+
+                currentPageNum++
+            }
+
+            @Suppress("UNREACHABLE_CODE")
+            return NetworkResponse.Failure(RuntimeException(""))
+        }
+    }
+
+    /**
+     * @returns true if the data was loaded and updated successfully
+     */
+    private suspend fun refreshExistingVisiblePosts(
+        highestVisibleIndex: Int,
+        pageSize: Int
+    ): Boolean {
+        val host = serverConfigurationService.host.first()
+
+        val pageCount = (highestVisibleIndex - (highestVisibleIndex % pageSize)) / pageSize
+
+        val serverUrl = serverConfigurationService.serverUrl.first()
+        val authToken = accountService.authToken.first()
+
+        // Start a coroutine for each page we have to request
+        return coroutineScope {
+            val updatedPosts = (0 until pageCount)
+                .map { pageNum ->
+                    async {
+                        MetisRemoteMediator.loadPosts(
+                            metisService = metisService,
+                            context = metisContext,
+                            serverUrl = serverUrl,
+                            authToken = authToken,
+                            pageSize = pageSize,
+                            pageNum = pageNum
+                        )
+                    }
+                }
+                .awaitAll()
+
+            if (updatedPosts.all { it is NetworkResponse.Response }) {
+                // Successfully loaded all updates
+                val newPosts = updatedPosts
+                    .filterIsInstance<NetworkResponse.Response<List<StandalonePost>>>()
+                    .flatMap { it.data }
+
+                // Edge case, a post at the very end of the list has been removed.
+                // If we loaded all posts that exist in this conversation with this update, we must delete posts that are older than the oldest post in this list.
+                // This handles the case, if, for example, the oldest 5 posts have been deleted.
+                val reachedEndOfPagination = updatedPosts
+                    .filterIsInstance<NetworkResponse.Response<List<StandalonePost>>>()
+                    .any { it.data.size < pageSize }
+
+                metisStorageService.insertOrUpdatePostsAndRemoveDeletedPosts(
+                    host = host,
+                    metisContext = metisContext,
+                    posts = newPosts,
+                    removeAllOlderPosts = reachedEndOfPagination
+                )
+
+                true
+            } else {
+                // At least one page was not loaded successfully
+                false
+            }
+        }
+    }
+
+    private suspend fun loadAndStorePosts(
+        host: String,
+        serverUrl: String,
+        authToken: String,
+        pageSize: Int,
+        pageNum: Int,
+        clearPreviousPosts: Boolean
+    ): NetworkResponse<Int> {
+        val loadedPosts = when (val networkResponse =
+            MetisRemoteMediator.loadPosts(
+                metisService = metisService,
+                context = metisContext,
+                serverUrl = serverUrl,
+                authToken = authToken,
+                pageSize = pageSize,
+                pageNum = pageNum
+            )
+        ) {
+            is NetworkResponse.Failure -> return networkResponse.bind { 0 }
+            is NetworkResponse.Response -> networkResponse.data
+        }
+
+        metisStorageService.insertOrUpdatePosts(
+            host = host,
+            metisContext = metisContext,
+            posts = loadedPosts,
+            clearPreviousPosts = clearPreviousPosts
+        )
+
+        return NetworkResponse.Response(loadedPosts.size)
+    }
 
     private val IStandalonePost.creationLocalDate: LocalDate
         get() = (creationDate ?: Instant.fromEpochMilliseconds(0))

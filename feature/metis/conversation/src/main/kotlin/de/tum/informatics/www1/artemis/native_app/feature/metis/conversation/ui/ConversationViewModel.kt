@@ -67,6 +67,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -106,6 +107,8 @@ internal open class ConversationViewModel(
     coroutineContext
 ), InitialReplyTextProvider, ReplyAutoCompleteHintProvider {
 
+    private val onRequestSoftReload = onReloadRequestAndWebsocketReconnect
+
     val metisContext = MetisContext.Conversation(courseId, conversationId)
 
     private val _postId: MutableStateFlow<StandalonePostId?> = MutableStateFlow(initialPostId)
@@ -116,8 +119,8 @@ internal open class ConversationViewModel(
         metisService = metisService,
         metisStorageService = metisStorageService,
         metisContext = metisContext,
-        onRequestReload = onRequestReload,
-        clientIdOrDefault = clientIdOrDefault,
+        onRequestHardRefresh = emptyFlow(), // TODO add extra hard refresh button
+        onRequestSoftReload = onRequestSoftReload,
         serverConfigurationService = serverConfigurationService,
         accountService = accountService
     )
@@ -162,32 +165,18 @@ internal open class ConversationViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
-    /**
-     * Emits true if the data may be outdated. Listens to the connection state of the websocket
-     * If a connection was established and is broken, then the data may be corrupted.
-     */
-    val isDataOutdated: StateFlow<Boolean> = onRequestReload
-        .transformLatest {
-            emit(false)
-            var wasConnected = false
 
-            websocketProvider.connectionState.collect { connectionState ->
-                when (connectionState) {
-                    is WebsocketProvider.WebsocketConnectionState.WithSession -> {
-                        if (!wasConnected && connectionState.isConnected) {
-                            wasConnected = true
-                        } else if (wasConnected && !connectionState.isConnected) {
-                            emit(true)
-                        }
-                    }
-
-                    WebsocketProvider.WebsocketConnectionState.Empty -> {
-                        wasConnected = false
-                    }
-                }
-            }
+    val conversationDataStatus: StateFlow<DataStatus> = combine(
+        websocketProvider.isConnected,
+        chatListUseCase.dataStatus
+    ) { websocketConnected, chatListStatus ->
+        when {
+            !websocketConnected -> DataStatus.Outdated
+            chatListStatus != DataStatus.UpToDate -> chatListStatus
+            else -> DataStatus.UpToDate
         }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
+    }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, DataStatus.Outdated)
 
     val conversation: StateFlow<DataState<Conversation>> = flatMapLatest(
         serverConfigurationService.serverUrl,

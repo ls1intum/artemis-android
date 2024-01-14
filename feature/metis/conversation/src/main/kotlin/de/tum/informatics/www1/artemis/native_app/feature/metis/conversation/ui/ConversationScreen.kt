@@ -12,9 +12,13 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import org.koin.androidx.compose.getViewModel
@@ -41,15 +45,30 @@ fun ConversationScreen(
     onNavigateToSettings: () -> Unit,
     conversationsOverview: @Composable (Modifier) -> Unit
 ) {
+    val store = remember { ViewModelStore() }
+
+    val owner = remember(store) {
+        object : ViewModelStoreOwner {
+            override val viewModelStore: ViewModelStore = store
+        }
+    }
+
+    DisposableEffect(courseId, conversationId) {
+        onDispose {
+            store.clear()
+        }
+    }
+
     val viewModel: ConversationViewModel =
-        getViewModel(key = "$courseId|$conversationId") { parametersOf(courseId, conversationId, threadPostId) }
+        getViewModel(
+            key = "$courseId|$conversationId",
+            viewModelStoreOwner = owner) { parametersOf(courseId, conversationId, threadPostId) }
 
     LaunchedEffect(threadPostId, viewModel) {
         viewModel.updateOpenedThread(threadPostId)
     }
 
     val widthSizeClass = getWindowSizeClass().widthSizeClass
-    val metisContext = viewModel.metisContext
 
     when {
         widthSizeClass <= WindowWidthSizeClass.Compact -> {
@@ -113,7 +132,9 @@ fun ConversationScreen(
                     .fillMaxHeight()
 
                 ConversationChatListScreen(
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                     viewModel = viewModel,
                     courseId = courseId,
                     conversationId = conversationId,

@@ -32,8 +32,6 @@ internal fun ConversationThreadScreen(
     viewModel: ConversationViewModel,
     onNavigateUp: () -> Unit
 ) {
-    val isDataOutdated by viewModel.isDataOutdated.collectAsState()
-
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -59,12 +57,6 @@ internal fun ConversationThreadScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            MetisOutdatedBanner(
-                modifier = Modifier.fillMaxWidth(),
-                isOutdated = isDataOutdated,
-                requestRefresh = viewModel::requestReload
-            )
-
             CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides viewModel) {
                 MetisThreadUi(
                     modifier = Modifier

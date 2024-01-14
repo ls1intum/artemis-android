@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -76,6 +77,7 @@ internal class ConversationThreadUseCase(
                     )
                 }
             }
+                // Also listens to the database in the end.
                 .flatMapLatest { standalonePostDataState ->
                     handleServerLoadedStandalonePost(metisContext, standalonePostDataState)
                 }
@@ -85,6 +87,9 @@ internal class ConversationThreadUseCase(
         .map { dataState -> dataState.bind { it } } // Type check adaption
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
+    /**
+     * Handles when the post has been directly loaded from the server. Stores the resulting post in the db.
+     */
     private suspend fun handleServerLoadedStandalonePost(
         metisContext: MetisContext,
         standalonePostDataState: DataState<StandalonePost>

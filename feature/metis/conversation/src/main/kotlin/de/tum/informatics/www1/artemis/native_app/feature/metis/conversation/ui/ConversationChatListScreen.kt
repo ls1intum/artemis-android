@@ -67,6 +67,7 @@ internal fun ConversationChatListScreen(
 ) {
     val query by viewModel.chatListUseCase.query.collectAsState()
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
+    val conversationDataStatus by viewModel.conversationDataStatus.collectAsState()
 
     val title by remember(conversationDataState) {
         derivedStateOf {
@@ -79,6 +80,7 @@ internal fun ConversationChatListScreen(
         courseId = courseId,
         conversationId = conversationId,
         isConversationLoaded = conversationDataState.isSuccess,
+        conversationDataStatus = conversationDataStatus,
         query = query,
         conversationTitle = title,
         onNavigateBack = onNavigateBack,
@@ -110,6 +112,7 @@ fun ConversationChatListScreen(
     conversationId: Long,
     conversationTitle: String,
     query: String,
+    conversationDataStatus: DataStatus,
     isConversationLoaded: Boolean,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
@@ -170,6 +173,12 @@ fun ConversationChatListScreen(
                 },
                 actions = {
                     if (!isSearchBarOpen) {
+                        ConversationDataStatusButton(
+                            dataStatus = conversationDataStatus,
+                            onRequestSoftReload = { /*TODO*/ },
+                            onRequestHardReload = {}
+                        )
+
                         IconButton(onClick = { isSearchBarOpen = true }) {
                             Icon(imageVector = Icons.Default.Search, contentDescription = null)
                         }

@@ -42,7 +42,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisOutdatedBanner
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
@@ -71,7 +70,6 @@ internal fun MetisChatList(
 
     val posts: LazyPagingItems<ChatListItem> =
         viewModel.chatListUseCase.postPagingData.collectAsLazyPagingItems()
-    val isDataOutdated by viewModel.isDataOutdated.collectAsState(initial = false)
 
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
@@ -84,7 +82,6 @@ internal fun MetisChatList(
         state = state,
         isReplyEnabled = isReplyEnabled,
         posts = posts.asPostsDataState(),
-        isDataOutdated = isDataOutdated,
         clientId = clientId,
         hasModerationRights = hasModerationRights,
         listContentPadding = listContentPadding,
@@ -104,7 +101,6 @@ fun MetisChatList(
     modifier: Modifier,
     initialReplyTextProvider: InitialReplyTextProvider,
     posts: PostsDataState,
-    isDataOutdated: Boolean,
     clientId: Long,
     hasModerationRights: Boolean,
     listContentPadding: PaddingValues,
@@ -127,12 +123,6 @@ fun MetisChatList(
         onRequestReactWithEmoji = onRequestReactWithEmoji
     ) { replyMode, onEditPostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, updateFailureStateDelegate ->
         Column(modifier = modifier) {
-            MetisOutdatedBanner(
-                modifier = Modifier.fillMaxWidth(),
-                isOutdated = isDataOutdated,
-                requestRefresh = onRequestReload
-            )
-
             val informationModifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)

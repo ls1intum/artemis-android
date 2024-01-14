@@ -18,6 +18,7 @@ import org.hildan.krossbow.websocket.WebSocketConnection
 import org.hildan.krossbow.websocket.WebSocketConnectionException
 import org.hildan.krossbow.websocket.WebSocketFrame
 import org.hildan.krossbow.websocket.WebSocketListenerFlowAdapter
+import java.lang.Exception
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -103,8 +104,12 @@ private class KrossbowToOkHttpListenerAdapter(
                 resumeWithException(exception)
             }
         } else {
-            channelListener.onError(t)
-            onError()
+            try {
+                channelListener.onError(t)
+            } catch (_: Exception) {
+            } finally {
+                onError()
+            }
         }
     }
 }

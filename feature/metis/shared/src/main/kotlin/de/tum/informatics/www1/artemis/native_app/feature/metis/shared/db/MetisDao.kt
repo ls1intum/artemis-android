@@ -5,13 +5,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.room.Update
-import androidx.sqlite.db.SimpleSQLiteQuery
-import androidx.sqlite.db.SupportSQLiteQuery
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.AnswerPostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
@@ -22,7 +17,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entiti
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.flow.Flow
-import java.util.Locale
+import kotlinx.datetime.Instant
 
 @Dao
 interface MetisDao {
@@ -61,13 +56,12 @@ interface MetisDao {
     @Insert
     suspend fun insertPostMetisContext(postMetisContext: MetisPostContextEntity)
 
-    @Query("select exists(select * from metis_post_context where client_post_id = :clientPostId and server_post_id = :serverPostId and course_id = :courseId and exercise_id = :exerciseId and lecture_id = :lectureId)")
+    @Query("select exists(select * from metis_post_context where client_post_id = :clientPostId and server_post_id = :serverPostId and course_id = :courseId and conversation_id = :conversationId)")
     suspend fun isPostPresentInContext(
         clientPostId: String,
         serverPostId: Long,
         courseId: Long,
-        exerciseId: Long,
-        lectureId: Long
+        conversationId: Long
     ): Boolean
 
     @Update
@@ -131,6 +125,40 @@ interface MetisDao {
     suspend fun deletePostingsWithServerIds(
         host: String,
         serverPostIds: List<Long>,
+        postingType: BasePostingEntity.PostingType = BasePostingEntity.PostingType.STANDALONE
+    )
+
+    @Query("""
+        delete from metis_post_context where metis_post_context.server_id = :host and metis_post_context.course_id = :courseId and metis_post_context.conversation_id = :conversationId 
+            and metis_post_context.server_post_id not in (:serverIds) and metis_post_context.type = :postingType
+            and exists (
+                select * from postings p where p.creation_date > :startInstant and p.creation_date < :endInstant and 
+                p.id = metis_post_context.client_post_id
+            )
+    """)
+    suspend fun deleteSuperfluousPostsInTimeInterval(
+        host: String,
+        courseId: Long,
+        conversationId: Long,
+        serverIds: List<Long>,
+        startInstant: Instant,
+        endInstant: Instant,
+        postingType: BasePostingEntity.PostingType = BasePostingEntity.PostingType.STANDALONE
+    )
+
+    @Query("""
+        delete from metis_post_context where metis_post_context.server_id = :host and metis_post_context.course_id = :courseId and metis_post_context.conversation_id = :conversationId 
+            and metis_post_context.type = :postingType
+            and exists (
+                select * from postings p where p.creation_date < :threshold
+                and p.id = metis_post_context.client_post_id
+            )
+    """)
+    suspend fun deletePostsOlderThanThreshold(
+        host: String,
+        courseId: Long,
+        conversationId: Long,
+        threshold: Instant,
         postingType: BasePostingEntity.PostingType = BasePostingEntity.PostingType.STANDALONE
     )
 
@@ -203,8 +231,7 @@ interface MetisDao {
             where
                 mpc.server_id = :serverId and
                 mpc.course_id = :courseId and
-                mpc.exercise_id = :exerciseId and
-                mpc.lecture_id = :lectureId and
+                mpc.conversation_id = :conversationId and
                 p.id = mpc.client_post_id and
                 p.type = 'STANDALONE' and
                 sp.post_id = p.id and
@@ -215,9 +242,44 @@ interface MetisDao {
     fun queryCoursePosts(
         serverId: String,
         courseId: Long,
-        exerciseId: Long,
-        lectureId: Long
+        conversationId: Long
     ): PagingSource<Int, PostPojo>
+
+    @Query("""
+        select
+                mpc.client_post_id,
+                mpc.server_post_id,
+                p.content,
+                p.creation_date,
+                p.updated_date,
+                sp.context,
+                sp.title,
+                sp.resolved,
+                u.name as author_name,
+                p.author_role,
+                p.author_id as author_id
+            from
+                metis_post_context mpc,
+                postings p,
+                standalone_postings sp,
+                users u
+            where
+                mpc.server_id = :serverId and
+                mpc.course_id = :courseId and
+                mpc.conversation_id = :conversationId and
+                p.id = mpc.client_post_id and
+                p.type = 'STANDALONE' and
+                sp.post_id = p.id and
+                u.server_id = mpc.server_id and
+                u.id = p.author_id
+            order by p.creation_date desc
+            limit 1
+    """)
+    suspend fun queryLatestKnownPost(
+        serverId: String,
+        courseId: Long,
+        conversationId: Long
+    ): PostPojo?
 
     @Transaction
     @Query(
@@ -229,8 +291,7 @@ interface MetisDao {
         where 
             mpc.server_id = :serverId and
             mpc.course_id = :courseId and
-            mpc.exercise_id = :exerciseId and
-            mpc.lecture_id = :lectureId and
+            mpc.conversation_id = :conversationId and
             p.id = mpc.client_post_id and
             p.type = 'STANDALONE' and
             sp.post_id = p.id and
@@ -240,8 +301,7 @@ interface MetisDao {
     suspend fun queryContextPostCountNoLiveCreated(
         serverId: String,
         courseId: Long,
-        exerciseId: Long,
-        lectureId: Long
+        conversationId: Long
     ): Int
 
     @Query("select author_role from postings where id = :clientPostId")

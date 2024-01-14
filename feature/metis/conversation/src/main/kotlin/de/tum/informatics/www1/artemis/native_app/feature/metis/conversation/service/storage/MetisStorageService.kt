@@ -27,6 +27,19 @@ interface MetisStorageService {
     )
 
     /**
+     * Inserts the posts into the db that do not exist yet, and updates the ones that already exist, matching by server id.
+     *
+     * However, all posts between the oldest and newest post in [posts] that are not present in the list but exist in the db are removed.
+     * If [removeAllOlderPosts] is set to true, all posts that are older than the oldest post in [posts] are also removed.
+     */
+    suspend fun insertOrUpdatePostsAndRemoveDeletedPosts(
+        host: String,
+        metisContext: MetisContext,
+        posts: List<StandalonePost>,
+        removeAllOlderPosts: Boolean
+    )
+
+    /**
      * Update the post with the same id in the database. If this post does not exist, no action is taken.
      */
     suspend fun updatePost(host: String, metisContext: MetisContext, post: StandalonePost)
@@ -46,6 +59,8 @@ interface MetisStorageService {
         serverId: String,
         metisContext: MetisContext
     ): PagingSource<Int, PostPojo>
+
+    suspend fun getLatestKnownPost(serverId: String, metisContext: MetisContext): PostPojo?
 
     /**
      * Query the given post with the given client post id.

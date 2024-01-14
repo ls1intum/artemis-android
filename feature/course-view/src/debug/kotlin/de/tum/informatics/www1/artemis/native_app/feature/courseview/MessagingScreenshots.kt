@@ -22,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_o
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
@@ -218,6 +219,7 @@ fun `Metis - Conversation Channel`() {
                         onUpdateQuery = {},
                         onNavigateBack = {},
                         onNavigateToSettings = {},
+                        conversationDataStatus = DataStatus.UpToDate,
                         content = { padding ->
                             MetisChatList(
                                 modifier = Modifier
@@ -229,7 +231,6 @@ fun `Metis - Conversation Channel`() {
                                 ),
                                 serverUrl = "",
                                 courseId = 0,
-                                isDataOutdated = false,
                                 clientId = 0L,
                                 hasModerationRights = true,
                                 listContentPadding = PaddingValues(),
