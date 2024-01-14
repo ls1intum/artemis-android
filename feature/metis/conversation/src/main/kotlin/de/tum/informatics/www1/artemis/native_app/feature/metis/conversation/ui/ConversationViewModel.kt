@@ -70,8 +70,10 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -166,13 +168,16 @@ internal open class ConversationViewModel(
     val conversationDataStatus: StateFlow<DataStatus> = combine(
         websocketProvider.isConnected,
         chatListUseCase.dataStatus,
-        threadUseCase.dataStatus
+        postId.flatMapLatest { postId ->
+            if (postId != null) threadUseCase.dataStatus else flowOf(DataStatus.UpToDate)
+        }
     ) { websocketConnected, chatListStatus, threadStatus ->
         when {
             !websocketConnected -> DataStatus.Outdated
             else -> minOf(chatListStatus, threadStatus)
         }
     }
+        .onEach { println("NEW STATUS $it") }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DataStatus.Outdated)
 
     val conversation: StateFlow<DataState<Conversation>> = flatMapLatest(

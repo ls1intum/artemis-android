@@ -60,7 +60,7 @@ interface MetisStorageService {
         metisContext: MetisContext
     ): PagingSource<Int, PostPojo>
 
-    suspend fun getLatestKnownPost(serverId: String, metisContext: MetisContext): PostPojo?
+    fun getLatestKnownPost(serverId: String, metisContext: MetisContext): Flow<PostPojo?>
 
     /**
      * Query the given post with the given client post id.

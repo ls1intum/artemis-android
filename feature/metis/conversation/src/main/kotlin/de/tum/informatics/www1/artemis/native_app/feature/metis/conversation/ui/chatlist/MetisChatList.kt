@@ -27,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
@@ -41,6 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
@@ -73,6 +73,8 @@ internal fun MetisChatList(
 
     val serverUrl by viewModel.serverUrl.collectAsState()
 
+    val bottomItem: PostPojo? by viewModel.chatListUseCase.bottomPost.collectAsState()
+
     MetisChatList(
         modifier = modifier,
         initialReplyTextProvider = viewModel,
@@ -83,6 +85,7 @@ internal fun MetisChatList(
         serverUrl = serverUrl,
         courseId = viewModel.courseId,
         state = state,
+        bottomItem = bottomItem,
         isReplyEnabled = isReplyEnabled,
         onCreatePost = viewModel::createPost,
         onEditPost = viewModel::editPost,
@@ -97,6 +100,7 @@ fun MetisChatList(
     modifier: Modifier,
     initialReplyTextProvider: InitialReplyTextProvider,
     posts: PostsDataState,
+    bottomItem: PostPojo?,
     clientId: Long,
     hasModerationRights: Boolean,
     listContentPadding: PaddingValues,
@@ -131,7 +135,7 @@ fun MetisChatList(
                 state = state,
                 itemCount = posts.itemCount,
                 order = DisplayPostOrder.REVERSED,
-                getItem = posts::peek
+                bottomItem = bottomItem
             ) {
                 when (posts) {
                     PostsDataState.Empty -> {

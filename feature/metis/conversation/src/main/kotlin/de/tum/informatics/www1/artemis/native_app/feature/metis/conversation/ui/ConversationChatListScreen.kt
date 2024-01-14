@@ -46,8 +46,6 @@ import io.github.fornewid.placeholder.material3.placeholder
 internal fun ConversationChatListScreen(
     modifier: Modifier,
     viewModel: ConversationViewModel,
-    posts: LazyPagingItems<ChatListItem>,
-    chatListState: LazyListState,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onClickViewPost: (StandalonePostId) -> Unit
@@ -56,8 +54,6 @@ internal fun ConversationChatListScreen(
         modifier = modifier,
         courseId = viewModel.courseId,
         conversationId = viewModel.conversationId,
-        posts = posts,
-        chatListState = chatListState,
         viewModel = viewModel,
         onNavigateBack = onNavigateBack,
         onNavigateToSettings = onNavigateToSettings,
@@ -71,8 +67,6 @@ internal fun ConversationChatListScreen(
     courseId: Long,
     conversationId: Long,
     viewModel: ConversationViewModel,
-    posts: LazyPagingItems<ChatListItem>,
-    chatListState: LazyListState,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onClickViewPost: (StandalonePostId) -> Unit
@@ -86,6 +80,11 @@ internal fun ConversationChatListScreen(
             conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
         }
     }
+
+    val chatListState: LazyListState = rememberLazyListState()
+
+    val posts: LazyPagingItems<ChatListItem> =
+        viewModel.chatListUseCase.postPagingData.collectAsLazyPagingItems()
 
     ConversationChatListScreen(
         modifier = modifier,

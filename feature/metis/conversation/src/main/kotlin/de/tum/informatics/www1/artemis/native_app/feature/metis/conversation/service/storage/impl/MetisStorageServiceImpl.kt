@@ -473,10 +473,10 @@ internal class MetisStorageServiceImpl(
         )
     }
 
-    override suspend fun getLatestKnownPost(
+    override fun getLatestKnownPost(
         serverId: String,
         metisContext: MetisContext
-    ): PostPojo? {
+    ): Flow<PostPojo?> {
         return databaseProvider.metisDao.queryLatestKnownPost(
             serverId = serverId,
             courseId = metisContext.courseId,

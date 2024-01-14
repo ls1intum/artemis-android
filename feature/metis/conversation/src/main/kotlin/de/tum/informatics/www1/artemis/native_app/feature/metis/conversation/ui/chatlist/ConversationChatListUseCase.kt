@@ -22,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -256,6 +257,13 @@ class ConversationChatListUseCase(
         ::minOf
     )
 
+    val bottomPost: StateFlow<PostPojo?> = serverConfigurationService
+        .host
+        .flatMapLatest { host ->
+            metisStorageService.getLatestKnownPost(host, metisContext)
+        }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     init {
         viewModelScope.launch(coroutineContext) {
             onRequestSoftReload.collect {
@@ -298,7 +306,7 @@ class ConversationChatListUseCase(
         val authToken = accountService.authToken.first()
 
         Log.d(TAG, "Loading newly created posts")
-        val latestKnownPost = metisStorageService.getLatestKnownPost(host, metisContext)
+        val latestKnownPost = metisStorageService.getLatestKnownPost(host, metisContext).first()
 
         return if (latestKnownPost == null) {
             Log.d(TAG, "There is no latest known post -> loading all posts.")

@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -75,34 +76,28 @@ fun ConversationScreen(
         viewModel.updateOpenedThread(threadPostId)
     }
 
-    // We put the list state and lazy paging items here, as otherwise the scroll position is lost when navigating to a thread and back
-    val chatListState: LazyListState = rememberLazyListState()
-
-    val posts: LazyPagingItems<ChatListItem> =
-        viewModel.chatListUseCase.postPagingData.collectAsLazyPagingItems()
-
     val widthSizeClass = getWindowSizeClass().widthSizeClass
 
     when {
         widthSizeClass <= WindowWidthSizeClass.Compact -> {
-            if (threadPostId != null) {
-                ConversationThreadScreen(
-                    modifier = modifier,
-                    viewModel = viewModel,
-                    onNavigateUp = onCloseThread
-                )
-            } else {
+            Box(modifier = modifier) {
                 ConversationChatListScreen(
-                    modifier = modifier,
+                    modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
                     courseId = courseId,
                     conversationId = conversationId,
-                    posts = posts,
-                    chatListState = chatListState,
                     onNavigateBack = onCloseConversation,
                     onNavigateToSettings = onNavigateToSettings,
                     onClickViewPost = { clientPostId -> onOpenThread(clientPostId) }
                 )
+
+                if (threadPostId != null) {
+                    ConversationThreadScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        viewModel = viewModel,
+                        onNavigateUp = onCloseThread
+                    )
+                }
             }
         }
 
@@ -153,8 +148,6 @@ fun ConversationScreen(
                     viewModel = viewModel,
                     courseId = courseId,
                     conversationId = conversationId,
-                    posts = posts,
-                    chatListState = chatListState,
                     onNavigateBack = onCloseConversation,
                     onNavigateToSettings = onNavigateToSettings,
                     onClickViewPost = { clientPostId -> onOpenThread(clientPostId) }

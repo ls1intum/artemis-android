@@ -275,11 +275,11 @@ interface MetisDao {
             order by p.creation_date desc
             limit 1
     """)
-    suspend fun queryLatestKnownPost(
+    fun queryLatestKnownPost(
         serverId: String,
         courseId: Long,
         conversationId: Long
-    ): PostPojo?
+    ): Flow<PostPojo?>
 
     @Transaction
     @Query(

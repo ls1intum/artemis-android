@@ -247,6 +247,7 @@ fun `Metis - Conversation Channel`() {
                                 onEditPost = { _, _ -> CompletableDeferred() },
                                 onDeletePost = { CompletableDeferred() },
                                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                                bottomItem = null,
                                 onClickViewPost = {}
                             )
                         }

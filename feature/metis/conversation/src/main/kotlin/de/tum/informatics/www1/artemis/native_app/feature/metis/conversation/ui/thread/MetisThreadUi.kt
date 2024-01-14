@@ -124,7 +124,7 @@ internal fun MetisThreadUi(
                             state = listState,
                             itemCount = post.orderedAnswerPostings.size,
                             order = DisplayPostOrder.REGULAR,
-                            getItem = post.orderedAnswerPostings::get,
+                            bottomItem = post.orderedAnswerPostings.lastOrNull(),
                         ) {
                             PostAndRepliesList(
                                 modifier = Modifier
