@@ -212,33 +212,42 @@ class ConversationChatListUseCase(
      *
      * It loads the necessary data from the server and updates the db.
      */
-    private val softReloadOnScrollDataStatus: Flow<DataStatus> = transformLatest(
-        softReloadOnRequestDataStatus,
-        highestVisiblePostIndex
-    ) { softReloadOnRequestDataStatus, highestVisiblePostIndex ->
-        // First check if the onRequest soft reload was successful. If not, we do not need to perform the on scroll check.
-        // The reason for this is that it the onRequest soft reload will be tried again anyway with the higher post index.
-        if (softReloadOnRequestDataStatus.dataStatus == DataStatus.UpToDate) {
-            // Only perform an action if there is really a higher post index.
-            if (softReloadOnRequestDataStatus.usedHighestVisibleIndex < highestVisiblePostIndex) {
-                emit(DataStatus.Loading)
+    private val softReloadOnScrollDataStatus: Flow<DataStatus> = softReloadOnRequestDataStatus
+        .transformLatest { softReloadOnRequestDataStatus ->
+            // Cache to hold for which index we last performed a refresh.
+            // Initialized to the value of the onRequest reload.
+            // Updated on each successful scroll update.
+            var prevHighestVisiblePostIndex = softReloadOnRequestDataStatus.usedHighestVisibleIndex
 
-                val successfullyLoadedExistingPosts = refreshExistingVisiblePosts(
-                    startVisibleIndex = softReloadOnRequestDataStatus.usedHighestVisibleIndex,
-                    highestVisibleIndex = highestVisiblePostIndex,
-                    pageSize = PAGE_SIZE
-                )
+            // First check if the onRequest soft reload was successful. If not, we do not need to perform the on scroll check.
+            // The reason for this is that it the onRequest soft reload will be tried again anyway with the higher post index.
+            if (softReloadOnRequestDataStatus.dataStatus == DataStatus.UpToDate) {
+                // Repeat this for as long as possible
+                highestVisiblePostIndex.collect { highestVisiblePostIndex ->
+                    // Only perform an action if there is really a higher post index.
+                    if (prevHighestVisiblePostIndex < highestVisiblePostIndex) {
+                        emit(DataStatus.Loading)
 
-                emit(if (successfullyLoadedExistingPosts) DataStatus.UpToDate else DataStatus.Outdated)
+                        val successfullyLoadedExistingPosts = refreshExistingVisiblePosts(
+                            startVisibleIndex = prevHighestVisiblePostIndex,
+                            highestVisibleIndex = highestVisiblePostIndex,
+                            pageSize = PAGE_SIZE
+                        )
+
+                        prevHighestVisiblePostIndex = highestVisiblePostIndex
+
+                        emit(if (successfullyLoadedExistingPosts) DataStatus.UpToDate else DataStatus.Outdated)
+                    } else {
+                        // Nothing new -> up to date
+                        emit(DataStatus.UpToDate)
+                    }
+                }
             } else {
-                // Nothing new -> up to date
-                emit(DataStatus.UpToDate)
+                // Just forward to emit a value
+                emit(softReloadOnRequestDataStatus.dataStatus)
             }
-        } else {
-            // Just forward to emit a value
-            emit(softReloadOnRequestDataStatus.dataStatus)
+
         }
-    }
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
     /**
