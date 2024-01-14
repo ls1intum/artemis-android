@@ -45,9 +45,11 @@ internal class MetisRemoteMediator(
 
             PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
             APPEND -> {
-                Log.d(TAG, "Appending to list")
                 val loadedItemsCount =
                     metisStorageService.getCachedPostCount(host, context)
+                val pageItemsCount = state.pages.sumOf { it.data.size }
+                Log.d(TAG, "Appending to list: itemsInDb=$loadedItemsCount, pageItemsCount=$pageItemsCount")
+
                 (loadedItemsCount - (loadedItemsCount % pageSize)) / pageSize
             }
         }

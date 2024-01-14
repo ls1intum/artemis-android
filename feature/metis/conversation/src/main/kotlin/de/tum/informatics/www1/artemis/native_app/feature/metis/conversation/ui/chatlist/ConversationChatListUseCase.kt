@@ -5,11 +5,11 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
+import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -27,7 +27,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -65,6 +64,8 @@ class ConversationChatListUseCase(
 ) {
     companion object {
         private const val TAG = "ConversationChatListUseCase"
+
+        private const val PAGE_SIZE = 20
     }
 
     private val _filter = MutableStateFlow<List<MetisFilter>>(emptyList())
@@ -116,7 +117,9 @@ class ConversationChatListUseCase(
             accountService.authToken
         ) { pagingDataInput, authToken ->
             val config = PagingConfig(
-                pageSize = 20
+                pageSize = PAGE_SIZE,
+                initialLoadSize = 20,
+                prefetchDistance = 0
             )
 
             if (pagingDataInput.standalonePostsContext.query.isNullOrBlank()) {
@@ -175,31 +178,82 @@ class ConversationChatListUseCase(
      * It is invoked when a soft reload is requested.
      *
      * It loads the necessary data from the server and updates the db.
+     *
+     * Instead of directly emitting a DataState, it instead emits a wrapper that also contains which
+     * highestvisiblepostindex was used. This is then used in [softReloadOnScrollDataStatus].
      */
-    val softReloadDataStatus: Flow<DataStatus> = onRequestSoftReload
+    private val softReloadOnRequestDataStatus: Flow<SoftReloadOnRequestResult> = onRequestSoftReload
         .transformLatest {
-            emit(DataStatus.Loading)
+            emit(SoftReloadOnRequestResult(DataStatus.Loading, 0))
             val successfullyLoadedNewPosts =
-                loadNewlyCreatedPosts(pageSize = 20) is NetworkResponse.Response
+                loadNewlyCreatedPosts(pageSize = PAGE_SIZE) is NetworkResponse.Response
 
             val highestVisiblePostIndex = highestVisiblePostIndex.value
             val successfullyLoadedExistingPosts = refreshExistingVisiblePosts(
+                startVisibleIndex = 0, // start at the very bottom, as the user has seen all posts until the [highestVisiblePostIndex]
                 highestVisibleIndex = highestVisiblePostIndex,
-                pageSize = 20
+                pageSize = PAGE_SIZE
             )
 
             val resultStatus =
                 if (successfullyLoadedNewPosts && successfullyLoadedExistingPosts) DataStatus.UpToDate else DataStatus.Outdated
 
-            emit(resultStatus)
+            emit(SoftReloadOnRequestResult(resultStatus, highestVisiblePostIndex))
         }
-        .onStart { emit(DataStatus.Outdated) }
+        .onStart { emit(SoftReloadOnRequestResult(DataStatus.Outdated, 0)) }
+        .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+
+    /**
+     * This flow handles reloading the visible posts from the server.
+     * It is invoked when the user scrolls through their chat list.
+     *
+     * This flow is the logical extension to [softReloadOnRequestDataStatus]: When the user scrolls through their long chat history,
+     * not all posts have been refreshed by [softReloadOnRequestDataStatus]. Therefore, this flow allows to lazily refresh posts only when the user views them.
+     *
+     * It loads the necessary data from the server and updates the db.
+     */
+    private val softReloadOnScrollDataStatus: Flow<DataStatus> = transformLatest(
+        softReloadOnRequestDataStatus,
+        highestVisiblePostIndex
+    ) { softReloadOnRequestDataStatus, highestVisiblePostIndex ->
+        // First check if the onRequest soft reload was successful. If not, we do not need to perform the on scroll check.
+        // The reason for this is that it the onRequest soft reload will be tried again anyway with the higher post index.
+        if (softReloadOnRequestDataStatus.dataStatus == DataStatus.UpToDate) {
+            // Only perform an action if there is really a higher post index.
+            if (softReloadOnRequestDataStatus.usedHighestVisibleIndex < highestVisiblePostIndex) {
+                emit(DataStatus.Loading)
+
+                val successfullyLoadedExistingPosts = refreshExistingVisiblePosts(
+                    startVisibleIndex = softReloadOnRequestDataStatus.usedHighestVisibleIndex,
+                    highestVisibleIndex = highestVisiblePostIndex,
+                    pageSize = PAGE_SIZE
+                )
+
+                emit(if (successfullyLoadedExistingPosts) DataStatus.UpToDate else DataStatus.Outdated)
+            } else {
+                // Nothing new -> up to date
+                emit(DataStatus.UpToDate)
+            }
+        } else {
+            // Just forward to emit a value
+            emit(softReloadOnRequestDataStatus.dataStatus)
+        }
+    }
         .shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
     /**
      * The combined data status of the chat list data. Tells the UI if we are in sync with the server or not.
      */
-    val dataStatus: Flow<DataStatus> = softReloadDataStatus
+    val dataStatus: Flow<DataStatus> = combine(
+        softReloadOnRequestDataStatus.map { it.dataStatus },
+        softReloadOnScrollDataStatus
+    ) { onRequest, onScroll ->
+        when {
+            onRequest is DataStatus.Outdated || onScroll is DataStatus.Outdated -> DataStatus.Outdated
+            onRequest is DataStatus.Loading || onScroll is DataStatus.Loading -> DataStatus.Loading
+            else -> DataStatus.UpToDate
+        }
+    }
 
     init {
         viewModelScope.launch(coroutineContext) {
@@ -296,7 +350,7 @@ class ConversationChatListUseCase(
 
                         // Check if the date of any of the loaded posts is smaller than a date we already know.
                         // if this is the case, we are done loading.
-                        if (postResult.data.mapNotNull { it.creationDate }
+                        if (postResult.data.map { it.creationDate }
                                 .any { it <= latestKnownPost.creationDate } || reachedEndOfPagination) {
                             Log.d(
                                 TAG,
@@ -329,22 +383,26 @@ class ConversationChatListUseCase(
     }
 
     /**
+     * @param startVisibleIndex from which post index should we start. Set to higher number than 1 * [pageSize] to skip pages.
+     * @param highestVisibleIndex on which index should we end.
      * @returns true if the data was loaded and updated successfully
      */
     private suspend fun refreshExistingVisiblePosts(
+        startVisibleIndex: Int,
         highestVisibleIndex: Int,
         pageSize: Int
     ): Boolean {
         val host = serverConfigurationService.host.first()
 
-        val pageCount = (highestVisibleIndex - (highestVisibleIndex % pageSize)) / pageSize
+        val startPageNum = (startVisibleIndex - (startVisibleIndex % pageSize)) / pageSize
+        val endPageNum = (highestVisibleIndex - (highestVisibleIndex % pageSize)) / pageSize
 
         val serverUrl = serverConfigurationService.serverUrl.first()
         val authToken = accountService.authToken.first()
 
         // Start a coroutine for each page we have to request
         return coroutineScope {
-            val updatedPosts = (0 until pageCount)
+            val updatedPosts = (startPageNum until endPageNum)
                 .map { pageNum ->
                     async {
                         MetisRemoteMediator.loadPosts(
@@ -422,4 +480,9 @@ class ConversationChatListUseCase(
     private val IStandalonePost.creationLocalDate: LocalDate
         get() = (creationDate ?: Instant.fromEpochMilliseconds(0))
             .toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+    private data class SoftReloadOnRequestResult(
+        val dataStatus: DataStatus,
+        val usedHighestVisibleIndex: Int
+    )
 }
