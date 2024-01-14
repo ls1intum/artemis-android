@@ -20,9 +20,13 @@ interface AccountService {
      * Can either be [LoggedIn] or [NotLoggedIn].
      */
     sealed class AuthenticationData {
-        object NotLoggedIn : AuthenticationData()
+        abstract val authToken: String
 
-        data class LoggedIn(val authToken: String, val username: String) : AuthenticationData()
+        data object NotLoggedIn : AuthenticationData() {
+            override val authToken: String = ""
+        }
+
+        data class LoggedIn(override val authToken: String, val username: String) : AuthenticationData()
     }
 
     /**

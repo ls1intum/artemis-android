@@ -9,17 +9,23 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import org.koin.androidx.compose.getViewModel
 import org.koin.core.parameter.parametersOf
@@ -62,11 +68,18 @@ fun ConversationScreen(
     val viewModel: ConversationViewModel =
         getViewModel(
             key = "$courseId|$conversationId",
-            viewModelStoreOwner = owner) { parametersOf(courseId, conversationId, threadPostId) }
+            viewModelStoreOwner = owner
+        ) { parametersOf(courseId, conversationId, threadPostId) }
 
     LaunchedEffect(threadPostId, viewModel) {
         viewModel.updateOpenedThread(threadPostId)
     }
+
+    // We put the list state and lazy paging items here, as otherwise the scroll position is lost when navigating to a thread and back
+    val chatListState: LazyListState = rememberLazyListState()
+
+    val posts: LazyPagingItems<ChatListItem> =
+        viewModel.chatListUseCase.postPagingData.collectAsLazyPagingItems()
 
     val widthSizeClass = getWindowSizeClass().widthSizeClass
 
@@ -84,6 +97,8 @@ fun ConversationScreen(
                     viewModel = viewModel,
                     courseId = courseId,
                     conversationId = conversationId,
+                    posts = posts,
+                    chatListState = chatListState,
                     onNavigateBack = onCloseConversation,
                     onNavigateToSettings = onNavigateToSettings,
                     onClickViewPost = { clientPostId -> onOpenThread(clientPostId) }
@@ -138,11 +153,12 @@ fun ConversationScreen(
                     viewModel = viewModel,
                     courseId = courseId,
                     conversationId = conversationId,
+                    posts = posts,
+                    chatListState = chatListState,
                     onNavigateBack = onCloseConversation,
                     onNavigateToSettings = onNavigateToSettings,
                     onClickViewPost = { clientPostId -> onOpenThread(clientPostId) }
                 )
-
 
                 if (threadPostId != null) {
                     VerticalDivider()

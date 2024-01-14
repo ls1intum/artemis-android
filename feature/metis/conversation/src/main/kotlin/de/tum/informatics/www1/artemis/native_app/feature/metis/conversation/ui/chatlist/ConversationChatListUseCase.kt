@@ -33,7 +33,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -111,10 +113,7 @@ class ConversationChatListUseCase(
 
     @OptIn(ExperimentalPagingApi::class)
     val postPagingData: Flow<PagingData<ChatListItem>> =
-        flatMapLatest(
-            pagingDataInput,
-            accountService.authToken
-        ) { pagingDataInput, authToken ->
+        pagingDataInput.flatMapLatest { pagingDataInput ->
             val config = PagingConfig(
                 pageSize = PAGE_SIZE,
                 enablePlaceholders = true
@@ -127,7 +126,7 @@ class ConversationChatListUseCase(
                         context = metisContext,
                         metisService = metisService,
                         metisStorageService = metisStorageService,
-                        authToken = authToken,
+                        authToken = pagingDataInput.authenticationData.authToken,
                         serverUrl = pagingDataInput.serverUrl,
                         host = pagingDataInput.host
                     ),
@@ -158,7 +157,7 @@ class ConversationChatListUseCase(
                         MetisSearchPagingSource(
                             metisService = metisService,
                             context = pagingDataInput.standalonePostsContext,
-                            authToken = authToken,
+                            authToken = pagingDataInput.authenticationData.authToken,
                             serverUrl = pagingDataInput.serverUrl
                         )
                     }

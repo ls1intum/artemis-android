@@ -21,7 +21,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_o
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.TAB_COMMUNICATION
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
@@ -226,30 +225,29 @@ fun `Metis - Conversation Channel`() {
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(padding),
-                                posts = PostsDataState.Loaded.WithList(
-                                    posts,
-                                    PostsDataState.NotLoading
-                                ),
-                                serverUrl = "",
-                                courseId = 0,
-                                clientId = 0L,
-                                hasModerationRights = true,
-                                listContentPadding = PaddingValues(),
-                                state = rememberLazyListState(),
-                                isReplyEnabled = true,
-                                onCreatePost = { CompletableDeferred() },
-                                onEditPost = { _, _ -> CompletableDeferred() },
-                                onDeletePost = { CompletableDeferred() },
-                                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                                onClickViewPost = {},
-                                onRequestReload = {},
                                 initialReplyTextProvider = object : InitialReplyTextProvider {
                                     override val newMessageText: Flow<TextFieldValue> = flowOf(
                                         TextFieldValue()
                                     )
 
                                     override fun updateInitialReplyText(text: TextFieldValue) = Unit
-                                }
+                                },
+                                posts = PostsDataState.Loaded.WithList(
+                                    posts,
+                                    PostsDataState.NotLoading
+                                ),
+                                clientId = 0L,
+                                hasModerationRights = true,
+                                listContentPadding = PaddingValues(),
+                                serverUrl = "",
+                                courseId = 0,
+                                state = rememberLazyListState(),
+                                isReplyEnabled = true,
+                                onCreatePost = { CompletableDeferred() },
+                                onEditPost = { _, _ -> CompletableDeferred() },
+                                onDeletePost = { CompletableDeferred() },
+                                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                                onClickViewPost = {}
                             )
                         }
                     )

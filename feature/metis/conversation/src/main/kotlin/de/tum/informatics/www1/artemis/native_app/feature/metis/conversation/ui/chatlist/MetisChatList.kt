@@ -60,15 +60,13 @@ internal fun testTagForPost(postId: Long) = "post$postId"
 internal fun MetisChatList(
     modifier: Modifier,
     viewModel: ConversationViewModel,
+    posts: LazyPagingItems<ChatListItem>,
     listContentPadding: PaddingValues,
     state: LazyListState = rememberLazyListState(),
     isReplyEnabled: Boolean = true,
     onClickViewPost: (StandalonePostId) -> Unit
 ) {
     ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
-
-    val posts: LazyPagingItems<ChatListItem> =
-        viewModel.chatListUseCase.postPagingData.collectAsLazyPagingItems()
 
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
@@ -78,20 +76,19 @@ internal fun MetisChatList(
     MetisChatList(
         modifier = modifier,
         initialReplyTextProvider = viewModel,
-        state = state,
-        isReplyEnabled = isReplyEnabled,
         posts = posts.asPostsDataState(),
         clientId = clientId,
         hasModerationRights = hasModerationRights,
         listContentPadding = listContentPadding,
         serverUrl = serverUrl,
         courseId = viewModel.courseId,
+        state = state,
+        isReplyEnabled = isReplyEnabled,
         onCreatePost = viewModel::createPost,
         onEditPost = viewModel::editPost,
         onDeletePost = viewModel::deletePost,
         onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
-        onClickViewPost = onClickViewPost,
-        onRequestReload = viewModel::requestReload
+        onClickViewPost = onClickViewPost
     )
 }
 
@@ -111,8 +108,7 @@ fun MetisChatList(
     onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
     onDeletePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
-    onClickViewPost: (StandalonePostId) -> Unit,
-    onRequestReload: () -> Unit
+    onClickViewPost: (StandalonePostId) -> Unit
 ) {
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
@@ -198,6 +194,8 @@ private fun ChatList(
     onRequestDelete: (IStandalonePost) -> Unit,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit
 ) {
+    println("POSTS: ${posts}")
+
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp),

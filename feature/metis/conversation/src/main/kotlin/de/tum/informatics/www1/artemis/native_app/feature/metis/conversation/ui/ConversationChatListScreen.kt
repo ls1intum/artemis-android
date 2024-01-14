@@ -4,6 +4,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
@@ -27,8 +29,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.ConversationDataStatusButton
@@ -41,6 +46,8 @@ import io.github.fornewid.placeholder.material3.placeholder
 internal fun ConversationChatListScreen(
     modifier: Modifier,
     viewModel: ConversationViewModel,
+    posts: LazyPagingItems<ChatListItem>,
+    chatListState: LazyListState,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onClickViewPost: (StandalonePostId) -> Unit
@@ -49,6 +56,8 @@ internal fun ConversationChatListScreen(
         modifier = modifier,
         courseId = viewModel.courseId,
         conversationId = viewModel.conversationId,
+        posts = posts,
+        chatListState = chatListState,
         viewModel = viewModel,
         onNavigateBack = onNavigateBack,
         onNavigateToSettings = onNavigateToSettings,
@@ -62,6 +71,8 @@ internal fun ConversationChatListScreen(
     courseId: Long,
     conversationId: Long,
     viewModel: ConversationViewModel,
+    posts: LazyPagingItems<ChatListItem>,
+    chatListState: LazyListState,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onClickViewPost: (StandalonePostId) -> Unit
@@ -100,7 +111,9 @@ internal fun ConversationChatListScreen(
                     viewModel = viewModel,
                     listContentPadding = PaddingValues(),
                     onClickViewPost = onClickViewPost,
-                    isReplyEnabled = isReplyEnabled
+                    isReplyEnabled = isReplyEnabled,
+                    state = chatListState,
+                    posts = posts
                 )
             }
         }
