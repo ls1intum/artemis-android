@@ -86,7 +86,8 @@ internal fun ConversationChatListScreen(
         conversationTitle = title,
         onNavigateBack = onNavigateBack,
         onNavigateToSettings = onNavigateToSettings,
-        onUpdateQuery = viewModel.chatListUseCase::updateQuery
+        onUpdateQuery = viewModel.chatListUseCase::updateQuery,
+        onRequestSoftReload = viewModel::requestReload
     ) { padding ->
         val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
@@ -118,6 +119,7 @@ fun ConversationChatListScreen(
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onUpdateQuery: (String) -> Unit,
+    onRequestSoftReload: () -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
     var isSearchBarOpen by rememberSaveable(courseId, conversationId) { mutableStateOf(false) }
@@ -176,8 +178,7 @@ fun ConversationChatListScreen(
                     if (!isSearchBarOpen) {
                         ConversationDataStatusButton(
                             dataStatus = conversationDataStatus,
-                            onRequestSoftReload = { /*TODO*/ },
-                            onRequestHardReload = {}
+                            onRequestSoftReload = onRequestSoftReload
                         )
 
                         IconButton(onClick = { isSearchBarOpen = true }) {

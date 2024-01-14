@@ -11,13 +11,13 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -36,7 +35,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 internal class ConversationThreadUseCase(
     metisContext: MetisContext,
     postId: Flow<StandalonePostId>,
-    onRequestReload: MutableSharedFlow<Unit>,
+    onRequestSoftReload: Flow<Unit>,
     viewModelScope: CoroutineScope,
     private val metisStorageService: MetisStorageService,
     private val metisService: MetisService,
@@ -66,7 +65,7 @@ internal class ConversationThreadUseCase(
             is StandalonePostId.ServerSideId -> flatMapLatest(
                 serverConfigurationService.serverUrl,
                 accountService.authToken,
-                onRequestReload.onStart { emit(Unit) }
+                onRequestSoftReload.onStart { emit(Unit) }
             ) { serverUrl, authToken, _ ->
                 retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                     metisService.getPost(
@@ -86,6 +85,14 @@ internal class ConversationThreadUseCase(
     }
         .map { dataState -> dataState.bind { it } } // Type check adaption
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+    val dataStatus: Flow<DataStatus> = post.map { dataState ->
+        when (dataState) {
+            is DataState.Failure -> DataStatus.Outdated
+            is DataState.Loading -> DataStatus.Loading
+            is DataState.Success -> DataStatus.UpToDate
+        }
+    }
 
     /**
      * Handles when the post has been directly loaded from the server. Stores the resulting post in the db.

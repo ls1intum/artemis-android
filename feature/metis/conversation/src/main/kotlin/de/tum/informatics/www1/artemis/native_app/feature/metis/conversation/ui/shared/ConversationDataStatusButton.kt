@@ -12,10 +12,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 @Composable
 internal fun ConversationDataStatusButton(
     dataStatus: DataStatus,
-    onRequestSoftReload: () -> Unit,
-    onRequestHardReload: () -> Unit
+    onRequestSoftReload: () -> Unit
 ) {
-    IconButton(onClick = { /*TODO*/ }) {
+    IconButton(onClick = onRequestSoftReload) {
         Icon(
             imageVector = when (dataStatus) {
                 DataStatus.Loading -> Icons.Default.CloudSync

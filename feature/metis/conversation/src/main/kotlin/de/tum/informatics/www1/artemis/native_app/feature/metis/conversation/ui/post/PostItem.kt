@@ -51,6 +51,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
+import io.github.fornewid.placeholder.foundation.placeholder
+import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
@@ -63,13 +65,12 @@ sealed class PostItemViewType {
         val answerPosts: List<IAnswerPost>
     ) : PostItemViewType()
 
-    object ThreadContextPostItem : PostItemViewType()
+    data object ThreadContextPostItem : PostItemViewType()
 
-    object ThreadAnswerItem : PostItemViewType()
+    data object ThreadAnswerItem : PostItemViewType()
 }
 
-private const val PlaceholderContent =
-    "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+private const val PlaceholderContent = "WWWWWWW"
 
 /**
  * Displays a post item or a placeholder for it.
@@ -119,7 +120,7 @@ internal fun PostItem(
                                 PlaceholderContent
                             } else post?.content.orEmpty()
                         },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().placeholder(visible = isPlaceholder),
                         maxLines = 5,
                         style = MaterialTheme.typography.bodyMedium,
                         onClick = onClick,

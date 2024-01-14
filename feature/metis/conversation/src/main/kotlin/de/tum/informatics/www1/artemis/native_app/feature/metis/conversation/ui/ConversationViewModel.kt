@@ -67,7 +67,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -75,7 +74,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.datetime.Clock
@@ -119,7 +117,6 @@ internal open class ConversationViewModel(
         metisService = metisService,
         metisStorageService = metisStorageService,
         metisContext = metisContext,
-        onRequestHardRefresh = emptyFlow(), // TODO add extra hard refresh button
         onRequestSoftReload = onRequestSoftReload,
         serverConfigurationService = serverConfigurationService,
         accountService = accountService
@@ -128,7 +125,7 @@ internal open class ConversationViewModel(
     val threadUseCase = ConversationThreadUseCase(
         metisContext = metisContext,
         postId = postId.filterNotNull(),
-        onRequestReload = onRequestReload,
+        onRequestSoftReload = onRequestSoftReload,
         viewModelScope = viewModelScope,
         metisStorageService = metisStorageService,
         metisService = metisService,
@@ -168,12 +165,12 @@ internal open class ConversationViewModel(
 
     val conversationDataStatus: StateFlow<DataStatus> = combine(
         websocketProvider.isConnected,
-        chatListUseCase.dataStatus
-    ) { websocketConnected, chatListStatus ->
+        chatListUseCase.dataStatus,
+        threadUseCase.dataStatus
+    ) { websocketConnected, chatListStatus, threadStatus ->
         when {
             !websocketConnected -> DataStatus.Outdated
-            chatListStatus != DataStatus.UpToDate -> chatListStatus
-            else -> DataStatus.UpToDate
+            else -> minOf(chatListStatus, threadStatus)
         }
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DataStatus.Outdated)

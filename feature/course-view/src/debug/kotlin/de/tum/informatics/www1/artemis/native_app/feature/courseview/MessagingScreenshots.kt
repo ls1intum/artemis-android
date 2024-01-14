@@ -220,6 +220,7 @@ fun `Metis - Conversation Channel`() {
                         onNavigateBack = {},
                         onNavigateToSettings = {},
                         conversationDataStatus = DataStatus.UpToDate,
+                        onRequestSoftReload = {},
                         content = { padding ->
                             MetisChatList(
                                 modifier = Modifier

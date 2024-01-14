@@ -56,7 +56,6 @@ class ConversationChatListUseCase(
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,
     private val metisContext: MetisContext,
-    onRequestHardRefresh: Flow<Unit>,
     onRequestSoftReload: Flow<Unit>,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
@@ -118,8 +117,7 @@ class ConversationChatListUseCase(
         ) { pagingDataInput, authToken ->
             val config = PagingConfig(
                 pageSize = PAGE_SIZE,
-                initialLoadSize = 20,
-                prefetchDistance = 0
+                enablePlaceholders = true
             )
 
             if (pagingDataInput.standalonePostsContext.query.isNullOrBlank()) {
@@ -255,14 +253,9 @@ class ConversationChatListUseCase(
      */
     val dataStatus: Flow<DataStatus> = combine(
         softReloadOnRequestDataStatus.map { it.dataStatus },
-        softReloadOnScrollDataStatus
-    ) { onRequest, onScroll ->
-        when {
-            onRequest is DataStatus.Outdated || onScroll is DataStatus.Outdated -> DataStatus.Outdated
-            onRequest is DataStatus.Loading || onScroll is DataStatus.Loading -> DataStatus.Loading
-            else -> DataStatus.UpToDate
-        }
-    }
+        softReloadOnScrollDataStatus,
+        ::minOf
+    )
 
     init {
         viewModelScope.launch(coroutineContext) {
