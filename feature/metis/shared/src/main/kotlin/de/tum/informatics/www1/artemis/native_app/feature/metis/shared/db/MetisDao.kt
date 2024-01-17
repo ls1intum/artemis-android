@@ -59,7 +59,7 @@ interface MetisDao {
     @Query("select exists(select * from metis_post_context where client_post_id = :clientPostId and server_post_id = :serverPostId and course_id = :courseId and conversation_id = :conversationId)")
     suspend fun isPostPresentInContext(
         clientPostId: String,
-        serverPostId: Long,
+        serverPostId: Long?,
         courseId: Long,
         conversationId: Long
     ): Boolean
@@ -113,6 +113,9 @@ interface MetisDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertUsers(users: List<MetisUserEntity>)
+
+    @Query("update metis_post_context set server_post_id = :serverSidePostId where client_post_id = :clientSidePostId")
+    suspend fun upgradePost(clientSidePostId: String, serverSidePostId: Long)
 
     @Query(
         """

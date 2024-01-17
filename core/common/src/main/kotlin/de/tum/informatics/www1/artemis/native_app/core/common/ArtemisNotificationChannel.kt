@@ -1,12 +1,11 @@
-package de.tum.informatics.www1.artemis.native_app.feature.push
+package de.tum.informatics.www1.artemis.native_app.core.common
 
 import android.app.NotificationManager
-import androidx.annotation.StringRes
 
 enum class ArtemisNotificationChannel(
     val id: String,
-    @StringRes val title: Int,
-    @StringRes val description: Int,
+    val title: Int,
+    val description: Int,
     val importance: Int = NotificationManager.IMPORTANCE_DEFAULT
 ) {
     MiscNotificationChannel(

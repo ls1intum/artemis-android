@@ -2,6 +2,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 
 import androidx.paging.PagingSource
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.BasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -38,6 +40,24 @@ interface MetisStorageService {
         posts: List<StandalonePost>,
         removeAllOlderPosts: Boolean
     )
+
+    /**
+     * Insert a post which has not been sent to the server yet and, thus, does nto have a server side post id yet.
+     * @return the client side post id for future referencing or null if inserting the post failed.
+     */
+    suspend fun insertClientSidePost(host: String, metisContext: MetisContext, post: BasePost): String?
+
+    /**
+     * Assigns a post previously created using [insertClientSidePost] a server side post. Therefore, the post will be transformed to a regular
+     * post. Also updates all fields of the post in the db with the values of [post].
+     */
+    suspend fun upgradeClientSidePost(host: String, metisContext: MetisContext, clientSidePostId: String, post: StandalonePost)
+
+    /**
+     * Assigns a post previously created using [insertClientSidePost] a server side post. Therefore, the post will be transformed to a regular
+     * post. Also updates all fields of the post in the db with the values of [post].
+     */
+    suspend fun upgradeClientSideAnswerPost(host: String, metisContext: MetisContext, clientSidePostId: String, post: AnswerPost)
 
     /**
      * Update the post with the same id in the database. If this post does not exist, no action is taken.

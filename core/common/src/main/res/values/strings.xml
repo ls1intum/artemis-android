@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="push_notification_channel_misc_name">Miscellaneous</string>
+    <string name="push_notification_channel_misc_description">All non-communication related notifications.</string>
+
+    <string name="push_notification_channel_course_announcement_name">Course Announcement</string>
+    <string name="push_notification_channel_course_announcement_description">Instructors can create important course-wide announcements.</string>
+
+    <string name="push_notification_channel_course_post_name">Course Posts</string>
+    <string name="push_notification_channel_course_post_description">New posts in courses and replies to course posts.</string>
+
+    <string name="push_notification_channel_exercise_post_name">Exercise Posts</string>
+    <string name="push_notification_channel_exercise_post_description">New posts in exercises and replies to exercise posts.</string>
+
+    <string name="push_notification_channel_lecture_post_name">Lecture Posts</string>
+    <string name="push_notification_channel_lecture_post_description">New posts in lectures and replies to lecture posts.</string>
+
+    <string name="push_notification_channel_communication_name">Communication</string>
+    <string name="push_notification_channel_communication_description">New messages in channels, group chats and personal chats.</string>
+</resources>

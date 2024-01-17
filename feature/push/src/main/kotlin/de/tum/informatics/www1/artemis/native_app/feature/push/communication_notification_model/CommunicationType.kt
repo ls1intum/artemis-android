@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model
 
 import androidx.annotation.DrawableRes
-import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
+import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 
 enum class CommunicationType(val notificationChannel: ArtemisNotificationChannel, @DrawableRes val notificationIcon: Int) {

@@ -10,8 +10,8 @@ import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.room.withTransaction
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PushNotificationArtemisMarkdownTransformer
-import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
-import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationManager
+import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ArtemisNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationMessageEntity

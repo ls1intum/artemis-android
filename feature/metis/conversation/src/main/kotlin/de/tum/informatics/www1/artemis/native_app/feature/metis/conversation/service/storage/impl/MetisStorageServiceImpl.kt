@@ -6,6 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.BasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.Reaction
@@ -144,7 +145,7 @@ internal class MetisStorageServiceImpl(
         private fun MetisContext.toPostMetisContext(
             serverId: String,
             clientSidePostId: String,
-            serverSidePostId: Long,
+            serverSidePostId: Long?,
             postingType: BasePostingEntity.PostingType
         ): MetisPostContextEntity =
             MetisPostContextEntity(
@@ -247,6 +248,111 @@ internal class MetisStorageServiceImpl(
         }
     }
 
+    override suspend fun insertClientSidePost(
+        host: String,
+        metisContext: MetisContext,
+        post: BasePost
+    ): String? {
+        val metisDao = databaseProvider.metisDao
+
+        return databaseProvider.database.withTransaction {
+            when (post) {
+                is StandalonePost -> {
+                    insertOrUpdatePost(
+                        databaseProvider.metisDao,
+                        host = host,
+                        metisContext = metisContext,
+                        null,
+                        sp = post,
+                        isLiveCreated = false
+                    )
+                }
+
+                is AnswerPost -> {
+                    // First figure out the parent and then insert it normally
+                    val parentClientPostId = metisDao.queryClientPostId(
+                        serverId = host,
+                        postId = post.post?.serverPostId ?: return@withTransaction null,
+                        postingType = BasePostingEntity.PostingType.STANDALONE
+                    ) ?: return@withTransaction null
+
+                    val clientPostId = UUID.randomUUID().toString()
+
+                    insertOrUpdateAnswerPost(
+                        isNewPost = true,
+                        answerPostClientSidePostId = clientPostId,
+                        answerPost = post,
+                        metisDao = metisDao,
+                        host = host,
+                        parentPostClientSidePostId = parentClientPostId,
+                        metisContext = metisContext,
+                        answerPostId = null
+                    )
+
+                    clientPostId
+                }
+            }
+        }
+    }
+
+    override suspend fun upgradeClientSidePost(
+        host: String,
+        metisContext: MetisContext,
+        clientSidePostId: String,
+        post: StandalonePost
+    ) {
+        val metisDao = databaseProvider.metisDao
+
+        databaseProvider.database.withTransaction {
+            metisDao.upgradePost(
+                clientSidePostId = clientSidePostId,
+                serverSidePostId = post.id ?: return@withTransaction
+            )
+
+            insertOrUpdatePost(
+                metisDao = metisDao,
+                host = host,
+                metisContext = metisContext,
+                queryClientPostId = clientSidePostId,
+                sp = post,
+                isLiveCreated = false
+            )
+        }
+    }
+
+    override suspend fun upgradeClientSideAnswerPost(
+        host: String,
+        metisContext: MetisContext,
+        clientSidePostId: String,
+        post: AnswerPost
+    ) {
+        val metisDao = databaseProvider.metisDao
+
+        databaseProvider.database.withTransaction {
+            metisDao.upgradePost(
+                clientSidePostId = clientSidePostId,
+                serverSidePostId = post.id ?: return@withTransaction
+            )
+
+            val parentClientSidePostId = metisDao.queryClientPostId(
+                host,
+                post.post?.serverPostId ?: return@withTransaction,
+                BasePostingEntity.PostingType.STANDALONE
+            ) ?: return@withTransaction
+
+            insertOrUpdateAnswerPost(
+                isNewPost = false,
+                answerPostClientSidePostId = clientSidePostId,
+                answerPost = post,
+                metisDao = metisDao,
+                host = host,
+                parentPostClientSidePostId = parentClientSidePostId,
+                metisContext = metisContext,
+                answerPostId = post.serverPostId
+            )
+        }
+    }
+
     override suspend fun updatePost(
         host: String,
         metisContext: MetisContext,
@@ -343,7 +449,7 @@ internal class MetisStorageServiceImpl(
             metisContext.toPostMetisContext(
                 serverId = host,
                 clientSidePostId = clientSidePostId,
-                serverSidePostId = standalonePostId ?: return null,
+                serverSidePostId = standalonePostId,
                 postingType = BasePostingEntity.PostingType.STANDALONE
             )
 
@@ -385,58 +491,78 @@ internal class MetisStorageServiceImpl(
         }
 
         for (ap in sp.answers.orEmpty()) {
-            val answerPostId = ap.id
+            val answerPostId = ap.id ?: continue
 
             val queryClientPostIdAnswer = metisDao.queryClientPostId(
                 serverId = host,
-                postId = answerPostId ?: return null,
+                postId = answerPostId,
                 postingType = BasePostingEntity.PostingType.ANSWER
             )
-            val answerClientSidePostId =
-                queryClientPostIdAnswer ?: UUID.randomUUID().toString()
 
-            val authorRole = (if (queryClientPostIdAnswer != null && ap.authorRole == null) {
-                metisDao.queryPostAuthorRole(answerClientSidePostId)
-            } else ap.authorRole?.asDb)?.asNetwork
-
-            val (basePostingEntity, answerPostingEntity, metisUserEntity) = ap
-                .copy(authorRole = authorRole)
-                .asDb(
-                    serverId = host,
-                    clientSidePostId = answerClientSidePostId,
-                    parentClientSidePostId = clientSidePostId
-                ) ?: return null
-
-            val answerPostReactionsWithUsers =
-                ap.reactions.orEmpty().mapNotNull { it.asDb(host, answerClientSidePostId) }
-            val answerPostReactions = answerPostReactionsWithUsers.map { it.first }
-            val answerPostReactionUsers = answerPostReactionsWithUsers.map { it.second }
-
-            metisDao.insertOrUpdateUser(metisUserEntity)
-            metisDao.updateUsers(answerPostReactionUsers)
-            metisDao.insertUsers(answerPostReactionUsers)
-
-            if (queryClientPostIdAnswer != null) {
-                metisDao.updateBasePost(basePostingEntity)
-                metisDao.updateAnswerPosting(answerPostingEntity)
-
-                metisDao.updateReactions(answerClientSidePostId, answerPostReactions)
-            } else {
-                metisDao.insertBasePost(basePostingEntity)
-                metisDao.insertAnswerPosting(answerPostingEntity)
-                metisDao.insertReactions(answerPostReactions)
-                metisDao.insertPostMetisContext(
-                    metisContext.toPostMetisContext(
-                        serverId = host,
-                        clientSidePostId = answerClientSidePostId,
-                        serverSidePostId = answerPostId,
-                        postingType = BasePostingEntity.PostingType.ANSWER
-                    )
-                )
-            }
+            insertOrUpdateAnswerPost(
+                isNewPost = queryClientPostIdAnswer != null,
+                answerPostClientSidePostId = queryClientPostIdAnswer ?: UUID.randomUUID().toString(),
+                answerPost = ap,
+                metisDao = metisDao,
+                host = host,
+                parentPostClientSidePostId = clientSidePostId,
+                metisContext = metisContext,
+                answerPostId = answerPostId
+            )
         }
 
         return clientSidePostId
+    }
+
+    private suspend fun insertOrUpdateAnswerPost(
+        isNewPost: Boolean,
+        answerPostClientSidePostId: String,
+        answerPost: AnswerPost,
+        metisDao: MetisDao,
+        host: String,
+        parentPostClientSidePostId: String,
+        metisContext: MetisContext,
+        answerPostId: Long?
+    ) {
+        val authorRole = (if (isNewPost && answerPost.authorRole == null) {
+            metisDao.queryPostAuthorRole(answerPostClientSidePostId)
+        } else answerPost.authorRole?.asDb)?.asNetwork
+
+        val (basePostingEntity, answerPostingEntity, metisUserEntity) = answerPost
+            .copy(authorRole = authorRole)
+            .asDb(
+                serverId = host,
+                clientSidePostId = answerPostClientSidePostId,
+                parentClientSidePostId = parentPostClientSidePostId
+            ) ?: return
+
+        val answerPostReactionsWithUsers =
+            answerPost.reactions.orEmpty().mapNotNull { it.asDb(host, answerPostClientSidePostId) }
+        val answerPostReactions = answerPostReactionsWithUsers.map { it.first }
+        val answerPostReactionUsers = answerPostReactionsWithUsers.map { it.second }
+
+        metisDao.insertOrUpdateUser(metisUserEntity)
+        metisDao.updateUsers(answerPostReactionUsers)
+        metisDao.insertUsers(answerPostReactionUsers)
+
+        if (isNewPost) {
+            metisDao.insertBasePost(basePostingEntity)
+            metisDao.insertAnswerPosting(answerPostingEntity)
+            metisDao.insertReactions(answerPostReactions)
+            metisDao.insertPostMetisContext(
+                metisContext.toPostMetisContext(
+                    serverId = host,
+                    clientSidePostId = answerPostClientSidePostId,
+                    serverSidePostId = answerPostId,
+                    postingType = BasePostingEntity.PostingType.ANSWER
+                )
+            )
+        } else {
+            metisDao.updateBasePost(basePostingEntity)
+            metisDao.updateAnswerPosting(answerPostingEntity)
+
+            metisDao.updateReactions(answerPostClientSidePostId, answerPostReactions)
+        }
     }
 
     private suspend fun MetisDao.insertOrUpdateUser(user: MetisUserEntity) {
