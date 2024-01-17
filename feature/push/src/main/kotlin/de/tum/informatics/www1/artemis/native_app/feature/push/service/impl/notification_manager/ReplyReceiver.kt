@@ -35,11 +35,11 @@ class ReplyReceiver : BroadcastReceiver(), KoinComponent {
             val communicationType = intent.getStringExtra(COMMUNICATION_TYPE) ?: return@let
 
             if (response.isNotBlank()) {
-                val workRequest = defaultInternetWorkRequest<ReplyWorker>(
+                val workRequest = defaultInternetWorkRequest<SendConversationPostWorker>(
                     Data.Builder()
-                        .putLong(ReplyWorker.KEY_PARENT_ID, parentId)
-                        .putString(ReplyWorker.KEY_COMMUNICATION_TYPE, communicationType)
-                        .putString(ReplyWorker.KEY_REPLY_CONTENT, response)
+                        .putLong(SendConversationPostWorker.KEY_PARENT_ID, parentId)
+                        .putString(SendConversationPostWorker.KEY_COMMUNICATION_TYPE, communicationType)
+                        .putString(SendConversationPostWorker.KEY_REPLY_CONTENT, response)
                         .build()
                 )
 

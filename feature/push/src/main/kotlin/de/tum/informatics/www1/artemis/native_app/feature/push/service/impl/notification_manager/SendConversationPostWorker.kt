@@ -12,7 +12,11 @@ import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationManager
@@ -24,23 +28,22 @@ import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Clock
 
 /**
- * Worker that sends a reply to a Metis posting to the server.
+ * Worker that uploads a post or answer post to the Artemis server.
  * If the input is invalid, the worker fails.
  * If the input is valid, but the reply could not be uploaded, the worker will schedule a retry.
  * If the upload failed 5 times, the worker will fail and pop a notification to notify the user about the failure.
  */
-internal class ReplyWorker(
+class SendConversationPostWorker(
     appContext: Context,
     params: WorkerParameters,
-    private val metisModificationService: de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService,
+    private val metisModificationService: MetisModificationService,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val pushCommunicationDatabaseProvider: PushCommunicationDatabaseProvider,
     private val communicationNotificationManager: CommunicationNotificationManager,
     private val accountDataService: AccountDataService,
-    private val conversationService: de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
-) :
-    CoroutineWorker(appContext, params) {
+    private val conversationService: ConversationService
+) : CoroutineWorker(appContext, params) {
 
     companion object {
         const val KEY_PARENT_ID = "parent_id"
@@ -99,9 +102,9 @@ internal class ReplyWorker(
 
                 metisModificationService.createAnswerPost(
                     metisContext,
-                    de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost(
+                    AnswerPost(
                         content = replyContent,
-                        post = de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost(
+                        post = StandalonePost(
                             id = postId,
                             conversation = conversation
                         ),

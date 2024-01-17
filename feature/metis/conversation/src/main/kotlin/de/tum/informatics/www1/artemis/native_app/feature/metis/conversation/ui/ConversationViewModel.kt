@@ -318,7 +318,7 @@ internal open class ConversationViewModel(
         return if (success) null else MetisModificationFailure.DELETE_REACTION
     }
 
-    protected suspend fun createStandalonePostImpl(post: StandalonePost): MetisModificationFailure? {
+    private suspend fun createStandalonePostImpl(post: StandalonePost): MetisModificationFailure? {
         val metisContext = metisContext
         val response = metisModificationService.createPost(
             context = metisContext,
