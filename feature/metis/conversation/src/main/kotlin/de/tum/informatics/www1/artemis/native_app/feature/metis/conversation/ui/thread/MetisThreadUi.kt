@@ -18,7 +18,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -31,6 +30,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisPostListHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
@@ -58,24 +58,22 @@ internal fun testTagForAnswerPost(answerPostId: Long) = "answerPost$answerPostId
 @Composable
 internal fun MetisThreadUi(
     modifier: Modifier,
-    viewModel: MetisThreadViewModel
+    viewModel: ConversationViewModel
 ) {
-    val postDataState: DataState<PostPojo> by viewModel.post.collectAsState()
+    val postDataState: DataState<PostPojo> by viewModel.threadUseCase.post.collectAsState()
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
 
     val serverUrl by viewModel.serverUrl.collectAsState()
 
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
 
-    val metisContext by viewModel.currentMetisContext.collectAsState()
-
     postDataState.bind { it.serverPostId }.orNull()?.let { serverSidePostId ->
         ReportVisibleMetisContext(
             remember(
-                metisContext,
+                viewModel.metisContext,
                 serverSidePostId
             ) {
-                VisibleStandalonePostDetails(metisContext, serverSidePostId)
+                VisibleStandalonePostDetails(viewModel.metisContext, serverSidePostId)
             }
         )
     }
@@ -122,11 +120,11 @@ internal fun MetisThreadUi(
                         MetisPostListHandler(
                             modifier = Modifier.fillMaxSize(),
                             serverUrl = serverUrl,
-                            courseId = metisContext.courseId,
+                            courseId = viewModel.courseId,
                             state = listState,
                             itemCount = post.orderedAnswerPostings.size,
                             order = DisplayPostOrder.REGULAR,
-                            getItem = post.orderedAnswerPostings::get,
+                            bottomItem = post.orderedAnswerPostings.lastOrNull(),
                         ) {
                             PostAndRepliesList(
                                 modifier = Modifier

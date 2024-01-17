@@ -52,7 +52,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATIO
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.standalonePostScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ProvideLocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextManager
@@ -343,10 +342,6 @@ class MainActivity : AppCompatActivity(),
                     onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
                     onParticipateInQuiz = onParticipateInQuiz,
                     onClickViewQuizResults = onClickViewQuizResults
-                )
-
-                standalonePostScreen(
-                    onNavigateUp = navController::navigateUp
                 )
 
                 quizParticipation(

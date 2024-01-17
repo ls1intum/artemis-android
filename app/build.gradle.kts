@@ -86,6 +86,8 @@ android {
         findByName(ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection)?.apply {
             versionNameSuffix =
                 "-" + ProductFlavors.Dimensions.InstanceSelection.Flavors.FreeInstanceSelection
+
+            isDefault = true
         }
 
         findByName(ProductFlavors.Dimensions.InstanceSelection.Flavors.Tum)?.apply {
@@ -101,6 +103,8 @@ android {
         findByName(ProductFlavors.Dimensions.ReleaseType.Flavors.Production)?.apply {
             versionNameSuffix =
                 "-prod"
+
+            isDefault = true
         }
     }
 }

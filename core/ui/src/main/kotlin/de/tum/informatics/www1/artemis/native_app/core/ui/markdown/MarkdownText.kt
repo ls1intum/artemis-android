@@ -123,6 +123,14 @@ fun MarkdownText(
         update = { textView ->
             markdownRender.setMarkdown(textView, transformedMarkdown)
             textView.movementMethod = LinkMovementMethod.getInstance()
+
+            onClick?.let { textView.setOnClickListener { onClick() } }
+            onLongClick?.let {
+                textView.setOnLongClickListener {
+                    onLongClick()
+                    true
+                }
+            }
         },
         onReset = {},
         onRelease = {}

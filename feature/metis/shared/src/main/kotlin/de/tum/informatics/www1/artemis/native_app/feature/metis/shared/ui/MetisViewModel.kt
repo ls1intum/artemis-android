@@ -74,10 +74,4 @@ abstract class MetisViewModel(
     open fun requestReload() {
         onRequestReload.tryEmit(Unit)
     }
-
-    fun forceReload(): Job {
-        return viewModelScope.launch(coroutineContext) {
-            onRequestReload.emit(Unit)
-        }
-    }
 }

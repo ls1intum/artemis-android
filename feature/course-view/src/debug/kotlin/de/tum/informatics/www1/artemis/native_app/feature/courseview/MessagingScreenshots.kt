@@ -20,7 +20,8 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvid
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseUiScreen
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.TAB_COMMUNICATION
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceImpl
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
@@ -207,7 +208,7 @@ fun `Metis - Conversation Channel`() {
                             Unit
                     }
                 ) {
-                    ConversationScreen(
+                    ConversationChatListScreen(
                         modifier = Modifier.fillMaxSize(),
                         courseId = ScreenshotCourse.id!!,
                         conversationId = sharedConversation.id,
@@ -217,36 +218,37 @@ fun `Metis - Conversation Channel`() {
                         onUpdateQuery = {},
                         onNavigateBack = {},
                         onNavigateToSettings = {},
+                        conversationDataStatus = DataStatus.UpToDate,
+                        onRequestSoftReload = {},
                         content = { padding ->
                             MetisChatList(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(padding),
-                                posts = PostsDataState.Loaded.WithList(
-                                    posts,
-                                    PostsDataState.NotLoading
-                                ),
-                                serverUrl = "",
-                                courseId = 0,
-                                isDataOutdated = false,
-                                clientId = 0L,
-                                hasModerationRights = true,
-                                listContentPadding = PaddingValues(),
-                                state = rememberLazyListState(),
-                                isReplyEnabled = true,
-                                onCreatePost = { CompletableDeferred() },
-                                onEditPost = { _, _ -> CompletableDeferred() },
-                                onDeletePost = { CompletableDeferred() },
-                                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                                onClickViewPost = {},
-                                onRequestReload = {},
                                 initialReplyTextProvider = object : InitialReplyTextProvider {
                                     override val newMessageText: Flow<TextFieldValue> = flowOf(
                                         TextFieldValue()
                                     )
 
                                     override fun updateInitialReplyText(text: TextFieldValue) = Unit
-                                }
+                                },
+                                posts = PostsDataState.Loaded.WithList(
+                                    posts,
+                                    PostsDataState.NotLoading
+                                ),
+                                clientId = 0L,
+                                hasModerationRights = true,
+                                listContentPadding = PaddingValues(),
+                                serverUrl = "",
+                                courseId = 0,
+                                state = rememberLazyListState(),
+                                isReplyEnabled = true,
+                                onCreatePost = { CompletableDeferred() },
+                                onEditPost = { _, _ -> CompletableDeferred() },
+                                onDeletePost = { CompletableDeferred() },
+                                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                                bottomItem = null,
+                                onClickViewPost = {}
                             )
                         }
                     )

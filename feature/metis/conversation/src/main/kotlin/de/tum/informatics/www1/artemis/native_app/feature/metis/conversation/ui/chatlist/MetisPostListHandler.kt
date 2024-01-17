@@ -27,7 +27,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import kotlinx.coroutines.launch
 
 /**
- * Handles scrolling down to new items if the list was scrolled down before the new items came it.
+ * Handles scrolling down to new items if the list was scrolled down before the new items came in.
  *
  * Shows a floating action button if there are new posts
  */
@@ -38,7 +38,7 @@ internal fun <T : Any> MetisPostListHandler(
     courseId: Long,
     state: LazyListState,
     itemCount: Int,
-    getItem: (Int) -> T?,
+    bottomItem: T?,
     order: DisplayPostOrder,
     content: @Composable BoxScope.() -> Unit
 ) {
@@ -61,20 +61,19 @@ internal fun <T : Any> MetisPostListHandler(
         DisplayPostOrder.REGULAR -> state.canScrollForward
     }
 
-    LaunchedEffect(isScrolledDown, itemCount, getItem, canScrollDown, bottomItemIndex) {
+    LaunchedEffect(isScrolledDown, itemCount, bottomItem, canScrollDown, bottomItemIndex) {
         if (itemCount > 0) {
-            val newBottomItem = getItem(bottomItemIndex)
             // Check if new bottom item exists
-            if (newBottomItem != prevBottomItem && isScrolledDown) {
+            if (bottomItem != prevBottomItem && isScrolledDown) {
                 // new bottom item exists and we were previously scrolled to the bottom. Scroll down!
                 state.animateScrollToItem(bottomItemIndex)
-            } else if (newBottomItem != prevBottomItem) {
+            } else if (bottomItem != prevBottomItem) {
                 //  new bottom item exists but we are not on bottom so instead show user button.
                 hasNewUnseenPost = true
             }
 
             isScrolledDown = !canScrollDown
-            prevBottomItem = newBottomItem
+            prevBottomItem = bottomItem
 
             if (isScrolledDown) {
                 // we are scrolled down now, so we must have seen all posts.

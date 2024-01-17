@@ -4,6 +4,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
@@ -27,39 +29,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisListViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.ConversationDataStatusButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import io.github.fornewid.placeholder.material3.placeholder
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 @Composable
-fun ConversationScreen(
+internal fun ConversationChatListScreen(
     modifier: Modifier,
-    courseId: Long,
-    conversationId: Long,
+    viewModel: ConversationViewModel,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onClickViewPost: (StandalonePostId) -> Unit
 ) {
-    val metisContext = remember(courseId, conversationId) {
-        MetisContext.Conversation(courseId, conversationId)
-    }
-
-    val viewModel = koinViewModel<MetisListViewModel> { parametersOf(metisContext) }
-
-    ConversationScreen(
+    ConversationChatListScreen(
         modifier = modifier,
-        courseId = courseId,
-        conversationId = conversationId,
-        metisContext = metisContext,
+        courseId = viewModel.courseId,
+        conversationId = viewModel.conversationId,
         viewModel = viewModel,
         onNavigateBack = onNavigateBack,
         onNavigateToSettings = onNavigateToSettings,
@@ -68,22 +62,18 @@ fun ConversationScreen(
 }
 
 @Composable
-fun ConversationScreen(
+internal fun ConversationChatListScreen(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,
-    metisContext: MetisContext,
-    viewModel: MetisListViewModel,
+    viewModel: ConversationViewModel,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onClickViewPost: (StandalonePostId) -> Unit
 ) {
-    LaunchedEffect(metisContext) {
-        viewModel.updateMetisContext(metisContext)
-    }
-
-    val query by viewModel.query.collectAsState()
+    val query by viewModel.chatListUseCase.query.collectAsState()
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
+    val conversationDataStatus by viewModel.conversationDataStatus.collectAsState()
 
     val title by remember(conversationDataState) {
         derivedStateOf {
@@ -91,16 +81,23 @@ fun ConversationScreen(
         }
     }
 
-    ConversationScreen(
+    val chatListState: LazyListState = rememberLazyListState()
+
+    val posts: LazyPagingItems<ChatListItem> =
+        viewModel.chatListUseCase.postPagingData.collectAsLazyPagingItems()
+
+    ConversationChatListScreen(
         modifier = modifier,
         courseId = courseId,
         conversationId = conversationId,
         isConversationLoaded = conversationDataState.isSuccess,
+        conversationDataStatus = conversationDataStatus,
         query = query,
         conversationTitle = title,
         onNavigateBack = onNavigateBack,
         onNavigateToSettings = onNavigateToSettings,
-        onUpdateQuery = viewModel::updateQuery
+        onUpdateQuery = viewModel.chatListUseCase::updateQuery,
+        onRequestSoftReload = viewModel::requestReload
     ) { padding ->
         val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
@@ -113,7 +110,9 @@ fun ConversationScreen(
                     viewModel = viewModel,
                     listContentPadding = PaddingValues(),
                     onClickViewPost = onClickViewPost,
-                    isReplyEnabled = isReplyEnabled
+                    isReplyEnabled = isReplyEnabled,
+                    state = chatListState,
+                    posts = posts
                 )
             }
         }
@@ -121,16 +120,18 @@ fun ConversationScreen(
 }
 
 @Composable
-fun ConversationScreen(
+fun ConversationChatListScreen(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,
     conversationTitle: String,
     query: String,
+    conversationDataStatus: DataStatus,
     isConversationLoaded: Boolean,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onUpdateQuery: (String) -> Unit,
+    onRequestSoftReload: () -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
     var isSearchBarOpen by rememberSaveable(courseId, conversationId) { mutableStateOf(false) }
@@ -187,6 +188,11 @@ fun ConversationScreen(
                 },
                 actions = {
                     if (!isSearchBarOpen) {
+                        ConversationDataStatusButton(
+                            dataStatus = conversationDataStatus,
+                            onRequestSoftReload = onRequestSoftReload
+                        )
+
                         IconButton(onClick = { isSearchBarOpen = true }) {
                             Icon(imageVector = Icons.Default.Search, contentDescription = null)
                         }
