@@ -2,18 +2,18 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.wo
 
 import android.content.Context
 import android.util.Log
-import androidx.work.CoroutineWorker
 import androidx.work.Data
-import androidx.work.OneTimeWorkRequest
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkerParameters
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Clock
 
@@ -24,6 +24,8 @@ import kotlinx.datetime.Clock
 class CreateClientSidePostWorker(
     appContext: Context,
     params: WorkerParameters,
+    private val accountService: AccountService,
+    private val accountDataService: AccountDataService,
     private val metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
 ) : BaseCreatePostWorker(appContext, params) {
@@ -39,8 +41,18 @@ class CreateClientSidePostWorker(
         postType: PostType,
         parentPostId: Long?
     ): Result {
-        val author = User(username = "TODO", id = 0L)
-        val userRole = UserRole.INSTRUCTOR
+        val serverUrl = serverConfigurationService.serverUrl.first()
+        val authToken = accountService.authToken.first()
+
+        val authorAccount = accountDataService.getCachedAccountData(serverUrl, authToken)
+            ?: Account() // Super edge case, just use nothing here.
+
+        val author = User(
+            username = authorAccount.username,
+            name = authorAccount.name,
+            firstName = authorAccount.firstName,
+            lastName = authorAccount.lastName
+        )
 
         val clientSidePostId = when (postType) {
             PostType.POST -> {
@@ -52,7 +64,7 @@ class CreateClientSidePostWorker(
                         title = null,
                         tags = null,
                         author = author,
-                        authorRole = userRole,
+                        authorRole = null, // We do not know the role of the user here!
                         content = content,
                         creationDate = Clock.System.now()
                     )
@@ -67,7 +79,7 @@ class CreateClientSidePostWorker(
                         id = null,
                         content = content,
                         author = author,
-                        authorRole = userRole,
+                        authorRole = null,
                         post = StandalonePost(id = parentPostId),
                         creationDate = Clock.System.now()
                     )
