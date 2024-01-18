@@ -18,7 +18,7 @@ data class PostPojo(
     @ColumnInfo(name = "client_post_id")
     val clientPostId: String,
     @ColumnInfo(name = "server_post_id")
-    override val serverPostId: Long,
+    override val serverPostId: Long?,
     @ColumnInfo(name = "title")
     override val title: String?,
     @ColumnInfo(name = "content")

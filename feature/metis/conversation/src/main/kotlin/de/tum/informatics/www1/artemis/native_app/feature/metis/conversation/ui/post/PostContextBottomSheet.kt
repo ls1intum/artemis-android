@@ -80,20 +80,22 @@ internal fun PostContextBottomSheet(
                     .fillMaxWidth()
                     .padding(horizontal = Spacings.ScreenHorizontalSpacing)
             ) {
-                EmojiReactionBar(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    presentReactions = post.reactions.orEmpty(),
-                    clientId = clientId,
-                    onReactWithEmoji = {
-                        onDismissRequest()
-                        postActions.onClickReaction(it, true)
-                    },
-                    onRequestViewMoreEmojis = {
-                        displayAllEmojis = true
-                    }
-                )
+                postActions.onClickReaction?.let { onClickReaction ->
+                    EmojiReactionBar(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        presentReactions = post.reactions.orEmpty(),
+                        clientId = clientId,
+                        onReactWithEmoji = { emojiId ->
+                            onDismissRequest()
+                            onClickReaction(emojiId, true)
+                        },
+                        onRequestViewMoreEmojis = {
+                            displayAllEmojis = true
+                        }
+                    )
+                }
 
                 if (postActions.canPerformAnyAction) {
                     Divider()
@@ -147,13 +149,15 @@ internal fun PostContextBottomSheet(
             }
         }
     } else {
-        EmojiDialog(
-            onDismissRequest = onDismissRequest,
-            onSelectEmoji = {
-                onDismissRequest()
-                postActions.onClickReaction(it, true)
-            }
-        )
+        postActions.onClickReaction?.let { onClickReaction ->
+            EmojiDialog(
+                onDismissRequest = onDismissRequest,
+                onSelectEmoji = { emojiId ->
+                    onDismissRequest()
+                    onClickReaction(emojiId, true)
+                }
+            )
+        }
     }
 }
 

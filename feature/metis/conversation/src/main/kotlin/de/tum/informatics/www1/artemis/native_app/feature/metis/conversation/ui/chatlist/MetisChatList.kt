@@ -54,7 +54,7 @@ import java.util.Date
 
 internal const val TEST_TAG_METIS_POST_LIST = "TEST_TAG_METIS_POST_LIST"
 
-internal fun testTagForPost(postId: Long) = "post$postId"
+internal fun testTagForPost(postId: StandalonePostId?) = "post$postId"
 
 @Composable
 internal fun MetisChatList(
@@ -243,7 +243,7 @@ private fun ChatList(
                             .fillMaxWidth()
                             .let {
                                 if (post != null) {
-                                    it.testTag(testTagForPost(post.serverPostId))
+                                    it.testTag(testTagForPost(post.standalonePostId))
                                 } else it
                             },
                         post = post,
@@ -265,8 +265,10 @@ private fun ChatList(
                             }
                         ),
                         onClick = {
-                            if (post != null) {
-                                onClickViewPost(post.standalonePostId)
+                            val standalonePostId = post?.standalonePostId
+
+                            if (post?.serverPostId != null && standalonePostId != null) {
+                                onClickViewPost(standalonePostId)
                             }
                         }
                     )

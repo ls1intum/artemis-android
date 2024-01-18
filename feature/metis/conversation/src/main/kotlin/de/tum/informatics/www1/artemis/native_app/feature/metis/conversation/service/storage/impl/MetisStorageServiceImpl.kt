@@ -232,7 +232,7 @@ internal class MetisStorageServiceImpl(
                 host = host,
                 courseId = metisContext.courseId,
                 conversationId = metisContext.conversationId,
-                serverIds = posts.map { it.serverPostId },
+                serverIds = posts.mapNotNull { it.serverPostId },
                 startInstant = oldestPost.creationDate,
                 endInstant = newestPost.creationDate
             )

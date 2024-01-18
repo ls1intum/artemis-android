@@ -82,7 +82,7 @@ internal fun PostItem(
     postItemViewType: PostItemViewType,
     clientId: Long,
     displayHeader: Boolean,
-    onClickOnReaction: (emojiId: String, create: Boolean) -> Unit,
+    onClickOnReaction: ((emojiId: String, create: Boolean) -> Unit)?,
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
@@ -291,7 +291,7 @@ private fun StandalonePostFooter(
     clientId: Long,
     reactions: List<IReaction>,
     postItemViewType: PostItemViewType,
-    onClickReaction: (emojiId: String, create: Boolean) -> Unit
+    onClickReaction: ((emojiId: String, create: Boolean) -> Unit)?
 ) {
     val reactionCount: Map<String, ReactionData> = remember(reactions, clientId) {
         reactions.groupBy { it.emojiId }.mapValues { groupedReactions ->
@@ -315,7 +315,7 @@ private fun StandalonePostFooter(
                     emojiId = emoji,
                     reactionCount = reactionData.reactionCount,
                     onClick = {
-                        onClickReaction(emoji, !reactionData.hasClientReacted)
+                        onClickReaction?.invoke(emoji, !reactionData.hasClientReacted)
                     }
                 )
             }

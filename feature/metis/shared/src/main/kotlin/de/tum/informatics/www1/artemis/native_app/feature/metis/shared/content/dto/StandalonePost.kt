@@ -46,11 +46,11 @@ data class StandalonePost(
     override val authorId: Long? = author?.id
 
     @Transient
-    override val serverPostId: Long = id ?: 0L
+    override val serverPostId: Long? = id
 
     @Transient
     override val key: Any = id ?: hashCode()
     
     @Transient
-    override val standalonePostId = StandalonePostId.ServerSideId(serverPostId)
+    override val standalonePostId = id?.let(StandalonePostId::ServerSideId)
 }

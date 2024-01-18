@@ -10,4 +10,6 @@ sealed interface IBasePost {
     val updatedDate: Instant?
     val content: String?
     val reactions: List<IReaction>?
+
+    val serverPostId: Long?
 }

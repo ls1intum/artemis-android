@@ -275,7 +275,7 @@ internal open class ConversationViewModel(
     ): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             if (create) {
-                createReactionImpl(emojiId, post.asAffectedPost)
+                createReactionImpl(emojiId, post.getAsAffectedPost() ?: return@async MetisModificationFailure.DELETE_REACTION)
             } else {
                 val clientId = clientId.value.orNull()
                     ?: return@async MetisModificationFailure.DELETE_REACTION
@@ -324,7 +324,7 @@ internal open class ConversationViewModel(
         return viewModelScope.async(coroutineContext) {
             metisModificationService.deletePost(
                 metisContext,
-                post.asAffectedPost,
+                post.getAsAffectedPost() ?: return@async MetisModificationFailure.DELETE_POST,
                 serverConfigurationService.serverUrl.first(),
                 accountService.authToken.first()
             )
@@ -545,13 +545,16 @@ internal open class ConversationViewModel(
         newMessageText.value = text
     }
 
-    private val IBasePost.asAffectedPost: MetisModificationService.AffectedPost
-        get() = when (this) {
-            is AnswerPost -> MetisModificationService.AffectedPost.Answer(serverPostId)
-            is IAnswerPost -> MetisModificationService.AffectedPost.Answer(serverPostId)
-            is StandalonePost -> MetisModificationService.AffectedPost.Standalone(serverPostId)
-            is IStandalonePost -> MetisModificationService.AffectedPost.Standalone(serverPostId)
+    private fun IBasePost.getAsAffectedPost(): MetisModificationService.AffectedPost? {
+        val sPostId = serverPostId ?: return null
+
+        return when (this) {
+            is AnswerPost -> MetisModificationService.AffectedPost.Answer(sPostId)
+            is IAnswerPost -> MetisModificationService.AffectedPost.Answer(sPostId)
+            is StandalonePost -> MetisModificationService.AffectedPost.Standalone(sPostId)
+            is IStandalonePost -> MetisModificationService.AffectedPost.Standalone(sPostId)
         }
+    }
 
     private suspend fun loadConversation(): Conversation? {
         return conversationService.getConversation(
@@ -607,7 +610,8 @@ internal open class ConversationViewModel(
 
     fun createReply(): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
-            val serverSideParentPostId = getPostId() ?: return@async MetisModificationFailure.CREATE_POST
+            val serverSideParentPostId =
+                getPostId() ?: return@async MetisModificationFailure.CREATE_POST
 
             createPostService.createAnswerPost(
                 courseId,

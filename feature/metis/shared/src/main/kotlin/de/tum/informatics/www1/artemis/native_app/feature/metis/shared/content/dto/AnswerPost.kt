@@ -21,7 +21,7 @@ data class AnswerPost(
 ) : BasePost(), IAnswerPost {
     override val authorId: Long? = author?.id
 
-    override val serverPostId: Long = id ?: 0L
+    override val serverPostId: Long? = id
 
     constructor(answerPostDb: AnswerPostPojo, post: StandalonePost) : this(
         id = answerPostDb.serverPostId,

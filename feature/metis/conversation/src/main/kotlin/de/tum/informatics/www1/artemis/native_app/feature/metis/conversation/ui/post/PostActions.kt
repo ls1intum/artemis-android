@@ -9,7 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 data class PostActions(
     val requestEditPost: (() -> Unit)? = null,
     val requestDeletePost: (() -> Unit)? = null,
-    val onClickReaction: (emojiId: String, create: Boolean) -> Unit = { _, _ -> },
+    val onClickReaction: ((emojiId: String, create: Boolean) -> Unit)? = null,
     val onCopyText: () -> Unit = {},
     val onReplyInThread: (() -> Unit)? = null
 ) {
@@ -39,16 +39,17 @@ fun rememberPostActions(
         clipboardManager
     ) {
         if (post != null) {
+            val doesPostExistOnServer = post.serverPostId != null
             val hasEditPostRights = hasModerationRights || post.authorId == clientId
 
             PostActions(
-                requestEditPost = if (hasEditPostRights) onRequestEdit else null,
+                requestEditPost = if (doesPostExistOnServer && hasEditPostRights) onRequestEdit else null,
                 requestDeletePost = if (hasEditPostRights) onRequestDelete else null,
-                onClickReaction = onClickReaction,
+                onClickReaction = if (doesPostExistOnServer) onClickReaction else null,
                 onCopyText = {
                     clipboardManager.setText(AnnotatedString(post.content.orEmpty()))
                 },
-                onReplyInThread = onReplyInThread
+                onReplyInThread = if (doesPostExistOnServer) onReplyInThread else null
             )
         } else {
             PostActions()
