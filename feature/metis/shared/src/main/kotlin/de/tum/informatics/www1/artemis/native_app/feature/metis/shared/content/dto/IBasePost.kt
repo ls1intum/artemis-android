@@ -12,4 +12,5 @@ sealed interface IBasePost {
     val reactions: List<IReaction>?
 
     val serverPostId: Long?
+    val clientPostId: String?
 }

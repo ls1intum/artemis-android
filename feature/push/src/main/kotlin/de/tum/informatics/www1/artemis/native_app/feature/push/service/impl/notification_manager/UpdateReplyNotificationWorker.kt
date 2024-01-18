@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager
 
 import android.content.Context
-import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
@@ -9,7 +8,6 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.SendConversationPostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import kotlinx.coroutines.flow.first
@@ -27,6 +25,7 @@ class UpdateReplyNotificationWorker(
     override suspend fun doWork(
         courseId: Long,
         conversationId: Long,
+        clientSidePostId: String,
         content: String,
         postType: PostType,
         parentPostId: Long?

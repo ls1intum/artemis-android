@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work
 
 import android.content.Context
+import androidx.compose.runtime.clearCompositionErrors
 import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.WorkerParameters
@@ -15,10 +16,15 @@ abstract class BaseCreatePostWorker(appContext: Context, workerParams: WorkerPar
         const val KEY_CONTENT = "content"
         const val KEY_PARENT_POST_ID = "parent_post_id"
 
+        /**
+         * Id of the post created on client side
+         */
+        const val KEY_CLIENT_SIDE_POST_ID = "client_side_post_id"
 
         fun createWorkInput(
             courseId: Long,
             conversationId: Long,
+            clientSidePostId: String,
             content: String,
             postType: PostType,
             parentPostId: Long?
@@ -26,6 +32,7 @@ abstract class BaseCreatePostWorker(appContext: Context, workerParams: WorkerPar
             return Data.Builder()
                 .putLong(KEY_COURSE_ID, courseId)
                 .putLong(KEY_CONVERSATION_ID, conversationId)
+                .putString(KEY_CLIENT_SIDE_POST_ID, clientSidePostId)
                 .putString(KEY_CONTENT, content)
                 .putString(KEY_POST_TYPE, postType.name)
                 .apply {
@@ -50,9 +57,13 @@ abstract class BaseCreatePostWorker(appContext: Context, workerParams: WorkerPar
             inputData.getLong(KEY_PARENT_POST_ID, 0)
         else null
 
+        val clientSidePostId =
+            inputData.getString(KEY_CLIENT_SIDE_POST_ID) ?: return Result.failure()
+
         return doWork(
             courseId = courseId,
             conversationId = conversationId,
+            clientSidePostId = clientSidePostId,
             content = content,
             postType = postType,
             parentPostId = parentPostId
@@ -62,6 +73,7 @@ abstract class BaseCreatePostWorker(appContext: Context, workerParams: WorkerPar
     abstract suspend fun doWork(
         courseId: Long,
         conversationId: Long,
+        clientSidePostId: String,
         content: String,
         postType: PostType,
         parentPostId: Long?

@@ -45,7 +45,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ConversationWebsocketDto
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
@@ -54,6 +53,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.hasModerationRights
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
@@ -75,12 +75,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import kotlinx.datetime.Clock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -275,7 +273,11 @@ internal open class ConversationViewModel(
     ): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             if (create) {
-                createReactionImpl(emojiId, post.getAsAffectedPost() ?: return@async MetisModificationFailure.DELETE_REACTION)
+                createReactionImpl(
+                    emojiId,
+                    post.getAsAffectedPost()
+                        ?: return@async MetisModificationFailure.DELETE_REACTION
+                )
             } else {
                 val clientId = clientId.value.orNull()
                     ?: return@async MetisModificationFailure.DELETE_REACTION
@@ -608,6 +610,28 @@ internal open class ConversationViewModel(
         return CompletableDeferred(null)
     }
 
+    fun retryCreatePost(standalonePostId: StandalonePostId) {
+        viewModelScope.launch(coroutineContext) {
+            val clientSidePostId = when (standalonePostId) {
+                is StandalonePostId.ClientSideId -> standalonePostId.clientSideId
+                is StandalonePostId.ServerSideId -> metisStorageService.getClientSidePostId(
+                    serverConfigurationService.host.first(),
+                    standalonePostId.serverSidePostId,
+                    postingType = BasePostingEntity.PostingType.STANDALONE
+                )
+            } ?: return@launch
+
+            val post = metisStorageService.getStandalonePost(clientSidePostId).first() ?: return@launch
+
+            createPostService.retryCreatePost(
+                courseId = courseId,
+                conversationId = conversationId,
+                clientSidePostId = clientSidePostId,
+                content = post.content
+            )
+        }
+    }
+
     fun createReply(): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             val serverSideParentPostId =
@@ -621,6 +645,17 @@ internal open class ConversationViewModel(
             )
 
             null
+        }
+    }
+
+    fun retryCreateReply(clientPostId: String, content: String) {
+        viewModelScope.launch(coroutineContext) {
+            createPostService.retryCreatePost(
+                courseId = courseId,
+                conversationId = conversationId,
+                clientSidePostId = clientPostId,
+                content = content
+            )
         }
     }
 

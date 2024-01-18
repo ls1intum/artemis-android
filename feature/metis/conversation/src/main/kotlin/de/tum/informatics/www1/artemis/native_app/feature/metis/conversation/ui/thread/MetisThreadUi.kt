@@ -42,6 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -50,7 +51,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.P
 import kotlinx.coroutines.CompletableDeferred
 
 internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
-internal fun testTagForAnswerPost(answerPostId: Long) = "answerPost$answerPostId"
+internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
 
 /**
  * Displays a single post with its replies.
@@ -136,7 +137,8 @@ internal fun MetisThreadUi(
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
                                 onRequestDelete = onDeletePostDelegate,
-                                state = listState
+                                state = listState,
+                                onRequestRetrySend = viewModel::retryCreateReply
                             )
                         }
                     }
@@ -165,7 +167,8 @@ private fun PostAndRepliesList(
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
-    onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit
+    onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
+    onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
 ) {
     val rememberPostActions: @Composable (IBasePost) -> PostActions = { affectedPost: IBasePost ->
         rememberPostActions(
@@ -181,7 +184,13 @@ private fun PostAndRepliesList(
                     create
                 )
             },
-            onReplyInThread = null
+            onReplyInThread = null,
+            onRequestRetrySend = {
+                onRequestRetrySend(
+                    affectedPost.clientPostId ?: return@rememberPostActions,
+                    affectedPost.content.orEmpty()
+                )
+            }
         )
     }
 
@@ -223,7 +232,7 @@ private fun PostAndRepliesList(
                 PostWithBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag(testTagForAnswerPost(answerPost.serverPostId)),
+                        .testTag(testTagForAnswerPost(answerPost.clientPostId)),
                     post = answerPost,
                     postActions = postActions,
                     postItemViewType = PostItemViewType.ThreadAnswerItem,

@@ -53,4 +53,7 @@ data class StandalonePost(
     
     @Transient
     override val standalonePostId = id?.let(StandalonePostId::ServerSideId)
+
+    @Transient
+    override val clientPostId: String? = null
 }

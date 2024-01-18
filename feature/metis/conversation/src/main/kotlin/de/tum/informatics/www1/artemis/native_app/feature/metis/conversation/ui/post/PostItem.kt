@@ -31,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,18 +46,21 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
-import io.github.fornewid.placeholder.foundation.placeholder
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import org.koin.compose.koinInject
 
 private val EditedGray: Color
+    @Composable get() = Color.Gray
+
+private val UnsentMessageTextColor: Color
     @Composable get() = Color.Gray
 
 sealed class PostItemViewType {
@@ -84,7 +88,8 @@ internal fun PostItem(
     displayHeader: Boolean,
     onClickOnReaction: ((emojiId: String, create: Boolean) -> Unit)?,
     onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onLongClick: () -> Unit,
+    onRequestRetrySend: () -> Unit
 ) {
     val isPlaceholder = post == null
     val isExpanded = when (postItemViewType) {
@@ -92,17 +97,37 @@ internal fun PostItem(
         else -> false
     }
 
+    // Retrieve post status
+    val clientPostId = post?.clientPostId
+    val postStatus = when {
+        post == null || post.serverPostId != null || clientPostId == null -> CreatePostService.Status.FINISHED
+        else -> {
+            val createPostService: CreatePostService = koinInject()
+            createPostService.observeCreatePostWorkStatus(clientPostId)
+                .collectAsState(initial = CreatePostService.Status.PENDING)
+                .value
+        }
+    }
+
     Column(
         modifier = modifier
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
-            )
+            .let {
+                if (postStatus == CreatePostService.Status.FAILED) {
+                    it
+                        .background(color = MaterialTheme.colorScheme.errorContainer)
+                        .clickable(onClick = onRequestRetrySend)
+                } else Modifier
+                    .combinedClickable(
+                        onClick = onClick,
+                        onLongClick = onLongClick
+                    )
+            }
             .padding(PaddingValues(horizontal = Spacings.ScreenHorizontalSpacing)),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         PostHeadline(
             modifier = Modifier.fillMaxWidth(),
+            postStatus = postStatus,
             authorRole = post?.authorRole,
             authorName = post?.authorName,
             creationDate = post?.creationDate,
@@ -114,15 +139,21 @@ internal fun PostItem(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
+                    val textStyle = if (post?.serverPostId == null) {
+                        MaterialTheme.typography.bodyMedium.copy(color = UnsentMessageTextColor)
+                    } else MaterialTheme.typography.bodyMedium
+
                     MarkdownText(
                         markdown = remember(post?.content, isPlaceholder) {
                             if (isPlaceholder) {
                                 PlaceholderContent
                             } else post?.content.orEmpty()
                         },
-                        modifier = Modifier.fillMaxWidth().placeholder(visible = isPlaceholder),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .placeholder(visible = isPlaceholder),
                         maxLines = 5,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = textStyle,
                         onClick = onClick,
                         onLongClick = onLongClick
                     )
@@ -158,6 +189,7 @@ private fun PostHeadline(
     authorRole: UserRole?,
     authorName: String?,
     creationDate: Instant?,
+    postStatus: CreatePostService.Status,
     expanded: Boolean = false,
     displayHeader: Boolean = true,
     content: @Composable () -> Unit
@@ -185,13 +217,23 @@ private fun PostHeadline(
             modifier = modifier,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HeadlineAuthorIcon(authorRole, displayIcon = displayHeader)
+            val doDisplayHeader = displayHeader || postStatus == CreatePostService.Status.FAILED
+
+            HeadlineAuthorIcon(authorRole, displayIcon = doDisplayHeader)
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                if (displayHeader) {
+                if (postStatus == CreatePostService.Status.FAILED) {
+                    Text(
+                        text = stringResource(id = R.string.post_sending_failed),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                if (doDisplayHeader) {
                     HeadlineAuthorInfo(
                         modifier = Modifier.fillMaxWidth(),
                         authorName = authorName,

@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -22,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Clock
 
@@ -42,10 +42,7 @@ class SendConversationPostWorker(
 ) : BaseCreatePostWorker(appContext, params) {
 
     companion object {
-        /**
-         * Id of the post created on client side
-         */
-        const val KEY_CLIENT_SIDE_POST_ID = "client_side_post_id"
+
 
 
         private const val TAG = "ReplyWorker"
@@ -54,13 +51,11 @@ class SendConversationPostWorker(
     override suspend fun doWork(
         courseId: Long,
         conversationId: Long,
+        clientSidePostId: String,
         content: String,
         postType: PostType,
         parentPostId: Long?
     ): Result {
-        val clientSidePostId =
-            inputData.getString(KEY_CLIENT_SIDE_POST_ID) ?: return Result.failure()
-
         Log.d(TAG, "Starting send post to server. ClientSidePostId=$clientSidePostId")
 
         val getErrorReturnType: suspend () -> Result = if (runAttemptCount > 5) {

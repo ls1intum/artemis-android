@@ -6,6 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.BasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.flow.Flow
 
@@ -45,7 +46,12 @@ interface MetisStorageService {
      * Insert a post which has not been sent to the server yet and, thus, does nto have a server side post id yet.
      * @return the client side post id for future referencing or null if inserting the post failed.
      */
-    suspend fun insertClientSidePost(host: String, metisContext: MetisContext, post: BasePost): String?
+    suspend fun insertClientSidePost(
+        host: String,
+        metisContext: MetisContext,
+        post: BasePost,
+        clientSidePostId: String
+    )
 
     /**
      * Assigns a post previously created using [insertClientSidePost] a server side post. Therefore, the post will be transformed to a regular

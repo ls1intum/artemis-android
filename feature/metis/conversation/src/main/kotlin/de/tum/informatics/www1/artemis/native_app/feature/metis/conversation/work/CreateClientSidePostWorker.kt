@@ -37,6 +37,7 @@ class CreateClientSidePostWorker(
     override suspend fun doWork(
         courseId: Long,
         conversationId: Long,
+        clientSidePostId: String,
         content: String,
         postType: PostType,
         parentPostId: Long?
@@ -54,7 +55,7 @@ class CreateClientSidePostWorker(
             lastName = authorAccount.lastName
         )
 
-        val clientSidePostId = when (postType) {
+        when (postType) {
             PostType.POST -> {
                 metisStorageService.insertClientSidePost(
                     host = serverConfigurationService.host.first(),
@@ -67,7 +68,8 @@ class CreateClientSidePostWorker(
                         authorRole = null, // We do not know the role of the user here!
                         content = content,
                         creationDate = Clock.System.now()
-                    )
+                    ),
+                    clientSidePostId = clientSidePostId
                 )
             }
 
@@ -82,20 +84,14 @@ class CreateClientSidePostWorker(
                         authorRole = null,
                         post = StandalonePost(id = parentPostId),
                         creationDate = Clock.System.now()
-                    )
+                    ),
+                    clientSidePostId = clientSidePostId
                 )
             }
         }
 
-        if (clientSidePostId == null) {
-            Log.d(TAG, "Could not create client side post. Returned ClientSidePostId is null.")
-            return Result.failure()
-        }
+        Log.d(TAG, "Created client side post with id $clientSidePostId")
 
-        return Result.success(
-            Data.Builder()
-                .putString(SendConversationPostWorker.KEY_CLIENT_SIDE_POST_ID, clientSidePostId)
-                .build()
-        )
+        return Result.success()
     }
 }

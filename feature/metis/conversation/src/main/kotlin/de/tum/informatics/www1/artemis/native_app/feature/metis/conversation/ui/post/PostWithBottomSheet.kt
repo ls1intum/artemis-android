@@ -33,7 +33,8 @@ internal fun PostWithBottomSheet(
         onClick = onClick,
         onLongClick = {
             displayBottomSheet = true
-        }
+        },
+        onRequestRetrySend = postActions.onRequestRetrySend
     )
 
     if (displayBottomSheet && post != null) {

@@ -16,7 +16,7 @@ import kotlinx.datetime.Instant
 
 data class PostPojo(
     @ColumnInfo(name = "client_post_id")
-    val clientPostId: String,
+    override val clientPostId: String,
     @ColumnInfo(name = "server_post_id")
     override val serverPostId: Long?,
     @ColumnInfo(name = "title")
