@@ -11,7 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.wor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.defaultInternetWorkRequest
+import de.tum.informatics.www1.artemis.native_app.core.common.defaultInternetWorkRequest
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
@@ -36,47 +36,48 @@ class ReplyReceiver : BroadcastReceiver(), KoinComponent {
                     .toString()
 
             val parentId = intent.getLongExtra(PARENT_ID, 0)
-            val communicationType = CommunicationType.valueOf(intent.getStringExtra(COMMUNICATION_TYPE)) ?: return@let
+//            val communicationType = CommunicationType.valueOf(intent.getStringExtra(COMMUNICATION_TYPE)) ?: return@let
 
             val pushCommunicationDatabaseProvider: PushCommunicationDatabaseProvider = get()
 
 
-            val (metisContext: MetisContext, postId: Long) = pushCommunicationDatabaseProvider.database.withTransaction {
-                val communication =
-                    pushCommunicationDatabaseProvider.pushCommunicationDao.getCommunication(
-                        parentId,
-                        communicationType
-                    )
-
-                val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
-                    communication.type,
-                    communication.target
-                )
-                metisTarget.metisContext to metisTarget.postId
-            }
+//            val (metisContext: MetisContext, postId: Long) = pushCommunicationDatabaseProvider.database.withTransaction {
+//                val communication =
+//                    pushCommunicationDatabaseProvider.pushCommunicationDao.getCommunication(
+//                        parentId,
+//                        communicationType
+//                    )
+//
+//                val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
+//                    communication.type,
+//                    communication.target
+//                )
+//                metisTarget.metisContext to metisTarget.postId
+//            }
 
             if (response.isNotBlank()) {
-                val workRequest = defaultInternetWorkRequest<SendConversationPostWorker>(
-                    Data.Builder()
-                        .putLong(SendConversationPostWorker.KEY_CONVERSATION_ID, parentId)
-                        .putString(SendConversationPostWorker.KEY_COMMUNICATION_TYPE, communicationType)
-                        .putString(SendConversationPostWorker.KEY_CONTENT, response)
-                        .build()
-                )
-
-                WorkManager.getInstance(context)
-                    .enqueue(workRequest)
+                // TODO
+//                val workRequest = defaultInternetWorkRequest<SendConversationPostWorker>(
+//                    Data.Builder()
+//                        .putLong(SendConversationPostWorker.KEY_CONVERSATION_ID, parentId)
+//                        .putString(SendConversationPostWorker.KEY_COMMUNICATION_TYPE, communicationType)
+//                        .putString(SendConversationPostWorker.KEY_CONTENT, response)
+//                        .build()
+//                )
+//
+//                WorkManager.getInstance(context)
+//                    .enqueue(workRequest)
             }
 
             val communicationNotificationManager: CommunicationNotificationManager = get()
 
             // Repop the notification to tell the OS we handled the notification
-            runBlocking {
-                communicationNotificationManager.repopNotification(
-                    parentId = parentId,
-                    communicationType = CommunicationType.valueOf(communicationType)
-                )
-            }
+//            runBlocking {
+//                communicationNotificationManager.repopNotification(
+//                    parentId = parentId,
+//                    communicationType = CommunicationType.valueOf(communicationType)
+//                )
+//            }
         }
     }
 }

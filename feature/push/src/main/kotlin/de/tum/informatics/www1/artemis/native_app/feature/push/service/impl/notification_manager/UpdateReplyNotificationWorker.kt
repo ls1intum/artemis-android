@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.network.Acco
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.SendConversationPostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
@@ -21,12 +22,15 @@ class UpdateReplyNotificationWorker(
     private val accountService: AccountService,
     private val accountDataService: AccountDataService,
     private val communicationNotificationManager: CommunicationNotificationManager,
-) : CoroutineWorker(appContext, params) {
+) : BaseCreatePostWorker(appContext, params) {
 
-    override suspend fun doWork(): Result {
-        val conversationId = inputData.getLong(SendConversationPostWorker.KEY_CONVERSATION_ID, 0L)
-        val content = inputData.getString(SendConversationPostWorker.KEY_CONTENT) ?: return Result.failure()
-
+    override suspend fun doWork(
+        courseId: Long,
+        conversationId: Long,
+        content: String,
+        postType: PostType,
+        parentPostId: Long?
+    ): Result {
         val serverUrl = serverConfigurationService.serverUrl.first()
         val authToken = accountService.authToken.first()
 

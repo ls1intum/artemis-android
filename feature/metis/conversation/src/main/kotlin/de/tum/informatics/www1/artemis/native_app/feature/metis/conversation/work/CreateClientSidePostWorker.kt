@@ -1,7 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
@@ -22,28 +26,24 @@ class CreateClientSidePostWorker(
     params: WorkerParameters,
     private val metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,
-) : CoroutineWorker(appContext, params) {
+) : BaseCreatePostWorker(appContext, params) {
 
-    override suspend fun doWork(): Result {
-        val courseId: Long = inputData.getLong(SendConversationPostWorker.KEY_COURSE_ID, 0)
-        val conversationId: Long =
-            inputData.getLong(SendConversationPostWorker.KEY_CONVERSATION_ID, 0)
-        val content =
-            inputData.getString(SendConversationPostWorker.KEY_CONTENT) ?: return Result.failure()
-        val parentPostId = inputData.getLong(SendConversationPostWorker.KEY_PARENT_POST_ID, 0)
+    companion object {
+        private const val TAG = "CreateClientSidePostWorker"
+    }
 
-        val postType =
-            SendConversationPostWorker.Companion.PostType.valueOf(
-                inputData.getString(
-                    SendConversationPostWorker.KEY_POST_TYPE
-                ) ?: return Result.failure()
-            )
-
+    override suspend fun doWork(
+        courseId: Long,
+        conversationId: Long,
+        content: String,
+        postType: PostType,
+        parentPostId: Long?
+    ): Result {
         val author = User(username = "TODO", id = 0L)
         val userRole = UserRole.INSTRUCTOR
 
-        when (postType) {
-            SendConversationPostWorker.Companion.PostType.POST -> {
+        val clientSidePostId = when (postType) {
+            PostType.POST -> {
                 metisStorageService.insertClientSidePost(
                     host = serverConfigurationService.host.first(),
                     metisContext = MetisContext.Conversation(courseId, conversationId),
@@ -59,7 +59,7 @@ class CreateClientSidePostWorker(
                 )
             }
 
-            SendConversationPostWorker.Companion.PostType.ANSWER_POST -> {
+            PostType.ANSWER_POST -> {
                 metisStorageService.insertClientSidePost(
                     host = serverConfigurationService.host.first(),
                     metisContext = MetisContext.Conversation(courseId, conversationId),
@@ -75,6 +75,15 @@ class CreateClientSidePostWorker(
             }
         }
 
-        return Result.success()
+        if (clientSidePostId == null) {
+            Log.d(TAG, "Could not create client side post. Returned ClientSidePostId is null.")
+            return Result.failure()
+        }
+
+        return Result.success(
+            Data.Builder()
+                .putString(SendConversationPostWorker.KEY_CLIENT_SIDE_POST_ID, clientSidePostId)
+                .build()
+        )
     }
 }

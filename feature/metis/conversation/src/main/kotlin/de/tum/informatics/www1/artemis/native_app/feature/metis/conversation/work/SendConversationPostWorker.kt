@@ -39,38 +39,29 @@ class SendConversationPostWorker(
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val conversationService: ConversationService
-) : CoroutineWorker(appContext, params) {
+) : BaseCreatePostWorker(appContext, params) {
 
     companion object {
-        enum class PostType {
-            POST,
-            ANSWER_POST
-        }
-
-        const val KEY_POST_TYPE = "type"
-        const val KEY_COURSE_ID = "course_id"
-        const val KEY_CONVERSATION_ID = "conversation_id"
-        const val KEY_PARENT_POST_ID = "parent_post_id"
-        const val KEY_CONTENT = "content"
-
         /**
          * Id of the post created on client side
          */
         const val KEY_CLIENT_SIDE_POST_ID = "client_side_post_id"
 
+
         private const val TAG = "ReplyWorker"
     }
 
-    override suspend fun doWork(): Result {
-        val postType =
-            PostType.valueOf(inputData.getString(KEY_POST_TYPE) ?: return Result.failure())
-        val courseId: Long = inputData.getLong(KEY_COURSE_ID, 0)
-        val conversationId: Long = inputData.getLong(KEY_CONVERSATION_ID, 0)
-        val content = inputData.getString(KEY_CONTENT) ?: return Result.failure()
-        val parentPostId = inputData.getLong(KEY_PARENT_POST_ID, 0)
-
+    override suspend fun doWork(
+        courseId: Long,
+        conversationId: Long,
+        content: String,
+        postType: PostType,
+        parentPostId: Long?
+    ): Result {
         val clientSidePostId =
             inputData.getString(KEY_CLIENT_SIDE_POST_ID) ?: return Result.failure()
+
+        Log.d(TAG, "Starting send post to server. ClientSidePostId=$clientSidePostId")
 
         val getErrorReturnType: suspend () -> Result = if (runAttemptCount > 5) {
             {
@@ -106,6 +97,9 @@ class SendConversationPostWorker(
                     }
 
                     PostType.ANSWER_POST -> {
+                        // Must not be null!
+                        if (parentPostId == null) return Result.failure()
+
                         uploadAnswerPost(
                             courseId = courseId,
                             conversationId = conversationId,

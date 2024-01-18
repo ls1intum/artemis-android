@@ -14,7 +14,7 @@ import androidx.room.Index
  */
 @Entity(
     tableName = "metis_post_context",
-    primaryKeys = ["client_post_id", "server_post_id", "course_id", "conversation_id", "type"],
+    primaryKeys = ["client_post_id", "course_id", "conversation_id", "type"],
     foreignKeys = [
         ForeignKey(
             entity = BasePostingEntity::class,
