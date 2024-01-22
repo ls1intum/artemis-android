@@ -1,11 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import de.tum.informatics.www1.artemis.native_app.core.common.defaultInternetWorkRequest
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostConfigurationBlock
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.CreateClientSidePostWorker
@@ -14,16 +16,22 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.UUID
 
-class CreatePostServiceImpl(private val context: Context) : CreatePostService {
+internal class CreatePostServiceImpl(private val context: Context) : CreatePostService {
 
-    override fun createPost(courseId: Long, conversationId: Long, content: String) {
+    override fun createPost(
+        courseId: Long,
+        conversationId: Long,
+        content: String,
+        configure: CreatePostConfigurationBlock
+    ) {
         scheduleCreatePostWork(
             courseId = courseId,
             conversationId = conversationId,
             content = content,
             postType = BaseCreatePostWorker.PostType.POST,
             parentPostId = null,
-            clientSidePostId = null
+            clientSidePostId = null,
+            configure = configure
         )
     }
 
@@ -31,7 +39,8 @@ class CreatePostServiceImpl(private val context: Context) : CreatePostService {
         courseId: Long,
         conversationId: Long,
         parentPostId: Long,
-        content: String
+        content: String,
+        configure: CreatePostConfigurationBlock
     ) {
         scheduleCreatePostWork(
             courseId = courseId,
@@ -39,7 +48,8 @@ class CreatePostServiceImpl(private val context: Context) : CreatePostService {
             content = content,
             postType = BaseCreatePostWorker.PostType.ANSWER_POST,
             parentPostId = parentPostId,
-            clientSidePostId = null
+            clientSidePostId = null,
+            configure = configure
         )
     }
 
@@ -47,7 +57,8 @@ class CreatePostServiceImpl(private val context: Context) : CreatePostService {
         courseId: Long,
         conversationId: Long,
         clientSidePostId: String,
-        content: String
+        content: String,
+        configure: CreatePostConfigurationBlock
     ) {
         scheduleCreatePostWork(
             courseId = courseId,
@@ -55,7 +66,8 @@ class CreatePostServiceImpl(private val context: Context) : CreatePostService {
             content = content,
             postType = BaseCreatePostWorker.PostType.POST,
             parentPostId = null,
-            clientSidePostId = clientSidePostId
+            clientSidePostId = clientSidePostId,
+            configure = configure
         )
     }
 
@@ -64,7 +76,8 @@ class CreatePostServiceImpl(private val context: Context) : CreatePostService {
         conversationId: Long,
         parentPostId: Long,
         clientSidePostId: String,
-        content: String
+        content: String,
+        configure: CreatePostConfigurationBlock
     ) {
         scheduleCreatePostWork(
             courseId = courseId,
@@ -72,7 +85,8 @@ class CreatePostServiceImpl(private val context: Context) : CreatePostService {
             content = content,
             postType = BaseCreatePostWorker.PostType.POST,
             parentPostId = parentPostId,
-            clientSidePostId = clientSidePostId
+            clientSidePostId = clientSidePostId,
+            configure = configure
         )
     }
 
@@ -92,13 +106,15 @@ class CreatePostServiceImpl(private val context: Context) : CreatePostService {
             }
     }
 
+    @SuppressLint("EnqueueWork")
     private fun scheduleCreatePostWork(
         courseId: Long,
         conversationId: Long,
         content: String,
         postType: BaseCreatePostWorker.PostType,
         parentPostId: Long?,
-        clientSidePostId: String?
+        clientSidePostId: String?,
+        configure: CreatePostConfigurationBlock
     ) {
         val postId = clientSidePostId ?: UUID.randomUUID().toString()
 
@@ -127,6 +143,7 @@ class CreatePostServiceImpl(private val context: Context) : CreatePostService {
                     createPostRequest
                 )
                 .then(sendPostRequest)
+                .let { configure(it, postId) }
                 .enqueue()
         } else {
             WorkManager
@@ -136,6 +153,7 @@ class CreatePostServiceImpl(private val context: Context) : CreatePostService {
                     ExistingWorkPolicy.REPLACE,
                     sendPostRequest
                 )
+                .let { configure(it, postId) }
                 .enqueue()
         }
     }

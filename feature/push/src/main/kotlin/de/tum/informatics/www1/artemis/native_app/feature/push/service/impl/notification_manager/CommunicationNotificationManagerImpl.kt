@@ -9,17 +9,15 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.room.withTransaction
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PushNotificationArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PushNotificationArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ArtemisNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationMessageEntity
-import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.PushCommunicationEntity
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.communicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import kotlinx.datetime.Instant
@@ -42,16 +40,11 @@ internal class CommunicationNotificationManagerImpl(
             }
 
             val parentId = artemisNotification.parentId
-            val communicationType = artemisNotification.communicationType
 
-            val communication = dbProvider.pushCommunicationDao.getCommunication(
-                parentId,
-                communicationType
-            )
+            val communication = dbProvider.pushCommunicationDao.getCommunication(parentId)
 
             val messages = dbProvider.pushCommunicationDao.getCommunicationMessages(
-                parentId,
-                communicationType
+                parentId
             )
 
             communication to messages
@@ -67,35 +60,24 @@ internal class CommunicationNotificationManagerImpl(
      */
     override suspend fun addSelfMessage(
         parentId: Long,
-        type: CommunicationType,
         authorName: String,
         body: String,
         date: Instant
     ) {
-        dbProvider.pushCommunicationDao.insertSelfMessage(parentId, type, authorName, body, date)
-        repopNotification(parentId, type)
+        dbProvider.pushCommunicationDao.insertSelfMessage(parentId, authorName, body, date)
+        repopNotification(parentId)
     }
 
     override suspend fun repopNotification(
-        parentId: Long,
-        communicationType: CommunicationType
+        parentId: Long
     ) {
         val (communication, messages) = dbProvider.database.withTransaction {
-            if (!dbProvider.pushCommunicationDao.hasPushCommunication(
-                    parentId,
-                    communicationType
-                )
+            if (!dbProvider.pushCommunicationDao.hasPushCommunication(parentId)
             ) return@withTransaction null to null
 
-            val communication = dbProvider.pushCommunicationDao.getCommunication(
-                parentId,
-                communicationType
-            )
+            val communication = dbProvider.pushCommunicationDao.getCommunication(parentId)
 
-            val messages = dbProvider.pushCommunicationDao.getCommunicationMessages(
-                parentId,
-                communicationType
-            )
+            val messages = dbProvider.pushCommunicationDao.getCommunicationMessages(parentId)
 
             communication to messages
         }
@@ -109,16 +91,15 @@ internal class CommunicationNotificationManagerImpl(
         communication: PushCommunicationEntity,
         messages: List<CommunicationMessageEntity>
     ) {
-        val notificationChannel: ArtemisNotificationChannel = communication.type.notificationChannel
+        val notificationChannel: ArtemisNotificationChannel =
+            ArtemisNotificationChannel.CommunicationNotificationChannel
 
-        val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
-            communication.type,
-            communication.target
-        )
+        val metisTarget =
+            NotificationTargetManager.getCommunicationNotificationTarget(communication.target)
 
         val notification = NotificationCompat.Builder(context, notificationChannel.id)
             .setStyle(buildMessagingStyle(communication, messages))
-            .setSmallIcon(communication.type.notificationIcon)
+            .setSmallIcon(R.drawable.baseline_chat_bubble_24)
             .setAutoCancel(true)
             .setContentIntent(
                 NotificationTargetManager.getMetisContentIntent(
@@ -129,8 +110,7 @@ internal class CommunicationNotificationManagerImpl(
             .setDeleteIntent(
                 constructDeletionIntent(
                     context = context,
-                    parentId = communication.parentId,
-                    type = communication.type
+                    parentId = communication.parentId
                 )
             )
             .addAction(
@@ -147,16 +127,13 @@ internal class CommunicationNotificationManagerImpl(
     }
 
 
-    override suspend fun deleteCommunication(parentId: Long, type: CommunicationType) {
+    override suspend fun deleteCommunication(parentId: Long) {
         val notificationId = dbProvider.database.withTransaction {
-            if (!dbProvider.pushCommunicationDao.hasPushCommunication(
-                    parentId,
-                    type
-                )
+            if (!dbProvider.pushCommunicationDao.hasPushCommunication(parentId)
             ) return@withTransaction null
 
-            val communication = dbProvider.pushCommunicationDao.getCommunication(parentId, type)
-            dbProvider.pushCommunicationDao.deleteCommunication(parentId, type)
+            val communication = dbProvider.pushCommunicationDao.getCommunication(parentId)
+            dbProvider.pushCommunicationDao.deleteCommunication(parentId)
             communication.notificationId
         }
 
@@ -171,12 +148,8 @@ internal class CommunicationNotificationManagerImpl(
         communication: PushCommunicationEntity,
         messages: List<CommunicationMessageEntity>
     ): NotificationCompat.MessagingStyle {
-        val person = when (communication.type) {
-            CommunicationType.QNA_COURSE, CommunicationType.QNA_EXERCISE, CommunicationType.QNA_LECTURE, CommunicationType.ANNOUNCEMENT, CommunicationType.CONVERSATION -> {
-                val firstMessage = messages.first()
-                Person.Builder().setName(firstMessage.authorName).build()
-            }
-        }
+        val firstMessage = messages.first()
+        val person = Person.Builder().setName(firstMessage.authorName).build()
 
         val style = NotificationCompat.MessagingStyle(person)
         messages.forEach { message ->
@@ -191,46 +164,20 @@ internal class CommunicationNotificationManagerImpl(
             )
         }
 
-        when (communication.type) {
-            CommunicationType.QNA_COURSE, CommunicationType.QNA_EXERCISE, CommunicationType.QNA_LECTURE, CommunicationType.ANNOUNCEMENT, CommunicationType.CONVERSATION -> {
-                style.isGroupConversation = true
-                style.conversationTitle = when (communication.type) {
-                    CommunicationType.QNA_COURSE, CommunicationType.ANNOUNCEMENT -> context.getString(
-                        R.string.conversation_title_course_post,
-                        communication.courseTitle,
-                        communication.title
-                    )
-
-                    CommunicationType.QNA_EXERCISE -> context.getString(
-                        R.string.conversation_title_exercise_post,
-                        communication.courseTitle,
-                        communication.containerTitle,
-                        communication.title
-                    )
-
-                    CommunicationType.QNA_LECTURE -> context.getString(
-                        R.string.conversation_title_lecture_post,
-                        communication.courseTitle,
-                        communication.containerTitle,
-                        communication.title
-                    )
-
-                    CommunicationType.CONVERSATION -> if (communication.title != null) {
-                        context.getString(
-                            R.string.conversation_title_conversation_thread,
-                            communication.courseTitle,
-                            communication.containerTitle,
-                            communication.title
-                        )
-                    } else {
-                        context.getString(
-                            R.string.conversation_title_conversation,
-                            communication.courseTitle,
-                            communication.containerTitle
-                        )
-                    }
-                }
-            }
+        style.isGroupConversation = true
+        style.conversationTitle = if (communication.title != null) {
+            context.getString(
+                R.string.conversation_title_conversation_thread,
+                communication.courseTitle,
+                communication.containerTitle,
+                communication.title
+            )
+        } else {
+            context.getString(
+                R.string.conversation_title_conversation,
+                communication.courseTitle,
+                communication.containerTitle
+            )
         }
 
         return style
@@ -238,14 +185,12 @@ internal class CommunicationNotificationManagerImpl(
 
     private fun constructDeletionIntent(
         context: Context,
-        parentId: Long,
-        type: CommunicationType
+        parentId: Long
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
-        (type.ordinal shl 16) + (parentId % Int.MAX_VALUE).toInt(),
+        (parentId % Int.MAX_VALUE).toInt(),
         Intent(context, DeleteNotificationReceiver::class.java)
-            .putExtra(DeleteNotificationReceiver.PARENT_ID, parentId)
-            .putExtra(DeleteNotificationReceiver.COMMUNICATION_TYPE, type.name),
+            .putExtra(DeleteNotificationReceiver.PARENT_ID, parentId),
         PendingIntent.FLAG_IMMUTABLE
     )
 
@@ -265,10 +210,6 @@ internal class CommunicationNotificationManagerImpl(
                 putExtra(
                     ReplyReceiver.PARENT_ID,
                     communication.parentId
-                )
-                putExtra(
-                    ReplyReceiver.COMMUNICATION_TYPE,
-                    communication.type.name
                 )
             }
 
@@ -301,7 +242,7 @@ internal class CommunicationNotificationManagerImpl(
         return NotificationCompat.Action.Builder(
             R.drawable.baseline_mark_chat_read_24,
             context.getString(R.string.push_notification_action_mark_as_read),
-            constructDeletionIntent(context, communication.parentId, communication.type)
+            constructDeletionIntent(context, communication.parentId)
         )
             .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
             .build()

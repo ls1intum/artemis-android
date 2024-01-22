@@ -10,23 +10,21 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ConversationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.communicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import kotlinx.datetime.Instant
 
 @Dao
 interface PushCommunicationDao {
 
-    @Query("select exists(select * from push_communication where parent_id = :parentId and type = :type)")
-    suspend fun hasPushCommunication(parentId: Long, type: CommunicationType): Boolean
+    @Query("select exists(select * from push_communication where parent_id = :parentId)")
+    suspend fun hasPushCommunication(parentId: Long): Boolean
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPushCommunication(pushCommunicationEntity: PushCommunicationEntity)
 
-    @Query("update push_communication set course_title = :courseTitle, title = :title where parent_id = :parentId and type = :type")
+    @Query("update push_communication set course_title = :courseTitle, title = :title where parent_id = :parentId")
     suspend fun updatePushCommunication(
         parentId: Long,
-        type: CommunicationType,
         courseTitle: String,
         title: String?
     )
@@ -40,7 +38,6 @@ interface PushCommunicationDao {
         generateNotificationId: suspend () -> Int
     ) {
         val parentId = artemisNotification.parentId
-        val type = artemisNotification.communicationType
 
         val courseTitle: String = artemisNotification.notificationPlaceholders[0]
         val postTitle: String? = when (artemisNotification.type) {
@@ -84,12 +81,11 @@ interface PushCommunicationDao {
             ConversationNotificationType.CONVERSATION_NEW_REPLY_MESSAGE -> artemisNotification.notificationPlaceholders[7]
         }
 
-        if (hasPushCommunication(parentId, type)) {
-            updatePushCommunication(parentId, type, courseTitle, postTitle)
+        if (hasPushCommunication(parentId)) {
+            updatePushCommunication(parentId, courseTitle, postTitle)
         } else {
             val pushCommunicationEntity = PushCommunicationEntity(
                 parentId = parentId,
-                type = type,
                 notificationId = generateNotificationId(),
                 courseTitle = courseTitle,
                 containerTitle = containerTitle,
@@ -103,7 +99,6 @@ interface PushCommunicationDao {
         val message: CommunicationMessageEntity = when (artemisNotification.type) {
             is StandalonePostCommunicationNotificationType, ConversationNotificationType.CONVERSATION_NEW_MESSAGE -> CommunicationMessageEntity(
                 communicationParentId = parentId,
-                communicationType = type,
                 title = postTitle,
                 text = postContent,
                 authorName = postAuthor,
@@ -123,7 +118,6 @@ interface PushCommunicationDao {
 
                 CommunicationMessageEntity(
                     communicationParentId = parentId,
-                    communicationType = type,
                     title = null,
                     text = answerPostContent,
                     authorName = answerPostAuthor,
@@ -138,16 +132,14 @@ interface PushCommunicationDao {
     @Transaction
     suspend fun insertSelfMessage(
         parentId: Long,
-        type: CommunicationType,
         authorName: String,
         body: String,
         date: Instant
     ) {
-        if (hasPushCommunication(parentId, type)) {
+        if (hasPushCommunication(parentId)) {
             insertCommunicationMessage(
                 CommunicationMessageEntity(
                     communicationParentId = parentId,
-                    communicationType = type,
                     title = null,
                     text = body,
                     authorName = authorName,
@@ -157,15 +149,14 @@ interface PushCommunicationDao {
         }
     }
 
-    @Query("select * from push_communication where parent_id = :parentId and type = :type")
-    suspend fun getCommunication(parentId: Long, type: CommunicationType): PushCommunicationEntity
+    @Query("select * from push_communication where parent_id = :parentId")
+    suspend fun getCommunication(parentId: Long): PushCommunicationEntity
 
-    @Query("select * from push_communication_message where communication_parent_id = :parentId and communication_type = :type order by id asc")
+    @Query("select * from push_communication_message where communication_parent_id = :parentId order by id asc")
     suspend fun getCommunicationMessages(
-        parentId: Long,
-        type: CommunicationType
+        parentId: Long
     ): List<CommunicationMessageEntity>
 
-    @Query("delete from push_communication where parent_id = :parentId and type = :type")
-    suspend fun deleteCommunication(parentId: Long, type: CommunicationType)
+    @Query("delete from push_communication where parent_id = :parentId")
+    suspend fun deleteCommunication(parentId: Long)
 }

@@ -8,7 +8,6 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
-import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Clock
@@ -46,7 +45,6 @@ class UpdateReplyNotificationWorker(
 
                 communicationNotificationManager.addSelfMessage(
                     parentId = conversationId,
-                    type = CommunicationType.CONVERSATION,
                     authorName = authorName,
                     body = content,
                     date = Clock.System.now()

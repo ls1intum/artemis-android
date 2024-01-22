@@ -1,33 +1,19 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push
 
-import android.util.Base64
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextReporter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.communicationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationCipher
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationHandler
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.NotificationTargetManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import org.koin.android.ext.android.get
 import java.security.NoSuchAlgorithmException
 import javax.crypto.Cipher
 import javax.crypto.NoSuchPaddingException
-import javax.crypto.SecretKey
-import javax.crypto.spec.IvParameterSpec
 
 class ArtemisFirebaseMessagingService : FirebaseMessagingService() {
 
