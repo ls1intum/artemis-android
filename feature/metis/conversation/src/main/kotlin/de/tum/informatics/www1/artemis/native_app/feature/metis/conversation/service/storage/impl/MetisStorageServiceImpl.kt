@@ -20,9 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entiti
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.PostReactionEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostTagEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostingEntity
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
 import java.util.UUID
@@ -165,18 +163,11 @@ internal class MetisStorageServiceImpl(
     override suspend fun insertOrUpdatePosts(
         host: String,
         metisContext: MetisContext,
-        posts: List<StandalonePost>,
-        clearPreviousPosts: Boolean
+        posts: List<StandalonePost>
     ) {
         val metisDao = databaseProvider.metisDao
 
         databaseProvider.database.withTransaction {
-            if (clearPreviousPosts) {
-                metisDao.clearAll(
-                    host
-                )
-            }
-
             insertOrUpdateImpl(posts, metisDao, host, metisContext)
         }
     }
@@ -624,12 +615,14 @@ internal class MetisStorageServiceImpl(
 
     override fun getLatestKnownPost(
         serverId: String,
-        metisContext: MetisContext
+        metisContext: MetisContext,
+        allowClientSidePost: Boolean
     ): Flow<PostPojo?> {
         return databaseProvider.metisDao.queryLatestKnownPost(
             serverId = serverId,
             courseId = metisContext.courseId,
-            conversationId = metisContext.conversationId
+            conversationId = metisContext.conversationId,
+            allowClientSidePost = allowClientSidePost
         )
     }
 

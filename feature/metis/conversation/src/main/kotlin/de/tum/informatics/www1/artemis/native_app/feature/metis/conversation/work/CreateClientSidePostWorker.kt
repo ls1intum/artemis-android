@@ -51,6 +51,7 @@ class CreateClientSidePostWorker(
         val author = User(
             username = authorAccount.username,
             name = authorAccount.name,
+            id = authorAccount.id,
             firstName = authorAccount.firstName,
             lastName = authorAccount.lastName
         )

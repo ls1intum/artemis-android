@@ -6,7 +6,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.BasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.flow.Flow
 
@@ -19,14 +18,11 @@ interface MetisStorageService {
     /**
      * Permanently store the given posts. If a post with an identical id already exists, the existing post is updated.
      * The answer posts are also updated by either being inserted or updated.
-     *
-     * @param clearPreviousPosts if all posts matching the context should be cleared before anything being inserted.
      */
     suspend fun insertOrUpdatePosts(
         host: String,
         metisContext: MetisContext,
-        posts: List<StandalonePost>,
-        clearPreviousPosts: Boolean
+        posts: List<StandalonePost>
     )
 
     /**
@@ -86,7 +82,11 @@ interface MetisStorageService {
         metisContext: MetisContext
     ): PagingSource<Int, PostPojo>
 
-    fun getLatestKnownPost(serverId: String, metisContext: MetisContext): Flow<PostPojo?>
+    fun getLatestKnownPost(
+        serverId: String,
+        metisContext: MetisContext,
+        allowClientSidePost: Boolean
+    ): Flow<PostPojo?>
 
     /**
      * Query the given post with the given client post id.

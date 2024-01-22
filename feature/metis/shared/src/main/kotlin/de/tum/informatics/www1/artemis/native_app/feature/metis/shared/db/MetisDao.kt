@@ -147,7 +147,7 @@ interface MetisDao {
 
     @Query("""
         delete from metis_post_context where metis_post_context.server_id = :host and metis_post_context.course_id = :courseId and metis_post_context.conversation_id = :conversationId 
-            and metis_post_context.server_post_id not in (:serverIds) and metis_post_context.type = :postingType
+            and metis_post_context.server_post_id not in (:serverIds) and metis_post_context.server_post_id is not null and metis_post_context.type = :postingType
             and exists (
                 select * from postings p where p.creation_date > :startInstant and p.creation_date < :endInstant and 
                 p.id = metis_post_context.client_post_id
@@ -288,14 +288,16 @@ interface MetisDao {
                 p.type = 'STANDALONE' and
                 sp.post_id = p.id and
                 u.server_id = mpc.server_id and
-                u.id = p.author_id
+                u.id = p.author_id and
+                (:allowClientSidePost or mpc.server_post_id is not null)
             order by p.creation_date desc
             limit 1
     """)
     fun queryLatestKnownPost(
         serverId: String,
         courseId: Long,
-        conversationId: Long
+        conversationId: Long,
+        allowClientSidePost: Boolean
     ): Flow<PostPojo?>
 
     @Transaction
