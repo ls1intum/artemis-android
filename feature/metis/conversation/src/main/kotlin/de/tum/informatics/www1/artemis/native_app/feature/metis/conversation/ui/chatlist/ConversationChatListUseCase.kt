@@ -264,14 +264,6 @@ class ConversationChatListUseCase(
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    init {
-        viewModelScope.launch(coroutineContext) {
-            onRequestSoftReload.collect {
-
-            }
-        }
-    }
-
     fun updateQuery(new: String) {
         _query.value = new.ifEmpty { null }
     }

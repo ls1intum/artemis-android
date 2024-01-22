@@ -139,10 +139,6 @@ internal fun PostItem(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    val textStyle = if (post?.serverPostId == null) {
-                        MaterialTheme.typography.bodyMedium.copy(color = UnsentMessageTextColor)
-                    } else MaterialTheme.typography.bodyMedium
-
                     MarkdownText(
                         markdown = remember(post?.content, isPlaceholder) {
                             if (isPlaceholder) {
@@ -153,9 +149,10 @@ internal fun PostItem(
                             .fillMaxWidth()
                             .placeholder(visible = isPlaceholder),
                         maxLines = 5,
-                        style = textStyle,
+                        style = MaterialTheme.typography.bodyMedium,
                         onClick = onClick,
-                        onLongClick = onLongClick
+                        onLongClick = onLongClick,
+                        color = if (post?.serverPostId == null) UnsentMessageTextColor else Color.Unspecified
                     )
 
                     if (post?.updatedDate != null) {

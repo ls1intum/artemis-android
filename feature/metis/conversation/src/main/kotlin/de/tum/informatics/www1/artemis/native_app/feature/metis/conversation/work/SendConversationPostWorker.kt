@@ -42,9 +42,6 @@ class SendConversationPostWorker(
 ) : BaseCreatePostWorker(appContext, params) {
 
     companion object {
-
-
-
         private const val TAG = "ReplyWorker"
     }
 
@@ -57,6 +54,8 @@ class SendConversationPostWorker(
         parentPostId: Long?
     ): Result {
         Log.d(TAG, "Starting send post to server. ClientSidePostId=$clientSidePostId")
+
+        delay(3000)
 
         val getErrorReturnType: suspend () -> Result = if (runAttemptCount > 5) {
             {

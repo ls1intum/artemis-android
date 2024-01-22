@@ -311,10 +311,10 @@ internal class MetisStorageServiceImpl(
                 metisContext.conversationId
             )
 
-            if (doesPostAlreadyExist) {
-                // TODO
-                metisDao.deletePostsOlderThanThreshold()
-            }
+//            if (doesPostAlreadyExist) {
+//                // TODO
+//                metisDao.deletePostsOlderThanThreshold()
+//            }
 
             metisDao.upgradePost(
                 clientSidePostId = clientSidePostId,
