@@ -607,7 +607,7 @@ internal open class ConversationViewModel(
     fun createPost(): Deferred<MetisModificationFailure?> {
         createPostService.createPost(courseId, conversationId, newMessageText.value.text)
 
-        return CompletableDeferred(null)
+        return CompletableDeferred(value = null)
     }
 
     fun retryCreatePost(standalonePostId: StandalonePostId) {

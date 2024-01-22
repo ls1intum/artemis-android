@@ -65,6 +65,14 @@ interface MetisDao {
         conversationId: Long
     ): Boolean
 
+    @Query("select exists(select * from metis_post_context where server_post_id = :serverPostId and course_id = :courseId and conversation_id = :conversationId and server_id = :serverId)")
+    suspend fun isPostPresentInContext(
+        serverId: String,
+        serverPostId: Long,
+        courseId: Long,
+        conversationId: Long
+    ): Boolean
+
     @Update
     suspend fun updateBasePost(post: BasePostingEntity)
 
@@ -130,6 +138,11 @@ interface MetisDao {
         host: String,
         serverPostIds: List<Long>,
         postingType: BasePostingEntity.PostingType = BasePostingEntity.PostingType.STANDALONE
+    )
+
+    @Query("delete from metis_post_context where client_post_id = :clientPostId")
+    suspend fun deletePostingWithClientSideId(
+        clientPostId: String
     )
 
     @Query("""

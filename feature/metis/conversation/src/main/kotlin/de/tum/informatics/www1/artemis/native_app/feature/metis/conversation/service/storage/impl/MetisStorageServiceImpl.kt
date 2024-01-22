@@ -22,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entiti
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
 import java.util.UUID
@@ -305,16 +306,18 @@ internal class MetisStorageServiceImpl(
 
         databaseProvider.database.withTransaction {
             val doesPostAlreadyExist = metisDao.isPostPresentInContext(
-                clientSidePostId,
-                post.id ?: return@withTransaction,
-                metisContext.courseId,
-                metisContext.conversationId
+                serverId = host,
+                serverPostId = post.id ?: return@withTransaction,
+                courseId = metisContext.courseId,
+                conversationId = metisContext.conversationId
             )
 
-//            if (doesPostAlreadyExist) {
-//                // TODO
-//                metisDao.deletePostsOlderThanThreshold()
-//            }
+            // In rare cases, the websocket connection already inserted the post. In that case, we can delete the client side post
+            if (doesPostAlreadyExist) {
+                // instead of upgrading, we delete the client side post
+                metisDao.deletePostingWithClientSideId(clientPostId = clientSidePostId)
+                return@withTransaction
+            }
 
             metisDao.upgradePost(
                 clientSidePostId = clientSidePostId,

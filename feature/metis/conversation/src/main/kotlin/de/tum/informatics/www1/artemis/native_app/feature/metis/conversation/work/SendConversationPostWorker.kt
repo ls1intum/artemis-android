@@ -55,8 +55,6 @@ class SendConversationPostWorker(
     ): Result {
         Log.d(TAG, "Starting send post to server. ClientSidePostId=$clientSidePostId")
 
-        delay(3000)
-
         val getErrorReturnType: suspend () -> Result = if (runAttemptCount > 5) {
             {
                 popFailureNotification(postType, content)
