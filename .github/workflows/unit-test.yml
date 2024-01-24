@@ -10,9 +10,7 @@ on:
 jobs:
   jUnit:
     name: JUnit Tests
-    runs-on:
-      labels: self-hosted
-      group: ase-large-android-sdk-34
+    runs-on: [self-hosted, ase-large-android-sdk-34]
     timeout-minutes: 60
 
     steps:
