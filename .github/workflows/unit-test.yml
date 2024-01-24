@@ -17,6 +17,9 @@ jobs:
       - name: Set Android Sdk Env
         run: export ANDROID_HOME=/usr/lib/android-sdk
 
+      - name: Print Android Sdk
+        run: ls /usr/lib/android-sdk
+
       - uses: actions/checkout@v4
 
       - name: Gradle Wrapper Verification
