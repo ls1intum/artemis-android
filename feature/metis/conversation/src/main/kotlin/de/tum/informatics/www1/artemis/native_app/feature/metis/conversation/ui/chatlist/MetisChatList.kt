@@ -27,11 +27,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
-import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
@@ -40,7 +38,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisOutdatedBanner
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
@@ -60,38 +59,39 @@ internal fun testTagForPost(postId: Long) = "post$postId"
 @Composable
 internal fun MetisChatList(
     modifier: Modifier,
-    viewModel: MetisListViewModel,
+    viewModel: ConversationViewModel,
+    posts: LazyPagingItems<ChatListItem>,
     listContentPadding: PaddingValues,
     state: LazyListState = rememberLazyListState(),
     isReplyEnabled: Boolean = true,
-    onClickViewPost: (clientPostId: String) -> Unit
+    onClickViewPost: (StandalonePostId) -> Unit
 ) {
-    val metisContext by viewModel.currentMetisContext.collectAsState()
-
-    ReportVisibleMetisContext(remember(metisContext) { VisiblePostList(metisContext) })
-
-    val posts: LazyPagingItems<ChatListItem> = viewModel.postPagingData.collectAsLazyPagingItems()
-    val isDataOutdated by viewModel.isDataOutdated.collectAsState(initial = false)
+    ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
 
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
 
+    val serverUrl by viewModel.serverUrl.collectAsState()
+
+    val bottomItem: PostPojo? by viewModel.chatListUseCase.bottomPost.collectAsState()
+
     MetisChatList(
         modifier = modifier,
         initialReplyTextProvider = viewModel,
-        state = state,
-        isReplyEnabled = isReplyEnabled,
         posts = posts.asPostsDataState(),
-        isDataOutdated = isDataOutdated,
         clientId = clientId,
         hasModerationRights = hasModerationRights,
         listContentPadding = listContentPadding,
+        serverUrl = serverUrl,
+        courseId = viewModel.courseId,
+        state = state,
+        bottomItem = bottomItem,
+        isReplyEnabled = isReplyEnabled,
         onCreatePost = viewModel::createPost,
         onEditPost = viewModel::editPost,
         onDeletePost = viewModel::deletePost,
         onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
-        onClickViewPost = onClickViewPost,
-        onRequestReload = viewModel::requestReload
+        onClickViewPost = onClickViewPost
     )
 }
 
@@ -100,18 +100,19 @@ fun MetisChatList(
     modifier: Modifier,
     initialReplyTextProvider: InitialReplyTextProvider,
     posts: PostsDataState,
-    isDataOutdated: Boolean,
+    bottomItem: PostPojo?,
     clientId: Long,
     hasModerationRights: Boolean,
     listContentPadding: PaddingValues,
+    serverUrl: String,
+    courseId: Long,
     state: LazyListState,
     isReplyEnabled: Boolean,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
-    onEditPost: (PostPojo, String) -> Deferred<MetisModificationFailure?>,
-    onDeletePost: (PostPojo) -> Deferred<MetisModificationFailure?>,
-    onRequestReactWithEmoji: (PostPojo, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
-    onClickViewPost: (clientPostId: String) -> Unit,
-    onRequestReload: () -> Unit
+    onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
+    onDeletePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
+    onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
+    onClickViewPost: (StandalonePostId) -> Unit
 ) {
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
@@ -121,12 +122,6 @@ fun MetisChatList(
         onRequestReactWithEmoji = onRequestReactWithEmoji
     ) { replyMode, onEditPostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, updateFailureStateDelegate ->
         Column(modifier = modifier) {
-            MetisOutdatedBanner(
-                modifier = Modifier.fillMaxWidth(),
-                isOutdated = isDataOutdated,
-                requestRefresh = onRequestReload
-            )
-
             val informationModifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
@@ -135,10 +130,12 @@ fun MetisChatList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
+                serverUrl = serverUrl,
+                courseId = courseId,
                 state = state,
                 itemCount = posts.itemCount,
                 order = DisplayPostOrder.REVERSED,
-                getItem = posts::peek
+                bottomItem = bottomItem
             ) {
                 when (posts) {
                     PostsDataState.Empty -> {
@@ -159,24 +156,20 @@ fun MetisChatList(
                     }
 
                     is PostsDataState.Loaded -> {
-                        ProvideMarkwon {
-                            ProvideEmojis {
-                                ChatList(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .testTag(TEST_TAG_METIS_POST_LIST),
-                                    listContentPadding = listContentPadding,
-                                    state = state,
-                                    posts = posts,
-                                    clientId = clientId,
-                                    onClickViewPost = onClickViewPost,
-                                    hasModerationRights = hasModerationRights,
-                                    onRequestEdit = onEditPostDelegate,
-                                    onRequestDelete = onDeletePostDelegate,
-                                    onRequestReactWithEmoji = onRequestReactWithEmojiDelegate
-                                )
-                            }
-                        }
+                        ChatList(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .testTag(TEST_TAG_METIS_POST_LIST),
+                            listContentPadding = listContentPadding,
+                            state = state,
+                            posts = posts,
+                            clientId = clientId,
+                            onClickViewPost = onClickViewPost,
+                            hasModerationRights = hasModerationRights,
+                            onRequestEdit = onEditPostDelegate,
+                            onRequestDelete = onDeletePostDelegate,
+                            onRequestReactWithEmoji = onRequestReactWithEmojiDelegate
+                        )
                     }
                 }
             }
@@ -200,11 +193,13 @@ private fun ChatList(
     posts: PostsDataState.Loaded,
     hasModerationRights: Boolean,
     clientId: Long,
-    onClickViewPost: (clientPostId: String) -> Unit,
-    onRequestEdit: (PostPojo) -> Unit,
-    onRequestDelete: (PostPojo) -> Unit,
-    onRequestReactWithEmoji: (PostPojo, emojiId: String, create: Boolean) -> Unit
+    onClickViewPost: (StandalonePostId) -> Unit,
+    onRequestEdit: (IStandalonePost) -> Unit,
+    onRequestDelete: (IStandalonePost) -> Unit,
+    onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit
 ) {
+    println("POSTS: ${posts}")
+
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -239,9 +234,7 @@ private fun ChatList(
                             onRequestReactWithEmoji(post ?: return@rememberPostActions, id, create)
                         },
                         onReplyInThread = {
-                            onClickViewPost(
-                                post?.clientPostId ?: return@rememberPostActions
-                            )
+                            onClickViewPost(post?.standalonePostId ?: return@rememberPostActions)
                         }
                     )
 
@@ -256,9 +249,7 @@ private fun ChatList(
                         post = post,
                         clientId = clientId,
                         postItemViewType = remember(post?.answers) {
-                            PostItemViewType.ChatListItem(
-                                post?.answers.orEmpty()
-                            )
+                            PostItemViewType.ChatListItem(post?.answers.orEmpty())
                         },
                         postActions = postActions,
                         displayHeader = shouldDisplayHeader(
@@ -275,7 +266,7 @@ private fun ChatList(
                         ),
                         onClick = {
                             if (post != null) {
-                                onClickViewPost(post.clientPostId)
+                                onClickViewPost(post.standalonePostId)
                             }
                         }
                     )

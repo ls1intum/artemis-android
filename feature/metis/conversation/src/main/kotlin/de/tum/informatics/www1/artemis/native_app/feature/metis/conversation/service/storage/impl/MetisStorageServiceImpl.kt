@@ -3,8 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
@@ -152,15 +150,13 @@ internal class MetisStorageServiceImpl(
             MetisPostContextEntity(
                 serverId = serverId,
                 courseId = courseId,
-                exerciseId = exerciseId,
-                lectureId = lectureId,
+                conversationId = conversationId,
                 serverPostId = serverSidePostId,
                 clientPostId = clientSidePostId,
                 postingType = postingType
             )
 
-        private val MetisContext.lectureId: Long get() = if (this is MetisContext.Lecture) lectureId else -1
-        private val MetisContext.exerciseId: Long get() = if (this is MetisContext.Exercise) exerciseId else -1
+        private val MetisContext.conversationId: Long get() = if (this is MetisContext.Conversation) conversationId else -1
     }
 
     override suspend fun insertOrUpdatePosts(
@@ -178,21 +174,74 @@ internal class MetisStorageServiceImpl(
                 )
             }
 
-            // Extract the db entities from the network entities. With the schema invalid entities are discarded.
-            for (sp in posts) {
-                val queryClientPostId = metisDao.queryClientPostId(
-                    serverId = host,
-                    postId = sp.id ?: continue,
-                    postingType = BasePostingEntity.PostingType.STANDALONE
-                )
+            insertOrUpdateImpl(posts, metisDao, host, metisContext)
+        }
+    }
 
-                insertOrUpdatePost(
-                    metisDao,
-                    host,
-                    metisContext,
-                    queryClientPostId,
-                    sp,
-                    isLiveCreated = false
+    /**
+     * Inserts or updates the posts in the given list.
+     */
+    private suspend fun insertOrUpdateImpl(
+        posts: List<StandalonePost>,
+        metisDao: MetisDao,
+        host: String,
+        metisContext: MetisContext
+    ) {
+        // Extract the db entities from the network entities. With the schema invalid entities are discarded.
+        for (sp in posts) {
+            val queryClientPostId = metisDao.queryClientPostId(
+                serverId = host,
+                postId = sp.id ?: continue,
+                postingType = BasePostingEntity.PostingType.STANDALONE
+            )
+
+            insertOrUpdatePost(
+                metisDao,
+                host,
+                metisContext,
+                queryClientPostId,
+                sp,
+                isLiveCreated = false
+            )
+        }
+    }
+
+    override suspend fun insertOrUpdatePostsAndRemoveDeletedPosts(
+        host: String,
+        metisContext: MetisContext,
+        posts: List<StandalonePost>,
+        removeAllOlderPosts: Boolean
+    ) {
+        val metisDao = databaseProvider.metisDao
+
+        // We do not have to do anything
+        if (posts.isEmpty()) return
+
+        val sortedByDate = posts
+            .sortedByDescending { it.creationDate }
+
+        val oldestPost = sortedByDate.last()
+        val newestPost = sortedByDate.first()
+
+        databaseProvider.database.withTransaction {
+            insertOrUpdateImpl(posts, metisDao, host, metisContext)
+
+            // Remove posts that do no longer exist.
+            metisDao.deleteSuperfluousPostsInTimeInterval(
+                host = host,
+                courseId = metisContext.courseId,
+                conversationId = metisContext.conversationId,
+                serverIds = posts.map { it.serverPostId },
+                startInstant = oldestPost.creationDate,
+                endInstant = newestPost.creationDate
+            )
+
+            if (removeAllOlderPosts) {
+                metisDao.deletePostsOlderThanThreshold(
+                    host = host,
+                    courseId = metisContext.courseId,
+                    conversationId = metisContext.conversationId,
+                    threshold = oldestPost.creationDate
                 )
             }
         }
@@ -303,8 +352,7 @@ internal class MetisStorageServiceImpl(
                 queryClientPostId,
                 standalonePostId,
                 courseId = postMetisContext.courseId,
-                exerciseId = postMetisContext.exerciseId,
-                lectureId = postMetisContext.lectureId
+                conversationId = metisContext.conversationId
             )
 
             if (!isPostPresent) {
@@ -416,21 +464,23 @@ internal class MetisStorageServiceImpl(
 
     override fun getStoredPosts(
         serverId: String,
-        clientId: Long,
-        filter: List<MetisFilter>,
-        sortingStrategy: MetisSortingStrategy,
-        query: String?,
         metisContext: MetisContext
     ): PagingSource<Int, PostPojo> {
         return databaseProvider.metisDao.queryCoursePosts(
             serverId = serverId,
-            clientId = clientId,
             courseId = metisContext.courseId,
-            exerciseId = metisContext.exerciseId,
-            lectureId = metisContext.lectureId,
-            metisFilter = filter,
-            metisSortingStrategy = sortingStrategy,
-            query = query
+            conversationId = metisContext.conversationId
+        )
+    }
+
+    override fun getLatestKnownPost(
+        serverId: String,
+        metisContext: MetisContext
+    ): Flow<PostPojo?> {
+        return databaseProvider.metisDao.queryLatestKnownPost(
+            serverId = serverId,
+            courseId = metisContext.courseId,
+            conversationId = metisContext.conversationId
         )
     }
 
@@ -442,8 +492,7 @@ internal class MetisStorageServiceImpl(
         return databaseProvider.metisDao.queryContextPostCountNoLiveCreated(
             host,
             metisContext.courseId,
-            metisContext.exerciseId,
-            metisContext.lectureId
+            metisContext.conversationId
         )
     }
 

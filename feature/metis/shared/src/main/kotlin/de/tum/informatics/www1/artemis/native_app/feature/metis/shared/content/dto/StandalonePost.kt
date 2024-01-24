@@ -1,8 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto
 
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -12,7 +14,7 @@ data class StandalonePost(
     override val id: Long?,
     override val author: User? = null,
     override val authorRole: UserRole? = null,
-    override val creationDate: Instant? = null,
+    override val creationDate: Instant = Clock.System.now(),
     override val updatedDate: Instant? = null,
     override val content: String = "",
     override val reactions: List<Reaction>? = null,
@@ -45,4 +47,10 @@ data class StandalonePost(
 
     @Transient
     override val serverPostId: Long = id ?: 0L
+
+    @Transient
+    override val key: Any = id ?: hashCode()
+    
+    @Transient
+    override val standalonePostId = StandalonePostId.ServerSideId(serverPostId)
 }

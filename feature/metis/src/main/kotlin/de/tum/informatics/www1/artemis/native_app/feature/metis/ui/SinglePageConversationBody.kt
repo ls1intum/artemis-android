@@ -2,32 +2,15 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
 
 import android.os.Parcelable
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisStandalonePostScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.browse_channels.BrowseChannelsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.CreateChannelScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.CreatePersonalConversationScreen
@@ -35,10 +18,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.ConversationAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.ConversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import kotlinx.parcelize.Parcelize
-
-private const val ConversationOverviewMaxWeight = 0.3f
-private val ConversationOverviewMaxWidth = 600.dp
 
 @Composable
 internal fun SinglePageConversationBody(
@@ -64,6 +45,8 @@ internal fun SinglePageConversationBody(
             is CreatePersonalConversation -> configuration = config.prevConfiguration
             is OpenedConversation -> configuration =
                 if (config.openedThread != null) config.copy(openedThread = null) else NothingOpened
+
+            is NavigateToUserConversation -> configuration = NothingOpened
             NothingOpened -> {}
         }
     }
@@ -82,132 +65,37 @@ internal fun SinglePageConversationBody(
         )
     }
 
-    val StandalonePost: @Composable (Modifier, OpenedConversation, OpenedThread) -> Unit =
-        { m, parent, openedThread ->
-            val metisContext = remember(openedThread) {
-                MetisContext.Conversation(courseId, openedThread.conversationId)
-            }
-
-            key(metisContext, openedThread) {
-                MetisStandalonePostScreen(
-                    modifier = m,
-                    standalonePostId = openedThread.postId,
-                    metisContext = metisContext,
-                    onNavigateUp = {
-                        configuration = OpenedConversation(parent.conversationId, null)
-                    }
-                )
-            }
-        }
-
-    val ConversationDetails: @Composable (Modifier, OpenedConversation, canNavigateBack: Boolean) -> Unit =
-        { m, conf, canNavigateBack ->
-            key(conf.conversationId) {
-                ConversationScreen(
-                    modifier = m,
-                    courseId = courseId,
-                    conversationId = conf.conversationId,
-                    onNavigateBack = if (canNavigateBack) {
-                        {
-                            configuration = NothingOpened
-                        }
-                    } else null,
-                    onNavigateToSettings = {
-                        configuration = ConversationSettings(conf.conversationId, conf)
-                    },
-                    onClickViewPost = {
-                        configuration = OpenedConversation(
-                            conf.conversationId,
-                            OpenedThread(conf.conversationId, StandalonePostId.ClientSideId(it))
-                        )
-                    }
-                )
-            }
-        }
-
     when (val config = configuration) {
         NothingOpened -> {
             ConversationOverview(modifier)
         }
 
         is OpenedConversation -> {
-            val widthSizeClass = getWindowSizeClass().widthSizeClass
-
-            when {
-                widthSizeClass <= WindowWidthSizeClass.Compact -> {
-                    if (config.openedThread != null) {
-                        StandalonePost(
-                            modifier,
-                            config,
-                            config.openedThread
-                        )
-                    } else {
-                        ConversationDetails(
-                            modifier,
-                            config,
-                            true
-                        )
-                    }
-                }
-
-                else -> {
-                    val arrangement = Arrangement.spacedBy(8.dp)
-
-                    Row(
-                        modifier = modifier,
-                        horizontalArrangement = arrangement
-                    ) {
-                        val isOverviewVisible =
-                            config.openedThread == null || widthSizeClass >= WindowWidthSizeClass.Expanded
-                        AnimatedVisibility(
-                            modifier = Modifier
-                                .weight(ConversationOverviewMaxWeight)
-                                .widthIn(max = ConversationOverviewMaxWidth)
-                                .fillMaxHeight(),
-                            visible = isOverviewVisible
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalArrangement = arrangement
-                            ) {
-                                ConversationOverview(
-                                    Modifier
-                                        .weight(1f)
-                                        .fillMaxHeight()
-                                )
-
-                                VerticalDivider()
-                            }
-                        }
-
-                        val otherWeight = when {
-                            isOverviewVisible && config.openedThread != null -> 0.35f
-                            isOverviewVisible && config.openedThread == null -> 0.7f
-                            else -> 0.5f
-                        }
-
-                        val otherModifier = Modifier
-                            .weight(otherWeight)
-                            .fillMaxHeight()
-
-                        ConversationDetails(
-                            otherModifier,
-                            config,
-                            false
-                        )
-
-                        if (config.openedThread != null) {
-                            VerticalDivider()
-
-                            StandalonePost(
-                                otherModifier,
-                                config,
-                                config.openedThread
-                            )
-                        }
-                    }
-                }
-            }
+            ConversationScreen(
+                modifier = modifier,
+                conversationId = config.conversationId,
+                threadPostId = config.openedThread?.postId,
+                courseId = courseId,
+                onOpenThread = { postId ->
+                    configuration = OpenedConversation(
+                        config.conversationId,
+                        OpenedThread(config.conversationId, postId)
+                    )
+                },
+                onCloseThread = {
+                    configuration = config.copy(openedThread = null)
+                },
+                onCloseConversation = {
+                    configuration = NothingOpened
+                },
+                onNavigateToSettings = {
+                    configuration = ConversationSettings(
+                        conversationId = config.conversationId,
+                        prevConfiguration = config
+                    )
+                },
+                conversationsOverview = { mod -> ConversationOverview(mod) }
+            )
         }
 
         is AddChannelConfiguration -> {
@@ -268,10 +156,16 @@ internal fun SinglePageConversationBody(
                         conversationId = config.conversationId,
                         onNavigateBack = { configuration = config.prevConfiguration },
                         onRequestAddMembers = {
-                            configuration = config.copy(isAddingMembers = true, prevConfiguration = configuration)
+                            configuration = config.copy(
+                                isAddingMembers = true,
+                                prevConfiguration = configuration
+                            )
                         },
                         onRequestViewAllMembers = {
-                            configuration = config.copy(isViewingAllMembers = true, prevConfiguration = configuration)
+                            configuration = config.copy(
+                                isViewingAllMembers = true,
+                                prevConfiguration = configuration
+                            )
                         },
                         onConversationLeft = {
                             configuration = NothingOpened
@@ -280,17 +174,19 @@ internal fun SinglePageConversationBody(
                 }
             }
         }
-    }
-}
 
-@Composable
-private fun VerticalDivider() {
-    Box(
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(1.dp)
-            .background(DividerDefaults.color)
-    )
+        is NavigateToUserConversation -> {
+            NavigateToUserConversationUi(
+                modifier = modifier,
+                courseId = courseId,
+                username = config.username,
+                onNavigateToConversation = { conversationId ->
+                    configuration = OpenedConversation(conversationId, null)
+                },
+                onNavigateBack = { configuration = NothingOpened }
+            )
+        }
+    }
 }
 
 @Parcelize
@@ -305,6 +201,13 @@ data class OpenedConversation(val conversationId: Long, val openedThread: Opened
 
 @Parcelize
 data class OpenedThread(val conversationId: Long, val postId: StandalonePostId) : Parcelable
+
+/**
+ * Special configuration in which we want to navigate to the 1-to-1 conversation with the user with the specified username.
+ * In this configuration, we simply show a loading bar while we load the necessary data to show the chat.
+ */
+@Parcelize
+data class NavigateToUserConversation(val username: String) : ConversationConfiguration
 
 @Parcelize
 private data class AddChannelConfiguration(

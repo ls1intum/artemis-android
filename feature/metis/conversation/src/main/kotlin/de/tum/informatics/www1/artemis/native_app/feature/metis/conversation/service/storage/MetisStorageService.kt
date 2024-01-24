@@ -2,8 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 
 import androidx.paging.PagingSource
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -29,6 +27,19 @@ interface MetisStorageService {
     )
 
     /**
+     * Inserts the posts into the db that do not exist yet, and updates the ones that already exist, matching by server id.
+     *
+     * However, all posts between the oldest and newest post in [posts] that are not present in the list but exist in the db are removed.
+     * If [removeAllOlderPosts] is set to true, all posts that are older than the oldest post in [posts] are also removed.
+     */
+    suspend fun insertOrUpdatePostsAndRemoveDeletedPosts(
+        host: String,
+        metisContext: MetisContext,
+        posts: List<StandalonePost>,
+        removeAllOlderPosts: Boolean
+    )
+
+    /**
      * Update the post with the same id in the database. If this post does not exist, no action is taken.
      */
     suspend fun updatePost(host: String, metisContext: MetisContext, post: StandalonePost)
@@ -46,12 +57,10 @@ interface MetisStorageService {
 
     fun getStoredPosts(
         serverId: String,
-        clientId: Long,
-        filter: List<MetisFilter>,
-        sortingStrategy: MetisSortingStrategy,
-        query: String?,
         metisContext: MetisContext
     ): PagingSource<Int, PostPojo>
+
+    fun getLatestKnownPost(serverId: String, metisContext: MetisContext): Flow<PostPojo?>
 
     /**
      * Query the given post with the given client post id.

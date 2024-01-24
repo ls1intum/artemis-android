@@ -4,7 +4,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardService
 import io.ktor.client.call.body
@@ -24,14 +23,14 @@ internal class DashboardServiceImpl(
     ): NetworkResponse<Dashboard> {
         return performNetworkCall {
             //Perform a network call to $serverUrl/api/courses/for-dashboard
-            val courses: List<CourseWithScore> = ktorProvider.ktorClient.get(serverUrl) {
+            val dashboard: Dashboard = ktorProvider.ktorClient.get(serverUrl) {
                 url {
                     appendPathSegments("api", "courses", "for-dashboard")
                 }
                 cookieAuth(authToken)
             }.body() //Decode JSON to List<Course>
 
-            Dashboard(courses)
+            dashboard
         }
     }
 }

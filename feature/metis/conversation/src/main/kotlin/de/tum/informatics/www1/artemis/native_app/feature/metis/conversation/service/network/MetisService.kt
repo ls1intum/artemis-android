@@ -45,7 +45,7 @@ interface MetisService {
         val metisContext: MetisContext,
         val filter: List<MetisFilter>,
         val query: String?,
-        val sortingStrategy: MetisSortingStrategy,
-        val courseWideContext: CourseWideContext?
+        val sortingStrategy: MetisSortingStrategy = MetisSortingStrategy.DATE_DESCENDING,
+        val courseWideContext: CourseWideContext? = null
     )
 }

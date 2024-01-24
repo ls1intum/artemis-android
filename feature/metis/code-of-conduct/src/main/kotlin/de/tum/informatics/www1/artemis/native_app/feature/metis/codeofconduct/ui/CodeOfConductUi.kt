@@ -74,7 +74,7 @@ internal fun <T> CodeOfConductDataStateUi(
     BasicDataStateUi(
         modifier = modifier,
         dataState = dataState,
-        loadingText = stringResource(id = R.string.code_of_conduct_failure),
+        loadingText = stringResource(id = R.string.code_of_conduct_loading),
         failureText = stringResource(id = R.string.code_of_conduct_failure),
         retryButtonText = stringResource(id = R.string.code_of_conduct_try_again),
         onClickRetry = onClickRetry,

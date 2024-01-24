@@ -53,7 +53,9 @@ internal class CourseOverviewViewModel(
                 dashboardService.loadDashboard(
                     authToken,
                     serverUrl
-                )
+                ).bind { dashboard ->
+                    dashboard.copy(courses = dashboard.courses.sortedBy { it.course.title })
+                }
             }
         }
             //Store the loaded dashboard, so it is not loaded again when somebody collects this flow.

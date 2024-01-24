@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -33,7 +34,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import io.github.fornewid.placeholder.material3.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
@@ -47,8 +47,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.LectureListUi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ConversationFacadeUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NavigateToUserConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.OpenedConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.OpenedThread
@@ -82,7 +83,8 @@ fun NavGraphBuilder.course(
     ) +
             generateLinks("courses/{courseId}") +
             generateLinks("courses/{courseId}/exercises") +
-            generateLinks("courses/{courseId}/messages?conversationId={conversationId}")
+            generateLinks("courses/{courseId}/messages?conversationId={conversationId}") +
+            generateLinks("courses/{courseId}/messages?username={username}")
     composable(
         route = "course/{courseId}",
         arguments = listOf(
@@ -90,7 +92,8 @@ fun NavGraphBuilder.course(
             navArgument("conversationId") {
                 type = NavType.LongType; defaultValue = DEFAULT_CONVERSATION_ID
             },
-            navArgument("postId") { type = NavType.LongType; defaultValue = DEFAULT_POST_ID }
+            navArgument("postId") { type = NavType.LongType; defaultValue = DEFAULT_POST_ID },
+            navArgument("username") { type = NavType.StringType; defaultValue = "" }
         ),
         deepLinks = deepLinks
     ) { backStackEntry ->
@@ -100,6 +103,7 @@ fun NavGraphBuilder.course(
         val conversationId =
             backStackEntry.arguments?.getLong("conversationId") ?: DEFAULT_CONVERSATION_ID
         val postId = backStackEntry.arguments?.getLong("postId") ?: DEFAULT_POST_ID
+        val username = backStackEntry.arguments?.getString("username").orEmpty()
 
         CourseUiScreen(
             modifier = Modifier.fillMaxSize(),
@@ -107,6 +111,7 @@ fun NavGraphBuilder.course(
             courseId = courseId,
             conversationId = conversationId,
             postId = postId,
+            username = username,
             onNavigateToExercise = onNavigateToExercise,
             onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
             onNavigateToExerciseResultView = onNavigateToExerciseResultView,
@@ -131,6 +136,7 @@ fun CourseUiScreen(
     courseId: Long,
     conversationId: Long,
     postId: Long,
+    username: String,
     onNavigateToExercise: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
@@ -147,6 +153,7 @@ fun CourseUiScreen(
         modifier = modifier,
         conversationId = conversationId,
         courseDataState = courseDataState,
+        username = username,
         onNavigateBack = onNavigateBack,
         weeklyExercisesDataState = weeklyExercisesDataState,
         onNavigateToExercise = onNavigateToExercise,
@@ -176,6 +183,7 @@ internal fun CourseUiScreen(
     courseId: Long,
     conversationId: Long,
     postId: Long,
+    username: String,
     courseDataState: DataState<Course>,
     weeklyExercisesDataState: DataState<List<GroupedByWeek<Exercise>>>,
     weeklyLecturesDataState: DataState<List<GroupedByWeek<Lecture>>>,
@@ -191,7 +199,7 @@ internal fun CourseUiScreen(
 ) {
     var selectedTabIndex by rememberSaveable(conversationId) {
         val initialTab = when {
-            conversationId != DEFAULT_CONVERSATION_ID -> TAB_COMMUNICATION
+            conversationId != DEFAULT_CONVERSATION_ID || username.isNotBlank() -> TAB_COMMUNICATION
             else -> TAB_EXERCISES
         }
 
@@ -261,6 +269,8 @@ internal fun CourseUiScreen(
                             conversationId,
                             null
                         )
+
+                        username.isNotBlank() -> NavigateToUserConversation(username)
 
                         else -> NothingOpened
                     }

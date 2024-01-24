@@ -11,6 +11,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,20 +19,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import kotlinx.coroutines.launch
 
 /**
- * Handles scrolling down to new items if the list was scrolled down before the new items came it.
+ * Handles scrolling down to new items if the list was scrolled down before the new items came in.
  *
  * Shows a floating action button if there are new posts
  */
 @Composable
 internal fun <T : Any> MetisPostListHandler(
     modifier: Modifier,
+    serverUrl: String,
+    courseId: Long,
     state: LazyListState,
     itemCount: Int,
-    getItem: (Int) -> T?,
+    bottomItem: T?,
     order: DisplayPostOrder,
     content: @Composable BoxScope.() -> Unit
 ) {
@@ -54,20 +61,19 @@ internal fun <T : Any> MetisPostListHandler(
         DisplayPostOrder.REGULAR -> state.canScrollForward
     }
 
-    LaunchedEffect(isScrolledDown, itemCount, getItem, canScrollDown, bottomItemIndex) {
+    LaunchedEffect(isScrolledDown, itemCount, bottomItem, canScrollDown, bottomItemIndex) {
         if (itemCount > 0) {
-            val newBottomItem = getItem(bottomItemIndex)
             // Check if new bottom item exists
-            if (newBottomItem != prevBottomItem && isScrolledDown) {
+            if (bottomItem != prevBottomItem && isScrolledDown) {
                 // new bottom item exists and we were previously scrolled to the bottom. Scroll down!
                 state.animateScrollToItem(bottomItemIndex)
-            } else if (newBottomItem != prevBottomItem) {
+            } else if (bottomItem != prevBottomItem) {
                 //  new bottom item exists but we are not on bottom so instead show user button.
                 hasNewUnseenPost = true
             }
 
             isScrolledDown = !canScrollDown
-            prevBottomItem = newBottomItem
+            prevBottomItem = bottomItem
 
             if (isScrolledDown) {
                 // we are scrolled down now, so we must have seen all posts.
@@ -99,7 +105,23 @@ internal fun <T : Any> MetisPostListHandler(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            content()
+            val markdownTransformer = remember(serverUrl, courseId) {
+                val strippedServerUrl =
+                    if (serverUrl.endsWith("/")) serverUrl.substring(
+                        0,
+                        serverUrl.length - 1
+                    ) else serverUrl
+
+                PostArtemisMarkdownTransformer(serverUrl = strippedServerUrl, courseId = courseId)
+            }
+
+            ProvideMarkwon {
+                ProvideEmojis {
+                    CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
+                        content()
+                    }
+                }
+            }
         }
     }
 }
