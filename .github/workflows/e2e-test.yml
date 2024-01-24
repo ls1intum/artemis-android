@@ -29,7 +29,7 @@ jobs:
         run: docker stop $(docker ps -a -q)
 
       - name: Remove all docker containers
-        run: docker container prune -f
+        run: docker rm $(docker ps -qa)
 
       - name: Launch docker containers
         run: docker compose -f docker/e2e-tests.yml up -d --remove-orphans --no-recreate artemis-app
