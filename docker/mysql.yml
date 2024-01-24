@@ -11,8 +11,6 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: true
       MYSQL_ROOT_PASSWORD: ""
       MYSQL_DATABASE: "Artemis"
-    ports:
-      - "127.0.0.1:3306:3306"
     # expose the port to make it reachable docker internally even if the external port mapping changes
     expose:
       - "3306"
