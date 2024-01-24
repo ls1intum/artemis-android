@@ -26,7 +26,7 @@ jobs:
         uses: gradle/wrapper-validation-action@v1
 
       - name: Launch docker containers
-        run: docker compose -f docker/e2e-tests.yml up -d artemis-app
+        run: docker compose -f docker/e2e-tests.yml up -d --remove-orphans --no-recreate artemis-app
 
       - name: JDK setup
         uses: actions/setup-java@v3
