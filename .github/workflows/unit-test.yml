@@ -9,7 +9,7 @@ on:
 
 jobs:
   jUnit:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ase-large-android-sdk-34]
     timeout-minutes: 60
 
     steps:

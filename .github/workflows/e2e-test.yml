@@ -9,7 +9,7 @@ on:
 
 jobs:
   end-to-end:
-    runs-on: [self-hosted, android]
+    runs-on: [self-hosted, ase-large-android-sdk-34, disabled]
     timeout-minutes: 60
 
     steps:
