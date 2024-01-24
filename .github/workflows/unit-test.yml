@@ -17,10 +17,10 @@ jobs:
       - name: Set Android Sdk Env
         run: export ANDROID_HOME=/usr/lib/android-sdk
 
-      - name: Print Android Sdk
-        run: ls /usr/lib/android-sdk
-
       - uses: actions/checkout@v4
+
+      - name: Set local.properties
+        run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
 
       - name: Gradle Wrapper Verification
         uses: gradle/wrapper-validation-action@v1
