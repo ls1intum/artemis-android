@@ -30,9 +30,11 @@ jobs:
 
       - name: Remove all docker containers
         run: docker rm $(docker ps -qa)
+        if: success() || failure()
 
       - name: Launch docker containers
         run: docker compose -f docker/e2e-tests.yml up -d --remove-orphans --no-recreate artemis-app
+        if: success() || failure()
 
       - name: JDK setup
         uses: actions/setup-java@v3
