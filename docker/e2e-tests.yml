@@ -38,24 +38,6 @@ services:
     ports:
       - "127.0.0.1:3306:3306"
 
-  artemis-app:
-    extends:
-      file: ./artemis.yml
-      service: artemis-app
-    depends_on:
-      mysql:
-        condition: service_healthy
-    env_file:
-      - artemis_e2e_config.env
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    ports:
-      - "8080:8080"
-    expose:
-      - "5005"
-    networks:
-      - artemis
-
   artemis-app-setup:
     image: ellerbrock/alpine-bash-curl-ssl:latest
     depends_on:

@@ -25,6 +25,7 @@ jobs:
       - name: Gradle Wrapper Verification
         uses: gradle/wrapper-validation-action@v1
 
+        # Sanity cleanup
       - name: Stop all running docker containers
         run: docker stop $(docker ps -a -q)
 
@@ -33,7 +34,7 @@ jobs:
         if: success() || failure()
 
       - name: Launch docker containers
-        run: docker compose -f docker/e2e-tests.yml up -d --remove-orphans --no-recreate artemis-app
+        run: docker compose -f docker/e2e-tests.yml up -d artemis-app-setup
         if: success() || failure()
 
       - name: JDK setup
@@ -52,3 +53,10 @@ jobs:
           name: Android End To End Test Results
           path: test-outputs/**/*.xml
           reporter: java-junit
+
+      - name: Cleanup -> Stop all running docker containers
+        run: docker stop $(docker ps -a -q)
+
+      - name: Cleanup -> Remove all docker containers
+        run: docker rm $(docker ps -qa)
+        if: success() || failure()
