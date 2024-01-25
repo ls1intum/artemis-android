@@ -9,11 +9,18 @@ on:
 
 jobs:
   jUnit:
-    runs-on: ubuntu-latest
+    name: JUnit Tests
+    runs-on: [self-hosted, ase-large-android-sdk-34]
     timeout-minutes: 60
 
     steps:
+      - name: Set Android Sdk Env
+        run: export ANDROID_HOME=/usr/lib/android-sdk
+
       - uses: actions/checkout@v4
+
+      - name: Set local.properties
+        run: echo "sdk.dir=/usr/lib/android-sdk" > local.properties
 
       - name: Gradle Wrapper Verification
         uses: gradle/wrapper-validation-action@v1

@@ -6,6 +6,7 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.dependencies
@@ -55,11 +56,14 @@ object ProductFlavors {
 internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension<*, *, *, *, *>,
 ) {
+    val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+
     commonExtension.apply {
-        compileSdk = 34
+        compileSdk = libs.findVersion("compileSdk").get().toString().toInt()
+        buildToolsVersion = libs.findVersion("buildToolsVersion").get().toString()
 
         defaultConfig {
-            minSdk = 30
+            minSdk = libs.findVersion("minSdk").get().toString().toInt()
         }
 
         compileOptions {
@@ -99,8 +103,6 @@ internal fun Project.configureKotlinAndroid(
             }
         }
     }
-
-    val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
     dependencies {
         add("coreLibraryDesugaring", libs.findLibrary("android.desugarJdkLibs").get())
