@@ -6,9 +6,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.printToString
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
@@ -38,10 +41,7 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `test can accept code of conduct without ui`() = runTest(testDispatcher) {
-        val codeOfConductService: CodeOfConductService =
-            CodeOfConductServiceImpl(
-                get()
-            )
+        val codeOfConductService: CodeOfConductService = CodeOfConductServiceImpl(get())
 
         val isCocAccepted = codeOfConductService
             .getIsCodeOfConductAccepted(course.id!!, testServerUrl, accessToken)
@@ -62,10 +62,7 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `test fetches correct responsible users`() = runTest(testDispatcher) {
-        val codeOfConductService: CodeOfConductService =
-            CodeOfConductServiceImpl(
-                get()
-            )
+        val codeOfConductService: CodeOfConductService = CodeOfConductServiceImpl(get())
 
         val responsibleUsers = codeOfConductService
             .getResponsibleUsers(course.id!!, testServerUrl, accessToken)
@@ -77,6 +74,17 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
             responsibleUsers.size,
             "Expected three responsible users, but got wrong amount"
         )
+    }
+
+    @Test(timeout = DefaultTestTimeoutMillis)
+    fun `test can fetch code of conduct text`() = runTest(testDispatcher) {
+        val codeOfConductService: CodeOfConductService = CodeOfConductServiceImpl(get())
+        codeOfConductService.getCodeOfConductTemplate(
+            courseId = course.id!!,
+            testServerUrl,
+            accessToken
+        )
+            .orThrow("Could not fetch code of conduct text")
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -105,6 +113,11 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
                 }
             )
         }
+
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText(context.getString(R.string.code_of_conduct_button_accept)),
+            DefaultTimeoutMillis
+        )
 
         composeTestRule
             .onNodeWithText(context.getString(R.string.code_of_conduct_button_accept))
