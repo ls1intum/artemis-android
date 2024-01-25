@@ -27,11 +27,13 @@ jobs:
 
         # Sanity cleanup
       - name: Stop all running docker containers
-        run: docker stop artemis-app artemis-mysql
+        run: docker stop artemis-app artemis-mysql docker-artemis-app-setup
+        continue-on-error: true
 
       - name: Remove all docker containers
-        run: docker rm artemis-app artemis-mysql
+        run: docker rm artemis-app artemis-mysql docker-artemis-app-setup
         if: success() || failure()
+        continue-on-error: true
 
       - name: Launch docker containers
         run: docker compose -f docker/e2e-tests.yml up -d artemis-app-setup
@@ -45,6 +47,7 @@ jobs:
 
       - name: run tests
         run: ./gradlew test --max-workers=4 -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
+        continue-on-error: true
 
       - name: Test Report
         uses: dorny/test-reporter@v1
@@ -55,8 +58,9 @@ jobs:
           reporter: java-junit
 
       - name: Cleanup -> Stop all running docker containers
-        run: docker stop artemis-app artemis-mysql
+        if: always()
+        run: docker stop artemis-app artemis-mysql docker-artemis-app-setup
 
       - name: Cleanup -> Remove all docker containers
-        run: docker rm artemis-app artemis-mysql
-        if: success() || failure()
+        if: always()
+        run: docker rm artemis-app artemis-mysql docker-artemis-app-setup
