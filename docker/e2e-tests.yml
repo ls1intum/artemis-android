@@ -3,8 +3,6 @@ services:
     extends:
       file: ./mysql.yml
       service: mysql
-    ports:
-      - "127.0.0.1:3306:3306"
 
   artemis-app:
     extends:
