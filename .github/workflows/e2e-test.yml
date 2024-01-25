@@ -27,10 +27,10 @@ jobs:
 
         # Sanity cleanup
       - name: Stop all running docker containers
-        run: docker stop $(docker ps -a -q)
+        run: docker stop artemis-app artemis-mysql
 
       - name: Remove all docker containers
-        run: docker rm $(docker ps -qa)
+        run: docker rm artemis-app artemis-mysql
         if: success() || failure()
 
       - name: Launch docker containers
@@ -55,8 +55,8 @@ jobs:
           reporter: java-junit
 
       - name: Cleanup -> Stop all running docker containers
-        run: docker stop $(docker ps -a -q)
+        run: docker stop artemis-app artemis-mysql
 
       - name: Cleanup -> Remove all docker containers
-        run: docker rm $(docker ps -qa)
+        run: docker rm artemis-app artemis-mysql
         if: success() || failure()
