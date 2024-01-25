@@ -22,6 +22,8 @@ COPY download-dependencies download-dependencies
 # Download all library dependencies
 RUN ./gradlew -p download-dependencies/ app:dependencies
 
+FROM builder as app-image
+
 COPY . .
 
 ARG buildNumber=1

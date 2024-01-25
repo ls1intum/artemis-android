@@ -1,36 +1,4 @@
 services:
-  artemis-android-e2e:
-    image: artemis-android
-    build:
-      context: ..
-      args:
-        buildNumber: ${bamboo_buildNumber:-1}
-    depends_on:
-      artemis-app-setup:
-        condition: service_started
-    environment:
-      - USER_1_USERNAME=aa01aaa
-      - USER_1_PASSWORD=test_user_1_password
-      - USER_2_USERNAME=aa02aaa
-      - USER_2_DISPLAY_NAME=Test User2
-      - USER_3_USERNAME=aa03aaa
-      - SERVER_URL=http://artemis-app:8080
-      - DEFAULT_TIMEOUT=30000
-      - ADMIN_USERNAME=artemis_admin
-      - ADMIN_PASSWORD=artemis_admin
-      - robolectric.logging.enabled=true
-    command:
-      - test
-      - --max-workers=4
-      - -Dskip.debugVariants=true
-      - -Dskip.flavor.unrestricted=true
-      - -Dskip.flavor.beta=true
-      - -Dskip.unit-tests=true
-    networks:
-      - artemis
-    volumes:
-      - ../test-outputs/:/app/test-outputs/
-
   mysql:
     extends:
       file: ./mysql.yml

@@ -3,6 +3,7 @@ import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import commonConfiguration.configureJacoco
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
 
@@ -17,10 +18,12 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 apply("org.jetbrains.kotlinx.kover")
             }
 
+            val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
                 configureInstanceSelectionFlavors(this)
-                defaultConfig.targetSdk = 33
+                defaultConfig.targetSdk = libs.findVersion("targetSdk").get().toString().toInt()
             }
 
             configureJacoco(extensions.getByType<ApplicationAndroidComponentsExtension>())
