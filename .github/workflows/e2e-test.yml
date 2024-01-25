@@ -60,7 +60,9 @@ jobs:
       - name: Cleanup -> Stop all running docker containers
         if: always()
         run: docker stop artemis-app artemis-mysql docker-artemis-app-setup
+        continue-on-error: true
 
       - name: Cleanup -> Remove all docker containers
         if: always()
         run: docker rm artemis-app artemis-mysql docker-artemis-app-setup
+        continue-on-error: true
