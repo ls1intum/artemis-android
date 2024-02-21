@@ -36,7 +36,7 @@ data class AnswerPostPojo(
         entity = MetisPostContextEntity::class,
         entityColumn = "client_post_id",
         parentColumn = "post_id",
-        projection = ["server_post_id"]
+        projection = ["client_post_id", "server_post_id"]
     )
     val serverPostIdCache: ServerPostIdCache
 ) : IAnswerPost {
@@ -59,7 +59,10 @@ data class AnswerPostPojo(
     override val authorId: Long = basePostingCache.authorId
 
     @Ignore
-    override val serverPostId: Long = serverPostIdCache.serverPostId
+    override val serverPostId: Long? = serverPostIdCache.serverPostId
+
+    @Ignore
+    override val clientPostId: String = postId
 
     data class BasePostingCache(
         @ColumnInfo(name = "id")
@@ -85,6 +88,6 @@ data class AnswerPostPojo(
 
     data class ServerPostIdCache(
         @ColumnInfo(name = "server_post_id")
-        val serverPostId: Long
+        val serverPostId: Long?
     )
 }

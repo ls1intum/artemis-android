@@ -8,4 +8,6 @@ class AccountDataServiceStub(private val account: Account = Account()) : Account
         serverUrl: String,
         bearerToken: String
     ): NetworkResponse<Account> = NetworkResponse.Response(account)
+
+    override suspend fun getCachedAccountData(serverUrl: String, bearerToken: String): Account = account
 }

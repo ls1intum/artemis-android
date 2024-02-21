@@ -22,7 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.exerciseM
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lectureModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
-import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
+import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.quizParticipationModule
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsModule

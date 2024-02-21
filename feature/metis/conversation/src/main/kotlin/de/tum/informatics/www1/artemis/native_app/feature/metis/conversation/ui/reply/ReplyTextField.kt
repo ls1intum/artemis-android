@@ -331,12 +331,14 @@ private fun rememberReplyState(
     updateFailureState: (MetisModificationFailure?) -> Unit
 ): ReplyState {
     var isCreatingReplyJob: Deferred<MetisModificationFailure?>? by remember { mutableStateOf(null) }
-    var hasSentReply by remember { mutableStateOf(false) }
+    var displaySendSuccess by remember { mutableStateOf(false) }
 
     AwaitDeferredCompletion(job = isCreatingReplyJob) { failure ->
         if (failure == null) {
             replyMode.onUpdate(TextFieldValue(text = ""))
-            hasSentReply = true
+
+            // Only show for edit.
+            displaySendSuccess = replyMode is ReplyMode.EditMessage
         } else {
             updateFailureState(failure)
         }
@@ -344,22 +346,22 @@ private fun rememberReplyState(
         isCreatingReplyJob = null
     }
 
-    LaunchedEffect(key1 = hasSentReply) {
-        if (hasSentReply) {
+    LaunchedEffect(key1 = displaySendSuccess) {
+        if (displaySendSuccess) {
             delay(1.seconds)
 
-            hasSentReply = false
+            displaySendSuccess = false
         }
     }
 
-    return remember(isCreatingReplyJob, hasSentReply, replyMode) {
+    return remember(isCreatingReplyJob, displaySendSuccess, replyMode) {
         when {
             isCreatingReplyJob != null -> ReplyState.IsSendingReply {
                 isCreatingReplyJob?.cancel()
                 isCreatingReplyJob = null
             }
 
-            hasSentReply -> ReplyState.HasSentReply
+            displaySendSuccess -> ReplyState.HasSentReply
             else -> ReplyState.CanCreate {
                 isCreatingReplyJob = when (replyMode) {
                     is ReplyMode.EditMessage -> replyMode.onEditMessage()

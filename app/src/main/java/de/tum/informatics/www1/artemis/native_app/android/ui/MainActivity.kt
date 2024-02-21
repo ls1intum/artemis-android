@@ -51,13 +51,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.lectureview.navigateTo
 import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATION
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ProvideLocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextReporter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
-import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
@@ -392,15 +390,9 @@ class MainActivity : AppCompatActivity(),
     private fun cancelCommunicationNotifications(visibleMetisContext: VisibleMetisContext) {
         if (visibleMetisContext is VisibleStandalonePostDetails) {
             val parentId = visibleMetisContext.postId
-            val communicationType: CommunicationType = when (visibleMetisContext.metisContext) {
-                is MetisContext.Course -> CommunicationType.QNA_COURSE
-                is MetisContext.Exercise -> CommunicationType.QNA_EXERCISE
-                is MetisContext.Lecture -> CommunicationType.QNA_LECTURE
-                is MetisContext.Conversation -> CommunicationType.CONVERSATION
-            }
 
             lifecycleScope.launch {
-                communicationNotificationManager.deleteCommunication(parentId, communicationType)
+                communicationNotificationManager.deleteCommunication(parentId)
             }
         }
     }

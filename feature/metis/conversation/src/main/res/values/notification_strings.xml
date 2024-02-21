@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="push_notification_send_post_failed_title">Your message has not been sent</string>
+    <string name="push_notification_send_answer_post_failed_title">Your reply has not been sent</string>
+    <string name="push_notification_send_post_failed_message">Affected message: %1$s</string>
+    <string name="push_notification_send_answer_post_failed_message">Affected reply: %1$s</string>
+</resources>

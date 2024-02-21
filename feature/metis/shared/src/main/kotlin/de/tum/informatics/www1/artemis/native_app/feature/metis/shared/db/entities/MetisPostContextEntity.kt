@@ -9,10 +9,12 @@ import androidx.room.Index
  * Defines the relation between the client-side unique post id and server side context.
  * This class exists to support a fully offline applications, where posts can be created even when no internet connection is available.
  * For this, a client id is utilized which allows the creation of posts even though no server side id is known yet.
+ *
+ * A post which has a [serverPostId] of null, is purely client side and has not been sent yet.
  */
 @Entity(
     tableName = "metis_post_context",
-    primaryKeys = ["client_post_id", "server_post_id", "course_id", "conversation_id", "type"],
+    primaryKeys = ["client_post_id", "course_id", "conversation_id", "type"],
     foreignKeys = [
         ForeignKey(
             entity = BasePostingEntity::class,
@@ -31,7 +33,7 @@ data class MetisPostContextEntity(
     @ColumnInfo(name = "conversation_id")
     val conversationId: Long,
     @ColumnInfo(name = "server_post_id") // a standalone post and a reply may have the same id
-    val serverPostId: Long,
+    val serverPostId: Long?,
     @ColumnInfo(name = "client_post_id")
     val clientPostId: String,
     @ColumnInfo(name = "type")

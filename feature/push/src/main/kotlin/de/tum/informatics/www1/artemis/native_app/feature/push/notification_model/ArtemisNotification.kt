@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.notification_model
 
-import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.NotificationTargetManager
 import kotlinx.datetime.Instant
 import kotlinx.serialization.DeserializationStrategy
@@ -56,8 +55,7 @@ data class UnknownArtemisNotification(
 private val nameToTypeMapping: Map<String, NotificationType> = (
         StandalonePostCommunicationNotificationType.entries +
                 ReplyPostCommunicationNotificationType.entries +
-                MiscNotificationType.entries +
-                ConversationNotificationType.entries
+                MiscNotificationType.entries
         ).associateBy { it.name }
 
 object ArtemisNotificationDeserializer :
@@ -87,13 +85,5 @@ object CommunicationNotificationTypeDeserializer :
 }
 
 val ArtemisNotification<CommunicationNotificationType>.parentId: Long
-    get() = NotificationTargetManager.getCommunicationNotificationTarget(
-        type.communicationType,
-        target
-    ).postId
+    get() = NotificationTargetManager.getCommunicationNotificationTarget(target).postId
 
-val ArtemisNotification<CommunicationNotificationType>.communicationType: CommunicationType
-    get() = when (type) {
-        is StandalonePostCommunicationNotificationType, is ReplyPostCommunicationNotificationType -> CommunicationType.QNA_COURSE
-        ConversationNotificationType.CONVERSATION_NEW_MESSAGE, ConversationNotificationType.CONVERSATION_NEW_REPLY_MESSAGE -> CommunicationType.CONVERSATION
-    }

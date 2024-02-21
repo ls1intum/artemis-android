@@ -54,7 +54,7 @@ import java.util.Date
 
 internal const val TEST_TAG_METIS_POST_LIST = "TEST_TAG_METIS_POST_LIST"
 
-internal fun testTagForPost(postId: Long) = "post$postId"
+internal fun testTagForPost(postId: StandalonePostId?) = "post$postId"
 
 @Composable
 internal fun MetisChatList(
@@ -91,7 +91,8 @@ internal fun MetisChatList(
         onEditPost = viewModel::editPost,
         onDeletePost = viewModel::deletePost,
         onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
-        onClickViewPost = onClickViewPost
+        onClickViewPost = onClickViewPost,
+        onRequestRetrySend = viewModel::retryCreatePost
     )
 }
 
@@ -112,7 +113,8 @@ fun MetisChatList(
     onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
     onDeletePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
-    onClickViewPost: (StandalonePostId) -> Unit
+    onClickViewPost: (StandalonePostId) -> Unit,
+    onRequestRetrySend: (StandalonePostId) -> Unit
 ) {
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
@@ -168,7 +170,8 @@ fun MetisChatList(
                             hasModerationRights = hasModerationRights,
                             onRequestEdit = onEditPostDelegate,
                             onRequestDelete = onDeletePostDelegate,
-                            onRequestReactWithEmoji = onRequestReactWithEmojiDelegate
+                            onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
+                            onRequestRetrySend = onRequestRetrySend
                         )
                     }
                 }
@@ -196,10 +199,9 @@ private fun ChatList(
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
     onRequestDelete: (IStandalonePost) -> Unit,
-    onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit
+    onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit,
+    onRequestRetrySend: (StandalonePostId) -> Unit
 ) {
-    println("POSTS: ${posts}")
-
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -235,6 +237,11 @@ private fun ChatList(
                         },
                         onReplyInThread = {
                             onClickViewPost(post?.standalonePostId ?: return@rememberPostActions)
+                        },
+                        onRequestRetrySend = {
+                            onRequestRetrySend(
+                                post?.standalonePostId ?: return@rememberPostActions
+                            )
                         }
                     )
 
@@ -243,7 +250,7 @@ private fun ChatList(
                             .fillMaxWidth()
                             .let {
                                 if (post != null) {
-                                    it.testTag(testTagForPost(post.serverPostId))
+                                    it.testTag(testTagForPost(post.standalonePostId))
                                 } else it
                             },
                         post = post,
@@ -265,8 +272,10 @@ private fun ChatList(
                             }
                         ),
                         onClick = {
-                            if (post != null) {
-                                onClickViewPost(post.standalonePostId)
+                            val standalonePostId = post?.standalonePostId
+
+                            if (post?.serverPostId != null && standalonePostId != null) {
+                                onClickViewPost(standalonePostId)
                             }
                         }
                     )
