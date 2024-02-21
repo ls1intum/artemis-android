@@ -25,12 +25,15 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Groups2
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.NotificationsOff
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -79,6 +82,7 @@ internal fun ConversationList(
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
+    onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit,
     trailingContent: LazyListScope.() -> Unit
@@ -98,7 +102,8 @@ internal fun ConversationList(
                 conversations = collection,
                 onNavigateToConversation = onNavigateToConversation,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
-                onToggleHidden = onToggleHidden
+                onToggleHidden = onToggleHidden,
+                onToggleMuted = onToggleMuted
             )
         }
 
@@ -220,6 +225,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
+    onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
 ) {
     if (!conversations.isExpanded) return
     items(
@@ -238,8 +244,12 @@ private fun <T : Conversation> LazyListScope.conversationList(
                 )
             },
             onToggleHidden = { onToggleHidden(conversation.id, !conversation.isHidden) },
+            onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) },
             content = { contentModifier ->
                 val unreadMessagesCount = conversation.unreadMessagesCount ?: 0
+
+                val headlineColor =
+                    LocalContentColor.current.copy(alpha = if (conversation.isMuted) 0.6f else 1f)
 
                 when (conversation) {
                     is ChannelChat -> {
@@ -257,7 +267,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
                             },
                             headlineContent = {
                                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                    Text(text = channelName, maxLines = 1)
+                                    Text(text = channelName, maxLines = 1, color = headlineColor)
 
                                     ExtraChannelIcons(channelChat = conversation)
                                 }
@@ -271,7 +281,12 @@ private fun <T : Conversation> LazyListScope.conversationList(
                     is GroupChat -> {
                         ListItem(
                             modifier = contentModifier,
-                            headlineContent = { Text(conversation.humanReadableTitle) },
+                            headlineContent = {
+                                Text(
+                                    conversation.humanReadableTitle,
+                                    color = headlineColor
+                                )
+                            },
                             leadingContent = {
                                 Icon(imageVector = Icons.Default.Groups2, contentDescription = null)
                             },
@@ -284,7 +299,12 @@ private fun <T : Conversation> LazyListScope.conversationList(
                     is OneToOneChat -> {
                         ListItem(
                             modifier = contentModifier,
-                            headlineContent = { Text(conversation.humanReadableTitle) },
+                            headlineContent = {
+                                Text(
+                                    conversation.humanReadableTitle,
+                                    color = headlineColor
+                                )
+                            },
                             trailingContent = {
                                 UnreadMessages(unreadMessagesCount = unreadMessagesCount)
                             }
@@ -324,6 +344,7 @@ private fun ConversationListItem(
     onNavigateToConversation: () -> Unit,
     onToggleMarkAsFavourite: () -> Unit,
     onToggleHidden: () -> Unit,
+    onToggleMuted: () -> Unit,
     content: @Composable (Modifier) -> Unit
 ) {
     var isContextDialogShown by remember { mutableStateOf(false) }
@@ -365,7 +386,7 @@ private fun ConversationListItem(
             DropdownMenuItem(
                 leadingIcon = {
                     Icon(
-                        imageVector = if (conversation.isHidden) Icons.Default.NotificationsActive else Icons.Default.NotificationsOff,
+                        imageVector = if (conversation.isHidden) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                         contentDescription = null
                     )
                 },
@@ -379,6 +400,27 @@ private fun ConversationListItem(
                 },
                 onClick = {
                     onToggleHidden()
+                    onDismissRequest()
+                }
+            )
+
+            DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (conversation.isMuted) Icons.Default.NotificationsActive else Icons.Default.NotificationsOff,
+                        contentDescription = null
+                    )
+                },
+                text = {
+                    Text(
+                        text = stringResource(
+                            id = if (conversation.isMuted) R.string.conversation_overview_conversation_item_unmark_as_muted
+                            else R.string.conversation_overview_conversation_item_mark_as_muted
+                        )
+                    )
+                },
+                onClick = {
+                    onToggleMuted()
                     onDismissRequest()
                 }
             )

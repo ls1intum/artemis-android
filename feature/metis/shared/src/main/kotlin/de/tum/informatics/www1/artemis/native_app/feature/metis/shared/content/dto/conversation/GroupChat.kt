@@ -16,6 +16,7 @@ data class GroupChat(
     override val unreadMessagesCount: Long? = 0L,
     override val isFavorite: Boolean = false,
     override val isHidden: Boolean = false,
+    override val isMuted: Boolean = false,
     override val isCreator: Boolean = false,
     override val isMember: Boolean = false,
     override val numberOfMembers: Int = 0,

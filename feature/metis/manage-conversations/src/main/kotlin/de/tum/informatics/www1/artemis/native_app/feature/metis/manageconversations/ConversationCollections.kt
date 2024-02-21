@@ -12,6 +12,8 @@ data class ConversationCollections(
     val directChats: ConversationCollection<OneToOneChat>,
     val hidden: ConversationCollection<Conversation>
 ) {
+    val conversations: List<Conversation> get() = favorites.conversations + channels.conversations + groupChats.conversations + directChats.conversations + hidden.conversations
+
     fun filtered(query: String): ConversationCollections {
         return ConversationCollections(
             channels = channels.filter { it.filterPredicate(query) },

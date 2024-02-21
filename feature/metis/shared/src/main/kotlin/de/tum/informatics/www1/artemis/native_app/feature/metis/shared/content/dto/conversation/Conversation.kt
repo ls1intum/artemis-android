@@ -13,6 +13,7 @@ sealed class Conversation {
     abstract val unreadMessagesCount: Long?
     abstract val isFavorite: Boolean
     abstract val isHidden: Boolean
+    abstract val isMuted: Boolean
     abstract val isCreator: Boolean
     abstract val isMember: Boolean
     abstract val numberOfMembers: Int

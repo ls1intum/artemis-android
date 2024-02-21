@@ -372,6 +372,24 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         appendPathSegments("favorite")
     }
 
+    override suspend fun markConversationMuted(
+        courseId: Long,
+        conversationId: Long,
+        muted: Boolean,
+        authToken: String,
+        serverUrl: String
+    ) = performActionOnConversation(
+        courseId,
+        conversationId,
+        authToken = authToken,
+        serverUrl = serverUrl,
+        httpRequestBlock = {
+            parameter("isMuted", muted)
+        }
+    ) {
+        appendPathSegments("muted")
+    }
+
     private suspend fun performActionOnUser(
         courseId: Long,
         conversation: Conversation,

@@ -140,4 +140,12 @@ open class ConversationServiceStub(
         authToken: String,
         serverUrl: String
     ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
+
+    override suspend fun markConversationMuted(
+        courseId: Long,
+        conversationId: Long,
+        muted: Boolean,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
 }
