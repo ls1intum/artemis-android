@@ -313,6 +313,24 @@ class ConversationOverviewViewModel(
         }
     }
 
+    fun markConversationAsMuted(conversationId: Long, muted: Boolean): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
+            conversationService.markConversationMuted(
+                courseId,
+                conversationId,
+                muted,
+                accountService.authToken.first(),
+                serverConfigurationService.serverUrl.first()
+            )
+                .onSuccess { isSuccessful ->
+                    if (isSuccessful) {
+                        onRequestReload.tryEmit(Unit)
+                    }
+                }
+                .or(false)
+        }
+    }
+
     fun markConversationAsFavorite(conversationId: Long, favorite: Boolean): Deferred<Boolean> {
         return viewModelScope.async(coroutineContext) {
             conversationService.markConversationAsFavorite(

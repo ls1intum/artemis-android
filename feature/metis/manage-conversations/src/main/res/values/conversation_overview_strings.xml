@@ -8,6 +8,9 @@
     <string name="conversation_overview_conversation_item_mark_as_hidden">Hide</string>
     <string name="conversation_overview_conversation_item_unmark_as_hidden">Unhide</string>
 
+    <string name="conversation_overview_conversation_item_mark_as_muted">Mute</string>
+    <string name="conversation_overview_conversation_item_unmark_as_muted">Unmute</string>
+
     <string name="conversation_overview_section_favorites">Favorites</string>
     <string name="conversation_overview_section_channels">Channels</string>
     <string name="conversation_overview_section_groups">Group Chats</string>

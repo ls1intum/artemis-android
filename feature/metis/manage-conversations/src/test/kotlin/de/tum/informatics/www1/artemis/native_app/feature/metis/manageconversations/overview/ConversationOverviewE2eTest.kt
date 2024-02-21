@@ -188,6 +188,42 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         )
     }
 
+    @Test(timeout = DefaultTestTimeoutMillis)
+    fun `can mark conversation as muted`() {
+        val chat = runBlocking { createPersonalConversation() }
+
+        markConversationImpl(
+            originalTag = getTagForConversation(chat),
+            newTag = tagForConversation(chat.id, KEY_SUFFIX_PERSONAL),
+            textToClick = context.getString(R.string.conversation_overview_conversation_item_mark_as_muted),
+            checkExists = { conversations.any { conv -> conv.id == chat.id && conv.isMuted } }
+        )
+    }
+
+    @Test(timeout = DefaultTestTimeoutMillis)
+    fun `can mark hidden conversation as not muted`() {
+        val chat = runBlocking {
+            val chat = createPersonalConversation()
+
+            conversationService.markConversationMuted(
+                courseId = course.id!!,
+                conversationId = chat.id,
+                muted = true,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            ).orThrow("Could not mark conversation as hidden")
+
+            chat
+        }
+
+        markConversationImpl(
+            originalTag = tagForConversation(chat.id, KEY_SUFFIX_PERSONAL),
+            newTag = getTagForConversation(chat),
+            textToClick = context.getString(R.string.conversation_overview_conversation_item_unmark_as_muted),
+            checkExists = { conversations.none { conv -> conv.id == chat.id && conv.isMuted } }
+        )
+    }
+
     /**
      * Checks that updates to conversations are automatically received over the websocket connection.
      */
