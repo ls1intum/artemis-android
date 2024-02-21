@@ -55,8 +55,7 @@ data class UnknownArtemisNotification(
 private val nameToTypeMapping: Map<String, NotificationType> = (
         StandalonePostCommunicationNotificationType.entries +
                 ReplyPostCommunicationNotificationType.entries +
-                MiscNotificationType.entries +
-                ConversationNotificationType.entries
+                MiscNotificationType.entries
         ).associateBy { it.name }
 
 object ArtemisNotificationDeserializer :

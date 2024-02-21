@@ -15,19 +15,15 @@ enum class StandalonePostCommunicationNotificationType : CommunicationNotificati
     NEW_EXERCISE_POST,
     NEW_LECTURE_POST,
     NEW_COURSE_POST,
-    NEW_ANNOUNCEMENT_POST
+    NEW_ANNOUNCEMENT_POST,
+    CONVERSATION_NEW_MESSAGE
 }
 
 @Serializable
 enum class ReplyPostCommunicationNotificationType : CommunicationNotificationType {
     NEW_REPLY_FOR_EXERCISE_POST,
     NEW_REPLY_FOR_LECTURE_POST,
-    NEW_REPLY_FOR_COURSE_POST
-}
-
-@Serializable
-enum class ConversationNotificationType : CommunicationNotificationType {
-    CONVERSATION_NEW_MESSAGE,
+    NEW_REPLY_FOR_COURSE_POST,
     CONVERSATION_NEW_REPLY_MESSAGE
 }
 
@@ -66,4 +62,4 @@ enum class MiscNotificationType(@StringRes val title: Int, @StringRes val body: 
 }
 
 @Serializable
-object UnknownNotificationType : NotificationType
+data object UnknownNotificationType : NotificationType
