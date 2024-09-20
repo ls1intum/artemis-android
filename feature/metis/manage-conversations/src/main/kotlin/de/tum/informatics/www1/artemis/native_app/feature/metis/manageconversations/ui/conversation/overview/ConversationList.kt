@@ -2,31 +2,14 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowRight
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Groups2
-import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material.icons.filled.NotificationsOff
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -36,15 +19,12 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
@@ -54,20 +34,25 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableTitle
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 
 internal const val TEST_TAG_CONVERSATION_LIST = "conversation list"
-
 internal const val TEST_TAG_HEADER_EXPAND_ICON = "expand icon"
 
 internal const val SECTION_FAVORITES_KEY = "favorites"
 internal const val SECTION_HIDDEN_KEY = "hidden"
 internal const val SECTION_CHANNELS_KEY = "channels"
 internal const val SECTION_GROUPS_KEY = "groups"
+internal const val SECTION_EXERCISES_KEY = "exercises"
+internal const val SECTION_EXAMS_KEY = "exams"
+internal const val SECTION_LECTURES_KEY = "lectures"
 internal const val SECTION_DIRECT_MESSAGES_KEY = "direct-messages"
 
 internal const val KEY_SUFFIX_FAVORITES = "_f"
 internal const val KEY_SUFFIX_CHANNELS = "_c"
+internal const val KEY_SUFFIX_EXAMS = "_exa"
+internal const val KEY_SUFFIX_EXERCISES = "_exe"
+internal const val KEY_SUFFIX_LECTURES = "_l"
 internal const val KEY_SUFFIX_GROUPS = "_g"
 internal const val KEY_SUFFIX_PERSONAL = "_p"
 internal const val KEY_SUFFIX_HIDDEN = "_h"
@@ -87,19 +72,22 @@ internal fun ConversationList(
     onRequestAddChannel: () -> Unit,
     trailingContent: LazyListScope.() -> Unit
 ) {
-    val listWithHeader: LazyListScope.(ConversationCollections.ConversationCollection<*>, String, String, Int, ConversationSectionHeaderAction, () -> Unit) -> Unit =
-        { collection, key, suffix, textRes, action, toggleIsExpanded ->
+
+    val listWithHeader: LazyListScope.(ConversationCollections.ConversationCollection<*>, String, String, Int, ConversationSectionHeaderAction, () -> Unit, @Composable () -> Unit) -> Unit =
+        { collection, key, suffix, textRes, action, toggleIsExpanded, icon ->
             conversationSectionHeader(
                 key = key,
                 text = textRes,
                 onClickAddAction = action,
                 isExpanded = collection.isExpanded,
-                toggleIsExpanded = toggleIsExpanded
+                toggleIsExpanded = toggleIsExpanded,
+                icon = icon
             )
 
             conversationList(
                 keySuffix = suffix,
                 conversations = collection,
+                showPrefix = collection.showPrefix,
                 onNavigateToConversation = onNavigateToConversation,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
                 onToggleHidden = onToggleHidden,
@@ -115,7 +103,8 @@ internal fun ConversationList(
                 KEY_SUFFIX_FAVORITES,
                 R.string.conversation_overview_section_favorites,
                 NoAction,
-                viewModel::toggleFavoritesExpanded
+                { viewModel.toggleFavoritesExpanded() },
+                { Icon(imageVector = Icons.Default.Favorite, contentDescription = null) }
             )
         }
 
@@ -123,10 +112,43 @@ internal fun ConversationList(
             conversationCollections.channels,
             SECTION_CHANNELS_KEY,
             KEY_SUFFIX_CHANNELS,
-            R.string.conversation_overview_section_channels,
+            R.string.conversation_overview_section_general_channels,
             OnClickAction(onRequestAddChannel),
-            viewModel::toggleChannelsExpanded
-        )
+            viewModel::toggleGeneralsExpanded
+        ) { Icon(imageVector = Icons.Default.ChatBubble, contentDescription = null) }
+
+        if (conversationCollections.exerciseChannels.conversations.isNotEmpty()) {
+            listWithHeader(
+                conversationCollections.exerciseChannels,
+                SECTION_EXERCISES_KEY,
+                KEY_SUFFIX_EXERCISES,
+                R.string.conversation_overview_section_exercise_channels,
+                NoAction,
+                viewModel::toggleExercisesExpanded
+            ) { Icon(imageVector = Icons.Default.List, contentDescription = null) }
+        }
+
+        if (conversationCollections.lectureChannels.conversations.isNotEmpty()) {
+            listWithHeader(
+                conversationCollections.lectureChannels,
+                SECTION_LECTURES_KEY,
+                KEY_SUFFIX_LECTURES,
+                R.string.conversation_overview_section_lecture_channels,
+                NoAction,
+                viewModel::toggleLecturesExpanded
+            ) { Icon(imageVector = Icons.Default.InsertDriveFile, contentDescription = null) }
+        }
+
+        if (conversationCollections.examChannels.conversations.isNotEmpty()) {
+            listWithHeader(
+                conversationCollections.examChannels,
+                SECTION_EXAMS_KEY,
+                KEY_SUFFIX_EXAMS,
+                R.string.conversation_overview_section_exam_channels,
+                NoAction,
+                viewModel::toggleExamsExpanded
+            ) { Icon(imageVector = Icons.Default.School, contentDescription = null) }
+        }
 
         listWithHeader(
             conversationCollections.groupChats,
@@ -135,7 +157,7 @@ internal fun ConversationList(
             R.string.conversation_overview_section_groups,
             OnClickAction(onRequestCreatePersonalConversation),
             viewModel::toggleGroupChatsExpanded
-        )
+        ) { Icon(imageVector = Icons.Default.Forum, contentDescription = null) }
 
         listWithHeader(
             conversationCollections.directChats,
@@ -144,7 +166,7 @@ internal fun ConversationList(
             R.string.conversation_overview_section_direct_messages,
             OnClickAction(onRequestCreatePersonalConversation),
             viewModel::togglePersonalConversationsExpanded
-        )
+        ) { Icon(imageVector = Icons.Default.Message, contentDescription = null) }
 
         if (conversationCollections.hidden.conversations.isNotEmpty()) {
             listWithHeader(
@@ -154,7 +176,7 @@ internal fun ConversationList(
                 R.string.conversation_overview_section_hidden,
                 NoAction,
                 viewModel::toggleHiddenExpanded
-            )
+            ) { Icon(imageVector = Icons.Default.NotInterested, contentDescription = null) }
         }
 
         trailingContent()
@@ -166,7 +188,8 @@ private fun LazyListScope.conversationSectionHeader(
     @StringRes text: Int,
     isExpanded: Boolean,
     onClickAddAction: ConversationSectionHeaderAction,
-    toggleIsExpanded: () -> Unit
+    toggleIsExpanded: () -> Unit,
+    icon: @Composable () -> Unit
 ) {
     item(key = key) {
         Column(
@@ -177,40 +200,36 @@ private fun LazyListScope.conversationSectionHeader(
             Divider()
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { toggleIsExpanded() }
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(
-                    modifier = Modifier.testTag(TEST_TAG_HEADER_EXPAND_ICON),
-                    onClick = {
-                        toggleIsExpanded()
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Icon(
-                        imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowRight,
-                        contentDescription = null
+                    icon()
+                    Text(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 8.dp),
+                        text = stringResource(id = text),
+                        style = MaterialTheme.typography.titleSmall
                     )
                 }
 
-                Text(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 16.dp),
-                    text = stringResource(id = text),
-                    style = MaterialTheme.typography.titleSmall
-                )
-
-                if (onClickAddAction is OnClickAction) {
-                    IconButton(
-                        onClick = onClickAddAction.onClick
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null
-                        )
-                    }
-                } else {
-                    Box(modifier = Modifier.height(40.dp))
+                IconButton(
+                    modifier = Modifier.testTag(TEST_TAG_HEADER_EXPAND_ICON),
+                    onClick = { toggleIsExpanded() }
+                ) {
+                    Icon(
+                        imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowRight,
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
             }
 
@@ -222,6 +241,7 @@ private fun LazyListScope.conversationSectionHeader(
 private fun <T : Conversation> LazyListScope.conversationList(
     keySuffix: String,
     conversations: ConversationCollections.ConversationCollection<T>,
+    showPrefix: Boolean,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
@@ -230,12 +250,14 @@ private fun <T : Conversation> LazyListScope.conversationList(
     if (!conversations.isExpanded) return
     items(
         conversations.conversations,
-        key = { tagForConversation(it.id, keySuffix) }) { conversation ->
+        key = { tagForConversation(it.id, keySuffix) }
+    ) { conversation ->
         ConversationListItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag(tagForConversation(conversation.id, keySuffix)),
             conversation = conversation,
+            showPrefix = showPrefix,
             onNavigateToConversation = { onNavigateToConversation(conversation.id) },
             onToggleMarkAsFavourite = {
                 onToggleMarkAsFavourite(
@@ -245,95 +267,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
             },
             onToggleHidden = { onToggleHidden(conversation.id, !conversation.isHidden) },
             onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) },
-            content = { contentModifier ->
-                val unreadMessagesCount = conversation.unreadMessagesCount ?: 0
-
-                val headlineColor =
-                    LocalContentColor.current.copy(alpha = if (conversation.isMuted) 0.6f else 1f)
-
-                when (conversation) {
-                    is ChannelChat -> {
-                        val channelName = if (conversation.isArchived) {
-                            stringResource(
-                                id = R.string.conversation_overview_archived_channel_name,
-                                conversation.name
-                            )
-                        } else conversation.name
-
-                        ListItem(
-                            modifier = contentModifier,
-                            leadingContent = {
-                                PrimaryChannelIcon(channelChat = conversation)
-                            },
-                            headlineContent = {
-                                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                    Text(text = channelName, maxLines = 1, color = headlineColor)
-
-                                    ExtraChannelIcons(channelChat = conversation)
-                                }
-                            },
-                            trailingContent = {
-                                UnreadMessages(unreadMessagesCount = unreadMessagesCount)
-                            }
-                        )
-                    }
-
-                    is GroupChat -> {
-                        ListItem(
-                            modifier = contentModifier,
-                            headlineContent = {
-                                Text(
-                                    conversation.humanReadableTitle,
-                                    color = headlineColor
-                                )
-                            },
-                            leadingContent = {
-                                Icon(imageVector = Icons.Default.Groups2, contentDescription = null)
-                            },
-                            trailingContent = {
-                                UnreadMessages(unreadMessagesCount = unreadMessagesCount)
-                            }
-                        )
-                    }
-
-                    is OneToOneChat -> {
-                        ListItem(
-                            modifier = contentModifier,
-                            headlineContent = {
-                                Text(
-                                    conversation.humanReadableTitle,
-                                    color = headlineColor
-                                )
-                            },
-                            trailingContent = {
-                                UnreadMessages(unreadMessagesCount = unreadMessagesCount)
-                            }
-                        )
-                    }
-                }
-            }
         )
-    }
-}
-
-@Composable
-private fun UnreadMessages(modifier: Modifier = Modifier, unreadMessagesCount: Long) {
-    if (unreadMessagesCount > 0) {
-        Box(
-            modifier = modifier
-                .size(24.dp)
-                .aspectRatio(1f)
-                .background(
-                    MaterialTheme.colorScheme.primaryContainer,
-                    CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = unreadMessagesCount.toString(),
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-        }
     }
 }
 
@@ -341,26 +275,116 @@ private fun UnreadMessages(modifier: Modifier = Modifier, unreadMessagesCount: L
 private fun ConversationListItem(
     modifier: Modifier = Modifier,
     conversation: Conversation,
+    showPrefix: Boolean,
     onNavigateToConversation: () -> Unit,
     onToggleMarkAsFavourite: () -> Unit,
     onToggleHidden: () -> Unit,
     onToggleMuted: () -> Unit,
-    content: @Composable (Modifier) -> Unit
 ) {
     var isContextDialogShown by remember { mutableStateOf(false) }
     val onDismissRequest = { isContextDialogShown = false }
 
+    val unreadMessagesCount = conversation.unreadMessagesCount ?: 0
+
+    val headlineColor =
+        LocalContentColor.current.copy(alpha = if (conversation.isMuted) 0.6f else 1f)
+
+    val displayName = when (conversation) {
+        is ChannelChat -> {
+            val channelName = if (conversation.isArchived) {
+                stringResource(
+                    id = R.string.conversation_overview_archived_channel_name,
+                    conversation.name
+                )
+            } else conversation.name
+
+            if (showPrefix) {
+                channelName
+            } else {
+                channelName.removeSectionPrefix()
+            }
+        }
+        is GroupChat, is OneToOneChat -> {
+            val humanReadableTitle = conversation.humanReadableName
+            if (showPrefix) {
+                humanReadableTitle
+            } else {
+                humanReadableTitle.removeSectionPrefix()
+            }
+        }
+        else -> conversation.humanReadableName
+    }
+
     Box(modifier = modifier) {
-        content(
-            Modifier.combinedClickable(
-                onClick = onNavigateToConversation,
-                onLongClick = { isContextDialogShown = true }
-            )
-        )
+        when (conversation) {
+            is ChannelChat -> {
+                ListItem(
+                    modifier = Modifier.clickable(onClick = onNavigateToConversation),
+                    leadingContent = {
+                        PrimaryChannelIcon(channelChat = conversation)
+                    },
+                    headlineContent = {
+                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Text(text = displayName, maxLines = 1, color = headlineColor)
+
+                            ExtraChannelIcons(channelChat = conversation)
+                        }
+                    },
+                    trailingContent = {
+                        UnreadMessages(
+                            modifier = Modifier.padding(end = 24.dp),
+                            unreadMessagesCount = unreadMessagesCount
+                        )
+                    }
+                )
+            }
+
+            is GroupChat -> {
+                ListItem(
+                    modifier = Modifier.clickable(onClick = onNavigateToConversation),
+                    headlineContent = {
+                        Text(
+                            displayName,
+                            color = headlineColor
+                        )
+                    },
+                    leadingContent = {
+                        Icon(imageVector = Icons.Default.Groups2, contentDescription = null)
+                    },
+                    trailingContent = {
+                        UnreadMessages(unreadMessagesCount = unreadMessagesCount)
+                    }
+                )
+            }
+
+            is OneToOneChat -> {
+                ListItem(
+                    modifier = Modifier.clickable(onClick = onNavigateToConversation),
+                    headlineContent = {
+                        Text(
+                            displayName,
+                            color = headlineColor
+                        )
+                    },
+                    trailingContent = {
+                        UnreadMessages(unreadMessagesCount = unreadMessagesCount)
+                    }
+                )
+            }
+        }
+
+        IconButton(
+            onClick = { isContextDialogShown = true },
+            modifier = Modifier.align(Alignment.CenterEnd)
+        ) {
+            Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null)
+        }
 
         DropdownMenu(
             expanded = isContextDialogShown,
-            onDismissRequest = onDismissRequest
+            onDismissRequest = onDismissRequest,
+            modifier = Modifier.align(Alignment.TopEnd),
+            offset = DpOffset(x = (-10).dp, y = 0.dp),
         ) {
             DropdownMenuItem(
                 leadingIcon = {
@@ -428,8 +452,41 @@ private fun ConversationListItem(
     }
 }
 
+@Composable
+private fun UnreadMessages(modifier: Modifier = Modifier, unreadMessagesCount: Long) {
+    if (unreadMessagesCount > 0) {
+        Box(
+            modifier = modifier
+                .size(24.dp)
+                .aspectRatio(1f)
+                .background(
+                    MaterialTheme.colorScheme.primaryContainer,
+                    CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = unreadMessagesCount.toString(),
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+    }
+}
+
 private sealed interface ConversationSectionHeaderAction
 
 private data class OnClickAction(val onClick: () -> Unit) : ConversationSectionHeaderAction
 
 private object NoAction : ConversationSectionHeaderAction
+
+private fun String.removeSectionPrefix(): String {
+    val prefixes = listOf("exercise-", "lecture-", "exam-")
+    var result = this
+    for (prefix in prefixes) {
+        if (result.startsWith(prefix, ignoreCase = true)) {
+            result = result.removePrefix(prefix)
+            break
+        }
+    }
+    return result.trim()
+}

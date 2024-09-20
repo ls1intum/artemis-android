@@ -2,36 +2,15 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -40,16 +19,18 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.getTextBeforeSelection
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ReplyState
 import kotlinx.coroutines.CompletableDeferred
@@ -68,7 +49,8 @@ private const val DisabledContentAlpha = 0.75f
 internal fun ReplyTextField(
     modifier: Modifier,
     replyMode: ReplyMode,
-    updateFailureState: (MetisModificationFailure?) -> Unit
+    updateFailureState: (MetisModificationFailure?) -> Unit,
+    title: String
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
 
@@ -96,7 +78,8 @@ internal fun ReplyTextField(
                                 .fillMaxWidth()
                                 .testTag(TEST_TAG_CAN_CREATE_REPLY),
                             replyMode = replyMode,
-                            onReply = { targetReplyState.onCreateReply() }
+                            onReply = { targetReplyState.onCreateReply() },
+                            title = "Message $title"
                         )
                     }
 
@@ -115,7 +98,8 @@ internal fun ReplyTextField(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 8.dp),
-                            onCancel = targetReplyState.onCancelSendReply
+                            onCancel = targetReplyState.onCancelSendReply,
+                            title = title
                         )
                     }
                 }
@@ -125,7 +109,7 @@ internal fun ReplyTextField(
 }
 
 @Composable
-private fun SendingReplyUi(modifier: Modifier, onCancel: () -> Unit) {
+private fun SendingReplyUi(modifier: Modifier, onCancel: () -> Unit, title: String?) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
@@ -136,7 +120,7 @@ private fun SendingReplyUi(modifier: Modifier, onCancel: () -> Unit) {
         )
 
         Text(
-            text = stringResource(id = R.string.create_answer_sending_reply),
+            text = title.toString(),
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f)
         )
@@ -152,7 +136,8 @@ private fun CreateReplyUi(
     modifier: Modifier,
     replyMode: ReplyMode,
     focusRequester: FocusRequester = remember { FocusRequester() },
-    onReply: () -> Unit
+    onReply: () -> Unit,
+    title: String?
 ) {
     var prevReplyContent by remember { mutableStateOf("") }
     var displayTextField: Boolean by remember { mutableStateOf(false) }
@@ -173,12 +158,6 @@ private fun CreateReplyUi(
         requestDismissAutoCompletePopup = false
     }
 
-    // Quite hacky!
-    /*
-    We do not want to dismiss the popup when the user pressed on their keyboard, so we wait
-    100 ms before we actually dismiss the popup. If in the meantime, the user entered a key again
-    we keep showing the popup.
-     */
     LaunchedEffect(requestDismissAutoCompletePopup) {
         if (requestDismissAutoCompletePopup) {
             delay(100)
@@ -186,95 +165,280 @@ private fun CreateReplyUi(
         }
     }
 
-    Box(modifier = modifier) {
-        if (displayTextField || currentTextFieldValue.text.isNotBlank()) {
-            val tagChars = LocalReplyAutoCompleteHintProvider.current.legalTagChars
-            val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue)
+    Column(modifier = modifier) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            if (displayTextField || currentTextFieldValue.text.isNotBlank()) {
+                val tagChars = LocalReplyAutoCompleteHintProvider.current.legalTagChars
+                val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue)
 
-            var textFieldWidth by remember { mutableIntStateOf(0) }
-            var popupMaxHeight by remember { mutableIntStateOf(0) }
+                var textFieldWidth by remember { mutableIntStateOf(0) }
+                var popupMaxHeight by remember { mutableStateOf(0) }
 
-            if (autoCompleteHints.orEmpty().flatMap { it.items }
-                    .isNotEmpty() && mayShowAutoCompletePopup) {
-                ReplyAutoCompletePopup(
-                    autoCompleteCategories = autoCompleteHints.orEmpty(),
-                    targetWidth = with(LocalDensity.current) { textFieldWidth.toDp() },
-                    maxHeight = with(LocalDensity.current) { popupMaxHeight.toDp() },
-                    popupPositionProvider = ReplyAutoCompletePopupPositionProvider,
-                    performAutoComplete = { replacement ->
-                        replyMode.onUpdate(
-                            performAutoComplete(
-                                currentTextFieldValue,
-                                tagChars,
-                                replacement
+                if (autoCompleteHints.orEmpty().flatMap { it.items }
+                        .isNotEmpty() && mayShowAutoCompletePopup) {
+                    ReplyAutoCompletePopup(
+                        autoCompleteCategories = autoCompleteHints.orEmpty(),
+                        targetWidth = with(LocalDensity.current) { textFieldWidth.toDp() },
+                        maxHeight = with(LocalDensity.current) { popupMaxHeight.toDp() },
+                        popupPositionProvider = ReplyAutoCompletePopupPositionProvider,
+                        performAutoComplete = { replacement ->
+                            replyMode.onUpdate(
+                                performAutoComplete(
+                                    currentTextFieldValue,
+                                    tagChars,
+                                    replacement
+                                )
                             )
-                        )
-                    },
-                    onDismissRequest = {
-                        requestDismissAutoCompletePopup = true
-                    }
-                )
-            }
+                        },
+                        onDismissRequest = {
+                            requestDismissAutoCompletePopup = true
+                        }
+                    )
+                }
 
-            MarkdownTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onSizeChanged { textFieldWidth = it.width }
-                    .padding(vertical = 8.dp, horizontal = 8.dp)
-                    .onGloballyPositioned { coordinates ->
-                        val textFieldWindowTopLeft = coordinates.localToWindow(Offset.Zero)
-                        popupMaxHeight = textFieldWindowTopLeft.y.toInt()
-                    }
-                    .testTag(TEST_TAG_REPLY_TEXT_FIELD),
-                textFieldValue = currentTextFieldValue,
-                onTextChanged = replyMode::onUpdate,
-                focusRequester = focusRequester,
-                onFocusLost = {
-                    if (displayTextField && currentTextFieldValue.text.isEmpty()) {
-                        displayTextField = false
-                    }
-                },
-                sendButton = {
-                    IconButton(
-                        modifier = Modifier.testTag(TEST_TAG_REPLY_SEND_BUTTON),
-                        onClick = onReply,
-                        enabled = currentTextFieldValue.text.isNotBlank()
-                    ) {
-                        Icon(
-                            imageVector = when (replyMode) {
-                                is ReplyMode.EditMessage -> Icons.Default.Edit
-                                is ReplyMode.NewMessage -> Icons.Default.Send
-                            },
-                            contentDescription = null
-                        )
-                    }
-                },
-                topRightButton = {
-                    if (replyMode is ReplyMode.EditMessage) {
-                        IconButton(onClick = replyMode.onCancelEditMessage) {
-                            Icon(imageVector = Icons.Default.Cancel, contentDescription = null)
+                MarkdownTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onSizeChanged { textFieldWidth = it.width }
+                        .padding(vertical = 8.dp, horizontal = 8.dp)
+                        .onGloballyPositioned { coordinates ->
+                            val textFieldWindowTopLeft = coordinates.localToWindow(Offset.Zero)
+                            popupMaxHeight = textFieldWindowTopLeft.y.toInt()
+                        }
+                        .testTag(TEST_TAG_REPLY_TEXT_FIELD),
+                    textFieldValue = currentTextFieldValue,
+                    onTextChanged = replyMode::onUpdate,
+                    focusRequester = focusRequester,
+                    onFocusLost = {
+                        if (displayTextField && currentTextFieldValue.text.isEmpty()) {
+                            displayTextField = false
+                        }
+                    },
+                    sendButton = {
+                        IconButton(
+                            modifier = Modifier.testTag(TEST_TAG_REPLY_SEND_BUTTON),
+                            onClick = onReply,
+                            enabled = currentTextFieldValue.text.isNotBlank()
+                        ) {
+                            Icon(
+                                imageVector = when (replyMode) {
+                                    is ReplyMode.EditMessage -> Icons.Default.Edit
+                                    is ReplyMode.NewMessage -> Icons.Default.Send
+                                },
+                                contentDescription = null
+                            )
+                        }
+                    },
+                    topRightButton = {
+                        if (replyMode is ReplyMode.EditMessage) {
+                            IconButton(onClick = replyMode.onCancelEditMessage) {
+                                Icon(imageVector = Icons.Default.Cancel, contentDescription = null)
+                            }
                         }
                     }
-                }
-            )
+                )
 
-            LaunchedEffect(requestFocus) {
-                if (requestFocus) {
-                    focusRequester.requestFocus()
-                    requestFocus = false
+                LaunchedEffect(requestFocus) {
+                    if (requestFocus) {
+                        focusRequester.requestFocus()
+                        requestFocus = false
+                    }
                 }
+            } else {
+                UnfocusedPreviewReplyTextField({
+                    displayTextField = true
+                    requestFocus = true
+                }, title = title)
             }
-        } else {
-            UnfocusedPreviewReplyTextField {
-                displayTextField = true
-                requestFocus = true
-            }
+        }
+
+        if (displayTextField || currentTextFieldValue.text.isNotBlank()) {
+            FormattingOptions(
+                currentTextFieldValue = currentTextFieldValue,
+                onTextChanged = replyMode::onUpdate
+            )
         }
     }
 }
 
+enum class MarkdownStyle(val startTag: String, val endTag: String) {
+    Bold("**", "**"),
+    Italic("*", "*"),
+    Underline("<ins>", "</ins>"),
+    InlineCode("`", "`"),
+    CodeBlock("```", "```"),
+    Blockquote("> ", "")
+}
+
 @Composable
-private fun UnfocusedPreviewReplyTextField(onRequestShowTextField: () -> Unit) {
+private fun FormattingOptions(
+    currentTextFieldValue: TextFieldValue,
+    onTextChanged: (TextFieldValue) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.Start
+    ) {
+        // Bold Button
+        IconButton(onClick = {
+            applyMarkdownStyle(
+                style = MarkdownStyle.Bold,
+                currentTextFieldValue = currentTextFieldValue,
+                onTextChanged = onTextChanged
+            )
+        }) {
+            Text(
+                text = "B",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+            )
+        }
+
+        // Italic Button
+        IconButton(onClick = {
+            applyMarkdownStyle(
+                style = MarkdownStyle.Italic,
+                currentTextFieldValue = currentTextFieldValue,
+                onTextChanged = onTextChanged
+            )
+        }) {
+            Text(
+                text = "I",
+                style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic)
+            )
+        }
+
+        // Underline Button
+        IconButton(onClick = {
+            applyMarkdownStyle(
+                style = MarkdownStyle.Underline,
+                currentTextFieldValue = currentTextFieldValue,
+                onTextChanged = onTextChanged
+            )
+        }) {
+            Text(
+                text = "U",
+                style = MaterialTheme.typography.bodyMedium.copy(textDecoration = TextDecoration.Underline)
+            )
+        }
+
+        // Inline Code Button
+        IconButton(onClick = {
+            applyMarkdownStyle(
+                style = MarkdownStyle.InlineCode,
+                currentTextFieldValue = currentTextFieldValue,
+                onTextChanged = onTextChanged
+            )
+        }) {
+            Text(
+                text = "</>",
+                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
+            )
+        }
+        
+        // Code Block Button
+        IconButton(onClick = {
+            applyMarkdownStyle(
+                style = MarkdownStyle.CodeBlock,
+                currentTextFieldValue = currentTextFieldValue,
+                onTextChanged = onTextChanged
+            )
+        }) {
+            Text(
+                text = "{ }",
+                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
+            )
+        }
+
+        // Blockquote Button
+        IconButton(onClick = {
+            applyMarkdownStyle(
+                style = MarkdownStyle.Blockquote,
+                currentTextFieldValue = currentTextFieldValue,
+                onTextChanged = onTextChanged
+            )
+        }) {
+            Text(
+                text = "\"",
+                style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic)
+            )
+        }
+    }
+}
+
+private fun applyMarkdownStyle(
+    style: MarkdownStyle,
+    currentTextFieldValue: TextFieldValue,
+    onTextChanged: (TextFieldValue) -> Unit
+) {
+    val selection = currentTextFieldValue.selection
+    val text = currentTextFieldValue.text
+
+    val startTag = style.startTag
+    val endTag = style.endTag
+
+    if (selection.collapsed) {
+        // No text selected
+        if (style == MarkdownStyle.CodeBlock) {
+            // Insert code block with newlines
+            val newText = text.substring(0, selection.start) +
+                    "$startTag\n\n$endTag" +
+                    text.substring(selection.end)
+            val newCursorPosition = selection.start + startTag.length + 1
+            onTextChanged(
+                TextFieldValue(
+                    text = newText,
+                    selection = TextRange(newCursorPosition, newCursorPosition)
+                )
+            )
+        } else {
+            // Other styles
+            val newText = text.substring(0, selection.start) + startTag + endTag + text.substring(selection.end)
+            val newCursorPosition = selection.start + startTag.length
+            onTextChanged(
+                TextFieldValue(
+                    text = newText,
+                    selection = TextRange(newCursorPosition, newCursorPosition)
+                )
+            )
+        }
+    } else {
+        val selectedText = text.substring(selection.start, selection.end)
+        if (style == MarkdownStyle.CodeBlock) {
+            val newText = text.substring(0, selection.start) +
+                    "$startTag\n$selectedText\n$endTag" +
+                    text.substring(selection.end)
+            val newSelection = TextRange(
+                selection.start + startTag.length + 1,
+                selection.end + startTag.length + 1
+            )
+            onTextChanged(
+                TextFieldValue(
+                    text = newText,
+                    selection = newSelection
+                )
+            )
+        } else {
+            val newText = text.substring(0, selection.start) +
+                    startTag +
+                    selectedText +
+                    endTag +
+                    text.substring(selection.end)
+            val newSelection = TextRange(selection.end + startTag.length + endTag.length)
+            onTextChanged(
+                TextFieldValue(
+                    text = newText,
+                    selection = newSelection
+                )
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun UnfocusedPreviewReplyTextField(onRequestShowTextField: () -> Unit, title: String?) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -283,7 +447,7 @@ private fun UnfocusedPreviewReplyTextField(onRequestShowTextField: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(id = R.string.create_answer_click_to_write),
+            text = title.toString(),
             modifier = Modifier
                 .padding(vertical = 8.dp)
                 .weight(1f)
@@ -452,7 +616,8 @@ private fun ReplyTextFieldPreview() {
             ) {
                 CompletableDeferred()
             },
-            updateFailureState = {}
+            updateFailureState = {},
+            title = "Replying.."
         )
     }
 }

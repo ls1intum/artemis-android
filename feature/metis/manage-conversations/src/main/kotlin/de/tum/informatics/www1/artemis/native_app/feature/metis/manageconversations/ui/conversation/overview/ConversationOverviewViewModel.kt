@@ -183,24 +183,50 @@ class ConversationOverviewViewModel(
     private val conversationsAsCollections: StateFlow<DataState<de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections>> =
         combine(
             updatedConversations,
-            currentPreferences
-        ) { conversationsDataState, preferences ->
+            currentPreferences,
+            query
+        ) { conversationsDataState, preferences, query ->
             conversationsDataState.bind { conversations ->
+                val isFiltering = query.isNotBlank()
+
                 de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections(
                     channels = conversations.filterNotHiddenNorFavourite<ChannelChat>()
-                        .asCollection(preferences.channelsExpanded),
+                        .filter { !it.filterPredicate("exercise") && !it.filterPredicate("lecture") && !it.filterPredicate("exam") }
+                        .asCollection(isFiltering || preferences.generalsExpanded),
+
                     groupChats = conversations.filterNotHiddenNorFavourite<GroupChat>()
-                        .asCollection(preferences.groupChatsExpanded),
+                        .asCollection(isFiltering || preferences.groupChatsExpanded),
+
                     directChats = conversations.filterNotHiddenNorFavourite<OneToOneChat>()
-                        .asCollection(preferences.personalConversationsExpanded),
+                        .asCollection(isFiltering || preferences.personalConversationsExpanded),
+
                     favorites = conversations.filter { it.isFavorite }
                         .asCollection(preferences.favouritesExpanded),
+
                     hidden = conversations.filter { it.isHidden }
-                        .asCollection(preferences.hiddenExpanded)
+                        .asCollection(preferences.hiddenExpanded),
+
+                    exerciseChannels = conversations.filter {
+                        it is ChannelChat && !it.isFavorite && !it.isHidden && it.filterPredicate("exercise")
+                    }.map { it as ChannelChat }
+                        .asCollection(isFiltering || preferences.exercisesExpanded, showPrefix = false),
+
+                    lectureChannels = conversations.filter {
+                        it is ChannelChat && !it.isFavorite && !it.isHidden && it.filterPredicate("lecture")
+                    }.map { it as ChannelChat }
+                        .asCollection(isFiltering || preferences.lecturesExpanded, showPrefix = false),
+
+                    examChannels = conversations.filter {
+                        it is ChannelChat && !it.isFavorite && !it.isHidden && it.filterPredicate("exam")
+                    }.map { it as ChannelChat }
+                        .asCollection(isFiltering || preferences.examsExpanded, showPrefix = false)
                 )
             }
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+
+
 
     /**
      * Holds the latest conversations we could successfully load.
@@ -359,8 +385,20 @@ class ConversationOverviewViewModel(
         expandOrCollapseSection { copy(favouritesExpanded = !favouritesExpanded) }
     }
 
-    fun toggleChannelsExpanded() {
-        expandOrCollapseSection { copy(channelsExpanded = !channelsExpanded) }
+    fun toggleGeneralsExpanded() {
+        expandOrCollapseSection { copy(generalsExpanded = !generalsExpanded) }
+    }
+
+    fun toggleExamsExpanded() {
+        expandOrCollapseSection { copy(examsExpanded = !examsExpanded) }
+    }
+
+    fun toggleExercisesExpanded() {
+        expandOrCollapseSection { copy(exercisesExpanded = !exercisesExpanded) }
+    }
+
+    fun toggleLecturesExpanded() {
+        expandOrCollapseSection { copy(lecturesExpanded = !lecturesExpanded) }
     }
 
     fun toggleGroupChatsExpanded() {
@@ -391,6 +429,7 @@ class ConversationOverviewViewModel(
     }
 
     private fun <T : Conversation> List<T>.asCollection(
-        isExpanded: Boolean
-    ) = ConversationCollection(this, isExpanded)
+        isExpanded: Boolean,
+        showPrefix: Boolean = true
+    ) = ConversationCollection(this, isExpanded, showPrefix)
 }

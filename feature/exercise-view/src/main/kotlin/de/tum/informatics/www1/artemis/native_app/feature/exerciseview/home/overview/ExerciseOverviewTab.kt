@@ -2,9 +2,12 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.ove
 
 import android.annotation.SuppressLint
 import android.webkit.WebView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
@@ -15,7 +18,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ArtemisWe
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 internal fun ExerciseOverviewTab(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     exercise: Exercise,
     webViewState: WebViewState?,
     serverUrl: String,
@@ -24,23 +27,40 @@ internal fun ExerciseOverviewTab(
     webView: WebView?,
     actions: ExerciseActions
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Spacer(modifier = Modifier)
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.White),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+
 
         ParticipationStatusUi(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             exercise = exercise,
             actions = actions
         )
 
         if (exercise !is QuizExercise && webViewState != null) {
             ArtemisWebView(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 webViewState = webViewState,
                 webView = webView,
                 serverUrl = serverUrl,
                 authToken = authToken,
                 setWebView = setWebView
+            )
+        } else {
+            Text(
+                text = "No problem statement available.",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                color = Color.Gray
             )
         }
     }

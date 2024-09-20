@@ -10,7 +10,10 @@ interface ConversationPreferenceService {
 
     data class Preferences(
         val favouritesExpanded: Boolean,
-        val channelsExpanded: Boolean,
+        val generalsExpanded: Boolean,
+        val examsExpanded: Boolean,
+        val exercisesExpanded: Boolean,
+        val lecturesExpanded: Boolean,
         val groupChatsExpanded: Boolean,
         val personalConversationsExpanded: Boolean,
         val hiddenExpanded: Boolean
