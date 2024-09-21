@@ -114,7 +114,6 @@ class BrowseChannelsE2eTest : ConversationBaseTest() {
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
                 onNavigateToConversation = onNavigateToConversation,
-                onNavigateToCreateChannel = { },
                 onNavigateBack = {}
             )
         }

@@ -395,12 +395,14 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
                 viewModel = viewModel,
                 onNavigateToConversation = {},
                 onRequestCreatePersonalConversation = { },
-                onRequestAddChannel = {}
+                onRequestAddChannel = {},
+                onRequestBrowseChannel = {},
+                canCreateChannel = false
             )
         }
 
         composeTestRule.waitUntilAtLeastOneExists(
-            hasText(context.getString(R.string.conversation_overview_section_channels)),
+            hasText(context.getString(R.string.conversation_overview_section_general_channels)),
             DefaultTimeoutMillis
         )
 
