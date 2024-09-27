@@ -150,23 +150,27 @@ internal fun ConversationList(
             ) { Icon(imageVector = Icons.Default.School, contentDescription = null) }
         }
 
-        listWithHeader(
-            conversationCollections.groupChats,
-            SECTION_GROUPS_KEY,
-            KEY_SUFFIX_GROUPS,
-            R.string.conversation_overview_section_groups,
-            OnClickAction(onRequestCreatePersonalConversation),
-            viewModel::toggleGroupChatsExpanded
-        ) { Icon(imageVector = Icons.Default.Forum, contentDescription = null) }
+        if (conversationCollections.groupChats.conversations.isNotEmpty()) {
+            listWithHeader(
+                conversationCollections.groupChats,
+                SECTION_GROUPS_KEY,
+                KEY_SUFFIX_GROUPS,
+                R.string.conversation_overview_section_groups,
+                OnClickAction(onRequestCreatePersonalConversation),
+                viewModel::toggleGroupChatsExpanded
+            ) { Icon(imageVector = Icons.Default.Forum, contentDescription = null) }
+        }
 
-        listWithHeader(
-            conversationCollections.directChats,
-            SECTION_DIRECT_MESSAGES_KEY,
-            KEY_SUFFIX_PERSONAL,
-            R.string.conversation_overview_section_direct_messages,
-            OnClickAction(onRequestCreatePersonalConversation),
-            viewModel::togglePersonalConversationsExpanded
-        ) { Icon(imageVector = Icons.Default.Message, contentDescription = null) }
+        if (conversationCollections.directChats.conversations.isNotEmpty()) {
+            listWithHeader(
+                conversationCollections.directChats,
+                SECTION_DIRECT_MESSAGES_KEY,
+                KEY_SUFFIX_PERSONAL,
+                R.string.conversation_overview_section_direct_messages,
+                OnClickAction(onRequestCreatePersonalConversation),
+                viewModel::togglePersonalConversationsExpanded
+            ) { Icon(imageVector = Icons.Default.Message, contentDescription = null) }
+        }
 
         if (conversationCollections.hidden.conversations.isNotEmpty()) {
             listWithHeader(
