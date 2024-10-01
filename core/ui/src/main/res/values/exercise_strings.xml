@@ -3,7 +3,7 @@
 <resources>
 
     <string name="exercise_item_due_date_set">Due date: %1$s</string>
-    <string name="exercise_item_due_date_not_set">No date associated</string>
+    <string name="exercise_item_due_date_not_set">No due date</string>
 
     <!--  Difficulty  -->
     <string name="exercise_difficulty_easy">Easy</string>
