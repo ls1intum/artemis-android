@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -200,7 +200,7 @@ private fun EmojiReactionBar(
             disabled = false
         ) {
             Icon(
-                imageVector = Icons.Default.MoreHoriz,
+                imageVector = Icons.Default.AddReaction,
                 contentDescription = null
             )
         }

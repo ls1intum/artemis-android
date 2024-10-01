@@ -106,10 +106,13 @@ fun `Metis - Conversation Overview`() {
             ): Flow<ConversationPreferenceService.Preferences> = flowOf(
                 ConversationPreferenceService.Preferences(
                     favouritesExpanded = true,
-                    channelsExpanded = true,
+                    generalsExpanded = true,
                     groupChatsExpanded = true,
                     personalConversationsExpanded = true,
-                    hiddenExpanded = false
+                    hiddenExpanded = false,
+                    examsExpanded = true,
+                    exercisesExpanded = true,
+                    lecturesExpanded = true,
                 )
             )
 
@@ -140,7 +143,9 @@ fun `Metis - Conversation Overview`() {
                     viewModel = viewModel,
                     onNavigateToConversation = {},
                     onRequestCreatePersonalConversation = {},
-                    onRequestAddChannel = {}
+                    onRequestAddChannel = {},
+                    onRequestBrowseChannel = {},
+                    canCreateChannel = false,
                 )
             },
             onNavigateBack = { },
@@ -249,7 +254,8 @@ fun `Metis - Conversation Channel`() {
                                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                                 bottomItem = null,
                                 onClickViewPost = {},
-                                onRequestRetrySend = {}
+                                onRequestRetrySend = {},
+                                title = ""
                             )
                         }
                     )

@@ -27,5 +27,7 @@ data class OneToOneChat(
     override fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation =
         copy(unreadMessagesCount = unreadMessagesCount)
 
-    override fun filterPredicate(query: String): Boolean = query in humanReadableTitle
+    override fun filterPredicate(query: String): Boolean {
+        return humanReadableTitle.contains(query, ignoreCase = true)
+    }
 }

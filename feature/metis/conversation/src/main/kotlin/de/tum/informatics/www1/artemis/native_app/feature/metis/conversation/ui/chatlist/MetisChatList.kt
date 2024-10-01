@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
@@ -42,6 +44,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.S
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import kotlinx.coroutines.Deferred
@@ -64,7 +67,8 @@ internal fun MetisChatList(
     listContentPadding: PaddingValues,
     state: LazyListState = rememberLazyListState(),
     isReplyEnabled: Boolean = true,
-    onClickViewPost: (StandalonePostId) -> Unit
+    onClickViewPost: (StandalonePostId) -> Unit,
+    title: String? = "Replying..."
 ) {
     ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
 
@@ -74,6 +78,14 @@ internal fun MetisChatList(
     val serverUrl by viewModel.serverUrl.collectAsState()
 
     val bottomItem: PostPojo? by viewModel.chatListUseCase.bottomPost.collectAsState()
+
+    val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
+
+    val updatedTitle by remember(conversationDataState) {
+        derivedStateOf {
+            conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
+        }
+    }
 
     MetisChatList(
         modifier = modifier,
@@ -92,7 +104,8 @@ internal fun MetisChatList(
         onDeletePost = viewModel::deletePost,
         onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
         onClickViewPost = onClickViewPost,
-        onRequestRetrySend = viewModel::retryCreatePost
+        onRequestRetrySend = viewModel::retryCreatePost,
+        title = updatedTitle
     )
 }
 
@@ -114,7 +127,8 @@ fun MetisChatList(
     onDeletePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
-    onRequestRetrySend: (StandalonePostId) -> Unit
+    onRequestRetrySend: (StandalonePostId) -> Unit,
+    title: String
 ) {
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
@@ -181,7 +195,8 @@ fun MetisChatList(
                 ReplyTextField(
                     modifier = Modifier.fillMaxWidth(),
                     replyMode = replyMode,
-                    updateFailureState = updateFailureStateDelegate
+                    updateFailureState = updateFailureStateDelegate,
+                    title = title,
                 )
             }
         }
