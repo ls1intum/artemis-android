@@ -3,8 +3,10 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,7 +47,9 @@ internal fun LectureListUi(
             getItemId = { id ?: 0L }
         ) { lecture ->
             LectureListItem(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
                 lecture = lecture,
                 onClick = { onClickLecture(lecture) }
             )
@@ -63,9 +67,26 @@ private fun LectureListItem(modifier: Modifier, lecture: Lecture, onClick: () ->
         )
     } else stringResource(id = R.string.course_ui_lecture_item_start_date_not_set)
 
-    ListItem(
-        modifier = modifier.clickable(onClick = onClick),
-        headlineContent = { Text(text = lecture.title) },
-        supportingContent = { Text(text = startTimeText) }
-    )
+    Card(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // TODO: add teacher image next to title
+            Text(
+                text = lecture.title,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Text(
+                text = startTimeText,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
 }
