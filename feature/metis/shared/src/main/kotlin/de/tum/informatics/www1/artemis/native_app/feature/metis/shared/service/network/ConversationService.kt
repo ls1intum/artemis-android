@@ -132,6 +132,14 @@ interface ConversationService {
         authToken: String,
         serverUrl: String
     ): NetworkResponse<Boolean>
+
+    suspend fun markConversationMuted(
+        courseId: Long,
+        conversationId: Long,
+        muted: Boolean,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean>
 }
 
 suspend fun ConversationService.getConversation(

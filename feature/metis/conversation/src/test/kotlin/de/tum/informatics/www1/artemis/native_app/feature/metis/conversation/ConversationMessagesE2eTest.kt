@@ -218,7 +218,7 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
             ).orThrow("Could not edit message")
 
             val editedPost = metisService
-                .getPost(metisContext, basePost.serverPostId, testServerUrl, accessToken)
+                .getPost(metisContext, basePost.serverPostId!!, testServerUrl, accessToken)
                 .orThrow("Could not download edited post")
 
             assertEquals(newText, editedPost.content, "Edited post does not have the updated text content")

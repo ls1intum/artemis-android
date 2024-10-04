@@ -29,6 +29,8 @@ dependencies {
     implementation(libs.androidx.emoji2.views)
     implementation(libs.androidx.emoji2.views.helper)
     implementation(libs.androidx.emoji2.emojiPicker)
+    implementation(libs.koin.androidx.workmanager)
+    implementation(libs.androidx.work.runtime.ktx)
 
     implementation(libs.androidx.dataStore.preferences)
 

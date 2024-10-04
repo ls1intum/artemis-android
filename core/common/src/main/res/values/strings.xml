@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="push_notification_channel_misc_name">Miscellaneous</string>
+    <string name="push_notification_channel_misc_description">All non-communication related notifications.</string>
+
+    <string name="push_notification_channel_communication_name">Communication</string>
+    <string name="push_notification_channel_communication_description">New messages in channels, group chats and personal chats.</string>
+</resources>

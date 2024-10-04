@@ -2,8 +2,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.not
 
 import android.content.Context
 import androidx.core.app.NotificationCompat
-import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationChannel
-import de.tum.informatics.www1.artemis.native_app.feature.push.ArtemisNotificationManager
+import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ArtemisNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationArtemisNotification

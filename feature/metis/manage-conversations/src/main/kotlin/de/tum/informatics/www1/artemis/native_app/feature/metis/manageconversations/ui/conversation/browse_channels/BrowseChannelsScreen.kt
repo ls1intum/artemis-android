@@ -1,21 +1,24 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.browse_channels
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,9 +30,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptionsBuilder
+import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
@@ -37,7 +38,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.ChannelIcons
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.courseNavGraphBuilderExtensions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.koinViewModel
@@ -50,14 +50,12 @@ fun BrowseChannelsScreen(
     modifier: Modifier,
     courseId: Long,
     onNavigateToConversation: (conversationId: Long) -> Unit,
-    onNavigateToCreateChannel: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     BrowseChannelsScreen(
         modifier = modifier,
         viewModel = koinViewModel { parametersOf(courseId) },
         onNavigateToConversation = onNavigateToConversation,
-        onNavigateToCreateChannel = onNavigateToCreateChannel,
         onNavigateBack = onNavigateBack
     )
 }
@@ -67,10 +65,12 @@ internal fun BrowseChannelsScreen(
     modifier: Modifier,
     viewModel: BrowseChannelsViewModel,
     onNavigateToConversation: (conversationId: Long) -> Unit,
-    onNavigateToCreateChannel: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    val canCreateChannel: Boolean by viewModel.canCreateChannel.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.requestReload()
+    }
 
     val channelsDataState by viewModel.channels.collectAsState()
 
@@ -98,13 +98,7 @@ internal fun BrowseChannelsScreen(
                 navigationIcon = { NavigationBackButton(onNavigateBack) }
             )
         },
-        floatingActionButton = {
-            if (canCreateChannel) {
-                FloatingActionButton(onClick = onNavigateToCreateChannel) {
-                    Icon(imageVector = Icons.Default.Create, contentDescription = null)
-                }
-            }
-        }
+
     ) { padding ->
         BasicDataStateUi(
             modifier = Modifier
@@ -159,20 +153,57 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
     ListItem(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
             .testTag(testTagForBrowsedChannelItem(channelChat.id)),
         leadingContent = {
             ChannelIcons(channelChat)
         },
         headlineContent = { Text(channelChat.name) },
         supportingContent = {
-            Text(
-                text = pluralStringResource(
-                    id = R.plurals.browse_channel_channel_item_member_count,
-                    count = channelChat.numberOfMembers,
-                    channelChat.numberOfMembers
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (channelChat.isMember) {
+                    Text(
+                        text = stringResource(id = R.string.joined_channel),
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .background(
+                                MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+
+                Text(
+                    text = pluralStringResource(
+                        id = R.plurals.browse_channel_channel_item_member_count,
+                        count = channelChat.numberOfMembers,
+                        channelChat.numberOfMembers
+                    )
                 )
-            )
+            }
+        },
+        trailingContent = {
+            if (!channelChat.isMember) {
+                Button(
+                    onClick = onClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    shape = RoundedCornerShape(4.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    modifier = Modifier
+                        .wrapContentSize()
+                ) {
+                    Text(text = stringResource(id = R.string.join_button_title))
+                }
+            }
         }
     )
 }
+
+

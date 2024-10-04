@@ -14,7 +14,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
-import java.lang.RuntimeException
 
 @OptIn(ExperimentalPagingApi::class)
 internal class MetisRemoteMediator(
@@ -69,8 +68,7 @@ internal class MetisRemoteMediator(
         metisStorageService.insertOrUpdatePosts(
             host = host,
             metisContext = context,
-            posts = loadedPosts,
-            clearPreviousPosts = false
+            posts = loadedPosts
         )
 
         return MediatorResult.Success(

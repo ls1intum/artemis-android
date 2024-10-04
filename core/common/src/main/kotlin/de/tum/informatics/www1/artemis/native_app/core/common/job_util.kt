@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.push
+package de.tum.informatics.www1.artemis.native_app.core.common
 
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints

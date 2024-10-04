@@ -31,16 +31,16 @@ internal class CreateChannelViewModel(
     private companion object {
         private const val KEY_NAME = "name"
         private const val KEY_DESCRIPTION = "description"
-        private const val KEY_IS_PUBLIC = "is_public"
+        private const val KEY_IS_PRIVATE = "is_private"
         private const val KEY_IS_ANNOUNCEMENT = "announcement"
     }
 
     val name: StateFlow<String> = savedStateHandle.getStateFlow(KEY_NAME, "")
     val description: StateFlow<String> = savedStateHandle.getStateFlow(KEY_DESCRIPTION, "")
 
-    val isPublic: StateFlow<Boolean> = savedStateHandle.getStateFlow(KEY_IS_PUBLIC, true)
+    val isPrivate: StateFlow<Boolean> = savedStateHandle.getStateFlow(KEY_IS_PRIVATE, false)
     val isAnnouncement: StateFlow<Boolean> =
-        savedStateHandle.getStateFlow(KEY_IS_ANNOUNCEMENT, true)
+        savedStateHandle.getStateFlow(KEY_IS_ANNOUNCEMENT, false)
 
     val isNameIllegal: StateFlow<Boolean> = name
         .mapIsChannelNameIllegal()
@@ -65,7 +65,7 @@ internal class CreateChannelViewModel(
                 courseId = courseId,
                 name = name.value,
                 description = description.value,
-                isPublic = isPublic.value,
+                isPublic = !isPrivate.value,
                 isAnnouncement = isAnnouncement.value,
                 authToken = authToken,
                 serverUrl = serverUrl
@@ -81,8 +81,8 @@ internal class CreateChannelViewModel(
         savedStateHandle[KEY_DESCRIPTION] = description
     }
 
-    fun updatePublic(isPublic: Boolean) {
-        savedStateHandle[KEY_IS_PUBLIC] = isPublic
+    fun updatePublic(isPrivate: Boolean) {
+        savedStateHandle[KEY_IS_PRIVATE] = isPrivate
     }
 
     fun updateAnnouncement(isAnnouncement: Boolean) {

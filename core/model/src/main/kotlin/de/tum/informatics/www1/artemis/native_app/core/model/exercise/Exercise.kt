@@ -39,13 +39,15 @@ sealed class Exercise {
     abstract val mode: Mode
     abstract val categories: List<Category>
     abstract val visibleToStudents: Boolean?
+    abstract val secondCorrectionEnabled: Boolean?
+    abstract val presentationScoreEnabled: Boolean?
     abstract val teamMode: Boolean
     abstract val studentAssignedTeamId: Long?
     abstract val studentAssignedTeamIdComputed: Boolean
     abstract val problemStatement: String?
     abstract val assessmentType: AssessmentType?
     abstract val allowComplaintsForAutomaticAssessments: Boolean?
-    abstract val allowManualFeedbackRequests: Boolean?
+    abstract val allowFeedbackRequests: Boolean?
     abstract val includedInOverallScore: IncludedInOverallScore
     abstract val exampleSolutionPublicationDate: Instant?
     abstract val studentParticipations: List<Participation>?

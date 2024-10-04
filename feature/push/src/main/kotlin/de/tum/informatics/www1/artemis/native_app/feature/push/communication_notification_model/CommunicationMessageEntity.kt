@@ -12,15 +12,14 @@ import kotlinx.datetime.Instant
     foreignKeys = [
         ForeignKey(
             entity = PushCommunicationEntity::class,
-            parentColumns = ["parent_id", "type"],
-            childColumns = ["communication_parent_id", "communication_type"],
+            parentColumns = ["parent_id"],
+            childColumns = ["communication_parent_id"],
             onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [
         Index(
             "communication_parent_id",
-            "communication_type",
             name = "i_communication_parent_id_communication_type"
         )
     ]
@@ -31,8 +30,6 @@ data class CommunicationMessageEntity(
     val id: Long = 0,
     @ColumnInfo(name = "communication_parent_id")
     val communicationParentId: Long,
-    @ColumnInfo(name = "communication_type")
-    val communicationType: CommunicationType,
     @ColumnInfo(name = "title")
     val title: String?,
     @ColumnInfo(name = "text")

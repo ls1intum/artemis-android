@@ -24,7 +24,7 @@ plugins {
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
-    val versionName = "0.8.0"
+    val versionName = "0.9.0"
     val versionCode =
         if (!System.getenv("bamboo_buildNumber")
                 .isNullOrEmpty()

@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -80,20 +80,22 @@ internal fun PostContextBottomSheet(
                     .fillMaxWidth()
                     .padding(horizontal = Spacings.ScreenHorizontalSpacing)
             ) {
-                EmojiReactionBar(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    presentReactions = post.reactions.orEmpty(),
-                    clientId = clientId,
-                    onReactWithEmoji = {
-                        onDismissRequest()
-                        postActions.onClickReaction(it, true)
-                    },
-                    onRequestViewMoreEmojis = {
-                        displayAllEmojis = true
-                    }
-                )
+                postActions.onClickReaction?.let { onClickReaction ->
+                    EmojiReactionBar(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        presentReactions = post.reactions.orEmpty(),
+                        clientId = clientId,
+                        onReactWithEmoji = { emojiId ->
+                            onDismissRequest()
+                            onClickReaction(emojiId, true)
+                        },
+                        onRequestViewMoreEmojis = {
+                            displayAllEmojis = true
+                        }
+                    )
+                }
 
                 if (postActions.canPerformAnyAction) {
                     Divider()
@@ -147,13 +149,15 @@ internal fun PostContextBottomSheet(
             }
         }
     } else {
-        EmojiDialog(
-            onDismissRequest = onDismissRequest,
-            onSelectEmoji = {
-                onDismissRequest()
-                postActions.onClickReaction(it, true)
-            }
-        )
+        postActions.onClickReaction?.let { onClickReaction ->
+            EmojiDialog(
+                onDismissRequest = onDismissRequest,
+                onSelectEmoji = { emojiId ->
+                    onDismissRequest()
+                    onClickReaction(emojiId, true)
+                }
+            )
+        }
     }
 }
 
@@ -196,7 +200,7 @@ private fun EmojiReactionBar(
             disabled = false
         ) {
             Icon(
-                imageVector = Icons.Default.MoreHoriz,
+                imageVector = Icons.Default.AddReaction,
                 contentDescription = null
             )
         }

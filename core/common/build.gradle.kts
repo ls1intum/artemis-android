@@ -9,4 +9,6 @@ android {
 dependencies {
     api(libs.kotlinx.coroutines.android)
     api(libs.kotlinx.datetime)
+
+    api(libs.androidx.work.runtime.ktx)
 }
