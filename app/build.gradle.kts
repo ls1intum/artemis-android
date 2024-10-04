@@ -45,7 +45,7 @@ android {
     }
 
     defaultConfig applicationDefaultConfig@{
-        applicationId = "de.tum.informatics.www1.artemis.native_app.android"
+        applicationId = "de.tum.cit.aet.artemis"
 
         this@applicationDefaultConfig.versionCode = versionCode
         this@applicationDefaultConfig.versionName = versionName
