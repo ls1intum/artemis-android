@@ -8,8 +8,6 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
-import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
-import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -36,13 +34,11 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
@@ -260,17 +256,9 @@ class ConversationChatListUseCase(
     val bottomPost: StateFlow<PostPojo?> = serverConfigurationService
         .host
         .flatMapLatest { host ->
-            metisStorageService.getLatestKnownPost(host, metisContext)
+            metisStorageService.getLatestKnownPost(host, metisContext, true)
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
-    init {
-        viewModelScope.launch(coroutineContext) {
-            onRequestSoftReload.collect {
-
-            }
-        }
-    }
 
     fun updateQuery(new: String) {
         _query.value = new.ifEmpty { null }
@@ -306,7 +294,8 @@ class ConversationChatListUseCase(
         val authToken = accountService.authToken.first()
 
         Log.d(TAG, "Loading newly created posts")
-        val latestKnownPost = metisStorageService.getLatestKnownPost(host, metisContext).first()
+        val latestKnownPost =
+            metisStorageService.getLatestKnownPost(host, metisContext, false).first()
 
         return if (latestKnownPost == null) {
             Log.d(TAG, "There is no latest known post -> loading all posts.")
@@ -367,11 +356,11 @@ class ConversationChatListUseCase(
                             )
 
                             // We have loaded all missing posts. Insert into db.
-                            metisStorageService.insertOrUpdatePosts(
+                            metisStorageService.insertOrUpdatePostsAndRemoveDeletedPosts(
                                 host = host,
                                 metisContext = metisContext,
                                 posts = loadedPosts,
-                                clearPreviousPosts = reachedEndOfPagination
+                                removeAllOlderPosts = true
                             )
 
                             return NetworkResponse.Response(Unit)
@@ -476,12 +465,20 @@ class ConversationChatListUseCase(
             is NetworkResponse.Response -> networkResponse.data
         }
 
-        metisStorageService.insertOrUpdatePosts(
-            host = host,
-            metisContext = metisContext,
-            posts = loadedPosts,
-            clearPreviousPosts = clearPreviousPosts
-        )
+        if (clearPreviousPosts) {
+            metisStorageService.insertOrUpdatePostsAndRemoveDeletedPosts(
+                host = host,
+                metisContext = metisContext,
+                posts = loadedPosts,
+                removeAllOlderPosts = true
+            )
+        } else {
+            metisStorageService.insertOrUpdatePosts(
+                host = host,
+                metisContext = metisContext,
+                posts = loadedPosts
+            )
+        }
 
         return NetworkResponse.Response(loadedPosts.size)
     }

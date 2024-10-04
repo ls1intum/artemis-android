@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.CourseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ExerciseServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl.ServerTimeServiceImpl
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
@@ -24,7 +25,7 @@ val dataModule = module {
 
     single<CourseService> { CourseServiceImpl(get()) }
     single<ExerciseService> { ExerciseServiceImpl(get(), get()) }
-    single<AccountDataService> { AccountDataServiceImpl(get()) }
+    single<AccountDataService> { AccountDataServiceImpl(androidContext(), get(), get()) }
     single<CourseExerciseService> { CourseExerciseServiceImpl(get()) }
     single<ParticipationService> { ParticipationServiceImpl(get()) }
     single<ServerTimeService> { ServerTimeServiceImpl(get()) }

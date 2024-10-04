@@ -8,8 +8,14 @@
     <string name="conversation_overview_conversation_item_mark_as_hidden">Hide</string>
     <string name="conversation_overview_conversation_item_unmark_as_hidden">Unhide</string>
 
+    <string name="conversation_overview_conversation_item_mark_as_muted">Mute</string>
+    <string name="conversation_overview_conversation_item_unmark_as_muted">Unmute</string>
+
     <string name="conversation_overview_section_favorites">Favorites</string>
-    <string name="conversation_overview_section_channels">Channels</string>
+    <string name="conversation_overview_section_general_channels">General</string>
+    <string name="conversation_overview_section_exercise_channels">Exercises</string>
+    <string name="conversation_overview_section_lecture_channels">Lectures</string>
+    <string name="conversation_overview_section_exam_channels">Exams</string>
     <string name="conversation_overview_section_groups">Group Chats</string>
     <string name="conversation_overview_section_direct_messages">Direct Messages</string>
     <string name="conversation_overview_section_hidden">Hidden</string>

@@ -16,6 +16,7 @@ data class OneToOneChat(
     override val unreadMessagesCount: Long? = 0L,
     override val isFavorite: Boolean = false,
     override val isHidden: Boolean = false,
+    override val isMuted: Boolean = false,
     override val isCreator: Boolean = false,
     override val isMember: Boolean = false,
     override val numberOfMembers: Int = 0,
@@ -26,5 +27,7 @@ data class OneToOneChat(
     override fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation =
         copy(unreadMessagesCount = unreadMessagesCount)
 
-    override fun filterPredicate(query: String): Boolean = query in humanReadableTitle
+    override fun filterPredicate(query: String): Boolean {
+        return humanReadableTitle.contains(query, ignoreCase = true)
+    }
 }

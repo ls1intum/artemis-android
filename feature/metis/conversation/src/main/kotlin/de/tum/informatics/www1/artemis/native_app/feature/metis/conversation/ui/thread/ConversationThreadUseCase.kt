@@ -112,8 +112,7 @@ internal class ConversationThreadUseCase(
                 metisStorageService.insertOrUpdatePosts(
                     host = host,
                     metisContext = metisContext,
-                    posts = listOf(post),
-                    clearPreviousPosts = false
+                    posts = listOf(post)
                 )
 
                 val clientSidePostId = metisStorageService.getClientSidePostId(

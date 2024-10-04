@@ -1,13 +1,17 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
-import androidx.work.Data
-import androidx.work.WorkManager
-import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.defaultInternetWorkRequest
+import androidx.room.Update
+import androidx.room.withTransaction
+import androidx.work.OneTimeWorkRequestBuilder
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
@@ -22,9 +26,9 @@ class ReplyReceiver : BroadcastReceiver(), KoinComponent {
     companion object {
         const val REPLY_INTENT_KEY = "reply_text_key"
         const val PARENT_ID = "parent_id"
-        const val COMMUNICATION_TYPE = "communication_type"
     }
 
+    @SuppressLint("EnqueueWork")
     override fun onReceive(context: Context, intent: Intent) {
         RemoteInput.getResultsFromIntent(intent)?.let { remoteInput ->
             val response =
@@ -32,29 +36,51 @@ class ReplyReceiver : BroadcastReceiver(), KoinComponent {
                     .toString()
 
             val parentId = intent.getLongExtra(PARENT_ID, 0)
-            val communicationType = intent.getStringExtra(COMMUNICATION_TYPE) ?: return@let
 
-            if (response.isNotBlank()) {
-                val workRequest = defaultInternetWorkRequest<ReplyWorker>(
-                    Data.Builder()
-                        .putLong(ReplyWorker.KEY_PARENT_ID, parentId)
-                        .putString(ReplyWorker.KEY_COMMUNICATION_TYPE, communicationType)
-                        .putString(ReplyWorker.KEY_REPLY_CONTENT, response)
-                        .build()
-                )
+            val pushCommunicationDatabaseProvider: PushCommunicationDatabaseProvider = get()
 
-                WorkManager.getInstance(context)
-                    .enqueue(workRequest)
+            val (metisContext: MetisContext, postId: Long) = runBlocking {
+                pushCommunicationDatabaseProvider.database.withTransaction {
+                    val communication =
+                        pushCommunicationDatabaseProvider.pushCommunicationDao.getCommunication(parentId)
+
+                    val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
+                        communication.target
+                    )
+                    metisTarget.metisContext to metisTarget.postId
+                }
+            }
+
+            if (response.isNotBlank() && metisContext is MetisContext.Conversation) {
+                val createPostService: CreatePostService = get()
+                createPostService.createAnswerPost(
+                    metisContext.courseId,
+                    metisContext.conversationId,
+                    postId,
+                    response
+                ) { clientSidePostId ->
+                    then(
+                        OneTimeWorkRequestBuilder<UpdateReplyNotificationWorker>()
+                            .setInputData(
+                                BaseCreatePostWorker.createWorkInput(
+                                    metisContext.courseId,
+                                    metisContext.conversationId,
+                                    clientSidePostId,
+                                    response,
+                                    postType = BaseCreatePostWorker.PostType.ANSWER_POST,
+                                    parentPostId = postId
+                                )
+                            )
+                            .build()
+                    )
+                }
             }
 
             val communicationNotificationManager: CommunicationNotificationManager = get()
 
             // Repop the notification to tell the OS we handled the notification
             runBlocking {
-                communicationNotificationManager.repopNotification(
-                    parentId = parentId,
-                    communicationType = CommunicationType.valueOf(communicationType)
-                )
+                communicationNotificationManager.repopNotification(parentId = parentId)
             }
         }
     }

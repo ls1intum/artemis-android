@@ -18,6 +18,9 @@ internal class ConversationPreferenceStorageServiceImpl(private val context: Con
         private const val KEY_GROUP_CHATS_EXPANDED = "group_chats"
         private const val KEY_PERSONAL_CONVERSATIONS_EXPANDED = "personal_conv"
         private const val KEY_HIDDEN_EXPANDED = "hidden"
+        private const val KEY_EXAMS_EXPANDED = "exams"
+        private const val KEY_EXERCISES_EXPANDED = "exercises"
+        private const val KEY_LECTURES_EXPANDED = "lectures"
     }
 
     private val Context.dataStore by preferencesDataStore("conversation_preferences")
@@ -28,20 +31,26 @@ internal class ConversationPreferenceStorageServiceImpl(private val context: Con
     ): Flow<ConversationPreferenceService.Preferences> = context.dataStore.data.map { data ->
         ConversationPreferenceService.Preferences(
             favouritesExpanded = data[getKey(serverUrl, courseId, KEY_FAVOURITES_EXPANDED)] ?: true,
-            channelsExpanded = data[getKey(serverUrl, courseId, KEY_CHANNELS_EXPANDED)] ?: true,
+            generalsExpanded = data[getKey(serverUrl, courseId, KEY_CHANNELS_EXPANDED)] ?: true,
             groupChatsExpanded = data[getKey(serverUrl, courseId, KEY_GROUP_CHATS_EXPANDED)] ?: true,
             personalConversationsExpanded = data[getKey(serverUrl, courseId, KEY_PERSONAL_CONVERSATIONS_EXPANDED)] ?: true,
-            hiddenExpanded = data[getKey(serverUrl, courseId, KEY_HIDDEN_EXPANDED)] ?: false
+            hiddenExpanded = data[getKey(serverUrl, courseId, KEY_HIDDEN_EXPANDED)] ?: false,
+            examsExpanded = data[getKey(serverUrl, courseId, KEY_EXAMS_EXPANDED)] ?: true,
+            exercisesExpanded = data[getKey(serverUrl, courseId, KEY_EXERCISES_EXPANDED)] ?: true,
+            lecturesExpanded = data[getKey(serverUrl, courseId, KEY_LECTURES_EXPANDED)] ?: true,
         )
     }
 
     override suspend fun updatePreferences(serverUrl: String, courseId: Long, preferences: ConversationPreferenceService.Preferences) {
         context.dataStore.edit { data ->
             data[getKey(serverUrl, courseId, KEY_FAVOURITES_EXPANDED)] = preferences.favouritesExpanded
-            data[getKey(serverUrl, courseId, KEY_CHANNELS_EXPANDED)] = preferences.channelsExpanded
+            data[getKey(serverUrl, courseId, KEY_CHANNELS_EXPANDED)] = preferences.generalsExpanded
             data[getKey(serverUrl, courseId, KEY_GROUP_CHATS_EXPANDED)] = preferences.groupChatsExpanded
             data[getKey(serverUrl, courseId, KEY_PERSONAL_CONVERSATIONS_EXPANDED)] = preferences.personalConversationsExpanded
             data[getKey(serverUrl, courseId, KEY_HIDDEN_EXPANDED)] = preferences.hiddenExpanded
+            data[getKey(serverUrl, courseId, KEY_EXAMS_EXPANDED)] = preferences.examsExpanded
+            data[getKey(serverUrl, courseId, KEY_EXERCISES_EXPANDED)] = preferences.exercisesExpanded
+            data[getKey(serverUrl, courseId, KEY_LECTURES_EXPANDED)] = preferences.lecturesExpanded
         }
     }
 

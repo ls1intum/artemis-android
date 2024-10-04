@@ -65,7 +65,8 @@ import io.noties.markwon.linkify.LinkifyPlugin
  * SOFTWARE.
  */
 
-val LocalMarkdownTransformer = compositionLocalOf<ArtemisMarkdownTransformer> { ArtemisMarkdownTransformer }
+val LocalMarkdownTransformer =
+    compositionLocalOf<ArtemisMarkdownTransformer> { ArtemisMarkdownTransformer }
 
 @Composable
 fun MarkdownText(
@@ -131,6 +132,8 @@ fun MarkdownText(
                     true
                 }
             }
+
+            textView.applyStyleAndColor(fontSize, textAlign, color, defaultColor, style)
         },
         onReset = {},
         onRelease = {}
@@ -150,15 +153,6 @@ private fun createTextView(
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null
 ): TextView {
-
-    val textColor = color.takeOrElse { style.color.takeOrElse { defaultColor } }
-    val mergedStyle = style.merge(
-        TextStyle(
-            color = textColor,
-            fontSize = if (fontSize != TextUnit.Unspecified) fontSize else style.fontSize,
-            textAlign = textAlign,
-        )
-    )
     return TextView(context).apply {
         onClick?.let { setOnClickListener { onClick() } }
         onLongClick?.let {
@@ -167,23 +161,45 @@ private fun createTextView(
                 true
             }
         }
-        setTextColor(textColor.toArgb())
         setMaxLines(maxLines)
-        setTextSize(TypedValue.COMPLEX_UNIT_DIP, mergedStyle.fontSize.value)
         highlightColor = android.graphics.Color.TRANSPARENT
 
         viewId?.let { id = viewId }
-        textAlign?.let { align ->
-            textAlignment = when (align) {
-                TextAlign.Left, TextAlign.Start -> View.TEXT_ALIGNMENT_TEXT_START
-                TextAlign.Right, TextAlign.End -> View.TEXT_ALIGNMENT_TEXT_END
-                TextAlign.Center -> View.TEXT_ALIGNMENT_CENTER
-                else -> View.TEXT_ALIGNMENT_TEXT_START
-            }
-        }
 
         fontResource?.let { font ->
             typeface = ResourcesCompat.getFont(context, font)
+        }
+
+        applyStyleAndColor(fontSize, textAlign, color, defaultColor, style)
+    }
+}
+
+private fun TextView.applyStyleAndColor(
+    fontSize: TextUnit,
+    textAlign: TextAlign?,
+    color: Color,
+    defaultColor: Color,
+    style: TextStyle
+) {
+    val textColor = color.takeOrElse { style.color.takeOrElse { defaultColor } }
+
+    val mergedStyle = style.merge(
+        TextStyle(
+            color = textColor,
+            fontSize = if (fontSize != TextUnit.Unspecified) fontSize else style.fontSize,
+            textAlign = textAlign,
+        )
+    )
+
+    setTextColor(textColor.toArgb())
+    setTextSize(TypedValue.COMPLEX_UNIT_DIP, mergedStyle.fontSize.value)
+
+    textAlign?.let { align ->
+        textAlignment = when (align) {
+            TextAlign.Left, TextAlign.Start -> View.TEXT_ALIGNMENT_TEXT_START
+            TextAlign.Right, TextAlign.End -> View.TEXT_ALIGNMENT_TEXT_END
+            TextAlign.Center -> View.TEXT_ALIGNMENT_CENTER
+            else -> View.TEXT_ALIGNMENT_TEXT_START
         }
     }
 }

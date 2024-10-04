@@ -79,7 +79,7 @@ fun LazyPagingItems<ChatListItem>.asPostsDataState(): PostsDataState = when {
         posts = this,
         appendState = when (loadState.append) {
             LoadState.Loading -> PostsDataState.Loading
-            is LoadState.Error -> PostsDataState.Error(::readln)
+            is LoadState.Error -> PostsDataState.Error(::retry)
             is LoadState.NotLoading -> PostsDataState.NotLoading
         }
     )

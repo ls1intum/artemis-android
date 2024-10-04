@@ -24,7 +24,10 @@ dependencies {
     implementation(libs.ktor.client.okhttp)
 
     implementation(libs.koin.core)
+    implementation(libs.koin.android.compat)
     implementation(libs.kotlinx.datetime)
+
+    implementation(libs.androidx.dataStore.preferences)
 
     debugImplementation(libs.ktor.client.cio)
 

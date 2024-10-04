@@ -1,11 +1,24 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
@@ -116,6 +129,10 @@ fun ExerciseActionButtons(
                     )
                 }
             }
+        } else {
+            Row(modifier=Modifier.padding(top=2.dp, bottom = 2.dp)) {
+                InfoMessageCard()
+            }
         }
 
         if (templateStatus is ResultTemplateStatus.WithResult) {
@@ -187,4 +204,30 @@ class BoundExerciseActions(
         onClickViewResult = { onClickViewResult(exerciseId) },
         onClickViewQuizResults = { onClickViewQuizResults(exerciseId) }
     )
+}
+
+
+@Composable
+fun InfoMessageCard() {
+    Box(
+        modifier = Modifier
+            .border(width = 2.dp, color = Color.LightGray)
+            .background(Color(0xFFB3E5FC)) // Light sky blue background
+            .padding(10.dp)
+            .fillMaxWidth()
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Filled.Info,
+                contentDescription = "Information",
+                modifier = Modifier.padding(end = 8.dp),
+                tint = Color(0xFF0288D1) 
+            )
+            Text(
+                text = stringResource(id = R.string.exercise_participation_not_possible),
+                fontSize = 16.sp,
+                color = Color.Black
+            )
+        }
+    }
 }

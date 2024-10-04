@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entiti
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.PostReactionEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostTagEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostingEntity
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
@@ -59,6 +60,14 @@ interface MetisDao {
     @Query("select exists(select * from metis_post_context where client_post_id = :clientPostId and server_post_id = :serverPostId and course_id = :courseId and conversation_id = :conversationId)")
     suspend fun isPostPresentInContext(
         clientPostId: String,
+        serverPostId: Long?,
+        courseId: Long,
+        conversationId: Long
+    ): Boolean
+
+    @Query("select exists(select * from metis_post_context where server_post_id = :serverPostId and course_id = :courseId and conversation_id = :conversationId and server_id = :serverId)")
+    suspend fun isPostPresentInContext(
+        serverId: String,
         serverPostId: Long,
         courseId: Long,
         conversationId: Long
@@ -114,6 +123,9 @@ interface MetisDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertUsers(users: List<MetisUserEntity>)
 
+    @Query("update metis_post_context set server_post_id = :serverSidePostId where client_post_id = :clientSidePostId")
+    suspend fun upgradePost(clientSidePostId: String, serverSidePostId: Long)
+
     @Query(
         """
         delete from metis_post_context where 
@@ -128,9 +140,14 @@ interface MetisDao {
         postingType: BasePostingEntity.PostingType = BasePostingEntity.PostingType.STANDALONE
     )
 
+    @Query("delete from metis_post_context where client_post_id = :clientPostId")
+    suspend fun deletePostingWithClientSideId(
+        clientPostId: String
+    )
+
     @Query("""
         delete from metis_post_context where metis_post_context.server_id = :host and metis_post_context.course_id = :courseId and metis_post_context.conversation_id = :conversationId 
-            and metis_post_context.server_post_id not in (:serverIds) and metis_post_context.type = :postingType
+            and metis_post_context.server_post_id not in (:serverIds) and metis_post_context.server_post_id is not null and metis_post_context.type = :postingType
             and exists (
                 select * from postings p where p.creation_date > :startInstant and p.creation_date < :endInstant and 
                 p.id = metis_post_context.client_post_id
@@ -271,14 +288,16 @@ interface MetisDao {
                 p.type = 'STANDALONE' and
                 sp.post_id = p.id and
                 u.server_id = mpc.server_id and
-                u.id = p.author_id
+                u.id = p.author_id and
+                (:allowClientSidePost or mpc.server_post_id is not null)
             order by p.creation_date desc
             limit 1
     """)
     fun queryLatestKnownPost(
         serverId: String,
         courseId: Long,
-        conversationId: Long
+        conversationId: Long,
+        allowClientSidePost: Boolean
     ): Flow<PostPojo?>
 
     @Transaction
