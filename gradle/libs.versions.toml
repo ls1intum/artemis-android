@@ -1,8 +1,8 @@
 [versions]
-compileSdk = "34"
-targetSdk = "33"
-minSdk = "30"
-buildToolsVersion = "34.0.0"
+compileSdk = "35"
+targetSdk = "34"
+minSdk = "31"
+buildToolsVersion = "35.0.0"
 
 accompanist = "0.30.1"
 androidDesugarJdkLibs = "2.0.4"
@@ -11,13 +11,13 @@ androidxAppCompat = "1.6.1"
 androidxComposeBom = "2023.10.01"
 androidxLifecycle = "2.6.2"
 androidxNavigation = "2.7.5"
-androidGradlePlugin = "8.1.4"
+androidGradlePlugin = "8.7.0"
 androidxDataStore = "1.0.0"
 androidxPaging = "3.2.1"
 androidxPagingCompose = "3.2.1"
 coil = "2.4.0"
 emoji2 = "1.4.0"
-kotlin = "1.9.22"
+kotlin = "1.9.25"
 kotlinxCoroutines = "1.7.3"
 kotlinxDatetime = "0.4.0"
 kotlinxSerializationJson = "1.5.1"
@@ -35,8 +35,8 @@ sentry-android = "6.22.0"
 work = "2.9.0"
 
 # Used indirecly in the build config -> Do not remove without double checking.
-androidxComposeCompiler = "1.5.4"
-androidxCore = "1.12.0"
+androidxComposeCompiler = "1.5.15"
+androidxCore = "1.13.1"
 
 [libraries]
 accompanist-placeholder-material = { group = "com.google.accompanist", name = "accompanist-placeholder-material", version.ref = "accompanist" }
@@ -122,7 +122,7 @@ noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", 
 oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 placeholder-material = { group = "io.github.fornewid", name = "placeholder-material3", version.ref = "placeholderMaterial" }
 play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.0.1" }
-robolectric = { group = "org.robolectric", name = "robolectric", version = "4.10.3" }
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.13" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
 sentry-compose-android = { group = "io.sentry", name = "sentry-compose-android", version.ref = "sentry-android" }
 toolbar-compose = { group = "me.onebone", name = "toolbar-compose", version = "2.3.5" }
@@ -139,4 +139,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 google-services = { id = "com.google.gms.google-services", version = "4.4.0" }
 google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.0.1" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
-google-ksp = { id = "com.google.devtools.ksp", version = "1.9.20-1.0.14" }
+google-ksp = { id = "com.google.devtools.ksp", version = "1.9.25-1.0.20" }

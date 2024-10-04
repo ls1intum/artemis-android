@@ -54,7 +54,7 @@ object ProductFlavors {
  * Configure base Kotlin with Android options
  */
 internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension<*, *, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
@@ -112,7 +112,7 @@ internal fun Project.configureKotlinAndroid(
 }
 
 internal fun Project.configureReleaseTypeFlavors(
-    commonExtension: CommonExtension<*, *, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
         flavorDimensions += ProductFlavors.Dimensions.ReleaseType.Key
@@ -136,7 +136,7 @@ internal fun Project.configureReleaseTypeFlavors(
 }
 
 internal fun Project.configureInstanceSelectionFlavors(
-    commonExtension: CommonExtension<*, *, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
         flavorDimensions += ProductFlavors.Dimensions.InstanceSelection.Key
@@ -191,6 +191,6 @@ private fun NamedDomainObjectContainer<out ProductFlavor>.createFlavor(
     }
 }
 
-fun CommonExtension<*, *, *, *, *>.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
+fun CommonExtension<*, *, *, *, *, *>.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
     (this as ExtensionAware).extensions.configure("kotlinOptions", block)
 }

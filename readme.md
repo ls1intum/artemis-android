@@ -35,6 +35,8 @@ The following libraries and tools are utilized:
 To run this project, you need a recent version of [Android Studio](https://developer.android.com/studio) or IntelliJ (not guaranteed to work) and the AndroidSDK installed.
 If you want to run the end-to-end tests, you will also need [docker](https://www.docker.com/). 
 
+Alternative, you can install the Android SDK as described here: https://benshapi.ro/post/android-sdk-without-android-studio
+
 ## Build flavors
 This project is configured to support multiple [flavor dimensions](https://developer.android.com/build/build-variants):
 - TUM or unrestricted: For TUM builds, users are forced to connect to the [TUM Artemis instance](https://artemis.cit.tum.de).

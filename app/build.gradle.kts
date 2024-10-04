@@ -3,7 +3,6 @@
 import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
 import java.io.FileInputStream
 import java.util.Properties
-import java.lang.Boolean as JavaBoolean
 
 // https://developer.android.com/studio/publish/app-signing#secure-shared-keystore
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -24,7 +23,7 @@ plugins {
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
-    val versionName = "0.9.0"
+    val versionName = "1.0.0"
     val versionCode =
         if (!System.getenv("bamboo_buildNumber")
                 .isNullOrEmpty()
