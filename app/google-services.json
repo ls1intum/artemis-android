@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:88090765578:android:867ba04c73e06b43f5f2f3",
+        "mobilesdk_app_id": "1:88090765578:android:0aaa68c4f6ef8fedf5f2f3",
         "android_client_info": {
-          "package_name": "de.tum.informatics.www1.artemis.native_app.android"
+          "package_name": "de.tum.cit.aet.artemis"
         }
       },
       "oauth_client": [

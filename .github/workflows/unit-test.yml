@@ -1,4 +1,4 @@
-name: JUnit Tests (no end-to-end)
+name: JUnit Tests
 
 on:
   push:
@@ -10,13 +10,10 @@ on:
 jobs:
   jUnit:
     name: JUnit Tests
-    runs-on: [self-hosted, ase-large-android-sdk-34]
+    runs-on: ubuntu-latest
     timeout-minutes: 60
 
     steps:
-      - name: Set Android Sdk Env
-        run: export ANDROID_HOME=/usr/lib/android-sdk
-
       - uses: actions/checkout@v4
 
       - name: Set local.properties
@@ -28,8 +25,11 @@ jobs:
       - name: JDK setup
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: run tests
         run: ./gradlew test -Dskip.unit-tests=false -Dskip.e2e=true -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true
