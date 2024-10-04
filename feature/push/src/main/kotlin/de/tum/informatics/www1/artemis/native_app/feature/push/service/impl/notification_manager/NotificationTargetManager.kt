@@ -4,11 +4,9 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.communicationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CommunicationPostTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CoursePostTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.ExercisePostTarget
@@ -92,7 +90,7 @@ internal object NotificationTargetManager {
 
     private fun getNotificationTarget(type: NotificationType, target: String): NotificationTarget {
         return when (type) {
-            is CommunicationNotificationType -> getCommunicationNotificationTarget(type.communicationType, target)
+            is CommunicationNotificationType -> getCommunicationNotificationTarget(target)
 
             MiscNotificationType.QUIZ_EXERCISE_STARTED -> {
                 json.decodeFromString<ExerciseTarget>(target)
@@ -103,25 +101,9 @@ internal object NotificationTargetManager {
     }
 
     fun getCommunicationNotificationTarget(
-        type: CommunicationType,
         target: String
     ): MetisTarget {
-        return when (type) {
-            CommunicationType.QNA_COURSE, CommunicationType.ANNOUNCEMENT -> {
-                json.decodeFromString<CoursePostTarget>(target)
-            }
-
-            CommunicationType.QNA_LECTURE -> {
-                json.decodeFromString<LecturePostTarget>(target)
-            }
-
-            CommunicationType.QNA_EXERCISE -> {
-                json.decodeFromString<ExercisePostTarget>(target)
-            }
-            CommunicationType.CONVERSATION -> {
-                json.decodeFromString<CommunicationPostTarget>(target)
-            }
-        }
+        return json.decodeFromString<CommunicationPostTarget>(target)
     }
 
     private fun buildOpenAppIntent(context: Context): PendingIntent = PendingIntent.getActivity(

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
-import de.tum.informatics.www1.artemis.native_app.feature.push.defaultInternetWorkRequest
+import de.tum.informatics.www1.artemis.native_app.core.common.defaultInternetWorkRequest
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import kotlinx.coroutines.guava.await
 

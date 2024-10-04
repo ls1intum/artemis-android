@@ -27,6 +27,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExe
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
@@ -44,7 +45,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ConversationWebsocketDto
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
@@ -53,12 +53,14 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.hasModerationRights
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToConversationUpdates
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -73,12 +75,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import kotlinx.datetime.Clock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -95,6 +95,7 @@ internal open class ConversationViewModel(
     private val conversationService: ConversationService,
     private val replyTextStorageService: ReplyTextStorageService,
     private val courseService: CourseService,
+    private val createPostService: CreatePostService,
     accountDataService: AccountDataService,
     metisService: MetisService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
@@ -177,7 +178,6 @@ internal open class ConversationViewModel(
             else -> minOf(chatListStatus, threadStatus)
         }
     }
-        .onEach { println("NEW STATUS $it") }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DataStatus.Outdated)
 
     val conversation: StateFlow<DataState<Conversation>> = flatMapLatest(
@@ -273,7 +273,11 @@ internal open class ConversationViewModel(
     ): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             if (create) {
-                createReactionImpl(emojiId, post.asAffectedPost)
+                createReactionImpl(
+                    emojiId,
+                    post.getAsAffectedPost()
+                        ?: return@async MetisModificationFailure.DELETE_REACTION
+                )
             } else {
                 val clientId = clientId.value.orNull()
                     ?: return@async MetisModificationFailure.DELETE_REACTION
@@ -318,46 +322,11 @@ internal open class ConversationViewModel(
         return if (success) null else MetisModificationFailure.DELETE_REACTION
     }
 
-    protected suspend fun createStandalonePostImpl(post: StandalonePost): MetisModificationFailure? {
-        val metisContext = metisContext
-        val response = metisModificationService.createPost(
-            context = metisContext,
-            post = post,
-            serverUrl = serverConfigurationService.serverUrl.first(),
-            authToken = accountService.authToken.first()
-        )
-
-        return when (response) {
-            is NetworkResponse.Failure -> MetisModificationFailure.CREATE_POST
-            is NetworkResponse.Response -> {
-                metisStorageService.insertLiveCreatedPost(
-                    serverConfigurationService.host.first(),
-                    metisContext,
-                    response.data
-                )
-
-                null
-            }
-        }
-    }
-
-    protected suspend fun createAnswerPostImpl(post: AnswerPost): MetisModificationFailure? {
-        val response = metisModificationService.createAnswerPost(
-            context = metisContext,
-            post = post,
-            serverUrl = serverConfigurationService.serverUrl.first(),
-            authToken = accountService.authToken.first()
-        )
-
-        return response.bind<MetisModificationFailure?> { null }
-            .or(MetisModificationFailure.CREATE_POST)
-    }
-
     fun deletePost(post: IBasePost): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             metisModificationService.deletePost(
                 metisContext,
-                post.asAffectedPost,
+                post.getAsAffectedPost() ?: return@async MetisModificationFailure.DELETE_POST,
                 serverConfigurationService.serverUrl.first(),
                 accountService.authToken.first()
             )
@@ -578,13 +547,16 @@ internal open class ConversationViewModel(
         newMessageText.value = text
     }
 
-    private val IBasePost.asAffectedPost: MetisModificationService.AffectedPost
-        get() = when (this) {
-            is AnswerPost -> MetisModificationService.AffectedPost.Answer(serverPostId)
-            is IAnswerPost -> MetisModificationService.AffectedPost.Answer(serverPostId)
-            is StandalonePost -> MetisModificationService.AffectedPost.Standalone(serverPostId)
-            is IStandalonePost -> MetisModificationService.AffectedPost.Standalone(serverPostId)
+    private fun IBasePost.getAsAffectedPost(): MetisModificationService.AffectedPost? {
+        val sPostId = serverPostId ?: return null
+
+        return when (this) {
+            is AnswerPost -> MetisModificationService.AffectedPost.Answer(sPostId)
+            is IAnswerPost -> MetisModificationService.AffectedPost.Answer(sPostId)
+            is StandalonePost -> MetisModificationService.AffectedPost.Standalone(sPostId)
+            is IStandalonePost -> MetisModificationService.AffectedPost.Standalone(sPostId)
         }
+    }
 
     private suspend fun loadConversation(): Conversation? {
         return conversationService.getConversation(
@@ -633,51 +605,57 @@ internal open class ConversationViewModel(
         }
 
     fun createPost(): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async(coroutineContext) {
-            val postText = newMessageText.value.text
+        createPostService.createPost(courseId, conversationId, newMessageText.value.text)
 
-            val conversation =
-                loadConversation() ?: return@async MetisModificationFailure.CREATE_POST
+        return CompletableDeferred(value = null)
+    }
 
-            val post = StandalonePost(
-                id = null,
-                title = null,
-                tags = null,
-                content = postText,
-                conversation = conversation,
-                creationDate = Clock.System.now(),
-                displayPriority = DisplayPriority.NONE
+    fun retryCreatePost(standalonePostId: StandalonePostId) {
+        viewModelScope.launch(coroutineContext) {
+            val clientSidePostId = when (standalonePostId) {
+                is StandalonePostId.ClientSideId -> standalonePostId.clientSideId
+                is StandalonePostId.ServerSideId -> metisStorageService.getClientSidePostId(
+                    serverConfigurationService.host.first(),
+                    standalonePostId.serverSidePostId,
+                    postingType = BasePostingEntity.PostingType.STANDALONE
+                )
+            } ?: return@launch
+
+            val post = metisStorageService.getStandalonePost(clientSidePostId).first() ?: return@launch
+
+            createPostService.retryCreatePost(
+                courseId = courseId,
+                conversationId = conversationId,
+                clientSidePostId = clientSidePostId,
+                content = post.content
             )
-
-            createStandalonePostImpl(post)
         }
     }
 
     fun createReply(): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
-            val postId = postId.value
-            if (postId == null) return@async MetisModificationFailure.CREATE_POST
+            val serverSideParentPostId =
+                getPostId() ?: return@async MetisModificationFailure.CREATE_POST
 
-            val conversation =
-                loadConversation() ?: return@async MetisModificationFailure.CREATE_POST
-
-            val replyPost = AnswerPost(
-                creationDate = Clock.System.now(),
-                content = newMessageText.first().text,
-                post = StandalonePost(
-                    id = when (postId) {
-                        is StandalonePostId.ClientSideId -> metisStorageService.getServerSidePostId(
-                            serverConfigurationService.host.first(),
-                            postId.clientSideId
-                        )
-
-                        is StandalonePostId.ServerSideId -> postId.serverSidePostId
-                    },
-                    conversation = conversation
-                )
+            createPostService.createAnswerPost(
+                courseId,
+                conversationId,
+                serverSideParentPostId,
+                newMessageText.value.text
             )
 
-            createAnswerPostImpl(replyPost)
+            null
+        }
+    }
+
+    fun retryCreateReply(clientPostId: String, content: String) {
+        viewModelScope.launch(coroutineContext) {
+            createPostService.retryCreatePost(
+                courseId = courseId,
+                conversationId = conversationId,
+                clientSidePostId = clientPostId,
+                content = content
+            )
         }
     }
 

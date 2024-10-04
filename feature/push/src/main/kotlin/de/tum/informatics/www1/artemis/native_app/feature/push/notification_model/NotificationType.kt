@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.notification_mod
 
 import androidx.annotation.StringRes
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
-import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -16,33 +15,17 @@ enum class StandalonePostCommunicationNotificationType : CommunicationNotificati
     NEW_EXERCISE_POST,
     NEW_LECTURE_POST,
     NEW_COURSE_POST,
-    NEW_ANNOUNCEMENT_POST
+    NEW_ANNOUNCEMENT_POST,
+    CONVERSATION_NEW_MESSAGE
 }
 
 @Serializable
 enum class ReplyPostCommunicationNotificationType : CommunicationNotificationType {
     NEW_REPLY_FOR_EXERCISE_POST,
     NEW_REPLY_FOR_LECTURE_POST,
-    NEW_REPLY_FOR_COURSE_POST
-}
-
-@Serializable
-enum class ConversationNotificationType : CommunicationNotificationType {
-    CONVERSATION_NEW_MESSAGE,
+    NEW_REPLY_FOR_COURSE_POST,
     CONVERSATION_NEW_REPLY_MESSAGE
 }
-
-val CommunicationNotificationType.communicationType: CommunicationType get() = when(this) {
-    ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_EXERCISE_POST,
-    StandalonePostCommunicationNotificationType.NEW_EXERCISE_POST -> CommunicationType.QNA_EXERCISE
-    ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_LECTURE_POST,
-    StandalonePostCommunicationNotificationType.NEW_LECTURE_POST -> CommunicationType.QNA_LECTURE
-    ReplyPostCommunicationNotificationType.NEW_REPLY_FOR_COURSE_POST,
-    StandalonePostCommunicationNotificationType.NEW_COURSE_POST -> CommunicationType.QNA_COURSE
-    StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_POST -> CommunicationType.ANNOUNCEMENT
-    is ConversationNotificationType -> CommunicationType.CONVERSATION
-}
-
 
 @Serializable
 enum class MiscNotificationType(@StringRes val title: Int, @StringRes val body: Int) : NotificationType {
@@ -79,4 +62,4 @@ enum class MiscNotificationType(@StringRes val title: Int, @StringRes val body: 
 }
 
 @Serializable
-object UnknownNotificationType : NotificationType
+data object UnknownNotificationType : NotificationType

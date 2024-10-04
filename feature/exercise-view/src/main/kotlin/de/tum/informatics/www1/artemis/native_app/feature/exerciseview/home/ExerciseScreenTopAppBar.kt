@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -9,11 +10,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
@@ -22,7 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,6 +41,7 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.placeholder.material.placeholder
@@ -134,8 +138,22 @@ internal fun TopBarExerciseInformation(
 ) {
     val dueDate = exercise.bind { it.dueDate }.orElse(null)
     val assessmentDueData = exercise.bind { it.assessmentDueDate }.orElse(null)
+    val releaseData = exercise.bind { it.releaseDate }.orElse(null)
 
-    // Prepare ui that is movable between long and short toolbars
+    var maxWidth: Int by remember { mutableIntStateOf(0) }
+    val updateMaxWidth = { new: Int -> maxWidth = new }
+
+    val dueDateTopBarTextInformation =
+        @Composable { date: Instant, hintRes: @receiver:StringRes Int ->
+            TopBarTextInformation(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 1.dp),
+                hintColumnWidth = maxWidth,
+                hint = stringResource(id = hintRes),
+                dataText = getRelativeTime(to = date).toString(),
+                dataColor = getDueDateColor(date),
+                updateHintColumnWidth = updateMaxWidth
+            )
+        }
 
     val exerciseInfoUi = @Composable {
         EmptyDataStateUi(
@@ -178,31 +196,27 @@ internal fun TopBarExerciseInformation(
         }
 
         Text(
-            modifier = Modifier.placeholder(exercise !is DataState.Success),
+            modifier = Modifier
+                .placeholder(exercise !is DataState.Success)
+                .padding(bottom = 4.dp),
             text = pointsHintText,
             style = MaterialTheme.typography.bodyLarge
         )
+
+        releaseData?.let {
+            dueDateTopBarTextInformation(
+                it,
+                R.string.exercise_view_overview_hint_assessment_release_date
+            )
+        }
+
     }
 
     val dueDateColumnUi = @Composable { contentModifier: Modifier ->
-        var maxWidth: Int by remember { mutableStateOf(0) }
-        val updateMaxWidth = { new: Int -> maxWidth = new }
 
         Column(
             modifier = contentModifier,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val dueDateTopBarTextInformation =
-                @Composable { date: Instant, hintRes: @receiver:StringRes Int ->
-                    TopBarTextInformation(
-                        modifier = Modifier.fillMaxWidth(),
-                        hintColumnWidth = maxWidth,
-                        hint = stringResource(id = hintRes),
-                        dataText = getRelativeTime(to = date).toString(),
-                        dataColor = getDueDateColor(date),
-                        updateHintColumnWidth = updateMaxWidth
-                    )
-                }
 
             dueDate?.let {
                 dueDateTopBarTextInformation(
@@ -217,21 +231,40 @@ internal fun TopBarExerciseInformation(
                     R.string.exercise_view_overview_hint_assessment_due_date
                 )
             }
+
+            val complaintPossible = exercise.bind { exercise ->
+                exercise.allowComplaintsForAutomaticAssessments
+            }.orElse(false)
+
+            Text(
+                modifier = Modifier
+                    .placeholder(exercise !is DataState.Success)
+                    .padding(bottom = 4.dp),
+                text = "Complaint possible: " + if (complaintPossible == true) "Yes" else "No",
+                style = MaterialTheme.typography.bodyLarge
+            )
+
         }
     }
 
     // Actual UI
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        TitleText(
+
+        Text(
+            text = "Exercise Details",
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
-                .fillMaxWidth()
-                .graphicsLayer { alpha = titleTextAlpha },
-            exerciseDataState = exercise,
-            style = MaterialTheme.typography.headlineLarge,
-            maxLines = 2
+                .padding(bottom = 1.dp)
+                .fillMaxWidth(),
+            textAlign = TextAlign.Start
+        )
+        Divider(
+            color = Color.Black,
+            thickness = 3.dp,
+            modifier = Modifier.padding(vertical = 0.dp)
         )
 
         // Here we make the distinction in the layout between long toolbar and short toolbar
@@ -370,7 +403,7 @@ internal fun StaticTopAppBar(
     Column(modifier = modifier) {
         TopAppBar(
             modifier = Modifier.fillMaxWidth(),
-            title = {},
+            title = { TitleText(modifier = modifier, maxLines = 1, exerciseDataState = exerciseDataState) },
             navigationIcon = {
                 TopAppBarNavigationIcon(onNavigateBack = onNavigateBack)
             },
@@ -382,7 +415,8 @@ internal fun StaticTopAppBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .border(2.dp, Color.Black, RoundedCornerShape(4.dp)),
             titleTextAlpha = 1f,
             exercise = exerciseDataState,
             isLongToolbar = isLongToolbar

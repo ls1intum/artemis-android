@@ -47,7 +47,7 @@ class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
             }
 
             val downloadedPost = metisService
-                .getPost(metisContext, post.serverPostId, testServerUrl, accessToken)
+                .getPost(metisContext, post.serverPostId!!, testServerUrl, accessToken)
                 .orThrow("Could not download relevant post")
 
             Logger.info("Downloaded post = $downloadedPost")

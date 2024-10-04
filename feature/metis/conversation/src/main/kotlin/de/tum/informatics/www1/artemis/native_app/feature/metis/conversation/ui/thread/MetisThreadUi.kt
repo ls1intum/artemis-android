@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -47,10 +48,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visibleme
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.coroutines.CompletableDeferred
 
 internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
-internal fun testTagForAnswerPost(answerPostId: Long) = "answerPost$answerPostId"
+internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
 
 /**
  * Displays a single post with its replies.
@@ -82,6 +84,12 @@ internal fun MetisThreadUi(
     val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
     val listState = rememberLazyListState()
+
+    val title by remember(conversationDataState) {
+        derivedStateOf {
+            conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
+        }
+    }
 
     ProvideEmojis {
         MetisReplyHandler(
@@ -136,7 +144,8 @@ internal fun MetisThreadUi(
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
                                 onRequestDelete = onDeletePostDelegate,
-                                state = listState
+                                state = listState,
+                                onRequestRetrySend = viewModel::retryCreateReply
                             )
                         }
                     }
@@ -147,7 +156,8 @@ internal fun MetisThreadUi(
                                 .fillMaxWidth()
                                 .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
                             replyMode = replyMode,
-                            updateFailureState = updateFailureStateDelegate
+                            updateFailureState = updateFailureStateDelegate,
+                            title = title
                         )
                     }
                 }
@@ -165,7 +175,8 @@ private fun PostAndRepliesList(
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
-    onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit
+    onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
+    onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
 ) {
     val rememberPostActions: @Composable (IBasePost) -> PostActions = { affectedPost: IBasePost ->
         rememberPostActions(
@@ -181,7 +192,13 @@ private fun PostAndRepliesList(
                     create
                 )
             },
-            onReplyInThread = null
+            onReplyInThread = null,
+            onRequestRetrySend = {
+                onRequestRetrySend(
+                    affectedPost.clientPostId ?: return@rememberPostActions,
+                    affectedPost.content.orEmpty()
+                )
+            }
         )
     }
 
@@ -223,7 +240,7 @@ private fun PostAndRepliesList(
                 PostWithBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag(testTagForAnswerPost(answerPost.serverPostId)),
+                        .testTag(testTagForAnswerPost(answerPost.clientPostId)),
                     post = answerPost,
                     postActions = postActions,
                     postItemViewType = PostItemViewType.ThreadAnswerItem,

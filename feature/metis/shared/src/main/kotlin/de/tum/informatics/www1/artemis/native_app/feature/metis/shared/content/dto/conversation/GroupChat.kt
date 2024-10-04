@@ -16,6 +16,7 @@ data class GroupChat(
     override val unreadMessagesCount: Long? = 0L,
     override val isFavorite: Boolean = false,
     override val isHidden: Boolean = false,
+    override val isMuted: Boolean = false,
     override val isCreator: Boolean = false,
     override val isMember: Boolean = false,
     override val numberOfMembers: Int = 0,
@@ -28,6 +29,9 @@ data class GroupChat(
     override fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation =
         copy(unreadMessagesCount = unreadMessagesCount)
 
-    override fun filterPredicate(query: String): Boolean =
-        if (name != null) query in name else query in humanReadableName
+    override fun filterPredicate(query: String): Boolean {
+        return (name!=null && name.contains(query, ignoreCase = true)) ||
+                (humanReadableName.contains(query, ignoreCase = true))
+
+    }
 }

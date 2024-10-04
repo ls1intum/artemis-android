@@ -15,6 +15,7 @@ data class ChannelChat(
     override val unreadMessagesCount: Long? = 0L,
     override val isFavorite: Boolean = false,
     override val isHidden: Boolean = false,
+    override val isMuted: Boolean = false,
     override val isCreator: Boolean = false,
     override val isMember: Boolean = false,
     override val numberOfMembers: Int = 0,
@@ -34,5 +35,7 @@ data class ChannelChat(
     override fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation =
         copy(unreadMessagesCount = unreadMessagesCount)
 
-    override fun filterPredicate(query: String): Boolean = query in name
+    override fun filterPredicate(query: String): Boolean {
+        return name.contains(query, ignoreCase = true)
+    }
 }

@@ -4,12 +4,23 @@ import android.os.Parcelable
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
+import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.account.isAtLeastTutorInCourse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.browse_channels.BrowseChannelsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.CreateChannelScreen
@@ -19,13 +30,20 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.ConversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 @Composable
 internal fun SinglePageConversationBody(
     modifier: Modifier,
     courseId: Long,
-    initialConfiguration: ConversationConfiguration = NothingOpened
+    initialConfiguration: ConversationConfiguration = NothingOpened,
+    accountService: AccountService,
+    serverConfigurationService: ServerConfigurationService,
+    courseService: CourseService,
+    accountDataService: AccountDataService,
+    networkStatusProvider: NetworkStatusProvider
 ) {
     var configuration: ConversationConfiguration by rememberSaveable(initialConfiguration) {
         mutableStateOf(initialConfiguration)
@@ -38,10 +56,36 @@ internal fun SinglePageConversationBody(
         }
     }
 
+    var canCreateChannel by rememberSaveable { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(courseId) {
+        coroutineScope.launch {
+            val flow = flatMapLatest(
+                serverConfigurationService.serverUrl,
+                accountService.authToken
+            ) { serverUrl, authToken ->
+                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                    courseService.getCourse(courseId, serverUrl, authToken)
+                        .then { courseWithScore ->
+                            accountDataService
+                                .getAccountData(serverUrl, authToken)
+                                .bind { it.isAtLeastTutorInCourse(courseWithScore.course) }
+                        }
+                }.map { it.orElse(false) }
+            }
+
+            flow.collect { value ->
+                canCreateChannel = value
+            }
+        }
+    }
+
     BackHandler(configuration != NothingOpened) {
         when (val config = configuration) {
             is ConversationSettings -> configuration = config.prevConfiguration
             is AddChannelConfiguration -> configuration = config.prevConfiguration
+            is BrowseChannelConfiguration -> configuration = config.prevConfiguration
             is CreatePersonalConversation -> configuration = config.prevConfiguration
             is OpenedConversation -> configuration =
                 if (config.openedThread != null) config.copy(openedThread = null) else NothingOpened
@@ -51,7 +95,7 @@ internal fun SinglePageConversationBody(
         }
     }
 
-    val ConversationOverview: @Composable (Modifier) -> Unit = { m ->
+    val conversationOverview: @Composable (Modifier) -> Unit = { m ->
         ConversationOverviewBody(
             modifier = m.padding(top = 16.dp),
             courseId = courseId,
@@ -60,14 +104,20 @@ internal fun SinglePageConversationBody(
                 configuration = CreatePersonalConversation(configuration)
             },
             onRequestAddChannel = {
-                configuration = AddChannelConfiguration(false, configuration)
-            }
+                if (canCreateChannel) {
+                    configuration = AddChannelConfiguration(configuration)
+                }
+            },
+            onRequestBrowseChannel = {
+                configuration = BrowseChannelConfiguration(configuration)
+            },
+            canCreateChannel = canCreateChannel
         )
     }
 
     when (val config = configuration) {
         NothingOpened -> {
-            ConversationOverview(modifier)
+            conversationOverview(modifier)
         }
 
         is OpenedConversation -> {
@@ -94,28 +144,26 @@ internal fun SinglePageConversationBody(
                         prevConfiguration = config
                     )
                 },
-                conversationsOverview = { mod -> ConversationOverview(mod) }
+                conversationsOverview = { mod -> conversationOverview(mod) }
+            )
+        }
+
+        is BrowseChannelConfiguration -> {
+            BrowseChannelsScreen(
+                modifier = modifier,
+                courseId = courseId,
+                onNavigateToConversation = openConversation,
+                //onNavigateToCreateChannel = {},
+                onNavigateBack = { configuration = config.prevConfiguration }
             )
         }
 
         is AddChannelConfiguration -> {
-            if (config.isCreatingChannel) {
+            if (canCreateChannel) {
                 CreateChannelScreen(
                     modifier = modifier,
                     courseId = courseId,
                     onConversationCreated = openConversation,
-                    onNavigateBack = {
-                        configuration = AddChannelConfiguration(false, config.prevConfiguration)
-                    }
-                )
-            } else {
-                BrowseChannelsScreen(
-                    modifier = modifier,
-                    courseId = courseId,
-                    onNavigateToConversation = openConversation,
-                    onNavigateToCreateChannel = {
-                        configuration = AddChannelConfiguration(true, config.prevConfiguration)
-                    },
                     onNavigateBack = { configuration = config.prevConfiguration }
                 )
             }
@@ -189,6 +237,7 @@ internal fun SinglePageConversationBody(
     }
 }
 
+
 @Parcelize
 sealed interface ConversationConfiguration : Parcelable
 
@@ -211,7 +260,12 @@ data class NavigateToUserConversation(val username: String) : ConversationConfig
 
 @Parcelize
 private data class AddChannelConfiguration(
-    val isCreatingChannel: Boolean,
+    val prevConfiguration: ConversationConfiguration
+) :
+    ConversationConfiguration
+
+@Parcelize
+private data class BrowseChannelConfiguration(
     val prevConfiguration: ConversationConfiguration
 ) :
     ConversationConfiguration

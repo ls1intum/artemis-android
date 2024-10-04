@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 
 interface IStandalonePost : IBasePost {
-    val serverPostId: Long
     val title: String?
     val answers: List<IAnswerPost>?
     val tags: List<String>?
@@ -14,5 +13,5 @@ interface IStandalonePost : IBasePost {
      */
     val key: Any
 
-    val standalonePostId: StandalonePostId
+    val standalonePostId: StandalonePostId?
 }
