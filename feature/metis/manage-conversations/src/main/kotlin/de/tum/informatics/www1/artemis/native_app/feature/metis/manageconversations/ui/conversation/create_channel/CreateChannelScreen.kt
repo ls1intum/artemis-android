@@ -4,18 +4,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material3.Icon
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -26,15 +25,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFloatingActionButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.PotentiallyIllegalTextField
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -76,7 +75,7 @@ internal fun CreateChannelScreen(
     val isNameIllegal by viewModel.isNameIllegal.collectAsState()
     val isDescriptionIllegal by viewModel.isDescriptionIllegal.collectAsState()
 
-    val isPublic by viewModel.isPublic.collectAsState()
+    val isPrivate by viewModel.isPrivate.collectAsState()
     val isAnnouncement by viewModel.isAnnouncement.collectAsState()
 
     val canCreate by viewModel.canCreate.collectAsState()
@@ -93,22 +92,7 @@ internal fun CreateChannelScreen(
                 }
             )
         },
-        floatingActionButton = {
-            JobAnimatedFloatingActionButton(
-                modifier = Modifier.testTag(TEST_TAG_CREATE_CHANNEL_BUTTON),
-                enabled = canCreate,
-                startJob = viewModel::createChannel,
-                onJobCompleted = { channel ->
-                    if (channel != null) {
-                        onConversationCreated(channel.id)
-                    } else {
-                        isDisplayingErrorDialog = true
-                    }
-                }
-            ) {
-                Icon(imageVector = Icons.Default.Create, contentDescription = null)
-            }
-        }
+
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -120,7 +104,8 @@ internal fun CreateChannelScreen(
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.create_channel_description)
+                text = stringResource(id = R.string.create_channel_description),
+                style = MaterialTheme.typography.bodySmall
             )
 
             PotentiallyIllegalTextField(
@@ -155,27 +140,40 @@ internal fun CreateChannelScreen(
                 modifier = Modifier.fillMaxWidth(),
                 title = stringResource(id = R.string.create_channel_channel_accessibility_type),
                 description = stringResource(id = R.string.create_channel_channel_accessibility_type_hint),
-                choiceOne = stringResource(id = R.string.create_channel_channel_accessibility_type_public),
-                choiceTwo = stringResource(id = R.string.create_channel_channel_accessibility_type_private),
-                choice = isPublic,
-                choiceOneButtonTestTag = TEST_TAG_SET_PUBLIC_BUTTON,
-                choiceTwoButtonTestTag = TEST_TAG_SET_PRIVATE_BUTTON,
-                updateChoice = viewModel::updatePublic
+                isChecked = isPrivate,
+                onCheckedChange = { viewModel.updatePublic(it) }
             )
 
             BinarySelection(
                 modifier = Modifier.fillMaxWidth(),
                 title = stringResource(id = R.string.create_channel_channel_announcement_type),
                 description = stringResource(id = R.string.create_channel_channel_announcement_type_hint),
-                choiceOne = stringResource(id = R.string.create_channel_channel_announcement_type_announcement),
-                choiceTwo = stringResource(id = R.string.create_channel_channel_announcement_type_unrestricted),
-                choice = isAnnouncement,
-                choiceOneButtonTestTag = TEST_TAG_SET_ANNOUNCEMENT_BUTTON,
-                choiceTwoButtonTestTag = TEST_TAG_SET_UNRESTRICTED_BUTTON,
-                updateChoice = viewModel::updateAnnouncement
+                isChecked = isAnnouncement,
+                onCheckedChange = { viewModel.updateAnnouncement(it) }
             )
 
-            Box(modifier = Modifier.height(Spacings.FabContentBottomPadding))
+            Button(
+                onClick = {
+                    viewModel.viewModelScope.launch {
+                        val channel = viewModel.createChannel().await()
+                        if (channel != null) {
+                            onConversationCreated(channel.id)
+                        } else {
+                            isDisplayingErrorDialog = true
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                enabled = viewModel.canCreate.collectAsState().value,
+
+            ) {
+                Text(text = "Create Channel")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
         }
     }
 
@@ -196,68 +194,33 @@ private fun BinarySelection(
     modifier: Modifier,
     title: String,
     description: String,
-    choiceOne: String,
-    choiceTwo: String,
-    choice: Boolean,
-    choiceOneButtonTestTag: String,
-    choiceTwoButtonTestTag: String,
-    updateChoice: (Boolean) -> Unit
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            text = title,
-            style = MaterialTheme.typography.titleSmall
-        )
-
-        Column {
-            RadioButtonWithText(
-                modifier = Modifier.fillMaxWidth(),
-                buttonTestTag = choiceOneButtonTestTag,
-                isChecked = choice,
-                onClick = { updateChoice(true) },
-                text = choiceOne
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                modifier = Modifier.weight(1f),
+                text = title,
+                style = MaterialTheme.typography.titleMedium
             )
-
-            RadioButtonWithText(
-                modifier = Modifier.fillMaxWidth(),
-                buttonTestTag = choiceTwoButtonTestTag,
-                isChecked = !choice,
-                onClick = {
-                    updateChoice(false)
-                },
-                text = choiceTwo
+            Switch(
+                checked = isChecked,
+                onCheckedChange = onCheckedChange
             )
         }
 
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = description,
+            style = MaterialTheme.typography.bodySmall
         )
     }
 }
 
-@Composable
-private fun RadioButtonWithText(
-    modifier: Modifier,
-    buttonTestTag: String,
-    isChecked: Boolean,
-    onClick: () -> Unit,
-    text: String
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RadioButton(
-            modifier = Modifier.testTag(buttonTestTag),
-            selected = isChecked,
-            onClick = onClick
-        )
-
-        Text(text = text)
-    }
-}
