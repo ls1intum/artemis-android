@@ -74,7 +74,7 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
     fontSize: TextUnit = TextUnit.Unspecified,
-    textAlign: TextAlign? = null,
+    textAlign: TextAlign = TextAlign.Left,
     maxLines: Int = Int.MAX_VALUE,
     @FontRes fontResource: Int? = null,
     style: TextStyle = LocalTextStyle.current,
@@ -145,7 +145,7 @@ private fun createTextView(
     color: Color = Color.Unspecified,
     defaultColor: Color,
     fontSize: TextUnit = TextUnit.Unspecified,
-    textAlign: TextAlign? = null,
+    textAlign: TextAlign = TextAlign.Left,
     maxLines: Int = Int.MAX_VALUE,
     @FontRes fontResource: Int? = null,
     style: TextStyle,
@@ -176,7 +176,7 @@ private fun createTextView(
 
 private fun TextView.applyStyleAndColor(
     fontSize: TextUnit,
-    textAlign: TextAlign?,
+    textAlign: TextAlign,
     color: Color,
     defaultColor: Color,
     style: TextStyle

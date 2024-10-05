@@ -10,7 +10,7 @@ on:
 jobs:
   end-to-end-tests:
     name: End To End Tests
-    runs-on: [self-hosted, ase-large-android-sdk-34]
+    runs-on: [self-hosted, ase-large-android-sdk-35]
     timeout-minutes: 60
 
     steps:
