@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,13 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 
+private val difficultyHardColor: Color
+    @Composable get() = Color(0xffdc3545)
+private val difficultyMediumColor: Color
+    @Composable get() = Color(0xffffc107)
+private val difficultyEasyColor: Color
+    @Composable get() = Color(0xff28a745)
+
 /**
  * Display a single exercise.
  * The exercise is displayed in a card with an icon specific to the exercise type.
@@ -55,7 +63,7 @@ fun ExerciseListItem(
                 .height(IntrinsicSize.Min)
         ) {
             if (exercise.difficulty != null) {
-                DifficultyRectangle(exercise.difficulty!!)
+                exercise.difficulty?.let { DifficultyRectangle(modifier = Modifier, difficulty = it)}
             }
 
             Column(
@@ -121,22 +129,21 @@ private fun ExerciseTypeIcon(modifier: Modifier, exercise: Exercise) {
  * Displays a rectangle next to the text to show the difficulty of the exercise.
  */
 @Composable
-private fun DifficultyRectangle(difficulty: Exercise.Difficulty) {
-    Box(modifier = Modifier
+private fun DifficultyRectangle(modifier: Modifier, difficulty: Exercise.Difficulty) {
+    Box(modifier = modifier
         .fillMaxHeight()
-        .height(40.dp)
         .width(10.dp)
         .clip(RectangleShape)
         .background(
             color = when (difficulty) {
                 Exercise.Difficulty.EASY ->
-                    Color(0xff28a745)
+                    difficultyEasyColor
 
                 Exercise.Difficulty.MEDIUM ->
-                    Color(0xffffc107)
+                    difficultyMediumColor
 
                 Exercise.Difficulty.HARD ->
-                    Color(0xffdc3545)
+                    difficultyHardColor
             }
         )
     )
