@@ -45,14 +45,13 @@ internal fun LectureListUi(
     } else {
         WeeklyItemsLazyColumn(
             modifier = modifier.testTag(TEST_TAG_LECTURE_LIST),
-            verticalArrangement = Arrangement.Top,
             weeklyItemGroups = lectures,
             getItemId = { id ?: 0L }
         ) { lecture ->
             LectureListItem(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(horizontal = 8.dp),
                 lecture = lecture,
                 onClick = { onClickLecture(lecture) }
             )
@@ -83,9 +82,13 @@ private fun LectureListItem(modifier: Modifier, lecture: Lecture, onClick: () ->
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TeacherIcon(
-                    modifier = Modifier.size(40.dp)
+                Icon(
+                    modifier = Modifier
+                        .size(40.dp)
                         .padding(horizontal = 8.dp)
+                        .fillMaxSize(),
+                    painter = painterResource(id = R.drawable.chalkboard_teacher),
+                    contentDescription = null
                 )
 
                 Text(
@@ -100,20 +103,5 @@ private fun LectureListItem(modifier: Modifier, lecture: Lecture, onClick: () ->
                 style = MaterialTheme.typography.bodyMedium
             )
         }
-    }
-}
-
-/**
- * Displays the teacher icon
- */
-@Composable
-fun TeacherIcon(modifier: Modifier) {
-    Box(modifier = modifier) {
-        Icon(
-            modifier = Modifier
-                .fillMaxSize(),
-            painter = painterResource(id = R.drawable.chalkboard_teacher),
-            contentDescription = null
-        )
     }
 }

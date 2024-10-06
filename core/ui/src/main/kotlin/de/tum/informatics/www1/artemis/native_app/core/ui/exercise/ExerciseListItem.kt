@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,22 +23,15 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-
-private val difficultyHardColor: Color
-    @Composable get() = Color(0xffdc3545)
-private val difficultyMediumColor: Color
-    @Composable get() = Color(0xffffc107)
-private val difficultyEasyColor: Color
-    @Composable get() = Color(0xff28a745)
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.easyColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.hardColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.mediumColor
 
 /**
  * Display a single exercise.
@@ -62,9 +54,7 @@ fun ExerciseListItem(
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
         ) {
-            if (exercise.difficulty != null) {
-                exercise.difficulty?.let { DifficultyRectangle(modifier = Modifier, difficulty = it)}
-            }
+            exercise.difficulty?.let { DifficultyRectangle(modifier = Modifier, difficulty = it)}
 
             Column(
                 modifier = Modifier
@@ -76,10 +66,14 @@ fun ExerciseListItem(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ExerciseTypeIcon(
-                        modifier = Modifier.size(40.dp)
-                            .padding(horizontal = 8.dp),
-                        exercise = exercise
+                    //Displays the icon of the exercise
+                    Icon(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(horizontal = 8.dp)
+                            .fillMaxSize(),
+                        painter = getExerciseTypeIconPainter(exercise),
+                        contentDescription = null
                     )
 
                     //Displays the title of the exercise
@@ -111,21 +105,6 @@ fun ExerciseListItem(
 }
 
 /**
- * Displays the icon of the exercise within an outlined circle
- */
-@Composable
-private fun ExerciseTypeIcon(modifier: Modifier, exercise: Exercise) {
-    Box(modifier = modifier) {
-        Icon(
-            modifier = Modifier
-                .fillMaxSize(),
-            painter = getExerciseTypeIconPainter(exercise),
-            contentDescription = null
-        )
-    }
-}
-
-/**
  * Displays a rectangle next to the text to show the difficulty of the exercise.
  */
 @Composable
@@ -133,17 +112,16 @@ private fun DifficultyRectangle(modifier: Modifier, difficulty: Exercise.Difficu
     Box(modifier = modifier
         .fillMaxHeight()
         .width(10.dp)
-        .clip(RectangleShape)
         .background(
             color = when (difficulty) {
                 Exercise.Difficulty.EASY ->
-                    difficultyEasyColor
+                    easyColor
 
                 Exercise.Difficulty.MEDIUM ->
-                    difficultyMediumColor
+                    mediumColor
 
                 Exercise.Difficulty.HARD ->
-                    difficultyHardColor
+                    hardColor
             }
         )
     )
