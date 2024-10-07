@@ -1,7 +1,6 @@
 plugins {
     id("artemis.android.feature")
     id("artemis.android.library.compose")
-    kotlin("plugin.serialization")
 }
 
 android {
