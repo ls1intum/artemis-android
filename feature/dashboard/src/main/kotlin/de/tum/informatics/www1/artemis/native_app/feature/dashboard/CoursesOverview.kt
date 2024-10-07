@@ -71,17 +71,20 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.Expanded
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.CoursePointsDecimalFormat
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.BetaHintService
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.getViewModel
 import org.koin.compose.koinInject
 import java.text.DecimalFormat
 
-const val DASHBOARD_DESTINATION = "dashboard"
 internal const val TEST_TAG_COURSE_LIST = "TEST_TAG_COURSE_LIST"
 
 internal fun testTagForCourse(courseId: Long) = "Course$courseId"
 
+@Serializable
+data object DashboardScreen
+
 fun NavController.navigateToDashboard(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(DASHBOARD_DESTINATION, builder)
+    navigate(DashboardScreen, builder)
 }
 
 fun NavGraphBuilder.dashboard(
@@ -89,7 +92,7 @@ fun NavGraphBuilder.dashboard(
     onClickRegisterForCourse: () -> Unit,
     onViewCourse: (courseId: Long) -> Unit
 ) {
-    composable(DASHBOARD_DESTINATION) {
+    composable<DashboardScreen> {
         CoursesOverview(
             modifier = Modifier.fillMaxSize(),
             viewModel = getViewModel(),
