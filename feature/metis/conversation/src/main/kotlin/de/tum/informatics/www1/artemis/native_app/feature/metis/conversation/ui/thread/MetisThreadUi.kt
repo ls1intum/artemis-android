@@ -43,6 +43,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -68,6 +69,7 @@ internal fun MetisThreadUi(
     val serverUrl by viewModel.serverUrl.collectAsState()
 
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
+    val isAtLeastTutorInCourse by viewModel.isAtLeastTutorInCourse.collectAsState()
 
     postDataState.bind { it.serverPostId }.orNull()?.let { serverSidePostId ->
         ReportVisibleMetisContext(
@@ -110,9 +112,21 @@ internal fun MetisThreadUi(
                     else -> throw NotImplementedError()
                 }
             },
+            onResolvePost = { post, resolved ->
+                val parentPost = postDataState.orNull()
+
+                if (post is AnswerPostPojo) {
+                    if (parentPost == null) return@MetisReplyHandler CompletableDeferred(
+                        MetisModificationFailure.UPDATE_POST
+                    )
+                    viewModel.resolveOrUnresolvePost(parentPost, post, resolved)
+                } else {
+                    throw NotImplementedError()
+                }
+            },
             onDeletePost = viewModel::deletePost,
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction
-        ) { replyMode, onEditPostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, updateFailureStateDelegate ->
+        ) { replyMode, onEditPostDelegate, onResolvePostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, updateFailureStateDelegate ->
             BoxWithConstraints(modifier = modifier) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     BasicDataStateUi(
@@ -140,10 +154,12 @@ internal fun MetisThreadUi(
                                     .testTag(TEST_TAG_THREAD_LIST),
                                 post = post,
                                 hasModerationRights = hasModerationRights,
+                                isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                                 clientId = clientId,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
                                 onRequestDelete = onDeletePostDelegate,
+                                onRequestResolve = onResolvePostDelegate,
                                 state = listState,
                                 onRequestRetrySend = viewModel::retryCreateReply
                             )
@@ -172,9 +188,11 @@ private fun PostAndRepliesList(
     state: LazyListState,
     post: PostPojo,
     hasModerationRights: Boolean,
+    isAtLeastTutorInCourse: Boolean,
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
+    onRequestResolve: (IBasePost, resolved: Boolean) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
 ) {
@@ -182,6 +200,7 @@ private fun PostAndRepliesList(
         rememberPostActions(
             affectedPost,
             hasModerationRights,
+            isAtLeastTutorInCourse,
             clientId,
             onRequestEdit = { onRequestEdit(affectedPost) },
             onRequestDelete = { onRequestDelete(affectedPost) },
@@ -193,6 +212,12 @@ private fun PostAndRepliesList(
                 )
             },
             onReplyInThread = null,
+            onResolvePost = { resolved ->
+                onRequestResolve(
+                    affectedPost,
+                    resolved
+                )
+            },
             onRequestRetrySend = {
                 onRequestRetrySend(
                     affectedPost.clientPostId ?: return@rememberPostActions,
