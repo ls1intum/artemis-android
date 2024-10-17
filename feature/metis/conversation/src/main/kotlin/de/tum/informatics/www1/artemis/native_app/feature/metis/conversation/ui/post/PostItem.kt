@@ -164,27 +164,22 @@ internal fun PostItem(
                             color = EditedGray
                         )
                     }
+
                     if (post is IStandalonePost) {
                         post.resolved?.let {
                             if (it) {
-                                Row(
+                                ResolvedLabel(
                                     modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Icon(
-                                        Icons.Default.Check,
-                                        modifier = Modifier
-                                            .size(16.dp)
-                                            .fillMaxSize(),
-                                        contentDescription = null
-                                    )
-                                    Text(
-                                        text = stringResource(id = R.string.post_is_resolved),
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                }
+                                    resourceString = R.string.post_is_resolved
+                                )
                             }
+                        }
+                    } else if (post is IAnswerPost) {
+                        if (post.resolvesPost) {
+                            ResolvedLabel(
+                                modifier = Modifier.fillMaxWidth(),
+                                resourceString = R.string.post_resolves
+                            )
                         }
                     }
                 }
@@ -269,6 +264,30 @@ private fun PostHeadline(
                 content()
             }
         }
+    }
+}
+
+@Composable
+private fun ResolvedLabel(
+    modifier: Modifier,
+    resourceString: Int
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Icon(
+            Icons.Default.Check,
+            modifier = Modifier
+                .size(16.dp)
+                .fillMaxSize(),
+            contentDescription = null
+        )
+        Text(
+            text = stringResource(id = resourceString),
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 }
 
