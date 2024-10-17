@@ -4,30 +4,39 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardAlt
+import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelectionBaseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 
 internal fun testTagForPotentialRecipient(username: String) = "potentialRecipient$username"
@@ -36,6 +45,7 @@ internal fun testTagForPotentialRecipient(username: String) = "potentialRecipien
 internal fun PotentialRecipientsUi(
     modifier: Modifier,
     potentialRecipientsDataState: DataState<List<User>>,
+    queryTooShort: Boolean,
     inclusionList: InclusionList,
     addRecipient: (User) -> Unit,
     updateInclusionList: (InclusionList) -> Unit,
@@ -63,7 +73,8 @@ internal fun PotentialRecipientsUi(
             PotentialRecipientsList(
                 modifier = Modifier.fillMaxSize(),
                 recipients = potentialRecipients,
-                addRecipient = addRecipient
+                addRecipient = addRecipient,
+                queryTooShort = queryTooShort
             )
         }
     }
@@ -106,7 +117,8 @@ private fun InclusionListUi(
 private fun PotentialRecipientsList(
     modifier: Modifier,
     recipients: List<User>,
-    addRecipient: (User) -> Unit
+    addRecipient: (User) -> Unit,
+    queryTooShort: Boolean,
 ) {
     if (recipients.isNotEmpty()) {
         LazyColumn(modifier = modifier) {
@@ -135,10 +147,34 @@ private fun PotentialRecipientsList(
             }
         }
     } else {
-        Box(modifier = modifier) {
+        val icon = if (queryTooShort) Icons.Default.KeyboardAlt else Icons.Default.PersonOff
+        val text = if (queryTooShort) {
+            stringResource(
+                id = R.string.conversation_member_selection_query_too_short,
+                MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH
+            )
+        } else {
+            stringResource(id = R.string.conversation_member_selection_recipients_empty)
+        }
+
+        Column(
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Icon(
+                modifier = Modifier.size(64.dp),
+                imageVector = icon,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                contentDescription = null
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
-                modifier = Modifier.align(Alignment.TopCenter),
-                text = stringResource(id = R.string.conversation_member_selection_recipients_empty)
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = text,
             )
         }
     }

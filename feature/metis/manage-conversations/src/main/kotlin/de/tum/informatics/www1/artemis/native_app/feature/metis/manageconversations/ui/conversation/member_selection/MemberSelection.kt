@@ -47,6 +47,7 @@ internal fun MemberSelection(
 ) {
     val recipients by viewModel.recipients.collectAsState()
     val query by viewModel.query.collectAsState()
+    val queryTooShort by viewModel.queryTooShort.collectAsState()
     val potentialRecipientsDataState by viewModel.potentialRecipients.collectAsState()
     val inclusionList by viewModel.inclusionList.collectAsState()
 
@@ -71,6 +72,7 @@ internal fun MemberSelection(
                 .fillMaxWidth()
                 .weight(1f),
             potentialRecipientsDataState = potentialRecipientsDataState,
+            queryTooShort = queryTooShort,
             inclusionList = inclusionList,
             addRecipient = viewModel::addRecipient,
             updateInclusionList = viewModel::updateInclusionList,

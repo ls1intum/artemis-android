@@ -47,6 +47,9 @@ internal abstract class MemberSelectionBaseViewModel(
         private const val KEY_RECIPIENTS = "recipients"
 
         val QUERY_DEBOUNCE_TIME = 200.milliseconds
+
+        /** The minimum length of the query to trigger a search */
+        const val MINIMUM_QUERY_LENGTH = 3
     }
 
     private val onRequestReloadPotentialRecipients =
@@ -71,7 +74,7 @@ internal abstract class MemberSelectionBaseViewModel(
         serverConfigurationService.serverUrl,
         onRequestReloadPotentialRecipients.onStart { emit(Unit) }
     ) { query, inclusionList, authToken, serverUrl, _ ->
-        if (query.length >= 3) {
+        if (query.length >= MINIMUM_QUERY_LENGTH) {
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                 conversationService.searchForPotentialCommunicationParticipants(
                     courseId = courseId,
@@ -98,6 +101,9 @@ internal abstract class MemberSelectionBaseViewModel(
         }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+    val queryTooShort: StateFlow<Boolean> = query.map { it.length < MINIMUM_QUERY_LENGTH }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, true)
 
     fun updateQuery(query: String) {
         savedStateHandle[KEY_QUERY] = query
