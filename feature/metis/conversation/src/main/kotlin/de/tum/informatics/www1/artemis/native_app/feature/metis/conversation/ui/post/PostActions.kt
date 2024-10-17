@@ -13,7 +13,7 @@ data class PostActions(
     val onClickReaction: ((emojiId: String, create: Boolean) -> Unit)? = null,
     val onCopyText: () -> Unit = {},
     val onReplyInThread: (() -> Unit)? = null,
-    val onResolvePost: ((resolved: Boolean) -> Unit)? = null,
+    val onResolvePost: (() -> Unit)? = null,
     val onRequestRetrySend: () -> Unit = {}
 ) {
     val canPerformAnyAction: Boolean get() = requestDeletePost != null || requestEditPost != null
@@ -29,7 +29,7 @@ fun rememberPostActions(
     onRequestDelete: () -> Unit,
     onClickReaction: (emojiId: String, create: Boolean) -> Unit,
     onReplyInThread: (() -> Unit)?,
-    onResolvePost: ((resolved: Boolean) -> Unit)?,
+    onResolvePost: (() -> Unit)?,
     onRequestRetrySend: () -> Unit
 ): PostActions {
     val clipboardManager = LocalClipboardManager.current

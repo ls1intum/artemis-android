@@ -148,7 +148,6 @@ internal fun PostItem(
                         modifier = Modifier
                             .fillMaxWidth()
                             .placeholder(visible = isPlaceholder),
-                        maxLines = 5,
                         style = MaterialTheme.typography.bodyMedium,
                         onClick = onClick,
                         onLongClick = onLongClick,

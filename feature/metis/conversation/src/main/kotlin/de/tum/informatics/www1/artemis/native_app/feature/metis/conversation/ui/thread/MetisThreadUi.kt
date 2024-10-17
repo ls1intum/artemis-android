@@ -112,14 +112,14 @@ internal fun MetisThreadUi(
                     else -> throw NotImplementedError()
                 }
             },
-            onResolvePost = { post, resolved ->
+            onResolvePost = { post ->
                 val parentPost = postDataState.orNull()
 
                 if (post is AnswerPostPojo) {
                     if (parentPost == null) return@MetisReplyHandler CompletableDeferred(
                         MetisModificationFailure.UPDATE_POST
                     )
-                    viewModel.resolveOrUnresolvePost(parentPost, post, resolved)
+                    viewModel.toggleResolvePost(parentPost, post)
                 } else {
                     throw NotImplementedError()
                 }
@@ -192,7 +192,7 @@ private fun PostAndRepliesList(
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
-    onRequestResolve: (IBasePost, resolved: Boolean) -> Unit,
+    onRequestResolve: (IBasePost) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
 ) {
@@ -212,12 +212,7 @@ private fun PostAndRepliesList(
                 )
             },
             onReplyInThread = null,
-            onResolvePost = { resolved ->
-                onRequestResolve(
-                    affectedPost,
-                    resolved
-                )
-            },
+            onResolvePost = { onRequestResolve(affectedPost) },
             onRequestRetrySend = {
                 onRequestRetrySend(
                     affectedPost.clientPostId ?: return@rememberPostActions,

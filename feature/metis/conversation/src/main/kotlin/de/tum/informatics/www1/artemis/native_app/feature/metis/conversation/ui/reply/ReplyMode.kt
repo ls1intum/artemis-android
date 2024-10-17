@@ -38,7 +38,7 @@ internal sealed class ReplyMode() {
         private val onEditMessage: (String) -> Deferred<MetisModificationFailure?>,
         val onCancelEditMessage: () -> Unit
     ) : ReplyMode() {
-        override val currentText = mutableStateOf(TextFieldValue())
+        override val currentText = mutableStateOf(TextFieldValue(post.content ?: ""))
 
         override fun onUpdate(new: TextFieldValue) {
             currentText.value = new
@@ -102,13 +102,13 @@ internal fun <T : IBasePost> MetisReplyHandler(
     initialReplyTextProvider: InitialReplyTextProvider,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (T, String) -> Deferred<MetisModificationFailure?>,
-    onResolvePost: ((T, resolved: Boolean) -> Deferred<MetisModificationFailure?>)?,
+    onResolvePost: ((T) -> Deferred<MetisModificationFailure?>)?,
     onDeletePost: (T) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (T, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     content: @Composable (
         replyMode: ReplyMode,
         onRequestEditPostDelegate: (T) -> Unit,
-        onRequestResolvePostDelegate: (T, resolved: Boolean) -> Unit,
+        onRequestResolvePostDelegate: (T) -> Unit,
         onRequestReactWithEmojiDelegate: (T, emojiId: String, create: Boolean) -> Unit,
         onDeletePostDelegate: (T) -> Unit,
         updateFailureStateDelegate: (MetisModificationFailure?) -> Unit
@@ -138,9 +138,9 @@ internal fun <T : IBasePost> MetisReplyHandler(
     content(
         replyMode,
         { post -> editingPost = post },
-        { post, resolved ->
+        { post ->
             if (onResolvePost != null) {
-                metisModificationTask = onResolvePost(post, resolved)
+                metisModificationTask = onResolvePost(post)
             }
         },
         { post, emojiId, create ->

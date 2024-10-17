@@ -341,31 +341,21 @@ internal open class ConversationViewModel(
      * Handles a click on resolve or does not resolve post.
      * It updates the post accordingly.
      */
-    fun resolveOrUnresolvePost(
+    fun toggleResolvePost(
         parentPost: PostPojo,
-        post: AnswerPostPojo,
-        resolved: Boolean
+        post: AnswerPostPojo
     ): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
 
-            System.out.println(resolved)
-            System.out.println(parentPost.resolved)
-            System.out.println(post.content)
-            val serializedParentPost = StandalonePost(parentPost, conversation).copy(resolved = resolved)
+            val resolved = !post.resolvesPost
+            val serializedParentPost = StandalonePost(parentPost, conversation)
             val newPost = AnswerPost(post, serializedParentPost).copy(resolvesPost = resolved)
 
             metisModificationService.updateAnswerPost(
                 context = metisContext,
                 post = newPost,
-                serverUrl = serverConfigurationService.serverUrl.first(),
-                authToken = accountService.authToken.first()
-            )
-                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
-            metisModificationService.updateStandalonePost(
-                context = metisContext,
-                post = serializedParentPost,
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first()
             )
