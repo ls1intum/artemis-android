@@ -114,30 +114,6 @@ private fun collectExerciseCategoryChips(
                 )
             ) else emptyList()
 
-    val difficulty = exercise.difficulty
-    val difficultyChips = if (difficulty != null) {
-        val data = when (difficulty) {
-            Exercise.Difficulty.EASY ->
-                ExerciseCategoryChipData(
-                    context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_difficulty_easy),
-                    Color(0xff28a745)
-                )
-
-            Exercise.Difficulty.MEDIUM ->
-                ExerciseCategoryChipData(
-                    context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_difficulty_medium),
-                    Color(0xffffc107)
-                )
-
-            Exercise.Difficulty.HARD ->
-                ExerciseCategoryChipData(
-                    context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_difficulty_hard),
-                    Color(0xffdc3545)
-                )
-        }
-        listOf(data)
-    } else emptyList()
-
     val bonusChips =
         if (exercise.includedInOverallScore == Exercise.IncludedInOverallScore.INCLUDED_AS_BONUS) {
             listOf(
@@ -155,5 +131,5 @@ private fun collectExerciseCategoryChips(
         )
     }
 
-    return liveQuizChips + categoryChips + difficultyChips + bonusChips
+    return liveQuizChips + categoryChips + bonusChips
 }
