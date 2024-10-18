@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.android.db
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -29,7 +30,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.communication_not
         CommunicationMessageEntity::class
     ],
     exportSchema = true,
-    version = 9
+    version = 10,
+    autoMigrations = [
+        AutoMigration(from = 9, to = 10)
+    ]
 )
 @TypeConverters(RoomTypeConverters::class)
 abstract class AppDatabase : RoomDatabase() {
