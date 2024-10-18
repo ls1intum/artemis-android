@@ -54,13 +54,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 
-private const val SETTINGS_DESTINATION = "settings"
-private const val PUSH_NOTIFICATION_SETTINGS_DESTINATION = "push_notification_settings"
+@Serializable
+private data object SettingsScreen
+
+@Serializable
+private data object PushNotificationSettingsScreen
 
 fun NavController.navigateToSettings(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(SETTINGS_DESTINATION, builder)
+    navigate(SettingsScreen, builder)
 }
 
 /**
@@ -74,7 +78,7 @@ fun NavGraphBuilder.settingsScreen(
     onLoggedOut: () -> Unit,
     onDisplayThirdPartyLicenses: () -> Unit
 ) {
-    composable(SETTINGS_DESTINATION) {
+    composable<SettingsScreen> {
         SettingsScreen(
             modifier = Modifier.fillMaxSize(),
             versionCode = versionCode,
@@ -83,11 +87,11 @@ fun NavGraphBuilder.settingsScreen(
             onLoggedOut = onLoggedOut,
             onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses
         ) {
-            navController.navigate(PUSH_NOTIFICATION_SETTINGS_DESTINATION)
+            navController.navigate(PushNotificationSettingsScreen)
         }
     }
 
-    composable(PUSH_NOTIFICATION_SETTINGS_DESTINATION) {
+    composable<PushNotificationSettingsScreen> {
         PushNotificationSettingsScreen(
             modifier = Modifier.fillMaxSize(),
             onNavigateBack = onNavigateUp
