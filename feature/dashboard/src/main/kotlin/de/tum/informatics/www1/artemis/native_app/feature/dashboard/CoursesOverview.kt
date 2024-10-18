@@ -2,11 +2,11 @@ package de.tum.informatics.www1.artemis.native_app.feature.dashboard
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,6 +48,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -61,7 +61,6 @@ import androidx.navigation.compose.composable
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
-import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseHeaderViewMode
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseItemHeader
@@ -250,7 +249,12 @@ private fun BetaHintDialog(
                 Text(text = stringResource(id = R.string.dashboard_dialog_beta_message))
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            role = Role.Checkbox,
+                            onClick = { isDismissPersistentlyChecked = !isDismissPersistentlyChecked }
+                        ),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
