@@ -3,10 +3,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -43,7 +41,7 @@ internal fun testTagForPotentialRecipient(username: String) = "potentialRecipien
 internal fun PotentialRecipientsUi(
     modifier: Modifier,
     potentialRecipientsDataState: DataState<List<User>>,
-    queryTooShort: Boolean,
+    isQueryTooShort: Boolean,
     inclusionList: InclusionList,
     addRecipient: (User) -> Unit,
     updateInclusionList: (InclusionList) -> Unit,
@@ -72,7 +70,7 @@ internal fun PotentialRecipientsUi(
                 modifier = Modifier.fillMaxSize(),
                 recipients = potentialRecipients,
                 addRecipient = addRecipient,
-                queryTooShort = queryTooShort
+                isQueryTooShort = isQueryTooShort
             )
         }
     }
@@ -116,7 +114,7 @@ private fun PotentialRecipientsList(
     modifier: Modifier,
     recipients: List<User>,
     addRecipient: (User) -> Unit,
-    queryTooShort: Boolean,
+    isQueryTooShort: Boolean,
 ) {
     if (recipients.isNotEmpty()) {
         LazyColumn(modifier = modifier) {
@@ -145,8 +143,8 @@ private fun PotentialRecipientsList(
             }
         }
     } else {
-        val icon = if (queryTooShort) Icons.Default.KeyboardAlt else Icons.Default.PersonOff
-        val text = if (queryTooShort) {
+        val icon = if (isQueryTooShort) Icons.Default.KeyboardAlt else Icons.Default.PersonOff
+        val text = if (isQueryTooShort) {
             stringResource(
                 id = R.string.conversation_member_selection_query_too_short,
                 MemberSelectionBaseViewModel.MINIMUM_QUERY_LENGTH
@@ -158,7 +156,7 @@ private fun PotentialRecipientsList(
         Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.CenterVertically),
         ) {
             Icon(
                 modifier = Modifier.size(64.dp),
@@ -166,8 +164,6 @@ private fun PotentialRecipientsList(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 contentDescription = null
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 textAlign = TextAlign.Center,
