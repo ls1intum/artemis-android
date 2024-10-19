@@ -165,22 +165,26 @@ internal fun PostItem(
                         )
                     }
 
-                    if (post is IStandalonePost) {
-                        post.resolved?.let {
-                            if (it) {
+                    when (post) {
+                        is IStandalonePost -> {
+                            post.resolved?.let {
+                                if (it) {
+                                    ResolvedLabel(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        resourceString = R.string.post_is_resolved
+                                    )
+                                }
+                            }
+                        }
+                        is IAnswerPost -> {
+                            if (post.resolvesPost) {
                                 ResolvedLabel(
                                     modifier = Modifier.fillMaxWidth(),
-                                    resourceString = R.string.post_is_resolved
+                                    resourceString = R.string.post_resolves
                                 )
                             }
                         }
-                    } else if (post is IAnswerPost) {
-                        if (post.resolvesPost) {
-                            ResolvedLabel(
-                                modifier = Modifier.fillMaxWidth(),
-                                resourceString = R.string.post_resolves
-                            )
-                        }
+                        else -> {}
                     }
                 }
 

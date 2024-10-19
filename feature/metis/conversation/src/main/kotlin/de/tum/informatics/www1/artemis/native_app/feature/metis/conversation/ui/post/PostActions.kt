@@ -59,7 +59,7 @@ fun rememberPostActions(
                     clipboardManager.setText(AnnotatedString(post.content.orEmpty()))
                 },
                 onReplyInThread = if (doesPostExistOnServer) onReplyInThread else null,
-                onResolvePost = if (hasResolvePostRights && post is IAnswerPost) onResolvePost else null,
+                onResolvePost = if (hasResolvePostRights) onResolvePost else null,
                 onRequestRetrySend = onRequestRetrySend
             )
         } else {

@@ -174,7 +174,8 @@ internal open class ConversationViewModel(
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             accountDataService.getAccountData(
                 serverUrl = serverUrl,
-                bearerToken = authToken)
+                bearerToken = authToken
+            )
                 .bind { it.isAtLeastTutorInCourse(course = this.course.value.orThrow()) }
         }
             .map { it.orElse(false) }
