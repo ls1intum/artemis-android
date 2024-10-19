@@ -355,25 +355,19 @@ internal open class ConversationViewModel(
             val serializedParentPost = StandalonePost(parentPost, conversation)
             val newPost = AnswerPost(post, serializedParentPost).copy(resolvesPost = resolved)
 
-            val result = metisModificationService.updateAnswerPost(
+            metisModificationService.updateAnswerPost(
                 context = metisContext,
                 post = newPost,
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first()
             )
                 .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
-
-            if (result == null) {
-                requestReload()  // Automatically reload after a successful update
-            }
-
-            return@async result
         }
     }
 
     fun deletePost(post: IBasePost): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
-            val result = metisModificationService.deletePost(
+            metisModificationService.deletePost(
                 metisContext,
                 post.getAsAffectedPost() ?: return@async MetisModificationFailure.DELETE_POST,
                 serverConfigurationService.serverUrl.first(),
@@ -381,12 +375,6 @@ internal open class ConversationViewModel(
             )
                 .bind { if (it) null else MetisModificationFailure.DELETE_POST }
                 .or(MetisModificationFailure.DELETE_POST)
-
-            if (result == null) {
-                requestReload()  // Automatically reload after a successful update
-            }
-
-            return@async result
         }
     }
 
@@ -405,19 +393,13 @@ internal open class ConversationViewModel(
                 else -> throw IllegalArgumentException()
             }
 
-            val result = metisModificationService.updateStandalonePost(
+            metisModificationService.updateStandalonePost(
                 context = metisContext,
                 post = newPost,
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first()
             )
                 .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
-
-            if (result == null) {
-                requestReload()  // Automatically reload after a successful update
-            }
-
-            return@async result
         }
     }
 
@@ -433,19 +415,13 @@ internal open class ConversationViewModel(
             val serializedParentPost = StandalonePost(parentPost, conversation)
             val newPost = AnswerPost(post, serializedParentPost).copy(content = newText)
 
-            val result = metisModificationService.updateAnswerPost(
+            metisModificationService.updateAnswerPost(
                 context = metisContext,
                 post = newPost,
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first()
             )
                 .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
-
-            if (result == null) {
-                requestReload()  // Automatically reload after a successful update
-            }
-
-            return@async result
         }
     }
 

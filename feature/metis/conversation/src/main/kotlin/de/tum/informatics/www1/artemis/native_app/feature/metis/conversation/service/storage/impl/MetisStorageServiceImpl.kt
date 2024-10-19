@@ -513,7 +513,7 @@ internal class MetisStorageServiceImpl(
             )
 
             insertOrUpdateAnswerPost(
-                isNewPost = queryClientPostIdAnswer == null,
+                isNewPost = queryClientPostIdAnswer != null,
                 answerPostClientSidePostId = queryClientPostIdAnswer ?: UUID.randomUUID()
                     .toString(),
                 answerPost = ap,
