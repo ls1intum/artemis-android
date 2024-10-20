@@ -340,8 +340,7 @@ internal open class ConversationViewModel(
 
     /**
      * Handles a click on resolve or does not resolve post.
-     * It updates the post accordingly. It reloads the view
-     * to make the changes visible.
+     * It updates the post accordingly.
      */
     fun toggleResolvePost(
         parentPost: PostPojo,

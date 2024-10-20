@@ -147,7 +147,7 @@ internal fun PostContextBottomSheet(
                         text = if (post.resolvesPost) stringResource(id = R.string.post_does_not_resolve) else stringResource(id = R.string.post_resolves),
                         onClick = {
                             onDismissRequest()
-                            postActions.onResolvePost
+                            postActions.onResolvePost.invoke()
                         }
                     )
                 }
