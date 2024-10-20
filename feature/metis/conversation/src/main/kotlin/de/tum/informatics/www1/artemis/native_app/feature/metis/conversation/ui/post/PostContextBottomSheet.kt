@@ -140,18 +140,16 @@ internal fun PostContextBottomSheet(
                     }
                 )
 
-                postActions.onResolvePost?.let {
-                    (post as? IAnswerPost)?.let {
-                        ActionButton(
-                            modifier = actionButtonModifier,
-                            icon = if (post.resolvesPost) Icons.Default.Clear else Icons.Default.Check,
-                            text = if (post.resolvesPost) stringResource(id = R.string.post_does_not_resolve) else stringResource(id = R.string.post_resolves),
-                            onClick = {
-                                onDismissRequest()
-                                it()
-                            }
-                        )
-                    }
+                if (postActions.onResolvePost != null && post is IAnswerPost) {
+                    ActionButton(
+                        modifier = actionButtonModifier,
+                        icon = if (post.resolvesPost) Icons.Default.Clear else Icons.Default.Check,
+                        text = if (post.resolvesPost) stringResource(id = R.string.post_does_not_resolve) else stringResource(id = R.string.post_resolves),
+                        onClick = {
+                            onDismissRequest()
+                            postActions.onResolvePost
+                        }
+                    )
                 }
 
                 postActions.onReplyInThread?.let {
