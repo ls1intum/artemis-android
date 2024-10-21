@@ -167,13 +167,11 @@ internal fun PostItem(
 
                     when (post) {
                         is IStandalonePost -> {
-                            post.resolved?.let {
-                                if (it) {
-                                    ResolvedLabel(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        resourceString = R.string.post_is_resolved
-                                    )
-                                }
+                            if (post.resolved == true) {
+                                ResolvedLabel(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    resourceString = R.string.post_is_resolved
+                                )
                             }
                         }
                         is IAnswerPost -> {

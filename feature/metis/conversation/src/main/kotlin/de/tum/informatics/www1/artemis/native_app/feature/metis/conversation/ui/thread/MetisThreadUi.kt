@@ -114,15 +114,11 @@ internal fun MetisThreadUi(
             },
             onResolvePost = { post ->
                 val parentPost = postDataState.orNull()
-
-                if (post is AnswerPostPojo) {
-                    if (parentPost == null) return@MetisReplyHandler CompletableDeferred(
+                    ?: return@MetisReplyHandler CompletableDeferred(
                         MetisModificationFailure.UPDATE_POST
                     )
-                    viewModel.toggleResolvePost(parentPost, post)
-                } else {
-                    throw NotImplementedError()
-                }
+
+                viewModel.toggleResolvePost(parentPost, post as AnswerPostPojo)
             },
             onDeletePost = viewModel::deletePost,
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction
