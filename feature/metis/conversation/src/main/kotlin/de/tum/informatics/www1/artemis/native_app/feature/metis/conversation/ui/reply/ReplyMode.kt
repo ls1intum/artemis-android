@@ -96,6 +96,8 @@ private fun <T : IBasePost> rememberReplyMode(
 
 /**
  * Holds the necessary data about the reply mode and tasks going on. Exposes methods to update the associated states over the content lambda.
+ * TODO https://github.com/ls1intum/artemis-android/issues/64:
+ * MetisReplyHandler is not efficient to use, refactoring is needed.
  */
 @Composable
 internal fun <T : IBasePost> MetisReplyHandler(
