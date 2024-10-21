@@ -38,7 +38,7 @@ internal sealed class ReplyMode() {
         private val onEditMessage: (String) -> Deferred<MetisModificationFailure?>,
         val onCancelEditMessage: () -> Unit
     ) : ReplyMode() {
-        override val currentText = mutableStateOf(TextFieldValue())
+        override val currentText = mutableStateOf(TextFieldValue(post.content ?: ""))
 
         override fun onUpdate(new: TextFieldValue) {
             currentText.value = new
@@ -96,17 +96,21 @@ private fun <T : IBasePost> rememberReplyMode(
 
 /**
  * Holds the necessary data about the reply mode and tasks going on. Exposes methods to update the associated states over the content lambda.
+ * TODO https://github.com/ls1intum/artemis-android/issues/64:
+ * MetisReplyHandler is not efficient to use, refactoring is needed.
  */
 @Composable
 internal fun <T : IBasePost> MetisReplyHandler(
     initialReplyTextProvider: InitialReplyTextProvider,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (T, String) -> Deferred<MetisModificationFailure?>,
+    onResolvePost: ((T) -> Deferred<MetisModificationFailure?>)?,
     onDeletePost: (T) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (T, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     content: @Composable (
         replyMode: ReplyMode,
         onRequestEditPostDelegate: (T) -> Unit,
+        onRequestResolvePostDelegate: (T) -> Unit,
         onRequestReactWithEmojiDelegate: (T, emojiId: String, create: Boolean) -> Unit,
         onDeletePostDelegate: (T) -> Unit,
         updateFailureStateDelegate: (MetisModificationFailure?) -> Unit
@@ -136,6 +140,11 @@ internal fun <T : IBasePost> MetisReplyHandler(
     content(
         replyMode,
         { post -> editingPost = post },
+        { post ->
+            if (onResolvePost != null) {
+                metisModificationTask = onResolvePost(post)
+            }
+        },
         { post, emojiId, create ->
             metisModificationTask = onRequestReactWithEmoji(post, emojiId, create)
         },

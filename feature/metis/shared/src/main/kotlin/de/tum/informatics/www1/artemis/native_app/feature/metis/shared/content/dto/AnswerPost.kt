@@ -16,7 +16,7 @@ data class AnswerPost(
     override val updatedDate: Instant? = null,
     override val content: String? = null,
     override val reactions: List<Reaction>? = null,
-    @SerialName("resolvedPost")
+    @SerialName("resolvesPost")
     override val resolvesPost: Boolean = false,
     val post: StandalonePost? = null
 ) : BasePost(), IAnswerPost {
