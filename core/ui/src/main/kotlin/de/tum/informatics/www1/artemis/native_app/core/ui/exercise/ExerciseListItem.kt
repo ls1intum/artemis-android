@@ -1,14 +1,19 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -24,6 +29,9 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.easyColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.hardColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.mediumColor
 
 /**
  * Display a single exercise.
@@ -41,54 +49,84 @@ fun ExerciseListItem(
         modifier = modifier,
         onClick = onClickExercise
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .height(IntrinsicSize.Min)
         ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                ExerciseTypeIcon(modifier = Modifier.size(80.dp), exercise = exercise)
+            exercise.difficulty?.let { DifficultyRectangle(modifier = Modifier, difficulty = it)}
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    //Displays the icon of the exercise
+                    Icon(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(end = 8.dp)
+                            .fillMaxSize(),
+                        painter = getExerciseTypeIconPainter(exercise),
+                        contentDescription = null
+                    )
+
+                    //Displays the title of the exercise
+                    Text(
+                        text = exercise.title.orEmpty(),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
 
                 ExerciseDataText(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 16.dp),
+                    modifier = Modifier,
                     exercise = exercise,
                     displayActionButtons = displayActionButtons,
                     exerciseActions = exerciseActions
                 )
-            }
 
-            //Display a row of chips
-            ExerciseCategoryChipRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                exercise = exercise
-            )
+                //Display a row of chips
+                ExerciseCategoryChipRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    exercise = exercise
+                )
+            }
         }
     }
 }
 
 /**
- * Displays the icon of the exercise within an outlined circle
+ * Displays a rectangle next to the text to show the difficulty of the exercise.
  */
 @Composable
-private fun ExerciseTypeIcon(modifier: Modifier, exercise: Exercise) {
-    Box(modifier = modifier) {
-        Icon(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            painter = getExerciseTypeIconPainter(exercise),
-            contentDescription = null
+private fun DifficultyRectangle(modifier: Modifier, difficulty: Exercise.Difficulty) {
+    Box(modifier = modifier
+        .fillMaxHeight()
+        .width(10.dp)
+        .background(
+            color = when (difficulty) {
+                Exercise.Difficulty.EASY ->
+                    easyColor
+
+                Exercise.Difficulty.MEDIUM ->
+                    mediumColor
+
+                Exercise.Difficulty.HARD ->
+                    hardColor
+            }
         )
-    }
+    )
 }
 
 /**
- * Displays the exercise title, the due data and the participation info. The participation info is automatically updated.
+ * Displays the exercise due data and the participation info. The participation info is automatically updated.
  */
 @Composable
 private fun ExerciseDataText(
@@ -107,11 +145,6 @@ private fun ExerciseDataText(
     } else stringResource(id = R.string.exercise_item_due_date_not_set)
 
     Column(modifier = modifier) {
-        Text(
-            text = exercise.title.orEmpty(),
-            style = MaterialTheme.typography.titleMedium
-        )
-
         Text(
             text = formattedDueDate,
             style = MaterialTheme.typography.bodyMedium
