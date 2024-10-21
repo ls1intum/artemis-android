@@ -42,6 +42,8 @@ fun ExerciseCategoryChipRow(modifier: Modifier, exercise: Exercise) {
 
 @Composable
 fun ExerciseCategoryChipRow(modifier: Modifier, chips: List<ExerciseCategoryChipData>) {
+    if (chips.isEmpty()) return
+
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp)

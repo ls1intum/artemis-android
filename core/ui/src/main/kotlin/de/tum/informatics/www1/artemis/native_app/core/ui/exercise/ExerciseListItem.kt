@@ -59,7 +59,7 @@ fun ExerciseListItem(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(
@@ -70,7 +70,7 @@ fun ExerciseListItem(
                     Icon(
                         modifier = Modifier
                             .size(40.dp)
-                            .padding(horizontal = 8.dp)
+                            .padding(end = 8.dp)
                             .fillMaxSize(),
                         painter = getExerciseTypeIconPainter(exercise),
                         contentDescription = null
@@ -84,8 +84,7 @@ fun ExerciseListItem(
                 }
 
                 ExerciseDataText(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
+                    modifier = Modifier,
                     exercise = exercise,
                     displayActionButtons = displayActionButtons,
                     exerciseActions = exerciseActions
@@ -95,7 +94,6 @@ fun ExerciseListItem(
                 ExerciseCategoryChipRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
                         .horizontalScroll(rememberScrollState()),
                     exercise = exercise
                 )

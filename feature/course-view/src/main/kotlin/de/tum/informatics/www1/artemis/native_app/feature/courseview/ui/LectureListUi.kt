@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -76,7 +75,7 @@ private fun LectureListItem(modifier: Modifier, lecture: Lecture, onClick: () ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -85,7 +84,7 @@ private fun LectureListItem(modifier: Modifier, lecture: Lecture, onClick: () ->
                 Icon(
                     modifier = Modifier
                         .size(40.dp)
-                        .padding(horizontal = 8.dp)
+                        .padding(end = 8.dp)
                         .fillMaxSize(),
                     painter = painterResource(id = R.drawable.chalkboard_teacher),
                     contentDescription = null
@@ -98,7 +97,7 @@ private fun LectureListItem(modifier: Modifier, lecture: Lecture, onClick: () ->
             }
 
             Text(
-                modifier = Modifier.padding(horizontal = 8.dp),
+                modifier = Modifier,
                 text = startTimeText,
                 style = MaterialTheme.typography.bodyMedium
             )
