@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseregistration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,8 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -57,23 +60,25 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeC
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import kotlinx.coroutines.Deferred
+import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.getViewModel
 
 internal const val TEST_TAG_REGISTRABLE_COURSE_LIST = "registrable course list"
 
 internal fun testTagForRegistrableCourse(courseId: Long) = "registrableCourse$courseId"
 
-private const val COURSE_REGISTRATION_DESTINATION = "courseRegistration"
+@Serializable
+private data object CourseRegistrationScreen
 
 fun NavController.navigateToCourseRegistration(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(COURSE_REGISTRATION_DESTINATION, builder)
+    navigate(CourseRegistrationScreen, builder)
 }
 
 fun NavGraphBuilder.courseRegistration(
     onNavigateUp: () -> Unit,
     onRegisteredInCourse: (courseId: Long) -> Unit
 ) {
-    composable(COURSE_REGISTRATION_DESTINATION) {
+    composable<CourseRegistrationScreen> {
         RegisterForCourseScreen(
             modifier = Modifier.fillMaxSize(),
             viewModel = getViewModel(),
@@ -213,6 +218,19 @@ private fun RegisterForCourseContent(
         val isCompact = windowSizeClass.widthSizeClass <= WindowWidthSizeClass.Compact
         val courseItemModifier = Modifier
             .computeCourseItemModifier(isCompact = isCompact)
+
+        if(data.isEmpty()) {
+            Column(
+                modifier = Modifier.align(Alignment.Center)
+            ) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.course_registration_no_courses),
+                    textAlign = TextAlign.Center,
+                    fontSize = 18.sp
+                )
+            }
+        }
 
         LazyVerticalGrid(
             modifier = Modifier

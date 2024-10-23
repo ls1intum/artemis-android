@@ -45,7 +45,7 @@ internal class CourseRegistrationServiceImpl(
             ktorProvider.ktorClient
                 .post(serverUrl) {
                     url {
-                        appendPathSegments("api", "courses", courseId.toString(), "register")
+                        appendPathSegments("api", "courses", courseId.toString(), "enroll")
                     }
 
                     cookieAuth(authToken)
