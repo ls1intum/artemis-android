@@ -131,7 +131,6 @@ class MainActivity : AppCompatActivity(),
         }
 
         setContent {
-            enableEdgeToEdge()
             AppTheme {
                 ProvideLocalVisibleMetisContextManager(
                     visibleMetisContextManager = visibleMetisContextManager
