@@ -7,20 +7,7 @@ import androidx.room.Index
 
 @Entity(
     tableName = "reactions",
-    primaryKeys = ["post_id", "emoji", "author_id"],
-    foreignKeys = [
-        ForeignKey(
-            entity = BasePostingEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["post_id"],
-            onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = MetisUserEntity::class,
-            parentColumns = ["server_id", "id"],
-            childColumns = ["server_id", "author_id"]
-        )
-    ],
+    primaryKeys = ["post_id", "emoji", "author_id", "server_id"],
     indices = [Index("server_id", "author_id", name = "server_id_author_id_index")]
 )
 data class PostReactionEntity(

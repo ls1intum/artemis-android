@@ -3,6 +3,7 @@
     <string name="course_registration_title">Register for a course</string>
     <string name="course_registration_loading_courses_failed">Something went wrong while loading courses.</string>
     <string name="course_registration_loading_courses_loading">Fetching courses from server…</string>
+    <string name="course_registration_no_courses">There are currently no courses you can sign up to.</string>
     <string name="course_registration_loading_courses_try_again">Try again</string>
 
     <string name="course_registration_sign_up">Register</string>

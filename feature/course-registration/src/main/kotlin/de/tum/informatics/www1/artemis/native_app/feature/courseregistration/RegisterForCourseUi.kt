@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseregistration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,8 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -215,6 +218,19 @@ private fun RegisterForCourseContent(
         val isCompact = windowSizeClass.widthSizeClass <= WindowWidthSizeClass.Compact
         val courseItemModifier = Modifier
             .computeCourseItemModifier(isCompact = isCompact)
+
+        if(data.isEmpty()) {
+            Column(
+                modifier = Modifier.align(Alignment.Center)
+            ) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.course_registration_no_courses),
+                    textAlign = TextAlign.Center,
+                    fontSize = 18.sp
+                )
+            }
+        }
 
         LazyVerticalGrid(
             modifier = Modifier
