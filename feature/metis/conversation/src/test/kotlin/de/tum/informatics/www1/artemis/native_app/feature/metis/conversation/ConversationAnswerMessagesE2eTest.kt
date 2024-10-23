@@ -64,4 +64,47 @@ class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
             }
         }
     }
+
+    @Test(timeout = DefaultTestTimeoutMillis)
+    fun `resolve a post`() {
+        runTest(timeout = DefaultTimeoutMillis.milliseconds * 4) {
+            val post = metisModificationService.createPost(
+                context = metisContext,
+                post = createPost("test message"),
+                serverUrl = testServerUrl,
+                authToken = accessToken
+            ).orThrow("Could not create message")
+
+            val answerPost = metisModificationService.createAnswerPost(
+                context = metisContext,
+                post = de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost(
+                    creationDate = Clock.System.now(),
+                    content = "answer post test message",
+                    resolvesPost = false,
+                    post = post
+                ),
+                serverUrl = testServerUrl,
+                authToken = accessToken
+            ).orThrow("Could not create answer message with text $post")
+
+            val newAnswerPost = answerPost.copy(resolvesPost = true)
+
+            metisModificationService.updateAnswerPost(
+                context = metisContext,
+                post = newAnswerPost,
+                serverUrl = testServerUrl,
+                authToken = accessToken
+            ).orThrow("Could not resolve answer post")
+
+            val updatedPost = metisService
+                .getPost(metisContext, post.serverPostId!!, testServerUrl, accessToken)
+                .orThrow("Could not download updated post")
+
+            assertNotNull(
+                updatedPost.answers?.firstOrNull { it.id == answerPost.id && it.resolvesPost },
+                "Answer post was not marked as resolved"
+            )
+        }
+    }
+
 }
