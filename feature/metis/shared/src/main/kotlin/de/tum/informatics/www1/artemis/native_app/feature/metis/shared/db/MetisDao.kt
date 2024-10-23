@@ -15,7 +15,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entiti
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.PostReactionEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostTagEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.StandalonePostingEntity
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
@@ -34,7 +33,8 @@ interface MetisDao {
     suspend fun clearAll(serverId: String)
 
     /**
-     * Query the client side post if for the given metis context. Returns null if the given post is not yet stored.
+     * Query the client side post id for the given server side post id.
+     * Returns null if the given post is not yet stored.
      * Note: Standalone posts and answer posts may have the same ids.
      */
     @Query(
