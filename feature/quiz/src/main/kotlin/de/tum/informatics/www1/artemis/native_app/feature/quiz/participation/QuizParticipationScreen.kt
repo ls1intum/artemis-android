@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -14,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,25 +28,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.DestructiveMarkdownTextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadingAnimation
-import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.KSerializableNavType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.ViewQuizResultScreen
 import kotlinx.coroutines.Deferred
-import kotlinx.serialization.Serializable
+import kotlinx.coroutines.Job
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
-import kotlin.reflect.typeOf
 
 private val submitButtonColor: Color
     @Composable get() = if (isSystemInDarkTheme()) Color(0xff00bc8c) else Color(0xff28a745)
@@ -52,28 +54,31 @@ private val submitButtonColor: Color
 private val submitButtonTextColor: Color
     @Composable get() = Color.White
 
-@Serializable
-private data class QuizParticipationScreen(
-    val courseId: Long,
-    val exerciseId: Long,
-    val quizType: QuizType.WorkableQuizType = QuizType.Live
-)
-
 fun NavController.navigateToQuizParticipation(
     courseId: Long,
     exerciseId: Long,
     quizType: QuizType.WorkableQuizType
 ) {
-    navigate(QuizParticipationScreen(courseId, exerciseId, quizType))
+    val quizTypeAsString = Json.encodeToString(QuizType.WorkableQuizType.serializer(), quizType)
+
+    navigate("quiz-participation/$courseId/$exerciseId/$quizTypeAsString")
 }
 
 fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
-    composable<QuizParticipationScreen>(
-        typeMap = mapOf(
-            typeOf<QuizType.WorkableQuizType>() to KSerializableNavType(
-                isNullableAllowed = false,
-                QuizType.WorkableQuizType.serializer()
-            )
+    composable(
+        route = "quiz-participation/{courseId}/{exerciseId}/{quizType}",
+        arguments = listOf(
+            navArgument("courseId") {
+                type = NavType.LongType
+            },
+            navArgument("exerciseId") {
+                type = NavType.LongType
+            },
+            navArgument("quizType") {
+                type = NavType.StringType
+                defaultValue =
+                    Json.encodeToString(QuizType.WorkableQuizType.serializer(), QuizType.Live)
+            }
         ),
         deepLinks = listOf(
             navDeepLink {
@@ -81,10 +86,15 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
             }
         )
     ) { backStackEntry ->
-        val screen = backStackEntry.toRoute<QuizParticipationScreen>()
-        val courseId = screen.courseId
-        val exerciseId = screen.exerciseId
-        val quizType = screen.quizType
+        val courseId = backStackEntry.arguments?.getLong("courseId")
+        val exerciseId = backStackEntry.arguments?.getLong("exerciseId")
+        val quizTypeString = backStackEntry.arguments?.getString("quizType")
+
+        checkNotNull(courseId)
+        checkNotNull(exerciseId)
+        checkNotNull(quizTypeString)
+
+        val quizType: QuizType.WorkableQuizType = Json.decodeFromString(quizTypeString)
 
         val jsonProvider: JsonProvider = koinInject()
 
