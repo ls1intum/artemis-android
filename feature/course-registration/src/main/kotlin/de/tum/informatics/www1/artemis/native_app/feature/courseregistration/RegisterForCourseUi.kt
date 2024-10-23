@@ -60,23 +60,25 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeC
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import kotlinx.coroutines.Deferred
+import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.getViewModel
 
 internal const val TEST_TAG_REGISTRABLE_COURSE_LIST = "registrable course list"
 
 internal fun testTagForRegistrableCourse(courseId: Long) = "registrableCourse$courseId"
 
-private const val COURSE_REGISTRATION_DESTINATION = "courseRegistration"
+@Serializable
+private data object CourseRegistrationScreen
 
 fun NavController.navigateToCourseRegistration(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(COURSE_REGISTRATION_DESTINATION, builder)
+    navigate(CourseRegistrationScreen, builder)
 }
 
 fun NavGraphBuilder.courseRegistration(
     onNavigateUp: () -> Unit,
     onRegisteredInCourse: (courseId: Long) -> Unit
 ) {
-    composable(COURSE_REGISTRATION_DESTINATION) {
+    composable<CourseRegistrationScreen> {
         RegisterForCourseScreen(
             modifier = Modifier.fillMaxSize(),
             viewModel = getViewModel(),

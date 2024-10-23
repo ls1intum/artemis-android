@@ -35,6 +35,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import androidx.navigation.toRoute
 import io.github.fornewid.placeholder.material3.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
@@ -45,16 +46,20 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMet
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
+import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 const val METIS_RATIO = 0.3f
 
+@Serializable
+private data class LectureScreenUi(val lectureId: Long)
+
 fun NavController.navigateToLecture(
     lectureId: Long,
     builder: NavOptionsBuilder.() -> Unit
 ) {
-    navigate("lecture/$lectureId", builder)
+    navigate(LectureScreenUi(lectureId), builder)
 }
 
 fun NavGraphBuilder.lecture(
@@ -66,23 +71,16 @@ fun NavGraphBuilder.lecture(
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
 ) {
-    composable(
-        route = "lecture/{lectureId}",
-        arguments = listOf(
-            navArgument("lectureId") {
-                type = NavType.LongType
-                nullable = false
-            }
-        ),
+    composable<LectureScreenUi>(
         deepLinks = listOf(
             navDeepLink {
                 uriPattern = "artemis://lectures/{lectureId}"
             }
         ) + generateLinks("courses/{courseId}/lectures/{lectureId}")
     ) { backStackEntry ->
-        val lectureId =
-            backStackEntry.arguments?.getLong("lectureId")
-        checkNotNull(lectureId)
+        val route: LectureScreenUi = backStackEntry.toRoute()
+
+        val lectureId = route.lectureId
 
         val viewModel: LectureViewModel = koinViewModel { parametersOf(lectureId) }
         val lectureDataState by viewModel.lectureDataState.collectAsState()
