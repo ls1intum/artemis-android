@@ -17,8 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
+import androidx.navigation.navArgument
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.join
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
@@ -28,27 +29,37 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
-import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-
-@Serializable
-private data class ViewQuizResultScreen(val courseId: Long, val exerciseId: Long)
 
 fun NavController.navigateToQuizResult(
     courseId: Long,
     exerciseId: Long
 ) {
-    navigate(ViewQuizResultScreen(courseId, exerciseId))
+    navigate("view-quiz-result/$courseId/$exerciseId")
 }
 
 fun NavGraphBuilder.quizResults(onRequestLeaveQuizResults: () -> Unit) {
-    composable<ViewQuizResultScreen> { backStackEntry ->
-        val route: ViewQuizResultScreen = backStackEntry.toRoute()
+    composable(
+        "view-quiz-result/{courseId}/{exerciseId}",
+        arguments = listOf(
+            navArgument("courseId") {
+                type = NavType.LongType
+            },
+            navArgument("exerciseId") {
+                type = NavType.LongType
+            }
+        )
+    ) { backStackEntry ->
+        val courseId = backStackEntry.arguments?.getLong("courseId")
+        val exerciseId = backStackEntry.arguments?.getLong("exerciseId")
+
+        checkNotNull(courseId)
+        checkNotNull(exerciseId)
 
         ViewQuizResultScreen(
             modifier = Modifier.fillMaxSize(),
-            exerciseId = route.exerciseId,
+            exerciseId = exerciseId,
             quizType = QuizType.ViewResults,
             onNavigateUp = onRequestLeaveQuizResults
         )
@@ -101,14 +112,7 @@ internal fun ViewQuizResultScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            dataState = joinMultiple(
-                quizExercise,
-                submission,
-                result,
-                quizQuestions,
-                maxPoints,
-                ::ResultData
-            ),
+            dataState = joinMultiple(quizExercise, submission, result, quizQuestions, maxPoints, ::ResultData),
             loadingText = stringResource(id = R.string.quiz_result_loading),
             failureText = stringResource(id = R.string.quiz_result_failure),
             retryButtonText = stringResource(id = R.string.quiz_result_try_again),

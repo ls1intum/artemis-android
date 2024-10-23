@@ -55,7 +55,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
@@ -74,34 +73,38 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNo
 import io.ktor.http.encodeURLPathPart
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import java.io.IOException
 
+private const val NAV_ARG_NEXT_DESTINATION = "next_destination"
+
+const val LOGIN_DESTINATION = "login/{$NAV_ARG_NEXT_DESTINATION}"
 private const val ARG_REMEMBER_ME = "rememberMe"
 private const val NESTED_SAML2_LOGIN_ROUTE = "saml2_login"
 
-@Serializable
-private sealed interface NestedDestination {
-    @Serializable
-    data object InstanceSelection : NestedDestination
-    @Serializable
-    data object CustomInstanceSelection : NestedDestination
-    @Serializable
-    data object Home : NestedDestination
-    @Serializable
-    data object Login : NestedDestination
-    @Serializable
-    data object Register : NestedDestination
-    @Serializable
-    data class Saml2Login(val rememberMe: Boolean) : NestedDestination
-}
+private enum class NestedDestination(val destination: String) {
+    INSTANCE_SELECTION("instance_selection"),
+    CUSTOM_INSTANCE_SELECTION("custom_instance_selection"),
+    HOME("nested_home"),
+    LOGIN("nested_login"),
+    REGISTER("nested_register"),
+    SAML2_LOGIN("$NESTED_SAML2_LOGIN_ROUTE/{$ARG_REMEMBER_ME}");
 
-@Serializable
-data class LoginScreen(val nextDestination: String?)
+    companion object {
+        fun getByRoute(route: String?): NestedDestination? = when (route) {
+            INSTANCE_SELECTION.destination -> INSTANCE_SELECTION
+            CUSTOM_INSTANCE_SELECTION.destination -> CUSTOM_INSTANCE_SELECTION
+            HOME.destination -> HOME
+            LOGIN.destination -> LOGIN
+            REGISTER.destination -> REGISTER
+            NESTED_SAML2_LOGIN_ROUTE -> SAML2_LOGIN
+            else -> null
+        }
+    }
+}
 
 /**
  * @param nextDestination the deep link to a destination that should be opened after a successful login
@@ -110,13 +113,11 @@ fun NavController.navigateToLogin(
     nextDestination: String? = null,
     builder: NavOptionsBuilder.() -> Unit
 ) {
-    val screen = if (nextDestination != null) {
-        LoginScreen(nextDestination)
+    if (nextDestination != null) {
+        navigate("login/${nextDestination.encodeURLPathPart()}", builder)
     } else {
-        LoginScreen(null)
+        navigate("login/null", builder)
     }
-
-    navigate(screen, builder)
 }
 
 /**
@@ -126,9 +127,17 @@ fun NavGraphBuilder.loginScreen(
     onFinishedLoginFlow: (deepLink: String?) -> Unit,
     onRequestOpenSettings: () -> Unit
 ) {
-    composable<LoginScreen> {
-        val screen = it.toRoute<LoginScreen>()
-        val nextDestinationValue = screen.nextDestination
+    composable(
+        LOGIN_DESTINATION,
+        arguments = listOf(
+            navArgument(NAV_ARG_NEXT_DESTINATION) {
+                type = NavType.StringType
+                defaultValue = null
+                nullable = true
+            }
+        )
+    ) {
+        val nextDestinationValue = it.arguments?.getString(NAV_ARG_NEXT_DESTINATION)
 
         var nextDestination by remember(nextDestinationValue) {
             mutableStateOf(if (nextDestinationValue == null || nextDestinationValue == "null") null else nextDestinationValue)
@@ -218,14 +227,16 @@ private fun LoginUiScreen(
         ?: return // Display nothing to avoid switching between destinations
 
     // Force recomposition
-    val currentBackStack by nestedNavController.currentBackStackEntryAsState()
     nestedNavController.currentBackStackEntryAsState().value
     val supportsBackNavigation = nestedNavController.previousBackStackEntry != null
 
-    val selectedDestination: NestedDestination? = currentBackStack?.toRoute()
+    val selectedDestination: NestedDestination? =
+        NestedDestination.getByRoute(nestedNavController.currentDestination?.route)
 
     val onClickSaml2Login: (rememberMe: Boolean) -> Unit = { rememberMe ->
-        nestedNavController.navigate(NestedDestination.Saml2Login(rememberMe))
+        nestedNavController.navigate(
+            createSaml2LoginRoute(rememberMe)
+        )
     }
 
     Scaffold(
@@ -241,9 +252,9 @@ private fun LoginUiScreen(
                 },
                 title = {
                     val titleText: Int? = when (selectedDestination) {
-                        NestedDestination.CustomInstanceSelection -> R.string.account_select_custom_instance_selection_title
-                        NestedDestination.Login -> R.string.login_title
-                        NestedDestination.Register -> R.string.register_title
+                        NestedDestination.CUSTOM_INSTANCE_SELECTION -> R.string.account_select_custom_instance_selection_title
+                        NestedDestination.LOGIN -> R.string.login_title
+                        NestedDestination.REGISTER -> R.string.register_title
                         else -> null
                     }
 
@@ -264,23 +275,23 @@ private fun LoginUiScreen(
                 .fillMaxSize()
                 .padding(paddingValues),
             navController = nestedNavController,
-            startDestination = if (hasSelectedInstance) NestedDestination.Home else NestedDestination.InstanceSelection
+            startDestination = if (hasSelectedInstance) NestedDestination.HOME.destination else NestedDestination.INSTANCE_SELECTION.destination
         ) {
-            composable<NestedDestination.Home>() {
+            composable(NestedDestination.HOME.destination) {
                 AccountScreen(
                     modifier = Modifier.fillMaxSize(),
                     canSwitchInstance = !BuildConfig.hasInstanceRestriction,
                     onNavigateToLoginScreen = {
-                        nestedNavController.navigate(NestedDestination.Login)
+                        nestedNavController.navigate(NestedDestination.LOGIN.destination)
                     },
                     onNavigateToRegisterScreen = {
-                        nestedNavController.navigate(NestedDestination.Register)
+                        nestedNavController.navigate(NestedDestination.REGISTER.destination)
                     },
                     onNavigateToInstanceSelection = {
                         onNavigatedToInstanceSelection()
 
-                        nestedNavController.navigate(NestedDestination.InstanceSelection) {
-                            popUpTo<NestedDestination.Home> {
+                        nestedNavController.navigate(NestedDestination.INSTANCE_SELECTION.destination) {
+                            popUpTo(NestedDestination.HOME.destination) {
                                 inclusive = true
                             }
                         }
@@ -290,21 +301,21 @@ private fun LoginUiScreen(
                 )
             }
 
-            composable<NestedDestination.CustomInstanceSelection> {
+            composable(NestedDestination.CUSTOM_INSTANCE_SELECTION.destination) {
                 CustomInstanceSelectionScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
                 ) {
-                    nestedNavController.navigate(NestedDestination.Home) {
-                        popUpTo<NestedDestination.InstanceSelection> {
+                    nestedNavController.navigate(NestedDestination.HOME.destination) {
+                        popUpTo(NestedDestination.INSTANCE_SELECTION.destination) {
                             inclusive = true
                         }
                     }
                 }
             }
 
-            composable<NestedDestination.Login> {
+            composable(NestedDestination.LOGIN.destination) {
                 LoginScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = getViewModel(),
@@ -313,7 +324,12 @@ private fun LoginUiScreen(
                 )
             }
 
-            composable<NestedDestination.Saml2Login> { backStack ->
+            composable(
+                route = NestedDestination.SAML2_LOGIN.destination,
+                arguments = listOf(navArgument("rememberMe") {
+                    type = NavType.BoolType
+                })
+            ) { backStack ->
                 val rememberMe = backStack.arguments?.getBoolean(ARG_REMEMBER_ME)
                 checkNotNull(rememberMe)
 
@@ -327,7 +343,7 @@ private fun LoginUiScreen(
                 )
             }
 
-            composable<NestedDestination.Register> {
+            composable(NestedDestination.REGISTER.destination) {
                 RegisterUi(
                     modifier = Modifier
                         .fillMaxSize()
@@ -336,12 +352,12 @@ private fun LoginUiScreen(
                     viewModel = koinViewModel(),
                     onRegistered = {
                         nestedNavController.popBackStack()
-                        nestedNavController.navigate(NestedDestination.Login)
+                        nestedNavController.navigate(NestedDestination.LOGIN.destination)
                     }
                 )
             }
 
-            composable<NestedDestination.InstanceSelection> {
+            composable(NestedDestination.INSTANCE_SELECTION.destination) {
                 val scope = rememberCoroutineScope()
 
                 InstanceSelectionScreen(
@@ -352,8 +368,8 @@ private fun LoginUiScreen(
                     onSelectArtemisInstance = { serverUrl ->
                         scope.launch {
                             serverConfigurationService.updateServerUrl(serverUrl)
-                            nestedNavController.navigate(NestedDestination.Home) {
-                                popUpTo<NestedDestination.InstanceSelection> {
+                            nestedNavController.navigate(NestedDestination.HOME.destination) {
+                                popUpTo(NestedDestination.INSTANCE_SELECTION.destination) {
                                     inclusive = true
                                 }
                             }
@@ -361,7 +377,7 @@ private fun LoginUiScreen(
                     },
                     onRequestOpenCustomInstanceSelection = {
                         nestedNavController.navigate(
-                            NestedDestination.CustomInstanceSelection
+                            NestedDestination.CUSTOM_INSTANCE_SELECTION.destination
                         )
                     }
                 )
@@ -369,6 +385,9 @@ private fun LoginUiScreen(
         }
     }
 }
+
+private fun createSaml2LoginRoute(rememberMe: Boolean): String =
+    NestedDestination.SAML2_LOGIN.destination.replace("{$ARG_REMEMBER_ME}", rememberMe.toString())
 
 /**
  * Displays the screen to login and register. Also allows to change the artemis instance.
