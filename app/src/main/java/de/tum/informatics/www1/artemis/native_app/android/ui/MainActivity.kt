@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -132,6 +133,7 @@ class MainActivity : AppCompatActivity(),
         }
 
         setContent {
+            enableEdgeToEdge()
             AppTheme {
                 ProvideLocalVisibleMetisContextManager(
                     visibleMetisContextManager = visibleMetisContextManager
