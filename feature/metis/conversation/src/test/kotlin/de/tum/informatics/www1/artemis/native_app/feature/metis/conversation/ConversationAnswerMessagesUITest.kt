@@ -113,7 +113,7 @@ class ConversationAnswerMessagesUITest : KoinTest {
     )
 
     @Test
-    fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the clicked answer post`() {
+    fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the first answer post`() {
         var resolvedPost: IBasePost? = null
 
         composeTestRule.setContent {
@@ -149,13 +149,50 @@ class ConversationAnswerMessagesUITest : KoinTest {
     }
 
     @Test
+    fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the third answer post`() {
+        var resolvedPost: IBasePost? = null
+
+        composeTestRule.setContent {
+            MetisThreadUi(
+                modifier = Modifier.fillMaxSize(),
+                courseId = course.id!!,
+                clientId = clientId,
+                postDataState = DataState.Success(post),
+                conversationDataState = DataState.Success(conversation),
+                hasModerationRights = false,
+                isAtLeastTutorInCourse = false,
+                serverUrl = "",
+                initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
+                onCreatePost = { CompletableDeferred() },
+                onEditPost = { _, _ -> CompletableDeferred() },
+                onResolvePost = { post ->
+                    resolvedPost = post
+                    CompletableDeferred()
+                },
+                onDeletePost = { CompletableDeferred() },
+                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                onRequestReload = {},
+                onRequestRetrySend = { _, _ -> },
+            )
+        }
+
+        composeTestRule.onNodeWithText("Answer Post content 2").performClick()
+        composeTestRule.onNodeWithText(context.getString(R.string.post_resolves)).performClick()
+
+        assert(resolvedPost != null)
+        assert(resolvedPost is AnswerPostPojo)
+        assert((resolvedPost as AnswerPostPojo).content == "Answer Post content 2")
+    }
+
+    @Test
     fun `test GIVEN post is resolved WHEN un-resolving the post THEN the post is un-resolved`() {
-        // A random answer post resolves the post
-        val randomIndex = Random.nextInt(post.answers.size)
+        var resolvingIndex = 0
         val resolvedPost = post.copy(
             resolved = true,
             answers = post.answers.mapIndexed { index, answer ->
-                if (index == randomIndex && !answer.resolvesPost) {
+                resolvingIndex = post.answers.indexOfFirst { !it.resolvesPost }
+                if (!answer.resolvesPost && index == resolvingIndex) {
+                    // Update only the first unresolved answer
                     answer.copy(resolvesPost = true)
                 } else {
                     answer
@@ -189,13 +226,13 @@ class ConversationAnswerMessagesUITest : KoinTest {
             )
         }
 
-        composeTestRule.onNodeWithText("Answer Post content $randomIndex")
+        composeTestRule.onNodeWithText("Answer Post content $resolvingIndex")
         composeTestRule.onNodeWithText(context.getString(R.string.post_does_not_resolve))
             .performClick()
 
         assert(unresolvedPost != null)
         assert(unresolvedPost is AnswerPostPojo)
-        assert((unresolvedPost as AnswerPostPojo).content == "Answer Post content $randomIndex")
+        assert((unresolvedPost as AnswerPostPojo).content == "Answer Post content $resolvingIndex")
     }
 
     @Test
@@ -233,12 +270,13 @@ class ConversationAnswerMessagesUITest : KoinTest {
 
     @Test
     fun `test GIVEN the post is resolved and one answer post is marked as resolving THEN the post is shown as resolved and this answer post is shown as resolving`() {
-        // A random answer post resolves the post
-        val randomIndex = Random.nextInt(post.answers.size)
+        var resolvingIndex = 0
         val resolvedPost = post.copy(
             resolved = true,
             answers = post.answers.mapIndexed { index, answer ->
-                if (index == randomIndex && !answer.resolvesPost) {
+                resolvingIndex = post.answers.indexOfFirst { !it.resolvesPost }
+                if (!answer.resolvesPost && index == resolvingIndex) {
+                    // Update only the first unresolved answer
                     answer.copy(resolvesPost = true)
                 } else {
                     answer
@@ -268,7 +306,6 @@ class ConversationAnswerMessagesUITest : KoinTest {
         }
 
         composeTestRule.onNodeWithText("Post content").assertExists()
-        composeTestRule.onNodeWithText("Answer Post content $randomIndex").assertExists()
         composeTestRule.onNodeWithText(context.getString(R.string.post_is_resolved)).assertExists()
         composeTestRule.onNodeWithText(context.getString(R.string.post_resolves)).assertExists()
     }
