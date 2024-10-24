@@ -417,12 +417,9 @@ internal open class ConversationViewModel(
         ) { authToken, serverUrl ->
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                 conversationService
-                    .searchForPotentialCommunicationParticipants(
+                    .searchForCourseMembers(
                         courseId = metisContext.courseId,
                         query = query,
-                        includeStudents = true,
-                        includeTutors = true,
-                        includeInstructors = true,
                         authToken = authToken,
                         serverUrl = serverUrl
                     )

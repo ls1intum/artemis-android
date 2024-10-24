@@ -26,6 +26,13 @@ interface ConversationService {
         serverUrl: String
     ): NetworkResponse<List<User>>
 
+    suspend fun searchForCourseMembers(
+        courseId: Long,
+        query: String,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<List<User>>
+
     suspend fun createOneToOneConversation(
         courseId: Long,
         partner: String,
