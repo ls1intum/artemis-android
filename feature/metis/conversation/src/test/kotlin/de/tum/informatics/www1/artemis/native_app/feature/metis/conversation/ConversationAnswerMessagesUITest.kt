@@ -49,7 +49,7 @@ class ConversationAnswerMessagesUITest : KoinTest {
     )
 
     @Test
-    fun `resolve post in UI`() {
+    fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the clicked answer post`() {
         var resolvedPost: IBasePost? = null
 
         composeTestRule.setContent {
@@ -79,5 +79,20 @@ class ConversationAnswerMessagesUITest : KoinTest {
         // TODO: use compose test role to click resolve on the answer post
 
         // TODO: assert that resolvedPost equals to the post you actually clicked on
+    }
+
+    @Test
+    fun `test GIVEN post is resolved WHEN un-resolving the post THEN the post is un-resolved`() {
+        // TODO: check that the correct callback is called
+    }
+
+    @Test
+    fun `test GIVEN the post is not resolved and no answer post is resolving THEN the post is shown as not resolved and no answer post is shown as resolving`() {
+        // TODO: check that the UI elements are shown correctly
+    }
+
+    @Test
+    fun `test GIVEN the post is resolved and one answer post is marked as resolving THEN the post is shown as resolved and this answer post is shown as resolving`() {
+        // TODO: check that the UI elements are shown correctly
     }
 }
