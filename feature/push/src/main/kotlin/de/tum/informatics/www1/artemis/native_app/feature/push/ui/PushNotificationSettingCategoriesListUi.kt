@@ -187,6 +187,7 @@ private fun getLocalizedNotificationGroupName(groupName: String): String {
         "course-wide-discussion" -> R.string.push_notification_settings_group_courseWideDiscussionNotifications
         "tutor-notification" -> R.string.push_notification_settings_group_tutorNotifications
         "editor-notification" -> R.string.push_notification_settings_group_editorNotifications
+        "exam-notification" -> R.string.push_notification_settings_group_examNotifications
         "instructor-notification" -> R.string.push_notification_settings_group_instructorNotifications
         "user-notification" -> R.string.push_notification_settings_group_conversationNotification
         else -> null
@@ -213,12 +214,17 @@ private fun getLocalizedNotificationSettingName(settingName: String): String {
         "course-and-exam-archiving-started" -> R.string.push_notification_settings_setting_courseAndExamArchivingStarted
         "file-submission-successful" -> R.string.push_notification_settings_setting_fileSubmissionSuccessful
         "programming-test-cases-changed" -> R.string.push_notification_settings_setting_programmingTestCasesChanged
+        "new-reply-for-exam-post" -> R.string.push_notification_settings_setting_newExamReply
+        "new-exam-post" -> R.string.push_notification_settings_setting_newExamPost
         "tutorial-group-registration" -> R.string.push_notification_settings_setting_registrationTutorialGroup
         "tutorial-group-delete-update" -> R.string.push_notification_settings_setting_tutorialGroupUpdateDelete
         "tutorial-group-assign-unassign" -> R.string.push_notification_settings_setting_assignUnassignTutorialGroup
         "quiz_start_reminder" -> R.string.push_notification_settings_setting_quizStartReminder
         "conversation-message" -> R.string.push_notification_setting_setting_newConversationMessages
         "new-reply-in-conversation" -> R.string.push_notification_setting_setting_newConversationReplies
+        "user-mention" -> R.string.push_notification_setting_setting_conversationUserMention
+        "data-export-failed" -> R.string.push_notification_setting_setting_conversationDataExportFailed
+        "data-export-created" -> R.string.push_notification_setting_setting_conversationDataExportCreated
         else -> null
     }
 
@@ -243,10 +249,15 @@ private fun getLocalizedNotificationSettingDescription(settingName: String): Str
         "course-and-exam-archiving-started" -> R.string.push_notification_setting_setting_description_courseAndExamArchivingStartedDescription
         "file-submission-successful" -> R.string.push_notification_setting_setting_description_fileSubmissionSuccessfulDescription
         "programming-test-cases-changed" -> R.string.push_notification_setting_setting_description_programmingTestCasesChangedDescription
+        "new-reply-for-exam-post" -> R.string.push_notification_settings_setting_newExamReplyDescription
+        "new-exam-post" -> R.string.push_notification_settings_setting_newExamPostDescription
         "tutorial-group-registration" -> R.string.push_notification_setting_setting_description_registrationTutorialGroupStudentDescription
         "tutorial-group-delete-update" -> R.string.push_notification_setting_setting_description_tutorialGroupUpdateDeleteDescription
         "tutorial-group-assign-unassign" -> R.string.push_notification_setting_setting_description_assignUnassignTutorialGroupDescription
         "quiz_start_reminder" -> R.string.push_notification_setting_setting_description_quizStartReminder
+        "user-mention" -> R.string.push_notification_settings_setting_conversationUserMentionDescription
+        "new-reply-in-conversation" -> R.string.push_notification_setting_setting_newConversationRepliesDescription
+        "conversation-message" -> R.string.push_notification_setting_setting_newConversationMessagesDescription
         else -> null
     }
 
