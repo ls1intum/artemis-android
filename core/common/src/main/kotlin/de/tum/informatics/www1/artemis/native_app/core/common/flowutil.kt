@@ -92,6 +92,50 @@ fun <A, B, C, D, E, F> flatMapLatest(
         .flatMapLatest { (a, b, c, d, e) -> transform(a, b, c, d, e) }
 }
 
+fun <A, B, C, D, E, F, G> flatMapLatest(
+    flow1: Flow<A>,
+    flow2: Flow<B>,
+    flow3: Flow<C>,
+    flow4: Flow<D>,
+    flow5: Flow<E>,
+    flow6: Flow<F>,
+    transform: suspend (A, B, C, D, E, F) -> Flow<G>
+): Flow<G> {
+    return combine(flow1, flow2, flow3, flow4, flow5, flow6, ::Tuple6)
+        .flatMapLatest { (a, b, c, d, e, f) -> transform(a, b, c, d, e, f) }
+}
+
+/**
+ * Implementation of [combine] that supports six flows.
+ * The default implementation of [combine] does not support more than five flows.
+ *
+ * This implementation is taken from [here](https://stackoverflow.com/a/73130632/13366254).
+ *
+ */
+inline fun <T1, T2, T3, T4, T5, T6, R> combine(
+    flow: Flow<T1>,
+    flow2: Flow<T2>,
+    flow3: Flow<T3>,
+    flow4: Flow<T4>,
+    flow5: Flow<T5>,
+    flow6: Flow<T6>,
+    crossinline transform: suspend (T1, T2, T3, T4, T5, T6) -> R
+): Flow<R> {
+    return combine(flow, flow2, flow3, flow4, flow5, flow6) { args: Array<*> ->
+        @Suppress("UNCHECKED_CAST")
+        transform(
+            args[0] as T1,
+            args[1] as T2,
+            args[2] as T3,
+            args[3] as T4,
+            args[4] as T5,
+            args[5] as T6,
+        )
+    }
+}
+
 private data class Quadruple<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)
 
 private data class Quintuple<A, B, C, D, E>(val a: A, val b: B, val c: C, val d: D, val e: E)
+
+private data class Tuple6<A, B, C, D, E, F>(val a: A, val b: B, val c: C, val d: D, val e: E, val f: F)
