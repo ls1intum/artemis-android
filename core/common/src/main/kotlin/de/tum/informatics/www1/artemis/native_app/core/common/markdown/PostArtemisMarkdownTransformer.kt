@@ -11,4 +11,8 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         channelName: String,
         conversationId: Long
     ): String = "[#$channelName](artemis://courses/$courseId/messages?conversationId=$conversationId)"
+
+    override fun transformLectureMarkdown(fileName: String, lectureId: Long): String {
+        TODO("Not yet implemented")
+    }
 }
