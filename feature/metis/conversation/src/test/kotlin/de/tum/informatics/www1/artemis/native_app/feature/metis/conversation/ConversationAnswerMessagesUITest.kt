@@ -24,6 +24,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.test.KoinTest
 import org.robolectric.RobolectricTestRunner
+import kotlin.random.Random
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
@@ -62,13 +63,49 @@ class ConversationAnswerMessagesUITest : KoinTest {
                     authorId = clientId,
                     creationDate = Clock.System.now(),
                     updatedDate = null,
-                    content = "Answer Post content",
+                    content = "Answer Post content 0",
                     authorRole = UserRole.USER,
                     authorName = "author name"
                 ),
                 reactions = emptyList(),
                 serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
                     serverPostId = 13
+                )
+            ),
+            AnswerPostPojo(
+                parentPostId = "client-id",
+                postId = "answer-client-id-1",
+                resolvesPost = false,
+                basePostingCache = AnswerPostPojo.BasePostingCache(
+                    serverPostId = 14,
+                    authorId = clientId,
+                    creationDate = Clock.System.now(),
+                    updatedDate = null,
+                    content = "Answer Post content 1",
+                    authorRole = UserRole.USER,
+                    authorName = "author name"
+                ),
+                reactions = emptyList(),
+                serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
+                    serverPostId = 14
+                )
+            ),
+            AnswerPostPojo(
+                parentPostId = "client-id",
+                postId = "answer-client-id-2",
+                resolvesPost = false,
+                basePostingCache = AnswerPostPojo.BasePostingCache(
+                    serverPostId = 15,
+                    authorId = clientId,
+                    creationDate = Clock.System.now(),
+                    updatedDate = null,
+                    content = "Answer Post content 2",
+                    authorRole = UserRole.USER,
+                    authorName = "author name"
+                ),
+                reactions = emptyList(),
+                serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
+                    serverPostId = 15
                 )
             )
         ),
@@ -103,26 +140,29 @@ class ConversationAnswerMessagesUITest : KoinTest {
             )
         }
 
-        composeTestRule.onNodeWithText("Answer Post content").performClick()
+        composeTestRule.onNodeWithText("Answer Post content 0").performClick()
         composeTestRule.onNodeWithText(context.getString(R.string.post_resolves)).performClick()
 
         assert(resolvedPost != null)
         assert(resolvedPost is AnswerPostPojo)
-        assert((resolvedPost as AnswerPostPojo).content == "Answer Post content")
+        assert((resolvedPost as AnswerPostPojo).content == "Answer Post content 0")
     }
 
     @Test
     fun `test GIVEN post is resolved WHEN un-resolving the post THEN the post is un-resolved`() {
+        // A random answer post resolves the post
+        val randomIndex = Random.nextInt(post.answers.size)
         val resolvedPost = post.copy(
             resolved = true,
             answers = post.answers.mapIndexed { index, answer ->
-                if (!answer.resolvesPost && index == post.answers.indexOfFirst { !it.resolvesPost }) {
+                if (index == randomIndex && !answer.resolvesPost) {
                     answer.copy(resolvesPost = true)
                 } else {
                     answer
                 }
             }
         )
+
         var unresolvedPost: IBasePost? = null
 
         composeTestRule.setContent {
@@ -149,13 +189,13 @@ class ConversationAnswerMessagesUITest : KoinTest {
             )
         }
 
-        composeTestRule.onNodeWithText("Answer Post content")
+        composeTestRule.onNodeWithText("Answer Post content $randomIndex")
         composeTestRule.onNodeWithText(context.getString(R.string.post_does_not_resolve))
             .performClick()
 
         assert(unresolvedPost != null)
         assert(unresolvedPost is AnswerPostPojo)
-        assert((unresolvedPost as AnswerPostPojo).content == "Answer Post content")
+        assert((unresolvedPost as AnswerPostPojo).content == "Answer Post content $randomIndex")
     }
 
     @Test
@@ -182,7 +222,9 @@ class ConversationAnswerMessagesUITest : KoinTest {
         }
 
         composeTestRule.onNodeWithText("Post content").assertExists()
-        composeTestRule.onNodeWithText("Answer Post content").assertExists()
+        composeTestRule.onNodeWithText("Answer Post content 0").assertExists()
+        composeTestRule.onNodeWithText("Answer Post content 1").assertExists()
+        composeTestRule.onNodeWithText("Answer Post content 2").assertExists()
         composeTestRule.onNodeWithText(context.getString(R.string.post_is_resolved))
             .assertDoesNotExist()
         composeTestRule.onNodeWithText(context.getString(R.string.post_resolves))
@@ -191,10 +233,12 @@ class ConversationAnswerMessagesUITest : KoinTest {
 
     @Test
     fun `test GIVEN the post is resolved and one answer post is marked as resolving THEN the post is shown as resolved and this answer post is shown as resolving`() {
+        // A random answer post resolves the post
+        val randomIndex = Random.nextInt(post.answers.size)
         val resolvedPost = post.copy(
             resolved = true,
             answers = post.answers.mapIndexed { index, answer ->
-                if (!answer.resolvesPost && index == post.answers.indexOfFirst { !it.resolvesPost }) {
+                if (index == randomIndex && !answer.resolvesPost) {
                     answer.copy(resolvesPost = true)
                 } else {
                     answer
@@ -224,7 +268,7 @@ class ConversationAnswerMessagesUITest : KoinTest {
         }
 
         composeTestRule.onNodeWithText("Post content").assertExists()
-        composeTestRule.onNodeWithText("Answer Post content").assertExists()
+        composeTestRule.onNodeWithText("Answer Post content $randomIndex").assertExists()
         composeTestRule.onNodeWithText(context.getString(R.string.post_is_resolved)).assertExists()
         composeTestRule.onNodeWithText(context.getString(R.string.post_resolves)).assertExists()
     }
