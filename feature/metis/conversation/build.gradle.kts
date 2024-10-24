@@ -36,6 +36,9 @@ dependencies {
 
     testImplementation(project(":feature:metis-test"))
     implementation("androidx.paging:paging-common:3.2.1")
+
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockk.agent)
 }
 
 tasks.register("fetchAndPrepareEmojis", emoji.FetchAndPrepareEmojisTask::class) {

@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddReaction
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -52,6 +54,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.LocalEmojiProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 
@@ -135,6 +139,18 @@ internal fun PostContextBottomSheet(
                         postActions.onCopyText()
                     }
                 )
+
+                if (postActions.onResolvePost != null && post is IAnswerPost) {
+                    ActionButton(
+                        modifier = actionButtonModifier,
+                        icon = if (post.resolvesPost) Icons.Default.Clear else Icons.Default.Check,
+                        text = if (post.resolvesPost) stringResource(id = R.string.post_does_not_resolve) else stringResource(id = R.string.post_resolves),
+                        onClick = {
+                            onDismissRequest()
+                            postActions.onResolvePost.invoke()
+                        }
+                    )
+                }
 
                 postActions.onReplyInThread?.let {
                     ActionButton(
