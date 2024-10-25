@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
@@ -16,14 +16,7 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyMode
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteCategory
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteHint
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyAutoCompleteHintProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.TEST_TAG_MARKDOWN_TEXTFIELD
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.TEST_TAG_UNFOCUSED_TEXT_FIELD
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -39,7 +32,8 @@ class ReplyTextFieldUiTest {
     val composeTestRule = createComposeRule()
 
     private val autoCompleteHints = listOf(
-        AutoCompleteCategory(R.string.markdown_textfield_autocomplete_category_users, listOf(
+        AutoCompleteCategory(
+            R.string.markdown_textfield_autocomplete_category_users, listOf(
             AutoCompleteHint("User1", "<User1>", "1"),
             AutoCompleteHint("User2", "<User2>", "2"),
             AutoCompleteHint("User3", "<User3>", "3"),
