@@ -133,14 +133,14 @@ class ReplyTextFieldUiTest {
 
 
     private fun ComposeContentTestRule.assertAllAutoCompletionHintsHidden() {
-        composeTestRule.onNodeWithText("User1").assertDoesNotExist()
-        composeTestRule.onNodeWithText("User2").assertDoesNotExist()
-        composeTestRule.onNodeWithText("User3").assertDoesNotExist()
+        onNodeWithText("User1").assertDoesNotExist()
+        onNodeWithText("User2").assertDoesNotExist()
+        onNodeWithText("User3").assertDoesNotExist()
     }
 
     private fun ComposeContentTestRule.assertAllAutoCompletionHintsShown() {
-        composeTestRule.onNodeWithText("User1").assertExists()
-        composeTestRule.onNodeWithText("User2").assertExists()
-        composeTestRule.onNodeWithText("User3").assertExists()
+        onNodeWithText("User1").assertExists()
+        onNodeWithText("User2").assertExists()
+        onNodeWithText("User3").assertExists()
     }
 }

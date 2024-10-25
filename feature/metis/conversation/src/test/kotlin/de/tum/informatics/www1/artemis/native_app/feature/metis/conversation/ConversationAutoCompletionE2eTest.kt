@@ -33,8 +33,7 @@ class ConversationAutoCompletionE2eTest : ConversationBaseTest() {
         }
 
         runTest(timeout = DefaultTimeoutMillis.milliseconds * 4) {
-            // Create users
-            val createdUsers = usernames.map { username ->
+            usernames.map { username ->
                 registerService.register(
                     account = User(
                         firstName = "firstName",
@@ -48,7 +47,6 @@ class ConversationAutoCompletionE2eTest : ConversationBaseTest() {
                 ).orThrow("Could not create user with username $username")
             }
 
-            // Simulate typing a channel name
             val typedText = "@user"
             val autoCompleteSuggestions = conversationService.searchForCourseMembers(
                 courseId = course.id!!,
@@ -61,7 +59,6 @@ class ConversationAutoCompletionE2eTest : ConversationBaseTest() {
 
             assertEquals(usernames.size, autoCompleteSuggestions.size)
 
-            // Verify that the suggestions contain the expected user
             usernames.forEach { username ->
                 assertTrue(
                     autoCompleteSuggestions.any { it.username == username },
