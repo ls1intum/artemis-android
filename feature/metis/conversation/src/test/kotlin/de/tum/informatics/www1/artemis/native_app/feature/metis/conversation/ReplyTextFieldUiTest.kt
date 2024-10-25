@@ -42,7 +42,7 @@ class ReplyTextFieldUiTest {
         AutoCompleteCategory(R.string.markdown_textfield_autocomplete_category_users, listOf(
             AutoCompleteHint("User1", "<User1>", "1"),
             AutoCompleteHint("User2", "<User2>", "2"),
-            AutoCompleteHint("User3", "<User3>", "3")
+            AutoCompleteHint("User3", "<User3>", "3"),
         ))
     )
 
@@ -122,6 +122,18 @@ class ReplyTextFieldUiTest {
 
         composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextInput("@")
         composeTestRule.assertAllAutoCompletionHintsShown()
+    }
+
+    @Test
+    fun `test GIVEN the textField WHEN entering a first and surname separated by a single whitespace THEN the dialog shows`() {
+        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextInput("@Olaf Scholz")
+        composeTestRule.assertAllAutoCompletionHintsShown()
+    }
+
+    @Test
+    fun `test GIVEN the textField WHEN entering a second whitespace THEN the dialog is hidden`() {
+        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextInput("@Olaf Scholz ")
+        composeTestRule.assertAllAutoCompletionHintsHidden()
     }
 
 
