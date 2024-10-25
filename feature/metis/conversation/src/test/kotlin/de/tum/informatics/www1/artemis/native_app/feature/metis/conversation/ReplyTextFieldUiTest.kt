@@ -6,11 +6,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -21,9 +23,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.TEST_TAG_MARKDOWN_TEXTFIELD
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.TEST_TAG_UNFOCUSED_TEXT_FIELD
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,24 +38,23 @@ class ReplyTextFieldUiTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    @Test
-    fun `test GIVEN an empty reply textField WHEN entering the @ character THEN a list of autocompletionHints for users shows`() {
+    private val autoCompleteHints = listOf(
+        AutoCompleteCategory(R.string.markdown_textfield_autocomplete_category_users, listOf(
+            AutoCompleteHint("User1", "<User1>", "1"),
+            AutoCompleteHint("User2", "<User2>", "2"),
+            AutoCompleteHint("User3", "<User3>", "3")
+        ))
+    )
 
-        val autoCompleteHints = listOf(
-            AutoCompleteCategory(R.string.markdown_textfield_autocomplete_category_users, listOf(
-                AutoCompleteHint("User1", "<User1>", "1"),
-                AutoCompleteHint("User2", "<User2>", "2"),
-                AutoCompleteHint("User3", "<User3>", "3")
-            ))
-        )
-
-        val mockHintProvider = object : ReplyAutoCompleteHintProvider {
-            override val legalTagChars: List<Char> = listOf('@')
-            override fun produceAutoCompleteHints(tagChar: Char, query: String): Flow<DataState<List<AutoCompleteCategory>>> {
-                return flowOf(DataState.Success(autoCompleteHints))
-            }
+    private val mockHintProvider = object : ReplyAutoCompleteHintProvider {
+        override val legalTagChars: List<Char> = listOf('@')
+        override fun produceAutoCompleteHints(tagChar: Char, query: String): Flow<DataState<List<AutoCompleteCategory>>> {
+            return flowOf(DataState.Success(autoCompleteHints))
         }
+    }
 
+    @Before
+    fun setUp() {
         composeTestRule.setContent {
             CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides mockHintProvider) {
                 val text = remember { mutableStateOf(TextFieldValue()) }
@@ -70,24 +73,68 @@ class ReplyTextFieldUiTest {
             }
         }
 
-        // Click the fake TextField to expand the ReplyTextField and show the real TextField
-        composeTestRule.onNodeWithText("TestChat", substring = true).performClick()
+        // Click the unfocused textField to focus and expand the textField
+        composeTestRule.onNodeWithTag(TEST_TAG_UNFOCUSED_TEXT_FIELD).performClick()
+    }
+
+    @Test
+    fun `test GIVEN an empty reply textField WHEN doing nothing THEN the autoCompletion dialog is hidden`() {
+        composeTestRule.assertAllAutoCompletionHintsHidden()
+    }
+
+    @Test
+    fun `test GIVEN an empty reply textField WHEN entering the tag character @ THEN a list of autoCompletionHints for users shows`() {
+        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextInput("@")
+        composeTestRule.assertAllAutoCompletionHintsShown()
+    }
+
+    @Test
+    fun `test GIVEN the autoCompletion dialog WHEN clicking an entry THEN the replacement is inserted into the textField and the dialog is hidden`() {
         composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextInput("@")
 
-        // Verify that auto-complete hints are displayed
-        composeTestRule.onNodeWithText("User1").assertExists()
-        composeTestRule.onNodeWithText("User2").assertExists()
-        composeTestRule.onNodeWithText("User3").assertExists()
-
-        // Simulate clicking on an auto-complete hint
         composeTestRule.onNodeWithText("User1").performClick()
 
-        // Verify that the text field contains the selected user tag
         composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).assertTextEquals("<User1>")
+        composeTestRule.assertAllAutoCompletionHintsHidden()
+    }
 
-        // Verify that the auto-complete hints are no longer displayed
+    @Test
+    fun `test GIVEN the textField WHEN entering a non-tag character THEN the autoCompletion dialog is hidden`() {
+        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextInput("a")
+        composeTestRule.assertAllAutoCompletionHintsHidden()
+    }
+
+    @Test
+    fun `test GIVEN the autoCompletion dialog WHEN removing the tag character @ THEN the autoCompletion dialog is hidden`() {
+        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextInput("@")
+        composeTestRule.assertAllAutoCompletionHintsShown()
+
+        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextClearance()
+        composeTestRule.assertAllAutoCompletionHintsHidden()
+    }
+
+    @Test
+    fun `test GIVEN the autoCompletion has been performed WHEN entering the tag character again THEN the autoCompletion dialog shows again`() {
+        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextInput("@")
+        composeTestRule.onNodeWithText("User1").performClick()
+        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).assertTextEquals("<User1>")
+        composeTestRule.assertAllAutoCompletionHintsHidden()
+
+        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextInput("@")
+        composeTestRule.assertAllAutoCompletionHintsShown()
+    }
+
+
+
+    private fun ComposeContentTestRule.assertAllAutoCompletionHintsHidden() {
         composeTestRule.onNodeWithText("User1").assertDoesNotExist()
         composeTestRule.onNodeWithText("User2").assertDoesNotExist()
         composeTestRule.onNodeWithText("User3").assertDoesNotExist()
+    }
+
+    private fun ComposeContentTestRule.assertAllAutoCompletionHintsShown() {
+        composeTestRule.onNodeWithText("User1").assertExists()
+        composeTestRule.onNodeWithText("User2").assertExists()
+        composeTestRule.onNodeWithText("User3").assertExists()
     }
 }
