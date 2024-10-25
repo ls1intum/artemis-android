@@ -47,12 +47,18 @@ internal abstract class MemberSelectionBaseViewModel(
         private const val KEY_RECIPIENTS = "recipients"
 
         val QUERY_DEBOUNCE_TIME = 200.milliseconds
+
+        /** The minimum length of the query to trigger a search */
+        const val MINIMUM_QUERY_LENGTH = 3
     }
 
     private val onRequestReloadPotentialRecipients =
         MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     val query: StateFlow<String> = savedStateHandle.getStateFlow(KEY_QUERY, "")
+
+    val isQueryTooShort: StateFlow<Boolean> = query.map { it.length < MINIMUM_QUERY_LENGTH }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, true)
 
     val inclusionList: StateFlow<InclusionList> =
         savedStateHandle.getStateFlow(KEY_INCLUSION_LIST, InclusionList())
@@ -66,12 +72,15 @@ internal abstract class MemberSelectionBaseViewModel(
 
     private val recipientsFromServer: Flow<DataState<List<User>>> = flatMapLatest(
         query.debounce(QUERY_DEBOUNCE_TIME),
+        isQueryTooShort,
         inclusionList,
         accountService.authToken,
         serverConfigurationService.serverUrl,
         onRequestReloadPotentialRecipients.onStart { emit(Unit) }
-    ) { query, inclusionList, authToken, serverUrl, _ ->
-        if (query.length >= 3) {
+    ) { query, isQueryToShort, inclusionList, authToken, serverUrl, _ ->
+        if (isQueryToShort) {
+            flowOf(DataState.Success(emptyList()))
+        } else {
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                 conversationService.searchForPotentialCommunicationParticipants(
                     courseId = courseId,
@@ -83,7 +92,7 @@ internal abstract class MemberSelectionBaseViewModel(
                     authToken = authToken
                 )
             }
-        } else flowOf(DataState.Success(emptyList()))
+        }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
