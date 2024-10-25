@@ -7,7 +7,7 @@ import io.ktor.http.HttpStatusCode
 /**
  * Allows the user to register
  */
-interface RegisterService {
+internal interface RegisterService {
 
     /**
      * Registers a new user. This is only possible if the password is long enough and there is no other user with the

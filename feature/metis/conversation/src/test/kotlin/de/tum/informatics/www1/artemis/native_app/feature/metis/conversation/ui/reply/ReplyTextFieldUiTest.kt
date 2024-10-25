@@ -40,7 +40,7 @@ class ReplyTextFieldUiTest {
         ))
     )
 
-    private val mockHintProvider = object : ReplyAutoCompleteHintProvider {
+    private val hintProviderStub = object : ReplyAutoCompleteHintProvider {
         override val legalTagChars: List<Char> = listOf('@')
         override fun produceAutoCompleteHints(tagChar: Char, query: String): Flow<DataState<List<AutoCompleteCategory>>> {
             return flowOf(DataState.Success(autoCompleteHints))
@@ -50,7 +50,7 @@ class ReplyTextFieldUiTest {
     @Before
     fun setUp() {
         composeTestRule.setContent {
-            CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides mockHintProvider) {
+            CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides hintProviderStub) {
                 val text = remember { mutableStateOf(TextFieldValue()) }
 
                 ReplyTextField(
@@ -120,13 +120,13 @@ class ReplyTextFieldUiTest {
 
     @Test
     fun `test GIVEN the textField WHEN entering a first and surname separated by a single whitespace THEN the dialog shows`() {
-        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextInput("@Olaf Scholz")
+        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextInput("@FirstName SurName")
         composeTestRule.assertAllAutoCompletionHintsShown()
     }
 
     @Test
     fun `test GIVEN the textField WHEN entering a second whitespace THEN the dialog is hidden`() {
-        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextInput("@Olaf Scholz ")
+        composeTestRule.onNodeWithTag(TEST_TAG_MARKDOWN_TEXTFIELD).performTextInput("@FirstName SurName ")
         composeTestRule.assertAllAutoCompletionHintsHidden()
     }
 
