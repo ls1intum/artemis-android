@@ -29,6 +29,7 @@ import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 
 private val HintHorizontalPadding = 16.dp
+private val PopupTopPadding = 8.dp
 
 @Composable
 internal fun ReplyAutoCompletePopup(
@@ -46,7 +47,8 @@ internal fun ReplyAutoCompletePopup(
     ) {
         ReplyAutoCompletePopupBody(
             modifier = Modifier
-                .heightIn(max = maxHeight)
+                .padding(top = PopupTopPadding)
+                .heightIn(max = maxHeight - PopupTopPadding)
                 .width(targetWidth),
             autoCompleteCategories = autoCompleteCategories,
             performAutoComplete = performAutoComplete

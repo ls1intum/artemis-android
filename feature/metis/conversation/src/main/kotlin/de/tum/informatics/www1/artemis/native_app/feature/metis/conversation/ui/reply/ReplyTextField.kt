@@ -202,7 +202,7 @@ private fun CreateReplyUi(
                         .onSizeChanged { textFieldWidth = it.width }
                         .padding(vertical = 8.dp, horizontal = 8.dp)
                         .onGloballyPositioned { coordinates ->
-                            val textFieldWindowTopLeft = coordinates.localToWindow(Offset.Zero)
+                            val textFieldWindowTopLeft = coordinates.localToRoot(Offset.Zero)
                             popupMaxHeight = textFieldWindowTopLeft.y.toInt()
                         }
                         .testTag(TEST_TAG_REPLY_TEXT_FIELD),
