@@ -34,7 +34,7 @@ class ConversationAutoCompletionE2eTest : ConversationBaseTest() {
 
         runTest(timeout = DefaultTimeoutMillis.milliseconds) {
 
-            val typedText = "@user"
+            val typedText = "user"
             val autoCompleteSuggestions = conversationService.searchForCourseMembers(
                 courseId = course.id!!,
                 query = typedText,
