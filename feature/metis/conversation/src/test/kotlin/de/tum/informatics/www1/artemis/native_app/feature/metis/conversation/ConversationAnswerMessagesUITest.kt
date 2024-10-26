@@ -1,44 +1,67 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
-import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.test.platform.app.InstrumentationRegistry
+import androidx.compose.ui.test.performTouchInput
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.sharedConversationModule
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
 import kotlinx.datetime.Clock
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.koin.test.KoinTest
+import org.koin.android.ext.koin.androidContext
+import org.koin.test.KoinTestRule
 import org.robolectric.RobolectricTestRunner
-import kotlin.random.Random
-import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
-class ConversationAnswerMessagesUITest : KoinTest {
+class ConversationAnswerMessagesUITest : BaseComposeTest() {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
-
-    private val context: Context get() = InstrumentationRegistry.getInstrumentation().context
+    val koinTestRule = KoinTestRule.create {
+        androidContext(context)
+        modules(conversationModule, sharedConversationModule)
+    }
 
     private val clientId = 20L
 
     private val course: Course = Course(id = 1)
     private val conversation = OneToOneChat(id = 2)
+
+    private val answers = (0..2).map { index ->
+        AnswerPostPojo(
+            parentPostId = "client-id",
+            postId = "answer-client-id-$index",
+            resolvesPost = false,
+            basePostingCache = AnswerPostPojo.BasePostingCache(
+                serverPostId = index.toLong(),
+                authorId = clientId,
+                creationDate = Clock.System.now(),
+                updatedDate = null,
+                content = "Answer Post content $index",
+                authorRole = UserRole.USER,
+                authorName = "author name"
+            ),
+            reactions = emptyList(),
+            serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
+                serverPostId = index.toLong()
+            )
+        )
+    }
 
     private val post = PostPojo(
         clientPostId = "client-id",
@@ -53,62 +76,7 @@ class ConversationAnswerMessagesUITest : KoinTest {
         authorRole = UserRole.USER,
         courseWideContext = null,
         tags = emptyList(),
-        answers = listOf(
-            AnswerPostPojo(
-                parentPostId = "client-id",
-                postId = "answer-client-id",
-                resolvesPost = false,
-                basePostingCache = AnswerPostPojo.BasePostingCache(
-                    serverPostId = 13,
-                    authorId = clientId,
-                    creationDate = Clock.System.now(),
-                    updatedDate = null,
-                    content = "Answer Post content 0",
-                    authorRole = UserRole.USER,
-                    authorName = "author name"
-                ),
-                reactions = emptyList(),
-                serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
-                    serverPostId = 13
-                )
-            ),
-            AnswerPostPojo(
-                parentPostId = "client-id",
-                postId = "answer-client-id-1",
-                resolvesPost = false,
-                basePostingCache = AnswerPostPojo.BasePostingCache(
-                    serverPostId = 14,
-                    authorId = clientId,
-                    creationDate = Clock.System.now(),
-                    updatedDate = null,
-                    content = "Answer Post content 1",
-                    authorRole = UserRole.USER,
-                    authorName = "author name"
-                ),
-                reactions = emptyList(),
-                serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
-                    serverPostId = 14
-                )
-            ),
-            AnswerPostPojo(
-                parentPostId = "client-id",
-                postId = "answer-client-id-2",
-                resolvesPost = false,
-                basePostingCache = AnswerPostPojo.BasePostingCache(
-                    serverPostId = 15,
-                    authorId = clientId,
-                    creationDate = Clock.System.now(),
-                    updatedDate = null,
-                    content = "Answer Post content 2",
-                    authorRole = UserRole.USER,
-                    authorName = "author name"
-                ),
-                reactions = emptyList(),
-                serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
-                    serverPostId = 15
-                )
-            )
-        ),
+        answers = answers,
         reactions = emptyList()
     )
 
@@ -116,152 +84,73 @@ class ConversationAnswerMessagesUITest : KoinTest {
     fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the first answer post`() {
         var resolvedPost: IBasePost? = null
 
-        composeTestRule.setContent {
-            MetisThreadUi(
-                modifier = Modifier.fillMaxSize(),
-                courseId = course.id!!,
-                clientId = clientId,
-                postDataState = DataState.Success(post),
-                conversationDataState = DataState.Success(conversation),
-                hasModerationRights = false,
-                isAtLeastTutorInCourse = false,
-                serverUrl = "",
-                initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
-                onCreatePost = { CompletableDeferred() },
-                onEditPost = { _, _ -> CompletableDeferred() },
-                onResolvePost = { post ->
-                    resolvedPost = post
-                    CompletableDeferred()
-                },
-                onDeletePost = { CompletableDeferred() },
-                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                onRequestReload = {},
-                onRequestRetrySend = { _, _ -> },
-            )
+        setupUi(post) { post ->
+            resolvedPost = post
+            CompletableDeferred()
         }
 
-        composeTestRule.onNodeWithText("Answer Post content 0").performClick()
-        composeTestRule.onNodeWithText(context.getString(R.string.post_resolves)).performClick()
+        composeTestRule.onNodeWithText(answers[0].content!!).performTouchInput { longClick() }
+        composeTestRule.onNodeWithText(context.getString(R.string.post_resolves))
+            .assertExists("Bottom sheet dialog with 'Resolves Post' option did not appear.")
+            .performClick()
 
         assert(resolvedPost != null)
         assert(resolvedPost is AnswerPostPojo)
-        assert((resolvedPost as AnswerPostPojo).content == "Answer Post content 0")
+        assert((resolvedPost as AnswerPostPojo).content == answers[0].content!!)
     }
 
     @Test
     fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the third answer post`() {
         var resolvedPost: IBasePost? = null
 
-        composeTestRule.setContent {
-            MetisThreadUi(
-                modifier = Modifier.fillMaxSize(),
-                courseId = course.id!!,
-                clientId = clientId,
-                postDataState = DataState.Success(post),
-                conversationDataState = DataState.Success(conversation),
-                hasModerationRights = false,
-                isAtLeastTutorInCourse = false,
-                serverUrl = "",
-                initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
-                onCreatePost = { CompletableDeferred() },
-                onEditPost = { _, _ -> CompletableDeferred() },
-                onResolvePost = { post ->
-                    resolvedPost = post
-                    CompletableDeferred()
-                },
-                onDeletePost = { CompletableDeferred() },
-                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                onRequestReload = {},
-                onRequestRetrySend = { _, _ -> },
-            )
+        setupUi(post) { post ->
+            resolvedPost = post
+            CompletableDeferred()
         }
 
-        composeTestRule.onNodeWithText("Answer Post content 2").performClick()
+        composeTestRule.onNodeWithText(answers[2].content!!).performClick()
         composeTestRule.onNodeWithText(context.getString(R.string.post_resolves)).performClick()
 
         assert(resolvedPost != null)
         assert(resolvedPost is AnswerPostPojo)
-        assert((resolvedPost as AnswerPostPojo).content == "Answer Post content 2")
+        assert((resolvedPost as AnswerPostPojo).content == answers[2].content!!)
     }
 
     @Test
     fun `test GIVEN post is resolved WHEN un-resolving the post THEN the post is un-resolved`() {
-        var resolvingIndex = 0
+        val resolvingIndex = 0
+
+        val modifiedAnswers = answers.toMutableList()
+        modifiedAnswers[resolvingIndex] = modifiedAnswers[resolvingIndex].copy(resolvesPost = true)
         val resolvedPost = post.copy(
             resolved = true,
-            answers = post.answers.mapIndexed { index, answer ->
-                resolvingIndex = post.answers.indexOfFirst { !it.resolvesPost }
-                if (!answer.resolvesPost && index == resolvingIndex) {
-                    // Update only the first unresolved answer
-                    answer.copy(resolvesPost = true)
-                } else {
-                    answer
-                }
-            }
+            answers = modifiedAnswers
         )
 
         var unresolvedPost: IBasePost? = null
 
-        composeTestRule.setContent {
-            MetisThreadUi(
-                modifier = Modifier.fillMaxSize(),
-                courseId = course.id!!,
-                clientId = clientId,
-                postDataState = DataState.Success(resolvedPost),
-                conversationDataState = DataState.Success(conversation),
-                hasModerationRights = false,
-                isAtLeastTutorInCourse = false,
-                serverUrl = "",
-                initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
-                onCreatePost = { CompletableDeferred() },
-                onEditPost = { _, _ -> CompletableDeferred() },
-                onResolvePost = { post ->
-                    unresolvedPost = post
-                    CompletableDeferred()
-                },
-                onDeletePost = { CompletableDeferred() },
-                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                onRequestReload = {},
-                onRequestRetrySend = { _, _ -> },
-            )
+        setupUi(resolvedPost) { post ->
+            unresolvedPost = post
+            CompletableDeferred()
         }
 
-        composeTestRule.onNodeWithText("Answer Post content $resolvingIndex")
+        composeTestRule.onNodeWithText(answers[resolvingIndex].content!!)
         composeTestRule.onNodeWithText(context.getString(R.string.post_does_not_resolve))
             .performClick()
 
         assert(unresolvedPost != null)
         assert(unresolvedPost is AnswerPostPojo)
-        assert((unresolvedPost as AnswerPostPojo).content == "Answer Post content $resolvingIndex")
+        assert((unresolvedPost as AnswerPostPojo).content == answers[resolvingIndex].content!!)
     }
 
     @Test
     fun `test GIVEN the post is not resolved and no answer post is resolving THEN the post is shown as not resolved and no answer post is shown as resolving`() {
-        composeTestRule.setContent {
-            MetisThreadUi(
-                modifier = Modifier.fillMaxSize(),
-                courseId = course.id!!,
-                clientId = clientId,
-                postDataState = DataState.Success(post),
-                conversationDataState = DataState.Success(conversation),
-                hasModerationRights = false,
-                isAtLeastTutorInCourse = false,
-                serverUrl = "",
-                initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
-                onCreatePost = { CompletableDeferred() },
-                onEditPost = { _, _ -> CompletableDeferred() },
-                onResolvePost = { CompletableDeferred() },
-                onDeletePost = { CompletableDeferred() },
-                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                onRequestReload = {},
-                onRequestRetrySend = { _, _ -> },
-            )
-        }
+        setupUi(post) { CompletableDeferred() }
 
-        composeTestRule.onNodeWithText("Post content").assertExists()
-        composeTestRule.onNodeWithText("Answer Post content 0").assertExists()
-        composeTestRule.onNodeWithText("Answer Post content 1").assertExists()
-        composeTestRule.onNodeWithText("Answer Post content 2").assertExists()
+        composeTestRule.onNodeWithText(post.content).assertExists()
+        for (answer in answers) {
+            composeTestRule.onNodeWithText(answer.content!!).assertExists()
+        }
         composeTestRule.onNodeWithText(context.getString(R.string.post_is_resolved))
             .assertDoesNotExist()
         composeTestRule.onNodeWithText(context.getString(R.string.post_resolves))
@@ -270,26 +159,30 @@ class ConversationAnswerMessagesUITest : KoinTest {
 
     @Test
     fun `test GIVEN the post is resolved and one answer post is marked as resolving THEN the post is shown as resolved and this answer post is shown as resolving`() {
-        var resolvingIndex = 0
+        val resolvingIndex = 0
+
+        val modifiedAnswers = answers.toMutableList()
+        modifiedAnswers[resolvingIndex] = modifiedAnswers[resolvingIndex].copy(resolvesPost = true)
         val resolvedPost = post.copy(
             resolved = true,
-            answers = post.answers.mapIndexed { index, answer ->
-                resolvingIndex = post.answers.indexOfFirst { !it.resolvesPost }
-                if (!answer.resolvesPost && index == resolvingIndex) {
-                    // Update only the first unresolved answer
-                    answer.copy(resolvesPost = true)
-                } else {
-                    answer
-                }
-            }
+            answers = modifiedAnswers
         )
 
+        setupUi(resolvedPost) { CompletableDeferred() }
+
+        composeTestRule.onNodeWithText(post.content).assertExists()
+        composeTestRule.onNodeWithText(context.getString(R.string.post_is_resolved)).assertExists()
+        composeTestRule.onNodeWithText(context.getString(R.string.post_resolves)).assertExists()
+        composeTestRule.onNodeWithText(answers[resolvingIndex].content!!)
+    }
+
+    private fun setupUi(post: PostPojo, onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?) {
         composeTestRule.setContent {
             MetisThreadUi(
                 modifier = Modifier.fillMaxSize(),
                 courseId = course.id!!,
                 clientId = clientId,
-                postDataState = DataState.Success(resolvedPost),
+                postDataState = DataState.Success(post),
                 conversationDataState = DataState.Success(conversation),
                 hasModerationRights = false,
                 isAtLeastTutorInCourse = false,
@@ -297,16 +190,12 @@ class ConversationAnswerMessagesUITest : KoinTest {
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },
-                onResolvePost = { CompletableDeferred() },
+                onResolvePost = onResolvePost,
                 onDeletePost = { CompletableDeferred() },
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onRequestReload = {},
                 onRequestRetrySend = { _, _ -> },
             )
         }
-
-        composeTestRule.onNodeWithText("Post content").assertExists()
-        composeTestRule.onNodeWithText(context.getString(R.string.post_is_resolved)).assertExists()
-        composeTestRule.onNodeWithText(context.getString(R.string.post_resolves)).assertExists()
     }
 }

@@ -66,7 +66,7 @@ class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
-    fun `resolve a post`() {
+    fun `resolving a post by updating its answer message`() {
         runTest(timeout = DefaultTimeoutMillis.milliseconds * 4) {
             val post = metisModificationService.createPost(
                 context = metisContext,
