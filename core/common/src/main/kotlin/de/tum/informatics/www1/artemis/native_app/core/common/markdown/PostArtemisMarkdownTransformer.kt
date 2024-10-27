@@ -2,7 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.common.markdown
 
 class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) : ArtemisMarkdownTransformer() {
     override fun transformExerciseMarkdown(title: String, url: String): String {
-        return "[$title]($serverUrl$url)"
+        return "[$title](artemis:/$url)"
     }
 
     override fun transformUserMentionMarkdown(text: String, fullName: String, userName: String): String = "[@$fullName](artemis://courses/$courseId/messages?username=$userName)"
@@ -12,7 +12,25 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         conversationId: Long
     ): String = "[#$channelName](artemis://courses/$courseId/messages?conversationId=$conversationId)"
 
-    override fun transformLectureMarkdown(fileName: String, lectureId: Long): String {
-        TODO("Not yet implemented")
+    override fun transformLectureContentMarkdown(
+        type: String,
+        fileName: String,
+        url: String
+    ): String {
+        return when (type) {
+            "attachment" -> "[$fileName](artemis:/$url)"
+            "lecture-unit" -> "[$fileName]($serverUrl/api/files/attachments/$url)" //TODO fix authentication
+            "slide" -> "[$fileName]($serverUrl/api/files/attachments/$url)" //TODO fix authentication
+            else -> fileName
+        }
+    }
+
+    override fun transformFileUploadMessageMarkdown(
+        isImage: Boolean,
+        fileName: String,
+        filePath: String
+    ): String {
+        println("![$fileName]($serverUrl$filePath)")
+        return if (isImage) "![$fileName]($serverUrl$filePath)" else "[$fileName]($serverUrl$filePath)"
     }
 }

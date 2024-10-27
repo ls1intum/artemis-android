@@ -19,17 +19,25 @@ abstract class ArtemisMarkdownTransformer {
             conversationId: Long
         ): String = ""
 
-        override fun transformLectureMarkdown(
+        override fun transformLectureContentMarkdown(
+            type: String,
             fileName: String,
-            lectureId: Long
+            url: String
+        ) : String = ""
+
+        override fun transformFileUploadMessageMarkdown(
+            isImage: Boolean,
+            fileName: String,
+            filePath: String,
         ) : String = ""
     }
 
     private val exerciseMarkdownPattern =
-        "\\[(text|quiz|lecture|modeling|file-upload|programing)](.*)\\(((?:/|\\w|\\d)+)\\)\\[/\\1]".toRegex()
+        "\\[(text|quiz|lecture|modeling|file-upload|programming)](.*)\\(((?:/|\\w|\\d)+)\\)\\[/\\1]".toRegex()
     private val userMarkdownPattern = "\\[user](.*?)\\((.*?)\\)\\[/user]".toRegex()
     private val channelMarkdownPattern = "\\[channel](.*?)\\((\\d+?)\\)\\[/channel]".toRegex()
-    private val lectureMarkdownPattern = "\\[(slide|attachment)](.*?)\\((.*?)\\)\\[/\\1]".toRegex()
+    private val lectureContentMarkdownPattern = "\\[(attachment|lecture-unit|slide)](.*?)\\(([/\\w\\d\\-_\\.]+)\\)\\[/\\1]".toRegex()
+    //private val fileUploadMessagePattern = "(\\!?)\\[(.+?)]\\((.*?)\\)".toRegex()
 
     fun transformMarkdown(markdown: String): String {
         return exerciseMarkdownPattern.replace(markdown) { matchResult ->
@@ -56,14 +64,27 @@ abstract class ArtemisMarkdownTransformer {
                 )
             }
         }.let {
-            lectureMarkdownPattern.replace(it) { matchResult ->
-                val fileName = matchResult.groups[1]?.value.orEmpty()
-                val lectureId = matchResult.groups[2]?.value.orEmpty().toLong()
-                transformLectureMarkdown(
+            lectureContentMarkdownPattern.replace(it) { matchResult ->
+                val type = matchResult.groups[1]?.value.orEmpty()
+                val fileName = matchResult.groups[2]?.value.orEmpty()
+                val url = matchResult.groups[3]?.value.orEmpty()
+                transformLectureContentMarkdown(
+                    type = type,
                     fileName = fileName,
-                    lectureId = lectureId
+                    url = url
                 )
             }
+//        }.let {
+//            fileUploadMessagePattern.replace(it) { matchResult ->
+//                val isImage = matchResult.groups[1]?.value.orEmpty() == "!"
+//                val fileName = matchResult.groups[2]?.value.orEmpty()
+//                val filePath = matchResult.groups[3]?.value.orEmpty()
+//                transformFileUploadMessageMarkdown(
+//                    isImage = isImage,
+//                    fileName = fileName,
+//                    filePath = filePath
+//                )
+//            }
         }
     }
 
@@ -80,8 +101,15 @@ abstract class ArtemisMarkdownTransformer {
         conversationId: Long
     ): String
 
-    protected abstract fun transformLectureMarkdown(
+    protected abstract fun transformLectureContentMarkdown(
+        type: String,
         fileName: String,
-        lectureId: Long
+        url: String
+    ): String
+
+    protected abstract fun transformFileUploadMessageMarkdown(
+        isImage: Boolean,
+        fileName: String,
+        filePath: String
     ): String
 }
