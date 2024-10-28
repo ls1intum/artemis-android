@@ -3,10 +3,14 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.longClick
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.hasAnyChild
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.performSemanticsAction
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
@@ -89,9 +93,9 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
             CompletableDeferred()
         }
 
-        composeTestRule.onNodeWithText(answers[0].content!!).performTouchInput { longClick() }
+        composeTestRule.onNodeWithText(answers[0].content!!, useUnmergedTree = true)
+            .performSemanticsAction(SemanticsActions.OnLongClick)
         composeTestRule.onNodeWithText(context.getString(R.string.post_resolves))
-            .assertExists("Bottom sheet dialog with 'Resolves Post' option did not appear.")
             .performClick()
 
         assert(resolvedPost != null)
@@ -108,7 +112,8 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
             CompletableDeferred()
         }
 
-        composeTestRule.onNodeWithText(answers[2].content!!).performClick()
+        composeTestRule.onNodeWithText(answers[2].content!!, useUnmergedTree = true)
+            .performSemanticsAction(SemanticsActions.OnLongClick)
         composeTestRule.onNodeWithText(context.getString(R.string.post_resolves)).performClick()
 
         assert(resolvedPost != null)
@@ -134,7 +139,8 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
             CompletableDeferred()
         }
 
-        composeTestRule.onNodeWithText(answers[resolvingIndex].content!!)
+        composeTestRule.onNodeWithText(answers[resolvingIndex].content!!, useUnmergedTree = true)
+            .performSemanticsAction(SemanticsActions.OnLongClick)
         composeTestRule.onNodeWithText(context.getString(R.string.post_does_not_resolve))
             .performClick()
 
@@ -173,7 +179,10 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
         composeTestRule.onNodeWithText(post.content).assertExists()
         composeTestRule.onNodeWithText(context.getString(R.string.post_is_resolved)).assertExists()
         composeTestRule.onNodeWithText(context.getString(R.string.post_resolves)).assertExists()
-        composeTestRule.onNodeWithText(answers[resolvingIndex].content!!)
+        composeTestRule
+            .onNodeWithText(answers[resolvingIndex].content!!, useUnmergedTree = true)
+            .onParent()
+            .assert(hasAnyChild(hasText(context.getString(R.string.post_resolves))))
     }
 
     private fun setupUi(post: PostPojo, onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?) {
