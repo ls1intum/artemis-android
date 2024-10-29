@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasAnyChild
@@ -14,7 +15,11 @@ import androidx.compose.ui.test.performSemanticsAction
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
+import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
@@ -25,10 +30,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.sharedCon
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.datetime.Clock
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.android.ext.koin.androidContext
+import org.koin.dsl.module
 import org.koin.test.KoinTestRule
 import org.robolectric.RobolectricTestRunner
 
@@ -38,6 +45,7 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
     @get:Rule
     val koinTestRule = KoinTestRule.create {
         androidContext(context)
+
         modules(conversationModule, sharedConversationModule)
     }
 
@@ -196,6 +204,7 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
                 hasModerationRights = false,
                 isAtLeastTutorInCourse = false,
                 serverUrl = "",
+                emojiService = EmojiServiceStub,
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },

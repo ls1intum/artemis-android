@@ -51,6 +51,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toJavaInstant
+import org.koin.compose.koinInject
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -154,6 +155,7 @@ fun MetisChatList(
                 state = state,
                 itemCount = posts.itemCount,
                 order = DisplayPostOrder.REVERSED,
+                emojiService = koinInject(),
                 bottomItem = bottomItem
             ) {
                 when (posts) {

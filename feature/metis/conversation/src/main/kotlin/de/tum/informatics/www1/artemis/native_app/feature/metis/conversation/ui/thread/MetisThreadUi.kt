@@ -30,6 +30,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
@@ -54,6 +55,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.P
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import org.koin.compose.koinInject
 
 internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
 internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
@@ -96,6 +98,7 @@ internal fun MetisThreadUi(
         isAtLeastTutorInCourse = isAtLeastTutorInCourse,
         hasModerationRights = hasModerationRights,
         serverUrl = serverUrl,
+        emojiService = koinInject(),
         clientId = clientId,
         onCreatePost = viewModel::createPost,
         onEditPost = { post, newText ->
@@ -140,6 +143,7 @@ internal fun MetisThreadUi(
     hasModerationRights: Boolean,
     isAtLeastTutorInCourse: Boolean,
     serverUrl: String,
+    emojiService: EmojiService,
     initialReplyTextProvider: InitialReplyTextProvider,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
@@ -158,7 +162,7 @@ internal fun MetisThreadUi(
         }
     }
 
-    ProvideEmojis {
+    ProvideEmojis(emojiService) {
         MetisReplyHandler(
             initialReplyTextProvider = initialReplyTextProvider,
             onCreatePost = onCreatePost,
@@ -186,6 +190,7 @@ internal fun MetisThreadUi(
                             state = listState,
                             itemCount = post.orderedAnswerPostings.size,
                             order = DisplayPostOrder.REGULAR,
+                            emojiService = emojiService,
                             bottomItem = post.orderedAnswerPostings.lastOrNull(),
                         ) {
                             PostAndRepliesList(
