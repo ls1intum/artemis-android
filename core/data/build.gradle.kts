@@ -29,7 +29,7 @@ dependencies {
 
     implementation(libs.androidx.dataStore.preferences)
 
-    debugImplementation(libs.ktor.client.cio)
+    testImplementation(libs.ktor.client.cio)
 
     testImplementation(project(":core:common-test"))
     testImplementation(project(":core:data-test"))
