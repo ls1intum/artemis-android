@@ -74,7 +74,7 @@ internal fun PasswordBasedLogin(
                     .then(createAutofillModifier(autofillNode)),
                 value = username,
                 onValueChange = updateUsername,
-                keyboardOptions = KeyboardOptions(
+                keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Next
                 ),
                 label = { Text(text = stringResource(id = R.string.login_username_label)) }
