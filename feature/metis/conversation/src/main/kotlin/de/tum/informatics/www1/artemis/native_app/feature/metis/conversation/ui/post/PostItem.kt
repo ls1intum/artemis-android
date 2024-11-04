@@ -119,7 +119,7 @@ internal fun PostItem(
                     it
                         .background(color = MaterialTheme.colorScheme.errorContainer)
                         .clickable(onClick = onRequestRetrySend)
-                } else Modifier
+                } else modifier
                     .combinedClickable(
                         onClick = onClick,
                         onLongClick = onLongClick

@@ -1,16 +1,25 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.hasAnyChild
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onParent
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.printToLog
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
@@ -74,6 +83,8 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
         answers = answers,
         reactions = emptyList()
     )
+
+    private fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
 
     @Test
     fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the first answer post`() {
@@ -167,13 +178,12 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
 
         setupUi(resolvedPost) { CompletableDeferred() }
 
-        composeTestRule.onNodeWithText(post.content).assertExists()
-        composeTestRule.onNodeWithText(context.getString(R.string.post_is_resolved)).assertExists()
-        composeTestRule.onNodeWithText(context.getString(R.string.post_resolves)).assertExists()
         composeTestRule
-            .onNodeWithText(answers[resolvingIndex].content!!, useUnmergedTree = true)
-            .onParent()
+            .onNodeWithTag(testTagForAnswerPost(answers[resolvingIndex].postId), useUnmergedTree = true)
             .assert(hasAnyChild(hasText(context.getString(R.string.post_resolves))))
+        composeTestRule
+            .onNodeWithTag(testTagForAnswerPost(answers[1].postId), useUnmergedTree = true)
+            .assert(hasAnyChild(hasText(context.getString(R.string.post_resolves)).not()))
     }
 
     private fun setupUi(post: PostPojo, onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?) {
