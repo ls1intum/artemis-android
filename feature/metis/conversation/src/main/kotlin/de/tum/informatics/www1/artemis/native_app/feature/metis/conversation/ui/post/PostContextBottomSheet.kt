@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -71,6 +73,7 @@ internal fun PostContextBottomSheet(
     if (!displayAllEmojis) {
         ModalBottomSheet(
             modifier = Modifier.testTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET),
+            windowInsets = WindowInsets.statusBars,
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = onDismissRequest
         ) {
