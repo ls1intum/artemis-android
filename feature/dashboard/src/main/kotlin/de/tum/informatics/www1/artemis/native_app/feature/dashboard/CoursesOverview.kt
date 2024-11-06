@@ -193,6 +193,7 @@ internal fun CoursesOverview(
         BasicDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(top = padding.calculateTopPadding())
                 .consumeWindowInsets(WindowInsets.systemBars),
             dataState = coursesDataState,
             loadingText = stringResource(id = R.string.courses_loading_loading),

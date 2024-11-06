@@ -3,9 +3,12 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -103,7 +106,8 @@ internal fun BrowseChannelsScreen(
         BasicDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(top = padding.calculateTopPadding())
+                .consumeWindowInsets(WindowInsets.systemBars),
             dataState = channelsDataState,
             loadingText = stringResource(id = R.string.browse_channel_list_loading),
             failureText = stringResource(id = R.string.browse_channel_list_failure),

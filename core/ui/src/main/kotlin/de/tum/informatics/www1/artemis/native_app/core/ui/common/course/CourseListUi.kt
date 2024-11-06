@@ -82,7 +82,6 @@ fun CourseItemGrid(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(
-            top = 90.dp,
             bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
         )
     ) {
