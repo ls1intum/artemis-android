@@ -106,6 +106,7 @@ internal fun CustomInstanceSelectionScreen(
             modifier = Modifier.fillMaxWidth(),
             value = enteredUrl,
             onValueChange = viewModel::updateServerUrl,
+            singleLine = true,
             textStyle = MaterialTheme.typography.bodyLarge,
             label = { Text(text = stringResource(id = R.string.account_select_custom_instance_selection_text_field_label)) }
         )

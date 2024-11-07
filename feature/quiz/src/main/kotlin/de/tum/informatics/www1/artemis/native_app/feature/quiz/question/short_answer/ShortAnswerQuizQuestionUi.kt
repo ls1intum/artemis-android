@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -69,6 +71,7 @@ internal fun ShortAnswerQuizQuestionUi(
     } else data.solutionTexts
 
     val inlineContentMap = remember(question.spots, solutionTexts) {
+        val maxSpotNr = question.spots.maxOfOrNull { it.spotNr ?: 0 } ?: 0
         question.spots.associate { spot ->
             val spotNr = spot.spotNr ?: 0
             val key = spotNr.toString()
@@ -80,6 +83,7 @@ internal fun ShortAnswerQuizQuestionUi(
                 ),
                 children = {
                     val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+                    val imeAction = if (spotNr == maxSpotNr) ImeAction.Done else ImeAction.Next
 
                     BasicTextField(
                         modifier = Modifier
@@ -96,9 +100,10 @@ internal fun ShortAnswerQuizQuestionUi(
                                 data.onUpdateSolutionText(spotNr, newText)
                             }
                         },
-                        maxLines = 1,
                         textStyle = LocalTextStyle.current.copy(color = textColor),
-                        cursorBrush = SolidColor(textColor)
+                        cursorBrush = SolidColor(textColor),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = imeAction)
                     )
                 }
             )
