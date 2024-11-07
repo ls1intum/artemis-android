@@ -21,7 +21,7 @@ abstract class ArtemisMarkdownTransformer {
     }
 
     private val exerciseMarkdownPattern =
-        "\\[(text|quiz|lecture|modeling|file-upload|programing)](.*)\\(((?:/|\\w|\\d)+)\\)\\[/\\1]".toRegex()
+        "\\[(text|quiz|lecture|modeling|file-upload|programming)](.*)\\(((?:/|\\w|\\d)+)\\)\\[/\\1]".toRegex()
     private val userMarkdownPattern = "\\[user](.*?)\\((.*?)\\)\\[/user]".toRegex()
     private val channelMarkdownPattern = "\\[channel](.*?)\\((\\d+?)\\)\\[/channel]".toRegex()
 
