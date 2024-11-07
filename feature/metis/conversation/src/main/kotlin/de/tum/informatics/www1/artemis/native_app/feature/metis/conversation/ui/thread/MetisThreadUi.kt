@@ -145,6 +145,7 @@ internal fun MetisThreadUi(
     serverUrl: String,
     emojiService: EmojiService,
     initialReplyTextProvider: InitialReplyTextProvider,
+    listState: LazyListState = rememberLazyListState(),
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
     onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
@@ -153,7 +154,6 @@ internal fun MetisThreadUi(
     onRequestReload: () -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
 ) {
-    val listState = rememberLazyListState()
     val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
     val title by remember(conversationDataState) {

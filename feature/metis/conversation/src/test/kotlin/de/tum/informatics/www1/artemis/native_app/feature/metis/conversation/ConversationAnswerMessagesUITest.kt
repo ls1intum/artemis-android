@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -33,6 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.A
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -176,7 +178,8 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
             answers = modifiedAnswers
         )
 
-        setupUi(resolvedPost) { CompletableDeferred() }
+        val listState = LazyListState()
+        setupUi(resolvedPost, listState) { CompletableDeferred() }
 
         composeTestRule
             .onNodeWithTag(testTagForAnswerPost(answers[resolvingIndex].postId), useUnmergedTree = true)
@@ -184,9 +187,21 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
         composeTestRule
             .onNodeWithTag(testTagForAnswerPost(answers[1].postId), useUnmergedTree = true)
             .assert(hasAnyChild(hasText(context.getString(R.string.post_resolves)).not()))
+
+        runBlocking {
+            listState.scrollToItem(index = 2)
+        }
+
+        composeTestRule
+            .onNodeWithTag(testTagForAnswerPost(answers[2].postId), useUnmergedTree = true)
+            .assert(hasAnyChild(hasText(context.getString(R.string.post_resolves)).not()))
     }
 
-    private fun setupUi(post: PostPojo, onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?) {
+    private fun setupUi(
+        post: PostPojo,
+        listState: LazyListState = LazyListState(),
+        onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?
+    ) {
         composeTestRule.setContent {
             MetisThreadUi(
                 modifier = Modifier.fillMaxSize(),
@@ -198,6 +213,7 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
                 isAtLeastTutorInCourse = false,
                 serverUrl = "",
                 emojiService = EmojiServiceStub,
+                listState = listState,
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },
