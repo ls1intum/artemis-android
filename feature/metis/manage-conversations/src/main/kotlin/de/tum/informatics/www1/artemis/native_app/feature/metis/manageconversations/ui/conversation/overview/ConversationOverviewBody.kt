@@ -161,6 +161,7 @@ fun ConversationOverviewBody(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(16.dp)
+                                    .padding(bottom = 24.dp)
                             ) {
                                 TextButton(
                                     modifier = Modifier.align(Alignment.Center),

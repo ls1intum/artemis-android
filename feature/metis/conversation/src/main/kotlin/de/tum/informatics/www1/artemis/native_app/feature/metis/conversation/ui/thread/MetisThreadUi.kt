@@ -60,6 +60,7 @@ internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPost
 @Composable
 internal fun MetisThreadUi(
     modifier: Modifier,
+    listContentPadding: PaddingValues,
     viewModel: ConversationViewModel
 ) {
     val postDataState: DataState<PostPojo> by viewModel.threadUseCase.post.collectAsState()
@@ -140,6 +141,7 @@ internal fun MetisThreadUi(
                                     .testTag(TEST_TAG_THREAD_LIST),
                                 post = post,
                                 hasModerationRights = hasModerationRights,
+                                listContentPadding = listContentPadding,
                                 clientId = clientId,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
@@ -172,6 +174,7 @@ private fun PostAndRepliesList(
     state: LazyListState,
     post: PostPojo,
     hasModerationRights: Boolean,
+    listContentPadding: PaddingValues,
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
@@ -205,7 +208,7 @@ private fun PostAndRepliesList(
     ProvideMarkwon {
         LazyColumn(
             modifier = modifier,
-            contentPadding = PaddingValues(vertical = 8.dp),
+            contentPadding = listContentPadding,
             verticalArrangement = Arrangement.spacedBy(8.dp),
             state = state
         ) {
@@ -217,7 +220,7 @@ private fun PostAndRepliesList(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     PostWithBottomSheet(
-                        modifier = Modifier.padding(top = 8.dp),
+                        modifier = Modifier.padding(top = 8.dp), //
                         post = post,
                         postItemViewType = PostItemViewType.ThreadContextPostItem,
                         postActions = postActions,

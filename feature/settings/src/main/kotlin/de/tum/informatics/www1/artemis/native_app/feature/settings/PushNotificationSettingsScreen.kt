@@ -1,7 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.settings
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -67,9 +70,10 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
         PushNotificationSettingsUi(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .padding(horizontal = 8.dp)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()),
             viewModel = viewModel
         )
 
