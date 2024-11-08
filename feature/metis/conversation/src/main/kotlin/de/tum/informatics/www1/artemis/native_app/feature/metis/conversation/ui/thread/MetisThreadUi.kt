@@ -220,7 +220,7 @@ private fun PostAndRepliesList(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     PostWithBottomSheet(
-                        modifier = Modifier.padding(top = 8.dp), //
+                        modifier = Modifier.padding(top = 8.dp),
                         post = post,
                         postItemViewType = PostItemViewType.ThreadContextPostItem,
                         postActions = postActions,
