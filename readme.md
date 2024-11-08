@@ -10,11 +10,11 @@ For the iOS app, check [this repository](https://github.com/ls1intum/artemis-ios
 
 ## Screenshots
 <p float="left">
-  <img src="playStoreScreenshots/smartphone/dashboard.png" width="300"/>
-  <img src="playStoreScreenshots/smartphone/exerciseList.png" width="300"/>
-  <img src="playStoreScreenshots/smartphone/lecture.png" width="300"/>
-  <img src="playStoreScreenshots/smartphone/quiz.png" width="300"/>
-  <img src="playStoreScreenshots/smartphone/conversationOverview.png" width="300"/>
+  <img src="playStoreScreenshots/smartphone/dashboard.png" width="250"/>
+  <img src="playStoreScreenshots/smartphone/exerciseList.png" width="250"/>
+  <img src="playStoreScreenshots/smartphone/lecture.png" width="250"/>
+  <img src="playStoreScreenshots/smartphone/quiz.png" width="250"/>
+  <img src="playStoreScreenshots/smartphone/conversationOverview.png" width="250"/>
 </p>
 
 ## Project structure
