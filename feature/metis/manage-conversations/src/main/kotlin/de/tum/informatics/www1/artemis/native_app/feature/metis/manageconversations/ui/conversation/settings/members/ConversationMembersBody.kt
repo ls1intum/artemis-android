@@ -88,6 +88,7 @@ internal fun ConversationMembersBody(
                     .padding(horizontal = Spacings.ScreenHorizontalSpacing),
                 value = query,
                 onValueChange = viewModel::updateQuery,
+                singleLine = true,
                 placeholder = { Text(text = stringResource(id = R.string.conversation_members_query_placeholder)) }
             )
 

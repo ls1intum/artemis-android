@@ -1,12 +1,21 @@
 # Artemis Android
+![Unit test](https://github.com/ls1intum/artemis-android/actions/workflows/unit-test.yml/badge.svg)
+![E2E test](https://github.com/ls1intum/artemis-android/actions/workflows/e2e-test.yml/badge.svg)
+[![Latest version)](https://img.shields.io/github/v/tag/ls1intum/artemis-android?label=%20Latest%20version&sort=semver)](https://github.com/ls1intum/artemis-android/releases/latest)
+
 The native android client for Artemis, an interactive learning platform with individual feedback. 
+It is available on the [Google PlayStore](https://play.google.com/store/apps/details?id=de.tum.cit.aet.artemis).
+
+For the iOS app, check [this repository](https://github.com/ls1intum/artemis-ios)
 
 ## Screenshots
-<img src="playStoreScreenshots/smartphone/dashboard.png" width="300"/>
-<img src="playStoreScreenshots/smartphone/exerciseList.png" width="300"/>
-<img src="playStoreScreenshots/smartphone/lecture.png" width="300"/>
-<img src="playStoreScreenshots/smartphone/quiz.png" width="300"/>
-<img src="playStoreScreenshots/smartphone/conversationOverview.png" width="300"/>
+<p float="left">
+  <img src="playStoreScreenshots/smartphone/dashboard.png" width="250"/>
+  <img src="playStoreScreenshots/smartphone/exerciseList.png" width="250"/>
+  <img src="playStoreScreenshots/smartphone/lecture.png" width="250"/>
+  <img src="playStoreScreenshots/smartphone/quiz.png" width="250"/>
+  <img src="playStoreScreenshots/smartphone/conversationOverview.png" width="250"/>
+</p>
 
 ## Project structure
 The project structure is heavily inspired by [nowinandroid](https://github.com/android/nowinandroid). 

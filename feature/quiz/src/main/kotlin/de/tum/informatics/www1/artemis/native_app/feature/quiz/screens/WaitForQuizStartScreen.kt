@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz.screens
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -226,12 +224,13 @@ private fun BodyJoinBatched(
         )
 
         TextField(
-            value = passcode,
-            onValueChange = { passcode = it },
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .widthIn(max = 600.dp)
-                .testTag(TEST_TAG_TEXT_FIELD_BATCH_PASSWORD)
+                .testTag(TEST_TAG_TEXT_FIELD_BATCH_PASSWORD),
+            value = passcode,
+            onValueChange = { passcode = it },
+            singleLine = true,
         )
 
         StartButton(
