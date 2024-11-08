@@ -54,7 +54,10 @@ This project is configured to support multiple [flavor dimensions](https://devel
 ## Tests
 We use both unit tests and end-to-end integration tests. Before running the end-to-end tests, consider the licenses section in this readme.
 - To run the unit tests, execute `./gradlew test -Dskip.unit-tests=false -Dskip.e2e=true -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true`
-- To run the end-to-end tests, execute `docker compose -f docker/e2e-tests.yml up artemis-android-e2e`
+- To run the end-to-end tests, first start artemis locally in docker: 
+  - `docker compose -f docker/e2e-tests.yml up artemis-app-setup`
+  - `./gradlew test -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true`
+
 
 ## Play store screenshots
 Screenshots can be generated using preview-composables in the `debug` source sets. They are annotated with `@PlayStoreScreenshots`. To get the screenshots, right click the rendered preview
