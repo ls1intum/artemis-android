@@ -1,10 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.impl
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.BasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext
@@ -336,6 +337,19 @@ internal class MetisStorageServiceImpl(
         val metisDao = databaseProvider.metisDao
 
         databaseProvider.database.withTransaction {
+            val doesPostAnswerAlreadyExist = metisDao.isPostPresentInContext(
+                serverId = host,
+                serverPostId = post.id ?: return@withTransaction,
+                courseId = metisContext.courseId,
+                conversationId = metisContext.conversationId
+            )
+
+            // In rare cases, the websocket connection already inserted the post answer. In that case, we can delete the client side post.
+            if (doesPostAnswerAlreadyExist) {
+                metisDao.deletePostingWithClientSideId(clientPostId = clientSidePostId)
+                return@withTransaction
+            }
+
             metisDao.upgradePost(
                 clientSidePostId = clientSidePostId,
                 serverSidePostId = post.id ?: return@withTransaction
@@ -357,6 +371,8 @@ internal class MetisStorageServiceImpl(
                 metisContext = metisContext,
                 answerPostId = post.serverPostId
             )
+
+            Log.d("AnswerDebug", "Upgrade finished")
         }
     }
 
@@ -503,7 +519,11 @@ internal class MetisStorageServiceImpl(
             )
         }
 
+        Log.d("AnswerDebug", "Updating answers for post ('${sp.content}') with id $clientSidePostId")
+
+
         for (ap in sp.answers.orEmpty()) {
+            Log.d("AnswerDebug", "Inserting answer for post ('${sp.content}') with clientId $clientSidePostId and serverId ${ap.id}")
             val answerPostId = ap.id ?: continue
 
             val queryClientPostIdAnswer = metisDao.queryClientPostId(
@@ -577,6 +597,10 @@ internal class MetisStorageServiceImpl(
 
             metisDao.updateReactions(answerPostClientSidePostId, answerPostReactions)
         }
+
+        Log.d("AnswerDebug", "InsertOrUpdate client side post ('${answerPost.content}') with clientId " +
+                "$answerPostClientSidePostId, serverId $answerPostId; new: $isNewPost")
+
     }
 
     private suspend fun MetisDao.insertOrUpdateUser(user: MetisUserEntity) {
