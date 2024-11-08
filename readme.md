@@ -47,6 +47,8 @@ We use both unit tests and end-to-end integration tests. Before running the end-
 - To run the unit tests, execute `./gradlew test -Dskip.unit-tests=false -Dskip.e2e=true -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true`
 - To run the end-to-end tests, execute `docker compose -f docker/e2e-tests.yml up artemis-android-e2e`
 
+For AndroidStudio, there are also preconfigured run configurations available. 
+
 ## Play store screenshots
 Screenshots can be generated using preview-composables in the `debug` source sets. They are annotated with `@PlayStoreScreenshots`. To get the screenshots, right click the rendered preview
 in AndroidStudio and select copy-image.
