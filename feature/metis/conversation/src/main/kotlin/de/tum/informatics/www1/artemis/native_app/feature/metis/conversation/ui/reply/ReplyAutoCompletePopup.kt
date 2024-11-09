@@ -11,17 +11,18 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
@@ -29,13 +30,14 @@ import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 
 private val HintHorizontalPadding = 16.dp
-private val PopupTopPadding = 8.dp
+private val PopupVerticalPadding = 8.dp
+private val AutoCompletionDialogMaxHeight = 270.dp
 
 @Composable
 internal fun ReplyAutoCompletePopup(
     popupPositionProvider: PopupPositionProvider,
     targetWidth: Dp,
-    maxHeight: Dp,
+    maxHeightFromScreen: Dp,
     autoCompleteCategories: List<AutoCompleteCategory>,
     performAutoComplete: (replacement: String) -> Unit,
     onDismissRequest: () -> Unit
@@ -45,10 +47,11 @@ internal fun ReplyAutoCompletePopup(
         properties = PopupProperties(dismissOnClickOutside = true),
         onDismissRequest = onDismissRequest
     ) {
+        val maxHeight = min(maxHeightFromScreen, AutoCompletionDialogMaxHeight)
         ReplyAutoCompletePopupBody(
             modifier = Modifier
-                .padding(top = PopupTopPadding)
-                .heightIn(max = maxHeight - PopupTopPadding)
+                .padding(vertical = PopupVerticalPadding)
+                .heightIn(max = maxHeight - PopupVerticalPadding * 2)
                 .width(targetWidth),
             autoCompleteCategories = autoCompleteCategories,
             performAutoComplete = performAutoComplete
@@ -64,12 +67,11 @@ private fun ReplyAutoCompletePopupBody(
 ) {
     LazyColumn(
         modifier = modifier
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(topStart = 45f, topEnd = 45f)
-            )
-            .padding(top = 8.dp)
+            .clip(MaterialTheme.shapes.large)
+            .background(color = MaterialTheme.colorScheme.surfaceVariant)
+            .padding(8.dp)
     ) {
+
         autoCompleteCategories.forEachIndexed { categoryIndex, category ->
             item {
                 AutoCompleteCategoryComposable(
