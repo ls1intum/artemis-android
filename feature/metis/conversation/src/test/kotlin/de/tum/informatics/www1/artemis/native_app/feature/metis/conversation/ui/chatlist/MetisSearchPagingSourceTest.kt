@@ -11,7 +11,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -22,25 +21,20 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class MetisSearchPagingSourceTest {
 
-    private lateinit var sut: MetisSearchPagingSource
     private val metisServiceStub = MetisServiceStub()
-
-    @Before
-    fun setup() {
-        sut = MetisSearchPagingSource(
-            metisService = metisServiceStub,
-            context = MetisService.StandalonePostsContext(
-                metisContext = MetisContext.Course(1),
-                filter = emptyList(),
-                query = null
-            ),
-            authToken = "token",
-            serverUrl = "url"
-        )
-    }
+    private val sut: MetisSearchPagingSource = MetisSearchPagingSource(
+        metisService = metisServiceStub,
+        context = MetisService.StandalonePostsContext(
+            metisContext = MetisContext.Course(1),
+            filter = emptyList(),
+            query = null
+        ),
+        authToken = "token",
+        serverUrl = "url"
+    )
 
     @Test
-    fun `GIVEN the metisService returns duplicated posts WHEN calling the load method THEN only unique posts are returned`() = runTest {
+    fun `test GIVEN the metisService returns duplicated posts WHEN calling the load method THEN only unique posts are returned`() = runTest {
         // GIVEN
         val post1 = StandalonePost(
             id = 1,
@@ -61,7 +55,7 @@ class MetisSearchPagingSourceTest {
         )
 
         val posts = listOf(post1, post2, post1)
-        metisServiceStub.setPosts(posts)
+        metisServiceStub.posts = posts
 
         // WHEN
         val result = sut.load(PagingSource.LoadParams.Refresh(0, 10, false))

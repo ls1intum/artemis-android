@@ -9,13 +9,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
-class MetisServiceStub : MetisService {
-
-    private var posts: List<StandalonePost> = emptyList()
-
-    fun setPosts(posts: List<StandalonePost>) {
-        this.posts = posts
-    }
+class MetisServiceStub(
+    var posts: List<StandalonePost> = emptyList()
+): MetisService {
 
     override suspend fun getPosts(
         standalonePostsContext: MetisService.StandalonePostsContext,
