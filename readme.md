@@ -59,6 +59,8 @@ We use both unit tests and end-to-end integration tests. Before running the end-
   - `./gradlew test -Dskip.unit-tests=true -Dskip.e2e=false -Dskip.debugVariants=true -Dskip.flavor.unrestricted=true -Dskip.flavor.beta=true`
 
 
+For AndroidStudio, there are also preconfigured run configurations available. 
+
 ## Play store screenshots
 Screenshots can be generated using preview-composables in the `debug` source sets. They are annotated with `@PlayStoreScreenshots`. To get the screenshots, right click the rendered preview
 in AndroidStudio and select copy-image.
