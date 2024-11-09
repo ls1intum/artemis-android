@@ -2,13 +2,11 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.paging.PagingSource
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
-import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.MetisServiceStub
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Clock
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -36,23 +34,8 @@ class MetisSearchPagingSourceTest {
     @Test
     fun `test GIVEN the metisService returns duplicated posts WHEN calling the load method THEN only unique posts are returned`() = runTest {
         // GIVEN
-        val post1 = StandalonePost(
-            id = 1,
-            content = "content",
-            author = User(),
-            creationDate = Clock.System.now(),
-            displayPriority = null,
-            tags = emptyList()
-        )
-
-        val post2 = StandalonePost(
-            id = 2,
-            content = "content",
-            author = User(),
-            creationDate = Clock.System.now(),
-            displayPriority = null,
-            tags = emptyList()
-        )
+        val post1 = StandalonePost(id = 1)
+        val post2 = StandalonePost(id = 2)
 
         val posts = listOf(post1, post2, post1)
         metisServiceStub.posts = posts
