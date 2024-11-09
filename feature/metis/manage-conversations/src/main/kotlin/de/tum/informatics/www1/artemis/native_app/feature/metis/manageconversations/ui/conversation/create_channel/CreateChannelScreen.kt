@@ -27,13 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.PotentiallyIllegalTextField
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -158,8 +156,7 @@ internal fun CreateChannelScreen(
                     .testTag(TEST_TAG_CREATE_CHANNEL_BUTTON),
                 enabled = canCreate,
                 onClick = {
-                    viewModel.viewModelScope.launch {
-                        val channel = viewModel.createChannel().await()
+                    viewModel.createChannel { channel ->
                         if (channel != null) {
                             onConversationCreated(channel.id)
                         } else {

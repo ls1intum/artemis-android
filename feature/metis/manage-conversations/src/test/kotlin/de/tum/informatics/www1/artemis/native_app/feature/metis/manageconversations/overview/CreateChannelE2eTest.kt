@@ -43,7 +43,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         canCreateChannelTestImpl(
             channelName = "testchannel1",
             channelDescription = "testchannel description",
-            isPublic = true,
+            isPrivate = false,
             isAnnouncement = true
         )
     }
@@ -53,7 +53,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         canCreateChannelTestImpl(
             channelName = "testchannel2",
             channelDescription = "",
-            isPublic = true,
+            isPrivate = false,
             isAnnouncement = true
         )
     }
@@ -63,7 +63,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
         canCreateChannelTestImpl(
             channelName = "testchannel3",
             channelDescription = "description",
-            isPublic = false,
+            isPrivate = true,
             isAnnouncement = false
         )
     }
@@ -71,11 +71,11 @@ class CreateChannelE2eTest : ConversationBaseTest() {
     private fun canCreateChannelTestImpl(
         channelName: String,
         channelDescription: String,
-        isPublic: Boolean,
+        isPrivate: Boolean,
         isAnnouncement: Boolean
     ) {
         Logger.info(
-            "Testing create channel with properties: channelname=$channelName, channelDescription$channelDescription, isPublic=$isPublic, isAnnouncement=$isAnnouncement"
+            "Testing create channel with properties: channelname=$channelName, channelDescription$channelDescription, isPublic=$isPrivate, isAnnouncement=$isAnnouncement"
         )
 
         val viewModel = CreateChannelViewModel(
@@ -108,7 +108,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             .performScrollTo()
             .performTextInput(channelDescription)
 
-        if (isPublic) {
+        if (isPrivate) {
             composeTestRule
                 .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH)
                 .performScrollTo()
@@ -138,12 +138,11 @@ class CreateChannelE2eTest : ConversationBaseTest() {
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_CREATE_CHANNEL_BUTTON)
+            .performScrollTo()
             .assertIsEnabled()
             .performClick()
 
-        composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText(context.getString(R.string.create_channel_failed_title)).assertDoesNotExist()
-
         composeTestRule.waitUntil(DefaultTimeoutMillis) { createdConversationId != null }
 
         val createdConversation = runBlocking {
@@ -161,7 +160,7 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             assertIs<ChannelChat>(createdConversation, "Created conversation is not a channel")
         assertEquals(channelName, channel.name, "Name not set correctly")
         assertEquals(channelDescription.ifBlank { null }, channel.description, "Description not set correctly")
-        assertEquals(isPublic, channel.isPublic, "Public property not set correctly")
+        assertEquals(!isPrivate, channel.isPublic, "Public property not set correctly")
         assertEquals(
             isAnnouncement,
             channel.isAnnouncementChannel,
