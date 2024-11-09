@@ -1,18 +1,32 @@
+# IntelliJ IDEA files
 *.iml
-.gradle
-.idea
+.idea/*
+!.idea/runConfigurations/
+
+# MacOS files
 .DS_Store
-build
-captures
+
+# Gradle files
+.gradle
 .externalNativeBuild
 .cxx
 local.properties
+
+# Build output
+build
+captures
+*.aab
+*.apk
+/app/release/output-metadata.json
+
+# Keystore files
 *.jks
 passwords
 *.pepk
 keystore.properties
-*.aab
-*.apk
-/app/release/output-metadata.json
+
+# Test outputs
 test-outputs
+
+# Service credentials
 serviceCredentials.json
