@@ -2,27 +2,27 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
-import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.CreateChannelScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.CreateChannelViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_CREATE_CHANNEL_BUTTON
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_SET_ANNOUNCEMENT_BUTTON
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_SET_PRIVATE_BUTTON
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_SET_PUBLIC_BUTTON
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_SET_UNRESTRICTED_BUTTON
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -108,23 +108,41 @@ class CreateChannelE2eTest : ConversationBaseTest() {
             .performScrollTo()
             .performTextInput(channelDescription)
 
-        composeTestRule
-            .onNodeWithTag(if (isPublic) TEST_TAG_SET_PUBLIC_BUTTON else TEST_TAG_SET_PRIVATE_BUTTON)
-            .performScrollTo()
-            .performClick()
+        if (isPublic) {
+            composeTestRule
+                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH)
+                .performScrollTo()
+                .performClick()
+            composeTestRule
+                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH)
+                .assertIsOn()
+        } else {
+            composeTestRule
+                .onNodeWithTag(TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH)
+                .assertIsOff()
+        }
 
-        composeTestRule
-            .onNodeWithTag(if (isPublic) TEST_TAG_SET_PUBLIC_BUTTON else TEST_TAG_SET_PRIVATE_BUTTON)
-            .assertIsSelected()
-
-        composeTestRule
-            .onNodeWithTag(if (isAnnouncement) TEST_TAG_SET_ANNOUNCEMENT_BUTTON else TEST_TAG_SET_UNRESTRICTED_BUTTON)
-            .performScrollTo()
-            .performClick()
+        if (isAnnouncement) {
+            composeTestRule
+                .onNodeWithTag(TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH)
+                .performScrollTo()
+                .performClick()
+            composeTestRule
+                .onNodeWithTag(TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH)
+                .assertIsOn()
+        } else {
+            composeTestRule
+                .onNodeWithTag(TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH)
+                .assertIsOff()
+        }
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_CREATE_CHANNEL_BUTTON)
+            .assertIsEnabled()
             .performClick()
+
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText(context.getString(R.string.create_channel_failed_title)).assertDoesNotExist()
 
         composeTestRule.waitUntil(DefaultTimeoutMillis) { createdConversationId != null }
 
