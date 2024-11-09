@@ -8,9 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.hasAnyChild
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
@@ -19,6 +21,7 @@ import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.printToLog
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -27,6 +30,7 @@ import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.TEST_TAG_THREAD_LIST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
@@ -178,8 +182,7 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
             answers = modifiedAnswers
         )
 
-        val listState = LazyListState()
-        setupUi(resolvedPost, listState) { CompletableDeferred() }
+        setupUi(resolvedPost) { CompletableDeferred() }
 
         composeTestRule
             .onNodeWithTag(testTagForAnswerPost(answers[resolvingIndex].postId), useUnmergedTree = true)
@@ -188,9 +191,8 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
             .onNodeWithTag(testTagForAnswerPost(answers[1].postId), useUnmergedTree = true)
             .assert(hasAnyChild(hasText(context.getString(R.string.post_resolves)).not()))
 
-        runBlocking {
-            listState.scrollToItem(index = 2)
-        }
+        composeTestRule.onNodeWithTag(TEST_TAG_THREAD_LIST, useUnmergedTree = true)
+            .performScrollToIndex(2)
 
         composeTestRule
             .onNodeWithTag(testTagForAnswerPost(answers[2].postId), useUnmergedTree = true)
@@ -199,7 +201,6 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
 
     private fun setupUi(
         post: PostPojo,
-        listState: LazyListState = LazyListState(),
         onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?
     ) {
         composeTestRule.setContent {
@@ -213,7 +214,6 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
                 isAtLeastTutorInCourse = false,
                 serverUrl = "",
                 emojiService = EmojiServiceStub,
-                listState = listState,
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },
