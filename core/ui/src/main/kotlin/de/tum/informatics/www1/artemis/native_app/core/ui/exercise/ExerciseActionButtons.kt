@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -29,6 +31,9 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestPart
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.skyBlueBackground
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.skyBlueBorder
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.textColor
 
 /**
  * This composable composes up to two buttons. The modifier parameter is applied to every button
@@ -211,22 +216,22 @@ class BoundExerciseActions(
 fun InfoMessageCard() {
     Box(
         modifier = Modifier
-            .border(width = 2.dp, color = Color.LightGray)
-            .background(Color(0xFFB3E5FC)) // Light sky blue background
-            .padding(10.dp)
+            .border(width = 1.dp, color = skyBlueBorder, shape = RoundedCornerShape(4.dp))
+            .background(skyBlueBackground)
+            .padding(8.dp)
             .fillMaxWidth()
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = Icons.Filled.Info,
+                imageVector = Icons.Outlined.Info,
                 contentDescription = "Information",
                 modifier = Modifier.padding(end = 8.dp),
-                tint = Color(0xFF0288D1) 
+                tint = textColor
             )
             Text(
                 text = stringResource(id = R.string.exercise_participation_not_possible),
                 fontSize = 16.sp,
-                color = Color.Black
+                color = textColor
             )
         }
     }

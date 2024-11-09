@@ -29,9 +29,9 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.easyColor
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.hardColor
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.mediumColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.easyColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.hardColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.mediumColor
 
 /**
  * Display a single exercise.

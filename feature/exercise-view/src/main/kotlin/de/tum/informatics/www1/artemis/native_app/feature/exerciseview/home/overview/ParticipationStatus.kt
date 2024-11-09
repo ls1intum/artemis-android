@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.overview
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,7 +25,7 @@ internal fun ParticipationStatusUi(
 ) {
     ProvideDefaultExerciseTemplateStatus(exercise) {
         FlowRow(
-            modifier = modifier,
+            modifier = Modifier.padding(8.dp),
             mainAxisSpacing = 8.dp,
             crossAxisAlignment = FlowCrossAxisAlignment.Center
         ) {

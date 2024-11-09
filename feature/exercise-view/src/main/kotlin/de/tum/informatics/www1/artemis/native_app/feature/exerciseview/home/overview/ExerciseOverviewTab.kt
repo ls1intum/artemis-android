@@ -8,10 +8,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ArtemisWebView
 
@@ -29,12 +31,9 @@ internal fun ExerciseOverviewTab(
 ) {
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .background(Color.White),
+            .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-
-
         ParticipationStatusUi(
             modifier = Modifier
                 .fillMaxWidth()
@@ -56,7 +55,7 @@ internal fun ExerciseOverviewTab(
             )
         } else {
             Text(
-                text = "No problem statement available.",
+                text = stringResource(id = de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R.string.exercise_view_overview_problem_statement_not_available),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
