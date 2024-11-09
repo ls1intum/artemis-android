@@ -78,14 +78,14 @@ class MetisStorageServiceImplTest {
 
     @Test
     fun testInsertClientSidePost() = runTest {
-        // GIVEN
+        // GIVEN: A base post
         sut.insertOrUpdatePosts(
             host = host,
             metisContext = metisContext,
             posts = listOf(basePost),
         )
 
-        // WHEN
+        // WHEN: Inserting a client side answer post
         sut.insertClientSidePost(
             host = host,
             metisContext = metisContext,
@@ -93,7 +93,7 @@ class MetisStorageServiceImplTest {
             clientSidePostId = answerClientPostId
         )
 
-        // THEN
+        // THEN: Both the base post and the answer post are stored
         val posts = sut.getStoredPosts(
             serverId = host,
             metisContext = metisContext
@@ -106,13 +106,7 @@ class MetisStorageServiceImplTest {
 
     @Test
     fun testUpgradeClientSideAnswerPost() = runTest {
-        // Okay, this is super weird. Somehow the test sql database has problems if the test method
-        // name is too long. That's why I had to create this delegation method.
-        `test GIVEN a post with a new only local answer post WHEN insertOrUpdatePosts is called before upgradeClientSideAnswerPost THEN only one answer post is stored`()
-    }
-
-    private suspend fun `test GIVEN a post with a new only local answer post WHEN insertOrUpdatePosts is called before upgradeClientSideAnswerPost THEN only one answer post is stored`() {
-        // GIVEN
+        // GIVEN: A post with a new only local answer post
         sut.insertOrUpdatePosts(
             host = host,
             metisContext = metisContext,
@@ -125,7 +119,7 @@ class MetisStorageServiceImplTest {
             post = localAnswer
         )
 
-        // WHEN
+        // WHEN: insertOrUpdatePosts is called before upgradeClientSideAnswerPost.
         val answerPojoUpdated = localAnswerPojo.copy(serverPostIdCache = localAnswerPojo.serverPostIdCache.copy(serverPostId = 1))
         var basePostUpdated = StandalonePost(basePostPojo, conversation)
         val answerUpdated = AnswerPost(answerPojoUpdated, basePostUpdated)
@@ -146,7 +140,7 @@ class MetisStorageServiceImplTest {
             post = answerUpdated
         )
 
-        // THEN
+        // THEN: Only one answer post is stored
         val posts = sut.getStoredPosts(
             serverId = host,
             metisContext = metisContext
