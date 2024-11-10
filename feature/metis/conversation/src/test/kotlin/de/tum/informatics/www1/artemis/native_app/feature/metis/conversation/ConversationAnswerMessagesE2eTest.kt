@@ -20,7 +20,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
-    fun `shows existing message with answer posts`() {
+    fun `test GIVEN existing answer posts WHEN displaying the parent post THEN it shows all the answer posts`() {
         val answerPostContents = (0 until 3).map {
             "answer post content $it"
         }
@@ -66,7 +66,7 @@ class ConversationAnswerMessagesE2eTest : ConversationMessagesBaseTest() {
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
-    fun `resolving a post by updating its answer message`() {
+    fun `test GIVEN an unresolved post with an answer message WHEN the answer post gets resolved THEN the post is marked as resolved`() {
         runTest(timeout = DefaultTimeoutMillis.milliseconds * 4) {
             val post = metisModificationService.createPost(
                 context = metisContext,
