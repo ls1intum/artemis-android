@@ -187,19 +187,17 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
 
         setupUi(resolvedPost) { CompletableDeferred() }
 
-        composeTestRule
-            .onNodeWithTag(testTagForAnswerPost(answers[resolvingIndex].postId), useUnmergedTree = true)
-            .assert(hasAnyChild(hasText(context.getString(R.string.post_resolves))))
-        composeTestRule
-            .onNodeWithTag(testTagForAnswerPost(answers[1].postId), useUnmergedTree = true)
-            .assert(hasAnyChild(hasText(context.getString(R.string.post_resolves)).not()))
+        val resolvesAssertion = hasAnyChild(hasText(context.getString(R.string.post_resolves)))
 
-        composeTestRule.onNodeWithTag(TEST_TAG_THREAD_LIST, useUnmergedTree = true)
-            .performScrollToIndex(2)
+        for (i in answers.indices) {
+            composeTestRule
+                .onNodeWithTag(TEST_TAG_THREAD_LIST, useUnmergedTree = true)
+                .performScrollToIndex(i)
 
-        composeTestRule
-            .onNodeWithTag(testTagForAnswerPost(answers[2].postId), useUnmergedTree = true)
-            .assert(hasAnyChild(hasText(context.getString(R.string.post_resolves)).not()))
+            composeTestRule
+                .onNodeWithTag(testTagForAnswerPost(answers[i].postId), useUnmergedTree = true)
+                .assert(if (i == resolvingIndex) resolvesAssertion else resolvesAssertion.not())
+        }
     }
 
     private fun setupUi(
