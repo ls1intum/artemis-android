@@ -432,4 +432,16 @@ class ConversationOverviewViewModel(
         isExpanded: Boolean,
         showPrefix: Boolean = true
     ) = ConversationCollection(this, isExpanded, showPrefix)
+
+    fun removeSectionPrefix(value: String): String {
+        val prefixes = listOf("exercise-", "lecture-", "exam-")
+        var result = value
+        for (prefix in prefixes) {
+            if (result.startsWith(prefix, ignoreCase = true)) {
+                result = result.removePrefix(prefix)
+                break
+            }
+        }
+        return result.trim()
+    }
 }

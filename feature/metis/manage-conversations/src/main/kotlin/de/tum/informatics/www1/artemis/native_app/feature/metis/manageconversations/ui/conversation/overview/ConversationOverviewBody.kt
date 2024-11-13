@@ -175,10 +175,10 @@ fun ConversationOverviewBody(
         }
 
         ConversationFabMenu(
+            canCreateChannel = canCreateChannel,
             onCreateChat = onRequestCreatePersonalConversation,
             onBrowseChannels = onRequestBrowseChannel,
-            onCreateChannel = onRequestAddChannel,
-            canCreateChannel = canCreateChannel
+            onCreateChannel = onRequestAddChannel
         )
     }
 
@@ -200,10 +200,10 @@ fun ConversationOverviewBody(
 
 @Composable
 fun ConversationFabMenu(
+    canCreateChannel: Boolean,
     onCreateChat: () -> Unit,
     onBrowseChannels: () -> Unit,
-    onCreateChannel: () -> Unit,
-    canCreateChannel: Boolean
+    onCreateChannel: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 

@@ -8,12 +8,18 @@
     <string name="exercise_view_tab_overview">Overview</string>
     <string name="exercise_view_tab_qna">Communication</string>
 
+    <string name="exercise_view_overview_title">Exercise Details</string>
+
     <string name="exercise_view_overview_points_max">Points: %1$s</string>
     <string name="exercise_view_overview_points_reached">Points: %1$s / %2$s</string>
     <string name="exercise_view_overview_points_none">No points</string>
     <string name="exercise_view_overview_hint_submission_due_date">Submission due:</string>
     <string name="exercise_view_overview_hint_assessment_due_date">Assessment due:</string>
+    <string name="exercise_view_overview_hint_assessment_complaint_possible">Complaint possible: %1$s</string>
     <string name="exercise_view_overview_hint_assessment_release_date">Release date:</string>
+
+    <string name="exercise_view_overview_hint_assessment_complaint_possible_yes">Yes</string>
+    <string name="exercise_view_overview_hint_assessment_complaint_possible_no">No</string>
 
     <string name="exercise_participation_status_title">Your exercise status:</string>
 

@@ -146,7 +146,9 @@ internal fun TopBarExerciseInformation(
     val dueDateTopBarTextInformation =
         @Composable { date: Instant, hintRes: @receiver:StringRes Int ->
             TopBarTextInformation(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 1.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 1.dp),
                 hintColumnWidth = maxWidth,
                 hint = stringResource(id = hintRes),
                 dataText = getRelativeTime(to = date).toString(),
@@ -235,12 +237,18 @@ internal fun TopBarExerciseInformation(
             val complaintPossible = exercise.bind { exercise ->
                 exercise.allowComplaintsForAutomaticAssessments
             }.orElse(false)
+            val complaintPossibleText = stringResource(
+                R.string.exercise_view_overview_hint_assessment_complaint_possible,
+                if (complaintPossible == true) stringResource(R.string.exercise_view_overview_hint_assessment_complaint_possible_yes) else stringResource(
+                    R.string.exercise_view_overview_hint_assessment_complaint_possible_no
+                )
+            )
 
             Text(
                 modifier = Modifier
                     .placeholder(exercise !is DataState.Success)
                     .padding(bottom = 4.dp),
-                text = "Complaint possible: " + if (complaintPossible == true) "Yes" else "No",
+                text = complaintPossibleText,
                 style = MaterialTheme.typography.bodyLarge
             )
 
@@ -254,7 +262,7 @@ internal fun TopBarExerciseInformation(
     ) {
 
         Text(
-            text = "Exercise Details",
+            text = stringResource(R.string.exercise_view_overview_title),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
                 .padding(bottom = 1.dp)
@@ -385,7 +393,19 @@ private fun TitleText(
         inlineContent = inlineContent,
         modifier = modifier
             .placeholder(exerciseDataState !is DataState.Success)
-            .semantics { set(SemanticsProperties.Text, listOf(AnnotatedString(exerciseDataState.bind { it.title }.orNull().orEmpty()))) },
+            .semantics {
+                set(
+                    SemanticsProperties.Text,
+                    listOf(
+                        AnnotatedString(
+                            exerciseDataState
+                                .bind { it.title }
+                                .orNull()
+                                .orEmpty()
+                        )
+                    )
+                )
+            },
         style = style,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis

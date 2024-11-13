@@ -224,7 +224,7 @@ fun InfoMessageCard() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = Icons.Outlined.Info,
-                contentDescription = "Information",
+                contentDescription = null,
                 modifier = Modifier.padding(end = 8.dp),
                 tint = textColor
             )
