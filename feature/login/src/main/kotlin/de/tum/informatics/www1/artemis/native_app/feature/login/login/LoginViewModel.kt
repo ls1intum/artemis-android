@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * View model to handle the login process.
@@ -33,7 +34,7 @@ class LoginViewModel(
     serverConfigurationService: ServerConfigurationService,
     serverProfileInfoService: ServerProfileInfoService,
     networkStatusProvider: NetworkStatusProvider,
-    private val coroutineContext: CoroutineContext
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : BaseAccountViewModel(serverConfigurationService, networkStatusProvider, serverProfileInfoService) {
 
     companion object {

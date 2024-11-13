@@ -9,6 +9,8 @@ services:
     # https://docs.artemis.cit.tum.de/dev/setup/#
     image: ghcr.io/ls1intum/artemis:latest
     pull_policy: always
+    volumes:
+      - artemis-data:/opt/artemis/data
     # system environments are the default way for custom configuration overrides in the containerized artemis setups
     # either add them in the environments or env_file section (alternative to application-local.yml)
     env_file:
@@ -31,3 +33,7 @@ networks:
   artemis:
     driver: "bridge"
     name: artemis
+
+volumes:
+  artemis-data:
+    name: artemis-data

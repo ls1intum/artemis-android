@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Divider
@@ -27,8 +29,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -153,12 +155,16 @@ fun ConversationOverviewBody(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = 8.dp)
+                                    .padding(top = 16.dp)
                             ) {
-                                OutlinedButton(
+                                TextButton(
                                     modifier = Modifier.align(Alignment.Center),
                                     onClick = { showCodeOfConduct = true }
                                 ) {
+                                    Icon(imageVector = Icons.Default.Info, contentDescription = null)
+
+                                    Spacer(modifier = Modifier.size(8.dp))
+
                                     Text(text = stringResource(id = R.string.conversation_overview_button_show_code_of_conduct))
                                 }
                             }

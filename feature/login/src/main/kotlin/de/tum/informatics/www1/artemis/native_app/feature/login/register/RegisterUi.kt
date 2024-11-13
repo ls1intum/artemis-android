@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,6 +19,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
@@ -101,7 +104,6 @@ internal fun RegisterUi(
             onValueChange = viewModel::updateFirstName,
             label = stringResource(id = R.string.register_label_first_name),
             errorText = firstNameStatus.localizedErrorString,
-            isPassword = false
         )
 
         ErrorTextField(
@@ -110,7 +112,6 @@ internal fun RegisterUi(
             onValueChange = viewModel::updateLastName,
             label = stringResource(id = R.string.register_label_last_name),
             errorText = lastNameStatus.localizedErrorString,
-            isPassword = false
         )
 
         ErrorTextField(
@@ -119,7 +120,6 @@ internal fun RegisterUi(
             onValueChange = viewModel::updateUsername,
             label = stringResource(id = R.string.register_label_username),
             errorText = usernameStatus.localizedErrorString,
-            isPassword = false
         )
 
         Divider(modifier = dividerModifier)
@@ -138,7 +138,7 @@ internal fun RegisterUi(
             onValueChange = viewModel::updateEmail,
             label = stringResource(id = R.string.register_label_email),
             errorText = emailStatus.localizedErrorString,
-            isPassword = false
+            keyboardType = KeyboardType.Email
         )
 
         Divider(modifier = dividerModifier)
@@ -149,7 +149,7 @@ internal fun RegisterUi(
             onValueChange = viewModel::updatePassword,
             label = stringResource(id = R.string.register_label_password),
             errorText = passwordStatus.localizedErrorString,
-            isPassword = true
+            keyboardType = KeyboardType.Password
         )
 
         ErrorTextField(
@@ -158,7 +158,8 @@ internal fun RegisterUi(
             onValueChange = viewModel::updateConfirmPassword,
             label = stringResource(id = R.string.register_label_confirm_password),
             errorText = confirmPasswordStatus.localizedErrorString,
-            isPassword = true
+            keyboardType = KeyboardType.Password,
+            isLastTextField = true
         )
 
         ButtonWithLoadingAnimation(
@@ -201,15 +202,19 @@ private fun ErrorTextField(
     onValueChange: (String) -> Unit,
     label: String,
     errorText: String?,
-    isPassword: Boolean
+    keyboardType: KeyboardType = KeyboardOptions.Default.keyboardType,
+    isLastTextField: Boolean = false
 ) {
+    val imeAction = if (isLastTextField) ImeAction.Done else ImeAction.Next
+
     Column(modifier = modifier) {
-        if (isPassword) {
+        if (keyboardType == KeyboardType.Password) {
             PasswordTextField(
                 modifier = Modifier.fillMaxWidth(),
                 password = value,
                 label = label,
-                updatePassword = onValueChange
+                updatePassword = onValueChange,
+                imeAction = imeAction,
             )
         } else {
             TextField(
@@ -217,7 +222,11 @@ private fun ErrorTextField(
                 value = value,
                 onValueChange = onValueChange,
                 label = { Text(text = label) },
-                isError = errorText != null
+                isError = errorText != null,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = keyboardType,
+                    imeAction = imeAction
+                ),
             )
         }
 

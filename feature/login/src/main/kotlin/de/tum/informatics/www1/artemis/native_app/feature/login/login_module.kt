@@ -17,7 +17,6 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.dsl.module
-import kotlin.coroutines.EmptyCoroutineContext
 
 val loginModule = module {
     viewModelOf(::AccountViewModel)
@@ -29,11 +28,18 @@ val loginModule = module {
             get(),
             get(),
             get(),
-            get(),
-            EmptyCoroutineContext
+            get()
         )
     }
-    viewModelOf(::RegisterViewModel)
+    viewModel {
+        RegisterViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModelOf(::CustomInstanceSelectionViewModel)
     viewModel { params -> Saml2LoginViewModel(params.get(), get(), get(), get(), get()) }
 
