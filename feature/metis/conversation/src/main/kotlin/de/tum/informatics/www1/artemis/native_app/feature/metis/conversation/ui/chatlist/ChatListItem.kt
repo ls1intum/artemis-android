@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist
 
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.datetime.LocalDate
 
 sealed class ChatListItem {

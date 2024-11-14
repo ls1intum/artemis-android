@@ -11,15 +11,15 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="artemis" />
-
                 <data android:host="courses" />
-                <data android:host="metis_standalone_post" />
-                <data android:scheme="artemis" />
                 <data android:host="exercises" />
                 <data android:host="lectures" />
+                <data android:host="metis_standalone_post" />
                 <data android:host="quiz_participation" />
             </intent-filter>
 
