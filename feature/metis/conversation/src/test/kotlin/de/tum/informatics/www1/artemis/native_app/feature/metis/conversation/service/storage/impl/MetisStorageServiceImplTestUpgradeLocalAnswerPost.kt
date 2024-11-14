@@ -22,7 +22,7 @@ import org.robolectric.RobolectricTestRunner
 
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
-class MetisStorageServiceImplTest {
+class MetisStorageServiceImplTestUpgradeLocalAnswerPost {
 
     private val databaseProviderMock = MetisDatabaseProviderMock(InstrumentationRegistry.getInstrumentation().context)
     private val sut = MetisStorageServiceImpl(databaseProviderMock)
@@ -76,6 +76,9 @@ class MetisStorageServiceImplTest {
     private val basePost = StandalonePost(basePostPojo, conversation)
     private val localAnswer = AnswerPost(localAnswerPojo, basePost)
 
+    private lateinit var basePostUpdated: StandalonePost
+    private lateinit var answerUpdated: AnswerPost
+
     @Test
     fun testInsertClientSidePost() = runTest {
         // GIVEN: A base post
@@ -94,36 +97,16 @@ class MetisStorageServiceImplTest {
         )
 
         // THEN: Both the base post and the answer post are stored
-        val posts = sut.getStoredPosts(
-            serverId = host,
-            metisContext = metisContext
-        ).loadAsList()
-
-        assertEquals(1, posts.size)
-        assertEquals(1, posts.first().answers.size)
+        assertStoredContentIsTheSame()
     }
-
 
     @Test
     fun testUpgradeClientSideAnswerPost() = runTest {
         // GIVEN: A post with a new only local answer post
-        sut.insertOrUpdatePosts(
-            host = host,
-            metisContext = metisContext,
-            posts = listOf(basePost)
-        )
-        sut.insertClientSidePost(
-            host = host,
-            metisContext = metisContext,
-            clientSidePostId = answerClientPostId,
-            post = localAnswer
-        )
+        setupPostWithLocalAnswer()
 
         // WHEN: insertOrUpdatePosts is called before upgradeClientSideAnswerPost.
-        val answerPojoUpdated = localAnswerPojo.copy(serverPostIdCache = localAnswerPojo.serverPostIdCache.copy(serverPostId = 1))
-        var basePostUpdated = StandalonePost(basePostPojo, conversation)
-        val answerUpdated = AnswerPost(answerPojoUpdated, basePostUpdated)
-        basePostUpdated = basePostUpdated.copy(answers = listOf(answerUpdated))
+        updateAnswerPostWithServerId()
 
         // Called by the WebSocket
         sut.updatePost(
@@ -140,15 +123,78 @@ class MetisStorageServiceImplTest {
             post = answerUpdated
         )
 
-        // THEN: Only one answer post is stored
-        val posts = sut.getStoredPosts(
-            serverId = host,
-            metisContext = metisContext
-        ).loadAsList()
-        assertEquals(1, posts.size)
-        assertEquals(1, posts.first().answers.size)
+        // THEN: Content stays the same and the upgrade is successful
+        assertStoredContentIsTheSame()
+        assertUpgradeSuccessful()
     }
 
+    @Test
+    fun testUpgradeClientSideAnswerPost2() = runTest {
+        // GIVEN: A post with a new only local answer post
+        setupPostWithLocalAnswer()
+
+        // WHEN: upgradeClientSideAnswerPost is called before updatePost.
+        updateAnswerPostWithServerId()
+
+        // Called by SendConversationPostWorker
+        sut.upgradeClientSideAnswerPost(
+            host = host,
+            metisContext = metisContext,
+            clientSidePostId = answerClientPostId,
+            post = answerUpdated
+        )
+
+        // Called by the WebSocket
+        sut.updatePost(
+            host = host,
+            metisContext = metisContext,
+            post = basePostUpdated
+        )
+
+        // THEN: Content stays the same and the upgrade is successful
+        assertStoredContentIsTheSame()
+        assertUpgradeSuccessful()
+    }
+
+    private suspend fun setupPostWithLocalAnswer() {
+        sut.insertOrUpdatePosts(
+            host = host,
+            metisContext = metisContext,
+            posts = listOf(basePost)
+        )
+        sut.insertClientSidePost(
+            host = host,
+            metisContext = metisContext,
+            clientSidePostId = answerClientPostId,
+            post = localAnswer
+        )
+    }
+
+
+    private fun updateAnswerPostWithServerId() {
+        val answerPojoUpdated = localAnswerPojo.copy(serverPostIdCache = localAnswerPojo.serverPostIdCache.copy(serverPostId = 1))
+        basePostUpdated = StandalonePost(basePostPojo, conversation)
+        answerUpdated = AnswerPost(answerPojoUpdated, basePostUpdated)
+        basePostUpdated = basePostUpdated.copy(answers = listOf(answerUpdated))
+    }
+
+    private suspend fun assertStoredContentIsTheSame() {
+        val posts = getStoredPosts()
+        assertEquals(1, posts.size)
+        assertEquals(basePostPojo.content, posts.first().content)
+        assertEquals(1, posts.first().answers.size)
+        assertEquals(localAnswerPojo.content, posts.first().answers.first().content)
+    }
+
+    private suspend fun assertUpgradeSuccessful() {
+        val posts = getStoredPosts()
+        assertEquals(answerUpdated.serverPostId, posts.first().answers.first().serverPostId)
+    }
+
+    private suspend fun getStoredPosts() = sut.getStoredPosts(
+        serverId = host,
+        metisContext = metisContext
+    ).loadAsList()
 
     private suspend fun <T : Any>PagingSource<Int, T>.loadAsList(): List<T> {
         val result = mutableListOf<T>()
