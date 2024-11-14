@@ -35,11 +35,6 @@ jobs:
         if: success() || failure()
         continue-on-error: true
 
-        # Sanity cleanup 2
-      - name: Stop anything still running on port 3306
-        run: sudo kill -9 $(sudo lsof -t -i:3306) || true
-        continue-on-error: true
-
       - name: Launch docker containers
         run: docker compose -f docker/e2e-tests.yml up -d artemis-app-setup
         if: success() || failure()
