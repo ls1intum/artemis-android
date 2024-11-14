@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -17,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -100,43 +98,49 @@ fun ExerciseActionButtons(
     }
 
     if (templateStatus != null) {
-        if (exercise is TextExercise) {
-            if (latestParticipation?.initializationState == Participation.InitializationState.INITIALIZED) {
-                Button(
-                    modifier = modifier,
-                    onClick = {
-                        actions.onClickOpenTextExercise(
-                            latestParticipation.id ?: return@Button
+        when (exercise) {
+            is TextExercise -> {
+                if (latestParticipation?.initializationState == Participation.InitializationState.INITIALIZED) {
+                    Button(
+                        modifier = modifier,
+                        onClick = {
+                            actions.onClickOpenTextExercise(
+                                latestParticipation.id ?: return@Button
+                            )
+                        },
+                        enabled = !exercise.teamMode
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.exercise_actions_open_exercise_button)
                         )
-                    },
-                    enabled = !exercise.teamMode
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.exercise_actions_open_exercise_button)
-                    )
+                    }
                 }
-            }
 
-            if (latestParticipation?.initializationState == Participation.InitializationState.FINISHED &&
-                (latestParticipation.results.isNullOrEmpty() || !showResult)
-            ) {
-                Button(
-                    modifier = modifier,
-                    onClick = {
-                        actions.onClickOpenTextExercise(
-                            latestParticipation.id ?: return@Button
-                        )
-                    },
-                    enabled = !exercise.teamMode
+                if (latestParticipation?.initializationState == Participation.InitializationState.FINISHED &&
+                    (latestParticipation.results.isNullOrEmpty() || !showResult)
                 ) {
-                    Text(
-                        text = stringResource(id = R.string.exercise_actions_view_submission_button)
-                    )
+                    Button(
+                        modifier = modifier,
+                        onClick = {
+                            actions.onClickOpenTextExercise(
+                                latestParticipation.id ?: return@Button
+                            )
+                        },
+                        enabled = !exercise.teamMode
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.exercise_actions_view_submission_button)
+                        )
+                    }
                 }
             }
-        } else {
-            Row(modifier=Modifier.padding(top=2.dp, bottom = 2.dp)) {
-                InfoMessageCard()
+            is QuizExercise -> {
+                // Do not show participation not possible info card for quiz exercises
+            }
+            else -> {
+                Row(modifier=Modifier.padding(top=2.dp, bottom = 2.dp)) {
+                    ParticipationNotPossibleInfoMessageCard()
+                }
             }
         }
 
@@ -213,7 +217,7 @@ class BoundExerciseActions(
 
 
 @Composable
-fun InfoMessageCard() {
+fun ParticipationNotPossibleInfoMessageCard() {
     Box(
         modifier = Modifier
             .border(width = 1.dp, color = skyBlueBorder, shape = RoundedCornerShape(4.dp))

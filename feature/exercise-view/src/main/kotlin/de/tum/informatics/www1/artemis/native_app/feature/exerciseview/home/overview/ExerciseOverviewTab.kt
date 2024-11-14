@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.ove
 
 import android.annotation.SuppressLint
 import android.webkit.WebView
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
-import de.tum.informatics.www1.artemis.native_app.core.ui.R
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ArtemisWebView
 
@@ -55,7 +54,7 @@ internal fun ExerciseOverviewTab(
             )
         } else {
             Text(
-                text = stringResource(id = de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R.string.exercise_view_overview_problem_statement_not_available),
+                text = stringResource(id = R.string.exercise_view_overview_problem_statement_not_available),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
