@@ -37,7 +37,7 @@ abstract class ArtemisMarkdownTransformer {
     private val userMarkdownPattern = "\\[user](.*?)\\((.*?)\\)\\[/user]".toRegex()
     private val channelMarkdownPattern = "\\[channel](.*?)\\((\\d+?)\\)\\[/channel]".toRegex()
     private val lectureContentMarkdownPattern = "\\[(attachment|lecture-unit|slide)](.*?)\\(([/\\w\\d\\-_\\.]+)\\)\\[/\\1]".toRegex()
-    //private val fileUploadMessagePattern = "(\\!?)\\[(.+?)]\\((.*?)\\)".toRegex()
+    private val fileUploadMessagePattern = "(\\!?)\\[(.*?)]\\((/api/files/[\\w\\d/\\-_.]+)\\)".toRegex()
 
     fun transformMarkdown(markdown: String): String {
         return exerciseMarkdownPattern.replace(markdown) { matchResult ->
@@ -74,17 +74,19 @@ abstract class ArtemisMarkdownTransformer {
                     url = url
                 )
             }
-//        }.let {
-//            fileUploadMessagePattern.replace(it) { matchResult ->
-//                val isImage = matchResult.groups[1]?.value.orEmpty() == "!"
-//                val fileName = matchResult.groups[2]?.value.orEmpty()
-//                val filePath = matchResult.groups[3]?.value.orEmpty()
-//                transformFileUploadMessageMarkdown(
-//                    isImage = isImage,
-//                    fileName = fileName,
-//                    filePath = filePath
-//                )
-//            }
+        }.let {
+            fileUploadMessagePattern.replace(it) { matchResult ->
+                // file uploads can be images or other files represented by a link:
+                // image: ![fileName](url), file: [fileName](url)
+                val isImage = matchResult.groups[1]?.value.orEmpty() == "!"
+                val fileName = matchResult.groups[2]?.value.orEmpty()
+                val filePath = matchResult.groups[3]?.value.orEmpty()
+                transformFileUploadMessageMarkdown(
+                    isImage = isImage,
+                    fileName = fileName,
+                    filePath = filePath
+                )
+            }
         }
     }
 
