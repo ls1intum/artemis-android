@@ -42,6 +42,7 @@ import kotlin.time.Duration.Companion.seconds
 internal const val TEST_TAG_CAN_CREATE_REPLY = "TEST_TAG_CAN_CREATE_REPLY"
 internal const val TEST_TAG_REPLY_TEXT_FIELD = "TEST_TAG_REPLY_TEXT_FIELD"
 internal const val TEST_TAG_REPLY_SEND_BUTTON = "TEST_TAG_REPLY_SEND_BUTTON"
+internal const val TEST_TAG_UNFOCUSED_TEXT_FIELD = "TEST_TAG_UNFOCUSED_TEXT_FIED"
 
 private const val DisabledContentAlpha = 0.75f
 
@@ -443,7 +444,8 @@ private fun UnfocusedPreviewReplyTextField(onRequestShowTextField: () -> Unit, t
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onRequestShowTextField)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .testTag(TEST_TAG_UNFOCUSED_TEXT_FIELD),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
