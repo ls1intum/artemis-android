@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,6 +29,8 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+
+const val TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST = "TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST"
 
 private val HintHorizontalPadding = 16.dp
 private val PopupVerticalPadding = 8.dp
@@ -70,6 +73,7 @@ private fun ReplyAutoCompletePopupBody(
             .clip(MaterialTheme.shapes.large)
             .background(color = MaterialTheme.colorScheme.surfaceVariant)
             .padding(8.dp)
+            .testTag(TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST)
     ) {
 
         autoCompleteCategories.forEachIndexed { categoryIndex, category ->
