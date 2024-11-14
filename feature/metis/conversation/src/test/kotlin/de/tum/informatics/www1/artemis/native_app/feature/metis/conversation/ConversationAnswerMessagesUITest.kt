@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
@@ -213,6 +214,7 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
                 conversationDataState = DataState.Success(conversation),
                 hasModerationRights = false,
                 isAtLeastTutorInCourse = false,
+                listContentPadding = PaddingValues(),
                 serverUrl = "",
                 emojiService = EmojiServiceStub,
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
