@@ -1,6 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.impl
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
+import androidx.paging.testing.asSnapshot
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
@@ -22,7 +25,7 @@ import org.robolectric.RobolectricTestRunner
 
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
-class MetisStorageServiceImplTestUpgradeLocalAnswerPost {
+class MetisStorageServiceImplUpgradeLocalAnswerPostTest {
 
     private val databaseProviderMock = MetisDatabaseProviderMock(InstrumentationRegistry.getInstrumentation().context)
     private val sut = MetisStorageServiceImpl(databaseProviderMock)
@@ -196,16 +199,9 @@ class MetisStorageServiceImplTestUpgradeLocalAnswerPost {
         metisContext = metisContext
     ).loadAsList()
 
-    private suspend fun <T : Any>PagingSource<Int, T>.loadAsList(): List<T> {
-        val result = mutableListOf<T>()
-        var key = 0
-        do {
-            val loadResult = load(PagingSource.LoadParams.Refresh(key, 10, false))
-            if (loadResult is PagingSource.LoadResult.Page) {
-                result.addAll(loadResult.data)
-                key = loadResult.nextKey ?: break
-            }
-        } while (true)
-        return result
+    private suspend fun <T : Any> PagingSource<Int, T>.loadAsList(): List<T> {
+        return Pager(PagingConfig(pageSize = 10), pagingSourceFactory = { this }).flow.asSnapshot {
+            scrollTo(50)
+        }
     }
 }

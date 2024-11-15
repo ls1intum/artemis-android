@@ -35,7 +35,8 @@ dependencies {
     implementation(libs.androidx.dataStore.preferences)
 
     testImplementation(project(":feature:metis-test"))
-    implementation("androidx.paging:paging-common:3.2.1")
+    implementation(libs.androidx.paging.common)
+    testImplementation(libs.androidx.paging.testing)
 }
 
 tasks.register("fetchAndPrepareEmojis", emoji.FetchAndPrepareEmojisTask::class) {
