@@ -14,7 +14,7 @@ val testWebsocketModule = module {
     single<WebsocketProvider> { TestWebsocketProvider() }
 }
 
-private class TestWebsocketProvider : WebsocketProvider {
+class TestWebsocketProvider : WebsocketProvider {
 
     override val connectionState: Flow<WebsocketProvider.WebsocketConnectionState> =
         flowOf(WebsocketProvider.WebsocketConnectionState.WithSession(true))

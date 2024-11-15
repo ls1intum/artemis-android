@@ -53,6 +53,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toJavaInstant
+import org.koin.compose.koinInject
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -75,6 +76,7 @@ internal fun MetisChatList(
 
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
+    val isAtLeastTutorInCourse by viewModel.isAtLeastTutorInCourse.collectAsState()
 
     val serverUrl by viewModel.serverUrl.collectAsState()
 
@@ -94,6 +96,7 @@ internal fun MetisChatList(
         posts = posts.asPostsDataState(),
         clientId = clientId,
         hasModerationRights = hasModerationRights,
+        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
         listContentPadding = listContentPadding,
         serverUrl = serverUrl,
         courseId = viewModel.courseId,
@@ -119,6 +122,7 @@ fun MetisChatList(
     bottomItem: PostPojo?,
     clientId: Long,
     hasModerationRights: Boolean,
+    isAtLeastTutorInCourse: Boolean,
     listContentPadding: PaddingValues,
     serverUrl: String,
     courseId: Long,
@@ -137,9 +141,10 @@ fun MetisChatList(
         initialReplyTextProvider = initialReplyTextProvider,
         onCreatePost = onCreatePost,
         onEditPost = onEditPost,
+        onResolvePost = null,
         onDeletePost = onDeletePost,
-        onRequestReactWithEmoji = onRequestReactWithEmoji
-    ) { replyMode, onEditPostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, updateFailureStateDelegate ->
+        onRequestReactWithEmoji = onRequestReactWithEmoji,
+    ) { replyMode, onEditPostDelegate, _, onRequestReactWithEmojiDelegate, onDeletePostDelegate, updateFailureStateDelegate ->
         Column(modifier = modifier) {
             val informationModifier = Modifier
                 .fillMaxSize()
@@ -155,7 +160,8 @@ fun MetisChatList(
                 itemCount = posts.itemCount,
                 order = DisplayPostOrder.REVERSED,
                 bottomItem = bottomItem,
-                imageLoaderCreation = imageLoaderCreation
+                imageLoaderCreation = imageLoaderCreation,
+                emojiService = koinInject()
             ) {
                 when (posts) {
                     PostsDataState.Empty -> {
@@ -186,6 +192,7 @@ fun MetisChatList(
                             clientId = clientId,
                             onClickViewPost = onClickViewPost,
                             hasModerationRights = hasModerationRights,
+                            isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                             onRequestEdit = onEditPostDelegate,
                             onRequestDelete = onDeletePostDelegate,
                             onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
@@ -214,6 +221,7 @@ private fun ChatList(
     state: LazyListState,
     posts: PostsDataState.Loaded,
     hasModerationRights: Boolean,
+    isAtLeastTutorInCourse: Boolean,
     clientId: Long,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
@@ -246,6 +254,7 @@ private fun ChatList(
                     val postActions = rememberPostActions(
                         post = post,
                         hasModerationRights = hasModerationRights,
+                        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                         clientId = clientId,
                         onRequestEdit = { onRequestEdit(post ?: return@rememberPostActions) },
                         onRequestDelete = {
@@ -257,6 +266,7 @@ private fun ChatList(
                         onReplyInThread = {
                             onClickViewPost(post?.standalonePostId ?: return@rememberPostActions)
                         },
+                        onResolvePost = null,
                         onRequestRetrySend = {
                             onRequestRetrySend(
                                 post?.standalonePostId ?: return@rememberPostActions

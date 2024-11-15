@@ -31,7 +31,7 @@ object ArtemisInstances {
     )
 
     private val TumTs1 = ArtemisInstance(
-        host = "artemis-test1.artemis.in.tum.de",
+        host = "artemis-test1.artemis.cit.tum.de",
         name = R.string.artemis_instance_tum_test_server_1,
         type = ArtemisInstance.Type.TEST
     )

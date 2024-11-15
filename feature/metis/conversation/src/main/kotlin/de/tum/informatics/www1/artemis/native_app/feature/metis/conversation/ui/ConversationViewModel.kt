@@ -20,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.account.isAtLeastTutorInCourse
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.FileUploadExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ModelingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
@@ -149,6 +150,21 @@ internal open class ConversationViewModel(
         metisStorageService = metisStorageService
     )
 
+    private val course: StateFlow<DataState<Course>> = flatMapLatest(
+        serverConfigurationService.serverUrl,
+        accountService.authToken,
+        onRequestReload.onStart { emit(Unit) }
+    ) { serverUrl, authToken, _ ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            courseService.getCourse(
+                metisContext.courseId,
+                serverUrl,
+                authToken
+            ).bind { it.course }
+        }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
+
     val hasModerationRights: StateFlow<Boolean> = flatMapLatest(
         serverConfigurationService.serverUrl,
         accountService.authToken,
@@ -168,6 +184,22 @@ internal open class ConversationViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
+    val isAtLeastTutorInCourse: StateFlow<Boolean> = flatMapLatest(
+        serverConfigurationService.serverUrl,
+        accountService.authToken,
+        course,
+        onRequestReload.onStart { emit(Unit) }
+    ) { serverUrl, authToken, course, _ ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            accountDataService.getAccountData(
+                serverUrl = serverUrl,
+                bearerToken = authToken
+            )
+                .bind { it.isAtLeastTutorInCourse(course = course.orThrow()) }
+        }
+            .map { it.orElse(false) }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     val conversationDataStatus: StateFlow<DataStatus> = combine(
         websocketProvider.isConnected,
@@ -209,21 +241,6 @@ internal open class ConversationViewModel(
             .onStart { emit(conversationDataState) }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
-
-    private val course: StateFlow<DataState<Course>> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
-        onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            courseService.getCourse(
-                metisContext.courseId,
-                serverUrl,
-                authToken
-            ).bind { it.course }
-        }
-    }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
     private val conversations: StateFlow<DataState<List<Conversation>>> = flatMapLatest(
         serverConfigurationService.serverUrl,
@@ -325,6 +342,32 @@ internal open class ConversationViewModel(
         return if (success) null else MetisModificationFailure.DELETE_REACTION
     }
 
+    /**
+     * Handles a click on resolve or does not resolve post.
+     * It updates the post accordingly.
+     */
+    fun toggleResolvePost(
+        parentPost: PostPojo,
+        post: AnswerPostPojo
+    ): Deferred<MetisModificationFailure?> {
+        return viewModelScope.async(coroutineContext) {
+            val conversation =
+                loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
+
+            val resolved = !post.resolvesPost
+            val serializedParentPost = StandalonePost(parentPost, conversation)
+            val newPost = AnswerPost(post, serializedParentPost).copy(resolvesPost = resolved)
+
+            metisModificationService.updateAnswerPost(
+                context = metisContext,
+                post = newPost,
+                serverUrl = serverConfigurationService.serverUrl.first(),
+                authToken = accountService.authToken.first()
+            )
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
+        }
+    }
+
     fun deletePost(post: IBasePost): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             metisModificationService.deletePost(
@@ -420,12 +463,9 @@ internal open class ConversationViewModel(
         ) { authToken, serverUrl ->
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                 conversationService
-                    .searchForPotentialCommunicationParticipants(
+                    .searchForCourseMembers(
                         courseId = metisContext.courseId,
                         query = query,
-                        includeStudents = true,
-                        includeTutors = true,
-                        includeInstructors = true,
                         authToken = authToken,
                         serverUrl = serverUrl
                     )
