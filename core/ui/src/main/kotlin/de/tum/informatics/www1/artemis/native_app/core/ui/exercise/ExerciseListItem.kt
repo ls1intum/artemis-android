@@ -29,9 +29,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.easyColor
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.hardColor
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.mediumColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.DifficultyColors
 
 /**
  * Display a single exercise.
@@ -113,13 +111,13 @@ private fun DifficultyRectangle(modifier: Modifier, difficulty: Exercise.Difficu
         .background(
             color = when (difficulty) {
                 Exercise.Difficulty.EASY ->
-                    easyColor
+                    DifficultyColors.easy
 
                 Exercise.Difficulty.MEDIUM ->
-                    mediumColor
+                    DifficultyColors.medium
 
                 Exercise.Difficulty.HARD ->
-                    hardColor
+                    DifficultyColors.hard
             }
         )
     )

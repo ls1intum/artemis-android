@@ -29,6 +29,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestPart
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ParticipationNotPossibleInfoMessageCardColors
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.skyBlueBackground
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.skyBlueBorder
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.textColor
@@ -220,8 +221,12 @@ class BoundExerciseActions(
 fun ParticipationNotPossibleInfoMessageCard() {
     Box(
         modifier = Modifier
-            .border(width = 1.dp, color = skyBlueBorder, shape = RoundedCornerShape(4.dp))
-            .background(skyBlueBackground)
+            .border(
+                width = 1.dp,
+                color = ParticipationNotPossibleInfoMessageCardColors.border,
+                shape = RoundedCornerShape(4.dp)
+            )
+            .background(ParticipationNotPossibleInfoMessageCardColors.background)
             .padding(8.dp)
             .fillMaxWidth()
     ) {
@@ -230,12 +235,12 @@ fun ParticipationNotPossibleInfoMessageCard() {
                 imageVector = Icons.Outlined.Info,
                 contentDescription = null,
                 modifier = Modifier.padding(end = 8.dp),
-                tint = textColor
+                tint = ParticipationNotPossibleInfoMessageCardColors.text
             )
             Text(
                 text = stringResource(id = R.string.exercise_participation_not_possible),
                 fontSize = 16.sp,
-                color = textColor
+                color = ParticipationNotPossibleInfoMessageCardColors.text
             )
         }
     }

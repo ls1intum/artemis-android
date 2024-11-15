@@ -25,7 +25,7 @@ internal fun ParticipationStatusUi(
 ) {
     ProvideDefaultExerciseTemplateStatus(exercise) {
         FlowRow(
-            modifier = Modifier.padding(8.dp),
+            modifier = modifier.padding(8.dp),
             mainAxisSpacing = 8.dp,
             crossAxisAlignment = FlowCrossAxisAlignment.Center
         ) {
