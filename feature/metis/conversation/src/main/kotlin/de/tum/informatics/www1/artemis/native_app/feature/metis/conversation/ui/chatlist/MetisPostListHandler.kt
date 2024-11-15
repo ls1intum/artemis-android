@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist
 
+import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,11 +20,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import coil.ImageLoader
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.launch
 
 /**
@@ -40,6 +44,7 @@ internal fun <T : Any> MetisPostListHandler(
     itemCount: Int,
     bottomItem: T?,
     order: DisplayPostOrder,
+    imageLoaderCreation: (Context) -> Deferred<ImageLoader>,
     content: @Composable BoxScope.() -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -115,7 +120,13 @@ internal fun <T : Any> MetisPostListHandler(
                 PostArtemisMarkdownTransformer(serverUrl = strippedServerUrl, courseId = courseId)
             }
 
-            ProvideMarkwon {
+            val context = LocalContext.current
+            var imageLoader: ImageLoader? by remember { mutableStateOf(null) }
+            LaunchedEffect(rememberCoroutineScope()) {
+                imageLoader = imageLoaderCreation(context).await()
+            }
+
+            ProvideMarkwon(imageLoader = imageLoader) {
                 ProvideEmojis {
                     CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
                         content()

@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import coil.ImageLoader
 import io.noties.markwon.Markwon
+import kotlinx.coroutines.flow.first
 
 val LocalMarkwon: ProvidableCompositionLocal<Markwon?> =
     compositionLocalOf { null }

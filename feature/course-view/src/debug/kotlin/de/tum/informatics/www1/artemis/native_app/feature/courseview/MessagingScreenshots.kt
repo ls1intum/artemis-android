@@ -255,6 +255,7 @@ fun `Metis - Conversation Channel`() {
                                 bottomItem = null,
                                 onClickViewPost = {},
                                 onRequestRetrySend = {},
+                                imageLoaderCreation = { CompletableDeferred() },
                                 title = ""
                             )
                         }

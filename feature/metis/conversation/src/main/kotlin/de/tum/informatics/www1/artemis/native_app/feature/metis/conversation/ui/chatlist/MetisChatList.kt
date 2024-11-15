@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
+import coil.ImageLoader
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -105,6 +107,7 @@ internal fun MetisChatList(
         onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
         onClickViewPost = onClickViewPost,
         onRequestRetrySend = viewModel::retryCreatePost,
+        imageLoaderCreation = viewModel::createMarkdownImageLoader,
         title = updatedTitle
     )
 }
@@ -128,6 +131,7 @@ fun MetisChatList(
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
+    imageLoaderCreation: (Context) -> Deferred<ImageLoader>,
     title: String
 ) {
     MetisReplyHandler(
@@ -151,7 +155,8 @@ fun MetisChatList(
                 state = state,
                 itemCount = posts.itemCount,
                 order = DisplayPostOrder.REVERSED,
-                bottomItem = bottomItem
+                bottomItem = bottomItem,
+                imageLoaderCreation = imageLoaderCreation
             ) {
                 when (posts) {
                     PostsDataState.Empty -> {

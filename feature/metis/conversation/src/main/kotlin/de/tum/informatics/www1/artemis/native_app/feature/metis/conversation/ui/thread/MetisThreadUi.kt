@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread
 
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,17 +17,25 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.ImageLoader
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
+import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -50,6 +59,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.A
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
 
 internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
 internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
@@ -64,7 +74,6 @@ internal fun MetisThreadUi(
 ) {
     val postDataState: DataState<PostPojo> by viewModel.threadUseCase.post.collectAsState()
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
-
     val serverUrl by viewModel.serverUrl.collectAsState()
 
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
@@ -133,6 +142,7 @@ internal fun MetisThreadUi(
                             itemCount = post.orderedAnswerPostings.size,
                             order = DisplayPostOrder.REGULAR,
                             bottomItem = post.orderedAnswerPostings.lastOrNull(),
+                            imageLoaderCreation = viewModel::createMarkdownImageLoader,
                         ) {
                             PostAndRepliesList(
                                 modifier = Modifier
@@ -145,6 +155,7 @@ internal fun MetisThreadUi(
                                 onRequestEdit = onEditPostDelegate,
                                 onRequestDelete = onDeletePostDelegate,
                                 state = listState,
+                                imageLoaderCreation = viewModel::createMarkdownImageLoader,
                                 onRequestRetrySend = viewModel::retryCreateReply
                             )
                         }
@@ -173,6 +184,7 @@ private fun PostAndRepliesList(
     post: PostPojo,
     hasModerationRights: Boolean,
     clientId: Long,
+    imageLoaderCreation: (Context) -> Deferred<ImageLoader>,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
@@ -202,7 +214,13 @@ private fun PostAndRepliesList(
         )
     }
 
-    ProvideMarkwon {
+    val context = LocalContext.current
+    var imageLoader: ImageLoader? by remember { mutableStateOf(null) }
+    LaunchedEffect(rememberCoroutineScope()) {
+        imageLoader = imageLoaderCreation(context).await()
+    }
+
+    ProvideMarkwon(imageLoader = imageLoader) {
         LazyColumn(
             modifier = modifier,
             contentPadding = PaddingValues(vertical = 8.dp),
