@@ -11,6 +11,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.input.TextFieldValue
@@ -143,7 +144,9 @@ class ReplyTextFieldUiTest {
 
     private fun ComposeContentTestRule.assertAllAutoCompletionHintsShown() {
         onNodeWithText("User1").assertExists()
+        onNodeWithTag(TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST).performScrollToIndex(1)
         onNodeWithText("User2").assertExists()
+        onNodeWithTag(TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST).performScrollToIndex(2)
         onNodeWithText("User3").assertExists()
     }
 }
