@@ -9,17 +9,15 @@ import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
-import androidx.compose.ui.test.performTouchInput
-import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
@@ -35,6 +33,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.TEST_TAG_CONVERSATION_LIST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.TEST_TAG_HEADER_EXPAND_ICON
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.tagForConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.tagForConversationOptions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
@@ -319,25 +318,24 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             .onNodeWithTag(TEST_TAG_CONVERSATION_LIST)
             .performScrollToKey(originalTag)
 
+        val optionsTag = tagForConversationOptions(originalTag)
         composeTestRule
-            .onNodeWithTag(originalTag)
-            .performTouchInput { longClick() }
+            .onNodeWithTag(optionsTag)
+            .performClick()
 
         composeTestRule
             .onNodeWithText(textToClick)
             .performClick()
 
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                viewModel
-                    .conversations
-                    .filter { state ->
-                        state
-                            .bind(checkExists)
-                            .orElse(false)
-                    }
-                    .first()
-            }
+        runBlockingWithTestTimeout {
+            viewModel
+                .conversations
+                .filter { state ->
+                    state
+                        .bind(checkExists)
+                        .orElse(false)
+                }
+                .first()
         }
 
         doAfterAvailable(viewModel)
@@ -352,10 +350,8 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
     }
 
     private fun waitUntilConversationsAreLoaded(viewModel: ConversationOverviewViewModel) {
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                viewModel.conversations.filterSuccess().first()
-            }
+        runBlockingWithTestTimeout {
+            viewModel.conversations.filterSuccess().first()
         }
     }
 

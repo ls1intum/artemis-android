@@ -8,13 +8,13 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.mapIsChannelNameIllegal
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.mapIsDescriptionOrTopicIllegal
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -56,12 +56,12 @@ internal class CreateChannelViewModel(
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
-    fun createChannel(): Deferred<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat?> {
-        return viewModelScope.async(coroutineContext) {
+    fun createChannel(onChannelCreated: (ChannelChat?) -> Unit) {
+        viewModelScope.launch(coroutineContext) {
             val authToken = accountService.authToken.first()
             val serverUrl = serverConfigurationService.serverUrl.first()
 
-            conversationService.createChannel(
+            val channel = conversationService.createChannel(
                 courseId = courseId,
                 name = name.value,
                 description = description.value,
@@ -70,6 +70,8 @@ internal class CreateChannelViewModel(
                 authToken = authToken,
                 serverUrl = serverUrl
             ).orNull()
+
+            onChannelCreated(channel)
         }
     }
 

@@ -151,9 +151,7 @@ internal fun BrowseChannelsScreen(
 @Composable
 private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
     ListItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag(testTagForBrowsedChannelItem(channelChat.id)),
+        modifier = Modifier.fillMaxWidth(),
         leadingContent = {
             ChannelIcons(channelChat)
         },
@@ -189,6 +187,9 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
         trailingContent = {
             if (!channelChat.isMember) {
                 Button(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .testTag(testTagForBrowsedChannelItem(channelChat.id)),
                     onClick = onClick,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
@@ -196,8 +197,7 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
                     ),
                     shape = RoundedCornerShape(4.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                    modifier = Modifier
-                        .wrapContentSize()
+
                 ) {
                     Text(text = stringResource(id = R.string.join_button_title))
                 }
@@ -205,5 +205,3 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
         }
     )
 }
-
-
