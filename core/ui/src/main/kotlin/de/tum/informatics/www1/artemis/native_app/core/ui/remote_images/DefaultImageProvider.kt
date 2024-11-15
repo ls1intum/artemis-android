@@ -12,15 +12,21 @@ class DefaultImageProvider : BaseImageProvider {
         context: Context,
         imagePath: String,
         serverUrl: String,
-        authorizationToken: String
+        authorizationToken: String,
+        memoryCacheKey: String?
     ): ImageRequest {
         val imageUrl = URLBuilder(serverUrl).appendPathSegments(imagePath).buildString()
 
-        return ImageRequest.Builder(context)
+        val builder = ImageRequest.Builder(context)
             .addHeader(HttpHeaders.Cookie, "jwt=$authorizationToken")
             .data(imageUrl)
-            .build()
+
+        memoryCacheKey?.let {
+            builder.memoryCacheKey(it)
+        }
+        return builder.build()
     }
+
 
     override fun createImageLoader(
         context: Context,

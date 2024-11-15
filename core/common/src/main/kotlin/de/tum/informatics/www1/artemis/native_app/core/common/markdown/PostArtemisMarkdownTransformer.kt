@@ -19,8 +19,8 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
     ): String {
         return when (type) {
             "attachment" -> "[$fileName](artemis:/$url)"
-            "lecture-unit" -> "[$fileName]($serverUrl/api/files/attachments/$url)" //TODO fix authentication or redirect to lecture unit
-            "slide" -> "[$fileName]($serverUrl/api/files/attachments/$url)" //TODO fix authentication or redirect to lecture unit
+            "lecture-unit" -> "[$fileName]($serverUrl/api/files/attachments/$url)" // TODO: fix authentication or redirect to lecture unit
+            "slide" -> "[$fileName]($serverUrl/api/files/attachments/$url)" // TODO: fix authentication or redirect to lecture unit
             else -> fileName
         }
     }
@@ -30,10 +30,7 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         fileName: String,
         filePath: String
     ): String {
-        println("isImage: $isImage")
-        println("fileName: $fileName")
-        //println("![$fileName]($serverUrl$filePath)")
-        //TODO download image
+        // TODO: fix authentication or redirect for all non-image uploads
         return if (isImage) "![$fileName]($serverUrl$filePath)" else "[$fileName]($serverUrl$filePath)"
     }
 }

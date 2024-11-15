@@ -6,10 +6,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import io.ktor.http.HttpHeaders
-import io.ktor.http.URLBuilder
-import io.ktor.http.appendPathSegments
 
 val LocalCourseImageProvider = compositionLocalOf<CourseImageProvider> { DefaultCourseImageProvider }
 
