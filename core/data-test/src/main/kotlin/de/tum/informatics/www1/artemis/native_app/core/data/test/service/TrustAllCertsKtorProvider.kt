@@ -11,7 +11,7 @@ import io.ktor.serialization.kotlinx.json.json
 import java.security.cert.X509Certificate
 import javax.net.ssl.X509TrustManager
 
-class TrustAllCertsKtorProvider(jsonProvider: JsonProvider, timeoutMillis: Long = 3000) : KtorProvider {
+class TrustAllCertsKtorProvider(jsonProvider: JsonProvider, timeoutMillis: Long = 10000) : KtorProvider {
 
     private val trustAll = @SuppressLint("CustomX509TrustManager")
     object : X509TrustManager {
