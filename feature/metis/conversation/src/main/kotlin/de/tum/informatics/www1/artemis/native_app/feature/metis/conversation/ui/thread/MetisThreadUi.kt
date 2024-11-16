@@ -100,7 +100,7 @@ internal fun MetisThreadUi(
         serverUrl = serverUrl,
         emojiService = koinInject(),
         clientId = clientId,
-        onCreatePost = viewModel::createPost,
+        onCreatePost = viewModel::createReply,
         onEditPost = { post, newText ->
             val parentPost = postDataState.orNull()
 
