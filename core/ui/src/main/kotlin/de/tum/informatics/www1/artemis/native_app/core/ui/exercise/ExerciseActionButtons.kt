@@ -30,9 +30,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participat
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ParticipationNotPossibleInfoMessageCardColors
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.skyBlueBackground
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.skyBlueBorder
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.textColor
 
 /**
  * This composable composes up to two buttons. The modifier parameter is applied to every button
@@ -136,9 +133,10 @@ fun ExerciseActionButtons(
                     }
                 }
             }
-            is QuizExercise -> {
+            // TODO: The following code is temporarily disabled. See https://github.com/ls1intum/artemis-android/issues/107
+            //is QuizExercise -> {
                 // Do not show participation not possible info card for quiz exercises
-            }
+            //}
             else -> {
                 Row(modifier=Modifier.padding(top=2.dp, bottom = 2.dp)) {
                     ParticipationNotPossibleInfoMessageCard()
