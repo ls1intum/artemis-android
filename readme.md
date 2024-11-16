@@ -1,6 +1,6 @@
 # Artemis Android
-![Unit test](https://github.com/ls1intum/artemis-android/actions/workflows/unit-test.yml/badge.svg)
-![E2E test](https://github.com/ls1intum/artemis-android/actions/workflows/e2e-test.yml/badge.svg)
+[![Unit test](https://github.com/ls1intum/artemis-android/actions/workflows/unit-test.yml/badge.svg)](https://github.com/ls1intum/artemis-android/actions/workflows/unit-test.yml)
+[![E2E test](https://github.com/ls1intum/artemis-android/actions/workflows/e2e-test.yml/badge.svg)](https://github.com/ls1intum/artemis-android/actions/workflows/e2e-test.yml)
 [![Latest version)](https://img.shields.io/github/v/tag/ls1intum/artemis-android?label=%20Latest%20version&sort=semver)](https://github.com/ls1intum/artemis-android/releases/latest)
 
 The native android client for Artemis, an interactive learning platform with individual feedback. 
