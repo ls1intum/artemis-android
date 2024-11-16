@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread
 
-import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,7 +51,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -82,6 +80,12 @@ internal fun MetisThreadUi(
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
     val isAtLeastTutorInCourse by viewModel.isAtLeastTutorInCourse.collectAsState()
 
+    val context = LocalContext.current
+    var imageLoader: ImageLoader? by remember { mutableStateOf(null) }
+    LaunchedEffect(rememberCoroutineScope()) {
+        imageLoader = viewModel.createMarkdownImageLoader(context).await()
+    }
+
     postDataState.bind { it.serverPostId }.orNull()?.let { serverSidePostId ->
         ReportVisibleMetisContext(
             remember(
@@ -106,6 +110,7 @@ internal fun MetisThreadUi(
         serverUrl = serverUrl,
         emojiService = koinInject(),
         clientId = clientId,
+        markdownImageLoader = imageLoader,
         onCreatePost = viewModel::createReply,
         onEditPost = { post, newText ->
             val parentPost = postDataState.orNull()
@@ -136,7 +141,6 @@ internal fun MetisThreadUi(
         onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
         onRequestReload = viewModel::requestReload,
         onRequestRetrySend = viewModel::retryCreateReply,
-        imageLoaderCreation = viewModel::createMarkdownImageLoader
     )
 }
 
@@ -151,8 +155,8 @@ internal fun MetisThreadUi(
     isAtLeastTutorInCourse: Boolean,
     serverUrl: String,
     emojiService: EmojiService,
+    markdownImageLoader: ImageLoader?,
     initialReplyTextProvider: InitialReplyTextProvider,
-    imageLoaderCreation: (Context) -> Deferred<ImageLoader>,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
     onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
@@ -198,9 +202,9 @@ internal fun MetisThreadUi(
                             state = listState,
                             itemCount = post.orderedAnswerPostings.size,
                             order = DisplayPostOrder.REGULAR,
+                            markdownImageLoader = markdownImageLoader,
                             emojiService = emojiService,
-                            bottomItem = post.orderedAnswerPostings.lastOrNull(),
-                            imageLoaderCreation = imageLoaderCreation,
+                            bottomItem = post.orderedAnswerPostings.lastOrNull()
                         ) {
                             PostAndRepliesList(
                                 modifier = Modifier
@@ -210,12 +214,12 @@ internal fun MetisThreadUi(
                                 hasModerationRights = hasModerationRights,
                                 isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                                 clientId = clientId,
+                                markdownImageLoader = markdownImageLoader,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
                                 onRequestDelete = onDeletePostDelegate,
                                 onRequestResolve = onResolvePostDelegate,
                                 state = listState,
-                                imageLoaderCreation = imageLoaderCreation,
                                 onRequestRetrySend = onRequestRetrySend
                             )
                         }
@@ -245,7 +249,7 @@ private fun PostAndRepliesList(
     hasModerationRights: Boolean,
     isAtLeastTutorInCourse: Boolean,
     clientId: Long,
-    imageLoaderCreation: (Context) -> Deferred<ImageLoader>,
+    markdownImageLoader: ImageLoader?,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
     onRequestResolve: (IBasePost) -> Unit,
@@ -278,13 +282,7 @@ private fun PostAndRepliesList(
         )
     }
 
-    val context = LocalContext.current
-    var imageLoader: ImageLoader? by remember { mutableStateOf(null) }
-    LaunchedEffect(rememberCoroutineScope()) {
-        imageLoader = imageLoaderCreation(context).await()
-    }
-
-    ProvideMarkwon(imageLoader = imageLoader) {
+    ProvideMarkwon(markdownImageLoader) {
         LazyColumn(
             modifier = modifier,
             contentPadding = PaddingValues(vertical = 8.dp),

@@ -247,6 +247,7 @@ fun `Metis - Conversation Channel`() {
                                 listContentPadding = PaddingValues(),
                                 serverUrl = "",
                                 courseId = 0,
+                                markdownImageLoader = null,
                                 state = rememberLazyListState(),
                                 isReplyEnabled = true,
                                 onCreatePost = { CompletableDeferred() },
@@ -256,7 +257,6 @@ fun `Metis - Conversation Channel`() {
                                 bottomItem = null,
                                 onClickViewPost = {},
                                 onRequestRetrySend = {},
-                                imageLoaderCreation = { CompletableDeferred() },
                                 title = ""
                             )
                         }

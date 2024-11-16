@@ -214,6 +214,7 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
                 hasModerationRights = false,
                 isAtLeastTutorInCourse = false,
                 serverUrl = "",
+                markdownImageLoader = null,
                 emojiService = EmojiServiceStub,
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
@@ -222,8 +223,7 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
                 onDeletePost = { CompletableDeferred() },
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onRequestReload = {},
-                onRequestRetrySend = { _, _ -> },
-                imageLoaderCreation = { CompletableDeferred() }
+                onRequestRetrySend = { _, _ -> }
             )
         }
     }
