@@ -132,7 +132,7 @@ internal fun PostItem(
             postStatus = postStatus,
             authorRole = post?.authorRole,
             authorName = post?.authorName,
-            // TODO: here we need to get the user and the imageUrl of the user to display the user profile image
+            authorImageUrl = post?.authorImageUrl,
             creationDate = post?.creationDate,
             expanded = isExpanded,
             displayHeader = displayHeader
@@ -207,6 +207,7 @@ private fun PostHeadline(
     modifier: Modifier,
     authorRole: UserRole?,
     authorName: String?,
+    authorImageUrl: String?,
     creationDate: Instant?,
     postStatus: CreatePostService.Status,
     expanded: Boolean = false,
@@ -341,6 +342,19 @@ private fun HeadlineAuthorInfo(
             creationDateContent()
         }
     }
+}
+
+@Composable
+private fun HeadlineProfilePicture(
+    imageUrl: String?,
+    displayImage: Boolean = true
+) {
+    if (!displayImage) {
+        Box(modifier = Modifier.size(30.dp))
+        return
+    }
+
+
 }
 
 @Composable

@@ -7,7 +7,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 
-class DefaultImageProvider : BaseImageProvider {
+open class DefaultImageProvider : BaseImageProvider {
     override fun createImageRequest(
         context: Context,
         imagePath: String,
