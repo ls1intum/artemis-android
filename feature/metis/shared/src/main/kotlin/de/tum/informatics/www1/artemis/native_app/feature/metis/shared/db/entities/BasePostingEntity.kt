@@ -36,7 +36,9 @@ data class BasePostingEntity(
     @ColumnInfo(name = "content")
     val content: String?,
     @ColumnInfo(name = "author_role")
-    val authorRole: UserRole?
+    val authorRole: UserRole?,
+    @ColumnInfo(name = "author_image_url")
+    val authorImageUrl: String?,
 ) {
     enum class CourseWideContext {
         @ColumnInfo(name = "tech_support")

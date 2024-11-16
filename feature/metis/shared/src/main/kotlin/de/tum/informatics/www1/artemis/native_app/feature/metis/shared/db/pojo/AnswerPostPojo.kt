@@ -59,6 +59,9 @@ data class AnswerPostPojo(
     override val authorId: Long = basePostingCache.authorId
 
     @Ignore
+    override val authorImageUrl: String? = basePostingCache.authorImageUrl
+
+    @Ignore
     override val serverPostId: Long? = serverPostIdCache.serverPostId
 
     @Ignore
@@ -83,7 +86,14 @@ data class AnswerPostPojo(
             parentColumn = "author_id",
             projection = ["name"]
         )
-        val authorName: String
+        val authorName: String,
+        @Relation(
+            entity = MetisUserEntity::class,
+            entityColumn = "id",
+            parentColumn = "author_id",
+            projection = ["image_url"]
+        )
+        val authorImageUrl: String?
     )
 
     data class ServerPostIdCache(

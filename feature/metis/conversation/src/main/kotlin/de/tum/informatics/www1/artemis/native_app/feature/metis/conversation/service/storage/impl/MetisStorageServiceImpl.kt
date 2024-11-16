@@ -2,9 +2,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.BasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext
@@ -75,6 +75,7 @@ internal class MetisStorageServiceImpl(
                 creationDate = creationDate,
                 content = content,
                 authorRole = authorRole?.asDb ?: UserRole.USER,
+                authorImageUrl = author?.imageUrl,
                 updatedDate = updatedDate
             )
 
@@ -105,6 +106,7 @@ internal class MetisStorageServiceImpl(
                 creationDate = creationDate ?: Instant.fromEpochSeconds(0),
                 content = content,
                 authorRole = authorRole?.asDb ?: UserRole.USER,
+                authorImageUrl = author?.imageUrl,
                 updatedDate = updatedDate
             )
 
@@ -117,7 +119,8 @@ internal class MetisStorageServiceImpl(
             val user = MetisUserEntity(
                 serverId = serverId,
                 id = authorId,
-                displayName = author?.name ?: "NULL"
+                displayName = author?.name ?: "NULL",
+                imageUrl = author?.imageUrl
             )
 
             return Triple(basePost, answer, user)
@@ -138,7 +141,8 @@ internal class MetisStorageServiceImpl(
             ) to MetisUserEntity(
                 serverId = serverId,
                 id = userId,
-                displayName = user?.name ?: return null
+                imageUrl = user?.imageUrl,
+                displayName = user?.name ?: return null,
             )
         }
 
@@ -429,7 +433,8 @@ internal class MetisStorageServiceImpl(
         val postingAuthor = MetisUserEntity(
             serverId = host,
             id = sp.author?.id ?: return null,
-            displayName = sp.author?.name ?: return null
+            displayName = sp.author?.name ?: return null,
+            imageUrl = sp.author?.imageUrl
         )
 
         val (standaloneBasePosting, standalonePosting) = sp.asDb(

@@ -285,6 +285,7 @@ private fun generateMessage(
             authorName = name,
             authorRole = UserRole.USER,
             authorId = authorId,
+            authorImageUrl = null,
             creationDate = time,
             updatedDate = null,
             resolved = false,
