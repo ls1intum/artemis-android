@@ -1,4 +1,4 @@
-name: End To End Tests
+name: E2E Tests
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   end-to-end-tests:
-    name: End To End Tests
+    name: E2E Tests
     runs-on: [self-hosted, ase-large-android-sdk-35]
     timeout-minutes: 60
 
@@ -35,6 +35,15 @@ jobs:
         if: success() || failure()
         continue-on-error: true
 
+        # Sanity cleanup 2
+      - name: Print what is running on port 3306
+        run: sudo lsof -i:3306 || true
+        continue-on-error: true
+
+      - name: Stop anything still running on port 3306
+        run: sudo kill -9 $(sudo lsof -t -i:3306) || true
+        continue-on-error: true
+
       - name: Launch docker containers
         run: docker compose -f docker/e2e-tests.yml up -d artemis-app-setup
         if: success() || failure()
@@ -53,7 +62,7 @@ jobs:
         uses: dorny/test-reporter@v1
         if: success() || failure()    # run this step even if previous step failed
         with:
-          name: Android End To End Test Results
+          name: E2E Test Results
           path: test-outputs/**/*.xml
           reporter: java-junit
           fail-on-empty: 'false'

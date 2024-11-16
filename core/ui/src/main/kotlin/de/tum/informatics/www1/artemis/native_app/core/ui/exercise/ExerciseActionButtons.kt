@@ -81,20 +81,21 @@ fun ExerciseActionButtons(
         val startQuizAvailable = exercise.isUninitializedC
 
         if (openQuizAvailable || startQuizAvailable) {
-            Button(
-                modifier = modifier,
-                onClick = {
-                    if (openQuizAvailable) actions.onClickOpenQuiz()
-                    else actions.onClickStartQuiz()
-                }
-            ) {
-                Text(
-                    text = stringResource(
-                        id = if (openQuizAvailable) R.string.exercise_actions_open_quiz_button
-                        else R.string.exercise_actions_start_quiz_button
-                    )
-                )
-            }
+            // TODO: Quiz participation temporarily disabled. See https://github.com/ls1intum/artemis-android/issues/107
+//            Button(
+//                modifier = modifier,
+//                onClick = {
+//                    if (openQuizAvailable) actions.onClickOpenQuiz()
+//                    else actions.onClickStartQuiz()
+//                }
+//            ) {
+//                Text(
+//                    text = stringResource(
+//                        id = if (openQuizAvailable) R.string.exercise_actions_open_quiz_button
+//                        else R.string.exercise_actions_start_quiz_button
+//                    )
+//                )
+//            }
         }
     }
 

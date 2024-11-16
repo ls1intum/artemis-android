@@ -21,6 +21,7 @@
     <string name="create_channel_channel_announcement_type_announcement">Announcement Channel</string>
     <string name="create_channel_channel_announcement_type_unrestricted">Unrestricted Channel</string>
 
+    <string name="create_channel_button">Create Channel</string>
     <string name="create_channel_failed_title">Could not create channel.</string>
     <string name="create_channel_failed_message">Something went wrong while creating your channel. Please try again.</string>
     <string name="create_channel_failed_positive">@android:string/ok</string>
