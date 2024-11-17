@@ -19,12 +19,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.google.accompanist.web.AccompanistWebViewClient
-import com.google.accompanist.web.WebContent
-import com.google.accompanist.web.WebView
-import com.google.accompanist.web.WebViewState
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.accompanist.AccompanistWebViewClient
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.accompanist.WebContent
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.accompanist.WebView
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.accompanist.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ResultTemplateStatus
-import io.ktor.http.*
+import io.ktor.http.URLBuilder
+import io.ktor.http.appendPathSegments
 
 @Composable
 internal fun getProblemStatementWebViewState(
@@ -159,10 +160,8 @@ private class ArtemisWebViewImpl(context: Context) : WebView(context) {
 private class ThemeClient(
     private val themeValue: String
 ) : AccompanistWebViewClient() {
-    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-        if (view != null) {
-            setLocalStorage(view)
-        }
+    override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
+        setLocalStorage(view)
 
         super.onPageStarted(view, url, favicon)
     }
@@ -176,10 +175,8 @@ private class ThemeClient(
         )
     }
 
-    override fun onPageFinished(view: WebView?, url: String?) {
-        if (view != null) {
-            setLocalStorage(view)
-        }
+    override fun onPageFinished(view: WebView, url: String?) {
+        setLocalStorage(view)
 
         super.onPageFinished(view, url)
     }
