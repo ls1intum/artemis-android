@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfilePictureImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 
 /**
@@ -19,6 +20,7 @@ internal fun PostWithBottomSheet(
     postActions: PostActions,
     clientId: Long,
     displayHeader: Boolean,
+    profilePictureImageProvider: ProfilePictureImageProvider?,
     onClick: () -> Unit
 ) {
     var displayBottomSheet by remember(post, postItemViewType) { mutableStateOf(false) }
@@ -29,6 +31,7 @@ internal fun PostWithBottomSheet(
         postItemViewType = postItemViewType,
         clientId = clientId,
         displayHeader = displayHeader,
+        profilePictureImageProvider = profilePictureImageProvider,
         onClickOnReaction = postActions.onClickReaction,
         onClick = onClick,
         onLongClick = {

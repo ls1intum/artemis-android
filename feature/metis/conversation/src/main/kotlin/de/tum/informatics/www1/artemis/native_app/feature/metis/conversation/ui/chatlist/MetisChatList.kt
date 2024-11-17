@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfilePictureImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
@@ -74,7 +75,6 @@ internal fun MetisChatList(
     state: LazyListState = rememberLazyListState(),
     isReplyEnabled: Boolean = true,
     onClickViewPost: (StandalonePostId) -> Unit,
-    title: String? = "Replying..."
 ) {
     ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
 
@@ -100,6 +100,8 @@ internal fun MetisChatList(
         }
     }
 
+    val profilePictureImageProvider by viewModel.profilePictureImageProvider.collectAsState()
+
     MetisChatList(
         modifier = modifier,
         initialReplyTextProvider = viewModel,
@@ -114,6 +116,7 @@ internal fun MetisChatList(
         state = state,
         bottomItem = bottomItem,
         isReplyEnabled = isReplyEnabled,
+        profilePictureImageProvider = profilePictureImageProvider,
         onCreatePost = viewModel::createPost,
         onEditPost = viewModel::editPost,
         onDeletePost = viewModel::deletePost,
@@ -139,6 +142,7 @@ fun MetisChatList(
     markdownImageLoader: ImageLoader?,
     state: LazyListState,
     isReplyEnabled: Boolean,
+    profilePictureImageProvider: ProfilePictureImageProvider?,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
     onDeletePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
@@ -200,6 +204,7 @@ fun MetisChatList(
                             state = state,
                             posts = posts,
                             clientId = clientId,
+                            profilePictureImageProvider = profilePictureImageProvider,
                             onClickViewPost = onClickViewPost,
                             hasModerationRights = hasModerationRights,
                             isAtLeastTutorInCourse = isAtLeastTutorInCourse,
@@ -233,6 +238,7 @@ private fun ChatList(
     hasModerationRights: Boolean,
     isAtLeastTutorInCourse: Boolean,
     clientId: Long,
+    profilePictureImageProvider: ProfilePictureImageProvider?,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
     onRequestDelete: (IStandalonePost) -> Unit,
@@ -298,6 +304,7 @@ private fun ChatList(
                             PostItemViewType.ChatListItem(post?.answers.orEmpty())
                         },
                         postActions = postActions,
+                        profilePictureImageProvider = profilePictureImageProvider,
                         displayHeader = shouldDisplayHeader(
                             index = index,
                             post = post,

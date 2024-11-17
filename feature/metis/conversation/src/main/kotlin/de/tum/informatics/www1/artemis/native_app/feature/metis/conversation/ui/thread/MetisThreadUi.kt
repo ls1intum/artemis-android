@@ -290,19 +290,20 @@ private fun PostAndRepliesList(
         item {
             val postActions = rememberPostActions(post)
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                PostWithBottomSheet(
-                    modifier = Modifier.padding(top = 8.dp),
-                    post = post,
-                    postItemViewType = PostItemViewType.ThreadContextPostItem,
-                    postActions = postActions,
-                    displayHeader = true,
-                    clientId = clientId,
-                    onClick = {}
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    PostWithBottomSheet(
+                        modifier = Modifier.padding(top = 8.dp),
+                        post = post,
+                        postItemViewType = PostItemViewType.ThreadContextPostItem,
+                        postActions = postActions,
+                        displayHeader = true,
+                        clientId = clientId,
+                        profilePictureImageProvider = null,
+                        onClick = {}
+                    )
 
                 Divider()
 
@@ -315,23 +316,25 @@ private fun PostAndRepliesList(
             key = { _, post -> post.postId }) { index, answerPost ->
             val postActions = rememberPostActions(answerPost)
 
-            PostWithBottomSheet(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(testTagForAnswerPost(answerPost.clientPostId)),
-                post = answerPost,
-                postActions = postActions,
-                postItemViewType = PostItemViewType.ThreadAnswerItem,
-                clientId = clientId,
-                displayHeader = shouldDisplayHeader(
-                    index = index,
+                PostWithBottomSheet(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(testTagForAnswerPost(answerPost.clientPostId)),
                     post = answerPost,
-                    postCount = post.orderedAnswerPostings.size,
-                    order = DisplayPostOrder.REGULAR,
-                    getPost = post.orderedAnswerPostings::get
-                ),
-                onClick = {}
-            )
+                    postActions = postActions,
+                    postItemViewType = PostItemViewType.ThreadAnswerItem,
+                    clientId = clientId,
+                    displayHeader = shouldDisplayHeader(
+                        index = index,
+                        post = answerPost,
+                        postCount = post.orderedAnswerPostings.size,
+                        order = DisplayPostOrder.REGULAR,
+                        getPost = post.orderedAnswerPostings::get
+                    ),
+                    profilePictureImageProvider = null,
+                    onClick = {}
+                )
+            }
         }
     }
 }

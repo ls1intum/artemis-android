@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfilePictureImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
@@ -54,6 +55,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -86,6 +89,7 @@ internal fun PostItem(
     modifier: Modifier,
     post: IBasePost?,
     postItemViewType: PostItemViewType,
+    profilePictureImageProvider: ProfilePictureImageProvider?,
     clientId: Long,
     displayHeader: Boolean,
     onClickOnReaction: ((emojiId: String, create: Boolean) -> Unit)?,
@@ -132,7 +136,12 @@ internal fun PostItem(
             postStatus = postStatus,
             authorRole = post?.authorRole,
             authorName = post?.authorName,
-            authorImageUrl = post?.authorImageUrl,
+            profilePictureData = ProfilePictureData.create(
+                userId = post?.authorId ?: -1,
+                username = post?.authorName.orEmpty(),
+                imageUrl = post?.authorImageUrl
+            ),
+            profilePictureImageProvider = profilePictureImageProvider,
             creationDate = post?.creationDate,
             expanded = isExpanded,
             displayHeader = displayHeader
@@ -207,7 +216,8 @@ private fun PostHeadline(
     modifier: Modifier,
     authorRole: UserRole?,
     authorName: String?,
-    authorImageUrl: String?,
+    profilePictureData: ProfilePictureData,
+    profilePictureImageProvider: ProfilePictureImageProvider?,
     creationDate: Instant?,
     postStatus: CreatePostService.Status,
     expanded: Boolean = false,
@@ -220,7 +230,11 @@ private fun PostHeadline(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                HeadlineAuthorIcon(authorRole)
+//                HeadlineAuthorIcon(authorRole)
+                HeadlineProfilePicture(
+                    profilePictureData = profilePictureData,
+                    profilePictureImageProvider = profilePictureImageProvider,
+                )
 
                 HeadlineAuthorInfo(
                     modifier = Modifier.fillMaxWidth(),
@@ -239,7 +253,12 @@ private fun PostHeadline(
         ) {
             val doDisplayHeader = displayHeader || postStatus == CreatePostService.Status.FAILED
 
-            HeadlineAuthorIcon(authorRole, displayIcon = doDisplayHeader)
+//            HeadlineAuthorIcon(authorRole, displayIcon = doDisplayHeader)
+            HeadlineProfilePicture(
+                profilePictureData = profilePictureData,
+                profilePictureImageProvider = profilePictureImageProvider,
+                displayImage = doDisplayHeader
+            )
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -346,7 +365,8 @@ private fun HeadlineAuthorInfo(
 
 @Composable
 private fun HeadlineProfilePicture(
-    imageUrl: String?,
+    profilePictureData: ProfilePictureData,
+    profilePictureImageProvider: ProfilePictureImageProvider?,
     displayImage: Boolean = true
 ) {
     if (!displayImage) {
@@ -354,7 +374,13 @@ private fun HeadlineProfilePicture(
         return
     }
 
-
+    ProfilePicture(
+        modifier = Modifier
+            .size(30.dp)
+            .clip(MaterialTheme.shapes.extraSmall),
+        profilePictureData = profilePictureData,
+        profilePictureImageProvider = profilePictureImageProvider
+    )
 }
 
 @Composable

@@ -250,6 +250,7 @@ fun `Metis - Conversation Channel`() {
                                 markdownImageLoader = null,
                                 state = rememberLazyListState(),
                                 isReplyEnabled = true,
+                                profilePictureImageProvider = null,
                                 onCreatePost = { CompletableDeferred() },
                                 onEditPost = { _, _ -> CompletableDeferred() },
                                 onDeletePost = { CompletableDeferred() },

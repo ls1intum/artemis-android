@@ -28,6 +28,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExerci
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.DefaultImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfilePictureImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -253,6 +254,19 @@ internal open class ConversationViewModel(
         }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
+
+    val profilePictureImageProvider: StateFlow<ProfilePictureImageProvider?> = flatMapLatest(
+        serverConfigurationService.serverUrl,
+        accountService.authToken
+    ) { serverUrl, authToken ->
+        flowOf(
+            ProfilePictureImageProvider(
+                serverUrl = serverUrl,
+                authToken = authToken
+            )
+        )
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, null)
 
     override val legalTagChars: List<Char> = listOf('@', '#')
 
