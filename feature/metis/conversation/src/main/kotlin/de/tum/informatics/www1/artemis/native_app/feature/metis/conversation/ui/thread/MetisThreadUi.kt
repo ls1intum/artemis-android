@@ -34,6 +34,8 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfilePictureImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -98,6 +100,8 @@ internal fun MetisThreadUi(
 
     val conversationDataState by viewModel.conversation.collectAsState()
 
+    val profilePictureImageProvider by viewModel.profilePictureImageProvider.collectAsState()
+
     MetisThreadUi(
         modifier = modifier,
         courseId = viewModel.courseId,
@@ -110,6 +114,7 @@ internal fun MetisThreadUi(
         emojiService = koinInject(),
         clientId = clientId,
         markdownImageLoader = imageLoader,
+        profilePictureImageProvider = profilePictureImageProvider,
         onCreatePost = viewModel::createReply,
         onEditPost = { post, newText ->
             val parentPost = postDataState.orNull()
@@ -156,6 +161,7 @@ internal fun MetisThreadUi(
     emojiService: EmojiService,
     markdownImageLoader: ImageLoader?,
     initialReplyTextProvider: InitialReplyTextProvider,
+    profilePictureImageProvider: ProfilePictureImageProvider?,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
     onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
@@ -214,6 +220,7 @@ internal fun MetisThreadUi(
                                 isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                                 clientId = clientId,
                                 markdownImageLoader = markdownImageLoader,
+                                profilePictureImageProvider = profilePictureImageProvider,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
                                 onRequestDelete = onDeletePostDelegate,
@@ -249,6 +256,7 @@ private fun PostAndRepliesList(
     isAtLeastTutorInCourse: Boolean,
     clientId: Long,
     markdownImageLoader: ImageLoader?,
+    profilePictureImageProvider: ProfilePictureImageProvider?,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
     onRequestResolve: (IBasePost) -> Unit,
@@ -301,7 +309,7 @@ private fun PostAndRepliesList(
                         postActions = postActions,
                         displayHeader = true,
                         clientId = clientId,
-                        profilePictureImageProvider = null,
+                        profilePictureImageProvider = profilePictureImageProvider,
                         onClick = {}
                     )
 
@@ -331,7 +339,7 @@ private fun PostAndRepliesList(
                         order = DisplayPostOrder.REGULAR,
                         getPost = post.orderedAnswerPostings::get
                     ),
-                    profilePictureImageProvider = null,
+                    profilePictureImageProvider = profilePictureImageProvider,
                     onClick = {}
                 )
             }

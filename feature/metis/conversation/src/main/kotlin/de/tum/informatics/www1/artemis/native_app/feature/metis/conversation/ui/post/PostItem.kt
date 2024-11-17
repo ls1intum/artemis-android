@@ -388,6 +388,7 @@ private fun HeadlineAuthorIcon(
     authorRole: UserRole?,
     displayIcon: Boolean = true
 ) {
+    // TODO: instead show badge with role
     if (displayIcon) {
         val icon = when (authorRole) {
             UserRole.INSTRUCTOR -> Icons.Default.School

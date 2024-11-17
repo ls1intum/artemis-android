@@ -35,7 +35,7 @@ sealed class ProfilePictureData {
 private fun getInitialsFromString(username: String): String {
     val parts = username.trim().split("\\s+".toRegex())
 
-    var initials = ""
+    var initials: String
 
     if (parts.size > 1) {
         // Takes first and last word in string and returns their initials.

@@ -31,6 +31,7 @@ fun ProfilePicture(
     profilePictureData: ProfilePictureData,
     profilePictureImageProvider: ProfilePictureImageProvider?,
 ) {
+    // TODO: Add onClick that opens a dialog with info about the user, see iOS
     when(profilePictureData) {
         is ProfilePictureData.Image -> {
             if (profilePictureImageProvider != null) {
