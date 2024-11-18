@@ -4,11 +4,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import coil.ImageLoader
 import io.noties.markwon.Markwon
-import kotlinx.coroutines.flow.first
 
 val LocalMarkwon: ProvidableCompositionLocal<Markwon?> =
     compositionLocalOf { null }

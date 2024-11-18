@@ -2,23 +2,26 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import android.content.Context
 import android.text.method.LinkMovementMethod
-import android.text.style.ForegroundColorSpan
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.FontRes
 import androidx.annotation.IdRes
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.onLongClick
@@ -28,6 +31,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
 import coil.ImageLoader
@@ -36,8 +40,17 @@ import io.noties.markwon.Markwon
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.html.HtmlPlugin
+import io.noties.markwon.image.AsyncDrawable
 import io.noties.markwon.image.coil.CoilImagesPlugin
 import io.noties.markwon.linkify.LinkifyPlugin
+import coil.request.ImageRequest
+import coil.request.Disposable
+import coil.size.Scale
+import coil.size.Size
+import coil.size.SizeResolver
+import coil.size.ViewSizeResolver
+import coil.transform.RoundedCornersTransformation
+import io.noties.markwon.image.ImageSizeResolver
 
 // Copy from: https://github.com/jeziellago/compose-markdown
 /*
@@ -205,15 +218,47 @@ private fun TextView.applyStyleAndColor(
 }
 
 fun createMarkdownRender(context: Context, imageLoader: ImageLoader?): Markwon {
+    // Setting the size of the output image is important to avoid jittering UIs.
+    var imagePlugin: CoilImagesPlugin? = null
+    if (imageLoader != null) {
+        imagePlugin = CoilImagesPlugin.create(
+            object : CoilImagesPlugin.CoilStore {
+                override fun load(drawable: AsyncDrawable): ImageRequest {
+                    return ImageRequest.Builder(context)
+                        .defaults(imageLoader.defaults)
+                        .data(drawable.destination)
+                        .crossfade(true)
+                        .size(800, 400)
+                        .scale(Scale.FIT)
+                        .transformations(RoundedCornersTransformation(20F))
+                        .build()
+                }
+
+                override fun cancel(disposable: Disposable) {
+                    disposable.dispose()
+                }
+            },
+            imageLoader
+        )
+    }
+
     return Markwon.builder(context)
         .usePlugin(HtmlPlugin.create())
         .usePlugin(StrikethroughPlugin.create())
         .usePlugin(TablePlugin.create(context))
         .usePlugin(LinkifyPlugin.create())
         .apply {
-            if (imageLoader != null) {
-                usePlugin(CoilImagesPlugin.create(context, imageLoader))
+            if (imagePlugin != null) {
+                usePlugin(imagePlugin)
             }
         }
         .build()
+}
+
+class MySizeResolver(private val view: View) : SizeResolver {
+    override suspend fun size(): Size {
+        val width = view.measuredWidth
+        val height = view.measuredHeight
+        return Size(width, height)
+    }
 }
