@@ -157,8 +157,8 @@ internal fun PostContextBottomSheet(
                 if (postActions.onPinPost != null && post is IStandalonePost) {
                     ActionButton(
                         modifier = actionButtonModifier,
-                        icon = if (true) Icons.Default.Clear else Icons.Default.PushPin, //TODO
-                        text = if (true) stringResource(id = R.string.post_unpin) else stringResource(id = R.string.post_pin),
+                        icon = if (false) Icons.Default.Clear else Icons.Default.PushPin, //TODO
+                        text = if (false) stringResource(id = R.string.post_unpin) else stringResource(id = R.string.post_pin),
                         onClick = {
                             onDismissRequest()
                             postActions.onPinPost.invoke()

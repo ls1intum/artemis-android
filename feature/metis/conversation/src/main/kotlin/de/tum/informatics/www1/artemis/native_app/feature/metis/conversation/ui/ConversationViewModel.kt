@@ -365,13 +365,11 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun togglePinPost(
-        post: PostPojo
-    ): Deferred<MetisModificationFailure?> {
+    fun togglePinPost(post: IStandalonePost): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
-            val newPost = post.copy(pinned = !post.pinned) //TODO
+            val newPost = StandalonePost(23423) //TODO
             metisModificationService.updateStandalonePost(
                 context = metisContext,
                 post = newPost,
