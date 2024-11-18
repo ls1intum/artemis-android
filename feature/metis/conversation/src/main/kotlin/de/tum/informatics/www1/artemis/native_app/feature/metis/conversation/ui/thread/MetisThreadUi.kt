@@ -126,6 +126,13 @@ internal fun MetisThreadUi(
                 throw NotImplementedError()
             }
         },
+        onPinPost = { post ->
+            if (post is PostPojo) {
+                viewModel.togglePinPost(post)
+            } else {
+                throw NotImplementedError()
+            }
+        },
         onDeletePost = viewModel::deletePost,
         onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
         onRequestReload = viewModel::requestReload,
@@ -148,6 +155,7 @@ internal fun MetisThreadUi(
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
     onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
+    onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
     onDeletePost: (IBasePost) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onRequestReload: () -> Unit,
@@ -169,8 +177,9 @@ internal fun MetisThreadUi(
             onEditPost = onEditPost,
             onResolvePost = onResolvePost,
             onDeletePost = onDeletePost,
+            onPinPost = onPinPost,
             onRequestReactWithEmoji = onRequestReactWithEmoji
-        ) { replyMode, onEditPostDelegate, onResolvePostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, updateFailureStateDelegate ->
+        ) { replyMode, onEditPostDelegate, onResolvePostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, onPinPostDelegate, updateFailureStateDelegate ->
             BoxWithConstraints(modifier = modifier) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     BasicDataStateUi(
@@ -205,6 +214,7 @@ internal fun MetisThreadUi(
                                 onRequestEdit = onEditPostDelegate,
                                 onRequestDelete = onDeletePostDelegate,
                                 onRequestResolve = onResolvePostDelegate,
+                                onRequestPin = onPinPostDelegate,
                                 state = listState,
                                 onRequestRetrySend = onRequestRetrySend
                             )
@@ -238,6 +248,7 @@ private fun PostAndRepliesList(
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
     onRequestResolve: (IBasePost) -> Unit,
+    onRequestPin: (IBasePost) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
 ) {
@@ -258,6 +269,7 @@ private fun PostAndRepliesList(
             },
             onReplyInThread = null,
             onResolvePost = { onRequestResolve(affectedPost) },
+            onPinPost = { onRequestPin(affectedPost) },
             onRequestRetrySend = {
                 onRequestRetrySend(
                     affectedPost.clientPostId ?: return@rememberPostActions,

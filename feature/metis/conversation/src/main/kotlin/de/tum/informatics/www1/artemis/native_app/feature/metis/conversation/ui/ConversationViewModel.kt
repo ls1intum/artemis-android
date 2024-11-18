@@ -365,6 +365,23 @@ internal open class ConversationViewModel(
         }
     }
 
+    fun togglePinPost(
+        post: PostPojo
+    ): Deferred<MetisModificationFailure?> {
+        return viewModelScope.async(coroutineContext) {
+            val conversation =
+                loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
+            val newPost = post.copy(pinned = !post.pinned) //TODO
+            metisModificationService.updateStandalonePost(
+                context = metisContext,
+                post = newPost,
+                serverUrl = serverConfigurationService.serverUrl.first(),
+                authToken = accountService.authToken.first()
+            )
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
+        }
+    }
+
     fun deletePost(post: IBasePost): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             metisModificationService.deletePost(

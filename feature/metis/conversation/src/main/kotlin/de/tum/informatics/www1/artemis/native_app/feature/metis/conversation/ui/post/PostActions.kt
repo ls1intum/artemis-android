@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 
 data class PostActions(
@@ -14,6 +13,7 @@ data class PostActions(
     val onCopyText: () -> Unit = {},
     val onReplyInThread: (() -> Unit)? = null,
     val onResolvePost: (() -> Unit)? = null,
+    val onPinPost: (() -> Unit)? = null,
     val onRequestRetrySend: () -> Unit = {}
 ) {
     val canPerformAnyAction: Boolean get() = requestDeletePost != null || requestEditPost != null
@@ -30,6 +30,7 @@ fun rememberPostActions(
     onClickReaction: (emojiId: String, create: Boolean) -> Unit,
     onReplyInThread: (() -> Unit)?,
     onResolvePost: (() -> Unit)?,
+    onPinPost: (() -> Unit)?,
     onRequestRetrySend: () -> Unit
 ): PostActions {
     val clipboardManager = LocalClipboardManager.current
@@ -43,6 +44,7 @@ fun rememberPostActions(
         onClickReaction,
         onReplyInThread,
         onResolvePost,
+        onPinPost,
         onRequestRetrySend,
         clipboardManager
     ) {
@@ -50,6 +52,7 @@ fun rememberPostActions(
             val doesPostExistOnServer = post.serverPostId != null
             val hasEditPostRights = hasModerationRights || post.authorId == clientId
             val hasResolvePostRights = isAtLeastTutorInCourse || post.authorId == clientId
+            val hasPinPostRights = hasModerationRights //|| isCreator
 
             PostActions(
                 requestEditPost = if (doesPostExistOnServer && hasEditPostRights) onRequestEdit else null,
@@ -60,6 +63,7 @@ fun rememberPostActions(
                 },
                 onReplyInThread = if (doesPostExistOnServer) onReplyInThread else null,
                 onResolvePost = if (hasResolvePostRights) onResolvePost else null,
+                onPinPost = if (hasPinPostRights) onPinPost else null,
                 onRequestRetrySend = onRequestRetrySend
             )
         } else {

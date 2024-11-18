@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -58,6 +59,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 
 internal const val TEST_TAG_POST_CONTEXT_BOTTOM_SHEET = "TEST_TAG_POST_CONTEXT_BOTTOM_SHEET"
 
@@ -148,6 +150,18 @@ internal fun PostContextBottomSheet(
                         onClick = {
                             onDismissRequest()
                             postActions.onResolvePost.invoke()
+                        }
+                    )
+                }
+
+                if (postActions.onPinPost != null && post is IStandalonePost) {
+                    ActionButton(
+                        modifier = actionButtonModifier,
+                        icon = if (true) Icons.Default.Clear else Icons.Default.PushPin, //TODO
+                        text = if (true) stringResource(id = R.string.post_unpin) else stringResource(id = R.string.post_pin),
+                        onClick = {
+                            onDismissRequest()
+                            postActions.onPinPost.invoke()
                         }
                     )
                 }
