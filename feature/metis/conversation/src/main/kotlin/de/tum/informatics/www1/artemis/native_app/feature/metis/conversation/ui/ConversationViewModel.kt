@@ -29,6 +29,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExerci
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.DefaultImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfilePictureImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfilePictureImageProviderImpl
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -260,7 +261,7 @@ internal open class ConversationViewModel(
         accountService.authToken
     ) { serverUrl, authToken ->
         flowOf(
-            ProfilePictureImageProvider(
+            ProfilePictureImageProviderImpl(
                 serverUrl = serverUrl,
                 authToken = authToken
             )

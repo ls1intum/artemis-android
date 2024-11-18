@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
@@ -25,6 +26,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.image.loadAsync
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.nonScaledSp
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfilePictureImageProvider
 
+const val TEST_TAG_PROFILE_PICTURE_IMAGE = "TEST_TAG_PROFILE_PICTURE_IMAGE"
+const val TEST_TAG_PROFILE_PICTURE_INITIALS = "TEST_TAG_PROFILE_PICTURE_INITIALS"
+
 @Composable
 fun ProfilePicture(
     modifier: Modifier,
@@ -32,6 +36,8 @@ fun ProfilePicture(
     profilePictureImageProvider: ProfilePictureImageProvider?,
 ) {
     // TODO: Add onClick that opens a dialog with info about the user, see iOS
+    // TODO: there is a bug when there are many posts in a chat, and one clicks on reload,
+    //      the list jumps and jitters.
     when(profilePictureData) {
         is ProfilePictureData.Image -> {
             if (profilePictureImageProvider != null) {
@@ -96,7 +102,8 @@ fun ProfilePictureImage(
 
             Image(
                 modifier = modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .testTag(TEST_TAG_PROFILE_PICTURE_IMAGE),
                 painter = painter,
                 contentDescription = null,
                 contentScale = ContentScale.Fit
@@ -117,7 +124,8 @@ fun InitialsPlaceholder(
             .background(color = profilePictureData.backgroundColor)
             .onGloballyPositioned {
                 boxSize.value = it.size.width
-            },
+            }
+            .testTag(TEST_TAG_PROFILE_PICTURE_INITIALS),
         contentAlignment = Alignment.Center,
     ) {
         Text(

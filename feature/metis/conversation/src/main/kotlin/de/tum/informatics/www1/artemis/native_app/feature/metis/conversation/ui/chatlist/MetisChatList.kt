@@ -36,6 +36,7 @@ import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfilePictureImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
@@ -143,6 +144,7 @@ fun MetisChatList(
     state: LazyListState,
     isReplyEnabled: Boolean,
     profilePictureImageProvider: ProfilePictureImageProvider?,
+    emojiService: EmojiService = koinInject(),
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
     onDeletePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
@@ -175,7 +177,7 @@ fun MetisChatList(
                 order = DisplayPostOrder.REVERSED,
                 markdownImageLoader = markdownImageLoader,
                 bottomItem = bottomItem,
-                emojiService = koinInject()
+                emojiService = emojiService
             ) {
                 when (posts) {
                     PostsDataState.Empty -> {

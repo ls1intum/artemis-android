@@ -1,29 +1,17 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
-import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.hasAnyChild
-import androidx.compose.ui.test.hasScrollAction
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onParent
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performSemanticsAction
-import androidx.compose.ui.test.printToLog
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
@@ -39,7 +27,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.A
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -67,7 +54,8 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
                 updatedDate = null,
                 content = "Answer Post content $index",
                 authorRole = UserRole.USER,
-                authorName = "author name"
+                authorName = "author name",
+                authorImageUrl = null,
             ),
             reactions = emptyList(),
             serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
@@ -87,6 +75,7 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
         title = null,
         authorName = "author name",
         authorRole = UserRole.USER,
+        authorImageUrl = null,
         courseWideContext = null,
         tags = emptyList(),
         answers = answers,
@@ -216,6 +205,7 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
                 serverUrl = "",
                 markdownImageLoader = null,
                 emojiService = EmojiServiceStub,
+                profilePictureImageProvider = null,
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },

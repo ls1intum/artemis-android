@@ -3,14 +3,21 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.remote_images
 import android.content.Context
 import coil.request.ImageRequest
 
-class ProfilePictureImageProvider(
+interface ProfilePictureImageProvider {
+    fun createImageRequest(
+        context: Context,
+        imagePath: String,
+    ): ImageRequest
+}
+
+class ProfilePictureImageProviderImpl(
     private val serverUrl: String,
     private val authToken: String
-) {
+) : ProfilePictureImageProvider {
 
     private val imageProvider = DefaultImageProvider()
 
-    fun createImageRequest(
+    override fun createImageRequest(
         context: Context,
         imagePath: String,
     ): ImageRequest {
