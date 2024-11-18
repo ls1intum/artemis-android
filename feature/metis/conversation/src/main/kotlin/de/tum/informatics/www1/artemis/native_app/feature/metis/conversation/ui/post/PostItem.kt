@@ -16,11 +16,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -230,7 +232,6 @@ private fun PostHeadline(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-//                HeadlineAuthorIcon(authorRole)
                 HeadlineProfilePicture(
                     profilePictureData = profilePictureData,
                     profilePictureImageProvider = profilePictureImageProvider,
@@ -239,6 +240,7 @@ private fun PostHeadline(
                 HeadlineAuthorInfo(
                     modifier = Modifier.fillMaxWidth(),
                     authorName = authorName,
+                    authorRole = authorRole,
                     creationDate = creationDate,
                     expanded = true
                 )
@@ -253,7 +255,6 @@ private fun PostHeadline(
         ) {
             val doDisplayHeader = displayHeader || postStatus == CreatePostService.Status.FAILED
 
-//            HeadlineAuthorIcon(authorRole, displayIcon = doDisplayHeader)
             HeadlineProfilePicture(
                 profilePictureData = profilePictureData,
                 profilePictureImageProvider = profilePictureImageProvider,
@@ -276,6 +277,7 @@ private fun PostHeadline(
                     HeadlineAuthorInfo(
                         modifier = Modifier.fillMaxWidth(),
                         authorName = authorName,
+                        authorRole  = authorRole,
                         creationDate = creationDate,
                         expanded = false
                     )
@@ -317,6 +319,7 @@ private fun ResolvedLabel(
 private fun HeadlineAuthorInfo(
     modifier: Modifier,
     authorName: String?,
+    authorRole: UserRole?,
     creationDate: Instant?,
     expanded: Boolean
 ) {
@@ -325,13 +328,21 @@ private fun HeadlineAuthorInfo(
     }
 
     val authorNameContent: @Composable () -> Unit = {
-        Text(
-            modifier = Modifier,
-            text = remember(authorName) { authorName ?: "Placeholder" },
-            maxLines = 1,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            HeadlineAuthorIcon(authorRole)
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            Text(
+                modifier = Modifier,
+                text = remember(authorName) { authorName ?: "Placeholder" },
+                maxLines = 1,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 
     val creationDateContent: @Composable () -> Unit = {
@@ -386,26 +397,19 @@ private fun HeadlineProfilePicture(
 @Composable
 private fun HeadlineAuthorIcon(
     authorRole: UserRole?,
-    displayIcon: Boolean = true
 ) {
-    // TODO: instead show badge with role
-    if (displayIcon) {
-        val icon = when (authorRole) {
-            UserRole.INSTRUCTOR -> Icons.Default.School
-            UserRole.TUTOR -> Icons.Default.SupervisorAccount
-            UserRole.USER -> Icons.Default.Person
-            null -> Icons.Default.Person
-        }
-
-        Icon(
-            modifier = Modifier.size(30.dp),
-            imageVector = icon,
-            contentDescription = null
-        )
-    } else {
-        Box(modifier = Modifier.size(30.dp))
+    val icon = when (authorRole) {
+        UserRole.INSTRUCTOR -> Icons.Default.School
+        UserRole.TUTOR -> Icons.Default.SupervisorAccount
+        UserRole.USER -> Icons.Default.Person
+        null -> Icons.Default.Person
     }
 
+    Icon(
+        modifier = Modifier.size(16.dp),
+        imageVector = icon,
+        contentDescription = null
+    )
 }
 
 /**

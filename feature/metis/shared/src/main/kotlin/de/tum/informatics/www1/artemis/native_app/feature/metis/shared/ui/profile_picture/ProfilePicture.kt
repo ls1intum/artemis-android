@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,8 +36,6 @@ fun ProfilePicture(
     profilePictureImageProvider: ProfilePictureImageProvider?,
 ) {
     // TODO: Add onClick that opens a dialog with info about the user, see iOS
-    // TODO: there is a bug when there are many posts in a chat, and one clicks on reload,
-    //      the list jumps and jitters.
     when(profilePictureData) {
         is ProfilePictureData.Image -> {
             if (profilePictureImageProvider != null) {
@@ -117,13 +115,13 @@ fun InitialsPlaceholder(
     modifier: Modifier,
     profilePictureData: ProfilePictureData.InitialsPlaceholder,
 ) {
-    val boxSize = remember { mutableStateOf(0) }
+    val boxSize = remember { mutableIntStateOf(0) }
 
     Box(
         modifier = modifier
             .background(color = profilePictureData.backgroundColor)
             .onGloballyPositioned {
-                boxSize.value = it.size.width
+                boxSize.intValue = it.size.width
             }
             .testTag(TEST_TAG_PROFILE_PICTURE_INITIALS),
         contentAlignment = Alignment.Center,
@@ -131,7 +129,7 @@ fun InitialsPlaceholder(
         Text(
             text = profilePictureData.initials,
             color = Color.White,
-            fontSize = boxSize.value.sp.nonScaledSp * 0.16f,
+            fontSize = boxSize.intValue.sp.nonScaledSp * 0.16f,
             fontWeight =  FontWeight.Bold
         )
     }
