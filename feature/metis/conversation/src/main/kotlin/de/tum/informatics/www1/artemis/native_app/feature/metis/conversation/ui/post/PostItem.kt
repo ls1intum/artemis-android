@@ -327,7 +327,7 @@ private fun HeadlineAuthorInfo(
         creationDate ?: Clock.System.now()
     }
 
-    val authorNameContent: @Composable () -> Unit = {
+    val authorIconAndNameContent: @Composable () -> Unit = {
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -357,7 +357,7 @@ private fun HeadlineAuthorInfo(
 
     if (expanded) {
         Column(modifier) {
-            authorNameContent()
+            authorIconAndNameContent()
 
             creationDateContent()
         }
@@ -367,7 +367,7 @@ private fun HeadlineAuthorInfo(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            authorNameContent()
+            authorIconAndNameContent()
 
             creationDateContent()
         }
