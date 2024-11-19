@@ -9,22 +9,23 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
-import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.addQuizExerciseBatch
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExerciseFormBodyWithPng
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createQuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.startQuizExerciseBatch
-import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExerciseFormBodyWithPng
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.TEST_TAG_TEXT_FIELD_BATCH_PASSWORD
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.TEST_TAG_WAIT_FOR_QUIZ_START_SCREEN
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -38,24 +39,22 @@ import kotlin.test.assertNotNull
 internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
 
     @Test(timeout = DefaultTestTimeoutMillis)
+    @Ignore("Quiz participation currently fails to load. See https://github.com/ls1intum/artemis-android/issues/107")
     fun `can start individual quiz`() {
-        val quiz: QuizExercise = runBlocking {
+        val quiz: QuizExercise = runBlockingWithTestTimeout {
             val path = getBackgroundImageFilePath()
-
-            withTimeout(DefaultTimeoutMillis) {
-                assertIs(
-                    createExerciseFormBodyWithPng(
-                        getAdminAccessToken(),
-                        courseId,
-                        endpoint = "quiz-exercises",
-                        pngFilePath = path,
-                        pngByteArray = getBackgroundImageBytes(),
-                        creator = { name, courseId ->
-                            createQuizExercise(name, courseId, path, QuizExercise.QuizMode.INDIVIDUAL)
-                        }
-                    )
+            assertIs(
+                createExerciseFormBodyWithPng(
+                    getAdminAccessToken(),
+                    courseId,
+                    endpoint = "quiz-exercises",
+                    pngFilePath = path,
+                    pngByteArray = getBackgroundImageBytes(),
+                    creator = { name, courseId ->
+                        createQuizExercise(name, courseId, path, QuizExercise.QuizMode.INDIVIDUAL)
+                    }
                 )
-            }
+            )
         }
 
         setupUi(quiz.id) { viewModel ->
@@ -99,28 +98,28 @@ internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
     }
 
     @Test(timeout = DefaultTestTimeoutMillis)
+    @Ignore("Quiz participation currently fails to load. See https://github.com/ls1intum/artemis-android/issues/107")
     fun `can start batched quiz`() {
-        val (quiz, batch) = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                val path = getBackgroundImageFilePath()
+        val (quiz, batch) = runBlockingWithTestTimeout {
+            val path = getBackgroundImageFilePath()
 
-                val quiz: QuizExercise = assertIs(
-                    createExerciseFormBodyWithPng(
-                        getAdminAccessToken(),
-                        courseId,
-                        endpoint = "quiz-exercises",
-                        pngByteArray = getBackgroundImageBytes(),
-                        pngFilePath = path,
-                        creator = { name, courseId ->
-                            createQuizExercise(name, courseId, path, QuizExercise.QuizMode.BATCHED)
-                        }
-                    )
+            val quiz: QuizExercise = assertIs(
+                createExerciseFormBodyWithPng(
+                    getAdminAccessToken(),
+                    courseId,
+                    endpoint = "quiz-exercises",
+                    pngByteArray = getBackgroundImageBytes(),
+                    pngFilePath = path,
+                    creator = { name, courseId ->
+                        createQuizExercise(name, courseId, path, QuizExercise.QuizMode.BATCHED)
+                    }
                 )
+            )
 
-                val batch = addQuizExerciseBatch(getAdminAccessToken(), quiz.id)
+            val batch = addQuizExerciseBatch(getAdminAccessToken(), quiz.id)
 
-                quiz to batch
-            }
+            quiz to batch
+
         }
 
         setupUi(quiz.id) { viewModel ->

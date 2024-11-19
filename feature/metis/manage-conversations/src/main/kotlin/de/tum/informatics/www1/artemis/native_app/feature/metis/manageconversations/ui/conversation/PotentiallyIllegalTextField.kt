@@ -58,6 +58,7 @@ internal fun PotentiallyIllegalTextField(
             }
         },
         isError = isIllegal,
-        readOnly = readOnly
+        readOnly = readOnly,
+        singleLine = true,
     )
 }

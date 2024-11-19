@@ -1,7 +1,7 @@
 [versions]
 compileSdk = "35"
 targetSdk = "34"
-minSdk = "31"
+minSdk = "30"
 buildToolsVersion = "35.0.0"
 
 accompanist = "0.30.1"

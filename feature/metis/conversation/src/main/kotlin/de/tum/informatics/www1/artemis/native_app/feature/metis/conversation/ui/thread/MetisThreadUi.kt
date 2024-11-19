@@ -30,6 +30,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
@@ -40,16 +41,21 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.rememberPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.shouldDisplayHeader
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
+import org.koin.compose.koinInject
 
 internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
 internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
@@ -68,6 +74,7 @@ internal fun MetisThreadUi(
     val serverUrl by viewModel.serverUrl.collectAsState()
 
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
+    val isAtLeastTutorInCourse by viewModel.isAtLeastTutorInCourse.collectAsState()
 
     postDataState.bind { it.serverPostId }.orNull()?.let { serverSidePostId ->
         ReportVisibleMetisContext(
@@ -81,9 +88,73 @@ internal fun MetisThreadUi(
     }
 
     val conversationDataState by viewModel.conversation.collectAsState()
-    val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
+    MetisThreadUi(
+        modifier = modifier,
+        courseId = viewModel.courseId,
+        initialReplyTextProvider = viewModel,
+        conversationDataState = conversationDataState,
+        postDataState = postDataState,
+        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+        hasModerationRights = hasModerationRights,
+        serverUrl = serverUrl,
+        emojiService = koinInject(),
+        clientId = clientId,
+        onCreatePost = viewModel::createReply,
+        onEditPost = { post, newText ->
+            val parentPost = postDataState.orNull()
+
+            when (post) {
+                is AnswerPostPojo -> {
+                    if (parentPost == null) CompletableDeferred(
+                        MetisModificationFailure.UPDATE_POST
+                    ) else viewModel.editAnswerPost(parentPost, post, newText)
+                }
+
+                is PostPojo -> viewModel.editPost(post, newText)
+                else -> throw NotImplementedError()
+            }
+        },
+        onResolvePost = { post ->
+            val parentPost = postDataState.orNull()
+
+            if (post is AnswerPostPojo) {
+                if (parentPost == null) CompletableDeferred(
+                    MetisModificationFailure.UPDATE_POST
+                ) else viewModel.toggleResolvePost(parentPost, post)
+            } else {
+                throw NotImplementedError()
+            }
+        },
+        onDeletePost = viewModel::deletePost,
+        onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
+        onRequestReload = viewModel::requestReload,
+        onRequestRetrySend = viewModel::retryCreateReply
+    )
+}
+
+@Composable
+internal fun MetisThreadUi(
+    modifier: Modifier,
+    courseId: Long,
+    clientId: Long,
+    postDataState: DataState<PostPojo>,
+    conversationDataState: DataState<Conversation>,
+    hasModerationRights: Boolean,
+    isAtLeastTutorInCourse: Boolean,
+    serverUrl: String,
+    emojiService: EmojiService,
+    initialReplyTextProvider: InitialReplyTextProvider,
+    onCreatePost: () -> Deferred<MetisModificationFailure?>,
+    onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
+    onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
+    onDeletePost: (IBasePost) -> Deferred<MetisModificationFailure?>,
+    onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
+    onRequestReload: () -> Unit,
+    onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
+) {
     val listState = rememberLazyListState()
+    val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
 
     val title by remember(conversationDataState) {
         derivedStateOf {
@@ -91,28 +162,15 @@ internal fun MetisThreadUi(
         }
     }
 
-    ProvideEmojis {
+    ProvideEmojis(emojiService) {
         MetisReplyHandler(
-            initialReplyTextProvider = viewModel,
-            onCreatePost = viewModel::createReply,
-            onEditPost = { post, newText ->
-                val parentPost = postDataState.orNull()
-
-                when (post) {
-                    is AnswerPostPojo -> {
-                        if (parentPost == null) return@MetisReplyHandler CompletableDeferred(
-                            MetisModificationFailure.UPDATE_POST
-                        )
-                        viewModel.editAnswerPost(parentPost, post, newText)
-                    }
-
-                    is PostPojo -> viewModel.editPost(post, newText)
-                    else -> throw NotImplementedError()
-                }
-            },
-            onDeletePost = viewModel::deletePost,
-            onRequestReactWithEmoji = viewModel::createOrDeleteReaction
-        ) { replyMode, onEditPostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, updateFailureStateDelegate ->
+            initialReplyTextProvider = initialReplyTextProvider,
+            onCreatePost = onCreatePost,
+            onEditPost = onEditPost,
+            onResolvePost = onResolvePost,
+            onDeletePost = onDeletePost,
+            onRequestReactWithEmoji = onRequestReactWithEmoji
+        ) { replyMode, onEditPostDelegate, onResolvePostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, updateFailureStateDelegate ->
             BoxWithConstraints(modifier = modifier) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     BasicDataStateUi(
@@ -123,15 +181,16 @@ internal fun MetisThreadUi(
                         loadingText = stringResource(id = R.string.standalone_post_loading),
                         failureText = stringResource(id = R.string.standalone_post_failure),
                         retryButtonText = stringResource(id = R.string.standalone_post_try_again),
-                        onClickRetry = viewModel::requestReload
+                        onClickRetry = onRequestReload
                     ) { post ->
                         MetisPostListHandler(
                             modifier = Modifier.fillMaxSize(),
                             serverUrl = serverUrl,
-                            courseId = viewModel.courseId,
+                            courseId = courseId,
                             state = listState,
                             itemCount = post.orderedAnswerPostings.size,
                             order = DisplayPostOrder.REGULAR,
+                            emojiService = emojiService,
                             bottomItem = post.orderedAnswerPostings.lastOrNull(),
                         ) {
                             PostAndRepliesList(
@@ -140,12 +199,14 @@ internal fun MetisThreadUi(
                                     .testTag(TEST_TAG_THREAD_LIST),
                                 post = post,
                                 hasModerationRights = hasModerationRights,
+                                isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                                 clientId = clientId,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
                                 onRequestDelete = onDeletePostDelegate,
+                                onRequestResolve = onResolvePostDelegate,
                                 state = listState,
-                                onRequestRetrySend = viewModel::retryCreateReply
+                                onRequestRetrySend = onRequestRetrySend
                             )
                         }
                     }
@@ -172,9 +233,11 @@ private fun PostAndRepliesList(
     state: LazyListState,
     post: PostPojo,
     hasModerationRights: Boolean,
+    isAtLeastTutorInCourse: Boolean,
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
+    onRequestResolve: (IBasePost) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
 ) {
@@ -182,6 +245,7 @@ private fun PostAndRepliesList(
         rememberPostActions(
             affectedPost,
             hasModerationRights,
+            isAtLeastTutorInCourse,
             clientId,
             onRequestEdit = { onRequestEdit(affectedPost) },
             onRequestDelete = { onRequestDelete(affectedPost) },
@@ -193,6 +257,7 @@ private fun PostAndRepliesList(
                 )
             },
             onReplyInThread = null,
+            onResolvePost = { onRequestResolve(affectedPost) },
             onRequestRetrySend = {
                 onRequestRetrySend(
                     affectedPost.clientPostId ?: return@rememberPostActions,
