@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -46,7 +45,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.navigateToDa
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewDestination
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewMode
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewUi
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewUiNestedNavigation
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.exercise
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.navigateToExercise
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture
@@ -98,7 +96,7 @@ class MainActivity : AppCompatActivity(),
         val startDestination = runBlocking {
             when (accountService.authenticationData.first()) {
                 is AccountService.AuthenticationData.LoggedIn -> DashboardScreen
-                AccountService.AuthenticationData.NotLoggedIn -> LoginScreen
+                AccountService.AuthenticationData.NotLoggedIn -> LoginScreen(null)
             }
         }
 
@@ -260,7 +258,7 @@ class MainActivity : AppCompatActivity(),
                         if (deepLink == null) {
                             // Navigate to the course overview and remove the login screen from the navigation stack.
                             navController.navigateToDashboard {
-                                popUpTo(LoginScreen) {
+                                popUpTo<LoginScreen> {
                                     inclusive = true
                                 }
                             }
