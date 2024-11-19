@@ -33,7 +33,6 @@ import coil.ImageLoader
 import coil.request.Disposable
 import coil.request.ImageRequest
 import coil.size.Scale
-import coil.transform.RoundedCornersTransformation
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
@@ -91,8 +90,9 @@ fun MarkdownText(
     val context: Context = LocalContext.current
     val localMarkwon = LocalMarkwon.current
 
+    val imageWith = context.resources.displayMetrics.widthPixels
     val markdownRender: Markwon = localMarkwon ?: remember(imageLoader) {
-        createMarkdownRender(context, imageLoader)
+        createMarkdownRender(context, imageLoader, imageWith)
     }
 
     val markdownTransformer = LocalMarkdownTransformer.current
@@ -105,11 +105,12 @@ fun MarkdownText(
 
     AndroidView(
         // Added semantics for ui testing.
-        modifier = modifier.semantics {
-            text = AnnotatedString(markdown)
-            onClick?.let { this.onClick(action = { onClick(); true }) }
-            onLongClick?.let { this.onLongClick(action = { onLongClick(); true }) }
-        },
+        modifier = modifier
+            .semantics {
+                text = AnnotatedString(markdown)
+                onClick?.let { this.onClick(action = { onClick(); true }) }
+                onLongClick?.let { this.onLongClick(action = { onLongClick(); true }) }
+            },
         factory = { ctx ->
             createTextView(
                 context = ctx,
@@ -208,7 +209,7 @@ private fun TextView.applyStyleAndColor(
     }
 }
 
-fun createMarkdownRender(context: Context, imageLoader: ImageLoader?): Markwon {
+fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, imageWith: Int): Markwon {
     // Setting the size of the output image is important to avoid jittering UIs.
     val imagePlugin: CoilImagesPlugin? =
         if (imageLoader != null) {
@@ -219,9 +220,8 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?): Markwon {
                             .defaults(imageLoader.defaults)
                             .data(drawable.destination)
                             .crossfade(true)
-                            .size(800, 400)
+                            .size(imageWith, 800) // We set a fixed height and set the width of the image to the screen width.
                             .scale(Scale.FIT)
-                            .transformations(RoundedCornersTransformation(20F))
                             .build()
                     }
 
