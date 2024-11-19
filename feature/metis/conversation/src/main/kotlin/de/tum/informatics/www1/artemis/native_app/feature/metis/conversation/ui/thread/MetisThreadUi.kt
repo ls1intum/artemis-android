@@ -34,7 +34,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -51,13 +50,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import org.koin.compose.koinInject
@@ -282,59 +281,57 @@ private fun PostAndRepliesList(
         )
     }
 
-    ProvideMarkwon(markdownImageLoader) {
-        LazyColumn(
-            modifier = modifier,
-            contentPadding = PaddingValues(vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            state = state
-        ) {
-            item {
-                val postActions = rememberPostActions(post)
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        state = state
+    ) {
+        item {
+            val postActions = rememberPostActions(post)
 
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    PostWithBottomSheet(
-                        modifier = Modifier.padding(top = 8.dp),
-                        post = post,
-                        postItemViewType = PostItemViewType.ThreadContextPostItem,
-                        postActions = postActions,
-                        displayHeader = true,
-                        clientId = clientId,
-                        onClick = {}
-                    )
-
-                    Divider()
-
-                    Box {}
-                }
-            }
-
-            itemsIndexed(
-                post.orderedAnswerPostings,
-                key = { _, post -> post.postId }) { index, answerPost ->
-                val postActions = rememberPostActions(answerPost)
-
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 PostWithBottomSheet(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(testTagForAnswerPost(answerPost.clientPostId)),
-                    post = answerPost,
+                    modifier = Modifier.padding(top = 8.dp),
+                    post = post,
+                    postItemViewType = PostItemViewType.ThreadContextPostItem,
                     postActions = postActions,
-                    postItemViewType = PostItemViewType.ThreadAnswerItem,
+                    displayHeader = true,
                     clientId = clientId,
-                    displayHeader = shouldDisplayHeader(
-                        index = index,
-                        post = answerPost,
-                        postCount = post.orderedAnswerPostings.size,
-                        order = DisplayPostOrder.REGULAR,
-                        getPost = post.orderedAnswerPostings::get
-                    ),
                     onClick = {}
                 )
+
+                Divider()
+
+                Box {}
             }
+        }
+
+        itemsIndexed(
+            post.orderedAnswerPostings,
+            key = { _, post -> post.postId }) { index, answerPost ->
+            val postActions = rememberPostActions(answerPost)
+
+            PostWithBottomSheet(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(testTagForAnswerPost(answerPost.clientPostId)),
+                post = answerPost,
+                postActions = postActions,
+                postItemViewType = PostItemViewType.ThreadAnswerItem,
+                clientId = clientId,
+                displayHeader = shouldDisplayHeader(
+                    index = index,
+                    post = answerPost,
+                    postCount = post.orderedAnswerPostings.size,
+                    order = DisplayPostOrder.REGULAR,
+                    getPost = post.orderedAnswerPostings::get
+                ),
+                onClick = {}
+            )
         }
     }
 }
