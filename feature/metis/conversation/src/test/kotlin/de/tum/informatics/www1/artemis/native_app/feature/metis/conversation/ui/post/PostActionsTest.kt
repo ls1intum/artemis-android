@@ -18,6 +18,7 @@ import org.junit.runner.RunWith
 class PostActionsTest : BaseComposeTest() {
 
     private val EDIT_POST = {}
+    private val DELETE_POST = {}
 
     private val author = User(id = 1)
     private val instructor = User(id = 2)
@@ -31,7 +32,7 @@ class PostActionsTest : BaseComposeTest() {
     fun `test GIVEN a post WHEN calling rememberPostActions as the post author THEN onRequestEditPost is not null`() {
         composeTestRule.setContent {
             val postActions = createPostActions(
-                editorId = author.id,
+                requestorId = author.id,
                 hasModerationRights = false
             )
 
@@ -45,7 +46,7 @@ class PostActionsTest : BaseComposeTest() {
     fun `test GIVEN a user with moderation-rights WHEN calling rememberPostActions THEN onRequestEditPost is null`() {
         composeTestRule.setContent {
             val postActions = createPostActions(
-                editorId = instructor.id,
+                requestorId = instructor.id,
                 hasModerationRights = true
             )
 
@@ -53,19 +54,32 @@ class PostActionsTest : BaseComposeTest() {
         }
     }
 
+    @Test
+    fun `test GIVEN a user with moderation-rights WHEN calling rememberPostActions THEN onRequestDeletePost is not null`() {
+        composeTestRule.setContent {
+            val postActions = createPostActions(
+                requestorId = instructor.id,
+                hasModerationRights = true
+            )
+
+            assertNotNull(postActions.requestDeletePost)
+            assertEquals(DELETE_POST, postActions.requestDeletePost)
+        }
+    }
+
 
     @Composable
     private fun createPostActions(
-        editorId: Long,
+        requestorId: Long,
         hasModerationRights: Boolean = false,
     ): PostActions {
         val postActions = rememberPostActions(
             post = post,
             hasModerationRights = hasModerationRights,
             isAtLeastTutorInCourse = false,
-            clientId = editorId,
+            clientId = requestorId,
             onRequestEdit = EDIT_POST,
-            onRequestDelete = {},
+            onRequestDelete = DELETE_POST,
             onClickReaction = { _, _ -> },
             onReplyInThread = {},
             onResolvePost = {},

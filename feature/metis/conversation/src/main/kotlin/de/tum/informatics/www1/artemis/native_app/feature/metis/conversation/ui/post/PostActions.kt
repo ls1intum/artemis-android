@@ -55,7 +55,7 @@ fun rememberPostActions(
 
         PostActions(
             requestEditPost = if (doesPostExistOnServer && hasEditPostRights) onRequestEdit else null,
-            requestDeletePost = if (hasEditPostRights) onRequestDelete else null,
+            requestDeletePost = if (hasModerationRights) onRequestDelete else null,
             onClickReaction = if (doesPostExistOnServer) onClickReaction else null,
             onCopyText = {
                 clipboardManager.setText(AnnotatedString(post.content.orEmpty()))
