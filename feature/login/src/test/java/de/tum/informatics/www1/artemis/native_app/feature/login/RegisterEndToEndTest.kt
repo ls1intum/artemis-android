@@ -11,15 +11,15 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.platform.app.InstrumentationRegistry
+import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
-import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.ktorProvider
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
-import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.RegisterUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.RegisterViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.TEST_TAG_TEXT_FIELD_CONFIRM_PASSWORD
@@ -45,8 +45,9 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.util.Logger
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+
 
 @RunWith(RobolectricTestRunner::class)
 @Category(EndToEndTest::class)
@@ -106,10 +107,13 @@ class RegisterEndToEndTest : BaseComposeTest() {
         performTextInput(TEST_TAG_TEXT_FIELD_CONFIRM_PASSWORD, password)
 
         runBlockingWithTestTimeout {
-            viewModel.register().await()
+            val result = viewModel.register().await()
+            assertEquals(result, RegisterViewModel.RegistrationResponse.SUCCESS,
+                "Registration failed: $result"
+            )
 
             val users: List<User> = getUsers(loginName)
-            Logger.debug("Loaded users are $users")
+            println("Loaded users are $users")
 
             assertTrue(users.any { it.username == loginName }, "Could not find registered user")
         }

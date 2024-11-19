@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,25 +24,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.PotentiallyIllegalTextField
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 internal const val TEST_TAG_CREATE_CHANNEL_BUTTON = "create channel button"
 
-internal const val TEST_TAG_SET_PUBLIC_BUTTON = "TEST_TAG_SET_PUBLIC_BUTTON"
-internal const val TEST_TAG_SET_PRIVATE_BUTTON = "TEST_TAG_SET_PRIVATE_BUTTON"
-
-internal const val TEST_TAG_SET_ANNOUNCEMENT_BUTTON = "TEST_TAG_SET_ANNOUNCEMENT_BUTTON"
-internal const val TEST_TAG_SET_UNRESTRICTED_BUTTON = "TEST_TAG_SET_UNRESTRICTED_BUTTON"
+internal const val TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH = "TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH"
+internal const val TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH = "TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH"
 
 @Composable
 fun CreateChannelScreen(
@@ -141,7 +136,8 @@ internal fun CreateChannelScreen(
                 title = stringResource(id = R.string.create_channel_channel_accessibility_type),
                 description = stringResource(id = R.string.create_channel_channel_accessibility_type_hint),
                 isChecked = isPrivate,
-                onCheckedChange = { viewModel.updatePublic(it) }
+                onCheckedChange = { viewModel.updatePublic(it) },
+                switchTestTag = TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH,
             )
 
             BinarySelection(
@@ -149,13 +145,18 @@ internal fun CreateChannelScreen(
                 title = stringResource(id = R.string.create_channel_channel_announcement_type),
                 description = stringResource(id = R.string.create_channel_channel_announcement_type_hint),
                 isChecked = isAnnouncement,
-                onCheckedChange = { viewModel.updateAnnouncement(it) }
+                onCheckedChange = { viewModel.updateAnnouncement(it) },
+                switchTestTag = TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH,
             )
 
             Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+                    .testTag(TEST_TAG_CREATE_CHANNEL_BUTTON),
+                enabled = canCreate,
                 onClick = {
-                    viewModel.viewModelScope.launch {
-                        val channel = viewModel.createChannel().await()
+                    viewModel.createChannel { channel ->
                         if (channel != null) {
                             onConversationCreated(channel.id)
                         } else {
@@ -163,13 +164,8 @@ internal fun CreateChannelScreen(
                         }
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                enabled = viewModel.canCreate.collectAsState().value,
-
             ) {
-                Text(text = "Create Channel")
+                Text(text = stringResource(R.string.create_channel_button))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -195,7 +191,8 @@ private fun BinarySelection(
     title: String,
     description: String,
     isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    switchTestTag: String = ""
 ) {
     Column(
         modifier = modifier,
@@ -211,6 +208,7 @@ private fun BinarySelection(
                 style = MaterialTheme.typography.titleMedium
             )
             Switch(
+                modifier = Modifier.testTag(switchTestTag),
                 checked = isChecked,
                 onCheckedChange = onCheckedChange
             )

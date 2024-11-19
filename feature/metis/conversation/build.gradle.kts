@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":core:device"))
 
     implementation(project(":feature:metis:shared"))
+    testImplementation(project(":feature:metis-test"))
 
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
@@ -33,10 +34,11 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
 
     implementation(libs.androidx.dataStore.preferences)
-
-    testImplementation(project(":feature:metis-test"))
     implementation(libs.androidx.paging.common)
+    
     testImplementation(libs.androidx.paging.testing)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockk.agent)
 }
 
 tasks.register("fetchAndPrepareEmojis", emoji.FetchAndPrepareEmojisTask::class) {

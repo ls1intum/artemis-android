@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SupervisorAccount
@@ -37,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +53,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.datetime.Clock
@@ -116,7 +119,7 @@ internal fun PostItem(
                     it
                         .background(color = MaterialTheme.colorScheme.errorContainer)
                         .clickable(onClick = onRequestRetrySend)
-                } else Modifier
+                } else modifier
                     .combinedClickable(
                         onClick = onClick,
                         onLongClick = onLongClick
@@ -148,7 +151,6 @@ internal fun PostItem(
                         modifier = Modifier
                             .fillMaxWidth()
                             .placeholder(visible = isPlaceholder),
-                        maxLines = 5,
                         style = MaterialTheme.typography.bodyMedium,
                         onClick = onClick,
                         onLongClick = onLongClick,
@@ -161,6 +163,26 @@ internal fun PostItem(
                             style = MaterialTheme.typography.bodyMedium,
                             color = EditedGray
                         )
+                    }
+
+                    when (post) {
+                        is IStandalonePost -> {
+                            if (post.resolved == true) {
+                                ResolvedLabel(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    resourceString = R.string.post_is_resolved
+                                )
+                            }
+                        }
+                        is IAnswerPost -> {
+                            if (post.resolvesPost) {
+                                ResolvedLabel(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    resourceString = R.string.post_resolves
+                                )
+                            }
+                        }
+                        else -> {}
                     }
                 }
 
@@ -244,6 +266,30 @@ private fun PostHeadline(
                 content()
             }
         }
+    }
+}
+
+@Composable
+private fun ResolvedLabel(
+    modifier: Modifier,
+    resourceString: Int
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Icon(
+            Icons.Default.Check,
+            modifier = Modifier
+                .size(16.dp)
+                .fillMaxSize(),
+            contentDescription = null
+        )
+        Text(
+            text = stringResource(id = resourceString),
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 }
 
