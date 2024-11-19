@@ -211,6 +211,7 @@ private fun SettingsScreen(
             AboutSection(
                 modifier = Modifier.fillMaxWidth(),
                 hasUserSelectedInstance = hasUserSelectedInstance,
+                serverUrl = serverUrl,
                 onOpenPrivacyPolicy = {
                     val link = URLBuilder(serverUrl).appendPathSegments("privacy").buildString()
 
@@ -338,6 +339,7 @@ private fun NotificationSection(modifier: Modifier, onOpenNotificationSettings: 
 private fun AboutSection(
     modifier: Modifier,
     hasUserSelectedInstance: Boolean,
+    serverUrl: String,
     onRequestSelectServerInstance: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
     onOpenImprint: () -> Unit,
@@ -356,6 +358,12 @@ private fun AboutSection(
         }
 
         if (hasUserSelectedInstance) {
+            PreferenceEntry(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.settings_server_url, serverUrl),
+                onClick = {}
+            )
+
             PreferenceEntry(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = R.string.settings_about_privacy_policy),
