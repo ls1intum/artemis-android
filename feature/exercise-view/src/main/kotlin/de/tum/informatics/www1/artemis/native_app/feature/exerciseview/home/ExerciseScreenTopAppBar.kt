@@ -235,13 +235,11 @@ internal fun TopBarExerciseInformation(
             }
 
             val complaintPossible = exercise.bind { exercise ->
-                exercise.allowComplaintsForAutomaticAssessments
+                exercise.allowComplaintsForAutomaticAssessments ?: false
             }.orElse(false)
             val complaintPossibleText = stringResource(
                 R.string.exercise_view_overview_hint_assessment_complaint_possible,
-                if (complaintPossible == true) stringResource(R.string.exercise_view_overview_hint_assessment_complaint_possible_yes) else stringResource(
-                    R.string.exercise_view_overview_hint_assessment_complaint_possible_no
-                )
+                stringResource(if (complaintPossible) R.string.exercise_view_overview_hint_assessment_complaint_possible_yes else R.string.exercise_view_overview_hint_assessment_complaint_possible_no)
             )
 
             Text(

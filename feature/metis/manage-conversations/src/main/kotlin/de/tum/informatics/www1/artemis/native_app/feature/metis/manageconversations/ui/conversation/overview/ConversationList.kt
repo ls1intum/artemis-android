@@ -53,7 +53,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.ExtraChannelIcons
@@ -120,8 +119,7 @@ internal fun ConversationList(
                 onNavigateToConversation = onNavigateToConversation,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
                 onToggleHidden = onToggleHidden,
-                onToggleMuted = onToggleMuted,
-                removeSectionPrefix = viewModel::removeSectionPrefix
+                onToggleMuted = onToggleMuted
             )
         }
 
@@ -279,8 +277,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
-    onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
-    removeSectionPrefix: (value: String) -> String
+    onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit
 ) {
     if (!conversations.isExpanded) return
     items(
@@ -303,8 +300,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
                 )
             },
             onToggleHidden = { onToggleHidden(conversation.id, !conversation.isHidden) },
-            onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) },
-            removeSectionPrefix = removeSectionPrefix
+            onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) }
         )
     }
 }
@@ -318,8 +314,7 @@ private fun ConversationListItem(
     onNavigateToConversation: () -> Unit,
     onToggleMarkAsFavourite: () -> Unit,
     onToggleHidden: () -> Unit,
-    onToggleMuted: () -> Unit,
-    removeSectionPrefix: (String) -> String
+    onToggleMuted: () -> Unit
 ) {
     var isContextDialogShown by remember { mutableStateOf(false) }
     val onDismissRequest = { isContextDialogShown = false }
@@ -341,7 +336,7 @@ private fun ConversationListItem(
             if (showPrefix) {
                 channelName
             } else {
-                removeSectionPrefix(channelName)
+                channelName.removeSectionPrefix()
             }
         }
         is GroupChat, is OneToOneChat -> {
@@ -349,7 +344,7 @@ private fun ConversationListItem(
             if (showPrefix) {
                 humanReadableTitle
             } else {
-                removeSectionPrefix(humanReadableTitle)
+                humanReadableTitle.removeSectionPrefix()
             }
         }
         else -> conversation.humanReadableName
@@ -541,3 +536,15 @@ private sealed interface ConversationSectionHeaderAction
 private data class OnClickAction(val onClick: () -> Unit) : ConversationSectionHeaderAction
 
 private object NoAction : ConversationSectionHeaderAction
+
+private fun String.removeSectionPrefix(): String {
+    val prefixes = listOf("exercise-", "lecture-", "exam-")
+    var result = this
+    for (prefix in prefixes) {
+        if (result.startsWith(prefix, ignoreCase = true)) {
+            result = result.removePrefix(prefix)
+            break
+        }
+    }
+    return result.trim()
+}
