@@ -41,6 +41,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -53,6 +54,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ReplyState
 import kotlinx.coroutines.CompletableDeferred
@@ -102,7 +104,7 @@ internal fun ReplyTextField(
                                 .testTag(TEST_TAG_CAN_CREATE_REPLY),
                             replyMode = replyMode,
                             onReply = { targetReplyState.onCreateReply() },
-                            title = "Message $title"
+                            title = stringResource(R.string.create_reply_click_to_write, title)
                         )
                     }
 
@@ -122,7 +124,7 @@ internal fun ReplyTextField(
                                 .fillMaxWidth()
                                 .padding(horizontal = 8.dp),
                             onCancel = targetReplyState.onCancelSendReply,
-                            title = title
+                            title = stringResource(R.string.create_reply_sending_reply)
                         )
                     }
                 }
