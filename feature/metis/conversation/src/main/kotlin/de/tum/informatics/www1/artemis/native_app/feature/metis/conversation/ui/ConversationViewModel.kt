@@ -488,7 +488,7 @@ internal open class ConversationViewModel(
                 val exerciseAutoCompleteItems =
                     course
                         .exercises
-                        .filter { query in it.title.orEmpty() }
+                        .filter { it.title.orEmpty().contains(query, ignoreCase = true) }
                         .mapNotNull { exercise ->
                             val exerciseTag = when (exercise) {
                                 is FileUploadExercise -> "file-upload"
@@ -538,7 +538,7 @@ internal open class ConversationViewModel(
             conversationsDataState.bind { conversations ->
                 val conversationAutoCompleteItems = conversations
                     .filterIsInstance<ChannelChat>()
-                    .filter { query in it.name }
+                    .filter { it.name.contains(query, ignoreCase = true) }
                     .map { channel ->
                         AutoCompleteHint(
                             hint = channel.name,
