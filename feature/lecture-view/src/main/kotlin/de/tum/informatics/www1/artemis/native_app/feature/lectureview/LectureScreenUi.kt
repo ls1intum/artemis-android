@@ -195,7 +195,7 @@ internal fun LectureScreen(
         ) { padding ->
             val bodyModifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
 
             contentBody(
                 bodyModifier

@@ -24,14 +24,14 @@ kotlinxSerializationJson = "1.5.1"
 koin = "3.5.3"
 koinAndroidxCompose = "3.4.5"
 kover = "0.7.2"
-ktor = "2.3.7"
+ktor = "2.3.12"
 krossbow = "5.2.0"
 markwon = "4.6.2"
 mockk = "1.13.8"
 ossLicensesPlugin = "0.10.6"
 placeholderMaterial = "1.0.1"
 room = "2.6.0"
-sentry-android = "6.22.0"
+sentry-android = "7.17.0"
 work = "2.9.0"
 
 # Used indirecly in the build config -> Do not remove without double checking.
@@ -72,6 +72,8 @@ androidx-lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "li
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidxNavigation" }
 androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "androidxPaging" }
 androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "androidxPagingCompose" }
+androidx-paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "androidxPaging" }
+androidx-paging-testing = { group = "androidx.paging", name = "paging-testing", version.ref = "androidxPaging" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
