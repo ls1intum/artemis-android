@@ -91,6 +91,7 @@ class MainActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         // When the user is logged in, immediately display the course overview.
         val startDestination = runBlocking {
