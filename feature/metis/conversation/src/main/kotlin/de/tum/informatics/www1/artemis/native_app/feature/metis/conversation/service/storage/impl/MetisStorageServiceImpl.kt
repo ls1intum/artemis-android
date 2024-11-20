@@ -146,12 +146,13 @@ internal class MetisStorageServiceImpl(
             serverId: String,
             clientSidePostId: String,
             serverSidePostId: Long?,
+            conversationId: Long?,
             postingType: BasePostingEntity.PostingType
         ): MetisPostContextEntity =
             MetisPostContextEntity(
                 serverId = serverId,
                 courseId = courseId,
-                conversationId = conversationId,
+                conversationId = conversationId ?: this.conversationId,
                 serverPostId = serverSidePostId,
                 clientPostId = clientSidePostId,
                 postingType = postingType
@@ -458,11 +459,13 @@ internal class MetisStorageServiceImpl(
         metisDao.insertOrUpdateUser(postingAuthor)
 
         val standalonePostId = sp.id
+        val conversationId = sp.conversation?.id
         val postMetisContext =
             metisContext.toPostMetisContext(
                 serverId = host,
                 clientSidePostId = clientSidePostId,
                 serverSidePostId = standalonePostId,
+                conversationId = conversationId,
                 postingType = BasePostingEntity.PostingType.STANDALONE
             )
 
@@ -568,6 +571,7 @@ internal class MetisStorageServiceImpl(
                     serverId = host,
                     clientSidePostId = answerPostClientSidePostId,
                     serverSidePostId = answerPostId,
+                    conversationId = null,
                     postingType = BasePostingEntity.PostingType.ANSWER
                 )
             )
