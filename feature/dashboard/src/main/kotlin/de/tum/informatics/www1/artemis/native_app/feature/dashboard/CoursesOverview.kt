@@ -8,10 +8,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -188,7 +193,8 @@ internal fun CoursesOverview(
         BasicDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(top = padding.calculateTopPadding())
+                .consumeWindowInsets(WindowInsets.systemBars),
             dataState = coursesDataState,
             loadingText = stringResource(id = R.string.courses_loading_loading),
             failureText = stringResource(id = R.string.courses_loading_failure),
