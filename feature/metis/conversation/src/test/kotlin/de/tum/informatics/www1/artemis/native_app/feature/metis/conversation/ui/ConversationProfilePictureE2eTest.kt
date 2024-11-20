@@ -75,7 +75,7 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
     }
 
 
-    fun setupUi(
+    private fun setupUi(
         post: PostPojo
     ) {
         composeTestRule.setContent {
@@ -95,6 +95,7 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
                 courseId = courseId,
                 state = LazyListState(),
                 isReplyEnabled = false,
+                markdownImageLoader = null,
                 profilePictureImageProvider = profilePictureImageProvider,
                 emojiService = EmojiServiceStub,
                 onCreatePost = { CompletableDeferred() },
@@ -103,7 +104,6 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onClickViewPost = {},
                 onRequestRetrySend = {},
-                imageLoaderCreation = { CompletableDeferred() },
                 title = "title",
             )
         }

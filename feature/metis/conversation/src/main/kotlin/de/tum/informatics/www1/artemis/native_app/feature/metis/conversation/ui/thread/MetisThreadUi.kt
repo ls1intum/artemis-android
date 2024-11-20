@@ -34,7 +34,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfilePictureImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
@@ -298,20 +297,20 @@ private fun PostAndRepliesList(
         item {
             val postActions = rememberPostActions(post)
 
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    PostWithBottomSheet(
-                        modifier = Modifier.padding(top = 8.dp),
-                        post = post,
-                        postItemViewType = PostItemViewType.ThreadContextPostItem,
-                        postActions = postActions,
-                        displayHeader = true,
-                        clientId = clientId,
-                        profilePictureImageProvider = profilePictureImageProvider,
-                        onClick = {}
-                    )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                PostWithBottomSheet(
+                    modifier = Modifier.padding(top = 8.dp),
+                    post = post,
+                    postItemViewType = PostItemViewType.ThreadContextPostItem,
+                    postActions = postActions,
+                    profilePictureImageProvider = profilePictureImageProvider,
+                    displayHeader = true,
+                    clientId = clientId,
+                    onClick = {}
+                )
 
                 Divider()
 
@@ -324,25 +323,24 @@ private fun PostAndRepliesList(
             key = { _, post -> post.postId }) { index, answerPost ->
             val postActions = rememberPostActions(answerPost)
 
-                PostWithBottomSheet(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(testTagForAnswerPost(answerPost.clientPostId)),
+            PostWithBottomSheet(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(testTagForAnswerPost(answerPost.clientPostId)),
+                post = answerPost,
+                postActions = postActions,
+                profilePictureImageProvider = profilePictureImageProvider,
+                postItemViewType = PostItemViewType.ThreadAnswerItem,
+                clientId = clientId,
+                displayHeader = shouldDisplayHeader(
+                    index = index,
                     post = answerPost,
-                    postActions = postActions,
-                    postItemViewType = PostItemViewType.ThreadAnswerItem,
-                    clientId = clientId,
-                    displayHeader = shouldDisplayHeader(
-                        index = index,
-                        post = answerPost,
-                        postCount = post.orderedAnswerPostings.size,
-                        order = DisplayPostOrder.REGULAR,
-                        getPost = post.orderedAnswerPostings::get
-                    ),
-                    profilePictureImageProvider = profilePictureImageProvider,
-                    onClick = {}
-                )
-            }
+                    postCount = post.orderedAnswerPostings.size,
+                    order = DisplayPostOrder.REGULAR,
+                    getPost = post.orderedAnswerPostings::get
+                ),
+                onClick = {}
+            )
         }
     }
 }
