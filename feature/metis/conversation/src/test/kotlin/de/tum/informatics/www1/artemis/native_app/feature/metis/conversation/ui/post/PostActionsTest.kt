@@ -67,6 +67,19 @@ class PostActionsTest : BaseComposeTest() {
         }
     }
 
+    @Test
+    fun `test GIVEN a post WHEN calling rememberPostActions as the post author THEN onRequestDeletePost is not null`() {
+        composeTestRule.setContent {
+            val postActions = createPostActions(
+                requestorId = author.id,
+                hasModerationRights = false
+            )
+
+            assertNotNull(postActions.requestDeletePost)
+            assertEquals(DELETE_POST, postActions.requestDeletePost)
+        }
+    }
+
 
     @Composable
     private fun createPostActions(

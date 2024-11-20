@@ -50,12 +50,12 @@ fun rememberPostActions(
         }
 
         val doesPostExistOnServer = post.serverPostId != null
-        val hasEditPostRights = post.authorId == clientId
+        val isPostAuthor = post.authorId == clientId
         val hasResolvePostRights = isAtLeastTutorInCourse || post.authorId == clientId
 
         PostActions(
-            requestEditPost = if (doesPostExistOnServer && hasEditPostRights) onRequestEdit else null,
-            requestDeletePost = if (hasModerationRights) onRequestDelete else null,
+            requestEditPost = if (doesPostExistOnServer && isPostAuthor) onRequestEdit else null,
+            requestDeletePost = if (isPostAuthor || hasModerationRights) onRequestDelete else null,
             onClickReaction = if (doesPostExistOnServer) onClickReaction else null,
             onCopyText = {
                 clipboardManager.setText(AnnotatedString(post.content.orEmpty()))
