@@ -6,9 +6,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -140,7 +144,8 @@ internal fun RegisterForCourseScreen(
         RegisterForCourseContent(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
+                .consumeWindowInsets(WindowInsets.systemBars)
                 .padding(horizontal = 8.dp),
             courses = courses,
             serverUrl = properServerUrl,
@@ -235,6 +240,7 @@ private fun RegisterForCourseContent(
                 .fillMaxSize()
                 .testTag(TEST_TAG_REGISTRABLE_COURSE_LIST),
             columns = GridCells.Fixed(columnCount),
+            contentPadding = WindowInsets.systemBars.asPaddingValues(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
