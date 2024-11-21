@@ -1,8 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -58,13 +60,15 @@ internal fun ConversationThreadScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .imePadding()
+                .padding(bottom = padding.calculateBottomPadding())
         ) {
             CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides viewModel) {
                 MetisThreadUi(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
+                    listContentPadding = PaddingValues(top = padding.calculateTopPadding()),
                     viewModel = viewModel
                 )
             }

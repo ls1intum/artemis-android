@@ -10,10 +10,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
@@ -262,7 +267,9 @@ private fun LoginUiScreen(
         NavHost(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .imePadding()
+                .consumeWindowInsets(WindowInsets.systemBars)
+                .padding(top = paddingValues.calculateTopPadding()),
             navController = nestedNavController,
             startDestination = if (hasSelectedInstance) NestedDestination.Home else NestedDestination.InstanceSelection
         ) {
@@ -444,7 +451,11 @@ private fun AccountUi(
             ClickableText(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(bottom = 8.dp),
+                    .padding(
+                        bottom = WindowInsets.systemBars
+                            .asPaddingValues()
+                            .calculateBottomPadding()
+                    ),
                 text = AnnotatedString(stringResource(id = R.string.account_change_artemis_instance_label)),
                 style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.linkTextColor),
                 onClick = { onNavigateToInstanceSelection() }

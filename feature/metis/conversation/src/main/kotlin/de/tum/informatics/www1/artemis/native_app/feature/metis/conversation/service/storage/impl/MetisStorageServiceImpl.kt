@@ -2,9 +2,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.BasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext
@@ -336,6 +336,19 @@ internal class MetisStorageServiceImpl(
         val metisDao = databaseProvider.metisDao
 
         databaseProvider.database.withTransaction {
+            val doesPostAnswerAlreadyExist = metisDao.isPostPresentInContext(
+                serverId = host,
+                serverPostId = post.id ?: return@withTransaction,
+                courseId = metisContext.courseId,
+                conversationId = metisContext.conversationId
+            )
+
+            // In rare cases, the websocket connection already inserted the post answer. In that case, we can delete the client side post.
+            if (doesPostAnswerAlreadyExist) {
+                metisDao.deletePostingWithClientSideId(clientPostId = clientSidePostId)
+                return@withTransaction
+            }
+
             metisDao.upgradePost(
                 clientSidePostId = clientSidePostId,
                 serverSidePostId = post.id ?: return@withTransaction
@@ -502,7 +515,6 @@ internal class MetisStorageServiceImpl(
                 answerServerIds = sp.answers.orEmpty().mapNotNull { it.id }
             )
         }
-
         for (ap in sp.answers.orEmpty()) {
             val answerPostId = ap.id ?: continue
 

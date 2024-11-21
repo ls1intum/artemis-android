@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
@@ -124,6 +125,7 @@ fun MetisChatList(
     serverUrl: String,
     courseId: Long,
     state: LazyListState,
+    emojiService: EmojiService = koinInject(),
     isReplyEnabled: Boolean,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
@@ -155,7 +157,7 @@ fun MetisChatList(
                 state = state,
                 itemCount = posts.itemCount,
                 order = DisplayPostOrder.REVERSED,
-                emojiService = koinInject(),
+                emojiService = emojiService,
                 bottomItem = bottomItem
             ) {
                 when (posts) {
