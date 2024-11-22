@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.dashboard
+package de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
@@ -9,12 +9,10 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -73,6 +71,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseEx
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseItemGrid
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.ExpandedCourseItemHeader
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.CoursePointsDecimalFormat
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.BuildConfig
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.R
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.BetaHintService
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
