@@ -74,6 +74,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.CoursePointsD
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.R
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.BetaHintService
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.SurveyHintService
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import org.koin.compose.koinInject
@@ -116,7 +117,8 @@ internal fun CoursesOverview(
     onClickRegisterForCourse: () -> Unit,
     onViewCourse: (courseId: Long) -> Unit,
     isBeta: Boolean = BuildConfig.isBeta,
-    betaHintService: BetaHintService = koinInject()
+    betaHintService: BetaHintService = koinInject(),
+    surveyHintService: SurveyHintService = koinInject()
 ) {
     val coursesDataState by viewModel.dashboard.collectAsState()
 
@@ -137,6 +139,13 @@ internal fun CoursesOverview(
     // Trigger the dialog if service sets value to true
     LaunchedEffect(shouldDisplayBetaDialog) {
         if (shouldDisplayBetaDialog) displayBetaDialog = true
+    }
+
+    val shouldDisplaySurveyHint by surveyHintService.shouldShowSurveyHint.collectAsState(initial = false)
+    var displaySurveyHint by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(shouldDisplaySurveyHint) {
+        if (shouldDisplaySurveyHint) displaySurveyHint = true
     }
 
     Scaffold(
