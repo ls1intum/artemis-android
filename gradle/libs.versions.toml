@@ -139,6 +139,6 @@ android-library = { id = "com.android.library", version.ref = "androidGradlePlug
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
-google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.0.1" }
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.0.0" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 google-ksp = { id = "com.google.devtools.ksp", version = "1.9.25-1.0.20" }
