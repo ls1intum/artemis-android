@@ -22,4 +22,5 @@ dependencies {
     api(libs.koin.test.junit4)
     api(libs.robolectric)
     api(libs.koin.android.test)
+    api(libs.androidx.paging.testing)
 }
