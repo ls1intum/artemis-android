@@ -37,24 +37,10 @@ fun BetaHintDialog(
             ) {
                 Text(text = stringResource(id = R.string.dashboard_dialog_beta_message))
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(
-                            role = Role.Checkbox,
-                            onClick = { isDismissPersistentlyChecked = !isDismissPersistentlyChecked }
-                        ),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        modifier = Modifier,
-                        checked = isDismissPersistentlyChecked,
-                        onCheckedChange = { isDismissPersistentlyChecked = it }
-                    )
-
-                    Text(text = stringResource(id = R.string.dashboard_dialog_beta_do_not_show_again))
-                }
+                DoNotShowAgainCheckBox(
+                    isChecked = isDismissPersistentlyChecked,
+                    onCheckedChange = { isDismissPersistentlyChecked = it }
+                )
             }
         },
         confirmButton = {
@@ -65,4 +51,29 @@ fun BetaHintDialog(
             }
         }
     )
+}
+
+@Composable
+fun DoNotShowAgainCheckBox(
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                role = Role.Checkbox,
+                onClick = { onCheckedChange(!isChecked) }
+            ),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            modifier = Modifier,
+            checked = isChecked,
+            onCheckedChange = onCheckedChange
+        )
+
+        Text(text = stringResource(id = R.string.dashboard_dialog_beta_do_not_show_again))
+    }
 }

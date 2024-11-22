@@ -115,13 +115,6 @@ internal fun CoursesOverview(
         if (shouldDisplayBetaDialog) displayBetaDialog = true
     }
 
-    val shouldDisplaySurveyHint by surveyHintService.shouldShowSurveyHint.collectAsState(initial = false)
-    var displaySurveyHint by rememberSaveable { mutableStateOf(false) }
-
-    LaunchedEffect(shouldDisplaySurveyHint) {
-        if (shouldDisplaySurveyHint) displaySurveyHint = true
-    }
-
     Scaffold(
         modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
         topBar = {
@@ -173,33 +166,43 @@ internal fun CoursesOverview(
             )
         }
     ) { padding ->
-        BasicDataStateUi(
+        Column(
             modifier = Modifier
-                .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars),
-            dataState = coursesDataState,
-            loadingText = stringResource(id = R.string.courses_loading_loading),
-            failureText = stringResource(id = R.string.courses_loading_failure),
-            retryButtonText = stringResource(id = R.string.courses_loading_try_again),
-            onClickRetry = viewModel::requestReloadDashboard
-        ) { dashboard: Dashboard ->
-            if (dashboard.courses.isEmpty()) {
-                DashboardEmpty(
-                    modifier = Modifier.fillMaxSize(),
-                    onClickSignup = onClickRegisterForCourse
-                )
-            } else {
-                CourseList(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 8.dp)
-                        .testTag(TEST_TAG_COURSE_LIST),
-                    courses = dashboard.courses,
-                    serverUrl = serverUrl,
-                    authorizationToken = authToken,
-                    onClickOnCourse = { course -> onViewCourse(course.id ?: 0L) }
-                )
+                .consumeWindowInsets(WindowInsets.systemBars)
+        ) {
+            SurveyHint(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                surveyHintService = surveyHintService
+            )
+
+            BasicDataStateUi(
+                modifier = Modifier.fillMaxSize(),
+                dataState = coursesDataState,
+                loadingText = stringResource(id = R.string.courses_loading_loading),
+                failureText = stringResource(id = R.string.courses_loading_failure),
+                retryButtonText = stringResource(id = R.string.courses_loading_try_again),
+                onClickRetry = viewModel::requestReloadDashboard
+            ) { dashboard: Dashboard ->
+                if (dashboard.courses.isEmpty()) {
+                    DashboardEmpty(
+                        modifier = Modifier.fillMaxSize(),
+                        onClickSignup = onClickRegisterForCourse
+                    )
+                } else {
+                    CourseList(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 8.dp)
+                            .testTag(TEST_TAG_COURSE_LIST),
+                        courses = dashboard.courses,
+                        serverUrl = serverUrl,
+                        authorizationToken = authToken,
+                        onClickOnCourse = { course -> onViewCourse(course.id ?: 0L) }
+                    )
+                }
             }
         }
     }
