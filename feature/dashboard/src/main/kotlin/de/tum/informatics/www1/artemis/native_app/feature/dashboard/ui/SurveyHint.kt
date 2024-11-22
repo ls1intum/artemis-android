@@ -31,8 +31,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.R
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.SurveyHintService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -102,7 +104,7 @@ private fun SurveyHintImpl(
             Spacer(modifier = Modifier.width(8.dp))
 
             Text(
-                text = "Survey available",
+                text = stringResource(R.string.survey_hint_text),
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -125,13 +127,13 @@ private fun SurveyDialog(
 
     AlertDialog(
         onDismissRequest = { onClose(false) },
-        title = { Text(text = "We need your help!") },
+        title = { Text(text = stringResource(R.string.survey_dialog_title)) },
         text = {
             Column(
                 modifier = Modifier,
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
-                Text(text = "Do you have 5-10 minutes to take a short survey and help us improve the app?")
+                Text(text = stringResource(R.string.survey_dialog_do_you_have_time))
 
                 Icon(
                     modifier = Modifier
@@ -142,14 +144,14 @@ private fun SurveyDialog(
                     contentDescription = null,
                 )
 
-                Text("Thank you for your consideration!")
+                Text(stringResource(R.string.survey_dialog_thank_you))
             }
         },
         confirmButton = {
             Button(
                 onClick = { onClose(true) }
             ) {
-                Text(text = "Participate")
+                Text(text = stringResource(R.string.survey_dialog_button_participate))
 
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.OpenInNew,
@@ -162,7 +164,7 @@ private fun SurveyDialog(
             TextButton(
                 onClick = { onClose(false) }
             ) {
-                Text(text = "Not now")
+                Text(text = stringResource(R.string.survey_dialog_button_not_now))
             }
         }
     )
