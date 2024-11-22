@@ -1,4 +1,3 @@
-// File: MetisDaoTest.kt
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db
 
 import androidx.test.platform.app.InstrumentationRegistry
