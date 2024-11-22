@@ -7,7 +7,7 @@ import androidx.room.Index
 
 @Entity(
     tableName = "reactions",
-    primaryKeys = ["post_id", "emoji", "author_id"],
+    primaryKeys = ["post_id", "emoji", "author_id", "server_id"],
     foreignKeys = [
         ForeignKey(
             entity = BasePostingEntity::class,
