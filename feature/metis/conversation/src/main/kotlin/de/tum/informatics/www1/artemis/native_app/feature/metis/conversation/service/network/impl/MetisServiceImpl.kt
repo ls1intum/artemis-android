@@ -5,6 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketTopic
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.RESOURCE_PATH_SEGMENTS
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
@@ -153,12 +154,12 @@ internal class MetisServiceImpl(
         courseId: Long,
         clientId: Long
     ): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>> {
-        val channel = "/topic/metis/courses/$courseId"
-        val channelConversationNotifications = "/topic/user/$clientId/notifications/conversations"
+        val courseWideTopic = WebsocketTopic.getCourseWideConversationUpdateTopic(courseId)
+        val normalTopic = WebsocketTopic.getNormalConversationUpdateTopic(clientId)
 
-        val flow1 = websocketProvider.subscribe(channel, MetisPostDTO.serializer())
-        val flow2 = websocketProvider.subscribe(channelConversationNotifications, MetisPostDTO.serializer())
+        val courseWideUpdates = websocketProvider.subscribe(courseWideTopic, MetisPostDTO.serializer())
+        val normalUpdates = websocketProvider.subscribe(normalTopic, MetisPostDTO.serializer())
 
-        return merge(flow1, flow2)
+        return merge(courseWideUpdates, normalUpdates)
     }
 }
