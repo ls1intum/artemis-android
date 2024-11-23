@@ -270,12 +270,14 @@ internal open class ConversationViewModel(
 
         // Receive websocket updates and store them in the db.
         viewModelScope.launch(coroutineContext) {
-            serverConfigurationService.host.collect { host ->
-                webSocketUpdateUseCase.updatePosts(
-                    host = host,
-                    context = MetisContext.Conversation(courseId, conversationId)
-                )
-            }
+            combine(serverConfigurationService.host, clientId.filterSuccess()) { host, clientId -> host to clientId }
+                .collect { (host, clientId) ->
+                    webSocketUpdateUseCase.updatePosts(
+                        host = host,
+                        context = metisContext,
+                        clientId = clientId
+                    )
+                }
         }
     }
 
