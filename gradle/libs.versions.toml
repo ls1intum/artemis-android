@@ -123,7 +123,7 @@ noties-markwon-simple-ext = { group = "io.noties.markwon", name = "simple-ext", 
 noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", version.ref = "markwon" }
 oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 placeholder-material = { group = "io.github.fornewid", name = "placeholder-material3", version.ref = "placeholderMaterial" }
-play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.0.1" }
+play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.1.0" }
 robolectric = { group = "org.robolectric", name = "robolectric", version = "4.13" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
 sentry-compose-android = { group = "io.sentry", name = "sentry-compose-android", version.ref = "sentry-android" }
