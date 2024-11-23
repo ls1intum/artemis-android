@@ -1,11 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
-import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostAction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisCrudAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostDTO
 
 /**
@@ -43,25 +42,24 @@ class ConversationWebSocketUpdateUseCase(
         context: MetisContext,
         host: String
     ) {
-        Log.d("WebSocket", "Received post update: ${dto.action} ${dto.post}")
         when (dto.action) {
-            MetisPostAction.CREATE -> {
+            MetisCrudAction.CREATE -> {
                 metisStorageService.insertLiveCreatedPost(host, context, dto.post)
             }
 
-            MetisPostAction.UPDATE -> {
+            MetisCrudAction.UPDATE -> {
                 metisStorageService.updatePost(host, context, dto.post)
             }
 
-            MetisPostAction.DELETE -> {
+            MetisCrudAction.DELETE -> {
                 metisStorageService.deletePosts(
                     host,
                     listOf(dto.post.id ?: return)
                 )
             }
 
-            MetisPostAction.NEW_MESSAGE -> {
-
+            MetisCrudAction.NEW_MESSAGE -> {
+                // Nothing to do here. Only relevant for the conversation overview.
             }
         }
     }
