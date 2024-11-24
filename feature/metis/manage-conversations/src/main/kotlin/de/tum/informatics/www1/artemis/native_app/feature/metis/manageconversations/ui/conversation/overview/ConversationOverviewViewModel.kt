@@ -283,7 +283,7 @@ class ConversationOverviewViewModel(
 
                             // TODO: It seems like there are no updates received from the websocket -> investigate
 
-                            when (serverSentUpdate.crudAction) {
+                            when (serverSentUpdate.action) {
                                 MetisCrudAction.CREATE, MetisCrudAction.UPDATE -> {
                                     currentConversations[serverSentUpdate.conversation.id] =
                                         serverSentUpdate.conversation

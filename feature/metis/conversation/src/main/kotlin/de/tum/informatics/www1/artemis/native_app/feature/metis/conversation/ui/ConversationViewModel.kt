@@ -233,7 +233,7 @@ internal open class ConversationViewModel(
         clientId.filterSuccess()
     ) { conversationDataState, clientId ->
         websocketProvider.subscribeToConversationUpdates(clientId, metisContext.courseId)
-            .filter { it.crudAction == MetisCrudAction.UPDATE }
+            .filter { it.action == MetisCrudAction.UPDATE }
             .map<ConversationWebsocketDto, DataState<Conversation>> { DataState.Success(it.conversation) }
             .onStart { emit(conversationDataState) }
     }
