@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 
 import android.app.Activity
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
@@ -20,7 +21,6 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage.ConversationPreferenceService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisCrudAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ConversationWebsocketDto
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
@@ -281,7 +281,9 @@ class ConversationOverviewViewModel(
                         is ServerSentConversationUpdate -> {
                             val serverSentUpdate = update.update
 
-                            // TODO: It seems like there are no updates received from the websocket -> investigate
+                            Log.d("ConversationOverviewViewModel", "Received update: ${serverSentUpdate.action} for conversation ${serverSentUpdate.conversation.id}")
+
+                            // TODO: Also listen to the websocket updates for the conversation messages
 
                             when (serverSentUpdate.action) {
                                 MetisCrudAction.CREATE, MetisCrudAction.UPDATE -> {
@@ -289,23 +291,23 @@ class ConversationOverviewViewModel(
                                         serverSentUpdate.conversation
                                 }
 
-                                MetisCrudAction.NEW_MESSAGE -> {
-                                    val isMetisContextVisible =
-                                        visibleMetisContexts.value.any { visibleMetisContext ->
-                                            val metisContext = visibleMetisContext.metisContext
-
-                                            metisContext is MetisContext.Conversation && metisContext.conversationId == serverSentUpdate.conversation.id
-                                        }
-
-                                    val existingConversation =
-                                        currentConversations[serverSentUpdate.conversation.id]
-                                    if (existingConversation != null && !isMetisContextVisible) {
-                                        currentConversations[serverSentUpdate.conversation.id] =
-                                            existingConversation.withUnreadMessagesCount(
-                                                (existingConversation.unreadMessagesCount ?: 0) + 1
-                                            )
-                                    }
-                                }
+//                                MetisCrudAction.NEW_MESSAGE -> {
+//                                    val isMetisContextVisible =
+//                                        visibleMetisContexts.value.any { visibleMetisContext ->
+//                                            val metisContext = visibleMetisContext.metisContext
+//
+//                                            metisContext is MetisContext.Conversation && metisContext.conversationId == serverSentUpdate.conversation.id
+//                                        }
+//
+//                                    val existingConversation =
+//                                        currentConversations[serverSentUpdate.conversation.id]
+//                                    if (existingConversation != null && !isMetisContextVisible) {
+//                                        currentConversations[serverSentUpdate.conversation.id] =
+//                                            existingConversation.withUnreadMessagesCount(
+//                                                (existingConversation.unreadMessagesCount ?: 0) + 1
+//                                            )
+//                                    }
+//                                }
 
                                 MetisCrudAction.DELETE -> {
                                     currentConversations.remove(serverSentUpdate.conversation.id)

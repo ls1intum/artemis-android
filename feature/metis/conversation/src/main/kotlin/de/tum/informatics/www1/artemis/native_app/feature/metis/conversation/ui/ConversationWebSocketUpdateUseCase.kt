@@ -57,10 +57,6 @@ class ConversationWebSocketUpdateUseCase(
                     listOf(dto.post.id ?: return)
                 )
             }
-
-            MetisCrudAction.NEW_MESSAGE -> {
-                // Nothing to do here. Only relevant for the conversation overview.
-            }
         }
     }
 }
