@@ -4,7 +4,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.RESOURCE_PATH_SEGMENTS
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
@@ -19,7 +18,6 @@ import io.ktor.http.appendPathSegments
 
 internal class MetisServiceImpl(
     private val ktorProvider: KtorProvider,
-    private val websocketProvider: WebsocketProvider
 ) : MetisService {
 
     override suspend fun getPosts(
@@ -145,6 +143,4 @@ internal class MetisServiceImpl(
             }
         }
     }
-
-
 }
