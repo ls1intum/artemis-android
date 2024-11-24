@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 
 import android.app.Activity
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
@@ -19,9 +18,11 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisCrudAction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostDTO
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ConversationWebsocketDto
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
@@ -29,6 +30,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToConversationUpdates
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToPostUpdates
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextReporter
@@ -134,6 +136,18 @@ class ConversationOverviewViewModel(
             replay = 0
         )
 
+    private val postUpdates: Flow<MetisPostDTO> = clientId
+        .filterSuccess()
+        .flatMapLatest { userId ->
+            websocketProvider.subscribeToPostUpdates(courseId, userId)
+        }
+        .flowOn(coroutineContext)
+        .shareIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(stopTimeout = 5.seconds),
+            replay = 0
+        )
+
     private val manualConversationUpdates = MutableSharedFlow<MarkMessagesRead>()
 
     /**
@@ -180,7 +194,7 @@ class ConversationOverviewViewModel(
             }
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
-    private val conversationsAsCollections: StateFlow<DataState<de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections>> =
+    private val conversationsAsCollections: StateFlow<DataState<ConversationCollections>> =
         combine(
             updatedConversations,
             currentPreferences,
@@ -189,7 +203,7 @@ class ConversationOverviewViewModel(
             conversationsDataState.bind { conversations ->
                 val isFiltering = query.isNotBlank()
 
-                de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections(
+                ConversationCollections(
                     channels = conversations.filterNotHiddenNorFavourite<ChannelChat>()
                         .filter { !it.filterPredicate("exercise") && !it.filterPredicate("lecture") && !it.filterPredicate("exam") }
                         .asCollection(isFiltering || preferences.generalsExpanded),
@@ -231,7 +245,7 @@ class ConversationOverviewViewModel(
     /**
      * Holds the latest conversations we could successfully load.
      */
-    private val latestConversations: StateFlow<DataState<de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections>> =
+    private val latestConversations: StateFlow<DataState<ConversationCollections>> =
         conversationsAsCollections
             .transformWhile { conversationsAsCollections ->
                 emit(conversationsAsCollections)
@@ -245,7 +259,7 @@ class ConversationOverviewViewModel(
             }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    val conversations: StateFlow<DataState<de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections>> =
+    val conversations: StateFlow<DataState<ConversationCollections>> =
         combine(latestConversations, query) { latestConversationsDataState, query ->
             if (query.isBlank()) {
                 latestConversationsDataState
@@ -265,54 +279,45 @@ class ConversationOverviewViewModel(
             emit(loadedConversations)
 
             merge(
+                manualConversationUpdates,
                 conversationUpdates.map(::ServerSentConversationUpdate),
-                manualConversationUpdates
+                postUpdates.map(::ServerSentPostUpdate)
             )
                 .collect { update ->
                     when (update) {
                         is MarkMessagesRead -> {
-                            val affectedConversation = currentConversations[update.conversationId]
-                            if (affectedConversation != null) {
-                                currentConversations[update.conversationId] =
-                                    affectedConversation.withUnreadMessagesCount(0L)
-                            }
+                            val affectedConversation = currentConversations[update.conversationId] ?: return@collect
+                            currentConversations[update.conversationId] = affectedConversation.withUnreadMessagesCount(0L)
                         }
 
                         is ServerSentConversationUpdate -> {
-                            val serverSentUpdate = update.update
+                            val serverConversationUpdate = update.update
 
-                            Log.d("ConversationOverviewViewModel", "Received update: ${serverSentUpdate.action} for conversation ${serverSentUpdate.conversation.id}")
-
-                            // TODO: Also listen to the websocket updates for the conversation messages
-
-                            when (serverSentUpdate.action) {
+                            when (serverConversationUpdate.action) {
                                 MetisCrudAction.CREATE, MetisCrudAction.UPDATE -> {
-                                    currentConversations[serverSentUpdate.conversation.id] =
-                                        serverSentUpdate.conversation
+                                    currentConversations[serverConversationUpdate.conversation.id] =
+                                        serverConversationUpdate.conversation
                                 }
-
-//                                MetisCrudAction.NEW_MESSAGE -> {
-//                                    val isMetisContextVisible =
-//                                        visibleMetisContexts.value.any { visibleMetisContext ->
-//                                            val metisContext = visibleMetisContext.metisContext
-//
-//                                            metisContext is MetisContext.Conversation && metisContext.conversationId == serverSentUpdate.conversation.id
-//                                        }
-//
-//                                    val existingConversation =
-//                                        currentConversations[serverSentUpdate.conversation.id]
-//                                    if (existingConversation != null && !isMetisContextVisible) {
-//                                        currentConversations[serverSentUpdate.conversation.id] =
-//                                            existingConversation.withUnreadMessagesCount(
-//                                                (existingConversation.unreadMessagesCount ?: 0) + 1
-//                                            )
-//                                    }
-//                                }
 
                                 MetisCrudAction.DELETE -> {
-                                    currentConversations.remove(serverSentUpdate.conversation.id)
+                                    currentConversations.remove(serverConversationUpdate.conversation.id)
                                 }
                             }
+                        }
+
+                        is ServerSentPostUpdate -> {
+                            val postUpdate = update.update
+                            if (postUpdate.action != MetisCrudAction.CREATE) return@collect
+
+                            val conversationId = postUpdate.post.conversation?.id ?: return@collect
+                            val isConversationVisible = visibleMetisContexts.value.any { it.isInConversation(conversationId) }
+                            if (isConversationVisible) return@collect       // The user is currently looking at the conversation in the UI
+
+                            val existingConversation = currentConversations[conversationId] ?: return@collect
+
+                            currentConversations[conversationId] = existingConversation.withUnreadMessagesCount(
+                                (existingConversation.unreadMessagesCount ?: 0) + 1
+                            )
                         }
                     }
 

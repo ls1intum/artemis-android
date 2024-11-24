@@ -5,12 +5,10 @@ import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
-import de.tum.informatics.www1.artemis.native_app.core.websocket.impl.WebsocketTopic
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.RESOURCE_PATH_SEGMENTS
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostDTO
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
@@ -18,8 +16,6 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.appendPathSegments
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.merge
 
 internal class MetisServiceImpl(
     private val ktorProvider: KtorProvider,
@@ -150,16 +146,5 @@ internal class MetisServiceImpl(
         }
     }
 
-    override fun subscribeToPostUpdates(
-        courseId: Long,
-        clientId: Long
-    ): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>> {
-        val courseWideTopic = WebsocketTopic.getCourseWideConversationUpdateTopic(courseId)
-        val normalTopic = WebsocketTopic.getNormalConversationUpdateTopic(clientId)
 
-        val courseWideUpdates = websocketProvider.subscribe(courseWideTopic, MetisPostDTO.serializer())
-        val normalUpdates = websocketProvider.subscribe(normalTopic, MetisPostDTO.serializer())
-
-        return merge(courseWideUpdates, normalUpdates)
-    }
 }

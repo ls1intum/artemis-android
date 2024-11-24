@@ -143,7 +143,7 @@ internal open class ConversationViewModel(
      * Manages updating from the websocket.
      */
     private val webSocketUpdateUseCase = ConversationWebSocketUpdateUseCase(
-        metisService = metisService,
+        websocketProvider = websocketProvider,
         metisStorageService = metisStorageService
     )
 
