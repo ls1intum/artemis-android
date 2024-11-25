@@ -1,5 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.impl
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingSource
+import androidx.paging.testing.asSnapshot
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
@@ -26,6 +30,9 @@ abstract class MetisStorageBaseTest {
     private val course: MetisContext.Course = MetisContext.Course(courseId = 1)
     internal val conversation = OneToOneChat(id = 2)
     internal val metisContext = MetisContext.Conversation(course.courseId, conversation.id)
+
+    internal val conversationTwo = OneToOneChat(id = 3)
+    internal val metisContextTwo = MetisContext.Conversation(course.courseId, conversationTwo.id)
 
     internal val localAnswerPojo = AnswerPostPojo(
         parentPostId = parentClientPostId,
@@ -64,5 +71,17 @@ abstract class MetisStorageBaseTest {
     )
 
     internal val basePost = StandalonePost(basePostPojo, conversation)
+    internal val basePostTwo = StandalonePost(basePostPojo, conversationTwo)
     internal val localAnswer = AnswerPost(localAnswerPojo, basePost)
+
+    internal suspend fun getStoredPosts(metisContext: MetisContext) = sut.getStoredPosts(
+        serverId = host,
+        metisContext = metisContext
+    ).loadAsList()
+
+    internal suspend fun <T : Any> PagingSource<Int, T>.loadAsList(): List<T> {
+        return Pager(PagingConfig(pageSize = 10), pagingSourceFactory = { this }).flow.asSnapshot {
+            scrollTo(50)
+        }
+    }
 }

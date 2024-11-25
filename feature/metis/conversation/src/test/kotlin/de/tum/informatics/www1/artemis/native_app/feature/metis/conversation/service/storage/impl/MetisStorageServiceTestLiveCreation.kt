@@ -1,11 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertEquals
 
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
@@ -20,7 +23,7 @@ class MetisStorageServiceTestLiveCreation : MetisStorageBaseTest() {
             posts = listOf(basePost),
         )
 
-        // WHEN: Inserting a live-created post
+        // WHEN: Inserting a live-created post with the same id into the same conversation
         sut.insertLiveCreatedPost(
             host = host,
             metisContext = metisContext,
@@ -33,29 +36,38 @@ class MetisStorageServiceTestLiveCreation : MetisStorageBaseTest() {
 
     @Test
     fun testInsertLiveCreatedPost() = runTest {
-        // GIVEN: An empty chat
+        // GIVEN: An empty conversation
 
-        // WHEN: Inserting a live-created post
+        // WHEN: Inserting a live-created post into a different conversation than the current
         sut.insertLiveCreatedPost(
             host = host,
             metisContext = metisContext,
-            post = basePost
+            post = basePostTwo
         )
 
         // THEN: The post should be inserted and matched to the correct conversation
-        assertPostIsCreated()
-        assertPostIsMatchedToConversation()
+        val createdPost = assertPostIsCreated()
+        assertPostIsMatchedToConversation(createdPost)
     }
 
-    private fun assertPostIsCreated() {
-        //TODO
+    private suspend fun assertPostIsCreated(): PostPojo {
+        val posts = getStoredPosts(metisContextTwo)
+        assertEquals(1, posts.size)
+        assertEquals(basePostTwo.content, posts.first().content)
+        return posts[0]
     }
 
-    private fun assertStoredContentIsNotModified() {
-        //TODO
+    private suspend fun assertStoredContentIsNotModified() {
+        val posts = getStoredPosts(metisContext)
+        val standalonePost = StandalonePost(posts.first(), conversation)
+        assertEquals(1, posts.size)
+        assertEquals(basePost.content, standalonePost.content)
+        assertEquals(basePost.id, standalonePost.id)
+        assertEquals(basePost.conversation, standalonePost.conversation)
     }
 
-    private fun assertPostIsMatchedToConversation() {
-        //TODO
+    private fun assertPostIsMatchedToConversation(createdPost: PostPojo) {
+        val createdStandalonePost = StandalonePost(createdPost, conversationTwo)
+        assertEquals(basePostTwo.conversation?.id, createdStandalonePost.conversation?.id)
     }
 }

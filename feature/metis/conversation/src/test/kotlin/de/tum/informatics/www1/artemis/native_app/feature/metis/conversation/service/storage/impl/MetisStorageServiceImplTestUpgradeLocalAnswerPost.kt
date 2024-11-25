@@ -1,9 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.impl
 
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingSource
-import androidx.paging.testing.asSnapshot
+
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
@@ -121,7 +118,7 @@ class MetisStorageServiceImplUpgradeLocalAnswerPostTest : MetisStorageBaseTest()
     }
 
     private suspend fun assertStoredContentIsTheSame() {
-        val posts = getStoredPosts()
+        val posts = getStoredPosts(metisContext)
         assertEquals(1, posts.size)
         assertEquals(basePostPojo.content, posts.first().content)
         assertEquals(1, posts.first().answers.size)
@@ -129,18 +126,7 @@ class MetisStorageServiceImplUpgradeLocalAnswerPostTest : MetisStorageBaseTest()
     }
 
     private suspend fun assertUpgradeSuccessful() {
-        val posts = getStoredPosts()
+        val posts = getStoredPosts(metisContext)
         assertEquals(answerUpdated.serverPostId, posts.first().answers.first().serverPostId)
-    }
-
-    private suspend fun getStoredPosts() = sut.getStoredPosts(
-        serverId = host,
-        metisContext = metisContext
-    ).loadAsList()
-
-    private suspend fun <T : Any> PagingSource<Int, T>.loadAsList(): List<T> {
-        return Pager(PagingConfig(pageSize = 10), pagingSourceFactory = { this }).flow.asSnapshot {
-            scrollTo(50)
-        }
     }
 }
