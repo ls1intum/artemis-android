@@ -84,7 +84,7 @@ internal fun MetisThreadUi(
 
     val context = LocalContext.current
     var imageLoader: ImageLoader? by remember { mutableStateOf(null) }
-    LaunchedEffect(rememberCoroutineScope()) {
+    LaunchedEffect(true) {
         imageLoader = viewModel.createMarkdownImageLoader(context).await()
     }
 
@@ -101,50 +101,51 @@ internal fun MetisThreadUi(
 
     val conversationDataState by viewModel.conversation.collectAsState()
 
-    MetisThreadUi(
-        modifier = modifier,
-        courseId = viewModel.courseId,
-        initialReplyTextProvider = viewModel,
-        conversationDataState = conversationDataState,
-        postDataState = postDataState,
-        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-        hasModerationRights = hasModerationRights,
-        listContentPadding = listContentPadding,
-        serverUrl = serverUrl,
-        emojiService = koinInject(),
-        clientId = clientId,
-        markdownImageLoader = imageLoader,
-        onCreatePost = viewModel::createReply,
-        onEditPost = { post, newText ->
-            val parentPost = postDataState.orNull()
+    ProvideMarkwon(imageLoader) {
+        MetisThreadUi(
+            modifier = modifier,
+            courseId = viewModel.courseId,
+            initialReplyTextProvider = viewModel,
+            conversationDataState = conversationDataState,
+            postDataState = postDataState,
+            isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+            hasModerationRights = hasModerationRights,
+            listContentPadding = listContentPadding,
+            serverUrl = serverUrl,
+            emojiService = koinInject(),
+            clientId = clientId,
+            onCreatePost = viewModel::createReply,
+            onEditPost = { post, newText ->
+                val parentPost = postDataState.orNull()
 
-            when (post) {
-                is AnswerPostPojo -> {
+                when (post) {
+                    is AnswerPostPojo -> {
+                        if (parentPost == null) CompletableDeferred(
+                            MetisModificationFailure.UPDATE_POST
+                        ) else viewModel.editAnswerPost(parentPost, post, newText)
+                    }
+
+                    is PostPojo -> viewModel.editPost(post, newText)
+                    else -> throw NotImplementedError()
+                }
+            },
+            onResolvePost = { post ->
+                val parentPost = postDataState.orNull()
+
+                if (post is AnswerPostPojo) {
                     if (parentPost == null) CompletableDeferred(
                         MetisModificationFailure.UPDATE_POST
-                    ) else viewModel.editAnswerPost(parentPost, post, newText)
+                    ) else viewModel.toggleResolvePost(parentPost, post)
+                } else {
+                    throw NotImplementedError()
                 }
-
-                is PostPojo -> viewModel.editPost(post, newText)
-                else -> throw NotImplementedError()
-            }
-        },
-        onResolvePost = { post ->
-            val parentPost = postDataState.orNull()
-
-            if (post is AnswerPostPojo) {
-                if (parentPost == null) CompletableDeferred(
-                    MetisModificationFailure.UPDATE_POST
-                ) else viewModel.toggleResolvePost(parentPost, post)
-            } else {
-                throw NotImplementedError()
-            }
-        },
-        onDeletePost = viewModel::deletePost,
-        onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
-        onRequestReload = viewModel::requestReload,
-        onRequestRetrySend = viewModel::retryCreateReply
-    )
+            },
+            onDeletePost = viewModel::deletePost,
+            onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
+            onRequestReload = viewModel::requestReload,
+            onRequestRetrySend = viewModel::retryCreateReply
+        )
+    }
 }
 
 @Composable
@@ -159,7 +160,6 @@ internal fun MetisThreadUi(
     listContentPadding: PaddingValues,
     serverUrl: String,
     emojiService: EmojiService,
-    markdownImageLoader: ImageLoader?,
     initialReplyTextProvider: InitialReplyTextProvider,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
@@ -206,7 +206,6 @@ internal fun MetisThreadUi(
                             state = listState,
                             itemCount = post.orderedAnswerPostings.size,
                             order = DisplayPostOrder.REGULAR,
-                            markdownImageLoader = markdownImageLoader,
                             emojiService = emojiService,
                             bottomItem = post.orderedAnswerPostings.lastOrNull()
                         ) {
@@ -219,7 +218,6 @@ internal fun MetisThreadUi(
                                 isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                                 listContentPadding = listContentPadding,
                                 clientId = clientId,
-                                markdownImageLoader = markdownImageLoader,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
                                 onRequestDelete = onDeletePostDelegate,
@@ -255,7 +253,6 @@ private fun PostAndRepliesList(
     isAtLeastTutorInCourse: Boolean,
     listContentPadding: PaddingValues,
     clientId: Long,
-    markdownImageLoader: ImageLoader?,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
     onRequestResolve: (IBasePost) -> Unit,
