@@ -27,7 +27,6 @@ class DefaultImageProvider : BaseImageProvider {
         return builder.build()
     }
 
-
     override fun createImageLoader(
         context: Context,
         authorizationToken: String
