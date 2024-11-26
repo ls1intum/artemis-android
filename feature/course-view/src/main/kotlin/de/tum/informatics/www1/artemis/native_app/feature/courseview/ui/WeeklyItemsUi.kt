@@ -3,9 +3,13 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui
 import android.os.Parcelable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -71,7 +75,13 @@ internal fun <T> WeeklyItemsLazyColumn(
         }
     }
 
-    LazyColumn(modifier = modifier, verticalArrangement = verticalArrangement) {
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = verticalArrangement,
+        contentPadding = PaddingValues(
+            bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+        )
+    ) {
         weeklyItemGroups.forEachIndexed { index, weeklyItems ->
             item {
                 WeeklyItemsSectionHeader(

@@ -1,7 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -61,7 +64,7 @@ fun ConversationMembersScreen(
         ConversationMembersBody(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .consumeWindowInsets(WindowInsets.systemBars)
                 .padding(top = 16.dp),
             courseId = courseId,
             conversationId = conversationId

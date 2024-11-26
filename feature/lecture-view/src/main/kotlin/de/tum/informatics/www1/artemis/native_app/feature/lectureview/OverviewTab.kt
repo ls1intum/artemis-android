@@ -2,7 +2,12 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -50,7 +55,10 @@ internal fun OverviewTab(
     LazyColumn(
         modifier = modifier.testTag(TEST_TAG_OVERVIEW_LIST),
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        state = state
+        state = state,
+        contentPadding = PaddingValues(
+            bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+        )
     ) {
         if (description != null) {
             item {

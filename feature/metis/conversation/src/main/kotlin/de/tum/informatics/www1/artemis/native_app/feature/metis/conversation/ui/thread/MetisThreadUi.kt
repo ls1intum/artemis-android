@@ -34,6 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -50,13 +51,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import org.koin.compose.koinInject
@@ -70,10 +71,12 @@ internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPost
 @Composable
 internal fun MetisThreadUi(
     modifier: Modifier,
+    listContentPadding: PaddingValues,
     viewModel: ConversationViewModel
 ) {
     val postDataState: DataState<PostPojo> by viewModel.threadUseCase.post.collectAsState()
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
+
     val serverUrl by viewModel.serverUrl.collectAsState()
 
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
@@ -106,6 +109,7 @@ internal fun MetisThreadUi(
         postDataState = postDataState,
         isAtLeastTutorInCourse = isAtLeastTutorInCourse,
         hasModerationRights = hasModerationRights,
+        listContentPadding = listContentPadding,
         serverUrl = serverUrl,
         emojiService = koinInject(),
         clientId = clientId,
@@ -139,7 +143,7 @@ internal fun MetisThreadUi(
         onDeletePost = viewModel::deletePost,
         onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
         onRequestReload = viewModel::requestReload,
-        onRequestRetrySend = viewModel::retryCreateReply,
+        onRequestRetrySend = viewModel::retryCreateReply
     )
 }
 
@@ -152,6 +156,7 @@ internal fun MetisThreadUi(
     conversationDataState: DataState<Conversation>,
     hasModerationRights: Boolean,
     isAtLeastTutorInCourse: Boolean,
+    listContentPadding: PaddingValues,
     serverUrl: String,
     emojiService: EmojiService,
     markdownImageLoader: ImageLoader?,
@@ -212,6 +217,7 @@ internal fun MetisThreadUi(
                                 post = post,
                                 hasModerationRights = hasModerationRights,
                                 isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+                                listContentPadding = listContentPadding,
                                 clientId = clientId,
                                 markdownImageLoader = markdownImageLoader,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
@@ -247,6 +253,7 @@ private fun PostAndRepliesList(
     post: PostPojo,
     hasModerationRights: Boolean,
     isAtLeastTutorInCourse: Boolean,
+    listContentPadding: PaddingValues,
     clientId: Long,
     markdownImageLoader: ImageLoader?,
     onRequestEdit: (IBasePost) -> Unit,
@@ -283,7 +290,7 @@ private fun PostAndRepliesList(
 
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(vertical = 8.dp),
+        contentPadding = listContentPadding,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         state = state
     ) {
