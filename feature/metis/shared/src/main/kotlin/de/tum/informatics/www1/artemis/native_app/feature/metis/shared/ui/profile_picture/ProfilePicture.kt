@@ -11,19 +11,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.drawable.toBitmap
-import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.image.loadAsyncImageDrawable
+import coil.compose.AsyncImagePainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.nonScaledSp
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfilePictureImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 
 const val TEST_TAG_PROFILE_PICTURE_IMAGE = "TEST_TAG_PROFILE_PICTURE_IMAGE"
 const val TEST_TAG_PROFILE_PICTURE_INITIALS = "TEST_TAG_PROFILE_PICTURE_INITIALS"
@@ -35,24 +30,16 @@ private const val BoxSizeToFontSizeMultiplier = 0.16f
 fun ProfilePicture(
     modifier: Modifier,
     profilePictureData: ProfilePictureData,
-    profilePictureImageProvider: ProfilePictureImageProvider?,
 ) {
     // TODO: Add onClick that opens a dialog with info about the user, see iOS
     //       https://github.com/ls1intum/artemis-android/issues/154
+
     when(profilePictureData) {
         is ProfilePictureData.Image -> {
-            if (profilePictureImageProvider != null) {
-                ProfilePictureImage(
-                    modifier = modifier,
-                    profilePictureData = profilePictureData,
-                    profilePictureImageProvider = profilePictureImageProvider,
-                )
-            } else {
-                InitialsPlaceholder(
-                    modifier = modifier,
-                    profilePictureData = profilePictureData.fallBack,
-                )
-            }
+            ProfilePictureImage(
+                modifier = modifier,
+                profilePictureData = profilePictureData,
+            )
         }
         is ProfilePictureData.InitialsPlaceholder -> {
             InitialsPlaceholder(
@@ -67,38 +54,15 @@ fun ProfilePicture(
 fun ProfilePictureImage(
     modifier: Modifier,
     profilePictureData: ProfilePictureData.Image,
-    profilePictureImageProvider: ProfilePictureImageProvider,
 ) {
     val imageUrl = profilePictureData.url
-    val context = LocalContext.current
-    val request = remember(imageUrl, profilePictureImageProvider) {
-        profilePictureImageProvider.createImageRequest(
-            context = context,
-            imagePath = imageUrl,
-        )
-    }
+    val artemisImageProvider = LocalArtemisImageProvider.current
+    val painter = artemisImageProvider.rememberArtemisAsyncImagePainter(imagePath = imageUrl)
 
-    when (val resultDataState = loadAsyncImageDrawable(request = request).dataState) {
-        is DataState.Failure -> {
-            InitialsPlaceholder(
-                modifier = modifier,
-                profilePictureData = profilePictureData.fallBack,
-            )
-        }
-        is DataState.Loading -> {
-            InitialsPlaceholder(
-                modifier = modifier,
-                profilePictureData = profilePictureData.fallBack,
-            )
-        }
-        is DataState.Success -> {
-            val loadedDrawable = resultDataState.data
+    painter.onRemembered()
 
-            val painter = remember(loadedDrawable) {
-                val bitmap = loadedDrawable.toBitmap().asImageBitmap()
-                BitmapPainter(bitmap)
-            }
-
+    when (painter.state) {
+        is AsyncImagePainter.State.Success -> {
             Image(
                 modifier = modifier
                     .fillMaxWidth()
@@ -106,6 +70,12 @@ fun ProfilePictureImage(
                 painter = painter,
                 contentDescription = null,
                 contentScale = ContentScale.Fit
+            )
+        }
+        else -> {
+            InitialsPlaceholder(
+                modifier = modifier,
+                profilePictureData = profilePictureData.fallBack,
             )
         }
     }

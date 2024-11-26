@@ -7,7 +7,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 
-open class DefaultImageProvider : BaseImageProvider {
+class BaseImageProviderImpl : BaseImageProvider {
     override fun createImageRequest(
         context: Context,
         imagePath: String,
@@ -20,6 +20,9 @@ open class DefaultImageProvider : BaseImageProvider {
         val builder = ImageRequest.Builder(context)
             .addHeader(HttpHeaders.Cookie, "jwt=$authorizationToken")
             .data(imageUrl)
+            // The following line is needed to for the AsyncImagePainter to work correctly, see:
+            // https://stackoverflow.com/a/74705550/13366254
+            .size(coil.size.Size.ORIGINAL)
 
         memoryCacheKey?.let {
             builder.memoryCacheKey(it)

@@ -195,6 +195,7 @@ fun `Metis - Conversation Channel`() {
         ),
     ).reversed()
 
+    // TODO: Provide artemis image provider
     ScreenshotFrame(title = "Send and receive messages directly from the app") {
         CourseUiScreen(
             modifier = Modifier.fillMaxSize(),
@@ -249,7 +250,6 @@ fun `Metis - Conversation Channel`() {
                                 courseId = 0,
                                 state = rememberLazyListState(),
                                 isReplyEnabled = true,
-                                profilePictureImageProvider = null,
                                 onCreatePost = { CompletableDeferred() },
                                 onEditPost = { _, _ -> CompletableDeferred() },
                                 onDeletePost = { CompletableDeferred() },

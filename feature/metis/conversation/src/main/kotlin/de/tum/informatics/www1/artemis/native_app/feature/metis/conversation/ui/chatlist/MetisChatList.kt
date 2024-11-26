@@ -16,13 +16,13 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -141,6 +143,7 @@ fun MetisChatList(
     courseId: Long,
     state: LazyListState,
     emojiService: EmojiService = koinInject(),
+    artemisImageProvider: ArtemisImageProvider = koinInject(),
     isReplyEnabled: Boolean,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
@@ -194,22 +197,24 @@ fun MetisChatList(
                     }
 
                     is PostsDataState.Loaded -> {
-                        ChatList(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .testTag(TEST_TAG_METIS_POST_LIST),
-                            listContentPadding = listContentPadding,
-                            state = state,
-                            posts = posts,
-                            clientId = clientId,
-                            onClickViewPost = onClickViewPost,
-                            hasModerationRights = hasModerationRights,
-                            isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-                            onRequestEdit = onEditPostDelegate,
-                            onRequestDelete = onDeletePostDelegate,
-                            onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
-                            onRequestRetrySend = onRequestRetrySend
-                        )
+                        CompositionLocalProvider(LocalArtemisImageProvider provides artemisImageProvider) {
+                            ChatList(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .testTag(TEST_TAG_METIS_POST_LIST),
+                                listContentPadding = listContentPadding,
+                                state = state,
+                                posts = posts,
+                                clientId = clientId,
+                                onClickViewPost = onClickViewPost,
+                                hasModerationRights = hasModerationRights,
+                                isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+                                onRequestEdit = onEditPostDelegate,
+                                onRequestDelete = onDeletePostDelegate,
+                                onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
+                                onRequestRetrySend = onRequestRetrySend
+                            )
+                        }
                     }
                 }
             }
