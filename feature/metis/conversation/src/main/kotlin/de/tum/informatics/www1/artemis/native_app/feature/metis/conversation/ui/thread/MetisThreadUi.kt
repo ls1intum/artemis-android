@@ -66,6 +66,7 @@ internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPost
 @Composable
 internal fun MetisThreadUi(
     modifier: Modifier,
+    listContentPadding: PaddingValues,
     viewModel: ConversationViewModel
 ) {
     val postDataState: DataState<PostPojo> by viewModel.threadUseCase.post.collectAsState()
@@ -97,6 +98,7 @@ internal fun MetisThreadUi(
         postDataState = postDataState,
         isAtLeastTutorInCourse = isAtLeastTutorInCourse,
         hasModerationRights = hasModerationRights,
+        listContentPadding = listContentPadding,
         serverUrl = serverUrl,
         emojiService = koinInject(),
         clientId = clientId,
@@ -149,6 +151,7 @@ internal fun MetisThreadUi(
     conversationDataState: DataState<Conversation>,
     hasModerationRights: Boolean,
     isAtLeastTutorInCourse: Boolean,
+    listContentPadding: PaddingValues,
     serverUrl: String,
     emojiService: EmojiService,
     initialReplyTextProvider: InitialReplyTextProvider,
@@ -209,6 +212,7 @@ internal fun MetisThreadUi(
                                 post = post,
                                 hasModerationRights = hasModerationRights,
                                 isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+                                listContentPadding = listContentPadding,
                                 clientId = clientId,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
@@ -244,6 +248,7 @@ private fun PostAndRepliesList(
     post: PostPojo,
     hasModerationRights: Boolean,
     isAtLeastTutorInCourse: Boolean,
+    listContentPadding: PaddingValues,
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
@@ -282,7 +287,7 @@ private fun PostAndRepliesList(
     ProvideMarkwon {
         LazyColumn(
             modifier = modifier,
-            contentPadding = PaddingValues(vertical = 8.dp),
+            contentPadding = listContentPadding,
             verticalArrangement = Arrangement.spacedBy(8.dp),
             state = state
         ) {

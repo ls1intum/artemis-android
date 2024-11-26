@@ -1,7 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
@@ -121,7 +125,9 @@ internal fun ConversationSettingsScreen(
         ConversationSettingsBody(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .imePadding()
+                .padding(top = paddingValues.calculateTopPadding())
+                .consumeWindowInsets(WindowInsets.systemBars),
             viewModel = viewModel,
             onRequestViewAllMembers = onRequestViewAllMembers,
             onRequestAddMembers = onRequestAddMembers,
