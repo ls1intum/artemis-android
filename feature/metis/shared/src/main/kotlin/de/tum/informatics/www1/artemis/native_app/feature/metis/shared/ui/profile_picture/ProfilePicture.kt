@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture
 
-import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -29,6 +28,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfileP
 const val TEST_TAG_PROFILE_PICTURE_IMAGE = "TEST_TAG_PROFILE_PICTURE_IMAGE"
 const val TEST_TAG_PROFILE_PICTURE_INITIALS = "TEST_TAG_PROFILE_PICTURE_INITIALS"
 
+private const val BoxSizeToFontSizeMultiplier = 0.16f
+
+
 @Composable
 fun ProfilePicture(
     modifier: Modifier,
@@ -36,6 +38,7 @@ fun ProfilePicture(
     profilePictureImageProvider: ProfilePictureImageProvider?,
 ) {
     // TODO: Add onClick that opens a dialog with info about the user, see iOS
+    //       https://github.com/ls1intum/artemis-android/issues/154
     when(profilePictureData) {
         is ProfilePictureData.Image -> {
             if (profilePictureImageProvider != null) {
@@ -75,9 +78,7 @@ fun ProfilePictureImage(
         )
     }
 
-    val resultData = loadAsyncImageDrawable(request = request)
-
-    when (resultData.dataState) {
+    when (val resultDataState = loadAsyncImageDrawable(request = request).dataState) {
         is DataState.Failure -> {
             InitialsPlaceholder(
                 modifier = modifier,
@@ -91,7 +92,7 @@ fun ProfilePictureImage(
             )
         }
         is DataState.Success -> {
-            val loadedDrawable = (resultData.dataState as DataState.Success<Drawable>).data
+            val loadedDrawable = resultDataState.data
 
             val painter = remember(loadedDrawable) {
                 val bitmap = loadedDrawable.toBitmap().asImageBitmap()
@@ -129,7 +130,7 @@ fun InitialsPlaceholder(
         Text(
             text = profilePictureData.initials,
             color = Color.White,
-            fontSize = boxSize.intValue.sp.nonScaledSp * 0.16f,
+            fontSize = boxSize.intValue.sp.nonScaledSp * BoxSizeToFontSizeMultiplier,
             fontWeight =  FontWeight.Bold
         )
     }

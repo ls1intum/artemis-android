@@ -24,6 +24,9 @@ sealed class ProfilePictureData {
 }
 
 // The following util functions are copied from the Artemis webapp implementation.
+// Sources:
+// https://github.com/ls1intum/Artemis/blob/fa32c243b568c92aa5e075e8176abdc7c7452444/src/main/webapp/app/utils/text.utils.ts
+// https://github.com/ls1intum/Artemis/blob/fa32c243b568c92aa5e075e8176abdc7c7452444/src/main/webapp/app/utils/color.utils.ts
 
 /**
  * Returns 2 capitalized initials of a given string.
