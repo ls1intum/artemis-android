@@ -34,7 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfilePictureImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -51,13 +51,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import org.koin.compose.koinInject
@@ -71,10 +71,12 @@ internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPost
 @Composable
 internal fun MetisThreadUi(
     modifier: Modifier,
+    listContentPadding: PaddingValues,
     viewModel: ConversationViewModel
 ) {
     val postDataState: DataState<PostPojo> by viewModel.threadUseCase.post.collectAsState()
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
+
     val serverUrl by viewModel.serverUrl.collectAsState()
 
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
@@ -82,7 +84,7 @@ internal fun MetisThreadUi(
 
     val context = LocalContext.current
     var imageLoader: ImageLoader? by remember { mutableStateOf(null) }
-    LaunchedEffect(rememberCoroutineScope()) {
+    LaunchedEffect(true) {
         imageLoader = viewModel.createMarkdownImageLoader(context).await()
     }
 
@@ -99,52 +101,51 @@ internal fun MetisThreadUi(
 
     val conversationDataState by viewModel.conversation.collectAsState()
 
-    val profilePictureImageProvider by viewModel.profilePictureImageProvider.collectAsState()
+    ProvideMarkwon(imageLoader) {
+        MetisThreadUi(
+            modifier = modifier,
+            courseId = viewModel.courseId,
+            initialReplyTextProvider = viewModel,
+            conversationDataState = conversationDataState,
+            postDataState = postDataState,
+            isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+            hasModerationRights = hasModerationRights,
+            listContentPadding = listContentPadding,
+            serverUrl = serverUrl,
+            emojiService = koinInject(),
+            clientId = clientId,
+            onCreatePost = viewModel::createReply,
+            onEditPost = { post, newText ->
+                val parentPost = postDataState.orNull()
 
-    MetisThreadUi(
-        modifier = modifier,
-        courseId = viewModel.courseId,
-        initialReplyTextProvider = viewModel,
-        conversationDataState = conversationDataState,
-        postDataState = postDataState,
-        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-        hasModerationRights = hasModerationRights,
-        serverUrl = serverUrl,
-        emojiService = koinInject(),
-        clientId = clientId,
-        markdownImageLoader = imageLoader,
-        profilePictureImageProvider = profilePictureImageProvider,
-        onCreatePost = viewModel::createReply,
-        onEditPost = { post, newText ->
-            val parentPost = postDataState.orNull()
+                when (post) {
+                    is AnswerPostPojo -> {
+                        if (parentPost == null) CompletableDeferred(
+                            MetisModificationFailure.UPDATE_POST
+                        ) else viewModel.editAnswerPost(parentPost, post, newText)
+                    }
 
-            when (post) {
-                is AnswerPostPojo -> {
+                    is PostPojo -> viewModel.editPost(post, newText)
+                    else -> throw NotImplementedError()
+                }
+            },
+            onResolvePost = { post ->
+                val parentPost = postDataState.orNull()
+
+                if (post is AnswerPostPojo) {
                     if (parentPost == null) CompletableDeferred(
                         MetisModificationFailure.UPDATE_POST
-                    ) else viewModel.editAnswerPost(parentPost, post, newText)
+                    ) else viewModel.toggleResolvePost(parentPost, post)
+                } else {
+                    throw NotImplementedError()
                 }
-
-                is PostPojo -> viewModel.editPost(post, newText)
-                else -> throw NotImplementedError()
-            }
-        },
-        onResolvePost = { post ->
-            val parentPost = postDataState.orNull()
-
-            if (post is AnswerPostPojo) {
-                if (parentPost == null) CompletableDeferred(
-                    MetisModificationFailure.UPDATE_POST
-                ) else viewModel.toggleResolvePost(parentPost, post)
-            } else {
-                throw NotImplementedError()
-            }
-        },
-        onDeletePost = viewModel::deletePost,
-        onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
-        onRequestReload = viewModel::requestReload,
-        onRequestRetrySend = viewModel::retryCreateReply,
-    )
+            },
+            onDeletePost = viewModel::deletePost,
+            onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
+            onRequestReload = viewModel::requestReload,
+            onRequestRetrySend = viewModel::retryCreateReply
+        )
+    }
 }
 
 @Composable
@@ -156,11 +157,10 @@ internal fun MetisThreadUi(
     conversationDataState: DataState<Conversation>,
     hasModerationRights: Boolean,
     isAtLeastTutorInCourse: Boolean,
+    listContentPadding: PaddingValues,
     serverUrl: String,
     emojiService: EmojiService,
-    markdownImageLoader: ImageLoader?,
     initialReplyTextProvider: InitialReplyTextProvider,
-    profilePictureImageProvider: ProfilePictureImageProvider?,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
     onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
@@ -206,7 +206,6 @@ internal fun MetisThreadUi(
                             state = listState,
                             itemCount = post.orderedAnswerPostings.size,
                             order = DisplayPostOrder.REGULAR,
-                            markdownImageLoader = markdownImageLoader,
                             emojiService = emojiService,
                             bottomItem = post.orderedAnswerPostings.lastOrNull()
                         ) {
@@ -217,9 +216,8 @@ internal fun MetisThreadUi(
                                 post = post,
                                 hasModerationRights = hasModerationRights,
                                 isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+                                listContentPadding = listContentPadding,
                                 clientId = clientId,
-                                markdownImageLoader = markdownImageLoader,
-                                profilePictureImageProvider = profilePictureImageProvider,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
                                 onRequestDelete = onDeletePostDelegate,
@@ -253,9 +251,8 @@ private fun PostAndRepliesList(
     post: PostPojo,
     hasModerationRights: Boolean,
     isAtLeastTutorInCourse: Boolean,
+    listContentPadding: PaddingValues,
     clientId: Long,
-    markdownImageLoader: ImageLoader?,
-    profilePictureImageProvider: ProfilePictureImageProvider?,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
     onRequestResolve: (IBasePost) -> Unit,
@@ -290,7 +287,7 @@ private fun PostAndRepliesList(
 
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(vertical = 8.dp),
+        contentPadding = listContentPadding,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         state = state
     ) {
@@ -306,7 +303,6 @@ private fun PostAndRepliesList(
                     post = post,
                     postItemViewType = PostItemViewType.ThreadContextPostItem,
                     postActions = postActions,
-                    profilePictureImageProvider = profilePictureImageProvider,
                     displayHeader = true,
                     clientId = clientId,
                     onClick = {}
@@ -329,7 +325,6 @@ private fun PostAndRepliesList(
                     .testTag(testTagForAnswerPost(answerPost.clientPostId)),
                 post = answerPost,
                 postActions = postActions,
-                profilePictureImageProvider = profilePictureImageProvider,
                 postItemViewType = PostItemViewType.ThreadAnswerItem,
                 clientId = clientId,
                 displayHeader = shouldDisplayHeader(

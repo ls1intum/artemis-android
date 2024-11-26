@@ -42,7 +42,6 @@ internal fun <T : Any> MetisPostListHandler(
     itemCount: Int,
     bottomItem: T?,
     order: DisplayPostOrder,
-    markdownImageLoader: ImageLoader?,
     emojiService: EmojiService,
     content: @Composable BoxScope.() -> Unit
 ) {
@@ -119,11 +118,9 @@ internal fun <T : Any> MetisPostListHandler(
                 PostArtemisMarkdownTransformer(serverUrl = strippedServerUrl, courseId = courseId)
             }
 
-            ProvideMarkwon(markdownImageLoader) {
-                ProvideEmojis(emojiService) {
-                    CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
-                        content()
-                    }
+            ProvideEmojis(emojiService) {
+                CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
+                    content()
                 }
             }
         }

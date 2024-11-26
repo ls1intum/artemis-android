@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
@@ -83,6 +84,7 @@ class RegisterEndToEndTest : BaseComposeTest() {
             RegisterUi(
                 modifier = Modifier
                     .fillMaxSize()
+                    .imePadding()
                     .verticalScroll(rememberScrollState()),
                 viewModel = viewModel,
                 onRegistered = { }

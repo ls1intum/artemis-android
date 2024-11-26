@@ -18,7 +18,6 @@ fun ProvideMarkwon(imageLoader: ImageLoader? = null, content: @Composable () -> 
 
     val imageWith = context.resources.displayMetrics.widthPixels
     val markdownRender: Markwon = remember(imageLoader) {
-        println(imageWith)
         createMarkdownRender(context, imageLoader, imageWith)
     }
 

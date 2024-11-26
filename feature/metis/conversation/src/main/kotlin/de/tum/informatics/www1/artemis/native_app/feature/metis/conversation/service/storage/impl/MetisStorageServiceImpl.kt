@@ -340,6 +340,19 @@ internal class MetisStorageServiceImpl(
         val metisDao = databaseProvider.metisDao
 
         databaseProvider.database.withTransaction {
+            val doesPostAnswerAlreadyExist = metisDao.isPostPresentInContext(
+                serverId = host,
+                serverPostId = post.id ?: return@withTransaction,
+                courseId = metisContext.courseId,
+                conversationId = metisContext.conversationId
+            )
+
+            // In rare cases, the websocket connection already inserted the post answer. In that case, we can delete the client side post.
+            if (doesPostAnswerAlreadyExist) {
+                metisDao.deletePostingWithClientSideId(clientPostId = clientSidePostId)
+                return@withTransaction
+            }
+
             metisDao.upgradePost(
                 clientSidePostId = clientSidePostId,
                 serverSidePostId = post.id ?: return@withTransaction
@@ -507,7 +520,6 @@ internal class MetisStorageServiceImpl(
                 answerServerIds = sp.answers.orEmpty().mapNotNull { it.id }
             )
         }
-
         for (ap in sp.answers.orEmpty()) {
             val answerPostId = ap.id ?: continue
 

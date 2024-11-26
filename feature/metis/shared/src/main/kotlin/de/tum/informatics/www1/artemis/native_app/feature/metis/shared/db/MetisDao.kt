@@ -140,7 +140,7 @@ interface MetisDao {
         postingType: BasePostingEntity.PostingType = BasePostingEntity.PostingType.STANDALONE
     )
 
-    @Query("delete from metis_post_context where client_post_id = :clientPostId")
+    @Query("delete from postings where id = :clientPostId")
     suspend fun deletePostingWithClientSideId(
         clientPostId: String
     )

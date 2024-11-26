@@ -34,7 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ProfilePictureImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -76,6 +76,7 @@ internal fun MetisChatList(
     state: LazyListState = rememberLazyListState(),
     isReplyEnabled: Boolean = true,
     onClickViewPost: (StandalonePostId) -> Unit,
+    title: String? = "Replying..."
 ) {
     ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
 
@@ -91,7 +92,7 @@ internal fun MetisChatList(
 
     val context = LocalContext.current
     var imageLoader: ImageLoader? by remember { mutableStateOf(null) }
-    LaunchedEffect(rememberCoroutineScope()) {
+    LaunchedEffect(true) {
         imageLoader = viewModel.createMarkdownImageLoader(context).await()
     }
 
@@ -101,31 +102,29 @@ internal fun MetisChatList(
         }
     }
 
-    val profilePictureImageProvider by viewModel.profilePictureImageProvider.collectAsState()
-
-    MetisChatList(
-        modifier = modifier,
-        initialReplyTextProvider = viewModel,
-        posts = posts.asPostsDataState(),
-        clientId = clientId,
-        hasModerationRights = hasModerationRights,
-        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-        listContentPadding = listContentPadding,
-        serverUrl = serverUrl,
-        courseId = viewModel.courseId,
-        markdownImageLoader = imageLoader,
-        state = state,
-        bottomItem = bottomItem,
-        isReplyEnabled = isReplyEnabled,
-        profilePictureImageProvider = profilePictureImageProvider,
-        onCreatePost = viewModel::createPost,
-        onEditPost = viewModel::editPost,
-        onDeletePost = viewModel::deletePost,
-        onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
-        onClickViewPost = onClickViewPost,
-        onRequestRetrySend = viewModel::retryCreatePost,
-        title = updatedTitle
-    )
+    ProvideMarkwon(imageLoader) {
+        MetisChatList(
+            modifier = modifier,
+            initialReplyTextProvider = viewModel,
+            posts = posts.asPostsDataState(),
+            clientId = clientId,
+            hasModerationRights = hasModerationRights,
+            isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+            listContentPadding = listContentPadding,
+            serverUrl = serverUrl,
+            courseId = viewModel.courseId,
+            state = state,
+            bottomItem = bottomItem,
+            isReplyEnabled = isReplyEnabled,
+            onCreatePost = viewModel::createPost,
+            onEditPost = viewModel::editPost,
+            onDeletePost = viewModel::deletePost,
+            onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
+            onClickViewPost = onClickViewPost,
+            onRequestRetrySend = viewModel::retryCreatePost,
+            title = updatedTitle
+        )
+    }
 }
 
 @Composable
@@ -140,11 +139,9 @@ fun MetisChatList(
     listContentPadding: PaddingValues,
     serverUrl: String,
     courseId: Long,
-    markdownImageLoader: ImageLoader?,
     state: LazyListState,
-    isReplyEnabled: Boolean,
-    profilePictureImageProvider: ProfilePictureImageProvider?,
     emojiService: EmojiService = koinInject(),
+    isReplyEnabled: Boolean,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
     onDeletePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
@@ -175,9 +172,8 @@ fun MetisChatList(
                 state = state,
                 itemCount = posts.itemCount,
                 order = DisplayPostOrder.REVERSED,
-                markdownImageLoader = markdownImageLoader,
-                bottomItem = bottomItem,
-                emojiService = emojiService
+                emojiService = emojiService,
+                bottomItem = bottomItem
             ) {
                 when (posts) {
                     PostsDataState.Empty -> {
@@ -206,7 +202,6 @@ fun MetisChatList(
                             state = state,
                             posts = posts,
                             clientId = clientId,
-                            profilePictureImageProvider = profilePictureImageProvider,
                             onClickViewPost = onClickViewPost,
                             hasModerationRights = hasModerationRights,
                             isAtLeastTutorInCourse = isAtLeastTutorInCourse,
@@ -240,7 +235,6 @@ private fun ChatList(
     hasModerationRights: Boolean,
     isAtLeastTutorInCourse: Boolean,
     clientId: Long,
-    profilePictureImageProvider: ProfilePictureImageProvider?,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
     onRequestDelete: (IStandalonePost) -> Unit,
@@ -306,7 +300,6 @@ private fun ChatList(
                             PostItemViewType.ChatListItem(post?.answers.orEmpty())
                         },
                         postActions = postActions,
-                        profilePictureImageProvider = profilePictureImageProvider,
                         displayHeader = shouldDisplayHeader(
                             index = index,
                             post = post,
