@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.Reaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 
@@ -28,7 +27,6 @@ interface MetisModificationService {
     suspend fun updatePostDisplayPriority(
         context: MetisContext,
         post: StandalonePost,
-        displayPriority: DisplayPriority,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<StandalonePost>

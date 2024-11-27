@@ -8,7 +8,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.RESOURCE_PATH_SEGMENTS
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.Reaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import io.ktor.client.call.body
@@ -102,7 +101,6 @@ internal class MetisModificationServiceImpl(
     override suspend fun updatePostDisplayPriority(
         context: MetisContext,
         post: StandalonePost,
-        displayPriority: DisplayPriority,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<StandalonePost> {
@@ -119,7 +117,7 @@ internal class MetisModificationServiceImpl(
                 }
 
                 contentType(ContentType.Application.Json)
-                parameter("displayPriority", displayPriority)
+                parameter("displayPriority", post.displayPriority)
                 cookieAuth(authToken)
             }.body()
         }

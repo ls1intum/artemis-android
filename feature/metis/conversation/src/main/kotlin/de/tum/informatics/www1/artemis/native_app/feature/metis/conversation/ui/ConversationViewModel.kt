@@ -390,7 +390,6 @@ internal open class ConversationViewModel(
             metisModificationService.updatePostDisplayPriority(
                 context = metisContext,
                 post = newPost,
-                displayPriority = newDisplayPriority,
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first(),
             )

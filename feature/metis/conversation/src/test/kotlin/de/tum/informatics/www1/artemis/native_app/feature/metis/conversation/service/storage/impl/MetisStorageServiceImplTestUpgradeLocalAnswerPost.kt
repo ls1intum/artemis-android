@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
@@ -73,7 +74,8 @@ class MetisStorageServiceImplUpgradeLocalAnswerPostTest {
         courseWideContext = null,
         tags = emptyList(),
         answers = emptyList(),
-        reactions = emptyList()
+        reactions = emptyList(),
+        displayPriority = DisplayPriority.NONE
     )
 
     private val basePost = StandalonePost(basePostPojo, conversation)

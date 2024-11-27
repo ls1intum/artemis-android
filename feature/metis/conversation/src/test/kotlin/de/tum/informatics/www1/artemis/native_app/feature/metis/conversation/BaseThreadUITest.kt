@@ -10,6 +10,7 @@ import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
@@ -62,7 +63,8 @@ abstract class BaseThreadUITest : BaseComposeTest() {
             courseWideContext = null,
             tags = emptyList(),
             answers = if (index == 0) answers else emptyList(),
-            reactions = emptyList()
+            reactions = emptyList(),
+            displayPriority = DisplayPriority.NONE
         )
     }
 
@@ -86,6 +88,7 @@ abstract class BaseThreadUITest : BaseComposeTest() {
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },
                 onResolvePost = onResolvePost,
+                onPinPost = { CompletableDeferred() },
                 onDeletePost = { CompletableDeferred() },
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onRequestReload = {},
