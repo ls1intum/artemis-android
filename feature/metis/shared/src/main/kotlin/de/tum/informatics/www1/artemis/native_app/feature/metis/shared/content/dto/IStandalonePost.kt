@@ -7,6 +7,7 @@ interface IStandalonePost : IBasePost {
     val answers: List<IAnswerPost>?
     val tags: List<String>?
     val resolved: Boolean?
+    val displayPriority: DisplayPriority?
 
     /**
      * A unique key which can be used to reference this post uniquely

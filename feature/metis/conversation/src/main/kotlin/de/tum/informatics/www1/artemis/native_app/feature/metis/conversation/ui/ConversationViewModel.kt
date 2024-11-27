@@ -46,6 +46,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ConversationWebsocketDto
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
@@ -369,12 +370,29 @@ internal open class ConversationViewModel(
         return viewModelScope.async(coroutineContext) {
             val conversation =
                 loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
-            val newPost = StandalonePost(23423) //TODO
-            metisModificationService.updateStandalonePost(
+
+            val newDisplayPriority = if (post.displayPriority == DisplayPriority.PINNED) {
+                DisplayPriority.NONE
+            } else {
+                DisplayPriority.PINNED
+            }
+
+            val newPost = when (post) {
+                is StandalonePost -> post.copy(displayPriority = newDisplayPriority)
+                is PostPojo -> StandalonePost(
+                    post = post.copy(displayPriority = newDisplayPriority),
+                    conversation = conversation
+                )
+
+                else -> throw IllegalArgumentException()
+            }
+
+            metisModificationService.updatePostDisplayPriority(
                 context = metisContext,
                 post = newPost,
+                displayPriority = newDisplayPriority,
                 serverUrl = serverConfigurationService.serverUrl.first(),
-                authToken = accountService.authToken.first()
+                authToken = accountService.authToken.first(),
             )
                 .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
         }

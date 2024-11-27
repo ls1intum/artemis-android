@@ -4,15 +4,17 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.RESOURCE_PATH_SEGMENTS
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.Reaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.delete
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -95,6 +97,34 @@ internal class MetisModificationServiceImpl(
                 cookieAuth(authToken)
             }.body()
         }
+    }
+
+    override suspend fun updatePostDisplayPriority(
+        context: MetisContext,
+        post: StandalonePost,
+        displayPriority: DisplayPriority,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<StandalonePost> {
+        val x = performNetworkCall {
+            ktorProvider.ktorClient.put(serverUrl) {
+                url {
+                    appendPathSegments(RESOURCE_PATH_SEGMENTS)
+                    appendPathSegments(
+                        context.courseId.toString(),
+                        context.standalonePostResourceEndpoint
+                    )
+                    appendPathSegments(post.id.toString())
+                    appendPathSegments("display-priority")
+                }
+
+                contentType(ContentType.Application.Json)
+                parameter("displayPriority", displayPriority)
+                cookieAuth(authToken)
+            }
+        }
+        println(x.orNull()?.body())
+        return x.bind { it.body() }
     }
 
     override suspend fun updateAnswerPost(

@@ -291,7 +291,8 @@ private fun generateMessage(
             courseWideContext = null,
             tags = emptyList(),
             answers = emptyList(),
-            reactions = emptyList()
+            reactions = emptyList(),
+            displayPriority = null
         )
     )
 }
