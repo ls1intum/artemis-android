@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.se
 
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -31,7 +30,12 @@ class MetisStorageServiceTestLiveCreation : MetisStorageBaseTest() {
         )
 
         // THEN: No post should be inserted and the existing posts should not be modified
-        assertStoredContentIsNotModified()
+        val posts = getStoredPosts(metisContext)
+        val standalonePost = StandalonePost(posts.first(), conversation)
+        assertEquals(1, posts.size)
+        assertEquals(basePost.content, standalonePost.content)
+        assertEquals(basePost.id, standalonePost.id)
+        assertEquals(basePost.conversation, standalonePost.conversation)
     }
 
     @Test
@@ -46,27 +50,12 @@ class MetisStorageServiceTestLiveCreation : MetisStorageBaseTest() {
         )
 
         // THEN: The post should be inserted and matched to the correct conversation
-        val createdPost = assertPostIsCreated()
-        assertPostIsMatchedToConversation(createdPost)
-    }
-
-    private suspend fun assertPostIsCreated(): PostPojo {
         val posts = getStoredPosts(metisContextTwo)
         assertEquals(1, posts.size)
         assertEquals(basePostTwo.content, posts.first().content)
-        return posts[0]
-    }
 
-    private suspend fun assertStoredContentIsNotModified() {
-        val posts = getStoredPosts(metisContext)
-        val standalonePost = StandalonePost(posts.first(), conversation)
-        assertEquals(1, posts.size)
-        assertEquals(basePost.content, standalonePost.content)
-        assertEquals(basePost.id, standalonePost.id)
-        assertEquals(basePost.conversation, standalonePost.conversation)
-    }
+        val createdPost = posts[0]
 
-    private fun assertPostIsMatchedToConversation(createdPost: PostPojo) {
         val createdStandalonePost = StandalonePost(createdPost, conversationTwo)
         assertEquals(basePostTwo.conversation?.id, createdStandalonePost.conversation?.id)
     }
