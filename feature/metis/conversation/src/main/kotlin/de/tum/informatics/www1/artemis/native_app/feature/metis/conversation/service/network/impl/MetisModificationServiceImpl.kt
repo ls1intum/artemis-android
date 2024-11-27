@@ -106,7 +106,7 @@ internal class MetisModificationServiceImpl(
         serverUrl: String,
         authToken: String
     ): NetworkResponse<StandalonePost> {
-        val x = performNetworkCall {
+        return performNetworkCall {
             ktorProvider.ktorClient.put(serverUrl) {
                 url {
                     appendPathSegments(RESOURCE_PATH_SEGMENTS)
@@ -121,10 +121,8 @@ internal class MetisModificationServiceImpl(
                 contentType(ContentType.Application.Json)
                 parameter("displayPriority", displayPriority)
                 cookieAuth(authToken)
-            }
+            }.body()
         }
-        println(x.orNull()?.body())
-        return x.bind { it.body() }
     }
 
     override suspend fun updateAnswerPost(
