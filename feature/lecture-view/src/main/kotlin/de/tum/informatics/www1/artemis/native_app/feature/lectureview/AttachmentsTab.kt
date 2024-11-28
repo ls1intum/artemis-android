@@ -2,9 +2,13 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -31,7 +35,12 @@ internal fun AttachmentsTab(
     onClickOpenLinkAttachment: (Attachment) -> Unit
 ) {
     if (attachments.isNotEmpty()) {
-        LazyColumn(modifier = modifier) {
+        LazyColumn(
+            modifier = modifier,
+            contentPadding = PaddingValues(
+                bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+            )
+        ) {
             items(attachments) { attachment ->
                 AttachmentItem(
                     modifier = Modifier.fillMaxWidth(),

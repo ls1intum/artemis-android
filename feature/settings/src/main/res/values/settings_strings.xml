@@ -12,6 +12,7 @@
 
     <string name="settings_about_section">About</string>
     <string name="settings_server_specifics_information">Imprint and privacy policy depend on the server you have currently selected.</string>
+    <string name="settings_server_url">Server URL: %1$s</string>
     <string name="settings_server_specifics_unavailable">Imprint and privacy policy are unavailable as you have not yet selected a server instance. Please select a server instance to view their privacy policy and imprint.</string>
     <string name="settings_server_specifics_unavailable_select_instance_button">Select instance</string>
     <string name="settings_about_privacy_policy">Privacy policy</string>

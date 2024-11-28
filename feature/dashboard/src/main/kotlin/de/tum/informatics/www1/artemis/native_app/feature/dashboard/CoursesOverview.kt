@@ -8,10 +8,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -70,17 +75,20 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.Expanded
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.CoursePointsDecimalFormat
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.BetaHintService
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.getViewModel
 import org.koin.compose.koinInject
 import java.text.DecimalFormat
 
-const val DASHBOARD_DESTINATION = "dashboard"
 internal const val TEST_TAG_COURSE_LIST = "TEST_TAG_COURSE_LIST"
 
 internal fun testTagForCourse(courseId: Long) = "Course$courseId"
 
+@Serializable
+data object DashboardScreen
+
 fun NavController.navigateToDashboard(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(DASHBOARD_DESTINATION, builder)
+    navigate(DashboardScreen, builder)
 }
 
 fun NavGraphBuilder.dashboard(
@@ -88,7 +96,7 @@ fun NavGraphBuilder.dashboard(
     onClickRegisterForCourse: () -> Unit,
     onViewCourse: (courseId: Long) -> Unit
 ) {
-    composable(DASHBOARD_DESTINATION) {
+    composable<DashboardScreen> {
         CoursesOverview(
             modifier = Modifier.fillMaxSize(),
             viewModel = getViewModel(),
@@ -188,7 +196,8 @@ internal fun CoursesOverview(
         BasicDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(top = padding.calculateTopPadding())
+                .consumeWindowInsets(WindowInsets.systemBars),
             dataState = coursesDataState,
             loadingText = stringResource(id = R.string.courses_loading_loading),
             failureText = stringResource(id = R.string.courses_loading_failure),
