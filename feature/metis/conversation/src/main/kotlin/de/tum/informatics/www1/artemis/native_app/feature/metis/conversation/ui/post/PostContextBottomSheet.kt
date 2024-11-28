@@ -78,7 +78,7 @@ internal fun PostContextBottomSheet(
     if (!displayAllEmojis) {
         ModalBottomSheet(
             modifier = Modifier.testTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET),
-            windowInsets = WindowInsets.statusBars,
+            contentWindowInsets = { WindowInsets.statusBars },
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = onDismissRequest
         ) {
