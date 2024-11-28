@@ -36,6 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.WindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.courseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.navigateToCourseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.course
@@ -52,7 +53,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.lectureview.navigateTo
 import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATION
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ProvideLocalVisibleMetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextReporter
@@ -72,6 +73,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
+import org.koin.compose.koinInject
 
 /**
  * Main and only activity used in the android app.
@@ -133,8 +135,8 @@ class MainActivity : AppCompatActivity(),
 
         setContent {
             AppTheme {
-                ProvideLocalVisibleMetisContextManager(
-                    visibleMetisContextManager = visibleMetisContextManager
+                CompositionLocalProvider(
+                    LocalVisibleMetisContextManager provides visibleMetisContextManager,
                 ) {
                     val navController = rememberNavController()
 
@@ -250,7 +252,8 @@ class MainActivity : AppCompatActivity(),
 
         CompositionLocalProvider(
             LocalWindowSizeClassProvider provides windowSizeClassProvider,
-            LocalLinkOpener provides linkOpener
+            LocalLinkOpener provides linkOpener,
+            LocalArtemisImageProvider provides koinInject()
         ) {
             // Use jetpack compose navigation for the navigation logic.
             NavHost(navController = navController, startDestination = startDestination) {

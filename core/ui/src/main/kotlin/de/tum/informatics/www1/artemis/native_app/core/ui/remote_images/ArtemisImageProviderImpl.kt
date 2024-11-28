@@ -23,6 +23,7 @@ class ArtemisImageProviderImpl(
         val authToken by accountService.authToken.collectAsState(initial = "")
 
         val context = LocalContext.current
+        // TODO: this request is created for every call
         val imageRequest = imageProvider.createImageRequest(
             context = context,
             imagePath = imagePath,

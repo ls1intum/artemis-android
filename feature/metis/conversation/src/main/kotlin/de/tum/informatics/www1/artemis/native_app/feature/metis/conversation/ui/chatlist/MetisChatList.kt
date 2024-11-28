@@ -16,7 +16,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -36,7 +35,6 @@ import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisImageProvider
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -197,24 +195,22 @@ fun MetisChatList(
                     }
 
                     is PostsDataState.Loaded -> {
-                        CompositionLocalProvider(LocalArtemisImageProvider provides artemisImageProvider) {
-                            ChatList(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .testTag(TEST_TAG_METIS_POST_LIST),
-                                listContentPadding = listContentPadding,
-                                state = state,
-                                posts = posts,
-                                clientId = clientId,
-                                onClickViewPost = onClickViewPost,
-                                hasModerationRights = hasModerationRights,
-                                isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-                                onRequestEdit = onEditPostDelegate,
-                                onRequestDelete = onDeletePostDelegate,
-                                onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
-                                onRequestRetrySend = onRequestRetrySend
-                            )
-                        }
+                        ChatList(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .testTag(TEST_TAG_METIS_POST_LIST),
+                            listContentPadding = listContentPadding,
+                            state = state,
+                            posts = posts,
+                            clientId = clientId,
+                            onClickViewPost = onClickViewPost,
+                            hasModerationRights = hasModerationRights,
+                            isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+                            onRequestEdit = onEditPostDelegate,
+                            onRequestDelete = onDeletePostDelegate,
+                            onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
+                            onRequestRetrySend = onRequestRetrySend
+                        )
                     }
                 }
             }
