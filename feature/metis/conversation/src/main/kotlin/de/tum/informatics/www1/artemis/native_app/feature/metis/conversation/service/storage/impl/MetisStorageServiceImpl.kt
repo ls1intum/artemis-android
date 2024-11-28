@@ -75,7 +75,6 @@ internal class MetisStorageServiceImpl(
                 creationDate = creationDate,
                 content = content,
                 authorRole = authorRole?.asDb ?: UserRole.USER,
-                authorImageUrl = author?.imageUrl,
                 updatedDate = updatedDate
             )
 
@@ -106,7 +105,6 @@ internal class MetisStorageServiceImpl(
                 creationDate = creationDate ?: Instant.fromEpochSeconds(0),
                 content = content,
                 authorRole = authorRole?.asDb ?: UserRole.USER,
-                authorImageUrl = author?.imageUrl,
                 updatedDate = updatedDate
             )
 
@@ -470,7 +468,9 @@ internal class MetisStorageServiceImpl(
         }
 
         // First insert the users as they have no dependencies
-        metisDao.updateUsers(standalonePostReactionsUsers)
+        // TODO: Do not update existing users, as for the reactions we always get null as image_url
+        //       Can be undone when https://github.com/ls1intum/Artemis/pull/9897 is merged.
+//        metisDao.updateUsers(standalonePostReactionsUsers)
         metisDao.insertUsers(standalonePostReactionsUsers)
 
         metisDao.insertOrUpdateUser(postingAuthor)
@@ -573,7 +573,10 @@ internal class MetisStorageServiceImpl(
         val answerPostReactionUsers = answerPostReactionsWithUsers.map { it.second }
 
         metisDao.insertOrUpdateUser(metisUserEntity)
-        metisDao.updateUsers(answerPostReactionUsers)
+
+        // TODO: Do not update existing users, as for the reactions we always get null as image_url
+        //       Can be undone when https://github.com/ls1intum/Artemis/pull/9897 is merged.
+//        metisDao.updateUsers(answerPostReactionUsers)
         metisDao.insertUsers(answerPostReactionUsers)
 
         if (isNewPost) {
