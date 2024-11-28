@@ -5,7 +5,11 @@ import androidx.compose.ui.graphics.Color
 sealed class ProfilePictureData {
 
     companion object {
-        fun create(userId: Long, username: String, imageUrl: String?): ProfilePictureData {
+        fun create(userId: Long?, username: String?, imageUrl: String?): ProfilePictureData {
+            if (userId == null || username == null) {
+                return Unknown
+            }
+
             val fallBack = InitialsPlaceholder(userId, username)
             return if (imageUrl != null) {
                 Image(imageUrl, fallBack)
@@ -21,6 +25,8 @@ sealed class ProfilePictureData {
             val initials: String = getInitialsFromString(username)
             val backgroundColor: Color = getBackgroundColorHue(userId.toString())
     }
+
+    data object Unknown: ProfilePictureData()
 }
 
 // The following util functions are copied from the Artemis webapp implementation.

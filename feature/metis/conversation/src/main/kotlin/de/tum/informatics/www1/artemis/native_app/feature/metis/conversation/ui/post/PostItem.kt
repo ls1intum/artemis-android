@@ -137,8 +137,8 @@ internal fun PostItem(
             authorRole = post?.authorRole,
             authorName = post?.authorName,
             profilePictureData = ProfilePictureData.create(
-                userId = post?.authorId ?: -1,
-                username = post?.authorName.orEmpty(),
+                userId = post?.authorId,
+                username = post?.authorName,
                 imageUrl = post?.authorImageUrl
             ),
             creationDate = post?.creationDate,
@@ -373,17 +373,19 @@ private fun HeadlineProfilePicture(
     profilePictureData: ProfilePictureData,
     displayImage: Boolean = true
 ) {
-    if (!displayImage) {
-        Box(modifier = Modifier.size(30.dp))
-        return
-    }
+    val size = 30.dp
+    Box(modifier = Modifier.size(size)) {
+        if (!displayImage) {
+            return
+        }
 
-    ProfilePicture(
-        modifier = Modifier
-            .size(30.dp)
-            .clip(MaterialTheme.shapes.extraSmall),
-        profilePictureData = profilePictureData,
-    )
+        ProfilePicture(
+            modifier = Modifier
+                .size(size)
+                .clip(MaterialTheme.shapes.extraSmall),
+            profilePictureData = profilePictureData,
+        )
+    }
 }
 
 @Composable

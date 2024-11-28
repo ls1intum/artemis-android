@@ -47,6 +47,12 @@ fun ProfilePicture(
                 profilePictureData = profilePictureData,
             )
         }
+        ProfilePictureData.Unknown -> {
+            InitialsPlaceholder(
+                modifier = modifier,
+                profilePictureData = ProfilePictureData.InitialsPlaceholder(0, "?"),
+            )
+        }
     }
 }
 
