@@ -21,7 +21,7 @@ import org.robolectric.RobolectricTestRunner
 
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
-class ConversationAnswerMessagesUITest : BaseThreadUITest() {
+class ConversationAnswerMessagesUITest : BaseChatUITest() {
 
     private fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
 
@@ -31,10 +31,10 @@ class ConversationAnswerMessagesUITest : BaseThreadUITest() {
     fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the first answer post`() {
         var resolvedPost: IBasePost? = null
 
-        setupThreadUi(post) { post ->
+        setupThreadUi(post, { post ->
             resolvedPost = post
             CompletableDeferred()
-        }
+        }, { CompletableDeferred() })
 
         composeTestRule.onNodeWithText(answers[0].content!!, useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.OnLongClick)
@@ -50,10 +50,10 @@ class ConversationAnswerMessagesUITest : BaseThreadUITest() {
     fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the third answer post`() {
         var resolvedPost: IBasePost? = null
 
-        setupThreadUi(post) { post ->
+        setupThreadUi(post, { post ->
             resolvedPost = post
             CompletableDeferred()
-        }
+        }, { CompletableDeferred() })
 
         composeTestRule.onNodeWithText(answers[2].content!!, useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.OnLongClick)
@@ -77,10 +77,10 @@ class ConversationAnswerMessagesUITest : BaseThreadUITest() {
 
         var unresolvedPost: IBasePost? = null
 
-        setupThreadUi(resolvedPost) { post ->
+        setupThreadUi(resolvedPost, { post ->
             unresolvedPost = post
             CompletableDeferred()
-        }
+        }, { CompletableDeferred() })
 
         composeTestRule.onNodeWithText(answers[resolvingIndex].content!!, useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.OnLongClick)
@@ -94,7 +94,7 @@ class ConversationAnswerMessagesUITest : BaseThreadUITest() {
 
     @Test
     fun `test GIVEN the post is not resolved and no answer post is resolving THEN the post is shown as not resolved and no answer post is shown as resolving`() {
-        setupThreadUi(post) { CompletableDeferred() }
+        setupThreadUi(post, { CompletableDeferred() }, { CompletableDeferred() })
 
         composeTestRule.onNodeWithText(post.content).assertExists()
         for (answer in answers) {
@@ -117,7 +117,7 @@ class ConversationAnswerMessagesUITest : BaseThreadUITest() {
             answers = modifiedAnswers
         )
 
-        setupThreadUi(resolvedPost) { CompletableDeferred() }
+        setupThreadUi(resolvedPost, { CompletableDeferred() }, { CompletableDeferred() })
 
         val resolvesAssertion = hasAnyChild(hasText(context.getString(R.string.post_resolves)))
 
