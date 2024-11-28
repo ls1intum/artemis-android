@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Person
@@ -130,7 +131,11 @@ internal fun PostItem(
                     it
                         .let { modifier ->
                             if (isPinned) {
-                                modifier.background(color = PinnedMessageBackgroundColor)
+                                modifier
+                                    .clip(
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .background(color = PinnedMessageBackgroundColor)
                             } else modifier
                         }
                         .combinedClickable(

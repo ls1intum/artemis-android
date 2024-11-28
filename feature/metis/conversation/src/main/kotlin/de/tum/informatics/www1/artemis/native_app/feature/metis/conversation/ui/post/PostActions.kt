@@ -24,6 +24,7 @@ fun rememberPostActions(
     post: IBasePost?,
     hasModerationRights: Boolean,
     isAtLeastTutorInCourse: Boolean,
+    isConversationCreator: Boolean,
     clientId: Long,
     onRequestEdit: () -> Unit,
     onRequestDelete: () -> Unit,
@@ -52,7 +53,7 @@ fun rememberPostActions(
             val doesPostExistOnServer = post.serverPostId != null
             val hasEditPostRights = hasModerationRights || post.authorId == clientId
             val hasResolvePostRights = isAtLeastTutorInCourse || post.authorId == clientId
-            val hasPinPostRights = hasModerationRights //|| isCreator
+            val hasPinPostRights = hasModerationRights || isConversationCreator
 
             PostActions(
                 requestEditPost = if (doesPostExistOnServer && hasEditPostRights) onRequestEdit else null,

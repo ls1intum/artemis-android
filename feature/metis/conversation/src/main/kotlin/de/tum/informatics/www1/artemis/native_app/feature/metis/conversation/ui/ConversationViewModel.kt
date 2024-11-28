@@ -252,6 +252,10 @@ internal open class ConversationViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
+    val isConversationCreator: StateFlow<Boolean> = conversation
+        .map { conversation -> conversation.bind { it.isCreator }.orElse(false) }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
+
     override val legalTagChars: List<Char> = listOf('@', '#')
 
     override val newMessageText: MutableStateFlow<TextFieldValue> =

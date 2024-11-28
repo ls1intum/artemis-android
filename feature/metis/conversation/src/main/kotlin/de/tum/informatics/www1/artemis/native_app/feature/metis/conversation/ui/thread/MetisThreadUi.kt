@@ -45,14 +45,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import org.koin.compose.koinInject
@@ -76,6 +75,7 @@ internal fun MetisThreadUi(
 
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
     val isAtLeastTutorInCourse by viewModel.isAtLeastTutorInCourse.collectAsState()
+    val isConversationCreator by viewModel.isConversationCreator.collectAsState()
 
     postDataState.bind { it.serverPostId }.orNull()?.let { serverSidePostId ->
         ReportVisibleMetisContext(
@@ -98,6 +98,7 @@ internal fun MetisThreadUi(
         postDataState = postDataState,
         isAtLeastTutorInCourse = isAtLeastTutorInCourse,
         hasModerationRights = hasModerationRights,
+        isConversationCreator = isConversationCreator,
         listContentPadding = listContentPadding,
         serverUrl = serverUrl,
         emojiService = koinInject(),
@@ -151,6 +152,7 @@ internal fun MetisThreadUi(
     conversationDataState: DataState<Conversation>,
     hasModerationRights: Boolean,
     isAtLeastTutorInCourse: Boolean,
+    isConversationCreator: Boolean,
     listContentPadding: PaddingValues,
     serverUrl: String,
     emojiService: EmojiService,
@@ -212,6 +214,7 @@ internal fun MetisThreadUi(
                                 post = post,
                                 hasModerationRights = hasModerationRights,
                                 isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+                                isConversationCreator = isConversationCreator,
                                 listContentPadding = listContentPadding,
                                 clientId = clientId,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
@@ -248,6 +251,7 @@ private fun PostAndRepliesList(
     post: PostPojo,
     hasModerationRights: Boolean,
     isAtLeastTutorInCourse: Boolean,
+    isConversationCreator: Boolean,
     listContentPadding: PaddingValues,
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
@@ -262,6 +266,7 @@ private fun PostAndRepliesList(
             affectedPost,
             hasModerationRights,
             isAtLeastTutorInCourse,
+            isConversationCreator,
             clientId,
             onRequestEdit = { onRequestEdit(affectedPost) },
             onRequestDelete = { onRequestDelete(affectedPost) },

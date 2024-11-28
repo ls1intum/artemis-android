@@ -64,6 +64,7 @@ class ReplyTextFieldVisibilityUITest : BaseThreadUITest() {
                 clientId = clientId,
                 hasModerationRights = false,
                 isAtLeastTutorInCourse = false,
+                isConversationCreator = false,
                 listContentPadding = PaddingValues(),
                 serverUrl = "",
                 courseId = course.id!!,

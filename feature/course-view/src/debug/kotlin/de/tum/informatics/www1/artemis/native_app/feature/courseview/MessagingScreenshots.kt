@@ -244,6 +244,7 @@ fun `Metis - Conversation Channel`() {
                                 clientId = 0L,
                                 hasModerationRights = true,
                                 isAtLeastTutorInCourse = true,
+                                isConversationCreator = true,
                                 listContentPadding = PaddingValues(),
                                 serverUrl = "",
                                 courseId = 0,

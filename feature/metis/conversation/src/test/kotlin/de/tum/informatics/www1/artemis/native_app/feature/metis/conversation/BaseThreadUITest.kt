@@ -81,6 +81,7 @@ abstract class BaseThreadUITest : BaseComposeTest() {
                 conversationDataState = DataState.Success(conversation),
                 hasModerationRights = false,
                 isAtLeastTutorInCourse = false,
+                isConversationCreator = false,
                 listContentPadding = PaddingValues(),
                 serverUrl = "",
                 emojiService = EmojiServiceStub,
