@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.remote_images
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
@@ -23,14 +24,15 @@ class ArtemisImageProviderImpl(
         val authToken by accountService.authToken.collectAsState(initial = "")
 
         val context = LocalContext.current
-        // TODO: this request is created for every call
-        val imageRequest = imageProvider.createImageRequest(
-            context = context,
-            imagePath = imagePath,
-            serverUrl = serverUrl,
-            authorizationToken = authToken,
-            memoryCacheKey = serverUrl + imagePath
-        )
+        val imageRequest = remember(serverUrl, authToken, imagePath) {
+            imageProvider.createImageRequest(
+                context = context,
+                imagePath = imagePath,
+                serverUrl = serverUrl,
+                authorizationToken = authToken,
+                memoryCacheKey = serverUrl + imagePath
+            )
+        }
 
         return rememberAsyncImagePainter(model = imageRequest)
     }
