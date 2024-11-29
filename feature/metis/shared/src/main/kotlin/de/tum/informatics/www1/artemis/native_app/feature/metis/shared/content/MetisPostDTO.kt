@@ -4,4 +4,4 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MetisPostDTO(val post: StandalonePost, val action: MetisPostAction)
+data class MetisPostDTO(val post: StandalonePost, val action: MetisCrudAction)
