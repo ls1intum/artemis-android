@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.dashboard
+package de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,7 +15,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.Dash
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn

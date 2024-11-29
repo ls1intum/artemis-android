@@ -1,11 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.impl
 
 import android.content.Context
-import androidx.datastore.core.DataMigration
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.BetaHintService
@@ -22,7 +19,11 @@ class BetaHintServiceImpl(private val context: Context) : BetaHintService {
 
     private val Context.storage by preferencesDataStore(DATA_STORE_KEY)
 
-    override val shouldShowBetaHint: Flow<Boolean> = context.storage.data.map { it[KEY_DISMISSED] ?: false }.map { !it }
+    private val isBetaHintDismissed: Flow<Boolean> = context.storage.data.map { it[KEY_DISMISSED] ?: false }
+
+    override val shouldShowBetaHint: Flow<Boolean> = isBetaHintDismissed.map { dismissed ->
+        BuildConfig.isBeta && !dismissed
+    }
 
     override suspend fun dismissBetaHintPermanently() {
         context.storage.edit { data ->

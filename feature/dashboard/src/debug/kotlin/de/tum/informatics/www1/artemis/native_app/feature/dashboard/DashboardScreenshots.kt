@@ -21,6 +21,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalCou
 import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardService
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CourseOverviewViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CoursesOverview
 
 private const val IMAGE_MARS = "mars"
 private const val IMAGE_SATURN_5 = "saturn5"
