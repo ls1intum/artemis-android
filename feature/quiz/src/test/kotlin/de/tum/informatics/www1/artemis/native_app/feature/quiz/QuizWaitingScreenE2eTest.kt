@@ -23,8 +23,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAcc
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationUi
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.TEST_TAG_TEXT_FIELD_BATCH_PASSWORD
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.TEST_TAG_WAIT_FOR_QUIZ_START_SCREEN
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -86,12 +84,10 @@ internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
                 DefaultTimeoutMillis
             )
 
-        val participation = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                participationService
-                    .findParticipation(quiz.id, testServerUrl, accessToken)
-                    .orThrow("Could not load participation. Expected a participation to have been created")
-            }
+        val participation = runBlockingWithTestTimeout {
+            participationService
+                .findParticipation(quiz.id, testServerUrl, accessToken)
+                .orThrow("Could not load participation. Expected a participation to have been created")
         }
 
         assertIs<StudentParticipation>(participation)
@@ -153,18 +149,14 @@ internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
             )
 
         // Start the batch to generate a participation
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                startQuizExerciseBatch(getAdminAccessToken(), quiz.id, batch)
-            }
+        runBlockingWithTestTimeout {
+            startQuizExerciseBatch(getAdminAccessToken(), quiz.id, batch)
         }
 
-        val participation = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                participationService
-                    .findParticipation(quiz.id, testServerUrl, accessToken)
-                    .orThrow("Could not load participation. Expected a participation to have been created")
-            }
+        val participation = runBlockingWithTestTimeout {
+            participationService
+                .findParticipation(quiz.id, testServerUrl, accessToken)
+                .orThrow("Could not load participation. Expected a participation to have been created")
         }
 
         assertIs<StudentParticipation>(participation)

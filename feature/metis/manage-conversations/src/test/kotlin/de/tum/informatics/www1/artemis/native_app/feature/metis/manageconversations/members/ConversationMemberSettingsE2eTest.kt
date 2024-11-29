@@ -28,8 +28,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.testTagForMember
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -112,16 +110,14 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can revoke moderation rights`() {
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                conversationService.grantModerationRights(
-                    course.id!!,
-                    channel,
-                    user2Username,
-                    accessToken,
-                    testServerUrl
-                ).orThrow("Could not promote user to moderator")
-            }
+        runBlockingWithTestTimeout {
+            conversationService.grantModerationRights(
+                course.id!!,
+                channel,
+                user2Username,
+                accessToken,
+                testServerUrl
+            ).orThrow("Could not promote user to moderator")
         }
 
         setupUiAndViewModel()

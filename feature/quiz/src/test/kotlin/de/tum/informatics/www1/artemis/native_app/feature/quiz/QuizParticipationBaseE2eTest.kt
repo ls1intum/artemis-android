@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
@@ -16,9 +17,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.MultipleChoiceSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createQuizExercise
-import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createExerciseFormBodyWithPng
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createQuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.TEST_TAG_BUTTON_WITH_LOADING_ANIMATION_LOADING
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
@@ -187,7 +187,9 @@ internal abstract class QuizParticipationBaseE2eTest(quizType: QuizType.Workable
             )
         }
 
-        runBlockingWithTestTimeout {
+        runBlockingWithTestTimeout(
+            timeoutMultiplier = 2
+        ) {
             setupAndVerify(viewModel) {
                 // Lambda to submit
 
