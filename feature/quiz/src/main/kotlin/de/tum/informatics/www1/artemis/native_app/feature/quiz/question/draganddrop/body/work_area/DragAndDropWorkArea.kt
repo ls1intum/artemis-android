@@ -22,8 +22,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toSize
-import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.scale
+import coil3.toBitmap
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.image.loadAsyncImageDrawable
@@ -95,10 +95,10 @@ internal fun DragAndDropWorkArea(
             }
 
             val painter = remember(loadedDrawable, maxWidthInPx) {
-                val bitmap = if (loadedDrawable.intrinsicWidth < maxWidthInPx) {
-                    val scale = maxWidthInPx / loadedDrawable.intrinsicWidth.toFloat()
-                    val newWidth = (loadedDrawable.intrinsicWidth * scale).toInt()
-                    val newHeight = (loadedDrawable.intrinsicHeight * scale).toInt()
+                val bitmap = if (loadedDrawable.width < maxWidthInPx) {
+                    val scale = maxWidthInPx / loadedDrawable.width.toFloat()
+                    val newWidth = (loadedDrawable.width * scale).toInt()
+                    val newHeight = (loadedDrawable.height * scale).toInt()
 
                     loadedDrawable
                         .toBitmap()

@@ -26,6 +26,7 @@ dependencies {
     api(libs.androidx.compose.ui.util)
     api(libs.androidx.compose.runtime)
     api(libs.androidx.navigation.compose)
+    api(libs.coil2.base)
     api(libs.coil.compose)
     api(libs.coil.network)
     debugApi(libs.coil.compose.core)

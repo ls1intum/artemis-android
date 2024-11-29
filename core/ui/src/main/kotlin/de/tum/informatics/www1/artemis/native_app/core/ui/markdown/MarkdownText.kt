@@ -29,11 +29,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
-import coil3.ImageLoader
-import coil3.request.Disposable
-import coil3.request.ImageRequest
-import coil3.request.crossfade
-import coil3.size.Scale
+import coil.ImageLoader
+import coil.request.Disposable
+import coil.request.ImageRequest
+import coil.size.Scale
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin

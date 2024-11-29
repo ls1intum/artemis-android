@@ -28,8 +28,10 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
+import coil3.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
@@ -78,9 +80,13 @@ internal fun DragItemUiElementContent(
         contentAlignment = Alignment.Center
     ) {
         if (pictureFilePath != null) {
+            val headers = NetworkHeaders.Builder()
+                .set(HttpHeaders.Authorization, "Bearer $authToken")
+                .build()
+
             val request = ImageRequest.Builder(LocalContext.current)
+                .httpHeaders(headers)
                 .data(pictureFilePath)
-                .addHeader(HttpHeaders.Authorization, "Bearer $authToken")
                 .build()
 
             AsyncImage(
