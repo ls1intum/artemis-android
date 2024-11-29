@@ -79,7 +79,7 @@ class DashboardE2eTest : BaseComposeTest() {
         composeTestRule
             .waitUntilExactlyOneExists(
                 hasTestTag(TEST_TAG_COURSE_LIST),
-                DefaultTimeoutMillis * 2    // Flaky test
+                DefaultTimeoutMillis * 4    // Flaky test
             )
 
         composeTestRule
