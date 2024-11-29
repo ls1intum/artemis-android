@@ -25,7 +25,7 @@ import org.robolectric.RobolectricTestRunner
 @Ignore("There is an open issue about onClick events not working for the ModalBottomSheetLayout with" +
         "the robolectric test runner. Enable this test again as soon as the following issue is resolved:" +
         "https://github.com/robolectric/robolectric/issues/9595")
-class ConversationAnswerMessagesUITest : BaseThreadUITest() {
+class ConversationAnswerMessagesUITest : BaseConversationUiTest() {
 
     private fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
 

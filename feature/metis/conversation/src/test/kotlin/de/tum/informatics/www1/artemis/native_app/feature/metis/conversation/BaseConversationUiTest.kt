@@ -2,15 +2,21 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
@@ -19,7 +25,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.datetime.Clock
 
-abstract class BaseThreadUITest : BaseComposeTest() {
+abstract class BaseConversationUiTest : BaseComposeTest() {
 
     val clientId = 20L
 
@@ -90,6 +96,38 @@ abstract class BaseThreadUITest : BaseComposeTest() {
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onRequestReload = {},
                 onRequestRetrySend = { _, _ -> },
+            )
+        }
+    }
+
+    fun setupChatUi(
+        posts: List<IStandalonePost>,
+        currentUser: User = User(id = clientId),
+        hasModerationRights: Boolean = false
+    ) {
+        composeTestRule.setContent {
+            val list = posts.map { post -> ChatListItem.PostChatListItem(post) }.toMutableList()
+            MetisChatList(
+                modifier = Modifier.fillMaxSize(),
+                initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
+                posts = PostsDataState.Loaded.WithList(list, PostsDataState.NotLoading),
+                clientId = currentUser.id,
+                hasModerationRights = hasModerationRights,
+                isAtLeastTutorInCourse = false,
+                listContentPadding = PaddingValues(),
+                serverUrl = "",
+                courseId = course.id!!,
+                state = rememberLazyListState(),
+                emojiService = EmojiServiceStub,
+                bottomItem = null,
+                isReplyEnabled = true,
+                onCreatePost = { CompletableDeferred() },
+                onEditPost = { _, _ -> CompletableDeferred() },
+                onDeletePost = { CompletableDeferred() },
+                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                onClickViewPost = {},
+                onRequestRetrySend = { _ -> },
+                title = "Title"
             )
         }
     }
