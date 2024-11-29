@@ -14,6 +14,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import kotlinx.coroutines.CompletableDeferred
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -21,6 +22,9 @@ import org.robolectric.RobolectricTestRunner
 
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
+@Ignore("There is an open issue about onClick events not working for the ModalBottomSheetLayout with" +
+        "the robolectric test runner. Enable this test again as soon as the following issue is resolved:" +
+        "https://github.com/robolectric/robolectric/issues/9595")
 class ConversationAnswerMessagesUITest : BaseThreadUITest() {
 
     private fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
