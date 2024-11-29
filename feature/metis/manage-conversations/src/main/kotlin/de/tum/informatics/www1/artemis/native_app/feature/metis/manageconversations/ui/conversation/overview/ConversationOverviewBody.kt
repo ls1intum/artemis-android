@@ -190,7 +190,7 @@ fun ConversationOverviewBody(
 
     if (showCodeOfConduct) {
         ModalBottomSheet(
-            windowInsets = WindowInsets.statusBars,
+            contentWindowInsets = { WindowInsets.statusBars },
             onDismissRequest = { showCodeOfConduct = false }
         ) {
             CodeOfConductUi(
