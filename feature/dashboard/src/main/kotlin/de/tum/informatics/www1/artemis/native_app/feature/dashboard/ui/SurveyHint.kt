@@ -39,7 +39,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.Surv
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private const val SURVEY_URL = "https://example.com/survey"     // TODO
+private const val SURVEY_URL = "https://survey.ase.in.tum.de/index.php/767298?lang=en"
 
 @Composable
 fun SurveyHint(

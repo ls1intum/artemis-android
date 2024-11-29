@@ -10,9 +10,8 @@ import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 
 
-// TODO: set the correct dates
-private val SURVEY_START_DATE = LocalDate.of(2024, 1, 1)
-private val SURVEY_END_DATE = LocalDate.of(2024, 12, 31)
+private val SURVEY_START_DATE = LocalDate.of(2024, 11, 30)
+private val SURVEY_END_DATE = LocalDate.of(2024, 12, 15)
 
 class SurveyHintServiceImpl(
     private val context: Context,
