@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAcc
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -30,6 +31,10 @@ import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 
+@Ignore("There seems to be a problem related to the docker files, where the mysql database is not " +
+        "reset properly. This causes the newly created courses by this E2e test to pile up and " +
+        "causes the server to take very long to return all the courses. This results in a timeout." +
+        "Issue: https://github.com/ls1intum/artemis-android/issues/169")
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
@@ -79,7 +84,7 @@ class DashboardE2eTest : BaseComposeTest() {
         composeTestRule
             .waitUntilExactlyOneExists(
                 hasTestTag(TEST_TAG_COURSE_LIST),
-                DefaultTimeoutMillis * 4    // Flaky test
+                DefaultTimeoutMillis
             )
 
         composeTestRule
