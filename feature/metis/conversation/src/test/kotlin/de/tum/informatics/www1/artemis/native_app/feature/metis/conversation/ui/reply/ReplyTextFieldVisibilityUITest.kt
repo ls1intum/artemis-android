@@ -4,7 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.BaseConversationUiTest
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.BaseChatUItest
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import org.junit.Test
@@ -14,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
 
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
-class ReplyTextFieldVisibilityUITest : BaseConversationUiTest() {
+class ReplyTextFieldVisibilityUITest : BaseChatUItest() {
 
     @Test
     fun `test GIVEN the thread view is shown containing one post and three answer posts WHEN the markdown text field is clicked THEN the keyboard is shown below the markdown text field`() {

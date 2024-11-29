@@ -25,11 +25,11 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.datetime.Clock
 
-abstract class BaseConversationUiTest : BaseComposeTest() {
+abstract class BaseChatUItest : BaseComposeTest() {
 
     val clientId = 20L
 
-    val course: Course = Course(id = 1)
+    private val course: Course = Course(id = 1)
     val conversation = OneToOneChat(id = 2)
 
     val answers = (0..2).map { index ->
