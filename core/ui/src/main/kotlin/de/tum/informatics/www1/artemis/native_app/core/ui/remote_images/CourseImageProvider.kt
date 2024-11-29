@@ -5,7 +5,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
-import coil.compose.rememberAsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
 
 val LocalCourseImageProvider = compositionLocalOf<CourseImageProvider> { DefaultCourseImageProvider }
 

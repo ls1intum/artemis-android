@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
-import coil.request.ImageRequest
+import coil3.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
@@ -47,7 +47,7 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
         override fun rememberArtemisImageRequest(imagePath: String): ImageRequest {
             return ImageRequest.Builder(LocalContext.current)
                 .data(sampleImageUrl)
-                .size(coil.size.Size.ORIGINAL)
+                .size(coil3.size.Size.ORIGINAL)
                 .build()
         }
     }

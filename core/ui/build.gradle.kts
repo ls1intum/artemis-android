@@ -27,6 +27,9 @@ dependencies {
     api(libs.androidx.compose.runtime)
     api(libs.androidx.navigation.compose)
     api(libs.coil.compose)
+    api(libs.coil.network)
+    debugApi(libs.coil.compose.core)
+    debugApi(libs.coil.test)
     api(libs.accompanist.webview)
 
     implementation(libs.kotlinx.datetime)
