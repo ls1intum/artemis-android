@@ -34,7 +34,8 @@ interface MetisService {
     ): NetworkResponse<StandalonePost>
 
     fun subscribeToPostUpdates(
-        metisContext: MetisContext
+        courseId: Long,
+        clientId: Long,
     ): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>>
 
     /**

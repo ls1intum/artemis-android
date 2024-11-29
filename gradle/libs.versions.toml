@@ -7,10 +7,10 @@ buildToolsVersion = "35.0.0"
 accompanist = "0.30.1"
 androidDesugarJdkLibs = "2.0.4"
 androidxActivity = "1.8.1"
-androidxAppCompat = "1.6.1"
-androidxComposeBom = "2024.06.00"
-androidxLifecycle = "2.6.2"
-androidxNavigation = "2.7.5"
+androidxAppCompat = "1.7.0"
+androidxComposeBom = "2024.11.00"
+androidxLifecycle = "2.8.7"
+androidxNavigation = "2.8.4"
 androidGradlePlugin = "8.7.0"
 androidxPaging = "3.3.4"
 androidxDataStore = "1.1.1"
@@ -24,10 +24,10 @@ kotlinxSerializationJson = "1.5.1"
 koin = "3.5.3"
 koinAndroidxCompose = "3.4.5"
 kover = "0.7.2"
-ktor = "2.3.12"
+ktor = "2.3.13"
 krossbow = "5.2.0"
 markwon = "4.6.2"
-mockk = "1.13.8"
+mockk = "1.13.13"
 ossLicensesPlugin = "0.10.6"
 placeholderMaterial = "2.0.0"
 room = "2.6.1"
@@ -123,7 +123,7 @@ noties-markwon-simple-ext = { group = "io.noties.markwon", name = "simple-ext", 
 noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", version.ref = "markwon" }
 oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 placeholder-material = { group = "io.github.fornewid", name = "placeholder-material3", version.ref = "placeholderMaterial" }
-play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.0.1" }
+play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.1.0" }
 robolectric = { group = "org.robolectric", name = "robolectric", version = "4.13" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
 sentry-compose-android = { group = "io.sentry", name = "sentry-compose-android", version.ref = "sentry-android" }
@@ -139,6 +139,6 @@ android-library = { id = "com.android.library", version.ref = "androidGradlePlug
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
-google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.0.1" }
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.0.0" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 google-ksp = { id = "com.google.devtools.ksp", version = "1.9.25-1.0.20" }
