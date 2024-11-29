@@ -101,7 +101,7 @@ val manageConversationsModule = module {
     viewModel { params ->
         ConversationAddMembersViewModel(
             params[0],
-            get(),
+            params[1],
             get(),
             get(),
             get(),
