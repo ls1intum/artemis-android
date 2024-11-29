@@ -19,12 +19,12 @@ interface WebsocketProvider {
      * Performs automatic reconnects.
      */
     fun <T : Any> subscribe(
-        channel: String,
+        topic: String,
         deserializer: DeserializationStrategy<T>
     ): Flow<WebsocketData<T>>
 
     fun <T : Any> subscribeMessage(
-        channel: String,
+        topic: String,
         deserializer: DeserializationStrategy<T>
     ): Flow<T>
 
