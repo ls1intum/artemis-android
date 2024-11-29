@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 
 data class PostActions(
@@ -46,24 +45,24 @@ fun rememberPostActions(
         onRequestRetrySend,
         clipboardManager
     ) {
-        if (post != null) {
-            val doesPostExistOnServer = post.serverPostId != null
-            val hasEditPostRights = hasModerationRights || post.authorId == clientId
-            val hasResolvePostRights = isAtLeastTutorInCourse || post.authorId == clientId
-
-            PostActions(
-                requestEditPost = if (doesPostExistOnServer && hasEditPostRights) onRequestEdit else null,
-                requestDeletePost = if (hasEditPostRights) onRequestDelete else null,
-                onClickReaction = if (doesPostExistOnServer) onClickReaction else null,
-                onCopyText = {
-                    clipboardManager.setText(AnnotatedString(post.content.orEmpty()))
-                },
-                onReplyInThread = if (doesPostExistOnServer) onReplyInThread else null,
-                onResolvePost = if (hasResolvePostRights) onResolvePost else null,
-                onRequestRetrySend = onRequestRetrySend
-            )
-        } else {
-            PostActions()
+        if (post == null) {
+            return@remember PostActions()
         }
+
+        val doesPostExistOnServer = post.serverPostId != null
+        val isPostAuthor = post.authorId == clientId
+        val hasResolvePostRights = isAtLeastTutorInCourse || post.authorId == clientId
+
+        PostActions(
+            requestEditPost = if (doesPostExistOnServer && isPostAuthor) onRequestEdit else null,
+            requestDeletePost = if (isPostAuthor || hasModerationRights) onRequestDelete else null,
+            onClickReaction = if (doesPostExistOnServer) onClickReaction else null,
+            onCopyText = {
+                clipboardManager.setText(AnnotatedString(post.content.orEmpty()))
+            },
+            onReplyInThread = if (doesPostExistOnServer) onReplyInThread else null,
+            onResolvePost = if (hasResolvePostRights) onResolvePost else null,
+            onRequestRetrySend = onRequestRetrySend
+        )
     }
 }

@@ -1,13 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lecture_view
 
-import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -15,6 +13,7 @@ import androidx.compose.ui.test.performScrollToKey
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.compose.rememberNavController
 import androidx.test.platform.app.InstrumentationRegistry
+import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.test.awaitFirstSuccess
@@ -22,9 +21,9 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
+import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
-import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createAttachment
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createAttachmentUnit
@@ -37,19 +36,18 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_cr
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextExercise
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createTextLectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createVideoLectureUnit
-import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.LectureScreen
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.LectureViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.lectureview.R
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.TEST_TAG_OVERVIEW_LIST
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.getLectureUnitTestTag
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lectureModule
+import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.encodeToString
 import org.junit.Before
 import org.junit.Rule
@@ -61,24 +59,17 @@ import org.koin.compose.LocalKoinApplication
 import org.koin.compose.LocalKoinScope
 import org.koin.core.annotation.KoinInternalApi
 import org.koin.mp.KoinPlatformTools
-import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import de.tum.informatics.www1.artemis.native_app.feature.lectureview.R
 
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
 @RunWith(RobolectricTestRunner::class)
-class LectureE2eTest : KoinTest {
-
-    private val testDispatcher = UnconfinedTestDispatcher()
-
-    @get:Rule
-    val composeTestRule = createComposeRule()
+class LectureE2eTest : BaseComposeTest() {
 
     @get:Rule
     val koinTestRule = KoinTestRule.create {
@@ -88,20 +79,16 @@ class LectureE2eTest : KoinTest {
         modules(loginModule, lectureModule, testLoginModule, testWebsocketModule)
     }
 
-    private val context: Context get() = InstrumentationRegistry.getInstrumentation().context
-
     private lateinit var course: Course
     private lateinit var lecture: Lecture
 
     @Before
     fun setup() {
-        runBlocking {
-            withTimeout(DefaultTestTimeoutMillis) {
-                performTestLogin()
+        runBlockingWithTestTimeout {
+            performTestLogin()
 
-                course = createCourse(getAdminAccessToken())
-                lecture = createLecture(getAdminAccessToken(), course.id!!)
-            }
+            course = createCourse(getAdminAccessToken())
+            lecture = createLecture(getAdminAccessToken(), course.id!!)
         }
     }
 
@@ -175,10 +162,8 @@ class LectureE2eTest : KoinTest {
         assert(attachments.size == 3) { "Expected 3 lecture units" }
 
         val viewModel = setupViewModelAndUi()
-        val loadedAttachments = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                viewModel.lectureDataState.awaitFirstSuccess("Lecture Data State").attachments
-            }
+        val loadedAttachments = runBlockingWithTestTimeout {
+            viewModel.lectureDataState.awaitFirstSuccess("Lecture Data State").attachments
         }
 
         assertEquals(loadedAttachments.size, 3, "Expected 3 attachments")

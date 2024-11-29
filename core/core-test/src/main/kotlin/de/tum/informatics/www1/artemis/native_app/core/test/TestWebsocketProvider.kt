@@ -21,12 +21,12 @@ class TestWebsocketProvider : WebsocketProvider {
     override val isConnected: Flow<Boolean> = flowOf(true)
 
     override fun <T : Any> subscribe(
-        channel: String,
+        topic: String,
         deserializer: DeserializationStrategy<T>
     ): Flow<WebsocketProvider.WebsocketData<T>> = flowOf(WebsocketProvider.WebsocketData.Subscribe())
 
     override fun <T : Any> subscribeMessage(
-        channel: String,
+        topic: String,
         deserializer: DeserializationStrategy<T>
     ): Flow<T> = emptyFlow()
 
