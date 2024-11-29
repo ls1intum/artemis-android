@@ -21,7 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvid
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostAction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisCrudAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ConversationWebsocketDto
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
@@ -281,13 +281,15 @@ class ConversationOverviewViewModel(
                         is ServerSentConversationUpdate -> {
                             val serverSentUpdate = update.update
 
+                            // TODO: It seems like there are no updates received from the websocket -> investigate
+
                             when (serverSentUpdate.crudAction) {
-                                MetisPostAction.CREATE, MetisPostAction.UPDATE -> {
+                                MetisCrudAction.CREATE, MetisCrudAction.UPDATE -> {
                                     currentConversations[serverSentUpdate.conversation.id] =
                                         serverSentUpdate.conversation
                                 }
 
-                                MetisPostAction.NEW_MESSAGE -> {
+                                MetisCrudAction.NEW_MESSAGE -> {
                                     val isMetisContextVisible =
                                         visibleMetisContexts.value.any { visibleMetisContext ->
                                             val metisContext = visibleMetisContext.metisContext
@@ -305,7 +307,7 @@ class ConversationOverviewViewModel(
                                     }
                                 }
 
-                                MetisPostAction.DELETE -> {
+                                MetisCrudAction.DELETE -> {
                                     currentConversations.remove(serverSentUpdate.conversation.id)
                                 }
                             }

@@ -2,9 +2,10 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisCrudAction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostDTO
 
 /**
  * Manages updates to the conversation over the web socket.
@@ -19,31 +20,46 @@ class ConversationWebSocketUpdateUseCase(
      */
     suspend fun updatePosts(
         host: String,
-        context: MetisContext
+        context: MetisContext,
+        clientId: Long
     ) {
-        metisService.subscribeToPostUpdates(context).collect { websocketData ->
+        metisService.subscribeToPostUpdates(
+            courseId = context.courseId,
+            clientId = clientId
+        ).collect { websocketData ->
             if (websocketData is WebsocketProvider.WebsocketData.Message) {
-                val dto = websocketData.message
-                when (dto.action) {
-                    MetisPostAction.CREATE -> {
-                        metisStorageService.insertLiveCreatedPost(host, context, dto.post)
-                    }
+                updateDatabaseWithDto(
+                    dto = websocketData.message,
+                    context = context,
+                    host = host
+                )
+            }
+        }
+    }
 
-                    MetisPostAction.UPDATE -> {
-                        metisStorageService.updatePost(host, context, dto.post)
-                    }
+    private suspend fun updateDatabaseWithDto(
+        dto: MetisPostDTO,
+        context: MetisContext,
+        host: String
+    ) {
+        when (dto.action) {
+            MetisCrudAction.CREATE -> {
+                metisStorageService.insertLiveCreatedPost(host, context, dto.post)
+            }
 
-                    MetisPostAction.DELETE -> {
-                        metisStorageService.deletePosts(
-                            host,
-                            listOf(dto.post.id ?: return@collect)
-                        )
-                    }
+            MetisCrudAction.UPDATE -> {
+                metisStorageService.updatePost(host, context, dto.post)
+            }
 
-                    MetisPostAction.NEW_MESSAGE -> {
+            MetisCrudAction.DELETE -> {
+                metisStorageService.deletePosts(
+                    host,
+                    listOf(dto.post.id ?: return)
+                )
+            }
 
-                    }
-                }
+            MetisCrudAction.NEW_MESSAGE -> {
+                // Nothing to do here. Only relevant for the conversation overview.
             }
         }
     }
