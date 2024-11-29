@@ -321,24 +321,6 @@ private fun HeadlineAuthorInfo(
         creationDate ?: Clock.System.now()
     }
 
-    val authorIconAndNameContent: @Composable () -> Unit = {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            HeadlineAuthorIcon(authorRole)
-
-            Spacer(modifier = Modifier.width(4.dp))
-
-            Text(
-                modifier = Modifier,
-                text = remember(authorName) { authorName ?: "Placeholder" },
-                maxLines = 1,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-
     val creationDateContent: @Composable () -> Unit = {
         val relativeTime = getRelativeTime(to = relativeTimeTo, showDate = false)
 
@@ -351,8 +333,7 @@ private fun HeadlineAuthorInfo(
 
     if (expanded) {
         Column(modifier) {
-            authorIconAndNameContent()
-
+            AuthorRoleAndNameRow(authorRole, authorName)
             creationDateContent()
         }
     } else {
@@ -361,10 +342,31 @@ private fun HeadlineAuthorInfo(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            authorIconAndNameContent()
-
+            AuthorRoleAndNameRow(authorRole, authorName)
             creationDateContent()
         }
+    }
+}
+
+@Composable
+private fun AuthorRoleAndNameRow(
+    authorRole: UserRole?,
+    authorName: String?
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        HeadlineAuthorIcon(authorRole)
+
+        Spacer(modifier = Modifier.width(4.dp))
+
+        Text(
+            modifier = Modifier,
+            text = remember(authorName) { authorName ?: "Placeholder" },
+            maxLines = 1,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 

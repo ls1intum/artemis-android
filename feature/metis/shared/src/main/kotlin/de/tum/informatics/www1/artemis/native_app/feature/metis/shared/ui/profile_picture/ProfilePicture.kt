@@ -22,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArt
 
 const val TEST_TAG_PROFILE_PICTURE_IMAGE = "TEST_TAG_PROFILE_PICTURE_IMAGE"
 const val TEST_TAG_PROFILE_PICTURE_INITIALS = "TEST_TAG_PROFILE_PICTURE_INITIALS"
+const val TEST_TAG_PROFILE_PICTURE_UNKNOWN = "TEST_TAG_PROFILE_PICTURE_UNKNOWN"
 
 private const val BoxSizeToFontSizeMultiplier = 0.16f
 
@@ -43,13 +44,13 @@ fun ProfilePicture(
         }
         is ProfilePictureData.InitialsPlaceholder -> {
             InitialsPlaceholder(
-                modifier = modifier,
+                modifier = modifier.testTag(TEST_TAG_PROFILE_PICTURE_INITIALS),
                 profilePictureData = profilePictureData,
             )
         }
         ProfilePictureData.Unknown -> {
             InitialsPlaceholder(
-                modifier = modifier,
+                modifier = modifier.testTag(TEST_TAG_PROFILE_PICTURE_UNKNOWN),
                 profilePictureData = ProfilePictureData.InitialsPlaceholder(0, "?"),
             )
         }
@@ -64,8 +65,6 @@ fun ProfilePictureImage(
     val imageUrl = profilePictureData.url
     val artemisImageProvider = LocalArtemisImageProvider.current
     val painter = artemisImageProvider.rememberArtemisAsyncImagePainter(imagePath = imageUrl)
-
-    painter.onRemembered()
 
     when (painter.state) {
         is AsyncImagePainter.State.Success -> {
@@ -99,8 +98,7 @@ fun InitialsPlaceholder(
             .background(color = profilePictureData.backgroundColor)
             .onGloballyPositioned {
                 boxSize.intValue = it.size.width
-            }
-            .testTag(TEST_TAG_PROFILE_PICTURE_INITIALS),
+            },
         contentAlignment = Alignment.Center,
     ) {
         Text(

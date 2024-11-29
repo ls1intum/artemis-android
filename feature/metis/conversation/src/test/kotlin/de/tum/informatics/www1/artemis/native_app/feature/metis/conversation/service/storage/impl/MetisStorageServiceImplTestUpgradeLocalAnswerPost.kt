@@ -51,7 +51,8 @@ class MetisStorageServiceImplUpgradeLocalAnswerPostTest {
             updatedDate = null,
             content = "Answer post content 0",
             authorRole = UserRole.USER,
-            authorName = author.name!!
+            authorName = author.name!!,
+            authorImageUrl = null,
         ),
         reactions = emptyList(),
         serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
@@ -70,6 +71,7 @@ class MetisStorageServiceImplUpgradeLocalAnswerPostTest {
         title = null,
         authorName = author.name!!,
         authorRole = UserRole.USER,
+        authorImageUrl = null,
         courseWideContext = null,
         tags = emptyList(),
         answers = emptyList(),

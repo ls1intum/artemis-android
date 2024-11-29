@@ -5,8 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -19,12 +18,12 @@ class ArtemisImageProviderImpl(
     private val imageProvider = BaseImageProviderImpl()
 
     @Composable
-    override fun rememberArtemisAsyncImagePainter(imagePath: String): AsyncImagePainter {
+    override fun rememberArtemisImageRequest(imagePath: String): ImageRequest {
         val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
         val authToken by accountService.authToken.collectAsState(initial = "")
 
         val context = LocalContext.current
-        val imageRequest = remember(serverUrl, authToken, imagePath) {
+        return remember(serverUrl, authToken, imagePath) {
             imageProvider.createImageRequest(
                 context = context,
                 imagePath = imagePath,
@@ -33,8 +32,6 @@ class ArtemisImageProviderImpl(
                 memoryCacheKey = serverUrl + imagePath
             )
         }
-
-        return rememberAsyncImagePainter(model = imageRequest)
     }
 
 }

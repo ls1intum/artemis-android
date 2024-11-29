@@ -38,7 +38,8 @@ abstract class BaseThreadUITest : BaseComposeTest() {
                 updatedDate = null,
                 content = "Answer Post content $index",
                 authorRole = UserRole.USER,
-                authorName = "author name"
+                authorName = "author name",
+                authorImageUrl = null,
             ),
             reactions = emptyList(),
             serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
@@ -59,6 +60,7 @@ abstract class BaseThreadUITest : BaseComposeTest() {
             title = null,
             authorName = "author name",
             authorRole = UserRole.USER,
+            authorImageUrl = null,
             courseWideContext = null,
             tags = emptyList(),
             answers = if (index == 0) answers else emptyList(),
