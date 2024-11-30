@@ -16,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.ConversationAddMembersViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.ConversationMembersViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.sharedConversationModule
 import org.junit.Rule
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -41,7 +42,7 @@ internal class manage_conversations_moduleTest : BaseComposeTest() {
         androidContext(InstrumentationRegistry.getInstrumentation().context)
 
         modules(coreTestModules)
-        modules(manageConversationsModule)
+        modules(manageConversationsModule, sharedConversationModule)
     }
 
     private val courseId = 1L
