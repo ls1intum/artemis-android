@@ -22,9 +22,7 @@ data class PostActions(
 @Composable
 fun rememberPostActions(
     post: IBasePost?,
-    hasModerationRights: Boolean,
-    isAtLeastTutorInCourse: Boolean,
-    isConversationCreator: Boolean,
+    postActionFlags: PostActionFlags,
     clientId: Long,
     onRequestEdit: () -> Unit,
     onRequestDelete: () -> Unit,
@@ -38,7 +36,7 @@ fun rememberPostActions(
 
     return remember(
         post,
-        hasModerationRights,
+        postActionFlags,
         clientId,
         onRequestEdit,
         onRequestDelete,
@@ -51,9 +49,10 @@ fun rememberPostActions(
     ) {
         if (post != null) {
             val doesPostExistOnServer = post.serverPostId != null
-            val hasEditPostRights = hasModerationRights || post.authorId == clientId
-            val hasResolvePostRights = isAtLeastTutorInCourse || post.authorId == clientId
-            val hasPinPostRights = hasModerationRights || isConversationCreator
+            val hasEditPostRights = postActionFlags.hasModerationRights || post.authorId == clientId
+            val hasResolvePostRights =
+                postActionFlags.isAtLeastTutorInCourse || post.authorId == clientId
+            val hasPinPostRights = postActionFlags.isAbleToPin
 
             PostActions(
                 requestEditPost = if (doesPostExistOnServer && hasEditPostRights) onRequestEdit else null,

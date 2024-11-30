@@ -33,6 +33,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.rememberPostActions
@@ -74,9 +75,7 @@ internal fun MetisChatList(
     ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
 
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
-    val hasModerationRights by viewModel.hasModerationRights.collectAsState()
-    val isAtLeastTutorInCourse by viewModel.isAtLeastTutorInCourse.collectAsState()
-    val isConversationCreator by viewModel.isConversationCreator.collectAsState()
+    val postActionFlags by viewModel.postActionFlags.collectAsState()
 
     val serverUrl by viewModel.serverUrl.collectAsState()
 
@@ -95,9 +94,7 @@ internal fun MetisChatList(
         initialReplyTextProvider = viewModel,
         posts = posts.asPostsDataState(),
         clientId = clientId,
-        hasModerationRights = hasModerationRights,
-        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-        isConversationCreator = isConversationCreator,
+        postActionFlags = postActionFlags,
         listContentPadding = listContentPadding,
         serverUrl = serverUrl,
         courseId = viewModel.courseId,
@@ -122,9 +119,7 @@ fun MetisChatList(
     posts: PostsDataState,
     bottomItem: PostPojo?,
     clientId: Long,
-    hasModerationRights: Boolean,
-    isAtLeastTutorInCourse: Boolean,
-    isConversationCreator: Boolean,
+    postActionFlags: PostActionFlags,
     listContentPadding: PaddingValues,
     serverUrl: String,
     courseId: Long,
@@ -194,9 +189,7 @@ fun MetisChatList(
                             posts = posts,
                             clientId = clientId,
                             onClickViewPost = onClickViewPost,
-                            hasModerationRights = hasModerationRights,
-                            isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-                            isConversationCreator = isConversationCreator,
+                            postActionFlags = postActionFlags,
                             onRequestEdit = onEditPostDelegate,
                             onRequestDelete = onDeletePostDelegate,
                             onRequestPin = onPinPostDelegate,
@@ -225,9 +218,7 @@ private fun ChatList(
     listContentPadding: PaddingValues,
     state: LazyListState,
     posts: PostsDataState.Loaded,
-    hasModerationRights: Boolean,
-    isAtLeastTutorInCourse: Boolean,
-    isConversationCreator: Boolean,
+    postActionFlags: PostActionFlags,
     clientId: Long,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
@@ -260,9 +251,7 @@ private fun ChatList(
 
                     val postActions = rememberPostActions(
                         post = post,
-                        hasModerationRights = hasModerationRights,
-                        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-                        isConversationCreator = isConversationCreator,
+                        postActionFlags = postActionFlags,
                         clientId = clientId,
                         onRequestEdit = { onRequestEdit(post ?: return@rememberPostActions) },
                         onRequestDelete = {

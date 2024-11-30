@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -85,9 +86,11 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 clientId = clientId,
                 postDataState = DataState.Success(post),
                 conversationDataState = DataState.Success(conversation),
-                hasModerationRights = true,
-                isAtLeastTutorInCourse = false,
-                isConversationCreator = false,
+                postActionFlags = PostActionFlags(
+                    isAbleToPin = true,
+                    isAtLeastTutorInCourse = false,
+                    hasModerationRights = true,
+                ),
                 listContentPadding = PaddingValues(),
                 serverUrl = "",
                 emojiService = EmojiServiceStub,
@@ -112,9 +115,11 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 posts = PostsDataState.Loaded.WithList(list, PostsDataState.NotLoading),
                 clientId = clientId,
-                hasModerationRights = true,
-                isAtLeastTutorInCourse = false,
-                isConversationCreator = false,
+                postActionFlags = PostActionFlags(
+                    isAbleToPin = true,
+                    isAtLeastTutorInCourse = false,
+                    hasModerationRights = true,
+                ),
                 listContentPadding = PaddingValues(),
                 serverUrl = "",
                 courseId = course.id!!,

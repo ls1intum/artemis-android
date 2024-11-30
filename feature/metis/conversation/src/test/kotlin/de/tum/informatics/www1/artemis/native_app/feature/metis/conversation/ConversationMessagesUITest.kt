@@ -47,7 +47,7 @@ class ConversationMessagesUITest : BaseChatUITest() {
     }
 
     @Test
-    fun `test GIVEN post is not pinned WHEN pinning the post THEN the correct post gets unpinned`() {
+    fun `test GIVEN post is pinned WHEN unpinning the post THEN the correct post gets unpinned`() {
         var changedPost: IBasePost? = null
         val modifiedPosts = posts.toMutableList()
         modifiedPosts[0] = modifiedPosts[0].copy(displayPriority = DisplayPriority.PINNED)
@@ -89,7 +89,7 @@ class ConversationMessagesUITest : BaseChatUITest() {
     }
 
     @Test
-    fun `test GIVEN post is not pinned in thread WHEN pinning the post THEN the correct post gets unpinned in thread`() {
+    fun `test GIVEN post is pinned in thread WHEN unpinning the post THEN the correct post gets unpinned in thread`() {
         var changedPost: IBasePost? = null
         val modifiedPosts = posts.toMutableList()
         modifiedPosts[0] = modifiedPosts[0].copy(displayPriority = DisplayPriority.PINNED)

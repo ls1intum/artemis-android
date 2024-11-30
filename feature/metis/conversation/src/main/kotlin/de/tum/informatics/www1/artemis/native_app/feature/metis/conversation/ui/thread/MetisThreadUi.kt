@@ -37,6 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisPostListHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.testTagForPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
@@ -74,9 +75,7 @@ internal fun MetisThreadUi(
 
     val serverUrl by viewModel.serverUrl.collectAsState()
 
-    val hasModerationRights by viewModel.hasModerationRights.collectAsState()
-    val isAtLeastTutorInCourse by viewModel.isAtLeastTutorInCourse.collectAsState()
-    val isConversationCreator by viewModel.isConversationCreator.collectAsState()
+    val postActionFlags by viewModel.postActionFlags.collectAsState()
 
     postDataState.bind { it.serverPostId }.orNull()?.let { serverSidePostId ->
         ReportVisibleMetisContext(
@@ -97,9 +96,7 @@ internal fun MetisThreadUi(
         initialReplyTextProvider = viewModel,
         conversationDataState = conversationDataState,
         postDataState = postDataState,
-        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-        hasModerationRights = hasModerationRights,
-        isConversationCreator = isConversationCreator,
+        postActionFlags = postActionFlags,
         listContentPadding = listContentPadding,
         serverUrl = serverUrl,
         emojiService = koinInject(),
@@ -151,9 +148,7 @@ internal fun MetisThreadUi(
     clientId: Long,
     postDataState: DataState<PostPojo>,
     conversationDataState: DataState<Conversation>,
-    hasModerationRights: Boolean,
-    isAtLeastTutorInCourse: Boolean,
-    isConversationCreator: Boolean,
+    postActionFlags: PostActionFlags,
     listContentPadding: PaddingValues,
     serverUrl: String,
     emojiService: EmojiService,
@@ -213,9 +208,7 @@ internal fun MetisThreadUi(
                                     .fillMaxSize()
                                     .testTag(TEST_TAG_THREAD_LIST),
                                 post = post,
-                                hasModerationRights = hasModerationRights,
-                                isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-                                isConversationCreator = isConversationCreator,
+                                postActionFlags = postActionFlags,
                                 listContentPadding = listContentPadding,
                                 clientId = clientId,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
@@ -250,9 +243,7 @@ private fun PostAndRepliesList(
     modifier: Modifier,
     state: LazyListState,
     post: PostPojo,
-    hasModerationRights: Boolean,
-    isAtLeastTutorInCourse: Boolean,
-    isConversationCreator: Boolean,
+    postActionFlags: PostActionFlags,
     listContentPadding: PaddingValues,
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
@@ -265,9 +256,7 @@ private fun PostAndRepliesList(
     val rememberPostActions: @Composable (IBasePost) -> PostActions = { affectedPost: IBasePost ->
         rememberPostActions(
             affectedPost,
-            hasModerationRights,
-            isAtLeastTutorInCourse,
-            isConversationCreator,
+            postActionFlags,
             clientId,
             onRequestEdit = { onRequestEdit(affectedPost) },
             onRequestDelete = { onRequestDelete(affectedPost) },

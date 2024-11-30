@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Person
@@ -106,7 +105,17 @@ internal fun PostItem(
         PostItemViewType.ThreadContextPostItem -> true
         else -> false
     }
+
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
+    val applyPinStatusToModifier: @Composable (Modifier) -> Modifier = {
+        if (isPinned) {
+            modifier
+                .clip(
+                    MaterialTheme.shapes.small
+                )
+                .background(color = PinnedMessageBackgroundColor)
+        } else modifier
+    }
 
     // Retrieve post status
     val clientPostId = post?.clientPostId
@@ -128,16 +137,7 @@ internal fun PostItem(
                         .background(color = MaterialTheme.colorScheme.errorContainer)
                         .clickable(onClick = onRequestRetrySend)
                 } else {
-                    it
-                        .let { modifier ->
-                            if (isPinned) {
-                                modifier
-                                    .clip(
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .background(color = PinnedMessageBackgroundColor)
-                            } else modifier
-                        }
+                    applyPinStatusToModifier(it)
                         .combinedClickable(
                             onClick = onClick,
                             onLongClick = onLongClick
