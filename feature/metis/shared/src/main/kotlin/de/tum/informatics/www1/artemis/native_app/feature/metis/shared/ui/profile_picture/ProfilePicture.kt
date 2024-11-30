@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -68,6 +69,10 @@ fun ProfilePictureImage(
     val artemisImageProvider = LocalArtemisImageProvider.current
     val painter = artemisImageProvider.rememberArtemisAsyncImagePainter(imagePath = imageUrl)
     val painterState by painter.state.collectAsState()
+
+    if (painterState is AsyncImagePainter.State.Error) {
+        Log.e("ProfilePicture", "Error loading image: ${(painterState as AsyncImagePainter.State.Error).result.throwable.message}")
+    }
 
     when (painterState) {
         is AsyncImagePainter.State.Success -> {

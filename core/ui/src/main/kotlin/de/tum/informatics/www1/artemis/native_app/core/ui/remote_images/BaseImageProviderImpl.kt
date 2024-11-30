@@ -26,9 +26,6 @@ class BaseImageProviderImpl : BaseImageProvider {
         val builder = ImageRequest.Builder(context)
             .httpHeaders(headers)
             .data(imageUrl)
-            // The following line is needed to for the AsyncImagePainter to work correctly, see:
-            // https://stackoverflow.com/a/74705550/13366254
-            // TODO is this needed: .size(coil.size.OriginalSize)
 
         memoryCacheKey?.let {
             builder.memoryCacheKey(it)

@@ -9,11 +9,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.annotation.DelicateCoilApi
 import coil3.request.ImageRequest
+import coil3.test.FakeImage
+import coil3.test.FakeImageLoaderEngine
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.TestInitialReplyTextProvider
@@ -27,11 +31,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_PROFILE_PICTURE_INITIALS
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_PROFILE_PICTURE_UNKNOWN
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLog
+
 
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
@@ -41,13 +47,11 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
     private val courseId = 1L
 
     private val artemisImageProviderStub = object : ArtemisImageProvider {
-        private val sampleImageUrl = "https://picsum.photos/200"
 
         @Composable
         override fun rememberArtemisImageRequest(imagePath: String): ImageRequest {
             return ImageRequest.Builder(LocalContext.current)
-                .data(sampleImageUrl)
-                .size(coil3.size.Size.ORIGINAL)
+                .data(imagePath)
                 .build()
         }
     }
@@ -58,24 +62,37 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
         TEST_TAG_PROFILE_PICTURE_UNKNOWN
     )
 
+    @OptIn(DelicateCoilApi::class)
+    @Before
+    @Throws(Exception::class)
+    fun setUp() {
+        ShadowLog.stream = System.out
+
+        val engine = FakeImageLoaderEngine.Builder()
+            .default(FakeImage(color = 0x00F))
+            .build()
+        val imageLoader = ImageLoader.Builder(context)
+            .components { add(engine) }
+            .build()
+        SingletonImageLoader.setUnsafe(imageLoader)
+    }
+
     @Test
-    fun `test GIVEN a post with an authorImageUrl WHEN displaying the post THEN the profile picture is shown`() = runTest {
+    fun `test GIVEN a post with an authorImageUrl WHEN displaying the post THEN the profile picture is shown`() {
         val post = StandalonePost(
             id = 1L,
             author = User(
                 id = 1L,
                 name = "author",
-                imageUrl = "https://picsum.photos/200"
+                imageUrl = "test.png"
             ),
         )
         setupUi(post)
 
-        composeTestRule.waitUntilNoAssertionError {
-            composeTestRule.assertTestTagExclusivelyExists(
-                exclusiveTag = TEST_TAG_PROFILE_PICTURE_IMAGE,
-                allTags = allTestTags
-            )
-        }
+        composeTestRule.assertTestTagExclusivelyExists(
+            exclusiveTag = TEST_TAG_PROFILE_PICTURE_IMAGE,
+            allTags = allTestTags
+        )
     }
 
     @Test
@@ -146,20 +163,6 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
                     onRequestRetrySend = {},
                     title = "title",
                 )
-            }
-        }
-    }
-
-    private fun ComposeTestRule.waitUntilNoAssertionError(
-        timeoutMillis: Long = DefaultTimeoutMillis,
-        assertion: () -> Unit,
-    ) {
-        waitUntil(timeoutMillis) {
-            try {
-                assertion()
-                true
-            } catch (e: AssertionError) {
-                false
             }
         }
     }
