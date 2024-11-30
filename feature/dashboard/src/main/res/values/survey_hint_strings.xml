@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="survey_hint_text">Survey available</string>
+    <string name="survey_dialog_title">We need your help!</string>
+    <string name="survey_dialog_do_you_have_time">Do you have 5–10 minutes to take a short survey and help us improve the app?</string>
+    <string name="survey_dialog_thank_you">Thank you for your consideration!</string>
+    <string name="survey_dialog_button_participate">Participate</string>
+    <string name="survey_dialog_button_not_now">Not now</string>
+</resources>

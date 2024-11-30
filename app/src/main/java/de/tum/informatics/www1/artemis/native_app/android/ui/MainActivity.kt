@@ -40,9 +40,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.cou
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.navigateToCourseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.course
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.navigateToCourse
-import de.tum.informatics.www1.artemis.native_app.feature.dashboard.DashboardScreen
-import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboard
-import de.tum.informatics.www1.artemis.native_app.feature.dashboard.navigateToDashboard
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.DashboardScreen
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.dashboard
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.navigateToDashboard
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewDestination
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewMode
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewUi

@@ -10,25 +10,24 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.SubmissionType
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TextSubmission
-import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.TextSubmissionService
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.SyncState
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.TEST_TAG_TEXT_FIELD_PARTICIPATION
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.TextExerciseParticipationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.TextExerciseParticipationViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.TextSubmissionService
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.datetime.Clock
 import org.junit.Before
@@ -56,20 +55,18 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
     @Before
     override fun setup() {
         super.setup()
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                val courseExerciseService: CourseExerciseService = get()
-                participation =
-                    courseExerciseService
-                        .startExercise(exercise.id!!, testServerUrl, accessToken)
-                        .orThrow("Start text exercise participation")
-
-                val submissions = participation.submissions
-                assertNotNull(submissions, "Submissions are not given in participation")
-                assertFalse(submissions.isEmpty(), "Submissions must not be empty")
-
-                initialSubmission = assertIs(submissions.first())
-            }
+        runBlockingWithTestTimeout {
+            val courseExerciseService: CourseExerciseService = get()
+            participation =
+                courseExerciseService
+                    .startExercise(exercise.id!!, testServerUrl, accessToken)
+                    .orThrow("Start text exercise participation")
+    
+            val submissions = participation.submissions
+            assertNotNull(submissions, "Submissions are not given in participation")
+            assertFalse(submissions.isEmpty(), "Submissions must not be empty")
+    
+            initialSubmission = assertIs(submissions.first())
         }
     }
 
@@ -77,27 +74,26 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
     fun `can view already entered text`() {
         val textSubmissionService: TextSubmissionService = get()
 
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                textSubmissionService.update(
-                    TextSubmission(
-                        id = initialSubmission.id,
-                        submissionDate = Clock.System.now(),
-                        participation = StudentParticipation.StudentParticipationImpl(id = participation.id!!),
-                        submitted = true,
-                        text = textToEnter,
-                        submissionType = SubmissionType.MANUAL
-                    ),
-                    exercise.id!!,
-                    testServerUrl,
-                    accessToken
-                ).orThrow("Could no update text submission to set initial submission")
-            }
+        runBlockingWithTestTimeout {
+            textSubmissionService.update(
+                TextSubmission(
+                    id = initialSubmission.id,
+                    submissionDate = Clock.System.now(),
+                    participation = StudentParticipation.StudentParticipationImpl(id = participation.id!!),
+                    submitted = true,
+                    text = textToEnter,
+                    submissionType = SubmissionType.MANUAL
+                ),
+                exercise.id!!,
+                testServerUrl,
+                accessToken
+            ).orThrow("Could no update text submission to set initial submission")
         }
+        
 
         setupUi()
 
-        composeTestRole
+        composeTestRule
             .onNodeWithTag(TEST_TAG_TEXT_FIELD_PARTICIPATION)
             .assert(hasText(textToEnter))
     }
@@ -106,11 +102,11 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
     fun `can update text by entering new text`() {
         val viewModel = setupUi()
 
-        composeTestRole
+        composeTestRule
             .onNodeWithTag(TEST_TAG_TEXT_FIELD_PARTICIPATION)
             .performTextInput(textToEnter)
 
-        composeTestRole
+        composeTestRule
             .onNodeWithText(context.getString(R.string.participate_text_exercise_submit_button))
             .performClick()
 
@@ -123,7 +119,7 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             } ?: throw RuntimeException("State could not be synced in time.")
         }
 
-        composeTestRole
+        composeTestRule
             .onNodeWithText(context.getString(R.string.participate_text_exercise_synced_changes))
             .assertExists()
     }
@@ -140,7 +136,7 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             coroutineContext = testDispatcher
         )
 
-        composeTestRole.setContent {
+        composeTestRule.setContent {
             TextExerciseParticipationScreen(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
@@ -149,7 +145,7 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             )
         }
 
-        composeTestRole.waitUntilAtLeastOneExists(
+        composeTestRule.waitUntilAtLeastOneExists(
             hasTestTag(TEST_TAG_TEXT_FIELD_PARTICIPATION),
             DefaultTimeoutMillis
         )
