@@ -47,27 +47,27 @@ fun rememberPostActions(
         onRequestRetrySend,
         clipboardManager
     ) {
-        if (post != null) {
-            val doesPostExistOnServer = post.serverPostId != null
-            val hasEditPostRights = postActionFlags.hasModerationRights || post.authorId == clientId
-            val hasResolvePostRights =
-                postActionFlags.isAtLeastTutorInCourse || post.authorId == clientId
-            val hasPinPostRights = postActionFlags.isAbleToPin
-
-            PostActions(
-                requestEditPost = if (doesPostExistOnServer && hasEditPostRights) onRequestEdit else null,
-                requestDeletePost = if (hasEditPostRights) onRequestDelete else null,
-                onClickReaction = if (doesPostExistOnServer) onClickReaction else null,
-                onCopyText = {
-                    clipboardManager.setText(AnnotatedString(post.content.orEmpty()))
-                },
-                onReplyInThread = if (doesPostExistOnServer) onReplyInThread else null,
-                onResolvePost = if (hasResolvePostRights) onResolvePost else null,
-                onPinPost = if (hasPinPostRights) onPinPost else null,
-                onRequestRetrySend = onRequestRetrySend
-            )
-        } else {
-            PostActions()
+        if (post == null) {
+            return@remember PostActions()
         }
+
+        val doesPostExistOnServer = post.serverPostId != null
+        val hasResolvePostRights =
+            postActionFlags.isAtLeastTutorInCourse || post.authorId == clientId
+        val hasPinPostRights = postActionFlags.isAbleToPin
+        val isPostAuthor = post.authorId == clientId
+
+        PostActions(
+            requestEditPost = if (doesPostExistOnServer && isPostAuthor) onRequestEdit else null,
+            requestDeletePost = if (isPostAuthor || postActionFlags.hasModerationRights) onRequestDelete else null,
+            onClickReaction = if (doesPostExistOnServer) onClickReaction else null,
+            onCopyText = {
+                clipboardManager.setText(AnnotatedString(post.content.orEmpty()))
+            },
+            onReplyInThread = if (doesPostExistOnServer) onReplyInThread else null,
+            onResolvePost = if (hasResolvePostRights) onResolvePost else null,
+            onPinPost = if (hasPinPostRights) onPinPost else null,
+            onRequestRetrySend = onRequestRetrySend
+        )
     }
 }

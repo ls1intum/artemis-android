@@ -1,16 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.settings
 
-import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -45,17 +42,15 @@ internal class GroupChatSettingsE2eTest : ConversationSettingsBaseE2eTest() {
         )
     }
 
-    private fun createGroupChat(): de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat {
-        return runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                conversationService.createGroupChat(
-                    courseId = course.id!!,
-                    groupMembers = listOf(user1Username, user2Username, user3Username),
-                    authToken = getAdminAccessToken(),
-                    serverUrl = testServerUrl
-                )
-                    .orThrow("Could not create group chat")
-            }
+    private fun createGroupChat(): GroupChat {
+        return runBlockingWithTestTimeout {
+            conversationService.createGroupChat(
+                courseId = course.id!!,
+                groupMembers = listOf(user1Username, user2Username, user3Username),
+                authToken = getAdminAccessToken(),
+                serverUrl = testServerUrl
+            )
+                .orThrow("Could not create group chat")
         }
     }
 }

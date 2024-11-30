@@ -43,7 +43,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ConversationThreadUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostAction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisCrudAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ConversationWebsocketDto
@@ -236,7 +236,7 @@ internal open class ConversationViewModel(
         clientId.filterSuccess()
     ) { conversationDataState, clientId ->
         websocketProvider.subscribeToConversationUpdates(clientId, metisContext.courseId)
-            .filter { it.crudAction == MetisPostAction.UPDATE }
+            .filter { it.crudAction == MetisCrudAction.UPDATE }
             .map<ConversationWebsocketDto, DataState<Conversation>> { DataState.Success(it.conversation) }
             .onStart { emit(conversationDataState) }
     }
@@ -305,12 +305,14 @@ internal open class ConversationViewModel(
 
         // Receive websocket updates and store them in the db.
         viewModelScope.launch(coroutineContext) {
-            serverConfigurationService.host.collect { host ->
-                webSocketUpdateUseCase.updatePosts(
-                    host = host,
-                    context = MetisContext.Conversation(courseId, conversationId)
-                )
-            }
+            combine(serverConfigurationService.host, clientId.filterSuccess()) { host, clientId -> host to clientId }
+                .collect { (host, clientId) ->
+                    webSocketUpdateUseCase.updatePosts(
+                        host = host,
+                        context = metisContext,
+                        clientId = clientId
+                    )
+                }
         }
     }
 

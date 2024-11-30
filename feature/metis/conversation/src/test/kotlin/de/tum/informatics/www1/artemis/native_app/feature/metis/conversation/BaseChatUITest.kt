@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
@@ -28,7 +29,7 @@ import kotlinx.datetime.Clock
 
 abstract class BaseChatUITest : BaseComposeTest() {
 
-    private val clientId = 20L
+    val clientId = 20L
 
     private val course: Course = Course(id = 1)
     val conversation = OneToOneChat(id = 2)
@@ -107,25 +108,30 @@ abstract class BaseChatUITest : BaseComposeTest() {
         }
     }
 
-    fun setupChatUi(posts: List<PostPojo>, onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure>) {
+    fun setupChatUi(
+        posts: List<IStandalonePost>,
+        currentUser: User = User(id = clientId),
+        hasModerationRights: Boolean = false,
+        onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure> = { CompletableDeferred() }
+    ) {
         composeTestRule.setContent {
             val list = posts.map { post -> ChatListItem.PostChatListItem(post) }.toMutableList()
             MetisChatList(
                 modifier = Modifier.fillMaxSize(),
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 posts = PostsDataState.Loaded.WithList(list, PostsDataState.NotLoading),
-                clientId = clientId,
+                clientId = currentUser.id,
                 postActionFlags = PostActionFlags(
                     isAbleToPin = true,
                     isAtLeastTutorInCourse = false,
-                    hasModerationRights = true,
+                    hasModerationRights = hasModerationRights,
                 ),
                 listContentPadding = PaddingValues(),
                 serverUrl = "",
                 courseId = course.id!!,
                 state = rememberLazyListState(),
                 emojiService = EmojiServiceStub,
-                bottomItem = posts.lastOrNull(),
+                bottomItem = null,
                 isReplyEnabled = true,
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },

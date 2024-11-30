@@ -10,8 +10,8 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.rememberNavController
-import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.ExerciseScreen
@@ -34,7 +34,7 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
     fun `displays correct exercise data`() {
         setupUiAndViewModel()
 
-        composeTestRole.onAllNodesWithText(exercise.title!!).onFirst().assertExists()
+        composeTestRule.onAllNodesWithText(exercise.title!!).onFirst().assertExists()
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -44,14 +44,14 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
 
         setupUiAndViewModel { participationId = it }
 
-        composeTestRole.onNodeWithText(
+        composeTestRule.onNodeWithText(
             context.getString(CoreUiR.string.exercise_actions_start_exercise_button)
         )
             .performClick()
 
-        composeTestRole.waitUntil(DefaultTimeoutMillis) { participationId != null }
+        composeTestRule.waitUntil(DefaultTimeoutMillis) { participationId != null }
 
-        composeTestRole
+        composeTestRule
             .waitUntilExactlyOneExists(
                 hasText(context.getString(CoreUiR.string.exercise_actions_open_exercise_button)),
                 DefaultTimeoutMillis
@@ -73,7 +73,7 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
             coroutineContext = testDispatcher
         )
 
-        composeTestRole.setContent {
+        composeTestRule.setContent {
             CompositionLocalProvider(
                 LocalKoinScope provides KoinPlatformTools.defaultContext()
                     .get().scopeRegistry.rootScope,
