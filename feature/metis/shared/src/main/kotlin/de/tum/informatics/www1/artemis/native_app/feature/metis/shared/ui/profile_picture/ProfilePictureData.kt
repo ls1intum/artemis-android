@@ -6,7 +6,7 @@ sealed class ProfilePictureData {
 
     companion object {
         fun create(userId: Long?, username: String?, imageUrl: String?): ProfilePictureData {
-            if (userId == null || username == null) {
+            if (userId == null || username.isNullOrEmpty()) {
                 return Unknown
             }
 
