@@ -39,8 +39,8 @@
 
     <!--  Exercise action buttons  -->
     <string name="exercise_actions_view_result_button">View result</string>
-    <string name="exercise_participation_not_possible">Participating this exercise is currently
-        not possible in the mobile app.</string>
+    <string name="exercise_participation_not_possible">Participating in this exercise is currently
+        not possible in the mobile app</string>
     <string name="exercise_actions_start_exercise_button">Start exercise</string>
     <string name="exercise_actions_open_exercise_button">Open exercise</string>
     <string name="exercise_actions_view_submission_button">View submission</string>

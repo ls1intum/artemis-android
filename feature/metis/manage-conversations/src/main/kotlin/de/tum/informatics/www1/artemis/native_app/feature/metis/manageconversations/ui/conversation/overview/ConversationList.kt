@@ -277,7 +277,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
-    onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
+    onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit
 ) {
     if (!conversations.isExpanded) return
     items(
@@ -300,7 +300,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
                 )
             },
             onToggleHidden = { onToggleHidden(conversation.id, !conversation.isHidden) },
-            onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) },
+            onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) }
         )
     }
 }
@@ -314,7 +314,7 @@ private fun ConversationListItem(
     onNavigateToConversation: () -> Unit,
     onToggleMarkAsFavourite: () -> Unit,
     onToggleHidden: () -> Unit,
-    onToggleMuted: () -> Unit,
+    onToggleMuted: () -> Unit
 ) {
     var isContextDialogShown by remember { mutableStateOf(false) }
     val onDismissRequest = { isContextDialogShown = false }
