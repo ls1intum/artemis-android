@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
-import de.tum.informatics.www1.artemis.native_app.core.ui.LocalCourseImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalCourseImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange

@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import android.content.Context
 import android.text.method.LinkMovementMethod
-import android.text.style.ForegroundColorSpan
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
@@ -31,11 +30,15 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
 import coil.ImageLoader
+import coil.request.Disposable
+import coil.request.ImageRequest
+import coil.size.Scale
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.html.HtmlPlugin
+import io.noties.markwon.image.AsyncDrawable
 import io.noties.markwon.image.coil.CoilImagesPlugin
 import io.noties.markwon.linkify.LinkifyPlugin
 
@@ -87,8 +90,9 @@ fun MarkdownText(
     val context: Context = LocalContext.current
     val localMarkwon = LocalMarkwon.current
 
+    val imageWith = context.resources.displayMetrics.widthPixels
     val markdownRender: Markwon = localMarkwon ?: remember(imageLoader) {
-        createMarkdownRender(context, imageLoader)
+        createMarkdownRender(context, imageLoader, imageWith)
     }
 
     val markdownTransformer = LocalMarkdownTransformer.current
@@ -101,11 +105,12 @@ fun MarkdownText(
 
     AndroidView(
         // Added semantics for ui testing.
-        modifier = modifier.semantics {
-            text = AnnotatedString(markdown)
-            onClick?.let { this.onClick(action = { onClick(); true }) }
-            onLongClick?.let { this.onLongClick(action = { onLongClick(); true }) }
-        },
+        modifier = modifier
+            .semantics {
+                text = AnnotatedString(markdown)
+                onClick?.let { this.onClick(action = { onClick(); true }) }
+                onLongClick?.let { this.onLongClick(action = { onLongClick(); true }) }
+            },
         factory = { ctx ->
             createTextView(
                 context = ctx,
@@ -204,15 +209,38 @@ private fun TextView.applyStyleAndColor(
     }
 }
 
-fun createMarkdownRender(context: Context, imageLoader: ImageLoader?): Markwon {
+fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, imageWith: Int): Markwon {
+    // Setting the size of the output image is important to avoid jittering UIs.
+    val imagePlugin: CoilImagesPlugin? =
+        if (imageLoader != null) {
+            CoilImagesPlugin.create(
+                object : CoilImagesPlugin.CoilStore {
+                    override fun load(drawable: AsyncDrawable): ImageRequest {
+                        return ImageRequest.Builder(context)
+                            .defaults(imageLoader.defaults)
+                            .data(drawable.destination)
+                            .crossfade(true)
+                            .size(imageWith, 800) // We set a fixed height and set the width of the image to the screen width.
+                            .scale(Scale.FIT)
+                            .build()
+                    }
+
+                    override fun cancel(disposable: Disposable) {
+                        disposable.dispose()
+                    }
+                },
+                imageLoader
+            )
+        } else null
+
     return Markwon.builder(context)
         .usePlugin(HtmlPlugin.create())
         .usePlugin(StrikethroughPlugin.create())
         .usePlugin(TablePlugin.create(context))
         .usePlugin(LinkifyPlugin.create())
         .apply {
-            if (imageLoader != null) {
-                usePlugin(CoilImagesPlugin.create(context, imageLoader))
+            if (imagePlugin != null) {
+                usePlugin(imagePlugin)
             }
         }
         .build()

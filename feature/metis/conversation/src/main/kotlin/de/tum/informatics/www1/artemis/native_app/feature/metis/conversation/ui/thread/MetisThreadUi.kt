@@ -16,14 +16,20 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import coil.ImageLoader
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
@@ -45,7 +51,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -77,6 +82,12 @@ internal fun MetisThreadUi(
     val hasModerationRights by viewModel.hasModerationRights.collectAsState()
     val isAtLeastTutorInCourse by viewModel.isAtLeastTutorInCourse.collectAsState()
 
+    val context = LocalContext.current
+    var imageLoader: ImageLoader? by remember { mutableStateOf(null) }
+    LaunchedEffect(true) {
+        imageLoader = viewModel.createMarkdownImageLoader(context).await()
+    }
+
     postDataState.bind { it.serverPostId }.orNull()?.let { serverSidePostId ->
         ReportVisibleMetisContext(
             remember(
@@ -90,49 +101,51 @@ internal fun MetisThreadUi(
 
     val conversationDataState by viewModel.conversation.collectAsState()
 
-    MetisThreadUi(
-        modifier = modifier,
-        courseId = viewModel.courseId,
-        initialReplyTextProvider = viewModel,
-        conversationDataState = conversationDataState,
-        postDataState = postDataState,
-        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-        hasModerationRights = hasModerationRights,
-        listContentPadding = listContentPadding,
-        serverUrl = serverUrl,
-        emojiService = koinInject(),
-        clientId = clientId,
-        onCreatePost = viewModel::createReply,
-        onEditPost = { post, newText ->
-            val parentPost = postDataState.orNull()
+    ProvideMarkwon(imageLoader) {
+        MetisThreadUi(
+            modifier = modifier,
+            courseId = viewModel.courseId,
+            initialReplyTextProvider = viewModel,
+            conversationDataState = conversationDataState,
+            postDataState = postDataState,
+            isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+            hasModerationRights = hasModerationRights,
+            listContentPadding = listContentPadding,
+            serverUrl = serverUrl,
+            emojiService = koinInject(),
+            clientId = clientId,
+            onCreatePost = viewModel::createReply,
+            onEditPost = { post, newText ->
+                val parentPost = postDataState.orNull()
 
-            when (post) {
-                is AnswerPostPojo -> {
+                when (post) {
+                    is AnswerPostPojo -> {
+                        if (parentPost == null) CompletableDeferred(
+                            MetisModificationFailure.UPDATE_POST
+                        ) else viewModel.editAnswerPost(parentPost, post, newText)
+                    }
+
+                    is PostPojo -> viewModel.editPost(post, newText)
+                    else -> throw NotImplementedError()
+                }
+            },
+            onResolvePost = { post ->
+                val parentPost = postDataState.orNull()
+
+                if (post is AnswerPostPojo) {
                     if (parentPost == null) CompletableDeferred(
                         MetisModificationFailure.UPDATE_POST
-                    ) else viewModel.editAnswerPost(parentPost, post, newText)
+                    ) else viewModel.toggleResolvePost(parentPost, post)
+                } else {
+                    throw NotImplementedError()
                 }
-
-                is PostPojo -> viewModel.editPost(post, newText)
-                else -> throw NotImplementedError()
-            }
-        },
-        onResolvePost = { post ->
-            val parentPost = postDataState.orNull()
-
-            if (post is AnswerPostPojo) {
-                if (parentPost == null) CompletableDeferred(
-                    MetisModificationFailure.UPDATE_POST
-                ) else viewModel.toggleResolvePost(parentPost, post)
-            } else {
-                throw NotImplementedError()
-            }
-        },
-        onDeletePost = viewModel::deletePost,
-        onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
-        onRequestReload = viewModel::requestReload,
-        onRequestRetrySend = viewModel::retryCreateReply
-    )
+            },
+            onDeletePost = viewModel::deletePost,
+            onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
+            onRequestReload = viewModel::requestReload,
+            onRequestRetrySend = viewModel::retryCreateReply
+        )
+    }
 }
 
 @Composable
@@ -194,7 +207,7 @@ internal fun MetisThreadUi(
                             itemCount = post.orderedAnswerPostings.size,
                             order = DisplayPostOrder.REGULAR,
                             emojiService = emojiService,
-                            bottomItem = post.orderedAnswerPostings.lastOrNull(),
+                            bottomItem = post.orderedAnswerPostings.lastOrNull()
                         ) {
                             PostAndRepliesList(
                                 modifier = Modifier
@@ -272,59 +285,57 @@ private fun PostAndRepliesList(
         )
     }
 
-    ProvideMarkwon {
-        LazyColumn(
-            modifier = modifier,
-            contentPadding = listContentPadding,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            state = state
-        ) {
-            item {
-                val postActions = rememberPostActions(post)
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = listContentPadding,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        state = state
+    ) {
+        item {
+            val postActions = rememberPostActions(post)
 
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    PostWithBottomSheet(
-                        modifier = Modifier.padding(top = 8.dp),
-                        post = post,
-                        postItemViewType = PostItemViewType.ThreadContextPostItem,
-                        postActions = postActions,
-                        displayHeader = true,
-                        clientId = clientId,
-                        onClick = {}
-                    )
-
-                    Divider()
-
-                    Box {}
-                }
-            }
-
-            itemsIndexed(
-                post.orderedAnswerPostings,
-                key = { _, post -> post.postId }) { index, answerPost ->
-                val postActions = rememberPostActions(answerPost)
-
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 PostWithBottomSheet(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(testTagForAnswerPost(answerPost.clientPostId)),
-                    post = answerPost,
+                    modifier = Modifier.padding(top = 8.dp),
+                    post = post,
+                    postItemViewType = PostItemViewType.ThreadContextPostItem,
                     postActions = postActions,
-                    postItemViewType = PostItemViewType.ThreadAnswerItem,
+                    displayHeader = true,
                     clientId = clientId,
-                    displayHeader = shouldDisplayHeader(
-                        index = index,
-                        post = answerPost,
-                        postCount = post.orderedAnswerPostings.size,
-                        order = DisplayPostOrder.REGULAR,
-                        getPost = post.orderedAnswerPostings::get
-                    ),
                     onClick = {}
                 )
+
+                Divider()
+
+                Box {}
             }
+        }
+
+        itemsIndexed(
+            post.orderedAnswerPostings,
+            key = { _, post -> post.postId }) { index, answerPost ->
+            val postActions = rememberPostActions(answerPost)
+
+            PostWithBottomSheet(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(testTagForAnswerPost(answerPost.clientPostId)),
+                post = answerPost,
+                postActions = postActions,
+                postItemViewType = PostItemViewType.ThreadAnswerItem,
+                clientId = clientId,
+                displayHeader = shouldDisplayHeader(
+                    index = index,
+                    post = answerPost,
+                    postCount = post.orderedAnswerPostings.size,
+                    order = DisplayPostOrder.REGULAR,
+                    getPost = post.orderedAnswerPostings::get
+                ),
+                onClick = {}
+            )
         }
     }
 }

@@ -19,15 +19,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import coil.ImageLoader
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 /**
  * Handles scrolling down to new items if the list was scrolled down before the new items came in.
@@ -119,11 +118,9 @@ internal fun <T : Any> MetisPostListHandler(
                 PostArtemisMarkdownTransformer(serverUrl = strippedServerUrl, courseId = courseId)
             }
 
-            ProvideMarkwon {
-                ProvideEmojis(emojiService) {
-                    CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
-                        content()
-                    }
+            ProvideEmojis(emojiService) {
+                CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
+                    content()
                 }
             }
         }
