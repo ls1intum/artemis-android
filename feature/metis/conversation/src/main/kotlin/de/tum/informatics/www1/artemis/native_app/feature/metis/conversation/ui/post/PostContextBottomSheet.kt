@@ -7,12 +7,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,7 +55,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.LocalEmojiProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
@@ -75,6 +75,7 @@ internal fun PostContextBottomSheet(
     if (!displayAllEmojis) {
         ModalBottomSheet(
             modifier = Modifier.testTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET),
+            contentWindowInsets = { WindowInsets.statusBars },
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = onDismissRequest
         ) {
@@ -83,7 +84,8 @@ internal fun PostContextBottomSheet(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = Spacings.ScreenHorizontalSpacing, end = Spacings.ScreenHorizontalSpacing, bottom = 40.dp)
+                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                    .padding(bottom = 40.dp)
             ) {
                 postActions.onClickReaction?.let { onClickReaction ->
                     EmojiReactionBar(

@@ -6,7 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -15,10 +14,10 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.lifecycle.SavedStateHandle
-import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
@@ -29,8 +28,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.testTagForMember
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -83,28 +80,24 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
         composeTestRule
             .onNodeWithTag(testTagForMember(user1Username))
             .performScrollTo()
+            .assert(hasText(user1Username))
+            .assert(hasContentDescription(context.getString(R.string.conversation_members_content_description_moderator))
+        )
+
+        composeTestRule
+            .onNodeWithTag(testTagForMember(user2Username))
+            .performScrollTo()
             .assert(
-                hasAnyDescendant(hasText(user1Username)) and hasAnyDescendant(
+                hasText(user2Username) and !
                     hasContentDescription(context.getString(R.string.conversation_members_content_description_moderator))
-                )
             )
 
         composeTestRule
             .onNodeWithTag(testTagForMember(user2Username))
             .performScrollTo()
             .assert(
-                hasAnyDescendant(hasText(user2Username)) and !hasAnyDescendant(
+                hasText(user2Username) and !
                     hasContentDescription(context.getString(R.string.conversation_members_content_description_moderator))
-                )
-            )
-
-        composeTestRule
-            .onNodeWithTag(testTagForMember(user2Username))
-            .performScrollTo()
-            .assert(
-                hasAnyDescendant(hasText(user2Username)) and !hasAnyDescendant(
-                    hasContentDescription(context.getString(R.string.conversation_members_content_description_moderator))
-                )
             )
     }
 
@@ -117,16 +110,14 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can revoke moderation rights`() {
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                conversationService.grantModerationRights(
-                    course.id!!,
-                    channel,
-                    user2Username,
-                    accessToken,
-                    testServerUrl
-                ).orThrow("Could not promote user to moderator")
-            }
+        runBlockingWithTestTimeout {
+            conversationService.grantModerationRights(
+                course.id!!,
+                channel,
+                user2Username,
+                accessToken,
+                testServerUrl
+            ).orThrow("Could not promote user to moderator")
         }
 
         setupUiAndViewModel()
@@ -186,10 +177,8 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
             )
             .performClick()
 
-        val isModeratorCheck = hasAnyDescendant(
-            hasContentDescription(
-                context.getString(R.string.conversation_members_content_description_moderator)
-            )
+        val isModeratorCheck = hasContentDescription(
+            context.getString(R.string.conversation_members_content_description_moderator)
         )
 
         composeTestRule.waitUntilExactlyOneExists(

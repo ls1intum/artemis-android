@@ -2,8 +2,18 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -29,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
@@ -106,9 +117,10 @@ internal fun ConversationChatListScreen(
                 MetisChatList(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding),
+                        .imePadding()
+                        .padding(bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()),
                     viewModel = viewModel,
-                    listContentPadding = PaddingValues(),
+                    listContentPadding = PaddingValues(top = padding.calculateTopPadding()),
                     onClickViewPost = onClickViewPost,
                     isReplyEnabled = isReplyEnabled,
                     state = chatListState,

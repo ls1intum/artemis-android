@@ -32,7 +32,10 @@ class MetisServiceStub(
         return NetworkResponse.Response(posts.first())
     }
 
-    override fun subscribeToPostUpdates(metisContext: MetisContext): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>> {
+    override fun subscribeToPostUpdates(
+        courseId: Long,
+        clientId: Long
+    ): Flow<WebsocketProvider.WebsocketData<MetisPostDTO>> {
         return flowOf()
     }
 }

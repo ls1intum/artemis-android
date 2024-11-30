@@ -8,15 +8,13 @@ import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -34,28 +32,26 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
      */
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can leave channel`() {
-        val channel = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                conversationService.createChannel(
-                    courseId = course.id!!,
-                    name = "clcchannel",
-                    description = "",
-                    isPublic = true,
-                    isAnnouncement = true,
-                    authToken = getAdminAccessToken(),
-                    serverUrl = testServerUrl
-                )
-                    .orThrow("Could not create channel")
-                    .apply {
-                        conversationService.registerMembers(
-                            courseId = course.id!!,
-                            conversation = this,
-                            users = listOf(user1Username),
-                            authToken = accessToken,
-                            serverUrl = testServerUrl
-                        )
-                    }
-            }
+        val channel = runBlockingWithTestTimeout {
+            conversationService.createChannel(
+                courseId = course.id!!,
+                name = "clcchannel",
+                description = "",
+                isPublic = true,
+                isAnnouncement = true,
+                authToken = getAdminAccessToken(),
+                serverUrl = testServerUrl
+            )
+                .orThrow("Could not create channel")
+                .apply {
+                    conversationService.registerMembers(
+                        courseId = course.id!!,
+                        conversation = this,
+                        users = listOf(user1Username),
+                        authToken = accessToken,
+                        serverUrl = testServerUrl
+                    )
+                }
         }
 
         canLeaveConversationTestImpl(channel)
@@ -63,19 +59,17 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can archive channel`() {
-        val channel = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                conversationService.createChannel(
-                    courseId = course.id!!,
-                    name = "cacchannel",
-                    description = "",
-                    isPublic = true,
-                    isAnnouncement = true,
-                    authToken = accessToken,
-                    serverUrl = testServerUrl
-                )
-                    .orThrow("Could not create channel")
-            }
+        val channel = runBlockingWithTestTimeout {
+            conversationService.createChannel(
+                courseId = course.id!!,
+                name = "cacchannel",
+                description = "",
+                isPublic = true,
+                isAnnouncement = true,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            )
+                .orThrow("Could not create channel")
         }
 
         setupUiAndViewModel(channel)
@@ -85,28 +79,26 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can unarchive archived channel`() {
-        val channel = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                conversationService.createChannel(
-                    courseId = course.id!!,
-                    name = "cuacchannel",
-                    description = "",
-                    isPublic = true,
-                    isAnnouncement = true,
-                    authToken = accessToken,
-                    serverUrl = testServerUrl
-                )
-                    .orThrow("Could not create channel")
-                    .also { channel ->
-                        conversationService.archiveChannel(
-                            course.id!!,
-                            channel.id,
-                            accessToken,
-                            testServerUrl
-                        )
-                            .orThrow("could not archive channel")
-                    }
-            }
+        val channel = runBlockingWithTestTimeout {
+            conversationService.createChannel(
+                courseId = course.id!!,
+                name = "cuacchannel",
+                description = "",
+                isPublic = true,
+                isAnnouncement = true,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            )
+                .orThrow("Could not create channel")
+                .also { channel ->
+                    conversationService.archiveChannel(
+                        course.id!!,
+                        channel.id,
+                        accessToken,
+                        testServerUrl
+                    )
+                        .orThrow("could not archive channel")
+                }
         }
 
         setupUiAndViewModel(channel)
@@ -153,19 +145,17 @@ internal class ChannelSettingsE2eTest : ConversationSettingsBaseE2eTest() {
 
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can change channel name, description and topic`() {
-        val channel = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                conversationService.createChannel(
-                    courseId = course.id!!,
-                    name = "ccndtchannel",
-                    description = "some description",
-                    isPublic = true,
-                    isAnnouncement = true,
-                    authToken = accessToken,
-                    serverUrl = testServerUrl
-                )
-                    .orThrow("Could not create channel")
-            }
+        val channel = runBlockingWithTestTimeout {
+            conversationService.createChannel(
+                courseId = course.id!!,
+                name = "ccndtchannel",
+                description = "some description",
+                isPublic = true,
+                isAnnouncement = true,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            )
+                .orThrow("Could not create channel")
         }
 
         val newTitle = "ccndtchannel2"

@@ -1,105 +1,41 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
-import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.hasAnyChild
-import androidx.compose.ui.test.hasScrollAction
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onParent
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performSemanticsAction
-import androidx.compose.ui.test.printToLog
-import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.model.Course
-import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
+import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.TEST_TAG_THREAD_LIST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@Category(EndToEndTest::class)
+@Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
-class ConversationAnswerMessagesUITest : BaseComposeTest() {
-
-    private val clientId = 20L
-
-    private val course: Course = Course(id = 1)
-    private val conversation = OneToOneChat(id = 2)
-
-    private val answers = (0..2).map { index ->
-        AnswerPostPojo(
-            parentPostId = "client-id",
-            postId = "answer-client-id-$index",
-            resolvesPost = false,
-            basePostingCache = AnswerPostPojo.BasePostingCache(
-                serverPostId = index.toLong(),
-                authorId = clientId,
-                creationDate = Clock.System.now(),
-                updatedDate = null,
-                content = "Answer Post content $index",
-                authorRole = UserRole.USER,
-                authorName = "author name"
-            ),
-            reactions = emptyList(),
-            serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
-                serverPostId = index.toLong()
-            )
-        )
-    }
-
-    private val post = PostPojo(
-        clientPostId = "client-id",
-        serverPostId = 12,
-        content = "Post content",
-        resolved = false,
-        updatedDate = null,
-        creationDate = Clock.System.now(),
-        authorId = clientId,
-        title = null,
-        authorName = "author name",
-        authorRole = UserRole.USER,
-        courseWideContext = null,
-        tags = emptyList(),
-        answers = answers,
-        reactions = emptyList()
-    )
+@Ignore("There is an open issue about onClick events not working for the ModalBottomSheetLayout with" +
+        "the robolectric test runner. Enable this test again as soon as the following issue is resolved:" +
+        "https://github.com/robolectric/robolectric/issues/9595")
+class ConversationAnswerMessagesUITest : BaseChatUItest() {
 
     private fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
+
+    private val post = posts[0]
 
     @Test
     fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the first answer post`() {
         var resolvedPost: IBasePost? = null
 
-        setupUi(post) { post ->
+        setupThreadUi(post) { post ->
             resolvedPost = post
             CompletableDeferred()
         }
@@ -118,7 +54,7 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
     fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the third answer post`() {
         var resolvedPost: IBasePost? = null
 
-        setupUi(post) { post ->
+        setupThreadUi(post) { post ->
             resolvedPost = post
             CompletableDeferred()
         }
@@ -145,7 +81,7 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
 
         var unresolvedPost: IBasePost? = null
 
-        setupUi(resolvedPost) { post ->
+        setupThreadUi(resolvedPost) { post ->
             unresolvedPost = post
             CompletableDeferred()
         }
@@ -162,7 +98,7 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
 
     @Test
     fun `test GIVEN the post is not resolved and no answer post is resolving THEN the post is shown as not resolved and no answer post is shown as resolving`() {
-        setupUi(post) { CompletableDeferred() }
+        setupThreadUi(post) { CompletableDeferred() }
 
         composeTestRule.onNodeWithText(post.content).assertExists()
         for (answer in answers) {
@@ -185,7 +121,7 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
             answers = modifiedAnswers
         )
 
-        setupUi(resolvedPost) { CompletableDeferred() }
+        setupThreadUi(resolvedPost) { CompletableDeferred() }
 
         val resolvesAssertion = hasAnyChild(hasText(context.getString(R.string.post_resolves)))
 
@@ -197,33 +133,6 @@ class ConversationAnswerMessagesUITest : BaseComposeTest() {
             composeTestRule
                 .onNodeWithTag(testTagForAnswerPost(answers[i].postId), useUnmergedTree = true)
                 .assert(if (i == resolvingIndex) resolvesAssertion else resolvesAssertion.not())
-        }
-    }
-
-    private fun setupUi(
-        post: PostPojo,
-        onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?
-    ) {
-        composeTestRule.setContent {
-            MetisThreadUi(
-                modifier = Modifier.fillMaxSize(),
-                courseId = course.id!!,
-                clientId = clientId,
-                postDataState = DataState.Success(post),
-                conversationDataState = DataState.Success(conversation),
-                hasModerationRights = false,
-                isAtLeastTutorInCourse = false,
-                serverUrl = "",
-                emojiService = EmojiServiceStub,
-                initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
-                onCreatePost = { CompletableDeferred() },
-                onEditPost = { _, _ -> CompletableDeferred() },
-                onResolvePost = onResolvePost,
-                onDeletePost = { CompletableDeferred() },
-                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                onRequestReload = {},
-                onRequestRetrySend = { _, _ -> },
-            )
         }
     }
 }

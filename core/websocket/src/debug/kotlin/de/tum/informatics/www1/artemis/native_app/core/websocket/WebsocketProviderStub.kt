@@ -15,12 +15,12 @@ class WebsocketProviderStub : WebsocketProvider {
     override val isConnected: Flow<Boolean> = flowOf(true)
 
     override fun <T : Any> subscribe(
-        channel: String,
+        topic: String,
         deserializer: DeserializationStrategy<T>
     ): Flow<WebsocketProvider.WebsocketData<T>> = emptyFlow()
 
     override fun <T : Any> subscribeMessage(
-        channel: String,
+        topic: String,
         deserializer: DeserializationStrategy<T>
     ): Flow<T> = emptyFlow()
 

@@ -7,10 +7,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -155,7 +160,8 @@ fun ConversationOverviewBody(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = 16.dp)
+                                    .padding(16.dp)
+                                    .padding(bottom = 24.dp)
                             ) {
                                 TextButton(
                                     modifier = Modifier.align(Alignment.Center),
@@ -175,15 +181,16 @@ fun ConversationOverviewBody(
         }
 
         ConversationFabMenu(
+            canCreateChannel = canCreateChannel,
             onCreateChat = onRequestCreatePersonalConversation,
             onBrowseChannels = onRequestBrowseChannel,
-            onCreateChannel = onRequestAddChannel,
-            canCreateChannel = canCreateChannel
+            onCreateChannel = onRequestAddChannel
         )
     }
 
     if (showCodeOfConduct) {
         ModalBottomSheet(
+            contentWindowInsets = { WindowInsets.statusBars },
             onDismissRequest = { showCodeOfConduct = false }
         ) {
             CodeOfConductUi(
@@ -200,17 +207,23 @@ fun ConversationOverviewBody(
 
 @Composable
 fun ConversationFabMenu(
+    canCreateChannel: Boolean,
     onCreateChat: () -> Unit,
     onBrowseChannels: () -> Unit,
-    onCreateChannel: () -> Unit,
-    canCreateChannel: Boolean
+    onCreateChannel: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(
+                bottom = WindowInsets.systemBars
+                    .asPaddingValues()
+                    .calculateBottomPadding() + 8.dp,
+                end = 16.dp
+            )
+            .imePadding(),
         contentAlignment = Alignment.BottomEnd
     ) {
         Box {

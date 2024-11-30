@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -87,6 +88,7 @@ internal fun CreatePersonalConversationScreen(
         MemberSelection(
             modifier = Modifier
                 .fillMaxSize()
+                .imePadding()
                 .padding(padding)
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             viewModel = viewModel

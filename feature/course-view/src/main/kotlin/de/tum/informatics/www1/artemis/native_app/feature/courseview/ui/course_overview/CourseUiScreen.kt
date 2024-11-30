@@ -6,8 +6,11 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,6 +37,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
@@ -53,6 +57,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NavigateToUse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.OpenedConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.OpenedThread
+import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -63,8 +68,16 @@ internal const val TAB_COMMUNICATION = 2
 internal const val DEFAULT_CONVERSATION_ID = -1L
 internal const val DEFAULT_POST_ID = -1L
 
+@Serializable
+private data class CourseUiScreen(
+    val courseId: Long,
+    val conversationId: Long = DEFAULT_CONVERSATION_ID,
+    val postId: Long = DEFAULT_POST_ID,
+    val username: String = ""
+)
+
 fun NavController.navigateToCourse(courseId: Long, builder: NavOptionsBuilder.() -> Unit) {
-    navigate("course/$courseId", builder)
+    navigate(CourseUiScreen(courseId), builder)
 }
 
 fun NavGraphBuilder.course(
@@ -85,25 +98,15 @@ fun NavGraphBuilder.course(
             generateLinks("courses/{courseId}/exercises") +
             generateLinks("courses/{courseId}/messages?conversationId={conversationId}") +
             generateLinks("courses/{courseId}/messages?username={username}")
-    composable(
-        route = "course/{courseId}",
-        arguments = listOf(
-            navArgument("courseId") { type = NavType.LongType; nullable = false },
-            navArgument("conversationId") {
-                type = NavType.LongType; defaultValue = DEFAULT_CONVERSATION_ID
-            },
-            navArgument("postId") { type = NavType.LongType; defaultValue = DEFAULT_POST_ID },
-            navArgument("username") { type = NavType.StringType; defaultValue = "" }
-        ),
+    composable<CourseUiScreen>(
         deepLinks = deepLinks
     ) { backStackEntry ->
-        val courseId = backStackEntry.arguments?.getLong("courseId")
-        checkNotNull(courseId)
+        val route: CourseUiScreen = backStackEntry.toRoute()
+        val courseId = route.courseId
 
-        val conversationId =
-            backStackEntry.arguments?.getLong("conversationId") ?: DEFAULT_CONVERSATION_ID
-        val postId = backStackEntry.arguments?.getLong("postId") ?: DEFAULT_POST_ID
-        val username = backStackEntry.arguments?.getString("username").orEmpty()
+        val conversationId = route.conversationId
+        val postId = route.postId
+        val username = route.username
 
         CourseUiScreen(
             modifier = Modifier.fillMaxSize(),
@@ -331,7 +334,8 @@ internal fun CourseUiScreen(
         BasicDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(top = padding.calculateTopPadding())
+                .consumeWindowInsets(WindowInsets.systemBars),
             dataState = courseDataState,
             loadingText = stringResource(id = R.string.course_ui_loading_course_loading),
             failureText = stringResource(id = R.string.course_ui_loading_course_failed),

@@ -11,4 +11,26 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         channelName: String,
         conversationId: Long
     ): String = "[#$channelName](artemis://courses/$courseId/messages?conversationId=$conversationId)"
+
+    override fun transformLectureContentMarkdown(
+        type: String,
+        fileName: String,
+        url: String
+    ): String {
+        return when (type) {
+            "attachment" -> "[$fileName](artemis:/$url)"
+            "lecture-unit" -> "[$fileName]($serverUrl/api/files/attachments/$url)" // TODO: fix authentication or redirect to lecture unit (https://github.com/ls1intum/artemis-android/issues/117)
+            "slide" -> "[$fileName]($serverUrl/api/files/attachments/$url)" // TODO: fix authentication or redirect to lecture unit (https://github.com/ls1intum/artemis-android/issues/117)
+            else -> fileName
+        }
+    }
+
+    override fun transformFileUploadMessageMarkdown(
+        isImage: Boolean,
+        fileName: String,
+        filePath: String
+    ): String {
+        // TODO: fix authentication or redirect for all non-image uploads (https://github.com/ls1intum/artemis-android/issues/117)
+        return if (isImage) "![$fileName]($serverUrl$filePath)" else "[$fileName]($serverUrl$filePath)"
+    }
 }

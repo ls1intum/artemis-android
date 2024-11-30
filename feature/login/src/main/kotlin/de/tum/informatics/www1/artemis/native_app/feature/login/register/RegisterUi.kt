@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Divider
@@ -92,7 +93,7 @@ internal fun RegisterUi(
     }
 
     Column(
-        modifier = modifier,
+        modifier = modifier.imePadding(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         val textFieldModifier = Modifier

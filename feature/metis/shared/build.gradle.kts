@@ -11,4 +11,5 @@ android {
 }
 dependencies {
     implementation(project(":core:device"))
+    testImplementation(project(":feature:metis-test"))
 }
