@@ -10,4 +10,8 @@ object PushNotificationArtemisMarkdownTransformer : ArtemisMarkdownTransformer()
         channelName: String,
         conversationId: Long
     ): String = "#$channelName"
+
+    override fun transformLectureContentMarkdown(type: String, fileName: String, url: String): String = fileName
+
+    override fun transformFileUploadMessageMarkdown(isImage: Boolean, fileName: String, filePath: String) = fileName
 }
