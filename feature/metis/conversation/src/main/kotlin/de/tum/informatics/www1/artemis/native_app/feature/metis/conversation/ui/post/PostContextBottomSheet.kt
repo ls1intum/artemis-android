@@ -84,7 +84,8 @@ internal fun PostContextBottomSheet(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = Spacings.ScreenHorizontalSpacing, end = Spacings.ScreenHorizontalSpacing, bottom = 40.dp)
+                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                    .padding(bottom = 40.dp)
             ) {
                 postActions.onClickReaction?.let { onClickReaction ->
                     EmojiReactionBar(
