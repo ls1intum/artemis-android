@@ -366,10 +366,7 @@ private fun ConversationListItem(
                         }
                     },
                     trailingContent = {
-                        UnreadMessages(
-                            modifier = Modifier.padding(end = 24.dp),
-                            unreadMessagesCount = unreadMessagesCount
-                        )
+                        UnreadMessages(unreadMessagesCount = unreadMessagesCount)
                     }
                 )
             }
@@ -515,6 +512,7 @@ private fun UnreadMessages(modifier: Modifier = Modifier, unreadMessagesCount: L
     if (unreadMessagesCount > 0) {
         Box(
             modifier = modifier
+                .padding(end = 24.dp)
                 .size(24.dp)
                 .aspectRatio(1f)
                 .background(
