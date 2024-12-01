@@ -16,16 +16,16 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowRight
+import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Groups2
-import androidx.compose.material.icons.filled.InsertDriveFile
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.NotInterested
 import androidx.compose.material.icons.filled.NotificationsActive
@@ -33,9 +33,9 @@ import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -153,7 +153,7 @@ internal fun ConversationList(
                 R.string.conversation_overview_section_exercise_channels,
                 NoAction,
                 viewModel::toggleExercisesExpanded
-            ) { Icon(imageVector = Icons.Default.List, contentDescription = null) }
+            ) { Icon(imageVector = Icons.AutoMirrored.Filled.List, contentDescription = null) }
         }
 
         if (conversationCollections.lectureChannels.conversations.isNotEmpty()) {
@@ -164,7 +164,7 @@ internal fun ConversationList(
                 R.string.conversation_overview_section_lecture_channels,
                 NoAction,
                 viewModel::toggleLecturesExpanded
-            ) { Icon(imageVector = Icons.Default.InsertDriveFile, contentDescription = null) }
+            ) { Icon(imageVector = Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = null) }
         }
 
         if (conversationCollections.examChannels.conversations.isNotEmpty()) {
@@ -197,7 +197,7 @@ internal fun ConversationList(
                 R.string.conversation_overview_section_direct_messages,
                 OnClickAction(onRequestCreatePersonalConversation),
                 viewModel::togglePersonalConversationsExpanded
-            ) { Icon(imageVector = Icons.Default.Message, contentDescription = null) }
+            ) { Icon(imageVector = Icons.AutoMirrored.Filled.Message, contentDescription = null) }
         }
 
         if (conversationCollections.hidden.conversations.isNotEmpty()) {
@@ -229,7 +229,7 @@ private fun LazyListScope.conversationSectionHeader(
                 .fillMaxWidth()
                 .testTag(key)
         ) {
-            Divider()
+            HorizontalDivider()
 
             Row(
                 modifier = Modifier
@@ -258,14 +258,14 @@ private fun LazyListScope.conversationSectionHeader(
                     onClick = { toggleIsExpanded() }
                 ) {
                     Icon(
-                        imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowRight,
+                        imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.AutoMirrored.Filled.ArrowRight,
                         contentDescription = null,
                         modifier = Modifier.size(32.dp)
                     )
                 }
             }
 
-            Divider()
+            HorizontalDivider()
         }
     }
 }
