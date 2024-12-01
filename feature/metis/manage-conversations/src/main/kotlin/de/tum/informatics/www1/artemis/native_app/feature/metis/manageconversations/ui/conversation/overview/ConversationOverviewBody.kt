@@ -26,10 +26,10 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.WifiOff
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -151,10 +151,8 @@ fun ConversationOverviewBody(
                     onToggleMarkAsFavourite = viewModel::markConversationAsFavorite,
                     onToggleHidden = viewModel::markConversationAsHidden,
                     onToggleMuted = viewModel::markConversationAsMuted,
-                    onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
-                    onRequestAddChannel = onRequestAddChannel,
                     trailingContent = {
-                        item { Divider() }
+                        item { HorizontalDivider() }
 
                         item(key = KEY_BUTTON_SHOW_COC) {
                             Box(

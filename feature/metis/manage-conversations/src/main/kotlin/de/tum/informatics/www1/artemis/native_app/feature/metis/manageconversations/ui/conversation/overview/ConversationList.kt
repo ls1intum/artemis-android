@@ -96,19 +96,16 @@ internal fun ConversationList(
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
-    onRequestCreatePersonalConversation: () -> Unit,
-    onRequestAddChannel: () -> Unit,
     trailingContent: LazyListScope.() -> Unit
 ) {
 
-    val listWithHeader: LazyListScope.(ConversationCollections.ConversationCollection<*>, String, String, Int, ConversationSectionHeaderAction, () -> Unit, @Composable () -> Unit) -> Unit =
-        { collection, key, suffix, textRes, action, toggleIsExpanded, icon ->
+    val listWithHeader: LazyListScope.(ConversationCollections.ConversationCollection<*>, String, String, Int, () -> Unit, @Composable () -> Unit) -> Unit =
+        { collection, key, suffix, textRes, onClick, icon ->
             conversationSectionHeader(
                 key = key,
                 text = textRes,
-                onClickAddAction = action,
                 isExpanded = collection.isExpanded,
-                toggleIsExpanded = toggleIsExpanded,
+                onClick = onClick,
                 icon = icon
             )
 
@@ -130,8 +127,7 @@ internal fun ConversationList(
                 SECTION_FAVORITES_KEY,
                 KEY_SUFFIX_FAVORITES,
                 R.string.conversation_overview_section_favorites,
-                NoAction,
-                { viewModel.toggleFavoritesExpanded() },
+                viewModel::toggleFavoritesExpanded,
                 { Icon(imageVector = Icons.Default.Favorite, contentDescription = null) }
             )
         }
@@ -141,7 +137,6 @@ internal fun ConversationList(
             SECTION_CHANNELS_KEY,
             KEY_SUFFIX_CHANNELS,
             R.string.conversation_overview_section_general_channels,
-            OnClickAction(onRequestAddChannel),
             viewModel::toggleGeneralsExpanded
         ) { Icon(imageVector = Icons.Default.ChatBubble, contentDescription = null) }
 
@@ -151,7 +146,6 @@ internal fun ConversationList(
                 SECTION_EXERCISES_KEY,
                 KEY_SUFFIX_EXERCISES,
                 R.string.conversation_overview_section_exercise_channels,
-                NoAction,
                 viewModel::toggleExercisesExpanded
             ) { Icon(imageVector = Icons.AutoMirrored.Filled.List, contentDescription = null) }
         }
@@ -162,7 +156,6 @@ internal fun ConversationList(
                 SECTION_LECTURES_KEY,
                 KEY_SUFFIX_LECTURES,
                 R.string.conversation_overview_section_lecture_channels,
-                NoAction,
                 viewModel::toggleLecturesExpanded
             ) { Icon(imageVector = Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = null) }
         }
@@ -173,7 +166,6 @@ internal fun ConversationList(
                 SECTION_EXAMS_KEY,
                 KEY_SUFFIX_EXAMS,
                 R.string.conversation_overview_section_exam_channels,
-                NoAction,
                 viewModel::toggleExamsExpanded
             ) { Icon(imageVector = Icons.Default.School, contentDescription = null) }
         }
@@ -184,7 +176,6 @@ internal fun ConversationList(
                 SECTION_GROUPS_KEY,
                 KEY_SUFFIX_GROUPS,
                 R.string.conversation_overview_section_groups,
-                OnClickAction(onRequestCreatePersonalConversation),
                 viewModel::toggleGroupChatsExpanded
             ) { Icon(imageVector = Icons.Default.Forum, contentDescription = null) }
         }
@@ -195,7 +186,6 @@ internal fun ConversationList(
                 SECTION_DIRECT_MESSAGES_KEY,
                 KEY_SUFFIX_PERSONAL,
                 R.string.conversation_overview_section_direct_messages,
-                OnClickAction(onRequestCreatePersonalConversation),
                 viewModel::togglePersonalConversationsExpanded
             ) { Icon(imageVector = Icons.AutoMirrored.Filled.Message, contentDescription = null) }
         }
@@ -206,7 +196,6 @@ internal fun ConversationList(
                 SECTION_HIDDEN_KEY,
                 KEY_SUFFIX_HIDDEN,
                 R.string.conversation_overview_section_hidden,
-                NoAction,
                 viewModel::toggleHiddenExpanded
             ) { Icon(imageVector = Icons.Default.NotInterested, contentDescription = null) }
         }
@@ -219,8 +208,7 @@ private fun LazyListScope.conversationSectionHeader(
     key: String,
     @StringRes text: Int,
     isExpanded: Boolean,
-    onClickAddAction: ConversationSectionHeaderAction,
-    toggleIsExpanded: () -> Unit,
+    onClick: () -> Unit,
     icon: @Composable () -> Unit
 ) {
     item(key = key) {
@@ -234,7 +222,7 @@ private fun LazyListScope.conversationSectionHeader(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { toggleIsExpanded() }
+                    .clickable { onClick() }
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -255,7 +243,7 @@ private fun LazyListScope.conversationSectionHeader(
 
                 IconButton(
                     modifier = Modifier.testTag(TEST_TAG_HEADER_EXPAND_ICON),
-                    onClick = { toggleIsExpanded() }
+                    onClick = { onClick() }
                 ) {
                     Icon(
                         imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.AutoMirrored.Filled.ArrowRight,
@@ -528,12 +516,6 @@ private fun UnreadMessages(modifier: Modifier = Modifier, unreadMessagesCount: L
         }
     }
 }
-
-private sealed interface ConversationSectionHeaderAction
-
-private data class OnClickAction(val onClick: () -> Unit) : ConversationSectionHeaderAction
-
-private object NoAction : ConversationSectionHeaderAction
 
 private fun String.removeSectionPrefix(): String {
     val prefixes = listOf("exercise-", "lecture-", "exam-")
