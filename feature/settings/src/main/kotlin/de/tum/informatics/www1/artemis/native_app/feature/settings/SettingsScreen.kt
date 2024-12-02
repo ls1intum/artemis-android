@@ -17,7 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -182,14 +182,16 @@ private fun SettingsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
                 .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+                .padding(top = padding.calculateTopPadding())
                 .padding(bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (authToken != null) {
-                LoggedInSettings(
-                    accountData = accountData,
+                UserInformationSection(
+                    modifier = Modifier.fillMaxWidth(),
+                    authData = accountData,
                     username = username,
                     onRequestLogout = {
                         scope.launch {
@@ -205,12 +207,14 @@ private fun SettingsScreen(
 
                             onLoggedOut()
                         }
-                    },
-                    onRequestOpenNotificationSettings = onRequestOpenNotificationSettings
+                    }
                 )
-
-                Divider()
             }
+
+            NotificationSection(
+                modifier = Modifier.fillMaxWidth(),
+                onOpenNotificationSettings = onRequestOpenNotificationSettings
+            )
 
             AboutSection(
                 modifier = Modifier.fillMaxWidth(),
@@ -231,8 +235,6 @@ private fun SettingsScreen(
                 onRequestSelectServerInstance = onNavigateUp
             )
 
-            Divider()
-
             BuildInformationSection(
                 modifier = Modifier.fillMaxWidth(),
                 versionCode = versionCode,
@@ -240,28 +242,6 @@ private fun SettingsScreen(
             )
         }
     }
-}
-
-@Composable
-private fun LoggedInSettings(
-    accountData: DataState<Account>?,
-    username: String?,
-    onRequestLogout: () -> Unit,
-    onRequestOpenNotificationSettings: () -> Unit
-) {
-    UserInformationSection(
-        modifier = Modifier.fillMaxWidth(),
-        authData = accountData,
-        username = username,
-        onRequestLogout = onRequestLogout
-    )
-
-    Divider()
-
-    NotificationSection(
-        modifier = Modifier.fillMaxWidth(),
-        onOpenNotificationSettings = onRequestOpenNotificationSettings
-    )
 }
 
 @Composable
@@ -355,7 +335,7 @@ private fun AboutSection(
     ) {
         if (!BuildConfig.hasInstanceRestriction) {
             Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(bottom = 8.dp),
                 text = stringResource(id = R.string.settings_server_specifics_information),
                 style = MaterialTheme.typography.labelMedium
             )
@@ -427,6 +407,18 @@ private fun BuildInformationSection(
     }
 }
 
+@Composable
+private fun PreferenceEntry(modifier: Modifier, text: String, onClick: () -> Unit) {
+    Box(modifier = modifier.clickable(onClick = onClick)) {
+        Row(modifier = Modifier.padding(horizontal = 16.dp).padding(vertical = 10.dp)) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = text,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+}
 
 @Composable
 private fun PreferenceSection(
@@ -434,40 +426,20 @@ private fun PreferenceSection(
     title: String,
     entries: @Composable ColumnScope.() -> Unit
 ) {
-    Column(modifier = modifier) {
-        val childModifier = Modifier.fillMaxWidth()
-
-        PreferenceSectionTitle(
-            modifier = childModifier.padding(horizontal = 16.dp),
-            text = title
-        )
-
-        entries()
-    }
-}
-
-@Composable
-private fun PreferenceSectionTitle(modifier: Modifier, text: String) {
-    Box(modifier = modifier) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            text = text,
-            style = MaterialTheme.typography.titleLarge
-        )
-    }
-}
-
-@Composable
-private fun PreferenceEntry(modifier: Modifier, text: String, onClick: () -> Unit) {
-    Box(modifier = modifier.clickable(onClick = onClick)) {
-        Row(modifier = Modifier.padding(16.dp)) {
+    Card(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = text,
-                style = MaterialTheme.typography.bodyLarge
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
             )
+            entries()
         }
     }
 }
