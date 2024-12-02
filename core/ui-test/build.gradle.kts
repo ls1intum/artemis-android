@@ -7,7 +7,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:ui"))
+    implementation(project(path = ":core:ui", configuration = "productionTumDebugApiElements"))
 
     implementation(libs.koin.core)
     implementation(libs.kotlinx.coroutines.core)
