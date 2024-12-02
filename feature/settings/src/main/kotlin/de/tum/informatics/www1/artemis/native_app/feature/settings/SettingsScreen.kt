@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +16,11 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -30,8 +35,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -185,7 +193,11 @@ private fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
                 .padding(top = padding.calculateTopPadding())
-                .padding(bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()),
+                .padding(
+                    bottom = WindowInsets.systemBars
+                        .asPaddingValues()
+                        .calculateBottomPadding()
+                ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (authToken != null) {
@@ -270,28 +282,31 @@ private fun UserInformationSection(
             ) { account ->
                 PreferenceEntry(
                     modifier = childModifier,
+                    icon = Icons.Default.Person,
                     text = stringResource(
                         id = R.string.settings_account_information_full_name,
-                        account.name.orEmpty()
                     ),
+                    valueText = account.name.orEmpty(),
                     onClick = {}
                 )
 
                 PreferenceEntry(
                     modifier = childModifier,
+                    icon = Icons.Filled.AlternateEmail,
                     text = stringResource(
                         id = R.string.settings_account_information_login,
-                        username
                     ),
+                    valueText = username,
                     onClick = {}
                 )
 
                 PreferenceEntry(
                     modifier = childModifier,
+                    icon = Icons.Default.Mail,
                     text = stringResource(
-                        id = R.string.settings_account_information_email,
-                        account.email.orEmpty()
+                        id = R.string.settings_account_information_email
                     ),
+                    valueText = account.email.orEmpty(),
                     onClick = {}
                 )
             }
@@ -300,6 +315,7 @@ private fun UserInformationSection(
         PreferenceEntry(
             modifier = childModifier,
             text = stringResource(id = R.string.settings_account_logout),
+            isPrimaryButton = true,
             onClick = onRequestLogout
         )
     }
@@ -311,7 +327,7 @@ private fun NotificationSection(modifier: Modifier, onOpenNotificationSettings: 
         modifier = modifier,
         title = stringResource(id = R.string.settings_notification_section)
     ) {
-        PreferenceEntry(
+        ButtonEntry(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(id = R.string.settings_notification_settings),
             onClick = onOpenNotificationSettings
@@ -333,6 +349,8 @@ private fun AboutSection(
         modifier = modifier,
         title = stringResource(id = R.string.settings_about_section)
     ) {
+        val linkOpener = LocalLinkOpener.current
+
         if (!BuildConfig.hasInstanceRestriction) {
             Text(
                 modifier = Modifier.padding(bottom = 8.dp),
@@ -342,19 +360,23 @@ private fun AboutSection(
         }
 
         if (hasUserSelectedInstance) {
-            PreferenceEntry(
+            ServerURLEntry(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.settings_server_url, serverUrl),
-                onClick = {}
+                text = stringResource(R.string.settings_server_url),
+                valueText = serverUrl,
+                onClick = {
+                    val builder = URLBuilder(serverUrl).buildString()
+                    linkOpener.openLink(builder)
+                }
             )
 
-            PreferenceEntry(
+            ButtonEntry(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = R.string.settings_about_privacy_policy),
                 onClick = onOpenPrivacyPolicy
             )
 
-            PreferenceEntry(
+            ButtonEntry(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = R.string.settings_about_imprint),
                 onClick = onOpenImprint
@@ -375,7 +397,7 @@ private fun AboutSection(
             }
         }
 
-        PreferenceEntry(
+        ButtonEntry(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(id = R.string.settings_about_third_party_licences),
             onClick = onOpenThirdPartyLicenses
@@ -395,26 +417,127 @@ private fun BuildInformationSection(
     ) {
         PreferenceEntry(
             modifier = Modifier.fillMaxWidth(),
-            text = stringResource(id = R.string.settings_build_version_code, versionCode),
+            text = stringResource(id = R.string.settings_build_version_code),
+            valueText = versionCode.toString(),
             onClick = {}
         )
 
         PreferenceEntry(
             modifier = Modifier.fillMaxWidth(),
-            text = stringResource(id = R.string.settings_build_version_name, versionName),
+            text = stringResource(id = R.string.settings_build_version_name),
+            valueText = versionName,
             onClick = { }
         )
     }
 }
 
 @Composable
-private fun PreferenceEntry(modifier: Modifier, text: String, onClick: () -> Unit) {
-    Box(modifier = modifier.clickable(onClick = onClick)) {
-        Row(modifier = Modifier.padding(horizontal = 16.dp).padding(vertical = 10.dp)) {
+fun PreferenceEntry(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: ImageVector? = null,
+    valueText: String? = null,
+    isPrimaryButton: Boolean = false,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = modifier
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = if (isPrimaryButton) Arrangement.Center else Arrangement.spacedBy(
+                8.dp
+            )
+        ) {
+            icon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null
+                )
+            }
+
             Text(
-                modifier = Modifier.fillMaxWidth(),
+                color = if (isPrimaryButton) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground,
+                text = text,
+                style = if (isPrimaryButton) MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.bodyLarge
+            )
+
+            valueText?.let {
+                Box(
+                    modifier = Modifier
+                        .weight(1f),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ServerURLEntry(
+    modifier: Modifier = Modifier,
+    text: String,
+    valueText: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .clickable(onClick = onClick)
+    ) {
+        Column(
+            modifier = modifier
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge
+            )
+
+            Text(
+                text = valueText,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+        }
+    }
+}
+
+@Composable
+fun ButtonEntry(
+    modifier: Modifier = Modifier,
+    text: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = modifier
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null
             )
         }
     }
