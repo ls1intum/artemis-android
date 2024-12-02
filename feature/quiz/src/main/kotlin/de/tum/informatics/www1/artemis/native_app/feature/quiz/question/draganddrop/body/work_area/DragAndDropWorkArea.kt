@@ -24,12 +24,11 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toSize
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.scale
-import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.image.loadAsyncImageDrawable
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.DefaultImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
-import io.ktor.http.HttpHeaders
 
 internal sealed interface DragAndDropAreaType {
     data class ViewOnly(
@@ -60,12 +59,15 @@ internal fun DragAndDropWorkArea(
 ) {
     val context = LocalContext.current
 
+    val defaultImageProvider = DefaultImageProvider()
     val request = remember(imageUrl, questionId) {
-        ImageRequest.Builder(context)
-            .data(imageUrl)
-            .memoryCacheKey("QQ_$questionId")
-            .addHeader(HttpHeaders.Cookie, "jwt=$authToken")
-            .build()
+        defaultImageProvider.createImageRequest(
+            context,
+            imageUrl,
+            serverUrl,
+            authToken,
+            "QQ_$questionId"
+        )
     }
 
     val resultData = loadAsyncImageDrawable(request = request)
