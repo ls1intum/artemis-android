@@ -35,8 +35,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -312,10 +312,11 @@ private fun UserInformationSection(
             }
         }
 
-        PreferenceEntry(
+        ButtonEntry(
             modifier = childModifier,
             text = stringResource(id = R.string.settings_account_logout),
-            isPrimaryButton = true,
+            isFocused = true,
+            textColor = MaterialTheme.colorScheme.error,
             onClick = onRequestLogout
         )
     }
@@ -437,7 +438,6 @@ fun PreferenceEntry(
     text: String,
     icon: ImageVector? = null,
     valueText: String? = null,
-    isPrimaryButton: Boolean = false,
     onClick: () -> Unit,
 ) {
     Box(
@@ -446,36 +446,32 @@ fun PreferenceEntry(
     ) {
         Row(
             modifier = modifier
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = if (isPrimaryButton) Arrangement.Center else Arrangement.spacedBy(
-                8.dp
-            )
+                .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
-            icon?.let {
-                Icon(
-                    imageVector = it,
-                    contentDescription = null
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                icon?.let {
+                    Icon(
+                        imageVector = it,
+                        contentDescription = null
+                    )
+                }
+
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
 
-            Text(
-                color = if (isPrimaryButton) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground,
-                text = text,
-                style = if (isPrimaryButton) MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.bodyLarge
-            )
+            Spacer(modifier = Modifier.weight(1f))
 
             valueText?.let {
-                Box(
-                    modifier = Modifier
-                        .weight(1f),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
-                    )
-                }
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                )
+
             }
         }
     }
@@ -494,9 +490,7 @@ fun ServerURLEntry(
     ) {
         Column(
             modifier = modifier
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
+                .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             Text(
                 text = text,
@@ -508,7 +502,6 @@ fun ServerURLEntry(
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.fillMaxWidth()
             )
-
         }
     }
 }
@@ -517,6 +510,8 @@ fun ServerURLEntry(
 fun ButtonEntry(
     modifier: Modifier = Modifier,
     text: String,
+    isFocused: Boolean = false,
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit,
 ) {
     Box(
@@ -526,19 +521,22 @@ fun ButtonEntry(
         Row(
             modifier = modifier
                 .padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = if (isFocused) Arrangement.Center else Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = text,
-                style = MaterialTheme.typography.bodyLarge
+                color = textColor,
+                style = if (isFocused) MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.bodyLarge
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            if (!isFocused) {
+                Spacer(modifier = Modifier.weight(1f))
 
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null
-            )
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null
+                )
+            }
         }
     }
 }
