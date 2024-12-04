@@ -35,6 +35,7 @@ internal fun PerformActionOnUserDialogs(
     AwaitDeferredCompletion(
         job = performActionOnUserJob,
         onComplete = { isSuccessful ->
+            onDismiss()
             if (!isSuccessful) {
                 displayPerformActionOnUserFailedDialog = true
             }
@@ -95,10 +96,10 @@ private fun PerformActionOnUserDialogs(
                     onDismissRequest = onDismiss
                 )
 
-                is GroupChat -> KickUserFromChannelDialog(
+                is GroupChat -> KickUserFromGroupDialog (
                     humanReadableName = humanReadableName,
                     username = username,
-                    channelName = conversation.humanReadableTitle,
+                    groupName = conversation.humanReadableTitle,
                     onPressPositiveButton = onKickUser,
                     onDismissRequest = onDismiss
                 )
