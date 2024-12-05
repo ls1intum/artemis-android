@@ -37,6 +37,7 @@ const val METIS_RATIO = 0.3f
 internal fun ExerciseScreenBody(
     modifier: Modifier,
     exerciseDataState: DataState<Exercise>,
+    isLongToolbar: Boolean,
     displayCommunicationOnSide: Boolean,
     navController: NavController,
     metisContext: MetisContext?,
@@ -60,6 +61,7 @@ internal fun ExerciseScreenBody(
                     ExerciseOverviewTab(
                         modifier = modifier,
                         exercise = exercise,
+                        isLongToolbar = isLongToolbar,
                         webViewState = webViewState,
                         setWebView = setWebView,
                         webView = webView,
@@ -73,6 +75,7 @@ internal fun ExerciseScreenBody(
                     Modifier
                         .fillMaxSize()
                         .padding(horizontal = 8.dp)
+                        .padding(bottom = 8.dp)
                 )
 
                 // Commented out as we may need that code again once we display communications for exercises

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.ui.material
+package de.tum.informatics.www1.artemis.native_app.core.ui.material.colors
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
