@@ -108,16 +108,18 @@ internal fun PostContextBottomSheet(
                     Divider()
                 }
 
-                postActions.requestEditPost?.let {
-                    ActionButton(
-                        modifier = actionButtonModifier,
-                        icon = Icons.Default.Edit,
-                        text = stringResource(id = R.string.post_edit),
-                        onClick = {
-                            onDismissRequest()
-                            it()
-                        }
-                    )
+                if(post.authorId == clientId) {
+                    postActions.requestEditPost?.let {
+                        ActionButton(
+                            modifier = actionButtonModifier,
+                            icon = Icons.Default.Edit,
+                            text = stringResource(id = R.string.post_edit),
+                            onClick = {
+                                onDismissRequest()
+                                it()
+                            }
+                        )
+                    }
                 }
 
                 postActions.requestDeletePost?.let {
