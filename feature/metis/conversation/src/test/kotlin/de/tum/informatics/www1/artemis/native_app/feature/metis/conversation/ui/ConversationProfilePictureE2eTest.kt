@@ -2,24 +2,16 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
-import coil3.ImageLoader
-import coil3.SingletonImageLoader
-import coil3.annotation.DelicateCoilApi
-import coil3.request.ImageRequest
-import coil3.test.FakeImage
-import coil3.test.FakeImageLoaderEngine
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.test.ArtemisImageProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.TestInitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
@@ -46,35 +38,16 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
     private val clientId = 20L
     private val courseId = 1L
 
-    private val artemisImageProviderStub = object : ArtemisImageProvider {
-
-        @Composable
-        override fun rememberArtemisImageRequest(imagePath: String): ImageRequest {
-            return ImageRequest.Builder(LocalContext.current)
-                .data(imagePath)
-                .build()
-        }
-    }
-
     private val allTestTags = listOf(
         TEST_TAG_PROFILE_PICTURE_IMAGE,
         TEST_TAG_PROFILE_PICTURE_INITIALS,
         TEST_TAG_PROFILE_PICTURE_UNKNOWN
     )
 
-    @OptIn(DelicateCoilApi::class)
     @Before
-    @Throws(Exception::class)
     fun setUp() {
         ShadowLog.stream = System.out
-
-        val engine = FakeImageLoaderEngine.Builder()
-            .default(FakeImage(color = 0x00F))
-            .build()
-        val imageLoader = ImageLoader.Builder(context)
-            .components { add(engine) }
-            .build()
-        SingletonImageLoader.setUnsafe(imageLoader)
+        ArtemisImageProviderStub.setup(context)
     }
 
     @Test
@@ -136,7 +109,7 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
     ) {
         composeTestRule.setContent {
             CompositionLocalProvider(
-               LocalArtemisImageProvider provides artemisImageProviderStub
+               LocalArtemisImageProvider provides ArtemisImageProviderStub()
             ) {
                 MetisChatList(
                     modifier = Modifier,

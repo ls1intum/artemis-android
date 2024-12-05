@@ -1,5 +1,7 @@
 plugins {
     id("artemis.android.library")
+    id("artemis.android.library.compose")
+    id("artemis.android.flavor.library.instanceSelection")
 }
 
 android {
@@ -7,7 +9,7 @@ android {
 }
 
 dependencies {
-    implementation(project(path = ":core:ui", configuration = "productionTumDebugApiElements"))
+    implementation(project(":core:ui"))
 
     implementation(libs.koin.core)
     implementation(libs.kotlinx.coroutines.core)
