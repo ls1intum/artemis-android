@@ -66,6 +66,17 @@ interface MetisModificationService {
         authToken: String
     ): NetworkResponse<Boolean>
 
+    suspend fun uploadFileOrImage(
+        context: MetisContext,
+        courseId: Long,
+        conversationId: Long,
+        fileData: ByteArray,
+        fileName: String,
+        fileType: String,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<String>
+
     sealed class AffectedPost {
         abstract val postId: Long
 

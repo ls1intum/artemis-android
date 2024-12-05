@@ -1,6 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import android.content.Context
+import android.net.Uri
+import android.util.Log
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
@@ -66,6 +68,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,6 +86,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -260,6 +264,13 @@ internal open class ConversationViewModel(
         MutableStateFlow(TextFieldValue(""))
 
     val serverUrl = serverUrlStateFlow(serverConfigurationService)
+
+    private val _selectedFileUri = MutableStateFlow<Uri?>(null)
+    val selectedFileUri: StateFlow<Uri?> = _selectedFileUri
+    private val _selectedFileName = MutableStateFlow<String>("")
+    val selectedFileName: StateFlow<String> = _selectedFileName
+    private val _selectedFileType = MutableStateFlow<String>("")
+    val selectedFileType: StateFlow<String> = _selectedFileType
 
     init {
         viewModelScope.launch(coroutineContext) {
@@ -666,7 +677,8 @@ internal open class ConversationViewModel(
                 )
             } ?: return@launch
 
-            val post = metisStorageService.getStandalonePost(clientSidePostId).first() ?: return@launch
+            val post =
+                metisStorageService.getStandalonePost(clientSidePostId).first() ?: return@launch
 
             createPostService.retryCreatePost(
                 courseId = courseId,
@@ -715,4 +727,53 @@ internal open class ConversationViewModel(
             imageProvider.createImageLoader(context, authorizationToken)
         }
     }
+
+    fun onImageSelected(uri: Uri?, fileName: String, fileType: String) {
+        Log.d("ConversationViewModel", "File selected: $uri")
+        viewModelScope.launch {
+            _selectedFileUri.emit(uri)
+            _selectedFileName.emit(fileName)
+            _selectedFileType.emit(fileType)
+        }
+    }
+
+    fun onFileSelected(uri: Uri?, fileName: String, fileType: String) {
+        Log.d("ConversationViewModel", "File selected: $uri")
+        viewModelScope.launch(coroutineContext) {
+            _selectedFileUri.emit(uri)
+            _selectedFileName.emit(fileName)
+            _selectedFileType.emit(fileType)
+        }
+    }
+
+
+    fun uploadFileOrImage(context: Context) {
+        Log.d("ConversationViewModel", "File upload initiated: URI=${_selectedFileUri.value}, fileName=${_selectedFileName.value}, fileType=${_selectedFileType.value}")
+        viewModelScope.launch(coroutineContext) {
+            try {
+                val fileData = withContext(Dispatchers.IO) {
+                    _selectedFileUri.value?.let { context.contentResolver.openInputStream(it)?.use { it.readBytes() } }
+                        ?: throw IllegalArgumentException("Unable to read file from URI: ${_selectedFileUri.value}")
+                }
+
+                val serverUrl = serverConfigurationService.serverUrl.first()
+                val authToken = accountService.authToken.first()
+
+                metisModificationService.uploadFileOrImage(
+                    context = metisContext,
+                    courseId = courseId,
+                    conversationId = conversationId,
+                    fileData = fileData,
+                    fileName = _selectedFileName.value,
+                    fileType = _selectedFileType.value,
+                    serverUrl = serverUrl,
+                    authToken = authToken
+                )
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
 }

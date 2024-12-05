@@ -4,19 +4,23 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.RESOURCE_PATH_SEGMENTS
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.Reaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.delete
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
@@ -216,6 +220,62 @@ internal class MetisModificationServiceImpl(
             }
                 .status
                 .isSuccess()
+        }
+    }
+
+//    override suspend fun uploadFileOrImage(
+//        context: MetisContext,
+//        courseId: Long,
+//        conversationId: Long,
+//        fileData: ByteArray,
+//        fileName: String,
+//        fileType: String,
+//        serverUrl: String,
+//        authToken: String
+//    ): NetworkResponse<String> {
+//        return performNetworkCall {
+//            val timestamp = System.currentTimeMillis().toString()
+//            val uniqueFilename = "FILE_${fileName.hashCode()}_${timestamp}.${fileType.split("/").last()}"
+//            ktorProvider.ktorClient.post(serverUrl) {
+//                url {
+//                    appendPathSegments("api", "files", "courses", courseId.toString(), "conversations", conversationId.toString())
+//                }
+//                setBody(MultipartBody.Part.createFormData(
+//                    uniqueFilename,
+//                    fileName,
+//                    fileData.toRequestBody(fileType.toMediaTypeOrNull())
+//                ))
+//                cookieAuth(authToken)
+//            }.body()
+//        }
+//    }
+
+    override suspend fun uploadFileOrImage(
+        context: MetisContext,
+        courseId: Long,
+        conversationId: Long,
+        fileData: ByteArray,
+        fileName: String,
+        fileType: String,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<String> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.submitFormWithBinaryData(
+                url = "$serverUrl/api/files/courses/$courseId/conversations/$conversationId",
+                formData = formData {
+                    append(
+                        key = "file",
+                        value = fileData,
+                        headers = Headers.build {
+                            append(HttpHeaders.ContentDisposition, "form-data; name=\"file\"; filename=\"$fileName\"")
+                            append(HttpHeaders.ContentType, fileType)
+                        }
+                    )
+                }
+            ) {
+                cookieAuth(authToken)
+            }.body()
         }
     }
 }

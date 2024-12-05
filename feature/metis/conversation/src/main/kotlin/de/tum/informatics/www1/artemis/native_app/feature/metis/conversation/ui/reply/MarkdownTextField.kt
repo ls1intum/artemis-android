@@ -1,5 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
+import android.content.ContentResolver
+import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +16,10 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -21,10 +33,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 
@@ -41,14 +55,40 @@ internal fun MarkdownTextField(
     focusRequester: FocusRequester = remember { FocusRequester() },
     sendButton: @Composable () -> Unit = {},
     topRightButton: @Composable RowScope.() -> Unit = {},
+    onFileSelect: (Uri?, String, String) -> Unit = { _, _, _ -> },
+    onImageSelect: (Uri?,String, String) -> Unit = {_, _, _ ->},
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit
 ) {
     val text = textFieldValue.text
+    val context = LocalContext.current
+    var selectedUri by remember { mutableStateOf<Uri?>(null) }
+    var selectedFileName by remember { mutableStateOf<String?>(null) }
 
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
     var hadFocus by remember { mutableStateOf(false) }
+
+    // Launchers for file and image selection
+    val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        onImageSelect(uri, resolveFileName(context, uri), resolveFileType(context, uri))
+        val fileName = resolveFileName(context, uri)
+        val fileType = resolveFileType(context, uri)
+        selectedUri = uri
+        selectedFileName = resolveFileName(context, uri)
+        onImageSelect(uri, fileName, fileType)
+        Log.d("MarkdownTextField", "selectedUri: $uri" )
+    }
+
+    val filePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        onImageSelect(uri, resolveFileName(context, uri), resolveFileType(context, uri))
+        val fileName = resolveFileName(context, uri)
+        val fileType = resolveFileType(context, uri)
+        selectedUri = uri
+        selectedFileName = resolveFileName(context, uri)
+        onFileSelect(uri, fileName, fileType)
+        Log.d("MarkdownTextField", "selectedUri: $uri" )
+    }
 
     Column(modifier = modifier) {
         Row(
@@ -72,9 +112,53 @@ internal fun MarkdownTextField(
                 }
             )
 
-            Box(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
+
+            InputChip(
+                selected = true,
+                onClick = { filePickerLauncher.launch("*/*") },
+                enabled = true,
+                label = {
+                    Icon(
+                        Icons.Default.AttachFile,
+                        contentDescription = "Attach File"
+                    )
+                }
+            )
+
+            InputChip(
+                selected = true,
+                onClick = { imagePickerLauncher.launch("image/*") },
+                enabled = true,
+                label = {
+                    Icon(
+                        Icons.Default.Image,
+                        contentDescription = "Select Image"
+                    )
+                }
+            )
 
             topRightButton()
+        }
+
+        selectedUri?.let { uri ->
+            Box() {
+                if (selectedFileName != null && selectedFileName!!.endsWith(".jpg", ignoreCase = true)) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Image(
+                        painter = rememberAsyncImagePainter(model = uri),
+                        contentDescription = "image",
+                        modifier = Modifier.fillMaxWidth().height(200.dp)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text =  selectedFileName.orEmpty(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
         }
 
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -119,4 +203,30 @@ internal fun MarkdownTextField(
 private enum class ViewType {
     TEXT,
     PREVIEW
+}
+
+private fun resolveFileName(context: Context, uri: Uri?): String {
+    return try {
+        val resolver: ContentResolver = context.contentResolver
+        uri?.let {
+            resolver.query(it, null, null, null, null)?.use { cursor ->
+                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                cursor.moveToFirst()
+                cursor.getString(nameIndex)
+            }
+        } ?: uri?.lastPathSegment.orEmpty() // Fallback to the URI path segment
+    } catch (e: Exception) {
+        Log.e("MarkdownTextField", "Error resolving file name", e)
+        uri?.lastPathSegment.orEmpty() // Fallback to the URI path segment
+    }
+}
+
+private fun resolveFileType(context: Context, uri: Uri?): String {
+    return try {
+        val resolver: ContentResolver = context.contentResolver
+        uri?.let { resolver.getType(it) } ?: "application/octet-stream" // Fallback to a generic binary type
+    } catch (e: Exception) {
+        Log.e("MarkdownTextField", "Error resolving file type", e)
+        "application/octet-stream" // Fallback MIME type
+    }
 }

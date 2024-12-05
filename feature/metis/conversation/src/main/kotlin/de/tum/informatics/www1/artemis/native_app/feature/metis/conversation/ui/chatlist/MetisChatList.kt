@@ -1,5 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist
 
+import android.content.Context
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +24,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,7 +35,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
-import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -102,29 +102,34 @@ internal fun MetisChatList(
         }
     }
 
-    ProvideMarkwon(imageLoader) {
-        MetisChatList(
-            modifier = modifier,
-            initialReplyTextProvider = viewModel,
-            posts = posts.asPostsDataState(),
-            clientId = clientId,
-            hasModerationRights = hasModerationRights,
-            isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-            listContentPadding = listContentPadding,
-            serverUrl = serverUrl,
-            courseId = viewModel.courseId,
-            state = state,
-            bottomItem = bottomItem,
-            isReplyEnabled = isReplyEnabled,
-            onCreatePost = viewModel::createPost,
-            onEditPost = viewModel::editPost,
-            onDeletePost = viewModel::deletePost,
-            onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
-            onClickViewPost = onClickViewPost,
-            onRequestRetrySend = viewModel::retryCreatePost,
-            title = updatedTitle
-        )
-    }
+    MetisChatList(
+        modifier = modifier,
+        initialReplyTextProvider = viewModel,
+        posts = posts.asPostsDataState(),
+        clientId = clientId,
+        hasModerationRights = hasModerationRights,
+        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+        listContentPadding = listContentPadding,
+        serverUrl = serverUrl,
+        courseId = viewModel.courseId,
+        state = state,
+        bottomItem = bottomItem,
+        isReplyEnabled = isReplyEnabled,
+        onCreatePost = viewModel::createPost,
+        onEditPost = viewModel::editPost,
+        onDeletePost = viewModel::deletePost,
+        onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
+        onClickViewPost = onClickViewPost,
+        onRequestRetrySend = viewModel::retryCreatePost,
+        title = updatedTitle,
+        onImageSelected = { uri, fileName, fileType ->
+            viewModel.onImageSelected(uri, fileName, fileType)
+        },
+        onFileSelected = { uri, fileName, fileType ->
+            viewModel.onFileSelected(uri, fileName, fileType)
+        },
+        onFileUpload = viewModel::uploadFileOrImage
+    )
 }
 
 @Composable
@@ -148,8 +153,10 @@ fun MetisChatList(
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
-    title: String
-) {
+    title: String,
+    onImageSelected: (Uri?, String, String) -> Unit,
+    onFileSelected:  (Uri?, String, String) -> Unit,
+    onFileUpload: (Context) -> Unit)  {
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
         onCreatePost = onCreatePost,
@@ -172,8 +179,8 @@ fun MetisChatList(
                 state = state,
                 itemCount = posts.itemCount,
                 order = DisplayPostOrder.REVERSED,
-                emojiService = emojiService,
-                bottomItem = bottomItem
+                bottomItem = bottomItem,
+                emojiService = koinInject()
             ) {
                 when (posts) {
                     PostsDataState.Empty -> {
@@ -220,6 +227,9 @@ fun MetisChatList(
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate,
                     title = title,
+                    onImageSelect = onImageSelected,
+                    onFileSelect = onFileSelected,
+                    onFileUpload = onFileUpload
                 )
             }
         }
