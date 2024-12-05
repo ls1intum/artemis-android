@@ -99,11 +99,6 @@ internal fun CoursesOverview(
 ) {
     val coursesDataState by viewModel.dashboard.collectAsState()
 
-    //The course composable needs the serverUrl to build the correct url to fetch the course icon from.
-    val serverUrl by viewModel.serverUrl.collectAsState()
-    //The server wants an authorization token to send the course icon.
-    val authToken by viewModel.authToken.collectAsState()
-
     val topAppBarState = rememberTopAppBarState()
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
@@ -201,8 +196,6 @@ internal fun CoursesOverview(
                             .padding(horizontal = 8.dp)
                             .testTag(TEST_TAG_COURSE_LIST),
                         courses = dashboard.courses,
-                        serverUrl = serverUrl,
-                        authorizationToken = authToken,
                         onClickOnCourse = { course -> onViewCourse(course.id ?: 0L) }
                     )
                 }

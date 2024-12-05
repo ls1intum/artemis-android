@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -46,8 +46,6 @@ import java.text.DecimalFormat
 fun CourseList(
     modifier: Modifier,
     courses: List<CourseWithScore>,
-    serverUrl: String,
-    authorizationToken: String,
     onClickOnCourse: (Course) -> Unit
 ) {
     CourseItemGrid(
@@ -57,8 +55,6 @@ fun CourseList(
         CourseItem(
             modifier = courseItemModifier.testTag(testTagForCourse(dashboardCourse.course.id!!)),
             courseWithScore = dashboardCourse,
-            serverUrl = serverUrl,
-            authorizationToken = authorizationToken,
             onClick = { onClickOnCourse(dashboardCourse.course) },
             isCompact = isCompact
         )
@@ -73,8 +69,6 @@ fun CourseItem(
     modifier: Modifier,
     isCompact: Boolean,
     courseWithScore: CourseWithScore,
-    serverUrl: String,
-    authorizationToken: String,
     onClick: () -> Unit
 ) {
     val currentPoints = courseWithScore.totalScores.studentScores.absoluteScore
@@ -97,12 +91,10 @@ fun CourseItem(
         CompactCourseItemHeader(
             modifier = modifier,
             course = courseWithScore.course,
-            serverUrl = serverUrl,
-            authorizationToken = authorizationToken,
             onClick = onClick,
             compactCourseHeaderViewMode = CompactCourseHeaderViewMode.EXERCISE_AND_LECTURE_COUNT,
             content = {
-                Divider()
+                HorizontalDivider()
 
                 Row(
                     modifier = Modifier
@@ -112,9 +104,9 @@ fun CourseItem(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     LinearProgressIndicator(
+                        progress = { progress },
                         modifier = Modifier.weight(1f),
-                        progress = progress,
-                        trackColor = MaterialTheme.colorScheme.onPrimary
+                        trackColor = MaterialTheme.colorScheme.onPrimary,
                     )
 
                     CourseProgressText(
@@ -130,8 +122,6 @@ fun CourseItem(
         ExpandedCourseItemHeader(
             modifier = modifier,
             course = courseWithScore.course,
-            serverUrl = serverUrl,
-            authorizationToken = authorizationToken,
             onClick = onClick,
             content = {
                 Box(

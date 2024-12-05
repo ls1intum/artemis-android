@@ -18,10 +18,10 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -104,12 +104,6 @@ internal fun RegisterForCourseScreen(
     var signUpCandidate: Course? by remember { mutableStateOf(null) }
     var displayRegistrationFailedDialog: Boolean by rememberSaveable { mutableStateOf(false) }
 
-    val authToken by viewModel.authToken.collectAsState()
-    val serverUrl by viewModel.serverUrl.collectAsState()
-
-    // CourseHeader requires url without trailing /
-    val properServerUrl = remember(serverUrl) { serverUrl.dropLast(1) }
-
     val topAppBarState = rememberTopAppBarState()
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
@@ -137,7 +131,7 @@ internal fun RegisterForCourseScreen(
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 }
             )
@@ -150,8 +144,6 @@ internal fun RegisterForCourseScreen(
                 .consumeWindowInsets(WindowInsets.systemBars)
                 .padding(horizontal = 8.dp),
             courses = courses,
-            serverUrl = properServerUrl,
-            authToken = authToken,
             reloadCourses = viewModel::reloadRegistrableCourses,
             onClickSignup = { course ->
                 signUpCandidate = course
@@ -204,8 +196,6 @@ internal fun RegisterForCourseScreen(
 private fun RegisterForCourseContent(
     modifier: Modifier,
     courses: DataState<List<RegisterForCourseViewModel.SemesterCourses>>,
-    serverUrl: String,
-    authToken: String,
     reloadCourses: () -> Unit,
     onClickSignup: (Course) -> Unit
 ) {
@@ -258,8 +248,6 @@ private fun RegisterForCourseContent(
                     RegistrableCourse(
                         modifier = courseItemModifier.testTag(testTagForRegistrableCourse(course.id ?: 0L)),
                         course = course,
-                        serverUrl = serverUrl,
-                        authToken = authToken,
                         onClickSignup = { onClickSignup(course) },
                         isCompact = isCompact
                     )
@@ -273,13 +261,11 @@ private fun RegisterForCourseContent(
 private fun RegistrableCourse(
     modifier: Modifier,
     course: Course,
-    serverUrl: String,
-    authToken: String,
     isCompact: Boolean,
     onClickSignup: () -> Unit
 ) {
     val content: @Composable ColumnScope.() -> Unit = @Composable {
-        Divider()
+        HorizontalDivider()
 
         Row(
             modifier = Modifier
@@ -301,8 +287,6 @@ private fun RegistrableCourse(
         CompactCourseItemHeader(
             modifier = modifier,
             course = course,
-            serverUrl = serverUrl,
-            authorizationToken = authToken,
             content = content,
             compactCourseHeaderViewMode = CompactCourseHeaderViewMode.DESCRIPTION
         )
@@ -310,8 +294,6 @@ private fun RegistrableCourse(
         ExpandedCourseItemHeader(
             modifier = modifier,
             course = course,
-            serverUrl = serverUrl,
-            authorizationToken = authToken,
             content = {
                 Text(
                     modifier = Modifier
