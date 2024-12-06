@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -103,6 +104,8 @@ fun MarkdownText(
         }
     }
 
+    val previousTransformedMarkdown = remember { mutableStateOf<String?>(null) }
+
     AndroidView(
         // Added semantics for ui testing.
         modifier = modifier
@@ -127,7 +130,12 @@ fun MarkdownText(
             )
         },
         update = { textView ->
-            markdownRender.setMarkdown(textView, transformedMarkdown)
+            // Only update if the transformed markdown has changed
+            if (transformedMarkdown != previousTransformedMarkdown.value) {
+                markdownRender.setMarkdown(textView, transformedMarkdown)
+                previousTransformedMarkdown.value = transformedMarkdown
+            }
+
             textView.movementMethod = LinkMovementMethod.getInstance()
 
             onClick?.let { textView.setOnClickListener { onClick() } }
