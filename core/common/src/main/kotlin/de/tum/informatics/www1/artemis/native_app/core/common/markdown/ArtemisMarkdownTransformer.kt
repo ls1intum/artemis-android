@@ -6,7 +6,8 @@ abstract class ArtemisMarkdownTransformer {
      * Empty markdown transformer.
      */
     companion object : ArtemisMarkdownTransformer() {
-        override fun transformExerciseMarkdown(title: String, url: String): String = ""
+        override fun transformExerciseMarkdown(title: String, url: String, type: String): String =
+            ""
 
         override fun transformUserMentionMarkdown(
             text: String,
@@ -41,9 +42,10 @@ abstract class ArtemisMarkdownTransformer {
 
     fun transformMarkdown(markdown: String): String {
         return exerciseMarkdownPattern.replace(markdown) { matchResult ->
+            val type = matchResult.groups[1]?.value.orEmpty()
             val title = matchResult.groups[2]?.value.orEmpty()
             val url = matchResult.groups[3]?.value.orEmpty()
-            transformExerciseMarkdown(title, url)
+            transformExerciseMarkdown(title, url, type)
         }.let {
             userMarkdownPattern.replace(it) { matchResult ->
                 val fullName = matchResult.groups[1]?.value.orEmpty()
@@ -90,7 +92,11 @@ abstract class ArtemisMarkdownTransformer {
         }
     }
 
-    protected abstract fun transformExerciseMarkdown(title: String, url: String): String
+    protected abstract fun transformExerciseMarkdown(
+        title: String,
+        url: String,
+        type: String
+    ): String
 
     protected abstract fun transformUserMentionMarkdown(
         text: String,

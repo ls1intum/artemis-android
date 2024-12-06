@@ -34,8 +34,11 @@ import coil.ImageLoader
 import coil.request.Disposable
 import coil.request.ImageRequest
 import coil.size.Scale
+import de.tum.informatics.www1.artemis.native_app.core.common.R
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
+import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
+import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.html.HtmlPlugin
@@ -224,11 +227,16 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, imageWith:
             CoilImagesPlugin.create(
                 object : CoilImagesPlugin.CoilStore {
                     override fun load(drawable: AsyncDrawable): ImageRequest {
+                        var height = 800
+                        if (drawable.destination.contains("android.resource://de.tum.cit.aet.artemis/")) {
+                            height = 52
+                        }
+
                         return ImageRequest.Builder(context)
                             .defaults(imageLoader.defaults)
                             .data(drawable.destination)
                             .crossfade(true)
-                            .size(imageWith, 800) // We set a fixed height and set the width of the image to the screen width.
+                            .size(imageWith, height) // We set a fixed height and set the width of the image to the screen width.
                             .scale(Scale.FIT)
                             .build()
                     }
@@ -246,6 +254,13 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, imageWith:
         .usePlugin(StrikethroughPlugin.create())
         .usePlugin(TablePlugin.create(context))
         .usePlugin(LinkifyPlugin.create())
+        .usePlugin(object : AbstractMarkwonPlugin() {
+            override fun configureTheme(builder: MarkwonTheme.Builder) {
+                builder
+                    .linkColor(context.getColor(R.color.link_color))
+                    .isLinkUnderlined(false)
+            }
+        })
         .apply {
             if (imagePlugin != null) {
                 usePlugin(imagePlugin)
