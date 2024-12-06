@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -68,7 +67,11 @@ internal fun ExerciseOverviewTab(
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(horizontal = 16.dp)
-                .border(2.dp, Color.Black, RoundedCornerShape(4.dp)),
+                .border(
+                    width = 2.dp,
+                    color = Color.Black,
+                    shape = MaterialTheme.shapes.extraSmall
+                ),
             exercise = exercise,
             isLongToolbar = isLongToolbar
         )
