@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.ui.remote_images
+package de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.impl
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -10,6 +10,7 @@ import coil3.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisImageProvider
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 

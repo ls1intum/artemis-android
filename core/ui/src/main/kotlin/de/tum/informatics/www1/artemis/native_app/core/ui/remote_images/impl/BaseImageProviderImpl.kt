@@ -1,10 +1,11 @@
-package de.tum.informatics.www1.artemis.native_app.core.ui.remote_images
+package de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.impl
 
 import android.content.Context
 import coil.ImageLoader
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.ImageRequest
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.BaseImageProvider
 import io.ktor.http.HttpHeaders
 
 class BaseImageProviderImpl : BaseImageProvider {
