@@ -13,4 +13,6 @@ dependencies {
 
     implementation(libs.koin.core)
     implementation(libs.kotlinx.coroutines.core)
+
+    implementation(libs.coil.test)
 }
