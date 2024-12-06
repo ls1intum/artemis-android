@@ -46,12 +46,9 @@ internal sealed interface DragAndDropAreaType {
 @Composable
 internal fun DragAndDropWorkArea(
     modifier: Modifier,
-    questionId: Long,
     dropLocationMapping: Map<DragAndDropQuizQuestion.DropLocation, DragAndDropQuizQuestion.DragItem>,
     imageUrl: String,
     dropLocations: List<DragAndDropQuizQuestion.DropLocation>,
-    serverUrl: String,
-    authToken: String,
     type: DragAndDropAreaType
 ) {
     val asyncImagePainter = LocalArtemisImageProvider.current.rememberArtemisAsyncImagePainter(
@@ -149,8 +146,6 @@ internal fun DragAndDropWorkArea(
                                 height = height.toDp()
                             ),
                         dragItem = dragItem,
-                        serverUrl = serverUrl,
-                        authToken = authToken,
                         type = when (type) {
                             is DragAndDropAreaType.Editable -> {
                                 WorkAreaDropLocationType.Editable(
