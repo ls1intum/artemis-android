@@ -71,7 +71,7 @@ private fun ReplyAutoCompletePopupBody(
     LazyColumn(
         modifier = modifier
             .clip(MaterialTheme.shapes.large)
-            .background(color = MaterialTheme.colorScheme.surfaceVariant)
+            .background(color = MaterialTheme.colorScheme.surfaceContainer)
             .padding(8.dp)
             .testTag(TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST)
     ) {

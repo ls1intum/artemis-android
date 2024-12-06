@@ -79,7 +79,7 @@ internal fun ReplyTextField(
 
     Surface(
         modifier = modifier.defaultMinSize(minHeight = 48.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = MaterialTheme.colorScheme.surfaceContainer,
         shape = MaterialTheme.shapes.large
     ) {
         Box(
