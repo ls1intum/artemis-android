@@ -31,15 +31,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.dragandd
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.work_area.DragAndDropWorkArea
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragOffset
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragPosition
-import io.ktor.http.URLBuilder
-import io.ktor.http.appendPathSegments
 
 @Composable
 internal fun DragAndDropQuizQuestionBody(
     question: DragAndDropQuizQuestion,
     data: QuizQuestionData.DragAndDropData,
-    authToken: String,
-    serverUrl: String,
 ) {
     var isSampleSolutionDisplayed by rememberSaveable { mutableStateOf(false) }
 
@@ -82,8 +78,6 @@ internal fun DragAndDropQuizQuestionBody(
                         }
                     },
                 dragItems = data.availableDragItems,
-                authToken = authToken,
-                serverUrl = serverUrl,
                 type = when (data) {
                     is QuizQuestionData.DragAndDropData.Editable -> DragAndDropDragItemsRowType.Editable(
                         onDragRelease = { dragItem ->
@@ -100,12 +94,6 @@ internal fun DragAndDropQuizQuestionBody(
                     is QuizQuestionData.DragAndDropData.Result -> DragAndDropDragItemsRowType.ViewOnly
                 }
             )
-
-            val imageUrl = remember(serverUrl, backgroundFilePath) {
-                URLBuilder(serverUrl)
-                    .appendPathSegments(backgroundFilePath)
-                    .buildString()
-            }
 
             // Correct mappings as sent from the server. Not relevant for participation mode.
             val sampleSolutionMappings = remember(question.correctMappings) {
@@ -129,12 +117,9 @@ internal fun DragAndDropQuizQuestionBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .zIndex(if (isDraggingFromArea) 20f else 1f),
-                questionId = question.id,
                 dropLocationMapping = dropLocationMapping,
-                imageUrl = imageUrl,
+                imageUrl = backgroundFilePath,
                 dropLocations = question.dropLocations,
-                serverUrl = serverUrl,
-                authToken = authToken,
                 type = data.getDragAndDropAreaType(
                     currentDropTarget = currentDropTarget,
                     isSampleSolutionDisplayed = isSampleSolutionDisplayed,
@@ -210,13 +195,3 @@ private fun QuizQuestionData.DragAndDropData.getDragAndDropAreaType(
 
 internal val dragItemOutlineColor: Color
     @Composable get() = Color.DarkGray
-
-@Composable
-internal fun DragAndDropQuizQuestion.DragItem.backgroundPictureServerUrl(serverUrl: String): String? =
-    remember(pictureFilePath, serverUrl) {
-        pictureFilePath?.let {
-            URLBuilder(serverUrl)
-                .appendPathSegments(it)
-                .buildString()
-        }
-    }

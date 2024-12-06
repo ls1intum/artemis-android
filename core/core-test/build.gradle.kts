@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":core:common"))
     api(project(":core:common-test"))
     implementation(project(":core:ui"))
+    api(project(":core:ui-test"))
     implementation(project(":core:datastore"))
     implementation(project(":core:device"))
     api(project(":core:device-test"))

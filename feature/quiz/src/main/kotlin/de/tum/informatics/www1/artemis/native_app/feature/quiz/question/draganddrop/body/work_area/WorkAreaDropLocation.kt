@@ -25,7 +25,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.dragandd
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.DragItemDraggableContainer
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.DragItemUiElement
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.DragItemUiElementContent
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.backgroundPictureServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.dragItemOutlineColor
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragOffset
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragPosition
@@ -58,8 +57,6 @@ internal sealed interface WorkAreaDropLocationType {
 internal fun WorkAreaDropLocation(
     modifier: Modifier,
     dragItem: DragAndDropQuizQuestion.DragItem?,
-    serverUrl: String,
-    authToken: String,
     type: WorkAreaDropLocationType
 ) {
     val targetInfo = LocalDragTargetInfo.current.currentDragTargetInfo
@@ -146,14 +143,11 @@ internal fun WorkAreaDropLocation(
         }
 
         if (dragItem != null) {
-            val pictureFilePath = dragItem.backgroundPictureServerUrl(serverUrl)
-
             val nonDraggedElementContent = @Composable {
                 DragItemUiElementContent(
                     modifier = Modifier.fillMaxSize(),
                     text = dragItem.text,
-                    pictureFilePath = pictureFilePath,
-                    authToken = authToken,
+                    pictureFilePath = dragItem.pictureFilePath,
                     fontColor = Color.Black
                 )
             }
@@ -169,8 +163,7 @@ internal fun WorkAreaDropLocation(
                             DragItemUiElement(
                                 modifier = Modifier.zIndex(20f),
                                 text = dragItem.text,
-                                pictureFilePath = pictureFilePath,
-                                authToken = authToken
+                                pictureFilePath = dragItem.pictureFilePath,
                             )
                         } else {
                             nonDraggedElementContent()

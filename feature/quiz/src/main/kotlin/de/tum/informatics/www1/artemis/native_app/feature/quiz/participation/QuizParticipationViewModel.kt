@@ -11,6 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ParticipationService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -30,7 +31,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.SubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
-import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.AnswerOptionId
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.BaseQuizViewModel
@@ -121,8 +121,8 @@ internal class QuizParticipationViewModel(
     private val submissionChannel = "/topic/quizExercise/$exerciseId/submission"
     private val quizExerciseChannel = "/topic/courses/$courseId/quizExercises"
 
-    val serverUrl = serverUrlStateFlow(serverConfigurationService)
-    val authToken = authTokenStateFlow(accountService)
+    private val serverUrl = serverUrlStateFlow(serverConfigurationService)
+    private val authToken = authTokenStateFlow(accountService)
 
     /**
      * Use server time for best time approximation.

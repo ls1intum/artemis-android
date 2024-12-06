@@ -70,9 +70,6 @@ internal fun ViewQuizResultScreen(
     val quizQuestions by viewModel.quizQuestionsWithData.collectAsState()
     val maxPoints by viewModel.maxPoints.collectAsState()
 
-    val serverUrl by viewModel.serverUrl.collectAsState()
-    val authToken by viewModel.authToken.collectAsState()
-
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -118,8 +115,6 @@ internal fun ViewQuizResultScreen(
                 modifier = Modifier.fillMaxSize(),
                 quizQuestions = data.quizExercise.quizQuestions,
                 quizQuestionsWithData = data.quizQuestions,
-                serverUrl = serverUrl,
-                authToken = authToken,
                 achievedPoints = data.submission.scoreInPoints ?: 0.0,
                 maxPoints = data.maxPoints,
                 quizTitle = data.quizExercise.title.orEmpty()

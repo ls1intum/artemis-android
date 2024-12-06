@@ -45,9 +45,6 @@ internal fun QuizParticipationUi(
     onNavigateToInspectResult: (QuizType.ViewableQuizType) -> Unit,
     onNavigateUp: () -> Unit
 ) {
-    val authToken by viewModel.authToken.collectAsState()
-    val serverUrl: String = viewModel.serverUrl.collectAsState().value.dropLast(1)
-
     val exerciseDataState by viewModel.quizExerciseDataState.collectAsState()
     val isWaitingForQuizStart by viewModel.waitingForQuizStart.collectAsState(initial = false)
     val hasQuizEnded by viewModel.quizEndedStatus.collectAsState(initial = false)
@@ -161,8 +158,6 @@ internal fun QuizParticipationUi(
                     questionsWithData = questionsWithData,
                     lastSubmissionTime = lastSubmission.submissionDate,
                     endDate = endDate,
-                    authToken = authToken,
-                    serverUrl = serverUrl,
                     isConnected = isConnected,
                     overallPoints = overallPoints,
                     latestWebsocketSubmission = latestWebsocketSubmission,
