@@ -1,8 +1,19 @@
 package de.tum.informatics.www1.artemis.native_app.core.common.markdown
 
+import de.tum.informatics.www1.artemis.native_app.core.common.R
+
 class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) : ArtemisMarkdownTransformer() {
-    override fun transformExerciseMarkdown(title: String, url: String): String {
-        return "[$title](artemis:/$url)"
+
+    private val resourcePath = "android.resource://de.tum.cit.aet.artemis/"
+
+    override fun transformExerciseMarkdown(title: String, url: String, type: String): String {
+        val x =  R.drawable.keyboard_small
+        return """<a href="artemis:/$url">
+                    <img src="android.resource://de.tum.cit.aet.artemis/$x"  width="40px" height="40px" alt="Image description">
+                    Link text
+                  </a>
+                """
+        return "![image](android.resource://de.tum.cit.aet.artemis/$x) [$title](artemis:/$url)"
     }
 
     override fun transformUserMentionMarkdown(text: String, fullName: String, userName: String): String = "[@$fullName](artemis://courses/$courseId/messages?username=$userName)"
