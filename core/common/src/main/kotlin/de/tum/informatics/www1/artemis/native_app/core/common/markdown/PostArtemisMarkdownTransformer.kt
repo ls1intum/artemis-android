@@ -16,7 +16,7 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
             "programming" -> R.drawable.keyboard_link_preview
             else -> return "[$title](artemis:/$url)"
         }
-        return "![](android.resource://de.tum.cit.aet.artemis/$typeIcon)  [$title](artemis:/$url)"
+        return "![]($resourcePath$typeIcon)  [$title](artemis:/$url)"
     }
 
     override fun transformUserMentionMarkdown(text: String, fullName: String, userName: String): String = "[@$fullName](artemis://courses/$courseId/messages?username=$userName)"
@@ -24,14 +24,14 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
     override fun transformChannelMentionMarkdown(
         channelName: String,
         conversationId: Long
-    ): String = "![](android.resource://de.tum.cit.aet.artemis/${R.drawable.message_link_preview})  [#$channelName](artemis://courses/$courseId/messages?conversationId=$conversationId)"
+    ): String = "![]($resourcePath${R.drawable.message_link_preview})  [#$channelName](artemis://courses/$courseId/messages?conversationId=$conversationId)"
 
     override fun transformLectureContentMarkdown(
         type: String,
         fileName: String,
         url: String
     ): String {
-        val fileIconImage = "![](android.resource://de.tum.cit.aet.artemis/${R.drawable.file_link_preview})"
+        val fileIconImage = "![]($resourcePath${R.drawable.file_link_preview})"
         return when (type) {
             "attachment" -> "$fileIconImage [$fileName](artemis:/$url)"
             "lecture-unit" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$url)" // TODO: fix authentication or redirect to lecture unit (https://github.com/ls1intum/artemis-android/issues/117)
