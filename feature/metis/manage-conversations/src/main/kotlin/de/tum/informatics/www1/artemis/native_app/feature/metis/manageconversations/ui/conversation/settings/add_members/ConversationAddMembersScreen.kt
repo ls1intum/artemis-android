@@ -45,10 +45,11 @@ fun NavGraphBuilder.conversationAddMembersScreen(
     conversationNavGraphBuilderExtension(
         route = "course/{courseId}/conversations/{conversationId}/settings/add_members",
         deepLink = "artemis://courses/{courseId}/conversations/{conversationId}/settings/add_members"
-    ) { courseId, _ ->
+    ) { courseId, conversationId ->
         ConversationAddMembersScreen(
             modifier = Modifier.fillMaxSize(),
             courseId = courseId,
+            conversationId = conversationId,
             onNavigateBack = onNavigateBack
         )
     }
@@ -58,11 +59,12 @@ fun NavGraphBuilder.conversationAddMembersScreen(
 fun ConversationAddMembersScreen(
     modifier: Modifier,
     courseId: Long,
+    conversationId: Long,
     onNavigateBack: () -> Unit
 ) {
     ConversationAddMembersScreen(
         modifier = modifier,
-        viewModel = koinViewModel { parametersOf(courseId) },
+        viewModel = koinViewModel { parametersOf(courseId, conversationId) },
         onNavigateBack
     )
 }
