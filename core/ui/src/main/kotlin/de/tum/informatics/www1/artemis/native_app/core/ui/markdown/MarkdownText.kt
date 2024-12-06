@@ -34,8 +34,11 @@ import coil.ImageLoader
 import coil.request.Disposable
 import coil.request.ImageRequest
 import coil.size.Scale
+import de.tum.informatics.www1.artemis.native_app.core.common.R
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
+import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
+import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.html.HtmlPlugin
@@ -251,6 +254,13 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, imageWith:
         .usePlugin(StrikethroughPlugin.create())
         .usePlugin(TablePlugin.create(context))
         .usePlugin(LinkifyPlugin.create())
+        .usePlugin(object : AbstractMarkwonPlugin() {
+            override fun configureTheme(builder: MarkwonTheme.Builder) {
+                builder
+                    .linkColor(context.getColor(R.color.link_color))
+                    .isLinkUnderlined(false)
+            }
+        })
         .apply {
             if (imagePlugin != null) {
                 usePlugin(imagePlugin)
