@@ -25,10 +25,11 @@ data class TestObject(
 class WebsocketCompressionUtilTest {
 
     private val jsonConfig = Json
+    private val testObject = TestObject("test")
+    private val message = Json.encodeToString(TestObject.serializer(), testObject)
 
     @Test
     fun `test GIVEN a non-compressed message without a compression header WHEN calling the util THEN the deserialized message is returned`() {
-        val message = "{ \"value1\": \"test\" }"
         val stompFrame = StompFrame.Message(
             headers = createHeaders(),
             body = FrameBody.Text(message)
@@ -36,13 +37,12 @@ class WebsocketCompressionUtilTest {
 
         val deserialized = WebsocketCompressionUtil.deserializeMessage(stompFrame, jsonConfig, TestObject.serializer())
 
-        assertEquals(TestObject("test"), deserialized)
+        assertEquals(testObject, deserialized)
     }
 
     @Test
     fun `test GIVEN a compressed message with a compression header WHEN calling the util THEN the deserialized message is returned`() {
-        val originalMessage = "{ \"value1\": \"test\" }"
-        val compressedMessage = compressGzip(originalMessage.toByteArray())
+        val compressedMessage = compressGzip(message.toByteArray())
         val stompFrame = StompFrame.Message(
             headers = createHeaders(mapOf("compressed" to "true")),
             body = FrameBody.Binary(compressedMessage)
@@ -50,7 +50,7 @@ class WebsocketCompressionUtilTest {
 
         val deserialized = WebsocketCompressionUtil.deserializeMessage(stompFrame, jsonConfig, TestObject.serializer())
 
-        assertEquals(TestObject("test"), deserialized)
+        assertEquals(testObject, deserialized)
     }
 
     private fun createHeaders(customHeaders: Map<String, String> = mapOf()) = StompMessageHeaders(
