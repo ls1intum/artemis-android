@@ -10,6 +10,8 @@ import coil3.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import io.ktor.http.URLBuilder
+import io.ktor.http.appendPathSegments
 
 class ArtemisImageProviderImpl(
     private val accountService: AccountService,
@@ -23,12 +25,13 @@ class ArtemisImageProviderImpl(
         val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
         val authToken by accountService.authToken.collectAsState(initial = "")
 
+        val imageUrl = URLBuilder(serverUrl).appendPathSegments(imagePath).buildString()
         val context = LocalContext.current
-        return remember(serverUrl, authToken, imagePath) {
+
+        return remember(imageUrl, authToken) {
             imageProvider.createImageRequest(
                 context = context,
-                imagePath = imagePath,
-                serverUrl = serverUrl,
+                imageUrl = imageUrl,
                 authorizationToken = authToken,
                 memoryCacheKey = serverUrl + imagePath
             )
@@ -44,6 +47,4 @@ class ArtemisImageProviderImpl(
             imageProvider.createImageLoader(context, authorizationToken)
         }
     }
-
-
 }

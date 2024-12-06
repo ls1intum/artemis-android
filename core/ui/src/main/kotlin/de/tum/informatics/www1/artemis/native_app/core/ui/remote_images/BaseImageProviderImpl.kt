@@ -6,19 +6,14 @@ import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.ImageRequest
 import io.ktor.http.HttpHeaders
-import io.ktor.http.URLBuilder
-import io.ktor.http.appendPathSegments
 
 class BaseImageProviderImpl : BaseImageProvider {
     override fun createImageRequest(
         context: Context,
-        imagePath: String,
-        serverUrl: String,
+        imageUrl: String,
         authorizationToken: String,
         memoryCacheKey: String?
     ): ImageRequest {
-        val imageUrl = URLBuilder(serverUrl).appendPathSegments(imagePath).buildString()
-
         val headers = NetworkHeaders.Builder()
             .set(HttpHeaders.Cookie, "jwt=$authorizationToken")
             .build()

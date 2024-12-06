@@ -7,8 +7,7 @@ import coil3.request.ImageRequest
 interface BaseImageProvider {
     fun createImageRequest(
         context: Context,
-        imagePath: String,
-        serverUrl: String,
+        imageUrl: String,
         authorizationToken: String,
         memoryCacheKey: String? = null
     ): ImageRequest
