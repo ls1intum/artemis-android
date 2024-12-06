@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.device.awaitInternetConnection
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.core.websocket.util.WebsocketCompressionUtil
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -44,6 +45,8 @@ import org.hildan.krossbow.stomp.StompClient
 import org.hildan.krossbow.stomp.StompReceipt
 import org.hildan.krossbow.stomp.StompSession
 import org.hildan.krossbow.stomp.config.HeartBeat
+import org.hildan.krossbow.stomp.conversions.kxserialization.StompSessionWithKxSerialization
+import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.stomp.headers.StompSendHeaders
 import org.hildan.krossbow.stomp.subscribe
 import kotlin.coroutines.CoroutineContext
@@ -93,7 +96,7 @@ class WebsocketProviderImpl(
      * Connects a stomp session only if it is actually needed.
      * After 10 seconds of not having any subscribers, the session will be closes
      */
-    private val session: Flow<StompSession> =
+    private val session: Flow<StompSessionWithKxSerialization> =
         combine(
             serverConfigurationService.serverUrl,
             serverConfigurationService.host,
@@ -123,7 +126,7 @@ class WebsocketProviderImpl(
 
                         val session = client
                             .connect(url = url)
-//                            .withJsonConversions(jsonProvider.applicationJsonConfiguration)
+                            .withJsonConversions(jsonProvider.applicationJsonConfiguration)
 
                         send(session)
 
@@ -192,7 +195,7 @@ class WebsocketProviderImpl(
         headers: StompSendHeaders,
         body: T,
         serializer: SerializationStrategy<T>
-    ): StompReceipt? = null // session.first().convertAndSend(headers, body, serializer)
+    ): StompReceipt? = session.first().convertAndSend(headers, body, serializer)
 
     /**
      * Returns a flow that automatically unsubscribes once the collector is inactive.
