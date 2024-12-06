@@ -32,7 +32,6 @@ internal fun KickUserFromChannelDialog(
 internal fun KickUserFromGroupDialog(
     humanReadableName: String,
     username: String,
-    groupName: String,
     onPressPositiveButton: () -> Unit,
     onDismissRequest: () -> Unit
 ) {

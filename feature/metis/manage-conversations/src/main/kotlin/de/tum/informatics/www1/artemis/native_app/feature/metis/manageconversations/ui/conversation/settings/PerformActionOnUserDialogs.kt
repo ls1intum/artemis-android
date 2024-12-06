@@ -14,7 +14,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableTitle
 import kotlinx.coroutines.Deferred
 
 /**
@@ -99,7 +98,6 @@ private fun PerformActionOnUserDialogs(
                 is GroupChat -> KickUserFromGroupDialog (
                     humanReadableName = humanReadableName,
                     username = username,
-                    groupName = conversation.humanReadableTitle,
                     onPressPositiveButton = onKickUser,
                     onDismissRequest = onDismiss
                 )
