@@ -1,33 +1,30 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.work_area
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.times
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toSize
-import androidx.core.graphics.scale
-import coil3.toBitmap
+import coil3.compose.AsyncImagePainter
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.image.loadAsyncImageDrawable
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.BaseImageProviderImpl
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 
 internal sealed interface DragAndDropAreaType {
@@ -57,29 +54,23 @@ internal fun DragAndDropWorkArea(
     authToken: String,
     type: DragAndDropAreaType
 ) {
-    val context = LocalContext.current
+    val asyncImagePainter = LocalArtemisImageProvider.current.rememberArtemisAsyncImagePainter(
+        imagePath = imageUrl
+    )
+    val asyncImagePainterState by asyncImagePainter.state.collectAsState()
+    asyncImagePainter.restart()
 
-    val imageProvider = BaseImageProviderImpl()
-    val request = remember(imageUrl, questionId) {
-        imageProvider.createImageRequest(
-            context,
-            imageUrl,
-            serverUrl,
-            authToken,
-            "QQ_$questionId"
-        )
-    }
-
-    val resultData = loadAsyncImageDrawable(request = request)
 
     BasicDataStateUi(
         modifier = modifier,
-        dataState = resultData.dataState,
+        dataState = asyncImagePainterState.toDataState(),
         loadingText = stringResource(id = R.string.quiz_participation_load_dnd_image_loading),
         failureText = stringResource(id = R.string.quiz_participation_load_dnd_image_failure),
         retryButtonText = stringResource(id = R.string.quiz_participation_load_dnd_image_retry),
-        onClickRetry = resultData.requestRetry
-    ) { loadedDrawable ->
+        onClickRetry = { asyncImagePainter.restart() }
+    ) { painter ->
+        // TODO: verify that the image is loaded properly after re-enabling quizes: https://github.com/ls1intum/artemis-android/issues/107
+
         val localDensity = LocalDensity.current
 
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -94,25 +85,26 @@ internal fun DragAndDropWorkArea(
                 })
             }
 
-            val painter = remember(loadedDrawable, maxWidthInPx) {
-                val bitmap = if (loadedDrawable.width < maxWidthInPx) {
-                    val scale = maxWidthInPx / loadedDrawable.width.toFloat()
-                    val newWidth = (loadedDrawable.width * scale).toInt()
-                    val newHeight = (loadedDrawable.height * scale).toInt()
-
-                    loadedDrawable
-                        .toBitmap()
-                        .copy(Bitmap.Config.ARGB_8888, true)
-                        .scale(newWidth, newHeight)
-                        .asImageBitmap()
-                } else {
-                    loadedDrawable
-                        .toBitmap()
-                        .asImageBitmap()
-                }
-
-                BitmapPainter(bitmap)
-            }
+            // TODO: check that the image is still scaled correctly: test with different image sizes
+//            val painter = remember(loadedDrawable, maxWidthInPx) {
+//                val bitmap = if (loadedDrawable.width < maxWidthInPx) {
+//                    val scale = maxWidthInPx / loadedDrawable.width.toFloat()
+//                    val newWidth = (loadedDrawable.width * scale).toInt()
+//                    val newHeight = (loadedDrawable.height * scale).toInt()
+//
+//                    loadedDrawable
+//                        .toBitmap()
+//                        .copy(Bitmap.Config.ARGB_8888, true)
+//                        .scale(newWidth, newHeight)
+//                        .asImageBitmap()
+//                } else {
+//                    loadedDrawable
+//                        .toBitmap()
+//                        .asImageBitmap()
+//                }
+//
+//                BitmapPainter(bitmap)
+//            }
 
             Image(
                 modifier = Modifier
@@ -187,5 +179,14 @@ internal fun DragAndDropWorkArea(
                 }
             }
         }
+    }
+}
+
+fun AsyncImagePainter.State.toDataState(): DataState<Painter> {
+    return when (this) {
+        is AsyncImagePainter.State.Success -> DataState.Success(this.painter)
+        is AsyncImagePainter.State.Loading -> DataState.Loading()
+        is AsyncImagePainter.State.Error -> DataState.Failure(this.result.throwable)
+        AsyncImagePainter.State.Empty -> DataState.Failure(IllegalStateException("The AsyncImagePainter state is Empty"))
     }
 }
