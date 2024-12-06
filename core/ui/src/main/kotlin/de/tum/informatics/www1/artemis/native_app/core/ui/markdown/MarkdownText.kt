@@ -224,11 +224,16 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, imageWith:
             CoilImagesPlugin.create(
                 object : CoilImagesPlugin.CoilStore {
                     override fun load(drawable: AsyncDrawable): ImageRequest {
+                        var height = 800
+                        if (drawable.destination.contains("android.resource://de.tum.cit.aet.artemis/")) {
+                            height = 52
+                        }
+
                         return ImageRequest.Builder(context)
                             .defaults(imageLoader.defaults)
                             .data(drawable.destination)
                             .crossfade(true)
-                            .size(imageWith, 800) // We set a fixed height and set the width of the image to the screen width.
+                            .size(imageWith, height) // We set a fixed height and set the width of the image to the screen width.
                             .scale(Scale.FIT)
                             .build()
                     }

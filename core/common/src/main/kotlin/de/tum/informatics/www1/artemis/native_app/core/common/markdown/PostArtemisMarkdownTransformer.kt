@@ -7,13 +7,16 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
     private val resourcePath = "android.resource://de.tum.cit.aet.artemis/"
 
     override fun transformExerciseMarkdown(title: String, url: String, type: String): String {
-        val x =  R.drawable.keyboard_small
-        return """<a href="artemis:/$url">
-                    <img src="android.resource://de.tum.cit.aet.artemis/$x"  width="40px" height="40px" alt="Image description">
-                    Link text
-                  </a>
-                """
-        return "![image](android.resource://de.tum.cit.aet.artemis/$x) [$title](artemis:/$url)"
+        val typeIcon =  when (type) {
+            "text" -> R.drawable.font_link_preview
+            "quiz" -> R.drawable.check_double_link_preview
+            "lecture" -> R.drawable.chalkboard_teacher_link_preview
+            "modeling" -> R.drawable.diagram_project_link_preview
+            "file-upload" -> R.drawable.file_arrow_up_link_preview
+            "programming" -> R.drawable.keyboard_link_preview
+            else -> return "[$title](artemis:/$url)"
+        }
+        return "![](android.resource://de.tum.cit.aet.artemis/$typeIcon)  [$title](artemis:/$url)"
     }
 
     override fun transformUserMentionMarkdown(text: String, fullName: String, userName: String): String = "[@$fullName](artemis://courses/$courseId/messages?username=$userName)"
@@ -21,17 +24,18 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
     override fun transformChannelMentionMarkdown(
         channelName: String,
         conversationId: Long
-    ): String = "[#$channelName](artemis://courses/$courseId/messages?conversationId=$conversationId)"
+    ): String = "![](android.resource://de.tum.cit.aet.artemis/${R.drawable.message_link_preview})  [#$channelName](artemis://courses/$courseId/messages?conversationId=$conversationId)"
 
     override fun transformLectureContentMarkdown(
         type: String,
         fileName: String,
         url: String
     ): String {
+        val fileIconImage = "![](android.resource://de.tum.cit.aet.artemis/${R.drawable.file_link_preview})"
         return when (type) {
-            "attachment" -> "[$fileName](artemis:/$url)"
-            "lecture-unit" -> "[$fileName]($serverUrl/api/files/attachments/$url)" // TODO: fix authentication or redirect to lecture unit (https://github.com/ls1intum/artemis-android/issues/117)
-            "slide" -> "[$fileName]($serverUrl/api/files/attachments/$url)" // TODO: fix authentication or redirect to lecture unit (https://github.com/ls1intum/artemis-android/issues/117)
+            "attachment" -> "$fileIconImage [$fileName](artemis:/$url)"
+            "lecture-unit" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$url)" // TODO: fix authentication or redirect to lecture unit (https://github.com/ls1intum/artemis-android/issues/117)
+            "slide" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$url)" // TODO: fix authentication or redirect to lecture unit (https://github.com/ls1intum/artemis-android/issues/117)
             else -> fileName
         }
     }
