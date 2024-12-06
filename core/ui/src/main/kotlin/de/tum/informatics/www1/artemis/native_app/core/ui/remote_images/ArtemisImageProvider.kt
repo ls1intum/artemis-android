@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.remote_images
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
+import coil.ImageLoader
 import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
@@ -24,5 +25,8 @@ interface ArtemisImageProvider {
     fun rememberArtemisAsyncImagePainter(
         imagePath: String,
     ): AsyncImagePainter = rememberAsyncImagePainter(model = rememberArtemisImageRequest(imagePath))
+
+    @Composable
+    fun rememberArtemisImageLoader() : ImageLoader
 }
 

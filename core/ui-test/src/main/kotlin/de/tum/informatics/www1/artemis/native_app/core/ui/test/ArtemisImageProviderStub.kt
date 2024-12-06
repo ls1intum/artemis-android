@@ -34,4 +34,9 @@ class ArtemisImageProviderStub : ArtemisImageProvider {
             .data(imagePath)
             .build()
     }
+
+    @Composable
+    override fun rememberArtemisImageLoader(): coil.ImageLoader {
+        return coil.ImageLoader(LocalContext.current)
+    }
 }

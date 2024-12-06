@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import coil.ImageLoader
 import coil3.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -33,5 +34,16 @@ class ArtemisImageProviderImpl(
             )
         }
     }
+
+    @Composable
+    override fun rememberArtemisImageLoader(): ImageLoader {
+        val authorizationToken by accountService.authToken.collectAsState(initial = "")
+        val context = LocalContext.current
+
+        return remember(authorizationToken) {
+            imageProvider.createImageLoader(context, authorizationToken)
+        }
+    }
+
 
 }
