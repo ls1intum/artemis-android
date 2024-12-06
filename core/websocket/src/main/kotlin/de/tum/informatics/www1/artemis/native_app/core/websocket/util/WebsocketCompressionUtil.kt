@@ -1,8 +1,10 @@
-package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
+package de.tum.informatics.www1.artemis.native_app.core.websocket.util
 
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 import org.hildan.krossbow.stomp.frame.StompFrame
+import java.util.zip.GZIPInputStream
+import kotlin.text.Charsets.UTF_8
 
 object WebsocketCompressionUtil {
 
@@ -22,14 +24,14 @@ object WebsocketCompressionUtil {
     ): T {
         val bodyJson: String = if (message.headers["compressed"] == "true") {
             val compressed = message.body?.bytes ?: error("Message body should not be null")
-            val decompressed = decompress(compressed)
-            String(decompressed)
+            ungzip(compressed)
         } else message.bodyAsText
 
         return jsonConfig.decodeFromString(deserializer, bodyJson)
     }
 
-    private fun decompress(compressed: ByteArray): ByteArray {
-        return compressed   // TODO
+    private fun ungzip(compressed: ByteArray): String {
+        // From: https://gist.github.com/sgdan/eaada2f243a48196c5d4e49a277e3880
+        return GZIPInputStream(compressed.inputStream()).bufferedReader(UTF_8).use { it.readText() }
     }
 }
