@@ -14,6 +14,7 @@ import io.ktor.http.URLProtocol
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -41,11 +42,10 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import org.hildan.krossbow.stomp.StompClient
 import org.hildan.krossbow.stomp.StompReceipt
+import org.hildan.krossbow.stomp.StompSession
 import org.hildan.krossbow.stomp.config.HeartBeat
-import org.hildan.krossbow.stomp.conversions.kxserialization.StompSessionWithKxSerialization
-import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.stomp.headers.StompSendHeaders
-import org.hildan.krossbow.stomp.headers.StompSubscribeHeaders
+import org.hildan.krossbow.stomp.subscribe
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
@@ -93,7 +93,7 @@ class WebsocketProviderImpl(
      * Connects a stomp session only if it is actually needed.
      * After 10 seconds of not having any subscribers, the session will be closes
      */
-    private val session: Flow<StompSessionWithKxSerialization> =
+    private val session: Flow<StompSession> =
         combine(
             serverConfigurationService.serverUrl,
             serverConfigurationService.host,
@@ -123,7 +123,7 @@ class WebsocketProviderImpl(
 
                         val session = client
                             .connect(url = url)
-                            .withJsonConversions(jsonProvider.applicationJsonConfiguration)
+//                            .withJsonConversions(jsonProvider.applicationJsonConfiguration)
 
                         send(session)
 
@@ -149,7 +149,7 @@ class WebsocketProviderImpl(
                                 withTimeoutOrNull(1.seconds * attempt.toInt()) {
                                     networkStatusProvider.awaitInternetConnection()
                                 }
-                                kotlinx.coroutines.delay(1.seconds * attempt.toInt())
+                                delay(1.seconds * attempt.toInt())
                                 true
                             } else false
                         }
@@ -164,7 +164,7 @@ class WebsocketProviderImpl(
             )
 
     override val connectionState: Flow<WebsocketProvider.WebsocketConnectionState> =
-        session.transformLatest<StompSessionWithKxSerialization, WebsocketProvider.WebsocketConnectionState> { _ ->
+        session.transformLatest<StompSession, WebsocketProvider.WebsocketConnectionState> { _ ->
             emit(WebsocketProvider.WebsocketConnectionState.WithSession(true))
 
             // Wait for error or reconnect
@@ -192,7 +192,7 @@ class WebsocketProviderImpl(
         headers: StompSendHeaders,
         body: T,
         serializer: SerializationStrategy<T>
-    ): StompReceipt? = session.first().convertAndSend(headers, body, serializer)
+    ): StompReceipt? = null // session.first().convertAndSend(headers, body, serializer)
 
     /**
      * Returns a flow that automatically unsubscribes once the collector is inactive.
@@ -206,10 +206,7 @@ class WebsocketProviderImpl(
             .transformLatest { currentSession ->
                 val flow: Flow<WebsocketProvider.WebsocketData<T>> = flow {
                     emitAll(
-                        currentSession.subscribe(
-                            StompSubscribeHeaders(destination = topic),
-                            deserializer
-                        )
+                        currentSession.subscribe(topic)
                     )
                 }
                     .onStart {
@@ -223,7 +220,12 @@ class WebsocketProviderImpl(
                         Log.d(TAG, "Subscription $topic reported error: ${e.localizedMessage}")
                     }
                     .map {
-                        WebsocketProvider.WebsocketData.Message(it)
+                        val deserialized = WebsocketCompressionUtil.deserializeMessage(
+                            message = it,
+                            jsonConfig = jsonProvider.applicationJsonConfiguration,
+                            deserializer = deserializer
+                        )
+                        return@map WebsocketProvider.WebsocketData.Message(deserialized)
                     }
 
                 emitAll(
