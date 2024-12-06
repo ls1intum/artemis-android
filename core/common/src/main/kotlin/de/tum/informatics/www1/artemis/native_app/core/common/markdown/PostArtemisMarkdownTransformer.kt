@@ -8,12 +8,12 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
 
     override fun transformExerciseMarkdown(title: String, url: String, type: String): String {
         val typeIcon =  when (type) {
-            "text" -> R.drawable.font_link_preview
-            "quiz" -> R.drawable.check_double_link_preview
-            "lecture" -> R.drawable.chalkboard_teacher_link_preview
-            "modeling" -> R.drawable.diagram_project_link_preview
-            "file-upload" -> R.drawable.file_arrow_up_link_preview
-            "programming" -> R.drawable.keyboard_link_preview
+            "text" -> R.drawable.font_link_icon
+            "quiz" -> R.drawable.check_double_link_icon
+            "lecture" -> R.drawable.chalkboard_teacher_link_icon
+            "modeling" -> R.drawable.diagram_project_link_icon
+            "file-upload" -> R.drawable.file_arrow_up_link_icon
+            "programming" -> R.drawable.keyboard_link_icon
             else -> return "[$title](artemis:/$url)"
         }
         return "![]($resourcePath$typeIcon)  [$title](artemis:/$url)"
@@ -24,14 +24,14 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
     override fun transformChannelMentionMarkdown(
         channelName: String,
         conversationId: Long
-    ): String = "![]($resourcePath${R.drawable.message_link_preview})  [#$channelName](artemis://courses/$courseId/messages?conversationId=$conversationId)"
+    ): String = "![]($resourcePath${R.drawable.message_link_icon})  [#$channelName](artemis://courses/$courseId/messages?conversationId=$conversationId)"
 
     override fun transformLectureContentMarkdown(
         type: String,
         fileName: String,
         url: String
     ): String {
-        val fileIconImage = "![]($resourcePath${R.drawable.file_link_preview})"
+        val fileIconImage = "![]($resourcePath${R.drawable.file_link_icon})"
         return when (type) {
             "attachment" -> "$fileIconImage [$fileName](artemis:/$url)"
             "lecture-unit" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$url)" // TODO: fix authentication or redirect to lecture unit (https://github.com/ls1intum/artemis-android/issues/117)
