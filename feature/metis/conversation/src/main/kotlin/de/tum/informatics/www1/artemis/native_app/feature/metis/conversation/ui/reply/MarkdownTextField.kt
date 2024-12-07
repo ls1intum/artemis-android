@@ -52,11 +52,11 @@ internal fun MarkdownTextField(
     focusRequester: FocusRequester = remember { FocusRequester() },
     sendButton: @Composable () -> Unit = {},
     topRightButton: @Composable RowScope.() -> Unit = {},
-    onFileSelect: (Uri?, String) -> Unit = { _, _ -> },
-    onImageSelect: (Uri?,String) -> Unit = {_, _ ->},
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
-    onTextChanged: (TextFieldValue) -> Unit
+    onTextChanged: (TextFieldValue) -> Unit,
+    onFileSelect: (Uri?, String) -> Unit = { _, _ -> },
+    onImageSelect: (Uri?,String) -> Unit = { _, _ ->},
 ) {
     val text = textFieldValue.text
     val context = LocalContext.current

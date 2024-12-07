@@ -673,8 +673,7 @@ internal open class ConversationViewModel(
                 )
             } ?: return@launch
 
-            val post =
-                metisStorageService.getStandalonePost(clientSidePostId).first() ?: return@launch
+            val post = metisStorageService.getStandalonePost(clientSidePostId).first() ?: return@launch
 
             createPostService.retryCreatePost(
                 courseId = courseId,

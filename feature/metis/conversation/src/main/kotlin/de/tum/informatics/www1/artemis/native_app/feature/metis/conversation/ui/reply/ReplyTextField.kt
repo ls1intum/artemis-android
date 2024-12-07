@@ -282,7 +282,6 @@ private fun CreateReplyUi(
                     }
                 )
 
-
                 LaunchedEffect(requestFocus) {
                     if (requestFocus) {
                         focusRequester.requestFocus()
@@ -439,10 +438,7 @@ private fun applyMarkdownStyle(
             )
         } else {
             // Other styles
-            val newText = text.substring(
-                0,
-                selection.start
-            ) + startTag + endTag + text.substring(selection.end)
+            val newText = text.substring(0, selection.start) + startTag + endTag + text.substring(selection.end)
             val newCursorPosition = selection.start + startTag.length
             onTextChanged(
                 TextFieldValue(

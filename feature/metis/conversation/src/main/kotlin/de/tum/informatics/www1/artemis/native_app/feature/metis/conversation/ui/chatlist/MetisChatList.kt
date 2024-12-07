@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import coil.ImageLoader
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -101,33 +102,35 @@ internal fun MetisChatList(
         }
     }
 
-    MetisChatList(
-        modifier = modifier,
-        initialReplyTextProvider = viewModel,
-        posts = posts.asPostsDataState(),
-        clientId = clientId,
-        hasModerationRights = hasModerationRights,
-        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-        listContentPadding = listContentPadding,
-        serverUrl = serverUrl,
-        courseId = viewModel.courseId,
-        state = state,
-        bottomItem = bottomItem,
-        isReplyEnabled = isReplyEnabled,
-        onCreatePost = viewModel::createPost,
-        onEditPost = viewModel::editPost,
-        onDeletePost = viewModel::deletePost,
-        onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
-        onClickViewPost = onClickViewPost,
-        onRequestRetrySend = viewModel::retryCreatePost,
-        title = updatedTitle,
-        onImageSelected = { uri, fileName ->
-            viewModel.onImageSelected(uri, fileName, context)
-        },
-        onFileSelected = { uri, fileName ->
-            viewModel.onFileSelected(uri, fileName, context)
-        },
-    )
+    ProvideMarkwon(imageLoader) {
+        MetisChatList(
+            modifier = modifier,
+            initialReplyTextProvider = viewModel,
+            posts = posts.asPostsDataState(),
+            clientId = clientId,
+            hasModerationRights = hasModerationRights,
+            isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+            listContentPadding = listContentPadding,
+            serverUrl = serverUrl,
+            courseId = viewModel.courseId,
+            state = state,
+            bottomItem = bottomItem,
+            isReplyEnabled = isReplyEnabled,
+            onCreatePost = viewModel::createPost,
+            onEditPost = viewModel::editPost,
+            onDeletePost = viewModel::deletePost,
+            onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
+            onClickViewPost = onClickViewPost,
+            onRequestRetrySend = viewModel::retryCreatePost,
+            title = updatedTitle,
+            onImageSelected = { uri, fileName ->
+                viewModel.onImageSelected(uri, fileName, context)
+            },
+            onFileSelected = { uri, fileName ->
+                viewModel.onFileSelected(uri, fileName, context)
+            }
+        )
+    }
 }
 
 @Composable
@@ -177,8 +180,8 @@ fun MetisChatList(
                 state = state,
                 itemCount = posts.itemCount,
                 order = DisplayPostOrder.REVERSED,
-                bottomItem = bottomItem,
-                emojiService = koinInject()
+                emojiService = emojiService,
+                bottomItem = bottomItem
             ) {
                 when (posts) {
                     PostsDataState.Empty -> {
@@ -226,7 +229,7 @@ fun MetisChatList(
                     updateFailureState = updateFailureStateDelegate,
                     title = title,
                     onImageSelect = onImageSelected,
-                    onFileSelect = onFileSelected,
+                    onFileSelect = onFileSelected
                 )
             }
         }
