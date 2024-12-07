@@ -20,7 +20,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -272,6 +271,9 @@ private fun PostAndRepliesList(
             },
             onReplyInThread = null,
             onResolvePost = { onRequestResolve(affectedPost) },
+            onSendMessageToAuthor = {
+                // TODO: Implement
+            },
             onPinPost = { onRequestPin(affectedPost) },
             onRequestRetrySend = {
                 onRequestRetrySend(

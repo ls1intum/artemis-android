@@ -1,5 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,9 +22,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -139,6 +141,14 @@ fun MetisChatList(
     onRequestRetrySend: (StandalonePostId) -> Unit,
     title: String
 ) {
+    val context = LocalContext.current
+
+    val navigateToChat = { userId: Long ->
+        val chatLink = "artemis://courses/$courseId/messages?userId=$userId"
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(chatLink))
+        context.startActivity(intent)
+    }
+
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
         onCreatePost = onCreatePost,
@@ -198,7 +208,8 @@ fun MetisChatList(
                             onRequestDelete = onDeletePostDelegate,
                             onRequestPin = onPinPostDelegate,
                             onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
-                            onRequestRetrySend = onRequestRetrySend
+                            onRequestRetrySend = onRequestRetrySend,
+                            onSendMessageToUser = navigateToChat
                         )
                     }
                 }
@@ -229,6 +240,7 @@ private fun ChatList(
     onRequestDelete: (IStandalonePost) -> Unit,
     onRequestPin: (IStandalonePost) -> Unit,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit,
+    onSendMessageToUser: (userId: Long) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit
 ) {
     LazyColumn(
@@ -268,6 +280,9 @@ private fun ChatList(
                             onClickViewPost(post?.standalonePostId ?: return@rememberPostActions)
                         },
                         onResolvePost = null,
+                        onSendMessageToAuthor = {
+                            onSendMessageToUser(it)
+                        },
                         onPinPost = { onRequestPin(post ?: return@rememberPostActions) },
                         onRequestRetrySend = {
                             onRequestRetrySend(
