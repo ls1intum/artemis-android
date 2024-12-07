@@ -145,11 +145,8 @@ internal fun MetisThreadUi(
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onRequestReload = viewModel::requestReload,
             onRequestRetrySend = viewModel::retryCreateReply,
-            onImageSelect = { uri, fileName, fileType ->
-                viewModel.onImageSelected(uri, fileName, fileType)
-            },
             onFileSelect = { uri, fileName, fileType ->
-                viewModel.onImageSelected(uri, fileName, fileType)
+                viewModel.onFileSelected(uri, fileName, fileType)
             }
         )
     }
@@ -175,7 +172,6 @@ internal fun MetisThreadUi(
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onRequestReload: () -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit,
-    onImageSelect: (Uri?, String, Context) -> Unit,
     onFileSelect: (Uri?, String, Context) -> Unit
 ) {
     val listState = rememberLazyListState()
@@ -245,9 +241,6 @@ internal fun MetisThreadUi(
                             replyMode = replyMode,
                             updateFailureState = updateFailureStateDelegate,
                             title = title,
-                            onImageSelect = { uri, title ->
-                                onImageSelect(uri, title, context)
-                            },
                             onFileSelect = { uri, title, ->
                                 onFileSelect(uri, title, context)
                             }

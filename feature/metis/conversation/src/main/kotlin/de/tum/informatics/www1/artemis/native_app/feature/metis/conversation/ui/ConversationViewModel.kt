@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
@@ -36,6 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.asMetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants.isImage
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
@@ -723,7 +725,7 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun onImageSelected(uri: Uri?, fileName: String, context: Context) {
+    fun onFileSelected(uri: Uri?, fileName: String, context: Context) {
         Log.d("ConversationViewModel", "File selected: $uri")
         viewModelScope.launch {
             _selectedFileUri.emit(uri)
@@ -732,26 +734,22 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun onFileSelected(uri: Uri?, fileName: String, context: Context){
-        Log.d("ConversationViewModel", "File selected: $uri")
+    private fun uploadFileOrImage(context: Context) {
         viewModelScope.launch(coroutineContext) {
-            _selectedFileUri.emit(uri)
-            _selectedFileName.emit(fileName)
-            uploadFileOrImage(context)
-        }
-    }
-
-    fun uploadFileOrImage(context: Context): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async(coroutineContext) {
             try {
                 val fileBytes = withContext(Dispatchers.IO) {
-                    _selectedFileUri.value?.let {
-                        context.contentResolver.openInputStream(it)?.use { inputStream -> inputStream.readBytes() }
+                    _selectedFileUri.value?.let { uri ->
+                        context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                            val fileSize = inputStream.available()
+
+                            val maxFileSize = 5 * 1024 * 1024
+                            if (fileSize > maxFileSize) {
+                                throw IllegalArgumentException("The file size exceeds the limit of 5MB.")
+                            }
+                            inputStream.readBytes()
+                        }
                     } ?: throw IllegalArgumentException("No file selected")
                 }
-
-                val serverUrl = serverConfigurationService.serverUrl.first()
-                val authToken = accountService.authToken.first()
 
                 val response = metisModificationService.uploadFileOrImage(
                     context = metisContext,
@@ -759,31 +757,38 @@ internal open class ConversationViewModel(
                     conversationId = conversationId,
                     fileBytes = fileBytes,
                     fileName = _selectedFileName.value,
-                    serverUrl = serverUrl,
-                    authToken = authToken
+                    serverUrl = serverConfigurationService.serverUrl.first(),
+                    authToken = accountService.authToken.first()
                 )
 
-                response.asMetisModificationFailure(MetisModificationFailure.CREATE_POST)?.let { failure ->
-                    Log.e("ConversationViewModel", "File upload failed: ${failure.name}")
-                    return@async failure
-                }
-
                 val fileUploadResponse = (response as NetworkResponse.Response).data
-                val imagePath = fileUploadResponse.path ?: ""
-
-                Log.d("ConversationViewModel", "File uploaded successfully: $fileUploadResponse")
+                val filePath = fileUploadResponse.path
+                    ?: throw IllegalArgumentException("There has been a prob")
 
                 val currentText = newMessageText.value.text
-                val updatedText = "$currentText\n![image]($imagePath)\n"
+                val updatedText = if (isImage(_selectedFileName.value)) {
+                    "$currentText\n![${_selectedFileName.value}]($filePath)\n" // Image markdown
+                } else {
+                    "$currentText\n[${_selectedFileName.value}]($filePath)\n"  // File markdown
+                }
                 newMessageText.value = TextFieldValue(updatedText)
-
-                null
+                clearSelectedFile()
             } catch (e: Exception) {
-                Log.e("ConversationViewModel", "File upload exception", e)
-                MetisModificationFailure.CREATE_POST
+                clearSelectedFile()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        e.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
 
+    private fun clearSelectedFile() {
+        _selectedFileUri.value = null
+        _selectedFileName.value = ""
+    }
 
 }

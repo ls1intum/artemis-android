@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +39,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
 
 
 const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
@@ -56,7 +58,6 @@ internal fun MarkdownTextField(
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
     onFileSelect: (Uri?, String) -> Unit = { _, _ -> },
-    onImageSelect: (Uri?,String) -> Unit = { _, _ ->},
 ) {
     val text = textFieldValue.text
     val context = LocalContext.current
@@ -64,14 +65,15 @@ internal fun MarkdownTextField(
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
     var hadFocus by remember { mutableStateOf(false) }
 
-    // Launchers for file and image selection
-    val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        onImageSelect(uri, resolveFileName(context, uri))
-    }
-
-    val filePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        onFileSelect(uri, resolveFileName(context, uri))
-    }
+    val filePickerLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            val mimeType = uri?.let { context.contentResolver.getType(it) }
+            if (mimeType in FileValidationConstants.ALLOWED_MIME_TYPES) {
+                onFileSelect(uri, resolveFileName(context, uri))
+            } else {
+                Toast.makeText(context, "Unsupported file type selected.", Toast.LENGTH_SHORT).show()
+            }
+        }
 
     Column(modifier = modifier) {
         Row(
@@ -99,7 +101,9 @@ internal fun MarkdownTextField(
 
             InputChip(
                 selected = true,
-                onClick = { filePickerLauncher.launch("*/*") },
+                onClick = {
+                    filePickerLauncher.launch("*/*")
+                },
                 enabled = true,
                 label = {
                     Icon(
@@ -111,7 +115,7 @@ internal fun MarkdownTextField(
 
             InputChip(
                 selected = true,
-                onClick = { imagePickerLauncher.launch("image/*") },
+                onClick = { filePickerLauncher.launch("image/*") },
                 enabled = true,
                 label = {
                     Icon(
@@ -157,7 +161,6 @@ internal fun MarkdownTextField(
                     )
                 }
             }
-
             sendButton()
         }
     }

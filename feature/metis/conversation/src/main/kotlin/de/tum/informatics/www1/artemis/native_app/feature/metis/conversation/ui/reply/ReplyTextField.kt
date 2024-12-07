@@ -73,7 +73,6 @@ private const val DisabledContentAlpha = 0.75f
 internal fun ReplyTextField(
     modifier: Modifier,
     replyMode: ReplyMode,
-    onImageSelect: (Uri?, String) -> Unit,
     onFileSelect: (Uri?, String) -> Unit,
     updateFailureState: (MetisModificationFailure?) -> Unit,
     title: String
@@ -108,7 +107,6 @@ internal fun ReplyTextField(
                                 targetReplyState.onCreateReply()
                             },
                             title = "Message $title",
-                            imagePicker = { uri, name -> onImageSelect(uri, name) },
                             filePicker = { uri, name -> onFileSelect(uri, name) }
                         )
                     }
@@ -167,7 +165,6 @@ private fun CreateReplyUi(
     replyMode: ReplyMode,
     focusRequester: FocusRequester = remember { FocusRequester() },
     onReply: () -> Unit,
-    imagePicker: (Uri, String) -> Unit,
     filePicker: (Uri, String) -> Unit,
     title: String?
 ) {
@@ -268,11 +265,6 @@ private fun CreateReplyUi(
                             IconButton(onClick = replyMode.onCancelEditMessage) {
                                 Icon(imageVector = Icons.Default.Cancel, contentDescription = null)
                             }
-                        }
-                    },
-                    onImageSelect = { uri, name ->
-                        if (uri != null) {
-                            imagePicker(uri, name)
                         }
                     },
                     onFileSelect = { uri, name ->
@@ -663,7 +655,6 @@ private fun ReplyTextFieldPreview() {
             },
             updateFailureState = {},
             title = "Replying..",
-            onImageSelect = { _, _ -> },
             onFileSelect = { _, _ -> }
         )
     }
