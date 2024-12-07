@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -16,8 +15,8 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AlternateEmail
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Person
@@ -181,7 +180,7 @@ private fun SettingsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 }
             )
@@ -440,39 +439,35 @@ fun PreferenceEntry(
     valueText: String? = null,
     onClick: () -> Unit,
 ) {
-    Box(
+    Row(
         modifier = modifier
             .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
         Row(
-            modifier = modifier
-                .padding(horizontal = 16.dp, vertical = 10.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                icon?.let {
-                    Icon(
-                        imageVector = it,
-                        contentDescription = null
-                    )
-                }
-
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodyLarge
+            icon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
 
-            valueText?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
-                )
+        Spacer(modifier = Modifier.weight(1f))
 
-            }
+        valueText?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+            )
+
         }
     }
 }
@@ -484,25 +479,21 @@ fun ServerURLEntry(
     valueText: String,
     onClick: () -> Unit,
 ) {
-    Box(
+    Column(
         modifier = modifier
             .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
-        Column(
-            modifier = modifier
-                .padding(horizontal = 16.dp, vertical = 10.dp)
-        ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodyLarge
-            )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge
+        )
 
-            Text(
-                text = valueText,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+        Text(
+            text = valueText,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
@@ -514,29 +505,25 @@ fun ButtonEntry(
     textColor: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit,
 ) {
-    Box(
+    Row(
         modifier = modifier
             .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        horizontalArrangement = if (isFocused) Arrangement.Center else Arrangement.spacedBy(8.dp)
     ) {
-        Row(
-            modifier = modifier
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            horizontalArrangement = if (isFocused) Arrangement.Center else Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = text,
-                color = textColor,
-                style = if (isFocused) MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.bodyLarge
+        Text(
+            text = text,
+            color = textColor,
+            style = if (isFocused) MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.bodyLarge
+        )
+
+        if (!isFocused) {
+            Spacer(modifier = Modifier.weight(1f))
+
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null
             )
-
-            if (!isFocused) {
-                Spacer(modifier = Modifier.weight(1f))
-
-                Icon(
-                    imageVector = Icons.Default.ChevronRight,
-                    contentDescription = null
-                )
-            }
         }
     }
 }
