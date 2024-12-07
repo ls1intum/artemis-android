@@ -264,6 +264,9 @@ private fun PostAndRepliesList(
             },
             onReplyInThread = null,
             onResolvePost = { onRequestResolve(affectedPost) },
+            onSendMessageToAuthor = {
+                // TODO: Implement
+            },
             onRequestRetrySend = {
                 onRequestRetrySend(
                     affectedPost.clientPostId ?: return@rememberPostActions,

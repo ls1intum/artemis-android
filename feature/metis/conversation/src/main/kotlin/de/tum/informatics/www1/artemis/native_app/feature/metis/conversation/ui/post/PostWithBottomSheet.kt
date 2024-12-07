@@ -34,7 +34,8 @@ internal fun PostWithBottomSheet(
         onLongClick = {
             displayBottomSheet = true
         },
-        onRequestRetrySend = postActions.onRequestRetrySend
+        onRequestRetrySend = postActions.onRequestRetrySend,
+        onSendMessageToAuthor = postActions.onSendMessageToAuthor
     )
 
     if (displayBottomSheet && post != null) {
@@ -47,4 +48,6 @@ internal fun PostWithBottomSheet(
             }
         )
     }
+
+
 }

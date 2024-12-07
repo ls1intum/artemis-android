@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="user_profile_dialog_close">Close</string>
+    <string name="user_profile_dialog_send_message_action">Send Message</string>
+    <string name="user_profile_dialog_is_app_user_placeholder">Wow, such a cool user!</string>
+</resources>

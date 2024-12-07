@@ -13,7 +13,8 @@ data class PostActions(
     val onCopyText: () -> Unit = {},
     val onReplyInThread: (() -> Unit)? = null,
     val onResolvePost: (() -> Unit)? = null,
-    val onRequestRetrySend: () -> Unit = {}
+    val onRequestRetrySend: () -> Unit = {},
+    val onSendMessageToAuthor: ((userId: Long) -> Unit)? = null
 ) {
     val canPerformAnyAction: Boolean get() = requestDeletePost != null || requestEditPost != null
 }
@@ -29,7 +30,8 @@ fun rememberPostActions(
     onClickReaction: (emojiId: String, create: Boolean) -> Unit,
     onReplyInThread: (() -> Unit)?,
     onResolvePost: (() -> Unit)?,
-    onRequestRetrySend: () -> Unit
+    onRequestRetrySend: () -> Unit,
+    onSendMessageToAuthor: ((userId: Long) -> Unit)?
 ): PostActions {
     val clipboardManager = LocalClipboardManager.current
 
@@ -43,6 +45,7 @@ fun rememberPostActions(
         onReplyInThread,
         onResolvePost,
         onRequestRetrySend,
+        onSendMessageToAuthor,
         clipboardManager
     ) {
         if (post == null) {
@@ -62,7 +65,8 @@ fun rememberPostActions(
             },
             onReplyInThread = if (doesPostExistOnServer) onReplyInThread else null,
             onResolvePost = if (hasResolvePostRights) onResolvePost else null,
-            onRequestRetrySend = onRequestRetrySend
+            onRequestRetrySend = onRequestRetrySend,
+            onSendMessageToAuthor = if (isPostAuthor) null else onSendMessageToAuthor
         )
     }
 }
