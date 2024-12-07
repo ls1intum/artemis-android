@@ -66,10 +66,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToConversationUpdates
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
-import io.ktor.client.request.forms.MultiPartFormDataContent
-import io.ktor.client.request.forms.formData
-import io.ktor.http.Headers
-import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -751,13 +747,8 @@ internal open class ConversationViewModel(
     }
 
 
-    fun uploadFileOrImage(context: Context) {
-        Log.d(
-            "ConversationViewModel",
-            "File upload initiated: URI=${_selectedFileUri.value}, fileName=${_selectedFileName.value}, fileType=${_selectedFileType.value}"
-        )
-
-        viewModelScope.launch(coroutineContext) {
+    fun uploadFileOrImage(context: Context): Deferred<MetisModificationFailure?> {
+        return viewModelScope.async(coroutineContext) {
             try {
                 val fileBytes = withContext(Dispatchers.IO) {
                     _selectedFileUri.value?.let {
@@ -765,33 +756,31 @@ internal open class ConversationViewModel(
                     } ?: throw IllegalArgumentException("Unable to read file from URI: ${_selectedFileUri.value}")
                 }
 
-                val formData = MultiPartFormDataContent(
-                    formData {
-                        append(
-                            key = "file",
-                            value = fileBytes,
-                            headers = Headers.build {
-                                append(HttpHeaders.ContentDisposition, "form-data; name=\"file\"; filename=\"${_selectedFileName.value}\"")
-                                append(HttpHeaders.ContentType, _selectedFileType.value ?: "application/octet-stream")
-                            }
-                        )
-                    }
-                )
-
                 val serverUrl = serverConfigurationService.serverUrl.first()
                 val authToken = accountService.authToken.first()
 
-                metisModificationService.uploadFileOrImage(
+                val response = metisModificationService.uploadFileOrImage(
                     context = metisContext,
                     courseId = courseId,
                     conversationId = conversationId,
-                    formData = formData,
+                    fileBytes = fileBytes,
+                    fileName = _selectedFileName.value,
                     serverUrl = serverUrl,
                     authToken = authToken
                 )
 
+                response.asMetisModificationFailure(MetisModificationFailure.CREATE_POST)?.let { failure ->
+                    Log.e("ConversationViewModel", "File upload failed: ${failure.name}")
+                    return@async failure
+                }
+
+                Log.d("ConversationViewModel", "File uploaded successfully: ${(response as NetworkResponse.Response)}")
+                null // Indicate no failure occurred
+
+
             } catch (e: Exception) {
-                Log.e("ConversationViewModel", "File upload failed", e)
+                Log.e("ConversationViewModel", "File upload exception occurred", e)
+                MetisModificationFailure.CREATE_POST // Return the predefined failure
             }
         }
     }
