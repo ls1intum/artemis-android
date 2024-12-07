@@ -5,6 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.Reaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import io.ktor.client.request.forms.MultiPartFormDataContent
 
 /**
  * Service that can modify metis posts.
@@ -70,9 +71,7 @@ interface MetisModificationService {
         context: MetisContext,
         courseId: Long,
         conversationId: Long,
-        fileData: ByteArray,
-        fileName: String,
-        fileType: String,
+        formData: MultiPartFormDataContent,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<String>

@@ -66,6 +66,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToConversationUpdates
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -748,13 +752,31 @@ internal open class ConversationViewModel(
 
 
     fun uploadFileOrImage(context: Context) {
-        Log.d("ConversationViewModel", "File upload initiated: URI=${_selectedFileUri.value}, fileName=${_selectedFileName.value}, fileType=${_selectedFileType.value}")
+        Log.d(
+            "ConversationViewModel",
+            "File upload initiated: URI=${_selectedFileUri.value}, fileName=${_selectedFileName.value}, fileType=${_selectedFileType.value}"
+        )
+
         viewModelScope.launch(coroutineContext) {
             try {
-                val fileData = withContext(Dispatchers.IO) {
-                    _selectedFileUri.value?.let { context.contentResolver.openInputStream(it)?.use { it.readBytes() } }
-                        ?: throw IllegalArgumentException("Unable to read file from URI: ${_selectedFileUri.value}")
+                val fileBytes = withContext(Dispatchers.IO) {
+                    _selectedFileUri.value?.let {
+                        context.contentResolver.openInputStream(it)?.use { inputStream -> inputStream.readBytes() }
+                    } ?: throw IllegalArgumentException("Unable to read file from URI: ${_selectedFileUri.value}")
                 }
+
+                val formData = MultiPartFormDataContent(
+                    formData {
+                        append(
+                            key = "file",
+                            value = fileBytes,
+                            headers = Headers.build {
+                                append(HttpHeaders.ContentDisposition, "form-data; name=\"file\"; filename=\"${_selectedFileName.value}\"")
+                                append(HttpHeaders.ContentType, _selectedFileType.value ?: "application/octet-stream")
+                            }
+                        )
+                    }
+                )
 
                 val serverUrl = serverConfigurationService.serverUrl.first()
                 val authToken = accountService.authToken.first()
@@ -763,17 +785,16 @@ internal open class ConversationViewModel(
                     context = metisContext,
                     courseId = courseId,
                     conversationId = conversationId,
-                    fileData = fileData,
-                    fileName = _selectedFileName.value,
-                    fileType = _selectedFileType.value,
+                    formData = formData,
                     serverUrl = serverUrl,
                     authToken = authToken
                 )
 
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("ConversationViewModel", "File upload failed", e)
             }
         }
     }
+
 
 }
