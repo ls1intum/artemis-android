@@ -1,23 +1,23 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.ui
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
@@ -25,7 +25,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.setting
 
-internal const val TEST_TAG_PUSH_CHECK_BOX = "TEST_TAG_PUSH_CHECK_BOX"
+internal const val TEST_TAG_PUSH_SWITCH= "TEST_TAG_PUSH_SWITCH"
 
 internal fun testTagForSettingCategory(categoryId: String) = "notification category $categoryId"
 
@@ -99,7 +99,7 @@ private fun PushNotificationSettingsList(
                         )
 
                         if (settingIndex != category.settings.size - 1) {
-                            Divider()
+                            HorizontalDivider()
                         }
                     }
                 }
@@ -114,30 +114,36 @@ private fun PushNotificationSettingEntry(
     setting: PushNotificationSetting,
     onUpdate: (webapp: Boolean?, email: Boolean?, push: Boolean?) -> Unit
 ) {
-    Column(
+    Row(
         modifier = modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = getLocalizedNotificationSettingName(settingName = setting.setting),
-            style = MaterialTheme.typography.bodyMedium
-        )
-
-        val description =
-            getLocalizedNotificationSettingDescription(settingName = setting.setting)
-        if (description != null) {
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            Text(
+                text = getLocalizedNotificationSettingName(settingName = setting.setting),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+            )
+
+            val description =
+                getLocalizedNotificationSettingDescription(settingName = setting.setting)
+            if (description != null) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
             // This is commented out because currently we only want to display push settings.
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .horizontalScroll(rememberScrollState())
+//            ) {
+//
 //            if (setting.webapp != null) {
 //                TextCheckBox(
 //                    modifier = Modifier,
@@ -155,38 +161,40 @@ private fun PushNotificationSettingEntry(
 //                    onCheckedChanged = { onUpdate(setting.webapp, it, setting.push) }
 //                )
 //            }
+//            }
+        }
 
-            if (setting.push != null) {
-                TextCheckBox(
-                    modifier = Modifier.testTag(TEST_TAG_PUSH_CHECK_BOX),
-                    isChecked = setting.push,
-                    text = stringResource(id = R.string.push_notification_settings_label_push),
-                    onCheckedChanged = { onUpdate(setting.webapp, setting.email, it) }
-                )
-            }
+        if (setting.push != null) {
+            Switch(
+                modifier = Modifier
+                    .scale(0.9f)
+                    .testTag(TEST_TAG_PUSH_SWITCH),
+                checked = setting.push,
+                onCheckedChange = { onUpdate(setting.webapp, setting.email, it) }
+            )
         }
     }
 }
 
-@Composable
-private fun TextCheckBox(
-    modifier: Modifier,
-    isChecked: Boolean,
-    text: String,
-    onCheckedChanged: (Boolean) -> Unit
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Checkbox(checked = isChecked, onCheckedChange = onCheckedChanged)
-
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
-}
+//@Composable
+//private fun TextCheckBox(
+//    modifier: Modifier,
+//    isChecked: Boolean,
+//    text: String,
+//    onCheckedChanged: (Boolean) -> Unit
+//) {
+//    Row(
+//        modifier = modifier,
+//        verticalAlignment = Alignment.CenterVertically
+//    ) {
+//        Checkbox(checked = isChecked, onCheckedChange = onCheckedChanged)
+//
+//        Text(
+//            text = text,
+//            style = MaterialTheme.typography.bodyMedium
+//        )
+//    }
+//}
 
 @Composable
 private fun getLocalizedNotificationGroupName(groupName: String): String {

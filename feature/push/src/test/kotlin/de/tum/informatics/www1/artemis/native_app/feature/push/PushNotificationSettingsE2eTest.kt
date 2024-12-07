@@ -26,7 +26,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.N
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.impl.NotificationSettingsServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.push.ui.TEST_TAG_PUSH_CHECK_BOX
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.TEST_TAG_PUSH_SWITCH
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.group
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.testTagForSetting
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.testTagForSettingCategory
@@ -145,7 +145,7 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
             .onNode(
                 hasAnyAncestor(hasTestTag(testTagForSettingCategory(category.categoryId)))
                         and hasAnyAncestor(hasTestTag(testTagForSetting(setting.settingId)))
-                        and hasAnyAncestor(hasTestTag(TEST_TAG_PUSH_CHECK_BOX))
+                        and hasAnyAncestor(hasTestTag(TEST_TAG_PUSH_SWITCH))
                         and hasClickAction()
             )
             .performScrollTo()
