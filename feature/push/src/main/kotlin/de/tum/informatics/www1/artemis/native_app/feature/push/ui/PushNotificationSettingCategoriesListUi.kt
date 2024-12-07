@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
@@ -63,35 +65,42 @@ private fun PushNotificationSettingsList(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         settingCategories.forEach { category ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(testTagForSettingCategory(category.categoryId)),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            Card(
+                modifier = modifier,
+                shape = MaterialTheme.shapes.medium
             ) {
-                Text(
-                    text = getLocalizedNotificationGroupName(groupName = category.categoryId),
-                    style = MaterialTheme.typography.headlineMedium
-                )
-
-                category.settings.forEachIndexed { settingIndex, pushNotificationSetting ->
-                    PushNotificationSettingEntry(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag(testTagForSetting(pushNotificationSetting.settingId)),
-                        setting = pushNotificationSetting,
-                        onUpdate = { webapp, email, push ->
-                            onUpdate(
-                                pushNotificationSetting,
-                                webapp,
-                                email,
-                                push
-                            )
-                        }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .testTag(testTagForSettingCategory(category.categoryId)),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = getLocalizedNotificationGroupName(groupName = category.categoryId),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
                     )
 
-                    if (settingIndex != category.settings.size - 1) {
-                        Divider()
+                    category.settings.forEachIndexed { settingIndex, pushNotificationSetting ->
+                        PushNotificationSettingEntry(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag(testTagForSetting(pushNotificationSetting.settingId)),
+                            setting = pushNotificationSetting,
+                            onUpdate = { webapp, email, push ->
+                                onUpdate(
+                                    pushNotificationSetting,
+                                    webapp,
+                                    email,
+                                    push
+                                )
+                            }
+                        )
+
+                        if (settingIndex != category.settings.size - 1) {
+                            Divider()
+                        }
                     }
                 }
             }
@@ -105,10 +114,12 @@ private fun PushNotificationSettingEntry(
     setting: PushNotificationSetting,
     onUpdate: (webapp: Boolean?, email: Boolean?, push: Boolean?) -> Unit
 ) {
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+    ) {
         Text(
             text = getLocalizedNotificationSettingName(settingName = setting.setting),
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyMedium
         )
 
         val description =
