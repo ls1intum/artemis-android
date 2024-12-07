@@ -7,5 +7,4 @@ enum class MetisCrudAction(val value: String) {
     CREATE("CREATE"),
     UPDATE("UPDATE"),
     DELETE("DELETE"),
-    NEW_MESSAGE("NEW_MESSAGE")    // Only used when for the first message in a new conversation.
 }

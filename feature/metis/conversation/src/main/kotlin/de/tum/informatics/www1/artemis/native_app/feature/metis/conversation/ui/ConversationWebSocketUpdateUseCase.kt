@@ -1,17 +1,17 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisCrudAction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisPostDTO
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToPostUpdates
 
 /**
  * Manages updates to the conversation over the web socket.
  */
 class ConversationWebSocketUpdateUseCase(
-    private val metisService: MetisService,
+    private val websocketProvider: WebsocketProvider,
     private val metisStorageService: MetisStorageService
 ) {
 
@@ -23,17 +23,15 @@ class ConversationWebSocketUpdateUseCase(
         context: MetisContext,
         clientId: Long
     ) {
-        metisService.subscribeToPostUpdates(
+        websocketProvider.subscribeToPostUpdates(
             courseId = context.courseId,
             clientId = clientId
-        ).collect { websocketData ->
-            if (websocketData is WebsocketProvider.WebsocketData.Message) {
-                updateDatabaseWithDto(
-                    dto = websocketData.message,
-                    context = context,
-                    host = host
-                )
-            }
+        ).collect { postDto ->
+            updateDatabaseWithDto(
+                dto = postDto,
+                context = context,
+                host = host
+            )
         }
     }
 
@@ -56,10 +54,6 @@ class ConversationWebSocketUpdateUseCase(
                     host,
                     listOf(dto.post.id ?: return)
                 )
-            }
-
-            MetisCrudAction.NEW_MESSAGE -> {
-                // Nothing to do here. Only relevant for the conversation overview.
             }
         }
     }

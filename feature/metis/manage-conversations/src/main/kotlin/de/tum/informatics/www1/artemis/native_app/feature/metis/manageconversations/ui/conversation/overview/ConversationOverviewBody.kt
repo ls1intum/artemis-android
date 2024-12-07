@@ -150,8 +150,6 @@ fun ConversationOverviewBody(
                     onToggleMarkAsFavourite = viewModel::markConversationAsFavorite,
                     onToggleHidden = viewModel::markConversationAsHidden,
                     onToggleMuted = viewModel::markConversationAsMuted,
-                    onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
-                    onRequestAddChannel = onRequestAddChannel,
                     trailingContent = {
                         item { HorizontalDivider() }
 

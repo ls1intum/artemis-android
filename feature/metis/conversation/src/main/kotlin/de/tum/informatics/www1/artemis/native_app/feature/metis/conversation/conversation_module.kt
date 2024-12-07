@@ -21,7 +21,7 @@ import org.koin.androidx.workmanager.dsl.workerOf
 import org.koin.dsl.module
 
 val conversationModule = module {
-    single<MetisService> { MetisServiceImpl(get(), get()) }
+    single<MetisService> { MetisServiceImpl(get()) }
     single<MetisModificationService> { MetisModificationServiceImpl(get()) }
     single<EmojiService> { EmojiServiceImpl(androidContext()) }
 
