@@ -117,7 +117,8 @@ internal class MetisStorageServiceImpl(
             val user = MetisUserEntity(
                 serverId = serverId,
                 id = authorId,
-                displayName = author?.name ?: "NULL"
+                displayName = author?.name ?: "NULL",
+                imageUrl = author?.imageUrl
             )
 
             return Triple(basePost, answer, user)
@@ -138,7 +139,8 @@ internal class MetisStorageServiceImpl(
             ) to MetisUserEntity(
                 serverId = serverId,
                 id = userId,
-                displayName = user?.name ?: return null
+                imageUrl = user?.imageUrl,
+                displayName = user?.name ?: return null,
             )
         }
 
@@ -443,7 +445,8 @@ internal class MetisStorageServiceImpl(
         val postingAuthor = MetisUserEntity(
             serverId = host,
             id = sp.author?.id ?: return null,
-            displayName = sp.author?.name ?: return null
+            displayName = sp.author?.name ?: return null,
+            imageUrl = sp.author?.imageUrl
         )
 
         val (standaloneBasePosting, standalonePosting) = sp.asDb(
@@ -466,7 +469,9 @@ internal class MetisStorageServiceImpl(
         }
 
         // First insert the users as they have no dependencies
-        metisDao.updateUsers(standalonePostReactionsUsers)
+        // TODO: Do not update existing users, as for the reactions we always get null as image_url
+        //       Can be undone when https://github.com/ls1intum/Artemis/pull/9897 is merged.
+//        metisDao.updateUsers(standalonePostReactionsUsers)
         metisDao.insertUsers(standalonePostReactionsUsers)
 
         metisDao.insertOrUpdateUser(postingAuthor)
@@ -571,7 +576,10 @@ internal class MetisStorageServiceImpl(
         val answerPostReactionUsers = answerPostReactionsWithUsers.map { it.second }
 
         metisDao.insertOrUpdateUser(metisUserEntity)
-        metisDao.updateUsers(answerPostReactionUsers)
+
+        // TODO: Do not update existing users, as for the reactions we always get null as image_url
+        //       Can be undone when https://github.com/ls1intum/Artemis/pull/9897 is merged.
+//        metisDao.updateUsers(answerPostReactionUsers)
         metisDao.insertUsers(answerPostReactionUsers)
 
         if (isNewPost) {

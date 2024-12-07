@@ -16,4 +16,7 @@ sealed class BasePost : IBasePost {
 
     override val authorName: String?
         get() = author?.name
+
+    override val authorImageUrl: String?
+        get() = author?.imageUrl
 }

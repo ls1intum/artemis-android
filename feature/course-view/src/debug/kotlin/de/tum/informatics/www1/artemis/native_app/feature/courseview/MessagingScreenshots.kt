@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,7 +38,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ProvideLocalVisibleMetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextManager
 import kotlinx.coroutines.CompletableDeferred
@@ -195,6 +196,15 @@ fun `Metis - Conversation Channel`() {
         ),
     ).reversed()
 
+    val visibleMetisContextManagerStub = object : VisibleMetisContextManager {
+        override fun registerMetisContext(metisContext: VisibleMetisContext) =
+            Unit
+
+        override fun unregisterMetisContext(metisContext: VisibleMetisContext) =
+            Unit
+    }
+
+    // TODO: Provide artemis image provider
     ScreenshotFrame(title = "Send and receive messages directly from the app") {
         CourseUiScreen(
             modifier = Modifier.fillMaxSize(),
@@ -204,14 +214,8 @@ fun `Metis - Conversation Channel`() {
             exerciseTabContent = { },
             lectureTabContent = { },
             communicationTabContent = {
-                ProvideLocalVisibleMetisContextManager(
-                    visibleMetisContextManager = object : VisibleMetisContextManager {
-                        override fun registerMetisContext(metisContext: VisibleMetisContext) =
-                            Unit
-
-                        override fun unregisterMetisContext(metisContext: VisibleMetisContext) =
-                            Unit
-                    }
+                CompositionLocalProvider(
+                    LocalVisibleMetisContextManager provides visibleMetisContextManagerStub,
                 ) {
                     ConversationChatListScreen(
                         modifier = Modifier.fillMaxSize(),
@@ -284,6 +288,7 @@ private fun generateMessage(
             authorName = name,
             authorRole = UserRole.USER,
             authorId = authorId,
+            authorImageUrl = null,
             creationDate = time,
             updatedDate = null,
             resolved = false,

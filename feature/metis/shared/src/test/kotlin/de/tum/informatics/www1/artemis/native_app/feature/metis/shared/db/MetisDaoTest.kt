@@ -33,7 +33,8 @@ class MetisDaoTest {
     private val user = MetisUserEntity(
         serverId = serverId,
         id = 4,
-        displayName = "User4"
+        displayName = "User4",
+        imageUrl = null,
     )
     private val basePost = BasePostingEntity(
         postId = clientPostId,

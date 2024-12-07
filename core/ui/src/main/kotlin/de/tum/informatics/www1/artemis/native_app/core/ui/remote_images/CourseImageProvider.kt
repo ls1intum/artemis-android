@@ -19,7 +19,7 @@ interface CourseImageProvider {
 }
 
 private object DefaultCourseImageProvider : CourseImageProvider {
-    private val imageProvider = DefaultImageProvider()
+    private val imageProvider = BaseImageProviderImpl()
 
     @Composable
     override fun rememberCourseImagePainter(
