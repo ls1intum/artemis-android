@@ -16,16 +16,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Reply
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -105,7 +104,7 @@ internal fun PostContextBottomSheet(
                 }
 
                 if (postActions.canPerformAnyAction) {
-                    Divider()
+                    HorizontalDivider()
                 }
 
                 postActions.requestEditPost?.let {
@@ -157,7 +156,7 @@ internal fun PostContextBottomSheet(
                 postActions.onReplyInThread?.let {
                     ActionButton(
                         modifier = actionButtonModifier,
-                        icon = Icons.Default.Reply,
+                        icon = Icons.AutoMirrored.Filled.Reply,
                         text = stringResource(id = R.string.post_reply),
                         onClick = {
                             onDismissRequest()
@@ -281,7 +280,7 @@ private fun EmojiDialog(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(5))
+                .clip(MaterialTheme.shapes.large)
         ) {
             EmojiPicker(
                 modifier = Modifier
