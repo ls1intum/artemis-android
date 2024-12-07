@@ -1,13 +1,24 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
+import android.content.ContentResolver
+import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -21,12 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
 
 
 const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
@@ -43,12 +56,24 @@ internal fun MarkdownTextField(
     topRightButton: @Composable RowScope.() -> Unit = {},
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
-    onTextChanged: (TextFieldValue) -> Unit
+    onTextChanged: (TextFieldValue) -> Unit,
+    onFileSelect: (Uri?, String) -> Unit = { _, _ -> },
 ) {
     val text = textFieldValue.text
+    val context = LocalContext.current
 
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
     var hadFocus by remember { mutableStateOf(false) }
+
+    val filePickerLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            val mimeType = uri?.let { context.contentResolver.getType(it) }
+            if (mimeType in FileValidationConstants.ALLOWED_MIME_TYPES) {
+                onFileSelect(uri, resolveFileName(context, uri))
+            } else {
+                Toast.makeText(context, "Unsupported file type selected.", Toast.LENGTH_SHORT).show()
+            }
+        }
 
     Column(modifier = modifier) {
         Row(
@@ -72,7 +97,33 @@ internal fun MarkdownTextField(
                 }
             )
 
-            Box(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
+
+            InputChip(
+                selected = true,
+                onClick = {
+                    filePickerLauncher.launch("*/*")
+                },
+                enabled = true,
+                label = {
+                    Icon(
+                        Icons.Default.AttachFile,
+                        contentDescription = "Attach File"
+                    )
+                }
+            )
+
+            InputChip(
+                selected = true,
+                onClick = { filePickerLauncher.launch("image/*") },
+                enabled = true,
+                label = {
+                    Icon(
+                        Icons.Default.Image,
+                        contentDescription = "Select Image"
+                    )
+                }
+            )
 
             topRightButton()
         }
@@ -110,7 +161,6 @@ internal fun MarkdownTextField(
                     )
                 }
             }
-
             sendButton()
         }
     }
@@ -119,4 +169,20 @@ internal fun MarkdownTextField(
 private enum class ViewType {
     TEXT,
     PREVIEW
+}
+
+private fun resolveFileName(context: Context, uri: Uri?): String {
+    return try {
+        val resolver: ContentResolver = context.contentResolver
+        uri?.let {
+            resolver.query(it, null, null, null, null)?.use { cursor ->
+                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                cursor.moveToFirst()
+                cursor.getString(nameIndex)
+            }
+        } ?: uri?.lastPathSegment.orEmpty()
+    } catch (e: Exception) {
+        Log.e("MarkdownTextField", "Error resolving file name", e)
+        uri?.lastPathSegment.orEmpty()
+    }
 }

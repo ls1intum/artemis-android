@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +23,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -122,7 +122,10 @@ internal fun MetisChatList(
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onClickViewPost = onClickViewPost,
             onRequestRetrySend = viewModel::retryCreatePost,
-            title = updatedTitle
+            title = updatedTitle,
+            onFileSelected = { uri, fileName ->
+                viewModel.onFileSelected(uri, fileName, context)
+            }
         )
     }
 }
@@ -148,7 +151,8 @@ fun MetisChatList(
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
-    title: String
+    title: String,
+    onFileSelected: (Uri?, String) -> Unit
 ) {
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
@@ -220,6 +224,7 @@ fun MetisChatList(
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate,
                     title = title,
+                    onFileSelect = onFileSelected
                 )
             }
         }

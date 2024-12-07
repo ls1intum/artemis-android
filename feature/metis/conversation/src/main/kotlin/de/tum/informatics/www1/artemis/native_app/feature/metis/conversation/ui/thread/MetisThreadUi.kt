@@ -1,5 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread
 
+import android.content.Context
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +24,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -143,7 +144,10 @@ internal fun MetisThreadUi(
             onDeletePost = viewModel::deletePost,
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onRequestReload = viewModel::requestReload,
-            onRequestRetrySend = viewModel::retryCreateReply
+            onRequestRetrySend = viewModel::retryCreateReply,
+            onFileSelect = { uri, fileName, fileType ->
+                viewModel.onFileSelected(uri, fileName, fileType)
+            }
         )
     }
 }
@@ -167,11 +171,12 @@ internal fun MetisThreadUi(
     onDeletePost: (IBasePost) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onRequestReload: () -> Unit,
-    onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
+    onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit,
+    onFileSelect: (Uri?, String, Context) -> Unit
 ) {
     val listState = rememberLazyListState()
     val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
-
+    val context = LocalContext.current
     val title by remember(conversationDataState) {
         derivedStateOf {
             conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
@@ -235,7 +240,10 @@ internal fun MetisThreadUi(
                                 .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
                             replyMode = replyMode,
                             updateFailureState = updateFailureStateDelegate,
-                            title = title
+                            title = title,
+                            onFileSelect = { uri, title, ->
+                                onFileSelect(uri, title, context)
+                            }
                         )
                     }
                 }

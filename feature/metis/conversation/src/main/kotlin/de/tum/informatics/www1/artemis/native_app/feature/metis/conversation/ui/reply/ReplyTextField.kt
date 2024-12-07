@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
+import android.net.Uri
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -72,6 +73,7 @@ private const val DisabledContentAlpha = 0.75f
 internal fun ReplyTextField(
     modifier: Modifier,
     replyMode: ReplyMode,
+    onFileSelect: (Uri?, String) -> Unit,
     updateFailureState: (MetisModificationFailure?) -> Unit,
     title: String
 ) {
@@ -101,8 +103,11 @@ internal fun ReplyTextField(
                                 .fillMaxWidth()
                                 .testTag(TEST_TAG_CAN_CREATE_REPLY),
                             replyMode = replyMode,
-                            onReply = { targetReplyState.onCreateReply() },
-                            title = "Message $title"
+                            onReply = {
+                                targetReplyState.onCreateReply()
+                            },
+                            title = "Message $title",
+                            filePicker = { uri, name -> onFileSelect(uri, name) }
                         )
                     }
 
@@ -160,6 +165,7 @@ private fun CreateReplyUi(
     replyMode: ReplyMode,
     focusRequester: FocusRequester = remember { FocusRequester() },
     onReply: () -> Unit,
+    filePicker: (Uri, String) -> Unit,
     title: String?
 ) {
     var prevReplyContent by remember { mutableStateOf("") }
@@ -259,6 +265,11 @@ private fun CreateReplyUi(
                             IconButton(onClick = replyMode.onCancelEditMessage) {
                                 Icon(imageVector = Icons.Default.Cancel, contentDescription = null)
                             }
+                        }
+                    },
+                    onFileSelect = { uri, name ->
+                        if (uri != null) {
+                            filePicker(uri, name)
                         }
                     }
                 )
@@ -361,7 +372,7 @@ private fun FormattingOptions(
                 style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
             )
         }
-        
+
         // Code Block Button
         IconButton(onClick = {
             applyMarkdownStyle(
@@ -643,7 +654,8 @@ private fun ReplyTextFieldPreview() {
                 CompletableDeferred()
             },
             updateFailureState = {},
-            title = "Replying.."
+            title = "Replying..",
+            onFileSelect = { _, _ -> }
         )
     }
 }
