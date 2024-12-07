@@ -266,11 +266,7 @@ internal open class ConversationViewModel(
     val serverUrl = serverUrlStateFlow(serverConfigurationService)
 
     private val _selectedFileUri = MutableStateFlow<Uri?>(null)
-    val selectedFileUri: StateFlow<Uri?> = _selectedFileUri
     private val _selectedFileName = MutableStateFlow<String>("")
-    val selectedFileName: StateFlow<String> = _selectedFileName
-    private val _selectedFileType = MutableStateFlow<String>("")
-    val selectedFileType: StateFlow<String> = _selectedFileType
 
     init {
         viewModelScope.launch(coroutineContext) {
@@ -728,24 +724,23 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun onImageSelected(uri: Uri?, fileName: String, fileType: String) {
+    fun onImageSelected(uri: Uri?, fileName: String, context: Context) {
         Log.d("ConversationViewModel", "File selected: $uri")
         viewModelScope.launch {
             _selectedFileUri.emit(uri)
             _selectedFileName.emit(fileName)
-            _selectedFileType.emit(fileType)
+            uploadFileOrImage(context)
         }
     }
 
-    fun onFileSelected(uri: Uri?, fileName: String, fileType: String) {
+    fun onFileSelected(uri: Uri?, fileName: String, context: Context){
         Log.d("ConversationViewModel", "File selected: $uri")
         viewModelScope.launch(coroutineContext) {
             _selectedFileUri.emit(uri)
             _selectedFileName.emit(fileName)
-            _selectedFileType.emit(fileType)
+            uploadFileOrImage(context)
         }
     }
-
 
     fun uploadFileOrImage(context: Context): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
@@ -753,7 +748,7 @@ internal open class ConversationViewModel(
                 val fileBytes = withContext(Dispatchers.IO) {
                     _selectedFileUri.value?.let {
                         context.contentResolver.openInputStream(it)?.use { inputStream -> inputStream.readBytes() }
-                    } ?: throw IllegalArgumentException("Unable to read file from URI: ${_selectedFileUri.value}")
+                    } ?: throw IllegalArgumentException("No file selected")
                 }
 
                 val serverUrl = serverConfigurationService.serverUrl.first()
@@ -774,13 +769,19 @@ internal open class ConversationViewModel(
                     return@async failure
                 }
 
-                Log.d("ConversationViewModel", "File uploaded successfully: ${(response as NetworkResponse.Response)}")
-                null // Indicate no failure occurred
+                val fileUploadResponse = (response as NetworkResponse.Response).data
+                val imagePath = fileUploadResponse.path ?: ""
 
+                Log.d("ConversationViewModel", "File uploaded successfully: $fileUploadResponse")
 
+                val currentText = newMessageText.value.text
+                val updatedText = "$currentText\n![image]($imagePath)\n"
+                newMessageText.value = TextFieldValue(updatedText)
+
+                null
             } catch (e: Exception) {
-                Log.e("ConversationViewModel", "File upload exception occurred", e)
-                MetisModificationFailure.CREATE_POST // Return the predefined failure
+                Log.e("ConversationViewModel", "File upload exception", e)
+                MetisModificationFailure.CREATE_POST
             }
         }
     }

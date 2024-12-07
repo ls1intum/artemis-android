@@ -7,9 +7,7 @@ import android.provider.OpenableColumns
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -38,7 +36,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 
@@ -55,39 +52,25 @@ internal fun MarkdownTextField(
     focusRequester: FocusRequester = remember { FocusRequester() },
     sendButton: @Composable () -> Unit = {},
     topRightButton: @Composable RowScope.() -> Unit = {},
-    onFileSelect: (Uri?, String, String) -> Unit = { _, _, _ -> },
-    onImageSelect: (Uri?,String, String) -> Unit = {_, _, _ ->},
+    onFileSelect: (Uri?, String) -> Unit = { _, _ -> },
+    onImageSelect: (Uri?,String) -> Unit = {_, _ ->},
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit
 ) {
     val text = textFieldValue.text
     val context = LocalContext.current
-    var selectedUri by remember { mutableStateOf<Uri?>(null) }
-    var selectedFileName by remember { mutableStateOf<String?>(null) }
 
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
     var hadFocus by remember { mutableStateOf(false) }
 
     // Launchers for file and image selection
     val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        onImageSelect(uri, resolveFileName(context, uri), resolveFileType(context, uri))
-        val fileName = resolveFileName(context, uri)
-        val fileType = resolveFileType(context, uri)
-        selectedUri = uri
-        selectedFileName = resolveFileName(context, uri)
-        onImageSelect(uri, fileName, fileType)
-        Log.d("MarkdownTextField", "selectedUri: $uri" )
+        onImageSelect(uri, resolveFileName(context, uri))
     }
 
     val filePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        onImageSelect(uri, resolveFileName(context, uri), resolveFileType(context, uri))
-        val fileName = resolveFileName(context, uri)
-        val fileType = resolveFileType(context, uri)
-        selectedUri = uri
-        selectedFileName = resolveFileName(context, uri)
-        onFileSelect(uri, fileName, fileType)
-        Log.d("MarkdownTextField", "selectedUri: $uri" )
+        onFileSelect(uri, resolveFileName(context, uri))
     }
 
     Column(modifier = modifier) {
@@ -139,26 +122,6 @@ internal fun MarkdownTextField(
             )
 
             topRightButton()
-        }
-
-        selectedUri?.let { uri ->
-            Box() {
-                if (selectedFileName != null && selectedFileName!!.endsWith(".jpg", ignoreCase = true)) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Image(
-                        painter = rememberAsyncImagePainter(model = uri),
-                        contentDescription = "image",
-                        modifier = Modifier.fillMaxWidth().height(200.dp)
-                    )
-                } else {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text =  selectedFileName.orEmpty(),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
-
         }
 
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -214,19 +177,9 @@ private fun resolveFileName(context: Context, uri: Uri?): String {
                 cursor.moveToFirst()
                 cursor.getString(nameIndex)
             }
-        } ?: uri?.lastPathSegment.orEmpty() // Fallback to the URI path segment
+        } ?: uri?.lastPathSegment.orEmpty()
     } catch (e: Exception) {
         Log.e("MarkdownTextField", "Error resolving file name", e)
-        uri?.lastPathSegment.orEmpty() // Fallback to the URI path segment
-    }
-}
-
-private fun resolveFileType(context: Context, uri: Uri?): String {
-    return try {
-        val resolver: ContentResolver = context.contentResolver
-        uri?.let { resolver.getType(it) } ?: "application/octet-stream" // Fallback to a generic binary type
-    } catch (e: Exception) {
-        Log.e("MarkdownTextField", "Error resolving file type", e)
-        "application/octet-stream" // Fallback MIME type
+        uri?.lastPathSegment.orEmpty()
     }
 }

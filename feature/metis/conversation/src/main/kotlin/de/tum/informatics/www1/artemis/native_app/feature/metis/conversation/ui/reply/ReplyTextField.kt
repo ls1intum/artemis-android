@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
-import android.content.Context
 import android.net.Uri
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
@@ -41,7 +40,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextRange
@@ -75,14 +73,12 @@ private const val DisabledContentAlpha = 0.75f
 internal fun ReplyTextField(
     modifier: Modifier,
     replyMode: ReplyMode,
-    onImageSelect: (Uri?, String, String) -> Unit,
-    onFileSelect: (Uri?, String, String) -> Unit,
+    onImageSelect: (Uri?, String) -> Unit,
+    onFileSelect: (Uri?, String) -> Unit,
     updateFailureState: (MetisModificationFailure?) -> Unit,
-    onFileUpload: (Context) -> Unit,
     title: String
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
-    val context = LocalContext.current
 
     Surface(
         modifier = modifier.defaultMinSize(minHeight = 48.dp),
@@ -109,12 +105,11 @@ internal fun ReplyTextField(
                                 .testTag(TEST_TAG_CAN_CREATE_REPLY),
                             replyMode = replyMode,
                             onReply = {
-                                onFileUpload(context)
                                 targetReplyState.onCreateReply()
                             },
                             title = "Message $title",
-                            imagePicker = { uri, name, type -> onImageSelect(uri, name, type) },
-                            filePicker = { uri, name, type -> onFileSelect(uri, name, type) }
+                            imagePicker = { uri, name -> onImageSelect(uri, name) },
+                            filePicker = { uri, name -> onFileSelect(uri, name) }
                         )
                     }
 
@@ -172,8 +167,8 @@ private fun CreateReplyUi(
     replyMode: ReplyMode,
     focusRequester: FocusRequester = remember { FocusRequester() },
     onReply: () -> Unit,
-    imagePicker: (Uri, String, String) -> Unit,
-    filePicker: (Uri, String, String) -> Unit,
+    imagePicker: (Uri, String) -> Unit,
+    filePicker: (Uri, String) -> Unit,
     title: String?
 ) {
     var prevReplyContent by remember { mutableStateOf("") }
@@ -275,14 +270,14 @@ private fun CreateReplyUi(
                             }
                         }
                     },
-                    onImageSelect = { uri, name, type ->
+                    onImageSelect = { uri, name ->
                         if (uri != null) {
-                            imagePicker(uri, name, type)
+                            imagePicker(uri, name)
                         }
                     },
-                    onFileSelect = { uri, name, type ->
+                    onFileSelect = { uri, name ->
                         if (uri != null) {
-                            filePicker(uri, name, type)
+                            filePicker(uri, name)
                         }
                     }
                 )
@@ -672,9 +667,8 @@ private fun ReplyTextFieldPreview() {
             },
             updateFailureState = {},
             title = "Replying..",
-            onImageSelect = { _, _, _ -> },
-            onFileSelect = { _, _, _ -> },
-            onFileUpload = {}
+            onImageSelect = { _, _ -> },
+            onFileSelect = { _, _ -> }
         )
     }
 }

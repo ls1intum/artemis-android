@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist
 
-import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -122,13 +121,12 @@ internal fun MetisChatList(
         onClickViewPost = onClickViewPost,
         onRequestRetrySend = viewModel::retryCreatePost,
         title = updatedTitle,
-        onImageSelected = { uri, fileName, fileType ->
-            viewModel.onImageSelected(uri, fileName, fileType)
+        onImageSelected = { uri, fileName ->
+            viewModel.onImageSelected(uri, fileName, context)
         },
-        onFileSelected = { uri, fileName, fileType ->
-            viewModel.onFileSelected(uri, fileName, fileType)
+        onFileSelected = { uri, fileName ->
+            viewModel.onFileSelected(uri, fileName, context)
         },
-        onFileUpload = viewModel::uploadFileOrImage
     )
 }
 
@@ -154,9 +152,9 @@ fun MetisChatList(
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
     title: String,
-    onImageSelected: (Uri?, String, String) -> Unit,
-    onFileSelected:  (Uri?, String, String) -> Unit,
-    onFileUpload: (Context) -> Unit)  {
+    onImageSelected: (Uri?, String) -> Unit,
+    onFileSelected: (Uri?, String) -> Unit
+) {
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
         onCreatePost = onCreatePost,
@@ -229,7 +227,6 @@ fun MetisChatList(
                     title = title,
                     onImageSelect = onImageSelected,
                     onFileSelect = onFileSelected,
-                    onFileUpload = onFileUpload
                 )
             }
         }

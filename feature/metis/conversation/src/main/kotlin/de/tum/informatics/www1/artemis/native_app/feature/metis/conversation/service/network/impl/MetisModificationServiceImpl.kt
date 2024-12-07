@@ -15,11 +15,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.delete
-import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
+import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
@@ -235,30 +236,22 @@ internal class MetisModificationServiceImpl(
         authToken: String
     ): NetworkResponse<FileUploadResponse> {
         return performNetworkCall {
-            val formData = MultiPartFormDataContent(
-                formData {
-                    append(
-                        key = "file",
-                        value = fileBytes,
-                        headers = Headers.build {
-                            append(HttpHeaders.ContentDisposition, "form-data; name=\"file\"; filename=\"$fileName\"")
-                            append(HttpHeaders.ContentType, ContentType.Application.OctetStream.toString())
-                        }
-                    )
-                }
-            )
 
-            ktorProvider.ktorClient.post(serverUrl) {
-                url {
-                    appendPathSegments("api", "files", "courses", courseId.toString(), "conversations", conversationId.toString())
+            val response =  ktorProvider.ktorClient.submitFormWithBinaryData(
+                url = serverUrl +"api/files/courses/$courseId/conversations/$conversationId",
+                formData = formData {
+                    append("file", fileBytes, Headers.build {
+                        append(HttpHeaders.ContentDisposition, "filename=$fileName")
+                    })
                 }
-
-                Log.d("MetisModificationService", "Uploading file to $url")
-                setBody(formData)
-                contentType(ContentType.MultiPart.FormData)
-                accept(ContentType.Application.Json)
+            ) {
                 cookieAuth(authToken)
-            }.body()
+            }
+
+            val rawResponse = response.bodyAsText()
+            Log.d("UploadDebug", "Raw response: $rawResponse")
+
+            response.body<FileUploadResponse>()
         }
     }
 }

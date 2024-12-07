@@ -257,9 +257,8 @@ fun `Metis - Conversation Channel`() {
                                 onClickViewPost = {},
                                 onRequestRetrySend = {},
                                 title = "",
-                                onImageSelected = {_, _ ,_  ->},
-                                onFileSelected = {_, _ ,_ ->},
-                                onFileUpload = { },
+                                onImageSelected = {_, _  ->},
+                                onFileSelected = {_, _  ->}
                             )
                         }
                     )
