@@ -19,10 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import coil.ImageLoader
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
-import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder

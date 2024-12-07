@@ -25,7 +25,7 @@ data class StandalonePost(
 //    val plagiarismCase: PlagiarismCase? = null,
     val conversation: Conversation? = null,
     val courseWideContext: CourseWideContext? = null,
-    val displayPriority: DisplayPriority? = null,
+    override val displayPriority: DisplayPriority? = null,
     override val resolved: Boolean? = null
 ) : BasePost(), IStandalonePost {
 
@@ -39,7 +39,8 @@ data class StandalonePost(
         conversation = conversation,
         creationDate = post.creationDate,
         title = post.title,
-        resolved = post.resolved
+        resolved = post.resolved,
+        displayPriority = post.displayPriority
     )
 
     @Transient
