@@ -69,7 +69,10 @@ internal class login_moduleTest : BaseComposeTest() {
         }
     }
 
-
+    /**
+     * Test if a ViewModel can be initialized without errors.
+     * @param parameters The parameters to pass to the ViewModel constructor
+     */
     @OptIn(KoinInternalApi::class)
     private inline fun <reified T: ViewModel> ComposeContentTestRule.testViewModelInitialization(
         noinline parameters: ParametersDefinition? = null
