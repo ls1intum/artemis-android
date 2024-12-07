@@ -14,7 +14,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableTitle
 import kotlinx.coroutines.Deferred
 
 /**
@@ -35,6 +34,7 @@ internal fun PerformActionOnUserDialogs(
     AwaitDeferredCompletion(
         job = performActionOnUserJob,
         onComplete = { isSuccessful ->
+            onDismiss()
             if (!isSuccessful) {
                 displayPerformActionOnUserFailedDialog = true
             }
@@ -95,10 +95,9 @@ private fun PerformActionOnUserDialogs(
                     onDismissRequest = onDismiss
                 )
 
-                is GroupChat -> KickUserFromChannelDialog(
+                is GroupChat -> KickUserFromGroupDialog (
                     humanReadableName = humanReadableName,
                     username = username,
-                    channelName = conversation.humanReadableTitle,
                     onPressPositiveButton = onKickUser,
                     onDismissRequest = onDismiss
                 )
