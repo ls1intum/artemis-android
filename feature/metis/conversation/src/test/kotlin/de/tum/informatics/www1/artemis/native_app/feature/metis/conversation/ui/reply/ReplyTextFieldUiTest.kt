@@ -66,7 +66,8 @@ class ReplyTextFieldUiTest {
                         CompletableDeferred()
                     },
                     updateFailureState = {},
-                    title = "TestChat"
+                    title = "TestChat",
+                    onFileSelect = { _, _ -> }
                 )
             }
         }
