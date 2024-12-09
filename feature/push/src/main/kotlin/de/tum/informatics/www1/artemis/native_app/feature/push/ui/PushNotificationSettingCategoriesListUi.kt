@@ -125,7 +125,7 @@ private fun PushNotificationSettingEntry(
         ) {
             Text(
                 text = getLocalizedNotificationSettingName(settingName = setting.setting),
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
             )
 
             val description =
