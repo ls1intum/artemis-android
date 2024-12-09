@@ -1,7 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
+import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.ContextCompat.getString
@@ -725,9 +728,10 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun onFileSelected(uri: Uri?, fileName: String, context: Context) {
+    fun onFileSelected(uri: Uri?, context: Context) {
         viewModelScope.launch {
             _selectedFileUri.emit(uri)
+            val fileName = resolveFileName(context, uri)
             _selectedFileName.emit(fileName)
             uploadFileOrImage(context)
         }
@@ -788,6 +792,22 @@ internal open class ConversationViewModel(
     private fun clearSelectedFile() {
         _selectedFileUri.value = null
         _selectedFileName.value = ""
+    }
+
+    private fun resolveFileName(context: Context, uri: Uri?): String {
+        return try {
+            val resolver: ContentResolver = context.contentResolver
+            uri?.let {
+                resolver.query(it, null, null, null, null)?.use { cursor ->
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    cursor.moveToFirst()
+                    cursor.getString(nameIndex)
+                }
+            } ?: uri?.lastPathSegment.orEmpty()
+        } catch (e: Exception) {
+            Log.e("MarkdownTextField", "Error resolving file name", e)
+            uri?.lastPathSegment.orEmpty()
+        }
     }
 
 }

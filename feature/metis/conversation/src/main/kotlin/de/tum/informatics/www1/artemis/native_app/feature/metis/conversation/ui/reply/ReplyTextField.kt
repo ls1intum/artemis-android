@@ -73,7 +73,7 @@ private const val DisabledContentAlpha = 0.75f
 internal fun ReplyTextField(
     modifier: Modifier,
     replyMode: ReplyMode,
-    onFileSelect: (Uri?, String) -> Unit,
+    onFileSelected: (Uri?) -> Unit,
     updateFailureState: (MetisModificationFailure?) -> Unit,
     title: String
 ) {
@@ -107,7 +107,7 @@ internal fun ReplyTextField(
                                 targetReplyState.onCreateReply()
                             },
                             title = "Message $title",
-                            filePicker = { uri, name -> onFileSelect(uri, name) }
+                            onFileSelected = { uri -> onFileSelected(uri) }
                         )
                     }
 
@@ -165,7 +165,7 @@ private fun CreateReplyUi(
     replyMode: ReplyMode,
     focusRequester: FocusRequester = remember { FocusRequester() },
     onReply: () -> Unit,
-    filePicker: (Uri, String) -> Unit,
+    onFileSelected: (Uri) -> Unit,
     title: String?
 ) {
     var prevReplyContent by remember { mutableStateOf("") }
@@ -267,9 +267,9 @@ private fun CreateReplyUi(
                             }
                         }
                     },
-                    onFileSelect = { uri, name ->
+                    onFileSelected = { uri ->
                         if (uri != null) {
-                            filePicker(uri, name)
+                            onFileSelected(uri)
                         }
                     }
                 )
@@ -655,7 +655,7 @@ private fun ReplyTextFieldPreview() {
             },
             updateFailureState = {},
             title = "Replying..",
-            onFileSelect = { _, _ -> }
+            onFileSelected = { _ -> }
         )
     }
 }

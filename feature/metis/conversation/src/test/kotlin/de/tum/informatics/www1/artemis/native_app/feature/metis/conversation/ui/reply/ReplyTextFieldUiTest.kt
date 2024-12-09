@@ -67,7 +67,7 @@ class ReplyTextFieldUiTest {
                     },
                     updateFailureState = {},
                     title = "TestChat",
-                    onFileSelect = { _, _ -> }
+                    onFileSelected = { _ -> }
                 )
             }
         }

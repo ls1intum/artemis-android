@@ -123,8 +123,8 @@ internal fun MetisChatList(
             onClickViewPost = onClickViewPost,
             onRequestRetrySend = viewModel::retryCreatePost,
             title = updatedTitle,
-            onFileSelected = { uri, fileName ->
-                viewModel.onFileSelected(uri, fileName, context)
+            onFileSelected = { uri ->
+                viewModel.onFileSelected(uri, context)
             }
         )
     }
@@ -152,7 +152,7 @@ fun MetisChatList(
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
     title: String,
-    onFileSelected: (Uri?, String) -> Unit
+    onFileSelected: (Uri?) -> Unit
 ) {
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
@@ -224,7 +224,7 @@ fun MetisChatList(
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate,
                     title = title,
-                    onFileSelect = onFileSelected
+                    onFileSelected = onFileSelected
                 )
             }
         }

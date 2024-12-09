@@ -58,7 +58,7 @@ internal fun MarkdownTextField(
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
-    onFileSelect: (Uri?, String) -> Unit = { _, _ -> },
+    onFileSelected: (Uri?) -> Unit = { _ -> },
 ) {
     val text = textFieldValue.text
     val context = LocalContext.current
@@ -70,7 +70,7 @@ internal fun MarkdownTextField(
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             val mimeType = uri?.let { context.contentResolver.getType(it) }
             if (mimeType in FileValidationConstants.ALLOWED_MIME_TYPES) {
-                onFileSelect(uri, resolveFileName(context, uri))
+                onFileSelected(uri)
             } else {
                 Toast.makeText(context, getString(context, R.string.markdown_textfield_unsupported_warning), Toast.LENGTH_SHORT).show()
             }
@@ -170,20 +170,4 @@ internal fun MarkdownTextField(
 private enum class ViewType {
     TEXT,
     PREVIEW
-}
-
-private fun resolveFileName(context: Context, uri: Uri?): String {
-    return try {
-        val resolver: ContentResolver = context.contentResolver
-        uri?.let {
-            resolver.query(it, null, null, null, null)?.use { cursor ->
-                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                cursor.moveToFirst()
-                cursor.getString(nameIndex)
-            }
-        } ?: uri?.lastPathSegment.orEmpty()
-    } catch (e: Exception) {
-        Log.e("MarkdownTextField", "Error resolving file name", e)
-        uri?.lastPathSegment.orEmpty()
-    }
 }
