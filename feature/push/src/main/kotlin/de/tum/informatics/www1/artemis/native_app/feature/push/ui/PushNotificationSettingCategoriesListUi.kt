@@ -66,14 +66,14 @@ private fun PushNotificationSettingsList(
     ) {
         settingCategories.forEach { category ->
             Card(
-                modifier = modifier,
+                modifier = modifier
+                    .testTag(testTagForSettingCategory(category.categoryId)),
                 shape = MaterialTheme.shapes.medium
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
-                        .testTag(testTagForSettingCategory(category.categoryId)),
+                        .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
