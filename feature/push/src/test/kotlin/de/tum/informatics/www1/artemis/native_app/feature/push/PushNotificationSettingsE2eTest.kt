@@ -140,15 +140,16 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
 
         Logger.info("Selected setting for switch=$setting")
 
-        // Click on push checkbox of setting
+        // Click on push switch of setting
         composeTestRule
             .onNode(
                 hasAnyAncestor(hasTestTag(testTagForSettingCategory(category.categoryId)))
                         and hasAnyAncestor(hasTestTag(testTagForSetting(setting.settingId)))
-                        and hasAnyAncestor(hasTestTag(TEST_TAG_PUSH_SWITCH))
                         and hasClickAction()
             )
             .performScrollTo()
+
+        composeTestRule.onNode(hasTestTag(TEST_TAG_PUSH_SWITCH))
             .performClick()
 
         val saveSettingsResult = runBlocking {

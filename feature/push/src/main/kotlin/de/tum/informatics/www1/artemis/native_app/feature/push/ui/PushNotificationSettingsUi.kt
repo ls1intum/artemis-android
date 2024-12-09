@@ -166,7 +166,7 @@ private fun ReceivePushNotificationsSwitch(
                 Text(
                     modifier = Modifier.weight(1f),
                     text = stringResource(id = R.string.push_notification_settings_receive_label),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyLarge
                 )
 
                 Switch(
