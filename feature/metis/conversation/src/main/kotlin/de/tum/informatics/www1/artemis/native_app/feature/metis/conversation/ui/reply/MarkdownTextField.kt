@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getString
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
@@ -71,7 +72,7 @@ internal fun MarkdownTextField(
             if (mimeType in FileValidationConstants.ALLOWED_MIME_TYPES) {
                 onFileSelect(uri, resolveFileName(context, uri))
             } else {
-                Toast.makeText(context, "Unsupported file type selected.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(context, R.string.markdown_textfield_unsupported_warning), Toast.LENGTH_SHORT).show()
             }
         }
 

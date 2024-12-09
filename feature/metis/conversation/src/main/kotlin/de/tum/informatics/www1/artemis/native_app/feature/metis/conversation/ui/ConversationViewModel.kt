@@ -2,9 +2,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
@@ -726,7 +726,6 @@ internal open class ConversationViewModel(
     }
 
     fun onFileSelected(uri: Uri?, fileName: String, context: Context) {
-        Log.d("ConversationViewModel", "File selected: $uri")
         viewModelScope.launch {
             _selectedFileUri.emit(uri)
             _selectedFileName.emit(fileName)
@@ -744,11 +743,11 @@ internal open class ConversationViewModel(
 
                             val maxFileSize = 5 * 1024 * 1024
                             if (fileSize > maxFileSize) {
-                                throw IllegalArgumentException("The file size exceeds the limit of 5MB.")
+                                throw IllegalArgumentException(getString(context, R.string.conversation_vm_file_size_exceed))
                             }
                             inputStream.readBytes()
                         }
-                    } ?: throw IllegalArgumentException("No file selected")
+                    } ?: throw IllegalArgumentException(getString(context, R.string.conversation_vm_file_upload_failed))
                 }
 
                 val response = metisModificationService.uploadFileOrImage(
@@ -763,7 +762,7 @@ internal open class ConversationViewModel(
 
                 val fileUploadResponse = (response as NetworkResponse.Response).data
                 val filePath = fileUploadResponse.path
-                    ?: throw IllegalArgumentException("There has been a prob")
+                    ?: throw IllegalArgumentException(getString(context, R.string.conversation_vm_file_upload_failed))
 
                 val currentText = newMessageText.value.text
                 val updatedText = if (isImage(_selectedFileName.value)) {
