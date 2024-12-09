@@ -105,6 +105,7 @@ internal fun <T : IBasePost> MetisReplyHandler(
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (T, String) -> Deferred<MetisModificationFailure?>,
     onResolvePost: ((T) -> Deferred<MetisModificationFailure?>)?,
+    onPinPost: ((T) -> Deferred<MetisModificationFailure?>)?,
     onDeletePost: (T) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (T, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     content: @Composable (
@@ -113,6 +114,7 @@ internal fun <T : IBasePost> MetisReplyHandler(
         onRequestResolvePostDelegate: (T) -> Unit,
         onRequestReactWithEmojiDelegate: (T, emojiId: String, create: Boolean) -> Unit,
         onDeletePostDelegate: (T) -> Unit,
+        onPinPostDelegate: (T) -> Unit,
         updateFailureStateDelegate: (MetisModificationFailure?) -> Unit
     ) -> Unit
 ) {
@@ -149,6 +151,11 @@ internal fun <T : IBasePost> MetisReplyHandler(
             metisModificationTask = onRequestReactWithEmoji(post, emojiId, create)
         },
         { post -> metisModificationTask = onDeletePost(post) },
+        { post ->
+            if (onPinPost != null) {
+                metisModificationTask = onPinPost(post)
+            }
+        },
         { metisFailure = it }
     )
 

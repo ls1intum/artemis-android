@@ -211,6 +211,7 @@ interface MetisDao {
             sp.context,
             sp.title,
             sp.resolved,
+            sp.display_priority,
             u.name as author_name,
             p.author_role,
             p.author_id as author_id
@@ -237,6 +238,7 @@ interface MetisDao {
                 sp.context,
                 sp.title,
                 sp.resolved,
+                sp.display_priority,
                 u.name as author_name,
                 p.author_role,
                 p.author_id as author_id
@@ -272,6 +274,7 @@ interface MetisDao {
                 sp.context,
                 sp.title,
                 sp.resolved,
+                sp.display_priority,
                 u.name as author_name,
                 p.author_role,
                 p.author_id as author_id
