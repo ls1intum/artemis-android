@@ -51,6 +51,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -95,6 +96,7 @@ internal fun PostItem(
     postItemViewType: PostItemViewType,
     clientId: Long,
     displayHeader: Boolean,
+    postActions: PostActions,
     onClickOnReaction: ((emojiId: String, create: Boolean) -> Unit)?,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -108,7 +110,7 @@ internal fun PostItem(
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
     val applyPinStatusToModifier: @Composable (Modifier) -> Modifier = {
-        if (isPinned) {
+        if (isPinned && !isExpanded) {
             modifier
                 .clip(
                     MaterialTheme.shapes.small
@@ -227,6 +229,9 @@ internal fun PostItem(
 
                 if (!post?.reactions.isNullOrEmpty()) {
                     Box(modifier = Modifier.height(2.dp))
+                }
+                if (isExpanded) {
+                    //PostActionBar(modifier = Modifier.fillMaxWidth(), postActions = postActions, repliesCount = postItemViewType.answerPosts.size)
                 }
             }
         }

@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostContextBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 
 /**
@@ -29,6 +31,7 @@ internal fun PostWithBottomSheet(
         postItemViewType = postItemViewType,
         clientId = clientId,
         displayHeader = displayHeader,
+        postActions = postActions,
         onClickOnReaction = postActions.onClickReaction,
         onClick = onClick,
         onLongClick = {
