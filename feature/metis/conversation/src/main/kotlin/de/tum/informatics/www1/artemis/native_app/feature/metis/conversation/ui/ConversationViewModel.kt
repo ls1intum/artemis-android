@@ -1,7 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
+import android.content.ContentResolver
 import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
@@ -34,6 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.asMetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants.isImage
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
@@ -66,6 +73,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,6 +91,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -260,6 +269,9 @@ internal open class ConversationViewModel(
         MutableStateFlow(TextFieldValue(""))
 
     val serverUrl = serverUrlStateFlow(serverConfigurationService)
+
+    private val _selectedFileUri = MutableStateFlow<Uri?>(null)
+    private val _selectedFileName = MutableStateFlow<String>("")
 
     init {
         viewModelScope.launch(coroutineContext) {
@@ -715,4 +727,87 @@ internal open class ConversationViewModel(
             imageProvider.createImageLoader(context, authorizationToken)
         }
     }
+
+    fun onFileSelected(uri: Uri?, context: Context) {
+        viewModelScope.launch {
+            _selectedFileUri.emit(uri)
+            val fileName = resolveFileName(context, uri)
+            _selectedFileName.emit(fileName)
+            uploadFileOrImage(context)
+        }
+    }
+
+    private fun uploadFileOrImage(context: Context) {
+        viewModelScope.launch(coroutineContext) {
+            try {
+                val fileBytes = withContext(Dispatchers.IO) {
+                    _selectedFileUri.value?.let { uri ->
+                        context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                            val fileSize = inputStream.available()
+
+                            val maxFileSize = 5 * 1024 * 1024
+                            if (fileSize > maxFileSize) {
+                                throw IllegalArgumentException(getString(context, R.string.conversation_vm_file_size_exceed))
+                            }
+                            inputStream.readBytes()
+                        }
+                    } ?: throw IllegalArgumentException(getString(context, R.string.conversation_vm_file_upload_failed))
+                }
+
+                val response = metisModificationService.uploadFileOrImage(
+                    context = metisContext,
+                    courseId = courseId,
+                    conversationId = conversationId,
+                    fileBytes = fileBytes,
+                    fileName = _selectedFileName.value,
+                    serverUrl = serverConfigurationService.serverUrl.first(),
+                    authToken = accountService.authToken.first()
+                )
+
+                val fileUploadResponse = (response as NetworkResponse.Response).data
+                val filePath = fileUploadResponse.path
+                    ?: throw IllegalArgumentException(getString(context, R.string.conversation_vm_file_upload_failed))
+
+                val currentText = newMessageText.value.text
+                val updatedText = if (isImage(_selectedFileName.value)) {
+                    "$currentText\n![${_selectedFileName.value}]($filePath)\n" // Image markdown
+                } else {
+                    "$currentText\n[${_selectedFileName.value}]($filePath)\n"  // File markdown
+                }
+                newMessageText.value = TextFieldValue(updatedText)
+                clearSelectedFile()
+            } catch (e: Exception) {
+                clearSelectedFile()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        e.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    private fun clearSelectedFile() {
+        _selectedFileUri.value = null
+        _selectedFileName.value = ""
+    }
+
+    private fun resolveFileName(context: Context, uri: Uri?): String {
+        return try {
+            val resolver: ContentResolver = context.contentResolver
+            uri?.let {
+                resolver.query(it, null, null, null, null)?.use { cursor ->
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    cursor.moveToFirst()
+                    cursor.getString(nameIndex)
+                }
+            } ?: uri?.lastPathSegment.orEmpty()
+        } catch (e: Exception) {
+            Log.e("MarkdownTextField", "Error resolving file name", e)
+            uri?.lastPathSegment.orEmpty()
+        }
+    }
+
 }
