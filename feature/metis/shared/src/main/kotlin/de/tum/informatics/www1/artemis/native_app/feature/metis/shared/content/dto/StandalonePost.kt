@@ -32,7 +32,8 @@ data class StandalonePost(
     constructor(post: PostPojo, conversation: Conversation) : this(
         id = post.serverPostId,
         author = User(
-            id = post.authorId
+            id = post.authorId,
+            imageUrl = post.authorImageUrl
         ),
         authorRole = post.authorRole,
         content = post.content,
