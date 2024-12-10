@@ -48,10 +48,12 @@ import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors.EditedGray
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors.PinnedMessageBackgroundColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors.UnsentMessageTextColor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -62,16 +64,6 @@ import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.koin.compose.koinInject
-
-private val EditedGray: Color
-    @Composable get() = Color.Gray
-
-private val UnsentMessageTextColor: Color
-    @Composable get() = Color.Gray
-
-private val PinnedMessageBackgroundColor: Color
-    @Composable get() = Color(0xFFFFA500).copy(alpha = 0.25f)
-
 
 sealed class PostItemViewType {
 
@@ -96,7 +88,6 @@ internal fun PostItem(
     postItemViewType: PostItemViewType,
     clientId: Long,
     displayHeader: Boolean,
-    postActions: PostActions,
     onClickOnReaction: ((emojiId: String, create: Boolean) -> Unit)?,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -229,9 +220,6 @@ internal fun PostItem(
 
                 if (!post?.reactions.isNullOrEmpty()) {
                     Box(modifier = Modifier.height(2.dp))
-                }
-                if (isExpanded) {
-                    //PostActionBar(modifier = Modifier.fillMaxWidth(), postActions = postActions, repliesCount = postItemViewType.answerPosts.size)
                 }
             }
         }

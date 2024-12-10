@@ -31,7 +31,6 @@ internal fun PostWithBottomSheet(
         postItemViewType = postItemViewType,
         clientId = clientId,
         displayHeader = displayHeader,
-        postActions = postActions,
         onClickOnReaction = postActions.onClickReaction,
         onClick = onClick,
         onLongClick = {
