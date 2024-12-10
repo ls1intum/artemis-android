@@ -13,5 +13,11 @@
 
     <string name="post_edited_hint">(edited)</string>
 
+    <string name="post_replies_count">%d Replies</string>
+    <plurals name="post_replies_count">
+        <item quantity="one">%d Reply</item>
+        <item quantity="other">%d Replies</item>
+    </plurals>
+
     <string name="post_sending_failed">Sending post failed. Click to try again.</string>
 </resources>

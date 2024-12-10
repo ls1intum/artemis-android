@@ -11,6 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.BaseChatUITest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_POST_CONTEXT_BOTTOM_SHEET
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import org.junit.Test
 import org.junit.experimental.categories.Category
