@@ -124,7 +124,7 @@ noties-markwon-image-coil = { group = "io.noties.markwon", name = "image-coil", 
 oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 placeholder-material = { group = "io.github.fornewid", name = "placeholder-material3", version.ref = "placeholderMaterial" }
 play-services-oss-licences = { group = "com.google.android.gms", name = "play-services-oss-licenses", version = "17.1.0" }
-robolectric = { group = "org.robolectric", name = "robolectric", version = "4.13" }
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.14.1" }
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry-android" }
 sentry-compose-android = { group = "io.sentry", name = "sentry-compose-android", version.ref = "sentry-android" }
 toolbar-compose = { group = "me.onebone", name = "toolbar-compose", version = "2.3.5" }
