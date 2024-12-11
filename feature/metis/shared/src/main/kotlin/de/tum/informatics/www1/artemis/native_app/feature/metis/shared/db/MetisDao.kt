@@ -214,7 +214,8 @@ interface MetisDao {
             sp.display_priority,
             u.name as author_name,
             p.author_role,
-            p.author_id as author_id
+            p.author_id as author_id,
+            u.image_url as author_image_url
         from 
             metis_post_context mpc, postings p, standalone_postings sp, users u
         where
@@ -241,7 +242,8 @@ interface MetisDao {
                 sp.display_priority,
                 u.name as author_name,
                 p.author_role,
-                p.author_id as author_id
+                p.author_id as author_id,
+                u.image_url as author_image_url
             from
                 metis_post_context mpc,
                 postings p,
@@ -277,7 +279,8 @@ interface MetisDao {
                 sp.display_priority,
                 u.name as author_name,
                 p.author_role,
-                p.author_id as author_id
+                p.author_id as author_id,
+                u.image_url as author_image_url
             from
                 metis_post_context mpc,
                 postings p,

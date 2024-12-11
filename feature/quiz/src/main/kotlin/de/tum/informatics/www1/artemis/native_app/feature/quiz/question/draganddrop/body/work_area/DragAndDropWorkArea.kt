@@ -27,7 +27,7 @@ import androidx.core.graphics.scale
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.image.loadAsyncImageDrawable
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.DefaultImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.BaseImageProviderImpl
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 
 internal sealed interface DragAndDropAreaType {
@@ -59,9 +59,9 @@ internal fun DragAndDropWorkArea(
 ) {
     val context = LocalContext.current
 
-    val defaultImageProvider = DefaultImageProvider()
+    val imageProvider = BaseImageProviderImpl()
     val request = remember(imageUrl, questionId) {
-        defaultImageProvider.createImageRequest(
+        imageProvider.createImageRequest(
             context,
             imageUrl,
             serverUrl,

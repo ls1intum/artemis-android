@@ -27,7 +27,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Programmin
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.DefaultImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.BaseImageProviderImpl
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -776,7 +776,7 @@ internal open class ConversationViewModel(
 
     fun createMarkdownImageLoader(context: Context): Deferred<ImageLoader> {
         return viewModelScope.async(coroutineContext) {
-            val imageProvider = DefaultImageProvider()
+            val imageProvider = BaseImageProviderImpl()
             val authorizationToken = accountService.authToken.first()
             imageProvider.createImageLoader(context, authorizationToken)
         }

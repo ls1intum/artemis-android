@@ -30,6 +30,8 @@ data class PostPojo(
     override val authorRole: UserRole,
     @ColumnInfo(name = "author_id")
     override val authorId: Long,
+    @ColumnInfo(name = "author_image_url")
+    override val authorImageUrl: String?,
     @ColumnInfo(name = "creation_date")
     override val creationDate: Instant,
     @ColumnInfo(name = "updated_date")
