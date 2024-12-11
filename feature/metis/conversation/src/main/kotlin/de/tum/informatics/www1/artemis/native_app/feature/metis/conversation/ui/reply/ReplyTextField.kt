@@ -15,10 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +42,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -54,6 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ReplyState
 import kotlinx.coroutines.CompletableDeferred
@@ -81,7 +83,7 @@ internal fun ReplyTextField(
 
     Surface(
         modifier = modifier.defaultMinSize(minHeight = 48.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = MaterialTheme.colorScheme.surfaceContainer,
         shape = MaterialTheme.shapes.large
     ) {
         Box(
@@ -103,10 +105,8 @@ internal fun ReplyTextField(
                                 .fillMaxWidth()
                                 .testTag(TEST_TAG_CAN_CREATE_REPLY),
                             replyMode = replyMode,
-                            onReply = {
-                                targetReplyState.onCreateReply()
-                            },
-                            title = "Message $title",
+                            onReply = { targetReplyState.onCreateReply() },
+                            title = stringResource(R.string.create_reply_click_to_write, title),
                             onFileSelected = { uri -> onFileSelected(uri) }
                         )
                     }
@@ -127,7 +127,7 @@ internal fun ReplyTextField(
                                 .fillMaxWidth()
                                 .padding(horizontal = 8.dp),
                             onCancel = targetReplyState.onCancelSendReply,
-                            title = title
+                            title = stringResource(R.string.create_reply_sending_reply)
                         )
                     }
                 }
@@ -254,7 +254,7 @@ private fun CreateReplyUi(
                             Icon(
                                 imageVector = when (replyMode) {
                                     is ReplyMode.EditMessage -> Icons.Default.Edit
-                                    is ReplyMode.NewMessage -> Icons.Default.Send
+                                    is ReplyMode.NewMessage -> Icons.AutoMirrored.Filled.Send
                                 },
                                 contentDescription = null
                             )
@@ -491,7 +491,7 @@ private fun UnfocusedPreviewReplyTextField(onRequestShowTextField: () -> Unit, t
         )
 
         Icon(
-            imageVector = Icons.Default.Send,
+            imageVector = Icons.AutoMirrored.Filled.Send,
             contentDescription = null,
             tint = LocalContentColor.current.copy(alpha = DisabledContentAlpha)
         )
