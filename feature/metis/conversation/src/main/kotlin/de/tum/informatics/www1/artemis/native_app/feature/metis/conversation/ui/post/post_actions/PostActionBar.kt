@@ -110,7 +110,7 @@ private fun ActionBar(
 
         postActions.requestEditPost?.let {
             IconButton(
-                modifier = Modifier.testTag("TEST_TAG_POST_EDIT"),
+                modifier = Modifier.testTag(TEST_TAG_POST_EDIT),
                 onClick = {
                     it()
                 }
@@ -125,7 +125,7 @@ private fun ActionBar(
 
         postActions.requestDeletePost?.let {
             IconButton(
-                modifier = Modifier.testTag("TEST_TAG_POST_DELETE"),
+                modifier = Modifier.testTag(TEST_TAG_POST_DELETE),
                 onClick = {
                     it()
                 }
