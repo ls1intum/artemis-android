@@ -21,6 +21,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_PROFILE_PICTURE_IMAGE
@@ -119,7 +120,7 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
     ) {
         composeTestRule.setContent {
             CompositionLocalProvider(
-               LocalArtemisImageProvider provides artemisImageProviderStub
+                LocalArtemisImageProvider provides artemisImageProviderStub
             ) {
                 MetisChatList(
                     modifier = Modifier,
@@ -130,8 +131,12 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
                     ),
                     bottomItem = null,
                     clientId = clientId,
-                    hasModerationRights = false,
-                    isAtLeastTutorInCourse = false,
+                    postActionFlags = PostActionFlags(
+                        isAbleToPin = false,
+                        isAtLeastTutorInCourse = false,
+                        hasModerationRights = false
+                    ),
+                    onPinPost = { CompletableDeferred() },
                     listContentPadding = PaddingValues(0.dp),
                     serverUrl = "",
                     courseId = courseId,
