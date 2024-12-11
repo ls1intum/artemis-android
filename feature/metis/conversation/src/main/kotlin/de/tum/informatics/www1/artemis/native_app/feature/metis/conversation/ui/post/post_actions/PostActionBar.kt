@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -27,6 +28,11 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostCo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
+
+internal const val TEST_TAG_PIN_POST = "TEST_TAG_PIN_POST"
+internal const val TEST_TAG_POST_EDIT = "TEST_TAG_POST_EDIT"
+internal const val  TEST_TAG_POST_DELETE = "TEST_TAG_POST_DELETE"
+
 
 @Composable
 fun PostActionBar(
@@ -85,6 +91,7 @@ private fun ActionBar(
             VerticalDivider()
 
             IconButton(
+                modifier = Modifier.testTag(TEST_TAG_PIN_POST),
                 onClick = {
                     postActions.onPinPost.invoke()
                 }
@@ -103,6 +110,7 @@ private fun ActionBar(
 
         postActions.requestEditPost?.let {
             IconButton(
+                modifier = Modifier.testTag("TEST_TAG_POST_EDIT"),
                 onClick = {
                     it()
                 }
@@ -117,6 +125,7 @@ private fun ActionBar(
 
         postActions.requestDeletePost?.let {
             IconButton(
+                modifier = Modifier.testTag("TEST_TAG_POST_DELETE"),
                 onClick = {
                     it()
                 }
