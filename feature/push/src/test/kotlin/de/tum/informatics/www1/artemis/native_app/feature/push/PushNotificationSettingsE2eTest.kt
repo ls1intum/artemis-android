@@ -4,11 +4,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
@@ -26,10 +26,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.N
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.impl.NotificationSettingsServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.push.ui.TEST_TAG_PUSH_SWITCH
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.group
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.testTagForSetting
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.testTagForSettingCategory
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.testTagForSwitch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -141,14 +141,8 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
         Logger.info("Selected setting for switch=$setting")
 
         // Click on push switch of setting
-        composeTestRule
-            .onNode(
-                hasAnyAncestor(hasTestTag(testTagForSettingCategory(category.categoryId)))
-                        and hasAnyAncestor(hasTestTag(testTagForSetting(setting.settingId)))
-                        and hasAnyAncestor(hasTestTag(TEST_TAG_PUSH_SWITCH))
-                        and hasClickAction()
-            )
-            .performScrollTo()
+        composeTestRule.onNodeWithTag(testTagForSwitch(setting.settingId))
+            .assertHasClickAction()
             .performClick()
 
         val saveSettingsResult = runBlocking {

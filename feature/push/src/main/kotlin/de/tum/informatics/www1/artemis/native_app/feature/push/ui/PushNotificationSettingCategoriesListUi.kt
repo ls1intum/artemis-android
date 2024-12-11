@@ -25,7 +25,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.PushNotificationSetting
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.setting
 
-internal const val TEST_TAG_PUSH_SWITCH= "TEST_TAG_PUSH_SWITCH"
+private const val TEST_TAG_PUSH_SWITCH = "TEST_TAG_PUSH_SWITCH"
+internal fun testTagForSwitch(settingId: String) = TEST_TAG_PUSH_SWITCH + settingId
 
 internal fun testTagForSettingCategory(categoryId: String) = "notification category $categoryId"
 
@@ -66,14 +67,14 @@ private fun PushNotificationSettingsList(
     ) {
         settingCategories.forEach { category ->
             Card(
-                modifier = modifier
-                    .testTag(testTagForSettingCategory(category.categoryId)),
+                modifier = modifier,
                 shape = MaterialTheme.shapes.medium
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .testTag(testTagForSettingCategory(category.categoryId)),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
@@ -168,7 +169,7 @@ private fun PushNotificationSettingEntry(
             Switch(
                 modifier = Modifier
                     .scale(0.9f)
-                    .testTag(TEST_TAG_PUSH_SWITCH),
+                    .testTag(testTagForSwitch(setting.settingId)),
                 checked = setting.push,
                 onCheckedChange = { onUpdate(setting.webapp, setting.email, it) }
             )
