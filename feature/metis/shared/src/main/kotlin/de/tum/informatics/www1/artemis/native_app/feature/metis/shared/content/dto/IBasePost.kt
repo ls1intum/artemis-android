@@ -6,6 +6,7 @@ sealed interface IBasePost {
     val authorName: String?
     val authorId: Long?
     val authorRole: UserRole?
+    val authorImageUrl: String?
     val creationDate: Instant?
     val updatedDate: Instant?
     val content: String?

@@ -16,11 +16,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -60,6 +62,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -155,6 +159,11 @@ internal fun PostItem(
             postStatus = postStatus,
             authorRole = post?.authorRole,
             authorName = post?.authorName,
+            profilePictureData = ProfilePictureData.create(
+                userId = post?.authorId,
+                username = post?.authorName,
+                imageUrl = post?.authorImageUrl
+            ),
             creationDate = post?.creationDate,
             expanded = isExpanded,
             displayHeader = displayHeader
@@ -231,6 +240,7 @@ private fun PostHeadline(
     modifier: Modifier,
     authorRole: UserRole?,
     authorName: String?,
+    profilePictureData: ProfilePictureData,
     creationDate: Instant?,
     postStatus: CreatePostService.Status,
     expanded: Boolean = false,
@@ -243,11 +253,14 @@ private fun PostHeadline(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                HeadlineAuthorIcon(authorRole)
+                HeadlineProfilePicture(
+                    profilePictureData = profilePictureData,
+                )
 
                 HeadlineAuthorInfo(
                     modifier = Modifier.fillMaxWidth(),
                     authorName = authorName,
+                    authorRole = authorRole,
                     creationDate = creationDate,
                     expanded = true
                 )
@@ -262,7 +275,10 @@ private fun PostHeadline(
         ) {
             val doDisplayHeader = displayHeader || postStatus == CreatePostService.Status.FAILED
 
-            HeadlineAuthorIcon(authorRole, displayIcon = doDisplayHeader)
+            HeadlineProfilePicture(
+                profilePictureData = profilePictureData,
+                displayImage = doDisplayHeader
+            )
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -280,6 +296,7 @@ private fun PostHeadline(
                     HeadlineAuthorInfo(
                         modifier = Modifier.fillMaxWidth(),
                         authorName = authorName,
+                        authorRole  = authorRole,
                         creationDate = creationDate,
                         expanded = false
                     )
@@ -322,21 +339,12 @@ private fun IconLabel(
 private fun HeadlineAuthorInfo(
     modifier: Modifier,
     authorName: String?,
+    authorRole: UserRole?,
     creationDate: Instant?,
     expanded: Boolean
 ) {
     val relativeTimeTo = remember(creationDate) {
         creationDate ?: Clock.System.now()
-    }
-
-    val authorNameContent: @Composable () -> Unit = {
-        Text(
-            modifier = Modifier,
-            text = remember(authorName) { authorName ?: "Placeholder" },
-            maxLines = 1,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold
-        )
     }
 
     val creationDateContent: @Composable () -> Unit = {
@@ -351,8 +359,7 @@ private fun HeadlineAuthorInfo(
 
     if (expanded) {
         Column(modifier) {
-            authorNameContent()
-
+            AuthorRoleAndNameRow(authorRole, authorName)
             creationDateContent()
         }
     } else {
@@ -361,35 +368,70 @@ private fun HeadlineAuthorInfo(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            authorNameContent()
-
+            AuthorRoleAndNameRow(authorRole, authorName)
             creationDateContent()
         }
     }
 }
 
 @Composable
-private fun HeadlineAuthorIcon(
+private fun AuthorRoleAndNameRow(
     authorRole: UserRole?,
-    displayIcon: Boolean = true
+    authorName: String?
 ) {
-    if (displayIcon) {
-        val icon = when (authorRole) {
-            UserRole.INSTRUCTOR -> Icons.Default.School
-            UserRole.TUTOR -> Icons.Default.SupervisorAccount
-            UserRole.USER -> Icons.Default.Person
-            null -> Icons.Default.Person
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        HeadlineAuthorIcon(authorRole)
+
+        Spacer(modifier = Modifier.width(4.dp))
+
+        Text(
+            modifier = Modifier,
+            text = remember(authorName) { authorName ?: "Placeholder" },
+            maxLines = 1,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun HeadlineProfilePicture(
+    profilePictureData: ProfilePictureData,
+    displayImage: Boolean = true
+) {
+    val size = 30.dp
+    Box(modifier = Modifier.size(size)) {
+        if (!displayImage) {
+            return
         }
 
-        Icon(
-            modifier = Modifier.size(30.dp),
-            imageVector = icon,
-            contentDescription = null
+        ProfilePicture(
+            modifier = Modifier
+                .size(size)
+                .clip(MaterialTheme.shapes.extraSmall),
+            profilePictureData = profilePictureData,
         )
-    } else {
-        Box(modifier = Modifier.size(30.dp))
+    }
+}
+
+@Composable
+private fun HeadlineAuthorIcon(
+    authorRole: UserRole?,
+) {
+    val icon = when (authorRole) {
+        UserRole.INSTRUCTOR -> Icons.Default.School
+        UserRole.TUTOR -> Icons.Default.SupervisorAccount
+        UserRole.USER -> Icons.Default.Person
+        null -> Icons.Default.Person
     }
 
+    Icon(
+        modifier = Modifier.size(16.dp),
+        imageVector = icon,
+        contentDescription = null
+    )
 }
 
 /**
