@@ -54,7 +54,7 @@ fun PostActionBar(
                 count = repliesCount,
                 repliesCount
             ),
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.bodyMedium
         )
 
