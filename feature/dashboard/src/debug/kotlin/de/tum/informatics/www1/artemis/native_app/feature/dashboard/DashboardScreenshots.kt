@@ -16,10 +16,10 @@ import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.CourseImageProvider
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalCourseImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.CourseImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalCourseImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardService
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CourseOverviewViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CoursesOverview

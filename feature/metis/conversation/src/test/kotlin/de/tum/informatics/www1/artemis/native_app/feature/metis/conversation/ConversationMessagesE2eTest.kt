@@ -1,14 +1,15 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
-import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.predefinedEmojiIds
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisSortingStrategy
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -222,6 +223,26 @@ class ConversationMessagesE2eTest : ConversationMessagesBaseTest() {
                 .orThrow("Could not download edited post")
 
             assertEquals(newText, editedPost.content, "Edited post does not have the updated text content")
+        }
+    }
+
+    @Test
+    fun `can pin message`() {
+        runTest(timeout = DefaultTimeoutMillis.milliseconds * 4) {
+            val basePost = postDefaultMessage()
+
+            metisModificationService.updatePostDisplayPriority(
+                metisContext,
+                basePost.copy(displayPriority = DisplayPriority.PINNED),
+                testServerUrl,
+                accessToken
+            ).orThrow("Could not pin message")
+
+            val editedPost = metisService
+                .getPost(metisContext, basePost.serverPostId!!, testServerUrl, accessToken)
+                .orThrow("Could not download pinned post")
+
+            assertEquals(DisplayPriority.PINNED, editedPost.displayPriority, "Edited post does not have the updated display priority")
         }
     }
 }

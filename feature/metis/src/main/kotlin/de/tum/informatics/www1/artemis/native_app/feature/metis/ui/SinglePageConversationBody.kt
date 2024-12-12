@@ -154,6 +154,7 @@ internal fun SinglePageConversationBody(
                     ConversationAddMembersScreen(
                         modifier = modifier,
                         courseId = courseId,
+                        conversationId = config.conversationId,
                         onNavigateBack = { configuration = config.prevConfiguration }
                     )
                 }

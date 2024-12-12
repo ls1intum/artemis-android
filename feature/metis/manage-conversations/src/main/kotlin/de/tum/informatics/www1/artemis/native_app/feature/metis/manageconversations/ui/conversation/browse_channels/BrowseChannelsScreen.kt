@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ListItem
@@ -171,7 +170,7 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
                             .padding(end = 8.dp)
                             .background(
                                 MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(4.dp)
+                                shape = MaterialTheme.shapes.extraSmall
                             )
                             .padding(horizontal = 8.dp, vertical = 4.dp),
                         color = MaterialTheme.colorScheme.onPrimary,
@@ -199,7 +198,7 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
-                    shape = RoundedCornerShape(4.dp),
+                    shape = MaterialTheme.shapes.extraSmall,
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
 
                 ) {
