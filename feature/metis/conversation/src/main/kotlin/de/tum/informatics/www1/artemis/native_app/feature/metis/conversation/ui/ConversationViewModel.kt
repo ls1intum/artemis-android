@@ -39,6 +39,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteCategory
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteHint
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
@@ -49,6 +50,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ConversationWebsocketDto
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
@@ -56,6 +58,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.hasModerationRights
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
@@ -165,7 +168,7 @@ internal open class ConversationViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
-    val hasModerationRights: StateFlow<Boolean> = flatMapLatest(
+    private val hasModerationRights: StateFlow<Boolean> = flatMapLatest(
         serverConfigurationService.serverUrl,
         accountService.authToken,
         onRequestReload.onStart { emit(Unit) }
@@ -184,7 +187,7 @@ internal open class ConversationViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
-    val isAtLeastTutorInCourse: StateFlow<Boolean> = flatMapLatest(
+    private val isAtLeastTutorInCourse: StateFlow<Boolean> = flatMapLatest(
         serverConfigurationService.serverUrl,
         accountService.authToken,
         course,
@@ -253,6 +256,38 @@ internal open class ConversationViewModel(
         }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
+
+    private val isAbleToPin: StateFlow<Boolean> = conversation
+        .map { conversation -> conversation.bind {
+            when (it) {
+                // Group Chat: Only Creator can pin
+                is GroupChat -> it.isCreator
+                // Channel: Only Moderators can pin
+                is ChannelChat -> it.hasModerationRights
+                else -> true
+            }
+        }.orElse(false) }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
+
+    val postActionFlags: StateFlow<PostActionFlags> = combine(
+        isAbleToPin,
+        hasModerationRights,
+        isAtLeastTutorInCourse
+    ) { isAbleToPin, hasModerationRights, isAtLeastTutorInCourse ->
+        PostActionFlags(
+            isAbleToPin = isAbleToPin,
+            hasModerationRights = hasModerationRights,
+            isAtLeastTutorInCourse = isAtLeastTutorInCourse
+        )
+    }.stateIn(
+        scope = viewModelScope + coroutineContext,
+        started = SharingStarted.Eagerly,
+        initialValue = PostActionFlags(
+            isAbleToPin = false,
+            hasModerationRights = false,
+            isAtLeastTutorInCourse = false
+        )
+    )
 
     override val legalTagChars: List<Char> = listOf('@', '#')
 
@@ -365,6 +400,37 @@ internal open class ConversationViewModel(
                 post = newPost,
                 serverUrl = serverConfigurationService.serverUrl.first(),
                 authToken = accountService.authToken.first()
+            )
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
+        }
+    }
+
+    fun togglePinPost(post: IStandalonePost): Deferred<MetisModificationFailure?> {
+        return viewModelScope.async(coroutineContext) {
+            val conversation =
+                loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
+
+            val newDisplayPriority = if (post.displayPriority == DisplayPriority.PINNED) {
+                DisplayPriority.NONE
+            } else {
+                DisplayPriority.PINNED
+            }
+
+            val newPost = when (post) {
+                is StandalonePost -> post.copy(displayPriority = newDisplayPriority)
+                is PostPojo -> StandalonePost(
+                    post = post.copy(displayPriority = newDisplayPriority),
+                    conversation = conversation
+                )
+
+                else -> throw IllegalArgumentException()
+            }
+
+            metisModificationService.updatePostDisplayPriority(
+                context = metisContext,
+                post = newPost,
+                serverUrl = serverConfigurationService.serverUrl.first(),
+                authToken = accountService.authToken.first(),
             )
                 .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
         }
