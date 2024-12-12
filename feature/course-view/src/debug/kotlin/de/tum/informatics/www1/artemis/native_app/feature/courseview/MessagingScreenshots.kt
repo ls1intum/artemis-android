@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -25,6 +26,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewBody
@@ -37,7 +39,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ProvideLocalVisibleMetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextManager
 import kotlinx.coroutines.CompletableDeferred
@@ -195,6 +197,15 @@ fun `Metis - Conversation Channel`() {
         ),
     ).reversed()
 
+    val visibleMetisContextManagerStub = object : VisibleMetisContextManager {
+        override fun registerMetisContext(metisContext: VisibleMetisContext) =
+            Unit
+
+        override fun unregisterMetisContext(metisContext: VisibleMetisContext) =
+            Unit
+    }
+
+    // TODO: Provide artemis image provider
     ScreenshotFrame(title = "Send and receive messages directly from the app") {
         CourseUiScreen(
             modifier = Modifier.fillMaxSize(),
@@ -204,14 +215,8 @@ fun `Metis - Conversation Channel`() {
             exerciseTabContent = { },
             lectureTabContent = { },
             communicationTabContent = {
-                ProvideLocalVisibleMetisContextManager(
-                    visibleMetisContextManager = object : VisibleMetisContextManager {
-                        override fun registerMetisContext(metisContext: VisibleMetisContext) =
-                            Unit
-
-                        override fun unregisterMetisContext(metisContext: VisibleMetisContext) =
-                            Unit
-                    }
+                CompositionLocalProvider(
+                    LocalVisibleMetisContextManager provides visibleMetisContextManagerStub,
                 ) {
                     ConversationChatListScreen(
                         modifier = Modifier.fillMaxSize(),
@@ -242,8 +247,11 @@ fun `Metis - Conversation Channel`() {
                                     PostsDataState.NotLoading
                                 ),
                                 clientId = 0L,
-                                hasModerationRights = true,
-                                isAtLeastTutorInCourse = true,
+                                postActionFlags = PostActionFlags(
+                                    isAbleToPin = true,
+                                    isAtLeastTutorInCourse = true,
+                                    hasModerationRights = true
+                                ),
                                 listContentPadding = PaddingValues(),
                                 serverUrl = "",
                                 courseId = 0,
@@ -252,6 +260,7 @@ fun `Metis - Conversation Channel`() {
                                 onCreatePost = { CompletableDeferred() },
                                 onEditPost = { _, _ -> CompletableDeferred() },
                                 onDeletePost = { CompletableDeferred() },
+                                onPinPost = { CompletableDeferred() },
                                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                                 bottomItem = null,
                                 onClickViewPost = {},
@@ -284,13 +293,15 @@ private fun generateMessage(
             authorName = name,
             authorRole = UserRole.USER,
             authorId = authorId,
+            authorImageUrl = null,
             creationDate = time,
             updatedDate = null,
             resolved = false,
             courseWideContext = null,
             tags = emptyList(),
             answers = emptyList(),
-            reactions = emptyList()
+            reactions = emptyList(),
+            displayPriority = null
         )
     )
 }

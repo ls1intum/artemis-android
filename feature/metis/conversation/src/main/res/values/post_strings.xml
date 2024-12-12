@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="post_edit">Edit message</string>
-    <string name="post_delete">Delete post</string>
-    <string name="post_copy_text">Copy text</string>
-    <string name="post_reply">Reply in thread</string>
+    <string name="post_edit">Edit Message</string>
+    <string name="post_delete">Delete Post</string>
+    <string name="post_copy_text">Copy Text</string>
+    <string name="post_reply">Reply in Thread</string>
     <string name="post_resolves">Resolves Post</string>
     <string name="post_does_not_resolve">Doesn\'t Resolve Post</string>
+    <string name="post_pin">Pin Post</string>
+    <string name="post_unpin">Unpin Post</string>
     <string name="post_is_resolved">Resolved</string>
+    <string name="post_is_pinned">Pinned</string>
 
     <string name="post_edited_hint">(edited)</string>
 
