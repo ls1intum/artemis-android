@@ -16,9 +16,9 @@ val LocalMarkwon: ProvidableCompositionLocal<Markwon?> =
 fun ProvideMarkwon(imageLoader: ImageLoader? = null, content: @Composable () -> Unit) {
     val context = LocalContext.current
 
-    val imageWith = context.resources.displayMetrics.widthPixels
+    val imageWidth = context.resources.displayMetrics.widthPixels
     val markdownRender: Markwon = remember(imageLoader) {
-        createMarkdownRender(context, imageLoader, imageWith)
+        createMarkdownRender(context, imageLoader, imageWidth)
     }
 
     CompositionLocalProvider(LocalMarkwon provides markdownRender) {
