@@ -1,10 +1,18 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture
 
 import androidx.compose.ui.graphics.Color
+import de.tum.informatics.www1.artemis.native_app.core.model.account.BaseAccount
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 
 sealed class ProfilePictureData {
 
     companion object {
+        fun from(user: BaseAccount): ProfilePictureData = create(
+            userId = user.id,
+            username = user.humanReadableName,
+            imageUrl = user.imageUrl
+        )
+
         fun create(userId: Long?, username: String?, imageUrl: String?): ProfilePictureData {
             if (userId == null || username.isNullOrEmpty()) {
                 return Unknown

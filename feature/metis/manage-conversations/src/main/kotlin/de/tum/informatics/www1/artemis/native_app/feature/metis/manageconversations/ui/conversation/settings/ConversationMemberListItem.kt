@@ -58,11 +58,7 @@ internal fun ConversationMemberListItem(
         },
         leadingContent = {
             ProfilePicture(
-                profilePictureData = ProfilePictureData.create(
-                    userId = member.id,
-                    username = member.username,
-                    imageUrl = member.imageUrl
-                )
+                profilePictureData = ProfilePictureData.from(member)
             )
         },
         trailingContent = {

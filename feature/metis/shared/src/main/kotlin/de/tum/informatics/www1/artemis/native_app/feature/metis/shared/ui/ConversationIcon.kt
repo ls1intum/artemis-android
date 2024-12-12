@@ -74,10 +74,6 @@ fun OneToOneChatIcon(
     val conversationPartner = oneToOneChat.members.first { it.id != clientId }
     ProfilePicture(
         modifier = modifier,
-        profilePictureData = ProfilePictureData.create(
-            userId = conversationPartner.id,
-            username = conversationPartner.humanReadableName,
-            imageUrl = conversationPartner.imageUrl
-        )
+        profilePictureData = ProfilePictureData.from(conversationPartner)
     )
 }
