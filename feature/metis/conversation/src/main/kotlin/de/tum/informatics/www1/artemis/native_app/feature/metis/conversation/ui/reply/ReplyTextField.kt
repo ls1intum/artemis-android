@@ -14,10 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -81,7 +81,7 @@ internal fun ReplyTextField(
 
     Surface(
         modifier = modifier.defaultMinSize(minHeight = 48.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = MaterialTheme.colorScheme.surfaceContainer,
         shape = MaterialTheme.shapes.large
     ) {
         Box(
@@ -250,7 +250,7 @@ private fun CreateReplyUi(
                             Icon(
                                 imageVector = when (replyMode) {
                                     is ReplyMode.EditMessage -> Icons.Default.Edit
-                                    is ReplyMode.NewMessage -> Icons.Default.Send
+                                    is ReplyMode.NewMessage -> Icons.AutoMirrored.Filled.Send
                                 },
                                 contentDescription = null
                             )
@@ -482,7 +482,7 @@ private fun UnfocusedPreviewReplyTextField(onRequestShowTextField: () -> Unit, t
         )
 
         Icon(
-            imageVector = Icons.Default.Send,
+            imageVector = Icons.AutoMirrored.Filled.Send,
             contentDescription = null,
             tint = LocalContentColor.current.copy(alpha = DisabledContentAlpha)
         )

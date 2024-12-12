@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SupervisorAccount
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +53,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
@@ -68,6 +71,10 @@ private val EditedGray: Color
 
 private val UnsentMessageTextColor: Color
     @Composable get() = Color.Gray
+
+private val PinnedMessageBackgroundColor: Color
+    @Composable get() = Color(0xFFFFA500).copy(alpha = 0.25f)
+
 
 sealed class PostItemViewType {
 
@@ -103,6 +110,17 @@ internal fun PostItem(
         else -> false
     }
 
+    val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
+    val applyPinStatusToModifier: @Composable (Modifier) -> Modifier = {
+        if (isPinned) {
+            modifier
+                .clip(
+                    MaterialTheme.shapes.small
+                )
+                .background(color = PinnedMessageBackgroundColor)
+        } else modifier
+    }
+
     // Retrieve post status
     val clientPostId = post?.clientPostId
     val postStatus = when {
@@ -122,15 +140,27 @@ internal fun PostItem(
                     it
                         .background(color = MaterialTheme.colorScheme.errorContainer)
                         .clickable(onClick = onRequestRetrySend)
-                } else modifier
-                    .combinedClickable(
-                        onClick = onClick,
-                        onLongClick = onLongClick
-                    )
+                } else {
+                    applyPinStatusToModifier(it)
+                        .combinedClickable(
+                            onClick = onClick,
+                            onLongClick = onLongClick
+                        )
+                }
             }
             .padding(PaddingValues(horizontal = Spacings.ScreenHorizontalSpacing)),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        if (isPinned) {
+            IconLabel(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                resourceString = R.string.post_is_pinned,
+                icon = Icons.Outlined.PushPin
+            )
+        }
+
         PostHeadline(
             modifier = Modifier.fillMaxWidth(),
             postStatus = postStatus,
@@ -176,17 +206,19 @@ internal fun PostItem(
                     when (post) {
                         is IStandalonePost -> {
                             if (post.resolved == true) {
-                                ResolvedLabel(
+                                IconLabel(
                                     modifier = Modifier.fillMaxWidth(),
-                                    resourceString = R.string.post_is_resolved
+                                    resourceString = R.string.post_is_resolved,
+                                    icon = Icons.Default.Check
                                 )
                             }
                         }
                         is IAnswerPost -> {
                             if (post.resolvesPost) {
-                                ResolvedLabel(
+                                IconLabel(
                                     modifier = Modifier.fillMaxWidth(),
-                                    resourceString = R.string.post_resolves
+                                    resourceString = R.string.post_resolves,
+                                    icon = Icons.Default.Check
                                 )
                             }
                         }
@@ -286,9 +318,10 @@ private fun PostHeadline(
 }
 
 @Composable
-private fun ResolvedLabel(
+private fun IconLabel(
     modifier: Modifier,
-    resourceString: Int
+    resourceString: Int,
+    icon: ImageVector
 ) {
     Row(
         modifier = modifier,
@@ -296,7 +329,7 @@ private fun ResolvedLabel(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Icon(
-            Icons.Default.Check,
+            icon,
             modifier = Modifier
                 .size(16.dp)
                 .fillMaxSize(),

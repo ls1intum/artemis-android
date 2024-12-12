@@ -20,7 +20,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +35,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.rememberPostActions
@@ -77,8 +77,7 @@ internal fun MetisChatList(
     ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
 
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
-    val hasModerationRights by viewModel.hasModerationRights.collectAsState()
-    val isAtLeastTutorInCourse by viewModel.isAtLeastTutorInCourse.collectAsState()
+    val postActionFlags by viewModel.postActionFlags.collectAsState()
 
     val serverUrl by viewModel.serverUrl.collectAsState()
 
@@ -98,8 +97,7 @@ internal fun MetisChatList(
             initialReplyTextProvider = viewModel,
             posts = posts.asPostsDataState(),
             clientId = clientId,
-            hasModerationRights = hasModerationRights,
-            isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+            postActionFlags = postActionFlags,
             listContentPadding = listContentPadding,
             serverUrl = serverUrl,
             courseId = viewModel.courseId,
@@ -109,6 +107,7 @@ internal fun MetisChatList(
             onCreatePost = viewModel::createPost,
             onEditPost = viewModel::editPost,
             onDeletePost = viewModel::deletePost,
+            onPinPost = viewModel::togglePinPost,
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onClickViewPost = onClickViewPost,
             onRequestRetrySend = viewModel::retryCreatePost,
@@ -124,8 +123,7 @@ fun MetisChatList(
     posts: PostsDataState,
     bottomItem: PostPojo?,
     clientId: Long,
-    hasModerationRights: Boolean,
-    isAtLeastTutorInCourse: Boolean,
+    postActionFlags: PostActionFlags,
     listContentPadding: PaddingValues,
     serverUrl: String,
     courseId: Long,
@@ -135,6 +133,7 @@ fun MetisChatList(
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
     onDeletePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
+    onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
@@ -145,9 +144,10 @@ fun MetisChatList(
         onCreatePost = onCreatePost,
         onEditPost = onEditPost,
         onResolvePost = null,
+        onPinPost = onPinPost,
         onDeletePost = onDeletePost,
         onRequestReactWithEmoji = onRequestReactWithEmoji,
-    ) { replyMode, onEditPostDelegate, _, onRequestReactWithEmojiDelegate, onDeletePostDelegate, updateFailureStateDelegate ->
+    ) { replyMode, onEditPostDelegate, _, onRequestReactWithEmojiDelegate, onDeletePostDelegate, onPinPostDelegate, updateFailureStateDelegate ->
         Column(modifier = modifier) {
             val informationModifier = Modifier
                 .fillMaxSize()
@@ -193,10 +193,10 @@ fun MetisChatList(
                             posts = posts,
                             clientId = clientId,
                             onClickViewPost = onClickViewPost,
-                            hasModerationRights = hasModerationRights,
-                            isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+                            postActionFlags = postActionFlags,
                             onRequestEdit = onEditPostDelegate,
                             onRequestDelete = onDeletePostDelegate,
+                            onRequestPin = onPinPostDelegate,
                             onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                             onRequestRetrySend = onRequestRetrySend
                         )
@@ -222,12 +222,12 @@ private fun ChatList(
     listContentPadding: PaddingValues,
     state: LazyListState,
     posts: PostsDataState.Loaded,
-    hasModerationRights: Boolean,
-    isAtLeastTutorInCourse: Boolean,
+    postActionFlags: PostActionFlags,
     clientId: Long,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
     onRequestDelete: (IStandalonePost) -> Unit,
+    onRequestPin: (IStandalonePost) -> Unit,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit
 ) {
@@ -255,8 +255,7 @@ private fun ChatList(
 
                     val postActions = rememberPostActions(
                         post = post,
-                        hasModerationRights = hasModerationRights,
-                        isAtLeastTutorInCourse = isAtLeastTutorInCourse,
+                        postActionFlags = postActionFlags,
                         clientId = clientId,
                         onRequestEdit = { onRequestEdit(post ?: return@rememberPostActions) },
                         onRequestDelete = {
@@ -269,6 +268,7 @@ private fun ChatList(
                             onClickViewPost(post?.standalonePostId ?: return@rememberPostActions)
                         },
                         onResolvePost = null,
+                        onPinPost = { onRequestPin(post ?: return@rememberPostActions) },
                         onRequestRetrySend = {
                             onRequestRetrySend(
                                 post?.standalonePostId ?: return@rememberPostActions

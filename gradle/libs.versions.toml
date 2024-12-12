@@ -14,17 +14,17 @@ androidGradlePlugin = "8.7.1"
 androidxNavigation = "2.8.4"
 androidxPaging = "3.3.4"
 androidxDataStore = "1.1.1"
-androidxPagingCompose = "3.2.1"
+androidxPagingCompose = "3.3.4"
 coil = "3.0.4"
 coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github.com/ls1intum/artemis-android/issues/171
 emoji2 = "1.5.0"
 kotlin = "1.9.25"
 kotlinxCoroutines = "1.9.0"
-kotlinxDatetime = "0.4.0"
+kotlinxDatetime = "0.6.1"
 kotlinxSerializationJson = "1.6.3"
 koin = "3.5.3"
 koinAndroidxCompose = "3.5.6"
-kover = "0.7.2"
+kover = "0.7.6"
 ktor = "2.3.13"
 krossbow = "5.2.0"
 markwon = "4.6.2"
@@ -87,7 +87,7 @@ coil-compose-core = { group = "io.coil-kt.coil3", name = "coil-compose-core", ve
 coil-test = { group = "io.coil-kt.coil3", name = "coil-test", version.ref = "coil" }
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 coil2-base = { group = "io.coil-kt", name = "coil-base", version.ref = "coil2" }
-google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.4.0" }
+google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.7.0" }
 google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
@@ -99,10 +99,10 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
-koin-test = { group = "io.insert-koin", name = "koin-test", version = "3.4.1" }
-koin-test-junit4 = { group = "io.insert-koin", name = "koin-test-junit4", version = "3.4.1" }
+koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
+koin-test-junit4 = { group = "io.insert-koin", name = "koin-test-junit4", version.ref = "koin" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
-koin-android-test = { group = "io.insert-koin", name = "koin-android-test", version = "3.4.1" }
+koin-android-test = { group = "io.insert-koin", name = "koin-android-test", version.ref = "koin" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinAndroidxCompose" }
 koin-androidx-workmanager = { group = "io.insert-koin", name = "koin-androidx-workmanager", version.ref = "koin" }
 koin-android-compat = { group = "io.insert-koin", name = "koin-android-compat", version.ref = "koin" }

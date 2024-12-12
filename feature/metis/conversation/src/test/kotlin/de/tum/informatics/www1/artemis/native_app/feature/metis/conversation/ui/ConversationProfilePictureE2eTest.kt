@@ -120,8 +120,12 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
                     ),
                     bottomItem = null,
                     clientId = clientId,
-                    hasModerationRights = false,
-                    isAtLeastTutorInCourse = false,
+                    postActionFlags = PostActionFlags(
+                        isAbleToPin = false,
+                        isAtLeastTutorInCourse = false,
+                        hasModerationRights = false
+                    ),
+                    onPinPost = { CompletableDeferred() },
                     listContentPadding = PaddingValues(0.dp),
                     serverUrl = "",
                     courseId = courseId,
