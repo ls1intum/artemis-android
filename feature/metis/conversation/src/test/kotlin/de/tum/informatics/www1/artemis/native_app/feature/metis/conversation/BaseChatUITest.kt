@@ -14,7 +14,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
@@ -25,7 +27,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.datetime.Clock
 
-abstract class BaseChatUItest : BaseComposeTest() {
+abstract class BaseChatUITest : BaseComposeTest() {
 
     val clientId = 20L
 
@@ -70,13 +72,15 @@ abstract class BaseChatUItest : BaseComposeTest() {
             courseWideContext = null,
             tags = emptyList(),
             answers = if (index == 0) answers else emptyList(),
-            reactions = emptyList()
+            reactions = emptyList(),
+            displayPriority = DisplayPriority.NONE
         )
     }
 
     fun setupThreadUi(
         post: PostPojo,
-        onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?
+        onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?,
+        onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)?
     ) {
         composeTestRule.setContent {
             MetisThreadUi(
@@ -85,8 +89,11 @@ abstract class BaseChatUItest : BaseComposeTest() {
                 clientId = clientId,
                 postDataState = DataState.Success(post),
                 conversationDataState = DataState.Success(conversation),
-                hasModerationRights = false,
-                isAtLeastTutorInCourse = false,
+                postActionFlags = PostActionFlags(
+                    isAbleToPin = true,
+                    isAtLeastTutorInCourse = false,
+                    hasModerationRights = true,
+                ),
                 listContentPadding = PaddingValues(),
                 serverUrl = "",
                 emojiService = EmojiServiceStub,
@@ -94,6 +101,7 @@ abstract class BaseChatUItest : BaseComposeTest() {
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },
                 onResolvePost = onResolvePost,
+                onPinPost = onPinPost,
                 onDeletePost = { CompletableDeferred() },
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onRequestReload = {},
@@ -106,7 +114,8 @@ abstract class BaseChatUItest : BaseComposeTest() {
     fun setupChatUi(
         posts: List<IStandalonePost>,
         currentUser: User = User(id = clientId),
-        hasModerationRights: Boolean = false
+        hasModerationRights: Boolean = false,
+        onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure> = { CompletableDeferred() }
     ) {
         composeTestRule.setContent {
             val list = posts.map { post -> ChatListItem.PostChatListItem(post) }.toMutableList()
@@ -115,8 +124,11 @@ abstract class BaseChatUItest : BaseComposeTest() {
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 posts = PostsDataState.Loaded.WithList(list, PostsDataState.NotLoading),
                 clientId = currentUser.id,
-                hasModerationRights = hasModerationRights,
-                isAtLeastTutorInCourse = false,
+                postActionFlags = PostActionFlags(
+                    isAbleToPin = true,
+                    isAtLeastTutorInCourse = false,
+                    hasModerationRights = hasModerationRights,
+                ),
                 listContentPadding = PaddingValues(),
                 serverUrl = "",
                 courseId = course.id!!,
@@ -126,6 +138,7 @@ abstract class BaseChatUItest : BaseComposeTest() {
                 isReplyEnabled = true,
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },
+                onPinPost = onPinPost,
                 onDeletePost = { CompletableDeferred() },
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onClickViewPost = {},
@@ -135,5 +148,4 @@ abstract class BaseChatUItest : BaseComposeTest() {
             )
         }
     }
-
 }

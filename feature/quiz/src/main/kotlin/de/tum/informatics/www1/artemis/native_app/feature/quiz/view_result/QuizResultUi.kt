@@ -42,8 +42,6 @@ internal fun QuizResultUi(
     maxPoints: Int,
     quizQuestions: List<QuizQuestion>,
     quizQuestionsWithData: List<QuizQuestionData<*>>,
-    serverUrl: String,
-    authToken: String
 ) {
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
@@ -108,8 +106,6 @@ internal fun QuizResultUi(
                                 .align(Alignment.Center),
                             questionIndex = index,
                             quizQuestionData = questionWithData,
-                            serverUrl = serverUrl,
-                            authToken = authToken
                         )
                     }
                 }

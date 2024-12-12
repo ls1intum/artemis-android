@@ -220,7 +220,7 @@ class WebsocketProviderImpl(
                         Log.d(TAG, "unsubscribe! $topic")
                     }
                     .catch { e ->
-                        Log.d(TAG, "Subscription $topic reported error: ${e.localizedMessage}")
+                        Log.e(TAG, "Subscription $topic reported error: ${e.localizedMessage}")
                     }
                     .map {
                         WebsocketProvider.WebsocketData.Message(it)

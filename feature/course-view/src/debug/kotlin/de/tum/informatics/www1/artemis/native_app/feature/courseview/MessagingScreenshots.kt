@@ -26,6 +26,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewBody
@@ -246,8 +247,11 @@ fun `Metis - Conversation Channel`() {
                                     PostsDataState.NotLoading
                                 ),
                                 clientId = 0L,
-                                hasModerationRights = true,
-                                isAtLeastTutorInCourse = true,
+                                postActionFlags = PostActionFlags(
+                                    isAbleToPin = true,
+                                    isAtLeastTutorInCourse = true,
+                                    hasModerationRights = true
+                                ),
                                 listContentPadding = PaddingValues(),
                                 serverUrl = "",
                                 courseId = 0,
@@ -256,6 +260,7 @@ fun `Metis - Conversation Channel`() {
                                 onCreatePost = { CompletableDeferred() },
                                 onEditPost = { _, _ -> CompletableDeferred() },
                                 onDeletePost = { CompletableDeferred() },
+                                onPinPost = { CompletableDeferred() },
                                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                                 bottomItem = null,
                                 onClickViewPost = {},
@@ -296,7 +301,8 @@ private fun generateMessage(
             courseWideContext = null,
             tags = emptyList(),
             answers = emptyList(),
-            reactions = emptyList()
+            reactions = emptyList(),
+            displayPriority = null
         )
     )
 }

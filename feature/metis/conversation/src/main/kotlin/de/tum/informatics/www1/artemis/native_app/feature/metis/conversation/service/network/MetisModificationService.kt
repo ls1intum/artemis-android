@@ -25,6 +25,13 @@ interface MetisModificationService {
         authToken: String
     ): NetworkResponse<StandalonePost>
 
+    suspend fun updatePostDisplayPriority(
+        context: MetisContext,
+        post: StandalonePost,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<StandalonePost>
+
     suspend fun createAnswerPost(
         context: MetisContext,
         post: AnswerPost,

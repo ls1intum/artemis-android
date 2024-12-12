@@ -17,6 +17,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.delete
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -99,6 +100,31 @@ internal class MetisModificationServiceImpl(
 
                 contentType(ContentType.Application.Json)
                 setBody(post)
+                cookieAuth(authToken)
+            }.body()
+        }
+    }
+
+    override suspend fun updatePostDisplayPriority(
+        context: MetisContext,
+        post: StandalonePost,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<StandalonePost> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.put(serverUrl) {
+                url {
+                    appendPathSegments(RESOURCE_PATH_SEGMENTS)
+                    appendPathSegments(
+                        context.courseId.toString(),
+                        context.standalonePostResourceEndpoint
+                    )
+                    appendPathSegments(post.id.toString())
+                    appendPathSegments("display-priority")
+                }
+
+                contentType(ContentType.Application.Json)
+                parameter("displayPriority", post.displayPriority)
                 cookieAuth(authToken)
             }.body()
         }

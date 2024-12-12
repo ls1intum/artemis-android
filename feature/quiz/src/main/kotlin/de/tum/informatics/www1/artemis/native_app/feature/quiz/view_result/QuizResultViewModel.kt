@@ -18,8 +18,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.DragAndDropSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.MultipleChoiceSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
-import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
-import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.AnswerOptionId
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.BaseQuizViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.DragAndDropStorageData
@@ -207,9 +205,6 @@ internal class QuizResultViewModel(
             }
             .filterSuccess()
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
-
-    val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
-    val authToken: StateFlow<String> = authTokenStateFlow(accountService)
 
     override fun constructDragAndDropData(
         questionId: Long,

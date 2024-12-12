@@ -15,7 +15,8 @@ androidxNavigation = "2.8.4"
 androidxPaging = "3.3.4"
 androidxDataStore = "1.1.1"
 androidxPagingCompose = "3.3.4"
-coil = "2.7.0"
+coil = "3.0.4"
+coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github.com/ls1intum/artemis-android/issues/171
 emoji2 = "1.5.0"
 kotlin = "1.9.25"
 kotlinxCoroutines = "1.9.0"
@@ -81,7 +82,11 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version = "1.1.0-alpha06" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 auth0-java-jwt = { group = "com.auth0.android", name = "jwtdecode", version = "2.0.2" }
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-compose-core = { group = "io.coil-kt.coil3", name = "coil-compose-core", version.ref = "coil" }
+coil-test = { group = "io.coil-kt.coil3", name = "coil-test", version.ref = "coil" }
+coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+coil2-base = { group = "io.coil-kt", name = "coil-base", version.ref = "coil2" }
 google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.7.0" }
 google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
