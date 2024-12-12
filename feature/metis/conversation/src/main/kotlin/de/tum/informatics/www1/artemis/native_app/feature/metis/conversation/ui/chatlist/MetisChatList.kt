@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -72,7 +72,6 @@ internal fun MetisChatList(
     state: LazyListState = rememberLazyListState(),
     isReplyEnabled: Boolean = true,
     onClickViewPost: (StandalonePostId) -> Unit,
-    title: String? = "Replying..."
 ) {
     ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
 
@@ -401,7 +400,7 @@ private fun DateDivider(modifier: Modifier, date: LocalDate) {
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Divider(modifier = Modifier.weight(1f))
+        HorizontalDivider(modifier = Modifier.weight(1f))
 
         Text(
             text = dateAsString,
@@ -409,6 +408,6 @@ private fun DateDivider(modifier: Modifier, date: LocalDate) {
             fontWeight = FontWeight.Bold
         )
 
-        Divider(modifier = Modifier.weight(1f))
+        HorizontalDivider(modifier = Modifier.weight(1f))
     }
 }
