@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Forum
-import androidx.compose.material.icons.filled.Groups2
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.NotInterested
 import androidx.compose.material.icons.filled.NotificationsActive
@@ -56,15 +55,12 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.ExtraChannelIcons
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.PrimaryChannelIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ConversationIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 
 internal const val TEST_TAG_CONVERSATION_LIST = "conversation list"
 internal const val TEST_TAG_HEADER_EXPAND_ICON = "expand icon"
@@ -347,69 +343,25 @@ private fun ConversationListItem(
     }
 
     Box(modifier = modifier) {
-        when (conversation) {
-            is ChannelChat -> {
-                ListItem(
-                    modifier = Modifier.clickable(onClick = onNavigateToConversation),
-                    leadingContent = {
-                        PrimaryChannelIcon(channelChat = conversation)
-                    },
-                    headlineContent = {
-                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Text(text = displayName, maxLines = 1, color = headlineColor)
-
-                            ExtraChannelIcons(channelChat = conversation)
-                        }
-                    },
-                    trailingContent = {
-                        UnreadMessages(unreadMessagesCount = unreadMessagesCount)
-                    }
+        ListItem(
+            modifier = Modifier.clickable(onClick = onNavigateToConversation),
+            leadingContent = {
+                ConversationIcon(
+                    conversation = conversation,
+                    clientId = clientId
                 )
-            }
-
-            is GroupChat -> {
-                ListItem(
-                    modifier = Modifier.clickable(onClick = onNavigateToConversation),
-                    leadingContent = {
-                        Icon(imageVector = Icons.Default.Groups2, contentDescription = null)
-                    },
-                    headlineContent = {
-                        Text(
-                            displayName,
-                            color = headlineColor
-                        )
-                    },
-                    trailingContent = {
-                        UnreadMessages(unreadMessagesCount = unreadMessagesCount)
-                    }
+            },
+            headlineContent = {
+                Text(
+                    text = displayName,
+                    maxLines = 1,
+                    color = headlineColor
                 )
+            },
+            trailingContent = {
+                UnreadMessages(unreadMessagesCount = unreadMessagesCount)
             }
-
-            is OneToOneChat -> {
-                ListItem(
-                    modifier = Modifier.clickable(onClick = onNavigateToConversation),
-                    leadingContent = {
-                        val conversationPartner = conversation.members.first { it.id != clientId }
-                        ProfilePicture(
-                            profilePictureData = ProfilePictureData.create(
-                                userId = conversationPartner.id,
-                                username = conversationPartner.humanReadableName,
-                                imageUrl = conversationPartner.imageUrl
-                            )
-                        )
-                    },
-                    headlineContent = {
-                        Text(
-                            displayName,
-                            color = headlineColor
-                        )
-                    },
-                    trailingContent = {
-                        UnreadMessages(unreadMessagesCount = unreadMessagesCount)
-                    }
-                )
-            }
-        }
+        )
 
         IconButton(
             modifier = Modifier
