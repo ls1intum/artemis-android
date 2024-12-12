@@ -27,9 +27,8 @@ fun UserProfileDialog(
     username: String,
     userRole: UserRole?,
     profilePictureData: ProfilePictureData,
-    isAppUser: Boolean,
     onDismiss: () -> Unit,
-    onSendMessageClick: () -> Unit,
+    onSendMessageClick: (() -> Unit)?,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -133,7 +132,6 @@ fun UserProfileDialogPreview() {
                 imageUrl = null,
             ),
             onDismiss = {},
-            isAppUser = true,
             onSendMessageClick = {},
         )
     }

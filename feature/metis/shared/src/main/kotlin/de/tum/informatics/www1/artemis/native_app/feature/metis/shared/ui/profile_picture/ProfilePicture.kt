@@ -69,11 +69,8 @@ fun ProfilePictureWithDialog(
             onDismiss = {
                 displayUserProfileDialog = false
             },
-            isAppUser = onSendMessage == null,
             onSendMessageClick = {
-                if (onSendMessage != null) {
-                    onSendMessage(userId)
-                }
+                onSendMessage?.invoke(userId)
                 displayUserProfileDialog = false
             }
         )
