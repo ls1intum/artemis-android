@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -42,19 +41,21 @@ fun UserProfileDialog(
             )
         },
         text = {
-            if (!isAppUser) {
-                FilledTonalButton(
-                    onClick = onSendMessageClick,
-                ) {
-                    Text(stringResource(R.string.user_profile_dialog_send_message_action))
-                }
-            } else {
-                Text(
-                    stringResource(R.string.user_profile_dialog_is_app_user_placeholder),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-            }
+            // TODO: Due to API changes on the backend, this feature has been postponed.
+            //      See https://github.com/ls1intum/artemis-android/issues/213
+//            if (!isAppUser) {
+//                FilledTonalButton(
+//                    onClick = onSendMessageClick,
+//                ) {
+//                    Text(stringResource(R.string.user_profile_dialog_send_message_action))
+//                }
+//            } else {
+//                Text(
+//                    stringResource(R.string.user_profile_dialog_is_app_user_placeholder),
+//                    style = MaterialTheme.typography.bodyMedium,
+//                    color = MaterialTheme.colorScheme.secondary
+//                )
+//            }
         },
         confirmButton = {},
         dismissButton = {

@@ -1,7 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -143,11 +141,12 @@ fun MetisChatList(
 ) {
     val context = LocalContext.current
 
-    val navigateToChat = { userId: Long ->
-        val chatLink = "artemis://courses/$courseId/messages?userId=$userId"
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(chatLink))
-        context.startActivity(intent)
-    }
+    // TODO: https://github.com/ls1intum/artemis-android/issues/213
+//    val navigateToChat = { userId: Long ->
+//        val chatLink = "artemis://courses/$courseId/messages?userId=$userId"
+//        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(chatLink))
+//        context.startActivity(intent)
+//    }
 
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
@@ -209,7 +208,6 @@ fun MetisChatList(
                             onRequestPin = onPinPostDelegate,
                             onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                             onRequestRetrySend = onRequestRetrySend,
-                            onSendMessageToUser = navigateToChat
                         )
                     }
                 }
@@ -240,7 +238,6 @@ private fun ChatList(
     onRequestDelete: (IStandalonePost) -> Unit,
     onRequestPin: (IStandalonePost) -> Unit,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit,
-    onSendMessageToUser: (userId: Long) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit
 ) {
     LazyColumn(
@@ -281,7 +278,7 @@ private fun ChatList(
                         },
                         onResolvePost = null,
                         onSendMessageToAuthor = {
-                            onSendMessageToUser(it)
+                            // TODO: https://github.com/ls1intum/artemis-android/issues/213
                         },
                         onPinPost = { onRequestPin(post ?: return@rememberPostActions) },
                         onRequestRetrySend = {

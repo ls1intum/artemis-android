@@ -272,7 +272,7 @@ private fun PostAndRepliesList(
             onReplyInThread = null,
             onResolvePost = { onRequestResolve(affectedPost) },
             onSendMessageToAuthor = {
-                // TODO: Implement
+                // TODO: https://github.com/ls1intum/artemis-android/issues/213
             },
             onPinPost = { onRequestPin(affectedPost) },
             onRequestRetrySend = {
