@@ -2,20 +2,16 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
-import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.test.ArtemisImageProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.TestInitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
@@ -28,11 +24,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_PROFILE_PICTURE_INITIALS
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_PROFILE_PICTURE_UNKNOWN
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLog
+
 
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
@@ -41,42 +39,34 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
     private val clientId = 20L
     private val courseId = 1L
 
-    private val artemisImageProviderStub = object : ArtemisImageProvider {
-        private val sampleImageUrl = "https://picsum.photos/200"
-
-        @Composable
-        override fun rememberArtemisImageRequest(imagePath: String): ImageRequest {
-            return ImageRequest.Builder(LocalContext.current)
-                .data(sampleImageUrl)
-                .size(coil.size.Size.ORIGINAL)
-                .build()
-        }
-    }
-
     private val allTestTags = listOf(
         TEST_TAG_PROFILE_PICTURE_IMAGE,
         TEST_TAG_PROFILE_PICTURE_INITIALS,
         TEST_TAG_PROFILE_PICTURE_UNKNOWN
     )
 
+    @Before
+    fun setUp() {
+        ShadowLog.stream = System.out
+        ArtemisImageProviderStub.setup(context)
+    }
+
     @Test
-    fun `test GIVEN a post with an authorImageUrl WHEN displaying the post THEN the profile picture is shown`() = runTest {
+    fun `test GIVEN a post with an authorImageUrl WHEN displaying the post THEN the profile picture is shown`() {
         val post = StandalonePost(
             id = 1L,
             author = User(
                 id = 1L,
                 name = "author",
-                imageUrl = "https://picsum.photos/200"
+                imageUrl = "test.png"
             ),
         )
         setupUi(post)
 
-        composeTestRule.waitUntilNoAssertionError {
-            composeTestRule.assertTestTagExclusivelyExists(
-                exclusiveTag = TEST_TAG_PROFILE_PICTURE_IMAGE,
-                allTags = allTestTags
-            )
-        }
+        composeTestRule.assertTestTagExclusivelyExists(
+            exclusiveTag = TEST_TAG_PROFILE_PICTURE_IMAGE,
+            allTags = allTestTags
+        )
     }
 
     @Test
@@ -120,7 +110,7 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
     ) {
         composeTestRule.setContent {
             CompositionLocalProvider(
-                LocalArtemisImageProvider provides artemisImageProviderStub
+               LocalArtemisImageProvider provides ArtemisImageProviderStub()
             ) {
                 MetisChatList(
                     modifier = Modifier,
@@ -151,20 +141,6 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
                     onRequestRetrySend = {},
                     title = "title",
                 )
-            }
-        }
-    }
-
-    private fun ComposeTestRule.waitUntilNoAssertionError(
-        timeoutMillis: Long = DefaultTimeoutMillis,
-        assertion: () -> Unit,
-    ) {
-        waitUntil(timeoutMillis) {
-            try {
-                assertion()
-                true
-            } catch (e: AssertionError) {
-                false
             }
         }
     }

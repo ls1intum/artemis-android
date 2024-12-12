@@ -22,8 +22,6 @@ internal fun DragAndDropQuizQuestionUi(
     questionIndex: Int,
     question: DragAndDropQuizQuestion,
     data: QuizQuestionData.DragAndDropData,
-    serverUrl: String,
-    authToken: String,
     onRequestDisplayHint: () -> Unit,
 ) {
     Column(modifier = modifier) {
@@ -48,8 +46,6 @@ internal fun DragAndDropQuizQuestionUi(
             DragAndDropQuizQuestionBody(
                 question,
                 data,
-                authToken,
-                serverUrl,
             )
         }
     }
