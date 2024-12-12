@@ -218,7 +218,6 @@ private fun TextView.applyStyleAndColor(
 }
 
 fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, imageWith: Int): Markwon {
-    // Setting the size of the output image is important to avoid jittering UIs.
     val imagePlugin: CoilImagesPlugin? =
         if (imageLoader != null) {
             CoilImagesPlugin.create(
