@@ -43,6 +43,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,6 +63,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 
 internal const val TEST_TAG_CONVERSATION_LIST = "conversation list"
 internal const val TEST_TAG_HEADER_EXPAND_ICON = "expand icon"
@@ -98,6 +101,7 @@ internal fun ConversationList(
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
     trailingContent: LazyListScope.() -> Unit
 ) {
+    val clientId by viewModel.clientIdOrDefault.collectAsState()
 
     val listWithHeader: LazyListScope.(ConversationCollections.ConversationCollection<*>, String, String, Int, () -> Unit, @Composable () -> Unit) -> Unit =
         { collection, key, suffix, textRes, onClick, icon ->
@@ -112,6 +116,7 @@ internal fun ConversationList(
             conversationList(
                 keySuffix = suffix,
                 conversations = collection,
+                clientId = clientId,
                 showPrefix = collection.showPrefix,
                 onNavigateToConversation = onNavigateToConversation,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
@@ -261,6 +266,7 @@ private fun LazyListScope.conversationSectionHeader(
 private fun <T : Conversation> LazyListScope.conversationList(
     keySuffix: String,
     conversations: ConversationCollections.ConversationCollection<T>,
+    clientId: Long,
     showPrefix: Boolean,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
@@ -279,6 +285,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
                 .testTag(itemTag),
             itemBaseTag = itemTag,
             conversation = conversation,
+            clientId = clientId,
             showPrefix = showPrefix,
             onNavigateToConversation = { onNavigateToConversation(conversation.id) },
             onToggleMarkAsFavourite = {
@@ -298,6 +305,7 @@ private fun ConversationListItem(
     modifier: Modifier = Modifier,
     itemBaseTag: String,
     conversation: Conversation,
+    clientId: Long,
     showPrefix: Boolean,
     onNavigateToConversation: () -> Unit,
     onToggleMarkAsFavourite: () -> Unit,
@@ -362,14 +370,14 @@ private fun ConversationListItem(
             is GroupChat -> {
                 ListItem(
                     modifier = Modifier.clickable(onClick = onNavigateToConversation),
+                    leadingContent = {
+                        Icon(imageVector = Icons.Default.Groups2, contentDescription = null)
+                    },
                     headlineContent = {
                         Text(
                             displayName,
                             color = headlineColor
                         )
-                    },
-                    leadingContent = {
-                        Icon(imageVector = Icons.Default.Groups2, contentDescription = null)
                     },
                     trailingContent = {
                         UnreadMessages(unreadMessagesCount = unreadMessagesCount)
@@ -380,6 +388,16 @@ private fun ConversationListItem(
             is OneToOneChat -> {
                 ListItem(
                     modifier = Modifier.clickable(onClick = onNavigateToConversation),
+                    leadingContent = {
+                        val conversationPartner = conversation.members.first { it.id != clientId }
+                        ProfilePicture(
+                            profilePictureData = ProfilePictureData.create(
+                                userId = conversationPartner.id,
+                                username = conversationPartner.humanReadableName,
+                                imageUrl = conversationPartner.imageUrl
+                            )
+                        )
+                    },
                     headlineContent = {
                         Text(
                             displayName,
@@ -403,7 +421,7 @@ private fun ConversationListItem(
         }
 
         ConversationListItemDropdownMenu(
-            modifier = Modifier.Companion.align(Alignment.TopEnd),
+            modifier = Modifier.align(Alignment.TopEnd),
             isContextDialogShown = isContextDialogShown,
             onDismissRequest = onDismissRequest,
             conversation = conversation,
