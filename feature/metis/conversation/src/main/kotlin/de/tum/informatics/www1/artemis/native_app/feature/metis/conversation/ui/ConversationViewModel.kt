@@ -382,7 +382,7 @@ internal open class ConversationViewModel(
             )
                 .bind { if (it) null else MetisModificationFailure.DELETE_POST }
                 .or(MetisModificationFailure.DELETE_POST)
-                .also { if (it != MetisModificationFailure.DELETE_POST && post is IStandalonePost && onCloseThread != null) onCloseThread?.invoke() }
+                .also { if (it != MetisModificationFailure.DELETE_POST && post is IStandalonePost) onCloseThread?.invoke() }
         }
     }
 
