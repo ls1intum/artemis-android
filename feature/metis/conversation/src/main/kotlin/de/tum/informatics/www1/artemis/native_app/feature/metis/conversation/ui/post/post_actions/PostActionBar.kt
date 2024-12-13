@@ -104,9 +104,11 @@ private fun ActionBar(
             }
         }
 
-        if (postActions.requestEditPost != null || postActions.requestDeletePost != null) {
-            VerticalDivider()
+        if (postActions.requestEditPost == null && postActions.requestDeletePost == null) {
+            return
         }
+
+        VerticalDivider()
 
         postActions.requestEditPost?.let {
             IconButton(
