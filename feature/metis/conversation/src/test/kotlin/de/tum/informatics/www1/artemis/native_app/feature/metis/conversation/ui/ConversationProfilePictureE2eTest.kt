@@ -140,6 +140,7 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
                     onClickViewPost = {},
                     onRequestRetrySend = {},
                     title = "title",
+                    onFileSelected =  { _ -> }
                 )
             }
         }

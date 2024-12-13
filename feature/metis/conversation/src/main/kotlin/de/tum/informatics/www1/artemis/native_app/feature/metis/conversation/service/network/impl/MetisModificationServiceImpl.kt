@@ -253,16 +253,15 @@ internal class MetisModificationServiceImpl(
     }
 
     override suspend fun uploadFileOrImage(
-        context: MetisContext,
-        courseId: Long,
-        conversationId: Long,
+        context: MetisContext.Conversation,
         fileBytes: ByteArray,
         fileName: String,
         serverUrl: String,
         authToken: String
     ): NetworkResponse<FileUploadResponse> {
         return performNetworkCall {
-
+            val courseId = context.courseId.toString()
+            val conversationId = context.conversationId.toString()
             val response =  ktorProvider.ktorClient.submitFormWithBinaryData(
                 url = serverUrl +"api/files/courses/$courseId/conversations/$conversationId",
                 formData = formData {

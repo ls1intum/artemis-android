@@ -75,7 +75,7 @@ private const val DisabledContentAlpha = 0.75f
 internal fun ReplyTextField(
     modifier: Modifier,
     replyMode: ReplyMode,
-    onFileSelected: (Uri?) -> Unit,
+    onFileSelected: (Uri) -> Unit,
     updateFailureState: (MetisModificationFailure?) -> Unit,
     title: String
 ) {
@@ -268,9 +268,7 @@ private fun CreateReplyUi(
                         }
                     },
                     onFileSelected = { uri ->
-                        if (uri != null) {
-                            onFileSelected(uri)
-                        }
+                        onFileSelected(uri)
                     }
                 )
 

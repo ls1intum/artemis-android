@@ -1,10 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
-import android.content.ContentResolver
-import android.content.Context
 import android.net.Uri
-import android.provider.OpenableColumns
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -58,7 +54,7 @@ internal fun MarkdownTextField(
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
-    onFileSelected: (Uri?) -> Unit = { _ -> },
+    onFileSelected: (Uri) -> Unit = { _ -> },
 ) {
     val text = textFieldValue.text
     val context = LocalContext.current
@@ -68,11 +64,17 @@ internal fun MarkdownTextField(
 
     val filePickerLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            val mimeType = uri?.let { context.contentResolver.getType(it) }
+            if (uri == null) return@rememberLauncherForActivityResult
+
+            val mimeType = context.contentResolver.getType(uri)
             if (mimeType in FileValidationConstants.ALLOWED_MIME_TYPES) {
                 onFileSelected(uri)
             } else {
-                Toast.makeText(context, getString(context, R.string.markdown_textfield_unsupported_warning), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    getString(context, R.string.markdown_textfield_unsupported_warning),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 

@@ -75,9 +75,7 @@ interface MetisModificationService {
     ): NetworkResponse<Boolean>
 
     suspend fun uploadFileOrImage(
-        context: MetisContext,
-        courseId: Long,
-        conversationId: Long,
+        context: MetisContext.Conversation,
         fileBytes: ByteArray,
         fileName: String,
         serverUrl: String,

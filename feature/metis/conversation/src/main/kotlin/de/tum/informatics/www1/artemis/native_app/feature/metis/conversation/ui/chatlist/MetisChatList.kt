@@ -21,9 +21,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -92,6 +92,8 @@ internal fun MetisChatList(
         }
     }
 
+    val context = LocalContext.current
+
     ProvideMarkwon {
         MetisChatList(
             modifier = modifier,
@@ -142,7 +144,7 @@ fun MetisChatList(
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
     title: String,
-    onFileSelected: (Uri?) -> Unit
+    onFileSelected: (Uri) -> Unit
 ) {
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,

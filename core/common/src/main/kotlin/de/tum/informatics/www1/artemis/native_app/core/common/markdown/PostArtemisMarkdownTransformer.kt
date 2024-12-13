@@ -25,7 +25,7 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         }
     }
 
-    override fun transformFileUploadMessageMarkdown(
+    public override fun transformFileUploadMessageMarkdown(
         isImage: Boolean,
         fileName: String,
         filePath: String

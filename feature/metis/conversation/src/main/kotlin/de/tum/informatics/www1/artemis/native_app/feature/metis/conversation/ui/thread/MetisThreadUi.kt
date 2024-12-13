@@ -22,8 +22,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -169,7 +169,7 @@ internal fun MetisThreadUi(
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onRequestReload: () -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit,
-    onFileSelect: (Uri?, Context) -> Unit
+    onFileSelect: (Uri, Context) -> Unit
 ) {
     val listState = rememberLazyListState()
     val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)

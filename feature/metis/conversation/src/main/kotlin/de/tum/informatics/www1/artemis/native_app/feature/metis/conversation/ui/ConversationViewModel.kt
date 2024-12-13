@@ -4,12 +4,12 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
@@ -302,9 +302,6 @@ internal open class ConversationViewModel(
         MutableStateFlow(TextFieldValue(""))
 
     val serverUrl = serverUrlStateFlow(serverConfigurationService)
-
-    private val _selectedFileUri = MutableStateFlow<Uri?>(null)
-    private val _selectedFileName = MutableStateFlow<String>("")
 
     init {
         viewModelScope.launch(coroutineContext) {
@@ -784,64 +781,70 @@ internal open class ConversationViewModel(
         _postId.value = newPostId
     }
 
-    fun createMarkdownImageLoader(context: Context): Deferred<ImageLoader> {
-        return viewModelScope.async(coroutineContext) {
-            val imageProvider = BaseImageProviderImpl()
-            val authorizationToken = accountService.authToken.first()
-            imageProvider.createImageLoader(context, authorizationToken)
-        }
+    fun onFileSelected(uri: Uri, context: Context) {
+        val fileName = resolveFileName(context, uri)
+        uploadFileOrImage(context = context, fileUri = uri, fileName = fileName)
     }
 
-    fun onFileSelected(uri: Uri?, context: Context) {
-        viewModelScope.launch {
-            _selectedFileUri.emit(uri)
-            val fileName = resolveFileName(context, uri)
-            _selectedFileName.emit(fileName)
-            uploadFileOrImage(context)
-        }
-    }
-
-    private fun uploadFileOrImage(context: Context) {
+    private fun uploadFileOrImage(context: Context, fileUri: Uri, fileName: String) {
         viewModelScope.launch(coroutineContext) {
             try {
                 val fileBytes = withContext(Dispatchers.IO) {
-                    _selectedFileUri.value?.let { uri ->
-                        context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                            val fileSize = inputStream.available()
 
-                            val maxFileSize = 5 * 1024 * 1024
-                            if (fileSize > maxFileSize) {
-                                throw IllegalArgumentException(getString(context, R.string.conversation_vm_file_size_exceed))
-                            }
-                            inputStream.readBytes()
+                    context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
+                        val fileSize = inputStream.available()
+
+                        val maxFileSize = 5 * 1024 * 1024
+                        if (fileSize > maxFileSize) {
+                            throw IllegalArgumentException(
+                                getString(
+                                    context,
+                                    R.string.conversation_vm_file_size_exceed
+                                )
+                            )
                         }
-                    } ?: throw IllegalArgumentException(getString(context, R.string.conversation_vm_file_upload_failed))
-                }
+                        inputStream.readBytes()
+                    }
+                } ?: throw IllegalArgumentException(
+                    getString(
+                        context,
+                        R.string.conversation_vm_file_upload_failed
+                    )
+                )
 
                 val response = metisModificationService.uploadFileOrImage(
                     context = metisContext,
-                    courseId = courseId,
-                    conversationId = conversationId,
                     fileBytes = fileBytes,
-                    fileName = _selectedFileName.value,
+                    fileName = fileName,
                     serverUrl = serverConfigurationService.serverUrl.first(),
                     authToken = accountService.authToken.first()
                 )
 
                 val fileUploadResponse = (response as NetworkResponse.Response).data
                 val filePath = fileUploadResponse.path
-                    ?: throw IllegalArgumentException(getString(context, R.string.conversation_vm_file_upload_failed))
+                    ?.let { if (it.startsWith("/")) it.substring(1) else it }
+                    ?: throw IllegalArgumentException(
+                        getString(
+                            context,
+                            R.string.conversation_vm_file_upload_failed
+                        )
+                    )
 
                 val currentText = newMessageText.value.text
-                val updatedText = if (isImage(_selectedFileName.value)) {
-                    "$currentText\n![${_selectedFileName.value}]($filePath)\n" // Image markdown
-                } else {
-                    "$currentText\n[${_selectedFileName.value}]($filePath)\n"  // File markdown
-                }
+
+                val transformer = PostArtemisMarkdownTransformer(
+                    serverUrl = serverConfigurationService.serverUrl.first(),
+                    courseId = metisContext.courseId
+                )
+
+                val markdown: String = transformer.transformFileUploadMessageMarkdown(
+                    isImage = isImage(fileName),
+                    fileName = fileName,
+                    filePath = filePath
+                )
+                val updatedText = "$currentText\n$markdown\n"
                 newMessageText.value = TextFieldValue(updatedText)
-                clearSelectedFile()
             } catch (e: Exception) {
-                clearSelectedFile()
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         context,
@@ -853,25 +856,13 @@ internal open class ConversationViewModel(
         }
     }
 
-    private fun clearSelectedFile() {
-        _selectedFileUri.value = null
-        _selectedFileName.value = ""
-    }
-
-    private fun resolveFileName(context: Context, uri: Uri?): String {
-        return try {
-            val resolver: ContentResolver = context.contentResolver
-            uri?.let {
-                resolver.query(it, null, null, null, null)?.use { cursor ->
-                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                    cursor.moveToFirst()
-                    cursor.getString(nameIndex)
-                }
-            } ?: uri?.lastPathSegment.orEmpty()
-        } catch (e: Exception) {
-            Log.e("MarkdownTextField", "Error resolving file name", e)
-            uri?.lastPathSegment.orEmpty()
-        }
+    private fun resolveFileName(context: Context, uri: Uri): String {
+        val resolver: ContentResolver = context.contentResolver
+        return resolver.query(uri, null, null, null, null)?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            cursor.moveToFirst()
+            cursor.getString(nameIndex)
+        } ?: uri.lastPathSegment.orEmpty()
     }
 
 }
