@@ -8,12 +8,12 @@ object PostColors {
         val delete: Color
             @Composable get() = Color(0xffdc3545)
     }
-    val EditedGray: Color
+    val editedHintText: Color
         @Composable get() = Color.Gray
 
-    val UnsentMessageTextColor: Color
+    val unsentMessageText: Color
         @Composable get() = Color.Gray
 
-    val PinnedMessageBackgroundColor: Color
+    val pinnedMessageBackground: Color
         @Composable get() = Color(0xFFFFA500).copy(alpha = 0.25f)
 }

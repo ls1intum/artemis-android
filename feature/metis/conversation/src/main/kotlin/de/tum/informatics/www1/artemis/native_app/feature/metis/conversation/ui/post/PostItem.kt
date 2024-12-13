@@ -50,9 +50,7 @@ import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors.EditedGray
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors.PinnedMessageBackgroundColor
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors.UnsentMessageTextColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
@@ -110,7 +108,7 @@ internal fun PostItem(
                 .clip(
                     MaterialTheme.shapes.small
                 )
-                .background(color = PinnedMessageBackgroundColor)
+                .background(color = PostColors.pinnedMessageBackground)
         } else modifier
     }
 
@@ -185,14 +183,14 @@ internal fun PostItem(
                         style = MaterialTheme.typography.bodyMedium,
                         onClick = onClick,
                         onLongClick = onLongClick,
-                        color = if (post?.serverPostId == null) UnsentMessageTextColor else Color.Unspecified
+                        color = if (post?.serverPostId == null) PostColors.unsentMessageText else Color.Unspecified
                     )
 
                     if (post?.updatedDate != null) {
                         Text(
                             text = stringResource(id = R.string.post_edited_hint),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = EditedGray
+                            color = PostColors.editedHintText
                         )
                     }
 

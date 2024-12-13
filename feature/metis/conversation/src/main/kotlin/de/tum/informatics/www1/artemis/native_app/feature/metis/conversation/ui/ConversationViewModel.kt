@@ -1,9 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
-import android.content.Context
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
-import coil.ImageLoader
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -27,7 +25,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Programmin
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.BaseImageProviderImpl
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -149,7 +146,7 @@ internal open class ConversationViewModel(
      * Manages updating from the websocket.
      */
     private val webSocketUpdateUseCase = ConversationWebSocketUpdateUseCase(
-        metisService = metisService,
+        websocketProvider = websocketProvider,
         metisStorageService = metisStorageService
     )
 
@@ -239,7 +236,7 @@ internal open class ConversationViewModel(
         clientId.filterSuccess()
     ) { conversationDataState, clientId ->
         websocketProvider.subscribeToConversationUpdates(clientId, metisContext.courseId)
-            .filter { it.crudAction == MetisCrudAction.UPDATE }
+            .filter { it.action == MetisCrudAction.UPDATE }
             .map<ConversationWebsocketDto, DataState<Conversation>> { DataState.Success(it.conversation) }
             .onStart { emit(conversationDataState) }
     }
@@ -772,13 +769,5 @@ internal open class ConversationViewModel(
 
     fun updateOpenedThread(newPostId: StandalonePostId?) {
         _postId.value = newPostId
-    }
-
-    fun createMarkdownImageLoader(context: Context): Deferred<ImageLoader> {
-        return viewModelScope.async(coroutineContext) {
-            val imageProvider = BaseImageProviderImpl()
-            val authorizationToken = accountService.authToken.first()
-            imageProvider.createImageLoader(context, authorizationToken)
-        }
     }
 }

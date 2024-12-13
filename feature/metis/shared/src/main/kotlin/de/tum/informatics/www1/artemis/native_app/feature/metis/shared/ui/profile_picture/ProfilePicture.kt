@@ -1,11 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -16,7 +19,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImagePainter
+import coil3.compose.AsyncImagePainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.nonScaledSp
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 
@@ -65,8 +68,13 @@ fun ProfilePictureImage(
     val imageUrl = profilePictureData.url
     val artemisImageProvider = LocalArtemisImageProvider.current
     val painter = artemisImageProvider.rememberArtemisAsyncImagePainter(imagePath = imageUrl)
+    val painterState by painter.state.collectAsState()
 
-    when (painter.state) {
+    if (painterState is AsyncImagePainter.State.Error) {
+        Log.e("ProfilePicture", "Error loading image: ${(painterState as AsyncImagePainter.State.Error).result.throwable.message}")
+    }
+
+    when (painterState) {
         is AsyncImagePainter.State.Success -> {
             Image(
                 modifier = modifier
