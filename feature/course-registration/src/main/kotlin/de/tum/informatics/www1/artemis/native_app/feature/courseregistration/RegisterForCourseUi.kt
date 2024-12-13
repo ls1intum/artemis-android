@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.compose.composable
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
@@ -63,6 +62,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeC
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseItemModifier
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import kotlinx.coroutines.Deferred
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.getViewModel
@@ -82,7 +82,7 @@ fun NavGraphBuilder.courseRegistration(
     onNavigateUp: () -> Unit,
     onRegisteredInCourse: (courseId: Long) -> Unit
 ) {
-    composable<CourseRegistrationScreen> {
+    animatedComposable<CourseRegistrationScreen> {
         RegisterForCourseScreen(
             modifier = Modifier.fillMaxSize(),
             viewModel = getViewModel(),

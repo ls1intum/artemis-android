@@ -43,9 +43,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.compose.composable
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.R
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.BetaHintService
@@ -71,7 +71,7 @@ fun NavGraphBuilder.dashboard(
     onClickRegisterForCourse: () -> Unit,
     onViewCourse: (courseId: Long) -> Unit
 ) {
-    composable<DashboardScreen> {
+    animatedComposable<DashboardScreen> {
         CoursesOverview(
             modifier = Modifier.fillMaxSize(),
             viewModel = getViewModel(),

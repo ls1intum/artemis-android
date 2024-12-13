@@ -55,7 +55,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
@@ -66,6 +65,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Profi
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.linkTextColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.login.custom_instance_selection.CustomInstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginScreen
@@ -128,7 +128,7 @@ fun NavGraphBuilder.loginScreen(
     onFinishedLoginFlow: (deepLink: String?) -> Unit,
     onRequestOpenSettings: () -> Unit
 ) {
-    composable<LoginScreen> {
+    animatedComposable<LoginScreen> {
         val screen = it.toRoute<LoginScreen>()
         val nextDestinationValue = screen.nextDestination
 
@@ -270,7 +270,7 @@ private fun LoginUiScreen(
             navController = nestedNavController,
             startDestination = if (hasSelectedInstance) NestedDestination.Home else NestedDestination.InstanceSelection
         ) {
-            composable<NestedDestination.Home>() {
+            animatedComposable<NestedDestination.Home>() {
                 AccountScreen(
                     modifier = Modifier.fillMaxSize(),
                     canSwitchInstance = !BuildConfig.hasInstanceRestriction,
@@ -294,7 +294,7 @@ private fun LoginUiScreen(
                 )
             }
 
-            composable<NestedDestination.CustomInstanceSelection> {
+            animatedComposable<NestedDestination.CustomInstanceSelection> {
                 CustomInstanceSelectionScreen(
                     modifier = Modifier
                         .fillMaxSize()
@@ -308,7 +308,7 @@ private fun LoginUiScreen(
                 }
             }
 
-            composable<NestedDestination.Login> {
+            animatedComposable<NestedDestination.Login> {
                 LoginScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = getViewModel(),
@@ -317,7 +317,7 @@ private fun LoginUiScreen(
                 )
             }
 
-            composable<NestedDestination.Saml2Login> { backStack ->
+            animatedComposable<NestedDestination.Saml2Login> { backStack ->
                 val rememberMe = backStack.arguments?.getBoolean(ARG_REMEMBER_ME)
                 checkNotNull(rememberMe)
 
@@ -331,7 +331,7 @@ private fun LoginUiScreen(
                 )
             }
 
-            composable<NestedDestination.Register> {
+            animatedComposable<NestedDestination.Register> {
                 RegisterUi(
                     modifier = Modifier
                         .fillMaxSize()
@@ -345,7 +345,7 @@ private fun LoginUiScreen(
                 )
             }
 
-            composable<NestedDestination.InstanceSelection> {
+            animatedComposable<NestedDestination.InstanceSelection> {
                 val scope = rememberCoroutineScope()
 
                 InstanceSelectionScreen(
