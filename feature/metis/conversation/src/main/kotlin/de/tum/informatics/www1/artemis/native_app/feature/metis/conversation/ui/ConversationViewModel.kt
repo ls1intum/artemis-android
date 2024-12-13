@@ -36,7 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostActionFlags
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteCategory
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteHint
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
@@ -316,6 +316,8 @@ internal open class ConversationViewModel(
         }
     }
 
+    var onCloseThread: (() -> Unit)? = null
+
     /**
      * Handles a reaction click. If the client has already reacted, it deletes the reaction.
      * Otherwise it creates a reaction with the same emoji id.
@@ -443,6 +445,7 @@ internal open class ConversationViewModel(
             )
                 .bind { if (it) null else MetisModificationFailure.DELETE_POST }
                 .or(MetisModificationFailure.DELETE_POST)
+                .also { if (it != MetisModificationFailure.DELETE_POST && post is IStandalonePost) onCloseThread?.invoke() }
         }
     }
 

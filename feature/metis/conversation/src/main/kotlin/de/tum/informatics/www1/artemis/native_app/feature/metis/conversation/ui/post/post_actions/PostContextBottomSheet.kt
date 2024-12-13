@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions
 
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.background
