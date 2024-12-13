@@ -79,10 +79,10 @@ abstract class BaseChatUITest : BaseComposeTest() {
 
     fun setupThreadUi(
         post: PostPojo,
-        hasModerationRights: Boolean = true,
-        isAbleToPin: Boolean = true,
         onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?,
-        onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)?
+        onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)?,
+        hasModerationRights: Boolean = true,
+        isAbleToPin: Boolean = true
     ) {
         composeTestRule.setContent {
             MetisThreadUi(
