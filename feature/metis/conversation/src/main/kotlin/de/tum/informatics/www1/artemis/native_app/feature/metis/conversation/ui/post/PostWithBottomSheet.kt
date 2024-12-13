@@ -35,7 +35,6 @@ internal fun PostWithBottomSheet(
             displayBottomSheet = true
         },
         onRequestRetrySend = postActions.onRequestRetrySend,
-        onSendMessageToAuthor = postActions.onSendMessageToAuthor
     )
 
     if (displayBottomSheet && post != null) {

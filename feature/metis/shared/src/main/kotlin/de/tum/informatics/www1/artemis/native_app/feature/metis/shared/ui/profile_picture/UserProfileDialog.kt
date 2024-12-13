@@ -19,7 +19,31 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.UserRoleIcon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
+
+
+@Composable
+// TODO: currently unused, due to https://github.com/ls1intum/artemis-android/issues/213
+fun UserProfileDialog(
+    courseId: Long,
+    user: ConversationUser,
+    onDismiss: () -> Unit,
+) {
+    val viewModel = koinViewModel<UserProfileDialogViewModel>() {
+        parametersOf(courseId, user.id)
+    }
+
+    UserProfileDialog(
+        username = user.humanReadableName,
+        userRole = user.getUserRole(),
+        profilePictureData = ProfilePictureData.fromAccount(user),
+        onDismiss = onDismiss
+    )
+}
 
 
 @Composable
@@ -28,7 +52,6 @@ fun UserProfileDialog(
     userRole: UserRole?,
     profilePictureData: ProfilePictureData,
     onDismiss: () -> Unit,
-    onSendMessageClick: (() -> Unit)?,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -132,7 +155,6 @@ fun UserProfileDialogPreview() {
                 imageUrl = null,
             ),
             onDismiss = {},
-            onSendMessageClick = {},
         )
     }
 }

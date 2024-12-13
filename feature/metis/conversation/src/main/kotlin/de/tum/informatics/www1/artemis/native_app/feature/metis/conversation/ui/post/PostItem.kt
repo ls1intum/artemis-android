@@ -97,7 +97,6 @@ internal fun PostItem(
     clientId: Long,
     displayHeader: Boolean,
     onClickOnReaction: ((emojiId: String, create: Boolean) -> Unit)?,
-    onSendMessageToAuthor: ((userId: Long) -> Unit)?,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onRequestRetrySend: () -> Unit
@@ -166,7 +165,6 @@ internal fun PostItem(
             authorName = post?.authorName,
             authorId = post?.authorId ?: -1,
             authorImageUrl = post?.authorImageUrl,
-            onSendMessageToAuthor = onSendMessageToAuthor,
             creationDate = post?.creationDate,
             expanded = isExpanded,
             displayHeader = displayHeader,
@@ -245,7 +243,6 @@ private fun PostHeadline(
     authorName: String?,
     authorId: Long,
     authorImageUrl: String?,
-    onSendMessageToAuthor: ((userId: Long) -> Unit)?,
     creationDate: Instant?,
     postStatus: CreatePostService.Status,
     expanded: Boolean = false,
@@ -263,7 +260,6 @@ private fun PostHeadline(
                     userName = authorName.orEmpty(),
                     imageUrl = authorImageUrl,
                     userRole = authorRole,
-                    onSendMessageToAuthor = onSendMessageToAuthor,
                 )
 
                 HeadlineAuthorInfo(
@@ -289,7 +285,6 @@ private fun PostHeadline(
                 userName = authorName.orEmpty(),
                 imageUrl = authorImageUrl,
                 userRole = authorRole,
-                onSendMessageToAuthor = onSendMessageToAuthor,
                 displayImage = doDisplayHeader
             )
 
@@ -415,7 +410,6 @@ private fun HeadlineProfilePicture(
     userName: String,
     imageUrl: String?,
     userRole: UserRole?,
-    onSendMessageToAuthor: ((userId: Long) -> Unit)?,
     displayImage: Boolean = true
 ) {
     val size = 30.dp
@@ -430,7 +424,6 @@ private fun HeadlineProfilePicture(
             userName = userName,
             userRole = userRole,
             imageUrl = imageUrl,
-            onSendMessage = onSendMessageToAuthor
         )
     }
 }

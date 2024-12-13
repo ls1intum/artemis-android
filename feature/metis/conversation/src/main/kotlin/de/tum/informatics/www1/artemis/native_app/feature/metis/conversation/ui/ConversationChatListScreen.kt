@@ -239,6 +239,7 @@ private fun ConversationTitle(
         ConversationIcon(
             conversation = conversation,
             clientId = clientId,
+            showDialogOnOneToOneChatClick = true
         )
 
         Spacer(Modifier.width(8.dp))

@@ -23,8 +23,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.hasModerationRights
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ConversationUserRoleIndicators
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureWithDialog
 
 @Composable
 internal fun ConversationMemberListItem(
@@ -57,8 +56,8 @@ internal fun ConversationMemberListItem(
             }
         },
         leadingContent = {
-            ProfilePicture(
-                profilePictureData = ProfilePictureData.fromAccount(member)
+            ProfilePictureWithDialog(
+                conversationUser = member
             )
         },
         trailingContent = {

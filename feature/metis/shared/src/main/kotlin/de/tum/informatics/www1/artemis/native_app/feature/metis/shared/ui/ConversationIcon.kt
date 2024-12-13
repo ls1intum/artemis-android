@@ -16,17 +16,19 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureWithDialog
 
 @Composable
 fun ConversationIcon(
     modifier: Modifier = Modifier,
     conversation: Conversation,
     clientId: Long,
+    showDialogOnOneToOneChatClick: Boolean = false
 ) {
     when(conversation) {
         is ChannelChat -> ChannelChatIcon(modifier, conversation)
         is GroupChat -> GroupChatIcon(modifier)
-        is OneToOneChat -> OneToOneChatIcon(modifier, conversation, clientId)
+        is OneToOneChat -> OneToOneChatIcon(modifier, conversation, clientId, showDialogOnOneToOneChatClick)
     }
 }
 
@@ -69,11 +71,19 @@ fun GroupChatIcon(modifier: Modifier) {
 fun OneToOneChatIcon(
     modifier: Modifier,
     oneToOneChat: OneToOneChat,
-    clientId: Long
+    clientId: Long,
+    showDialogOnClick: Boolean = false
 ) {
     val conversationPartner = oneToOneChat.members.first { it.id != clientId }
-    ProfilePicture(
-        modifier = modifier,
-        profilePictureData = ProfilePictureData.fromAccount(conversationPartner)
-    )
+    if (showDialogOnClick) {
+        ProfilePictureWithDialog(
+            modifier = modifier,
+            conversationUser = conversationPartner
+        )
+    } else {
+        ProfilePicture(
+            modifier = modifier,
+            profilePictureData = ProfilePictureData.fromAccount(conversationPartner)
+        )
+    }
 }

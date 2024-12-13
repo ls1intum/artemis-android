@@ -276,9 +276,6 @@ private fun ChatList(
                             onClickViewPost(post?.standalonePostId ?: return@rememberPostActions)
                         },
                         onResolvePost = null,
-                        onSendMessageToAuthor = {
-                            // TODO: https://github.com/ls1intum/artemis-android/issues/213
-                        },
                         onPinPost = { onRequestPin(post ?: return@rememberPostActions) },
                         onRequestRetrySend = {
                             onRequestRetrySend(
