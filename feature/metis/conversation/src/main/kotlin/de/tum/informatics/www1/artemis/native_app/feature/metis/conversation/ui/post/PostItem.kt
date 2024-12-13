@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
@@ -65,16 +66,6 @@ import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.koin.compose.koinInject
-
-private val EditedGray: Color
-    @Composable get() = Color.Gray
-
-private val UnsentMessageTextColor: Color
-    @Composable get() = Color.Gray
-
-private val PinnedMessageBackgroundColor: Color
-    @Composable get() = Color(0xFFFFA500).copy(alpha = 0.25f)
-
 
 sealed class PostItemViewType {
 
@@ -112,12 +103,12 @@ internal fun PostItem(
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
     val applyPinStatusToModifier: @Composable (Modifier) -> Modifier = {
-        if (isPinned) {
+        if (isPinned && !isExpanded) {
             modifier
                 .clip(
                     MaterialTheme.shapes.small
                 )
-                .background(color = PinnedMessageBackgroundColor)
+                .background(color = PostColors.pinnedMessageBackground)
         } else modifier
     }
 
@@ -192,14 +183,14 @@ internal fun PostItem(
                         style = MaterialTheme.typography.bodyMedium,
                         onClick = onClick,
                         onLongClick = onLongClick,
-                        color = if (post?.serverPostId == null) UnsentMessageTextColor else Color.Unspecified
+                        color = if (post?.serverPostId == null) PostColors.unsentMessageText else Color.Unspecified
                     )
 
                     if (post?.updatedDate != null) {
                         Text(
                             text = stringResource(id = R.string.post_edited_hint),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = EditedGray
+                            color = PostColors.editedHintText
                         )
                     }
 
