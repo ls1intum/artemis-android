@@ -6,6 +6,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
@@ -23,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_PROFILE_PICTURE_IMAGE
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_PROFILE_PICTURE_INITIALS
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_PROFILE_PICTURE_UNKNOWN
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.TEST_TAG_USER_PROFILE_DIALOG
 import kotlinx.coroutines.CompletableDeferred
 import org.junit.Before
 import org.junit.Test
@@ -103,6 +105,30 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
             exclusiveTag = TEST_TAG_PROFILE_PICTURE_UNKNOWN,
             allTags = allTestTags
         )
+    }
+
+    @Test
+    fun `test GIVEN a post with a profile picture WHEN clicking on it THEN the user profile dialog is shown`() {
+        val post = StandalonePost(
+            id = 1L,
+            author = User(
+                id = 1L,
+                name = "author",
+                imageUrl = null
+            ),
+        )
+        setupUi(post)
+
+        composeTestRule.assertTestTagExclusivelyExists(
+            exclusiveTag = TEST_TAG_PROFILE_PICTURE_INITIALS,
+            allTags = allTestTags
+        )
+
+        composeTestRule.onNodeWithTag(TEST_TAG_PROFILE_PICTURE_INITIALS)
+            .performClick()
+
+        composeTestRule.onNodeWithTag(TEST_TAG_USER_PROFILE_DIALOG)
+            .assertExists()
     }
 
     private fun setupUi(
