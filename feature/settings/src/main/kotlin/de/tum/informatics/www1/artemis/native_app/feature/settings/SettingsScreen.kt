@@ -273,7 +273,7 @@ private fun UserInformationSection(
                 leadingContent = {
                     ProfilePicture(
                         modifier = Modifier.size(24.dp),
-                        profilePictureData = ProfilePictureData.from(account)
+                        profilePictureData = ProfilePictureData.fromAccount(account)
                     )
                 },
                 text = stringResource(

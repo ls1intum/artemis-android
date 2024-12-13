@@ -7,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanR
 sealed class ProfilePictureData {
 
     companion object {
-        fun from(user: BaseAccount): ProfilePictureData = create(
+        fun fromAccount(user: BaseAccount): ProfilePictureData = create(
             userId = user.id,
             username = user.humanReadableName,
             imageUrl = user.imageUrl

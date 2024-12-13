@@ -127,7 +127,7 @@ private fun PotentialRecipientsList(
                         .testTag(testTagForPotentialRecipient(user.username.orEmpty())),
                     leadingContent = {
                         ProfilePicture(
-                            profilePictureData = ProfilePictureData.from(user)
+                            profilePictureData = ProfilePictureData.fromAccount(user)
                         )
                     },
                     headlineContent = {
