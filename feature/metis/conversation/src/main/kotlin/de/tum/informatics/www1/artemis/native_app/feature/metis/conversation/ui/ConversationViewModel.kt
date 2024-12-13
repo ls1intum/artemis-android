@@ -265,15 +265,17 @@ internal open class ConversationViewModel(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
     private val isAbleToPin: StateFlow<Boolean> = conversation
-        .map { conversation -> conversation.bind {
-            when (it) {
-                // Group Chat: Only Creator can pin
-                is GroupChat -> it.isCreator
-                // Channel: Only Moderators can pin
-                is ChannelChat -> it.hasModerationRights
-                else -> true
-            }
-        }.orElse(false) }
+        .map { conversation ->
+            conversation.bind {
+                when (it) {
+                    // Group Chat: Only Creator can pin
+                    is GroupChat -> it.isCreator
+                    // Channel: Only Moderators can pin
+                    is ChannelChat -> it.hasModerationRights
+                    else -> true
+                }
+            }.orElse(false)
+        }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     val postActionFlags: StateFlow<PostActionFlags> = combine(
@@ -315,7 +317,10 @@ internal open class ConversationViewModel(
 
         // Receive websocket updates and store them in the db.
         viewModelScope.launch(coroutineContext) {
-            combine(serverConfigurationService.host, clientId.filterSuccess()) { host, clientId -> host to clientId }
+            combine(
+                serverConfigurationService.host,
+                clientId.filterSuccess()
+            ) { host, clientId -> host to clientId }
                 .collect { (host, clientId) ->
                     webSocketUpdateUseCase.updatePosts(
                         host = host,
@@ -739,7 +744,8 @@ internal open class ConversationViewModel(
                 )
             } ?: return@launch
 
-            val post = metisStorageService.getStandalonePost(clientSidePostId).first() ?: return@launch
+            val post =
+                metisStorageService.getStandalonePost(clientSidePostId).first() ?: return@launch
 
             createPostService.retryCreatePost(
                 courseId = courseId,
@@ -790,7 +796,6 @@ internal open class ConversationViewModel(
         viewModelScope.launch(coroutineContext) {
             try {
                 val fileBytes = withContext(Dispatchers.IO) {
-
                     context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
                         val fileSize = inputStream.available()
 
@@ -820,30 +825,42 @@ internal open class ConversationViewModel(
                     authToken = accountService.authToken.first()
                 )
 
-                val fileUploadResponse = (response as NetworkResponse.Response).data
-                val filePath = fileUploadResponse.path
-                    ?.let { if (it.startsWith("/")) it.substring(1) else it }
-                    ?: throw IllegalArgumentException(
-                        getString(
-                            context,
-                            R.string.conversation_vm_file_upload_failed
+                when (response) {
+                    is NetworkResponse.Response -> {
+                        val fileUploadResponse = response.data
+                        val filePath = fileUploadResponse.path
+                            ?.let { if (it.startsWith("/")) it.substring(1) else it }
+                            ?: throw IllegalArgumentException(
+                                getString(
+                                    context,
+                                    R.string.conversation_vm_file_upload_failed
+                                )
+                            )
+
+                        val currentText = newMessageText.value.text
+
+                        val transformer = PostArtemisMarkdownTransformer(
+                            serverUrl = serverConfigurationService.serverUrl.first(),
+                            courseId = metisContext.courseId
                         )
-                    )
 
-                val currentText = newMessageText.value.text
+                        val markdown: String = transformer.transformFileUploadMessageMarkdown(
+                            isImage = isImage(fileName),
+                            fileName = fileName,
+                            filePath = filePath
+                        )
+                        val updatedText = "$currentText\n$markdown\n"
+                        newMessageText.value = TextFieldValue(updatedText)
+                    }
 
-                val transformer = PostArtemisMarkdownTransformer(
-                    serverUrl = serverConfigurationService.serverUrl.first(),
-                    courseId = metisContext.courseId
-                )
-
-                val markdown: String = transformer.transformFileUploadMessageMarkdown(
-                    isImage = isImage(fileName),
-                    fileName = fileName,
-                    filePath = filePath
-                )
-                val updatedText = "$currentText\n$markdown\n"
-                newMessageText.value = TextFieldValue(updatedText)
+                    else -> {
+                        throw IllegalArgumentException(
+                            getString(
+                                context,
+                                R.string.conversation_vm_file_upload_failed
+                            ))
+                    }
+                }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
