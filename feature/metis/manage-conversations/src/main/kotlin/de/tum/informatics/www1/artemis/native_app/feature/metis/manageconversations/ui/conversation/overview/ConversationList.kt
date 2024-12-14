@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -50,13 +49,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.ExtraChannelIcons
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.PrimaryChannelIcon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.ChannelIcons
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.CommunicationColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
@@ -217,7 +217,6 @@ private fun LazyListScope.conversationSectionHeader(
                 .fillMaxWidth()
                 .testTag(key)
         ) {
-            HorizontalDivider()
 
             Row(
                 modifier = Modifier
@@ -248,12 +247,12 @@ private fun LazyListScope.conversationSectionHeader(
                     Icon(
                         imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.AutoMirrored.Filled.ArrowRight,
                         contentDescription = null,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
+                        tint = CommunicationColors.ArtemisBlue
                     )
                 }
             }
 
-            HorizontalDivider()
         }
     }
 }
@@ -338,19 +337,17 @@ private fun ConversationListItem(
         else -> conversation.humanReadableName
     }
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier.padding(horizontal = 16.dp)) {
         when (conversation) {
             is ChannelChat -> {
                 ListItem(
-                    modifier = Modifier.clickable(onClick = onNavigateToConversation),
+                    modifier = Modifier.clickable(onClick = onNavigateToConversation).padding(start = 8.dp),
                     leadingContent = {
-                        PrimaryChannelIcon(channelChat = conversation)
+                        ChannelIcons(channelChat = conversation, hasUnreadMessages = unreadMessagesCount > 0)
                     },
                     headlineContent = {
                         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                             Text(text = displayName, maxLines = 1, color = headlineColor)
-
-                            ExtraChannelIcons(channelChat = conversation)
                         }
                     },
                     trailingContent = {
@@ -361,7 +358,7 @@ private fun ConversationListItem(
 
             is GroupChat -> {
                 ListItem(
-                    modifier = Modifier.clickable(onClick = onNavigateToConversation),
+                    modifier = Modifier.clickable(onClick = onNavigateToConversation).padding(start = 8.dp),
                     headlineContent = {
                         Text(
                             displayName,
@@ -379,7 +376,7 @@ private fun ConversationListItem(
 
             is OneToOneChat -> {
                 ListItem(
-                    modifier = Modifier.clickable(onClick = onNavigateToConversation),
+                    modifier = Modifier.clickable(onClick = onNavigateToConversation).padding(start = 8.dp),
                     headlineContent = {
                         Text(
                             displayName,
@@ -500,18 +497,18 @@ private fun UnreadMessages(modifier: Modifier = Modifier, unreadMessagesCount: L
     if (unreadMessagesCount > 0) {
         Box(
             modifier = modifier
-                .padding(end = 24.dp)
+                .padding(end = 32.dp)
                 .size(24.dp)
                 .aspectRatio(1f)
                 .background(
-                    MaterialTheme.colorScheme.primaryContainer,
+                    CommunicationColors.ArtemisBlue,
                     CircleShape
                 ),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = unreadMessagesCount.toString(),
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
     }

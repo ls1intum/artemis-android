@@ -151,8 +151,6 @@ fun ConversationOverviewBody(
                     onToggleHidden = viewModel::markConversationAsHidden,
                     onToggleMuted = viewModel::markConversationAsMuted,
                     trailingContent = {
-                        item { HorizontalDivider() }
-
                         item(key = KEY_BUTTON_SHOW_COC) {
                             Box(
                                 modifier = Modifier
