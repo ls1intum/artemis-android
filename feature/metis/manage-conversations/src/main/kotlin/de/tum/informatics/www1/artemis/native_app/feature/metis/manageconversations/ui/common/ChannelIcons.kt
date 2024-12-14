@@ -40,8 +40,6 @@ internal fun ChannelIcons(channelChat: ChannelChat, hasUnreadMessages: Boolean =
     }
 }
 
-
-
 @Composable
 internal fun ExtraChannelIcons(channelChat: ChannelChat) {
     Row {
