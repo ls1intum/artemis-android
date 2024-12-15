@@ -6,7 +6,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.sharedConversationModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NavigateToUserConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SinglePageConversationBodyViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val communicationModule = module {

@@ -31,7 +31,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadi
 import de.tum.informatics.www1.artemis.native_app.feature.login.R
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.PasswordTextField
 import kotlinx.coroutines.Deferred
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 
 internal const val TEST_TAG_TEXT_FIELD_FIRST_NAME = "TEST_TAG_TEXT_FIELD_FIRST_NAME"
 internal const val TEST_TAG_TEXT_FIELD_LAST_NAME = "TEST_TAG_TEXT_FIELD_LAST_NAME"
@@ -49,7 +49,7 @@ private val RegisterViewModel.Status.localizedErrorString: String?
 @Composable
 internal fun RegisterUi(
     modifier: Modifier,
-    viewModel: RegisterViewModel = getViewModel(),
+    viewModel: RegisterViewModel = koinViewModel(),
     onRegistered: () -> Unit
 ) {
     val profileInfo: DataState<ProfileInfo> = viewModel.serverProfileInfo.collectAsState().value
