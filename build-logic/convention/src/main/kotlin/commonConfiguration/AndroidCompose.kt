@@ -10,15 +10,6 @@ internal fun Project.configureCompose(commonExtension: CommonExtension<*, *, *, 
     val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
     commonExtension.apply {
-        buildFeatures {
-            compose = true
-        }
-
-        composeOptions {
-            kotlinCompilerExtensionVersion =
-                libs.findVersion("androidxComposeCompiler").get().toString()
-        }
-
         kotlinOptions {
             freeCompilerArgs = freeCompilerArgs + listOf(
                 "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",

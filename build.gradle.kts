@@ -18,6 +18,7 @@ plugins {
     alias(libs.plugins.google.firebase.appdistribution) apply false
     alias(libs.plugins.kover) apply true
     alias(libs.plugins.google.ksp) apply false
+    alias(libs.plugins.compose.compiler) apply false
 }
 
 tasks.register("clean", Delete::class) {

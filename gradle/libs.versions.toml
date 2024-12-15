@@ -18,7 +18,7 @@ androidxPagingCompose = "3.3.4"
 coil = "3.0.4"
 coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github.com/ls1intum/artemis-android/issues/171
 emoji2 = "1.5.0"
-kotlin = "1.9.25"
+kotlin = "2.0.21"
 kotlinxCoroutines = "1.9.0"
 kotlinxDatetime = "0.6.1"
 kotlinxSerializationJson = "1.6.3"
@@ -36,7 +36,6 @@ sentry-android = "7.17.0"
 work = "2.10.0"
 
 # Used indirecly in the build config -> Do not remove without double checking.
-androidxComposeCompiler = "1.5.15"
 androidxCore = "1.13.1"
 
 [libraries]
@@ -146,4 +145,5 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
 google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.0.0" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
-google-ksp = { id = "com.google.devtools.ksp", version = "1.9.25-1.0.20" }
+google-ksp = { id = "com.google.devtools.ksp", version = "2.0.21-1.0.28" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

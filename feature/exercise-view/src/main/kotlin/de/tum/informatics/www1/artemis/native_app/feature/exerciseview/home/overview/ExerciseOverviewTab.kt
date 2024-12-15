@@ -121,7 +121,7 @@ private fun ExerciseInformation(
     var maxWidth: Int by remember { mutableIntStateOf(0) }
     val updateMaxWidth = { new: Int -> maxWidth = new }
 
-    val nullableDueDateTextInfo = @Composable { dueDate: Instant?, hintRes: @receiver:StringRes Int ->
+    val nullableDueDateTextInfo = @Composable { dueDate: Instant?, hintRes: Int ->
         if (dueDate != null) {
             DueDateTextInfo(
                 dueDate = dueDate,
