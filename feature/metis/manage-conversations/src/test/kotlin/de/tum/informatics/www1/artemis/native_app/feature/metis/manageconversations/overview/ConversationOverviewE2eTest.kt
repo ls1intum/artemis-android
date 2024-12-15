@@ -43,7 +43,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metistest.Conversation
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -290,13 +289,11 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             )
             .performClick()
 
-        runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                viewModel
-                    .conversations
-                    .filter { it.bind { conv -> conv.hidden.isExpanded }.orElse(false) }
-                    .first()
-            }
+        runBlockingWithTestTimeout {
+            viewModel
+                .conversations
+                .filter { it.bind { conv -> conv.hidden.isExpanded }.orElse(false) }
+                .first()
         }
     }
 

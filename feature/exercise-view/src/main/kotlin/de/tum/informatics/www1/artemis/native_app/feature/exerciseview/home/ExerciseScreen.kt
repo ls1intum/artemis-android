@@ -8,12 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
@@ -21,7 +18,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -29,7 +25,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.web.WebViewState
-import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
@@ -42,10 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.getProble
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import kotlinx.coroutines.Deferred
-import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ExperimentalToolbarApi
-import me.onebone.toolbar.ScrollStrategy
-import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 
 val LocalExerciseScreenFloatingActionButton =
     compositionLocalOf { ExerciseScreenFloatingActionButtonProvider() }
@@ -126,58 +118,7 @@ internal fun ExerciseScreen(
             metisContentRatio = METIS_RATIO
         )
 
-        // Only collapse toolbar if otherwise too much of the screen would be occupied by it
-        val isToolbarCollapsible = windowSizeClass.heightSizeClass < WindowHeightSizeClass.Expanded
-
         val isLongToolbar = windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Medium
-
-        // Keep state when device configuration changes
-        val body = @Composable { modifier: Modifier ->
-            val onParticipateInQuizDelegate = { isPractice: Boolean ->
-                courseId?.let {
-                    onParticipateInQuiz(it, isPractice)
-                }
-            }
-
-            val actions = remember(
-                courseId,
-                onViewTextExerciseParticipationScreen,
-                onParticipateInQuizDelegate,
-                onViewResult,
-                viewModel
-            ) {
-                ExerciseActions(
-                    onClickStartTextExercise = {
-                        startExerciseParticipationDeferred = viewModel.startExercise()
-                    },
-                    onClickPracticeQuiz = { onParticipateInQuizDelegate(true) },
-                    onClickOpenQuiz = { onParticipateInQuizDelegate(false) },
-                    onClickStartQuiz = { onParticipateInQuizDelegate(false) },
-                    onClickViewResult = onViewResult,
-                    onClickOpenTextExercise = onViewTextExerciseParticipationScreen,
-                    onClickViewQuizResults = {
-                        courseId?.let {
-                            onClickViewQuizResults(it)
-                        }
-                    }
-                )
-            }
-
-            ExerciseScreenBody(
-                modifier = modifier,
-                exerciseDataState = exerciseDataState,
-                displayCommunicationOnSide = displayCommunicationOnSide,
-                navController = navController,
-                metisContext = metisContext,
-                actions = actions,
-                webViewState = webViewState,
-                setWebView = { savedWebView = it },
-                webView = savedWebView,
-                onClickRetry = viewModel::requestReloadExercise,
-                serverUrl = serverUrl,
-                authToken = authToken
-            )
-        }
 
         val currentExerciseScreenFloatingActionButton =
             remember { ExerciseScreenFloatingActionButtonProvider() }
@@ -197,65 +138,66 @@ internal fun ExerciseScreen(
                 }
             }
 
-            if (isToolbarCollapsible) {
-                val state = rememberCollapsingToolbarScaffoldState()
-                // On the first load, we need to expand the toolbar, as otherwise content may be hidden
-                var hasExecutedInitialExpand by rememberSaveable { mutableStateOf(false) }
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    ExerciseScreenTopAppBar(
+                        modifier = Modifier.fillMaxWidth(),
+                        onNavigateBack = onNavigateBack,
+                        exerciseDataState = exerciseDataState,
+                        onRequestReloadExercise = viewModel::requestReloadExercise
+                    )
+                },
+                floatingActionButton = floatingActionButton
+            ) { padding ->
 
-                LaunchedEffect(exerciseDataState, hasExecutedInitialExpand) {
-                    if (exerciseDataState.isSuccess && !hasExecutedInitialExpand) {
-                        state.toolbarState.expand()
-                        hasExecutedInitialExpand = true
+                val onParticipateInQuizDelegate = { isPractice: Boolean ->
+                    courseId?.let {
+                        onParticipateInQuiz(it, isPractice)
                     }
                 }
 
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    floatingActionButton = floatingActionButton
-                ) { padding ->
-                    CollapsingToolbarScaffold(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(padding),
-                        state = state,
-                        toolbar = {
-                            ExerciseScreenCollapsingTopBar(
-                                modifier = Modifier.fillMaxWidth(),
-                                state = state,
-                                exercise = exerciseDataState,
-                                onNavigateBack = onNavigateBack,
-                                onRequestRefresh = viewModel::requestReloadExercise,
-                                isLongToolbar = isLongToolbar
-                            )
+                val actions = remember(
+                    courseId,
+                    onViewTextExerciseParticipationScreen,
+                    onParticipateInQuizDelegate,
+                    onViewResult,
+                    viewModel
+                ) {
+                    ExerciseActions(
+                        onClickStartTextExercise = {
+                            startExerciseParticipationDeferred = viewModel.startExercise()
                         },
-                        scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
-                        body = {
-                            Surface(Modifier.fillMaxSize()) {
-                                body(Modifier.fillMaxSize())
+                        onClickPracticeQuiz = { onParticipateInQuizDelegate(true) },
+                        onClickOpenQuiz = { onParticipateInQuizDelegate(false) },
+                        onClickStartQuiz = { onParticipateInQuizDelegate(false) },
+                        onClickViewResult = onViewResult,
+                        onClickOpenTextExercise = onViewTextExerciseParticipationScreen,
+                        onClickViewQuizResults = {
+                            courseId?.let {
+                                onClickViewQuizResults(it)
                             }
                         }
                     )
                 }
-            } else {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    topBar = {
-                        StaticTopAppBar(
-                            modifier = Modifier.fillMaxWidth(),
-                            onNavigateBack = onNavigateBack,
-                            exerciseDataState = exerciseDataState,
-                            isLongToolbar = isLongToolbar,
-                            onRequestReloadExercise = viewModel::requestReloadExercise
-                        )
-                    },
-                    floatingActionButton = floatingActionButton
-                ) { padding ->
-                    body(
-                        Modifier
-                            .fillMaxSize()
-                            .padding(padding)
-                    )
-                }
+
+                ExerciseScreenBody(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    exerciseDataState = exerciseDataState,
+                    isLongToolbar = isLongToolbar,
+                    displayCommunicationOnSide = displayCommunicationOnSide,
+                    navController = navController,
+                    metisContext = metisContext,
+                    actions = actions,
+                    webViewState = webViewState,
+                    setWebView = { savedWebView = it },
+                    webView = savedWebView,
+                    onClickRetry = viewModel::requestReloadExercise,
+                    serverUrl = serverUrl,
+                    authToken = authToken
+                )
             }
         }
     }

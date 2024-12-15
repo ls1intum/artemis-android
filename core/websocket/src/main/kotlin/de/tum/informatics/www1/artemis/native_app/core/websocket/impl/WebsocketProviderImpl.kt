@@ -199,7 +199,7 @@ class WebsocketProviderImpl(
      * The given flow can only be subscribed to once.
      */
     override fun <T : Any> subscribe(
-        channel: String,
+        topic: String,
         deserializer: DeserializationStrategy<T>
     ): Flow<WebsocketProvider.WebsocketData<T>> {
         return session
@@ -207,20 +207,20 @@ class WebsocketProviderImpl(
                 val flow: Flow<WebsocketProvider.WebsocketData<T>> = flow {
                     emitAll(
                         currentSession.subscribe(
-                            StompSubscribeHeaders(destination = channel),
+                            StompSubscribeHeaders(destination = topic),
                             deserializer
                         )
                     )
                 }
                     .onStart {
-                        Log.d(TAG, "subscribe! $channel")
+                        Log.d(TAG, "subscribe! $topic")
                         emit(WebsocketProvider.WebsocketData.Subscribe())
                     }
                     .onCompletion {
-                        Log.d(TAG, "unsubscribe! $channel")
+                        Log.d(TAG, "unsubscribe! $topic")
                     }
                     .catch { e ->
-                        Log.d(TAG, "Subscription $channel reported error: ${e.localizedMessage}")
+                        Log.e(TAG, "Subscription $topic reported error: ${e.localizedMessage}")
                     }
                     .map {
                         WebsocketProvider.WebsocketData.Message(it)
@@ -247,10 +247,10 @@ class WebsocketProviderImpl(
     }
 
     override fun <T : Any> subscribeMessage(
-        channel: String,
+        topic: String,
         deserializer: DeserializationStrategy<T>
     ): Flow<T> {
-        return subscribe(channel, deserializer).mapNotNull {
+        return subscribe(topic, deserializer).mapNotNull {
             when (it) {
                 is WebsocketProvider.WebsocketData.Message -> it.message
                 else -> null

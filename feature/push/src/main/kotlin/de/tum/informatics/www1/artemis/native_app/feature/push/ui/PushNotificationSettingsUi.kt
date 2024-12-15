@@ -31,7 +31,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.linkTextColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.linkTextColor
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import kotlinx.coroutines.Job
 import org.koin.androidx.compose.koinViewModel

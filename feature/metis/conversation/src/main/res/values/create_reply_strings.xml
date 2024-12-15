@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_reply_click_to_write">Message %1$s</string>
+    <string name="create_reply_sending_reply">Sending reply…</string>
+</resources>

@@ -32,18 +32,16 @@ internal fun KickUserFromChannelDialog(
 internal fun KickUserFromGroupDialog(
     humanReadableName: String,
     username: String,
-    groupName: String,
     onPressPositiveButton: () -> Unit,
     onDismissRequest: () -> Unit
 ) {
     MarkdownTextAlertDialog(
-        title = stringResource(
-            id = R.string.conversation_settings_dialog_kick_member_from_group_title,
+        title = stringResource(id = R.string.conversation_settings_dialog_kick_member_from_group_title,),
+        text = stringResource(
+            id = R.string.conversation_settings_dialog_kick_member_from_group_message,
             humanReadableName,
-            username,
-            groupName
+            username
         ),
-        text = stringResource(id = R.string.conversation_settings_dialog_kick_member_from_group_message),
         confirmButtonText = stringResource(id = R.string.conversation_settings_dialog_kick_member_positive),
         dismissButtonText = stringResource(id = R.string.conversation_settings_dialog_kick_member_negative),
         onPressPositiveButton = onPressPositiveButton,

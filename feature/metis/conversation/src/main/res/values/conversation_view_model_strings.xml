@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="conversation_vm_">Error loading conversation</string>
+    <string name="conversation_vm_file_size_exceed">The file size exceeds the limit of 5MB.</string>
+    <string name="conversation_vm_file_type_unsupported">Unsupported file type selected.</string>
+    <string name="conversation_vm_file_upload_failed">There has been a problem with the file upload.</string>
+    <string name="conversation_vm_file_not_selected">No file selected</string>
+</resources>

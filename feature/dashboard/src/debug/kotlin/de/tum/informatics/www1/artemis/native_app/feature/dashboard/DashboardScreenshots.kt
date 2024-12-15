@@ -5,8 +5,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.res.imageResource
+import coil3.annotation.ExperimentalCoilApi
+import coil3.asImage
+import coil3.compose.AsyncImagePreviewHandler
+import coil3.compose.LocalAsyncImagePreviewHandler
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationServiceStub
@@ -16,15 +21,18 @@ import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
-import de.tum.informatics.www1.artemis.native_app.core.ui.CourseImageProvider
-import de.tum.informatics.www1.artemis.native_app.core.ui.LocalCourseImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.test.ArtemisImageProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardService
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CourseOverviewViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CoursesOverview
 
 private const val IMAGE_MARS = "mars"
 private const val IMAGE_SATURN_5 = "saturn5"
 
+@OptIn(ExperimentalCoilApi::class)
 @PlayStoreScreenshots
 @Composable
 fun `Dashboard - Exercise List`() {
@@ -85,26 +93,20 @@ fun `Dashboard - Exercise List`() {
 
     val betaHintService = remember { BetaHintServiceFake() }
 
-    val fakeCourseImageProvider = remember {
-        object : CourseImageProvider {
-            @Composable
-            override fun rememberCourseImagePainter(
-                courseIconPath: String,
-                serverUrl: String,
-                authorizationToken: String
-            ): Painter {
-                return painterResource(
-                    id = when (courseIconPath) {
-                        IMAGE_MARS -> R.drawable.mars
-                        else -> R.drawable.saturn5
-                    }
-                )
-            }
-
+    val marsImage = ImageBitmap.imageResource(R.drawable.mars).asAndroidBitmap().asImage()
+    val saturnImage = ImageBitmap.imageResource(R.drawable.saturn5).asAndroidBitmap().asImage()
+    val previewHandler = AsyncImagePreviewHandler { request ->
+        when (request.data) {
+            IMAGE_MARS -> marsImage
+            IMAGE_SATURN_5 -> saturnImage
+            else -> null
         }
     }
 
-    CompositionLocalProvider(LocalCourseImageProvider provides fakeCourseImageProvider) {
+    CompositionLocalProvider(
+        LocalArtemisImageProvider provides ArtemisImageProviderStub(),
+        LocalAsyncImagePreviewHandler provides previewHandler
+    ) {
         ScreenshotFrame(title = "Manage all of your courses in one app") {
             CoursesOverview(
                 modifier = Modifier.fillMaxSize(),

@@ -5,6 +5,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 
 sealed interface VisibleMetisContext {
     val metisContext: MetisContext
+
+    fun isInConversation(conversationId: Long): Boolean {
+        return metisContext is MetisContext.Conversation &&
+                (metisContext as MetisContext.Conversation).conversationId == conversationId
+    }
 }
 
 data class VisiblePostList(override val metisContext: MetisContext) : VisibleMetisContext
