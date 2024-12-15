@@ -3,9 +3,9 @@ import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import commonConfiguration.configureJacoco
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
+import util.libs
 
 //Adapted from: https://github.com/android/nowinandroid/blob/3ca68d49eaeed8bb177d49c9c78249bb6bce3c5f/build-logic/convention/src/main/kotlin/AndroidApplicationConventionPlugin.kt
 class AndroidApplicationConventionPlugin : Plugin<Project> {
@@ -17,8 +17,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 apply("org.gradle.jacoco")
                 apply("org.jetbrains.kotlinx.kover")
             }
-
-            val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
