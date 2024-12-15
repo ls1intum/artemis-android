@@ -1,12 +1,11 @@
 package commonConfiguration
 
 import com.android.build.api.variant.AndroidComponentsExtension
-import kotlinx.kover.gradle.plugin.dsl.KoverReportExtension
+import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
@@ -81,20 +80,22 @@ internal fun Project.configureJacoco(
         }
     }
 
-    extensions.getByType(KoverReportExtension::class).apply {
-        androidComponentsExtension.onVariants { variant ->
-            androidReports(variant.name) {
-                filters {
-                    includes {
-                        packages("de.tum.informatics.www1.artemis.native_app.*")
+    extensions.configure<KoverProjectExtension>("kover") {
+        reports {
+            androidComponentsExtension.onVariants { variant ->
+                variant(variant.name) {
+                    filters {
+                        includes {
+                            packages("de.tum.informatics.www1.artemis.native_app.*")
+                        }
+                        excludes {
+                            classes("*.BuildConfig")
+                        }
                     }
-                    excludes {
-                        classes("*.BuildConfig")
-                    }
-                }
 
-                html {
-                    onCheck = false
+                    html {
+                        onCheck = false
+                    }
                 }
             }
         }
