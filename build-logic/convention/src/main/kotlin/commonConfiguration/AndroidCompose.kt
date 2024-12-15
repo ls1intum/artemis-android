@@ -1,14 +1,11 @@
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Project
-import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.getByType
+import util.libs
 
 //Adapted from: https://github.com/android/nowinandroid/blob/bbc5460b624d67b64b5b5118f8a0e1763427e7e4/build-logic/convention/src/main/kotlin/com/google/samples/apps/nowinandroid/AndroidCompose.kt
 
 internal fun Project.configureCompose(commonExtension: CommonExtension<*, *, *, *, *, *>) {
-    val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
-
     commonExtension.apply {
         kotlinOptions {
             freeCompilerArgs = freeCompilerArgs + listOf(
