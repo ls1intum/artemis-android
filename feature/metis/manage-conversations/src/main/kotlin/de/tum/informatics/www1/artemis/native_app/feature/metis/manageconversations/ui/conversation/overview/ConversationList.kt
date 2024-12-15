@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -50,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
@@ -235,7 +237,7 @@ private fun LazyListScope.conversationSectionHeader(
                             .weight(1f)
                             .padding(start = 8.dp),
                         text = stringResource(id = text),
-                        style = MaterialTheme.typography.titleSmall
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 }
 
@@ -340,13 +342,20 @@ private fun ConversationListItem(
         when (conversation) {
             is ChannelChat -> {
                 ListItem(
-                    modifier = Modifier.clickable(onClick = onNavigateToConversation).padding(start = 8.dp),
+                    modifier = Modifier
+                        .clickable(onClick = onNavigateToConversation)
+                        .padding(start = 8.dp),
                     leadingContent = {
                         ChannelIcons(channelChat = conversation, hasUnreadMessages = unreadMessagesCount > 0)
                     },
                     headlineContent = {
                         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Text(text = displayName, maxLines = 1, color = headlineColor)
+                            Text(
+                                text = displayName,
+                                maxLines = 1,
+                                color = headlineColor,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         }
                     },
                     trailingContent = {
@@ -357,11 +366,14 @@ private fun ConversationListItem(
 
             is GroupChat -> {
                 ListItem(
-                    modifier = Modifier.clickable(onClick = onNavigateToConversation).padding(start = 8.dp),
+                    modifier = Modifier
+                        .clickable(onClick = onNavigateToConversation)
+                        .padding(start = 8.dp),
                     headlineContent = {
                         Text(
-                            displayName,
-                            color = headlineColor
+                            text = displayName,
+                            color = headlineColor,
+                            style = MaterialTheme.typography.bodyLarge
                         )
                     },
                     leadingContent = {
@@ -375,11 +387,14 @@ private fun ConversationListItem(
 
             is OneToOneChat -> {
                 ListItem(
-                    modifier = Modifier.clickable(onClick = onNavigateToConversation).padding(start = 8.dp),
+                    modifier = Modifier
+                        .clickable(onClick = onNavigateToConversation)
+                        .padding(start = 8.dp),
                     headlineContent = {
                         Text(
-                            displayName,
-                            color = headlineColor
+                            text = displayName,
+                            color = headlineColor,
+                            style = MaterialTheme.typography.bodyLarge
                         )
                     },
                     trailingContent = {
@@ -389,26 +404,27 @@ private fun ConversationListItem(
             }
         }
 
-        IconButton(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .testTag(tagForConversationOptions(itemBaseTag)),
-            onClick = { isContextDialogShown = true }
-        ) {
-            Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null)
-        }
+        Box(modifier = Modifier.align(Alignment.CenterEnd)) {
+            IconButton(
+                modifier = Modifier.testTag(tagForConversationOptions(itemBaseTag)),
+                onClick = { isContextDialogShown = true }
+            ) {
+                Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null)
+            }
 
-        ConversationListItemDropdownMenu(
-            modifier = Modifier.Companion.align(Alignment.TopEnd),
-            isContextDialogShown = isContextDialogShown,
-            onDismissRequest = onDismissRequest,
-            conversation = conversation,
-            onToggleMarkAsFavourite = onToggleMarkAsFavourite,
-            onToggleHidden = onToggleHidden,
-            onToggleMuted = onToggleMuted
-        )
+            ConversationListItemDropdownMenu(
+                modifier = Modifier,
+                isContextDialogShown = isContextDialogShown,
+                onDismissRequest = onDismissRequest,
+                conversation = conversation,
+                onToggleMarkAsFavourite = onToggleMarkAsFavourite,
+                onToggleHidden = onToggleHidden,
+                onToggleMuted = onToggleMuted
+            )
+        }
     }
 }
+
 
 @Composable
 private fun ConversationListItemDropdownMenu(
