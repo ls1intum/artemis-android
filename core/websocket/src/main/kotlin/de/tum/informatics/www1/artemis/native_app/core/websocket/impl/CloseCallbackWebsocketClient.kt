@@ -21,7 +21,7 @@ class CloseCallbackWebsocketClient(
     override val supportsCustomHeaders: Boolean
 ) : WebSocketClient {
 
-    override suspend fun connect(url: String, headers: Map<String, String>): WebSocketConnection {
+    override suspend fun connect(url: String, protocols: List<String>, headers: Map<String, String>): WebSocketConnection {
         return CloseCallbackWebsocketConnectionProxy(baseClient.connect(url), onClose)
     }
 

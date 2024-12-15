@@ -37,7 +37,7 @@ class CustomOkHttpWebSocketClient(
     override val supportsCustomHeaders: Boolean = false
 ) : WebSocketClient {
 
-    override suspend fun connect(url: String, headers: Map<String, String>): WebSocketConnection {
+    override suspend fun connect(url: String, protocols: List<String>, headers: Map<String, String>): WebSocketConnection {
         val authToken = authTokenFlow.first()
 
         val request = Request.Builder()
@@ -121,7 +121,8 @@ private class KrossbowToOkHttpListenerAdapter(
 private class OkHttpSocketToKrossbowConnectionAdapter(
     private val okSocket: WebSocket,
     override val incomingFrames: Flow<WebSocketFrame>,
-    private val onMissingHeartbeat: () -> Unit
+    private val onMissingHeartbeat: () -> Unit,
+    override val protocol: String? = null
 ) : WebSocketConnection {
 
     override val url: String
