@@ -5,7 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.T
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.TextSubmissionService
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.impl.TextEditorServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.impl.TextSubmissionServiceImpl
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val exerciseModule = module {
