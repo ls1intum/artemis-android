@@ -57,7 +57,10 @@ fun ScreenshotFrame(title: String, content: @Composable () -> Unit) {
                         modifier = Modifier
                             .padding(horizontal = 48.dp)
                             .padding(bottom = 16.dp)
-                            .background(color = Color.Black, RoundedCornerShape(16.dp))
+                            .background(
+                                color = Color.Black,
+                                shape = MaterialTheme.shapes.large
+                            )
                     ) {
                         Box(
                             modifier = Modifier

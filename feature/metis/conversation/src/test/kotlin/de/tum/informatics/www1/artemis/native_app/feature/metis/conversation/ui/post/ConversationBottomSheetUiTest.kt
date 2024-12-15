@@ -9,8 +9,9 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.BaseChatUItest
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.BaseChatUITest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_POST_CONTEXT_BOTTOM_SHEET
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -18,7 +19,7 @@ import org.junit.runner.RunWith
 
 @Category(UnitTest::class)
 @RunWith(AndroidJUnit4::class)
-class ConversationBottomSheetUiTest : BaseChatUItest() {
+class ConversationBottomSheetUiTest : BaseChatUITest() {
 
     private val currentUser = User(id = clientId)
     private val otherUser = User(id = 1234)

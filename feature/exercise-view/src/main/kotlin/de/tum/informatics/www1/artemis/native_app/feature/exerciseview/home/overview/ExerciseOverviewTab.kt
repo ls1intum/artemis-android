@@ -13,8 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -68,7 +67,11 @@ internal fun ExerciseOverviewTab(
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(horizontal = 16.dp)
-                .border(2.dp, Color.Black, RoundedCornerShape(4.dp)),
+                .border(
+                    width = 2.dp,
+                    color = Color.Black,
+                    shape = MaterialTheme.shapes.extraSmall
+                ),
             exercise = exercise,
             isLongToolbar = isLongToolbar
         )
@@ -118,7 +121,7 @@ private fun ExerciseInformation(
     var maxWidth: Int by remember { mutableIntStateOf(0) }
     val updateMaxWidth = { new: Int -> maxWidth = new }
 
-    val nullableDueDateTextInfo = @Composable { dueDate: Instant?, hintRes: @receiver:StringRes Int ->
+    val nullableDueDateTextInfo = @Composable { dueDate: Instant?, hintRes: Int ->
         if (dueDate != null) {
             DueDateTextInfo(
                 dueDate = dueDate,
@@ -174,10 +177,10 @@ private fun ExerciseInformation(
                 .fillMaxWidth(),
             textAlign = TextAlign.Start
         )
-        Divider(
-            color = Color.Black,
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 0.dp),
             thickness = 2.dp,
-            modifier = Modifier.padding(vertical = 0.dp)
+            color = Color.Black
         )
 
         // Here we make the distinction in the layout between long toolbar and short toolbar
