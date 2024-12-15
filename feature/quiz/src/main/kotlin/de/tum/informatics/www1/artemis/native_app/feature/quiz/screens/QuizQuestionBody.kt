@@ -22,8 +22,6 @@ internal fun QuizQuestionBody(
     modifier: Modifier,
     questionIndex: Int,
     quizQuestionData: QuizQuestionData<*>,
-    serverUrl: String,
-    authToken: String
 ) {
     var displayQuestionHint by rememberSaveable { mutableStateOf(false) }
     // Store the hint text of the answer option
@@ -39,8 +37,6 @@ internal fun QuizQuestionBody(
             questionIndex = questionIndex,
             question = quizQuestionData.question,
             data = quizQuestionData,
-            serverUrl = serverUrl,
-            authToken = authToken,
             onRequestDisplayHint = onRequestDisplayHint
         )
 

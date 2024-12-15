@@ -14,12 +14,13 @@ androidGradlePlugin = "8.7.1"
 androidxNavigation = "2.8.4"
 androidxPaging = "3.3.4"
 androidxDataStore = "1.1.1"
-androidxPagingCompose = "3.2.1"
-coil = "2.7.0"
+androidxPagingCompose = "3.3.4"
+coil = "3.0.4"
+coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github.com/ls1intum/artemis-android/issues/171
 emoji2 = "1.5.0"
-kotlin = "1.9.25"
+kotlin = "2.0.21"
 kotlinxCoroutines = "1.9.0"
-kotlinxDatetime = "0.4.0"
+kotlinxDatetime = "0.6.1"
 kotlinxSerializationJson = "1.6.3"
 koin = "3.5.3"
 koinAndroidxCompose = "3.5.6"
@@ -33,10 +34,6 @@ placeholderMaterial = "2.0.0"
 room = "2.6.1"
 sentry-android = "7.17.0"
 work = "2.10.0"
-
-# Used indirecly in the build config -> Do not remove without double checking.
-androidxComposeCompiler = "1.5.15"
-androidxCore = "1.13.1"
 
 [libraries]
 accompanist-placeholder-material = { group = "com.google.accompanist", name = "accompanist-placeholder-material", version.ref = "accompanist" }
@@ -67,7 +64,6 @@ androidx-emoji2 = { group = "androidx.emoji2", name = "emoji2", version.ref = "e
 androidx-emoji2-views = { group = "androidx.emoji2", name = "emoji2-views", version.ref = "emoji2" }
 androidx-emoji2-views-helper = { group = "androidx.emoji2", name = "emoji2-views-helper", version.ref = "emoji2" }
 androidx-emoji2-emojiPicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
-androidx-lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidxLifecycle" }
 androidx-lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidxLifecycle" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidxNavigation" }
 androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "androidxPaging" }
@@ -81,10 +77,13 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version = "1.1.0-alpha06" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 auth0-java-jwt = { group = "com.auth0.android", name = "jwtdecode", version = "2.0.2" }
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.4.0" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-compose-core = { group = "io.coil-kt.coil3", name = "coil-compose-core", version.ref = "coil" }
+coil-test = { group = "io.coil-kt.coil3", name = "coil-test", version.ref = "coil" }
+coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+coil2-base = { group = "io.coil-kt", name = "coil-base", version.ref = "coil2" }
+google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version = "33.7.0" }
 google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
-kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version.ref = "kotlinxCoroutines" }
@@ -94,10 +93,10 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
-koin-test = { group = "io.insert-koin", name = "koin-test", version = "3.4.1" }
-koin-test-junit4 = { group = "io.insert-koin", name = "koin-test-junit4", version = "3.4.1" }
+koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
+koin-test-junit4 = { group = "io.insert-koin", name = "koin-test-junit4", version.ref = "koin" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
-koin-android-test = { group = "io.insert-koin", name = "koin-android-test", version = "3.4.1" }
+koin-android-test = { group = "io.insert-koin", name = "koin-android-test", version.ref = "koin" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinAndroidxCompose" }
 koin-androidx-workmanager = { group = "io.insert-koin", name = "koin-androidx-workmanager", version.ref = "koin" }
 koin-android-compat = { group = "io.insert-koin", name = "koin-android-compat", version.ref = "koin" }
@@ -136,9 +135,10 @@ kotlin-kover = { group = "org.jetbrains.kotlinx", name = "kover-gradle-plugin", 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.0.0" }
+google-ksp = { id = "com.google.devtools.ksp", version = "2.0.21-1.0.28" }
+google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
-google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.0.0" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
-google-ksp = { id = "com.google.devtools.ksp", version = "1.9.25-1.0.20" }

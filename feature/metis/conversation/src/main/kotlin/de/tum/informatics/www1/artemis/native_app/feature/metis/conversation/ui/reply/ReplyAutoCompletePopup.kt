@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,7 +71,7 @@ private fun ReplyAutoCompletePopupBody(
     LazyColumn(
         modifier = modifier
             .clip(MaterialTheme.shapes.large)
-            .background(color = MaterialTheme.colorScheme.surfaceVariant)
+            .background(color = MaterialTheme.colorScheme.surfaceContainer)
             .padding(8.dp)
             .testTag(TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST)
     ) {
@@ -94,14 +94,14 @@ private fun ReplyAutoCompletePopupBody(
                 }
 
                 if (i != category.items.lastIndex) {
-                    item { Divider() }
+                    item { HorizontalDivider() }
                 }
             }
 
             if (categoryIndex != autoCompleteCategories.lastIndex) {
                 item {
                     Column {
-                        Divider()
+                        HorizontalDivider()
 
                         Box(modifier = Modifier.height(8.dp))
                     }

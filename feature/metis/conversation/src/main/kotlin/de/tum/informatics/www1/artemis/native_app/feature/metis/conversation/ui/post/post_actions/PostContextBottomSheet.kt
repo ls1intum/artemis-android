@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions
 
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.background
@@ -16,16 +16,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Reply
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.viewinterop.AndroidView
@@ -55,9 +55,11 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.LocalEmojiProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 
 internal const val TEST_TAG_POST_CONTEXT_BOTTOM_SHEET = "TEST_TAG_POST_CONTEXT_BOTTOM_SHEET"
 
@@ -105,7 +107,7 @@ internal fun PostContextBottomSheet(
                 }
 
                 if (postActions.canPerformAnyAction) {
-                    Divider()
+                    HorizontalDivider()
                 }
 
                 postActions.requestEditPost?.let {
@@ -154,10 +156,22 @@ internal fun PostContextBottomSheet(
                     )
                 }
 
+                if (postActions.onPinPost != null && post is IStandalonePost) {
+                    ActionButton(
+                        modifier = actionButtonModifier,
+                        icon = if (post.displayPriority == DisplayPriority.PINNED) ImageVector.vectorResource(R.drawable.unpin) else ImageVector.vectorResource(R.drawable.pin),
+                        text = if (post.displayPriority == DisplayPriority.PINNED) stringResource(id = R.string.post_unpin) else stringResource(id = R.string.post_pin),
+                        onClick = {
+                            onDismissRequest()
+                            postActions.onPinPost.invoke()
+                        }
+                    )
+                }
+
                 postActions.onReplyInThread?.let {
                     ActionButton(
                         modifier = actionButtonModifier,
-                        icon = Icons.Default.Reply,
+                        icon = Icons.AutoMirrored.Filled.Reply,
                         text = stringResource(id = R.string.post_reply),
                         onClick = {
                             onDismissRequest()
@@ -281,7 +295,7 @@ private fun EmojiDialog(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(5))
+                .clip(MaterialTheme.shapes.large)
         ) {
             EmojiPicker(
                 modifier = Modifier
