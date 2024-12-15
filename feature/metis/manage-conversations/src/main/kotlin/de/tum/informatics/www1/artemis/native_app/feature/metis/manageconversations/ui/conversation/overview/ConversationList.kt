@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -354,7 +353,9 @@ private fun ConversationListItem(
                                 text = displayName,
                                 maxLines = 1,
                                 color = headlineColor,
-                                style = MaterialTheme.typography.bodyLarge
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
+                                )
                             )
                         }
                     },
@@ -373,7 +374,9 @@ private fun ConversationListItem(
                         Text(
                             text = displayName,
                             color = headlineColor,
-                            style = MaterialTheme.typography.bodyLarge
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
+                            )
                         )
                     },
                     leadingContent = {
@@ -394,7 +397,9 @@ private fun ConversationListItem(
                         Text(
                             text = displayName,
                             color = headlineColor,
-                            style = MaterialTheme.typography.bodyLarge
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
+                            )
                         )
                     },
                     trailingContent = {
