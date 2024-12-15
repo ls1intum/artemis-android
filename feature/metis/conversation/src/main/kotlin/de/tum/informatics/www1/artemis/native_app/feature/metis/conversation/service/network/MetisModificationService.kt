@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileUploadResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.Reaction
@@ -72,6 +73,14 @@ interface MetisModificationService {
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Boolean>
+
+    suspend fun uploadFileOrImage(
+        context: MetisContext.Conversation,
+        fileBytes: ByteArray,
+        fileName: String,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<FileUploadResponse>
 
     sealed class AffectedPost {
         abstract val postId: Long

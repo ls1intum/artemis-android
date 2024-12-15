@@ -108,6 +108,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onRequestReload = {},
                 onRequestRetrySend = { _, _ -> },
+                onFileSelect = { _, _ -> },
             )
         }
     }
@@ -144,7 +145,8 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onClickViewPost = {},
                 onRequestRetrySend = { _ -> },
-                title = "Title"
+                title = "Title",
+                onFileSelected = { _ -> }
             )
         }
     }
