@@ -17,10 +17,11 @@ import org.hildan.krossbow.websocket.WebSocketFrame
  */
 class CloseCallbackWebsocketClient(
     private val baseClient: WebSocketClient,
-    private val onClose: () -> Unit
+    private val onClose: () -> Unit,
+    override val supportsCustomHeaders: Boolean
 ) : WebSocketClient {
 
-    override suspend fun connect(url: String): WebSocketConnection {
+    override suspend fun connect(url: String, headers: Map<String, String>): WebSocketConnection {
         return CloseCallbackWebsocketConnectionProxy(baseClient.connect(url), onClose)
     }
 
