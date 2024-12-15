@@ -5,10 +5,12 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.os.Bundle
 import androidx.core.app.NotificationManagerCompat
-import coil.ImageLoader
-import coil.ImageLoaderFactory
-import coil.memory.MemoryCache
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
+import coil3.memory.MemoryCache
 import de.tum.informatics.www1.artemis.native_app.android.db.dbModule
+import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
 import de.tum.informatics.www1.artemis.native_app.core.data.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.datastore.datastoreModule
@@ -22,7 +24,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.exerciseM
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lectureModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
-import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.feature.push.pushModule
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.quizParticipationModule
 import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsModule
@@ -32,7 +33,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin
 
-class ArtemisApplication : Application(), ImageLoaderFactory, CurrentActivityListener {
+class ArtemisApplication : Application(), SingletonImageLoader.Factory, CurrentActivityListener {
 
     override val currentActivity = MutableStateFlow<Activity?>(null)
 
@@ -84,11 +85,11 @@ class ArtemisApplication : Application(), ImageLoaderFactory, CurrentActivityLis
         registerActivityLifecycleCallbacks(this)
     }
 
-    override fun newImageLoader(): ImageLoader =
+    override fun newImageLoader(context: PlatformContext): ImageLoader =
         ImageLoader.Builder(this)
             .memoryCache {
-                MemoryCache.Builder(this)
-                    .maxSizePercent(0.25)
+                MemoryCache.Builder()
+                    .maxSizePercent(context, 0.25)
                     .build()
             }
             .build()

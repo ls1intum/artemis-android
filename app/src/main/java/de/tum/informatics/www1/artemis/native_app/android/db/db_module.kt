@@ -7,6 +7,6 @@ import org.koin.dsl.module
 
 val dbModule = module {
     single { DatabaseProvider(androidContext()) }
-    single<de.tum.informatics.www1.artemis.native_app.feature.metis.shared.MetisDatabaseProvider> { MetisDatabaseProviderImpl(get()) }
+    single<MetisDatabaseProvider> { MetisDatabaseProviderImpl(get()) }
     single<PushCommunicationDatabaseProvider> { PushCommunicationDatabaseProviderImpl(get()) }
 }

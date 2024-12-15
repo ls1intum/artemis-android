@@ -53,7 +53,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalCourseImageProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 
 private val headerHeight = 80.dp
 
@@ -100,13 +100,11 @@ fun Modifier.computeCourseItemModifier(isCompact: Boolean): Modifier {
 fun CompactCourseItemHeader(
     modifier: Modifier,
     course: Course,
-    serverUrl: String,
-    authorizationToken: String,
     compactCourseHeaderViewMode: CompactCourseHeaderViewMode,
     onClick: () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val painter = getCourseIconPainter(course, serverUrl, authorizationToken)
+    val painter = getCourseIconPainter(course)
 
     Card(modifier = modifier, onClick = onClick) {
         Column(
@@ -173,14 +171,10 @@ fun CompactCourseItemHeader(
 @Composable
 private fun getCourseIconPainter(
     course: Course,
-    serverUrl: String,
-    authorizationToken: String
 ): Painter {
     return if (course.courseIconPath != null) {
-        LocalCourseImageProvider.current.rememberCourseImagePainter(
-            courseIconPath = course.courseIconPath.orEmpty(),
-            serverUrl = serverUrl,
-            authorizationToken = authorizationToken
+        LocalArtemisImageProvider.current.rememberArtemisAsyncImagePainter(
+            imagePath = course.courseIconPath.orEmpty()
         )
     } else rememberVectorPainter(image = Icons.Default.QuestionMark)
 }
@@ -189,13 +183,11 @@ private fun getCourseIconPainter(
 fun ExpandedCourseItemHeader(
     modifier: Modifier,
     course: Course,
-    serverUrl: String,
-    authorizationToken: String,
     onClick: () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
     rightHeaderContent: @Composable BoxScope.() -> Unit
 ) {
-    val courseIconPainter = getCourseIconPainter(course, serverUrl, authorizationToken)
+    val courseIconPainter = getCourseIconPainter(course)
 
     val courseColor: Color? = remember {
         try {

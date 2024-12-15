@@ -34,8 +34,6 @@ internal fun WorkOnQuizQuestionsScreen(
     overallPoints: Int,
     latestWebsocketSubmission: Result<QuizSubmission>?,
     clock: Clock,
-    serverUrl: String,
-    authToken: String,
     onRequestRetrySave: () -> Unit
 ) {
     var selectedQuestionIndex by rememberSaveable(questionsWithData.size) { mutableStateOf(0) }
@@ -60,8 +58,6 @@ internal fun WorkOnQuizQuestionsScreen(
                 modifier = bodyModifier,
                 quizQuestionData = currentQuestion,
                 questionIndex = selectedQuestionIndex,
-                serverUrl = serverUrl,
-                authToken = authToken
             )
         } else {
             Box(modifier = bodyModifier)

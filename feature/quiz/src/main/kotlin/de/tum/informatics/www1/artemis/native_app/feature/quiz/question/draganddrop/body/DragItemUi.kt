@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -22,20 +23,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.DragTargetInfo
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.LocalDragTargetInfo
-import io.ktor.http.HttpHeaders
 
 private val dragItemBackgroundColor: Color
     @Composable get() = if (isSystemInDarkTheme()) Color.Black else Color.White
@@ -48,7 +46,6 @@ internal fun DragItemUiElement(
     modifier: Modifier,
     text: String?,
     pictureFilePath: String?,
-    authToken: String
 ) {
     Box(
         modifier = modifier
@@ -60,7 +57,6 @@ internal fun DragItemUiElement(
             modifier = Modifier.padding(4.dp),
             text = text,
             pictureFilePath = pictureFilePath,
-            authToken = authToken
         )
     }
 }
@@ -70,7 +66,6 @@ internal fun DragItemUiElementContent(
     modifier: Modifier,
     text: String?,
     pictureFilePath: String?,
-    authToken: String,
     fontColor: Color = dragItemTextColor
 ) {
     Box(
@@ -78,16 +73,16 @@ internal fun DragItemUiElementContent(
         contentAlignment = Alignment.Center
     ) {
         if (pictureFilePath != null) {
-            val request = ImageRequest.Builder(LocalContext.current)
-                .data(pictureFilePath)
-                .addHeader(HttpHeaders.Authorization, "Bearer $authToken")
-                .build()
+            val asyncImagePainter = LocalArtemisImageProvider.current.rememberArtemisAsyncImagePainter(
+                imagePath = pictureFilePath
+            )
 
-            AsyncImage(
-                model = request, contentDescription = null,
+            Image(
                 modifier = Modifier
                     .widthIn(max = 60.dp)
-                    .heightIn(max = 60.dp)
+                    .heightIn(max = 60.dp),
+                painter = asyncImagePainter,
+                contentDescription = null
             )
         }
 

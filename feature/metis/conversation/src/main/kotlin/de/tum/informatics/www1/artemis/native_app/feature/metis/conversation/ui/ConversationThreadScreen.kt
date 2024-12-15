@@ -37,6 +37,7 @@ internal fun ConversationThreadScreen(
     onNavigateUp: () -> Unit
 ) {
     val dataStatus by viewModel.conversationDataStatus.collectAsState()
+    viewModel.onCloseThread = onNavigateUp
 
     Scaffold(
         modifier = modifier,
