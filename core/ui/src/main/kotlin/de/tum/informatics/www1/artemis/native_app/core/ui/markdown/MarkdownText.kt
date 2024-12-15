@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import android.content.Context
 import android.text.method.LinkMovementMethod
-import android.text.style.ForegroundColorSpan
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
@@ -14,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,11 +31,19 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
 import coil.ImageLoader
+import coil.request.Disposable
+import coil.request.ImageRequest
+import coil.size.Scale
+import de.tum.informatics.www1.artemis.native_app.core.common.R
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.TYPE_ICON_RESOURCE_PATH
+import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
+import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.html.HtmlPlugin
+import io.noties.markwon.image.AsyncDrawable
 import io.noties.markwon.image.coil.CoilImagesPlugin
 import io.noties.markwon.linkify.LinkifyPlugin
 
@@ -68,6 +76,9 @@ import io.noties.markwon.linkify.LinkifyPlugin
 val LocalMarkdownTransformer =
     compositionLocalOf<ArtemisMarkdownTransformer> { ArtemisMarkdownTransformer }
 
+private const val DEFAULT_IMAGE_HEIGHT = 800
+private const val LINK_TYPE_HINT_ICON_HEIGHT = 52
+
 @Composable
 fun MarkdownText(
     markdown: String,
@@ -87,8 +98,9 @@ fun MarkdownText(
     val context: Context = LocalContext.current
     val localMarkwon = LocalMarkwon.current
 
+    val imageWidth = context.resources.displayMetrics.widthPixels
     val markdownRender: Markwon = localMarkwon ?: remember(imageLoader) {
-        createMarkdownRender(context, imageLoader)
+        createMarkdownRender(context, imageLoader, imageWidth)
     }
 
     val markdownTransformer = LocalMarkdownTransformer.current
@@ -99,13 +111,16 @@ fun MarkdownText(
         }
     }
 
+    val previousTransformedMarkdown = remember { mutableStateOf<String?>(null) }
+
     AndroidView(
         // Added semantics for ui testing.
-        modifier = modifier.semantics {
-            text = AnnotatedString(markdown)
-            onClick?.let { this.onClick(action = { onClick(); true }) }
-            onLongClick?.let { this.onLongClick(action = { onLongClick(); true }) }
-        },
+        modifier = modifier
+            .semantics {
+                text = AnnotatedString(markdown)
+                onClick?.let { this.onClick(action = { onClick(); true }) }
+                onLongClick?.let { this.onLongClick(action = { onLongClick(); true }) }
+            },
         factory = { ctx ->
             createTextView(
                 context = ctx,
@@ -122,7 +137,12 @@ fun MarkdownText(
             )
         },
         update = { textView ->
-            markdownRender.setMarkdown(textView, transformedMarkdown)
+            // Only update if the transformed markdown has changed
+            if (transformedMarkdown != previousTransformedMarkdown.value) {
+                markdownRender.setMarkdown(textView, transformedMarkdown)
+                previousTransformedMarkdown.value = transformedMarkdown
+            }
+
             textView.movementMethod = LinkMovementMethod.getInstance()
 
             onClick?.let { textView.setOnClickListener { onClick() } }
@@ -204,15 +224,49 @@ private fun TextView.applyStyleAndColor(
     }
 }
 
-fun createMarkdownRender(context: Context, imageLoader: ImageLoader?): Markwon {
+fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, imageWidth: Int): Markwon {
+    val imagePlugin: CoilImagesPlugin? =
+        if (imageLoader != null) {
+            CoilImagesPlugin.create(
+                object : CoilImagesPlugin.CoilStore {
+                    override fun load(drawable: AsyncDrawable): ImageRequest {
+                        var height = DEFAULT_IMAGE_HEIGHT
+                        if (drawable.destination.contains(TYPE_ICON_RESOURCE_PATH)) {
+                            height = LINK_TYPE_HINT_ICON_HEIGHT
+                        }
+
+                        return ImageRequest.Builder(context)
+                            .defaults(imageLoader.defaults)
+                            .data(drawable.destination)
+                            .crossfade(true)
+                            .size(imageWidth, height) // We set a fixed height and set the width of the image to the screen width.
+                            .scale(Scale.FIT)
+                            .build()
+                    }
+
+                    override fun cancel(disposable: Disposable) {
+                        disposable.dispose()
+                    }
+                },
+                imageLoader
+            )
+        } else null
+
     return Markwon.builder(context)
         .usePlugin(HtmlPlugin.create())
         .usePlugin(StrikethroughPlugin.create())
         .usePlugin(TablePlugin.create(context))
         .usePlugin(LinkifyPlugin.create())
+        .usePlugin(object : AbstractMarkwonPlugin() {
+            override fun configureTheme(builder: MarkwonTheme.Builder) {
+                builder
+                    .linkColor(context.getColor(R.color.link_color))
+                    .isLinkUnderlined(false)
+            }
+        })
         .apply {
-            if (imageLoader != null) {
-                usePlugin(CoilImagesPlugin.create(context, imageLoader))
+            if (imagePlugin != null) {
+                usePlugin(imagePlugin)
             }
         }
         .build()

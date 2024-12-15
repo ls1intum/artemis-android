@@ -4,7 +4,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductFacadeUi
-import org.koin.compose.koinInject
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 /**
  * Displays the conversation ui. If the code of conduct has not yet been accepted, displays a code
@@ -22,13 +23,9 @@ fun ConversationFacadeUi(
         codeOfConductAcceptedContent = {
             SinglePageConversationBody(
                 modifier = Modifier.fillMaxSize(),
+                viewModel = koinViewModel { parametersOf(courseId) },
                 courseId = courseId,
                 initialConfiguration = initialConfiguration,
-                accountService = koinInject(),
-                accountDataService = koinInject(),
-                courseService = koinInject(),
-                networkStatusProvider = koinInject(),
-                serverConfigurationService = koinInject()
             )
         }
     )

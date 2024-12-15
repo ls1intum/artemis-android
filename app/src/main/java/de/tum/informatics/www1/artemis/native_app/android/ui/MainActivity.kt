@@ -21,12 +21,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navOptions
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import de.tum.informatics.www1.artemis.native_app.android.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.android.R
+import de.tum.informatics.www1.artemis.native_app.android.ui.theme.AppTheme
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -36,23 +37,25 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.WindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.courseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.navigateToCourseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.course
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.navigateToCourse
-import de.tum.informatics.www1.artemis.native_app.feature.dashboard.DASHBOARD_DESTINATION
-import de.tum.informatics.www1.artemis.native_app.feature.dashboard.dashboard
-import de.tum.informatics.www1.artemis.native_app.feature.dashboard.navigateToDashboard
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.DashboardScreen
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.dashboard
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.navigateToDashboard
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewDestination
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewMode
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewUi
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.exercise
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.navigateToExercise
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.navigateToLecture
-import de.tum.informatics.www1.artemis.native_app.feature.login.LOGIN_DESTINATION
+import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ProvideLocalVisibleMetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextReporter
@@ -72,6 +75,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
+import org.koin.compose.koinInject
 
 /**
  * Main and only activity used in the android app.
@@ -96,8 +100,8 @@ class MainActivity : AppCompatActivity(),
         // When the user is logged in, immediately display the course overview.
         val startDestination = runBlocking {
             when (accountService.authenticationData.first()) {
-                is AccountService.AuthenticationData.LoggedIn -> DASHBOARD_DESTINATION
-                AccountService.AuthenticationData.NotLoggedIn -> LOGIN_DESTINATION
+                is AccountService.AuthenticationData.LoggedIn -> DashboardScreen
+                AccountService.AuthenticationData.NotLoggedIn -> LoginScreen(null)
             }
         }
 
@@ -133,8 +137,8 @@ class MainActivity : AppCompatActivity(),
 
         setContent {
             AppTheme {
-                ProvideLocalVisibleMetisContextManager(
-                    visibleMetisContextManager = visibleMetisContextManager
+                CompositionLocalProvider(
+                    LocalVisibleMetisContextManager provides visibleMetisContextManager,
                 ) {
                     val navController = rememberNavController()
 
@@ -190,7 +194,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     @Composable
-    private fun MainActivityComposeUi(startDestination: String, navController: NavHostController) {
+    private fun MainActivityComposeUi(startDestination: Any, navController: NavHostController) {
         // Listen for when the user get logged out (e.g. because their token has expired)
         // This only happens when the user has the app running for multiple days or the user logged out manually
         LaunchedEffect(Unit) {
@@ -199,7 +203,7 @@ class MainActivity : AppCompatActivity(),
                 .collect { (wasLoggedIn, isLoggedIn) ->
                     if (wasLoggedIn == true && !isLoggedIn) {
                         navController.navigateToLogin {
-                            popUpTo(DASHBOARD_DESTINATION) {
+                            popUpTo(DashboardScreen) {
                                 inclusive = true
                             }
                         }
@@ -250,7 +254,8 @@ class MainActivity : AppCompatActivity(),
 
         CompositionLocalProvider(
             LocalWindowSizeClassProvider provides windowSizeClassProvider,
-            LocalLinkOpener provides linkOpener
+            LocalLinkOpener provides linkOpener,
+            LocalArtemisImageProvider provides koinInject()
         ) {
             // Use jetpack compose navigation for the navigation logic.
             NavHost(navController = navController, startDestination = startDestination) {
@@ -259,7 +264,7 @@ class MainActivity : AppCompatActivity(),
                         if (deepLink == null) {
                             // Navigate to the course overview and remove the login screen from the navigation stack.
                             navController.navigateToDashboard {
-                                popUpTo(LOGIN_DESTINATION) {
+                                popUpTo<LoginScreen> {
                                     inclusive = true
                                 }
                             }
@@ -267,7 +272,9 @@ class MainActivity : AppCompatActivity(),
                             try {
                                 navController.navigate(
                                     Uri.parse(deepLink),
-                                    NavOptions.Builder().setPopUpTo(LOGIN_DESTINATION, true).build()
+                                    navOptions {
+                                        popUpTo<LoginScreen>()
+                                    }
                                 )
                             } catch (_: IllegalArgumentException) {
                                 navController.navigateToDashboard {
@@ -347,7 +354,7 @@ class MainActivity : AppCompatActivity(),
                 quizParticipation(
                     onLeaveQuiz = {
                         val previousBackStackEntry = navController.previousBackStackEntry
-                        if (previousBackStackEntry?.destination?.route == ExerciseViewDestination.EXERCISE_VIEW_ROUTE) {
+                        if (previousBackStackEntry?.destination?.route == ExerciseViewUi::class.qualifiedName.orEmpty()) {
                             previousBackStackEntry.savedStateHandle[ExerciseViewDestination.REQUIRE_RELOAD_KEY] =
                                 true
                         }

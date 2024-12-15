@@ -21,9 +21,18 @@ abstract class BaseComposeTest : KoinTest {
 
     protected val context: Context get() = InstrumentationRegistry.getInstrumentation().context
 
-    fun <T> runBlockingWithTestTimeout(block: suspend () -> T): T {
+    /**
+     * Run a block of code with a timeout. The default test timeout is multiplied by the
+     * given [timeoutMultiplier].
+     * @param timeoutMultiplier The multiplier for the default test timeout. Can be used to increase
+     *                          the timeout for flaky tests
+     */
+    fun <T> runBlockingWithTestTimeout(
+        timeoutMultiplier: Int = 1,
+        block: suspend () -> T
+    ): T {
         return runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
+            withTimeout(DefaultTimeoutMillis * timeoutMultiplier) {
                 block()
             }
         }

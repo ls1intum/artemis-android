@@ -10,19 +10,19 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
+import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
+import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
-import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.generateId
-import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
+import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.NotificationSettingsService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.impl.NotificationSettingsServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
@@ -88,13 +88,11 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
     fun `can retrieve notification settings`() {
         val viewModel = setupUiAndViewModel()
 
-        val currentSettingsByGroup = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                viewModel
-                    .currentSettingsByGroup
-                    .filterSuccess()
-                    .first()
-            }
+        val currentSettingsByGroup = runBlockingWithTestTimeout {
+            viewModel
+                .currentSettingsByGroup
+                .filterSuccess()
+                .first()
         }
 
         assertTrue(
@@ -124,13 +122,11 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
     fun `can update notification settings`() {
         val viewModel = setupUiAndViewModel()
 
-        val currentSettingsByGroup = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                viewModel
-                    .currentSettingsByGroup
-                    .filterSuccess()
-                    .first()
-            }
+        val currentSettingsByGroup = runBlockingWithTestTimeout {
+            viewModel
+                .currentSettingsByGroup
+                .filterSuccess()
+                .first()
         }
 
         Logger.info("CurrentSettingsByGroup=$currentSettingsByGroup")

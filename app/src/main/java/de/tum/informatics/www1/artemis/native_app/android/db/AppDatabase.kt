@@ -29,7 +29,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.communication_not
         CommunicationMessageEntity::class
     ],
     exportSchema = true,
-    version = 10,
+    version = 12,
 )
 @TypeConverters(RoomTypeConverters::class)
 abstract class AppDatabase : RoomDatabase() {

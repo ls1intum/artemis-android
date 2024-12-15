@@ -1,5 +1,3 @@
-@file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-
 import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
 import java.io.FileInputStream
 import java.util.Properties
@@ -16,20 +14,15 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
     id("com.google.android.gms.oss-licenses-plugin")
-    id("io.sentry.android.gradle") version "3.9.0"
+    id("io.sentry.android.gradle") version "4.14.0"
     id("artemis.android.room")
 }
 
 android {
     namespace = "de.tum.informatics.www1.artemis.native_app.android"
 
-    val versionName = "1.0.0"
-    val versionCode =
-        if (!System.getenv("bamboo_buildNumber")
-                .isNullOrEmpty()
-        ) System.getenv("bamboo_buildNumber")
-            ?.toString()
-            ?.toIntOrNull() ?: deriveVersionCodeFromGit() else deriveVersionCodeFromGit()
+    val versionName = "1.1.0"
+    val versionCode = deriveVersionCodeFromGit()
 
     setProperty("archivesBaseName", "artemis-android-$versionName-$versionCode")
 

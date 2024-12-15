@@ -1,7 +1,6 @@
 plugins {
     id("artemis.android.feature")
     id("artemis.android.library.compose")
-    kotlin("plugin.serialization")
 }
 
 android {
@@ -17,6 +16,7 @@ dependencies {
     implementation(libs.androidx.dataStore.preferences)
 
     implementation(libs.accompanist.swiperefresh)
+    debugImplementation(project(":core:ui-test"))
     testImplementation(project(":feature:login"))
     testImplementation(project(":feature:login-test"))
 }

@@ -12,16 +12,14 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
-import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
+import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.koin.compose.LocalKoinApplication
 import org.koin.compose.LocalKoinScope
 import org.koin.core.annotation.KoinInternalApi
@@ -52,17 +50,15 @@ internal abstract class ConversationSettingsBaseE2eTest : ConversationBaseTest()
         composeTestRule
             .waitUntilDoesNotExist(hasText(context.getString(R.string.conversation_settings_basic_data_save)))
 
-        val updatedConversation = runBlocking {
-            withTimeout(DefaultTimeoutMillis) {
-                conversationService
-                    .getConversation(
-                        courseId = course.id!!,
-                        conversationId = conversation.id,
-                        authToken = accessToken,
-                        serverUrl = testServerUrl
-                    )
-                    .orThrow("Could not load updated conversation")
-            }
+        val updatedConversation = runBlockingWithTestTimeout {
+            conversationService
+                .getConversation(
+                    courseId = course.id!!,
+                    conversationId = conversation.id,
+                    authToken = accessToken,
+                    serverUrl = testServerUrl
+                )
+                .orThrow("Could not load updated conversation")
         }
 
         verifyChanges(assertIs(updatedConversation, "Loaded conversation is not of correct type"))
