@@ -13,7 +13,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -203,7 +203,7 @@ fun ConversationChatListScreen(
                         }
 
                         IconButton(onClick = onNavigateToSettings) {
-                            Icon(imageVector = Icons.Default.Settings, contentDescription = null)
+                            Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
                         }
                     }
                 }
