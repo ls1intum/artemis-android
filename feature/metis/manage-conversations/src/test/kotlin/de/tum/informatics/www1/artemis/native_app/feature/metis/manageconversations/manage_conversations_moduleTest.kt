@@ -18,6 +18,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.sharedConversationModule
 import org.junit.Rule
+import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.koin.android.ext.koin.androidContext
@@ -30,7 +31,6 @@ import org.koin.core.parameter.parametersOf
 import org.koin.mp.KoinPlatformTools
 import org.koin.test.KoinTestRule
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.Test
 
 
 @RunWith(RobolectricTestRunner::class)
