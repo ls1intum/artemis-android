@@ -5,7 +5,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import java.util.Date
 
-fun convertToFormat(date: Instant?): String {
+fun converDateAndTime(date: Instant?): String {
     return SimpleDateFormat.getDateTimeInstance(
         SimpleDateFormat.SHORT,
         SimpleDateFormat.SHORT

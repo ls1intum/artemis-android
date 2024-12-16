@@ -39,13 +39,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
-import de.tum.informatics.www1.artemis.native_app.core.ui.date.convertToFormat
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.converDateAndTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
@@ -137,8 +138,12 @@ internal fun PostItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .let {
-                        if (postItemViewJoinedType == PostItemViewJoinedType.JOINED) {
-                            it.padding(top = 4.dp)
+                        if (postItemViewJoinedType in listOf(
+                                PostItemViewJoinedType.JOINED,
+                                PostItemViewJoinedType.FOOTER
+                            )
+                        ) {
+                            it.padding(top = 8.dp)
                         } else {
                             it.padding(bottom = 4.dp)
                         }
@@ -182,7 +187,7 @@ internal fun PostItem(
                 )
 
                 if (post?.updatedDate != null) {
-                    val updateTime = convertToFormat(post.updatedDate)
+                    val updateTime = converDateAndTime(post.updatedDate)
                     Text(
                         text = stringResource(id = R.string.post_edited_hint, updateTime),
                         style = MaterialTheme.typography.bodySmall,
@@ -218,11 +223,14 @@ internal fun PostItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .let {
-                            if (postItemViewJoinedType == PostItemViewJoinedType.JOINED && post?.reactions
+                            if (postItemViewJoinedType in listOf(
+                                    PostItemViewJoinedType.JOINED,
+                                    PostItemViewJoinedType.HEADER
+                                ) && post?.reactions
                                     .orEmpty()
                                     .isNotEmpty()
                             ) {
-                                it.padding(bottom = 4.dp)
+                                it.padding(bottom = 8.dp)
                             } else {
                                 it
                             }
@@ -400,25 +408,11 @@ private fun HeadlineProfilePicture(
 private fun HeadlineAuthorRoleBadge(
     authorRole: UserRole?,
 ) {
-    var text = R.string.post_student
-    var color = MaterialTheme.colorScheme.primary
-    when (authorRole) {
-        UserRole.INSTRUCTOR -> {
-            text = R.string.post_instructor
-            color = PostColors.Roles.instructor
-        }
-
-        UserRole.TUTOR -> {
-            text = R.string.post_tutor
-            color = PostColors.Roles.tutor
-        }
-
-        UserRole.USER -> {
-            text = R.string.post_student
-            color = PostColors.Roles.student
-        }
-
-        null -> {}
+    val (text, color) = when (authorRole) {
+        UserRole.INSTRUCTOR -> R.string.post_instructor to PostColors.Roles.instructor
+        UserRole.TUTOR -> R.string.post_tutor to PostColors.Roles.tutor
+        UserRole.USER -> R.string.post_student to PostColors.Roles.student
+        null -> R.string.post_student to PostColors.Roles.student
     }
 
     Box(
@@ -481,15 +475,29 @@ private fun StandalonePostFooter(
             val replyCount = postItemViewType.answerPosts.size
 
             if (replyCount > 0) {
-                Text(
-                    style = MaterialTheme.typography.bodyMedium,
-                    text = pluralStringResource(
-                        id = R.plurals.communication_standalone_post_view_replies_button,
-                        count = replyCount,
-                        replyCount
-                    ),
-                    color = MaterialTheme.colorScheme.secondary
-                )
+                Row (
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        modifier = Modifier.size(16.dp),
+                        painter = painterResource(id = R.drawable.replies),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+
+                    Text(
+                        style = MaterialTheme.typography.bodyMedium,
+                        text = pluralStringResource(
+                            id = R.plurals.communication_standalone_post_view_replies_button,
+                            count = replyCount,
+                            replyCount
+                        ),
+                        fontWeight = FontWeight.Normal,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }
