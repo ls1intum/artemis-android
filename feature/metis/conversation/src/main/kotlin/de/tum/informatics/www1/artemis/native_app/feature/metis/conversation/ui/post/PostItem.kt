@@ -391,16 +391,27 @@ private fun HeadlineProfilePicture(
 private fun HeadlineAuthorIcon(
     authorRole: UserRole?,
 ) {
-    val text = when (authorRole) {
-        UserRole.INSTRUCTOR -> R.string.post_instructor
-        UserRole.TUTOR -> R.string.post_tutor
-        UserRole.USER -> R.string.post_student
-        null -> R.string.post_student
+    var text = R.string.post_student
+    var color = MaterialTheme.colorScheme.primary
+    when (authorRole) {
+        UserRole.INSTRUCTOR -> {
+            text = R.string.post_instructor
+            color = PostColors.Roles.instructor
+        }
+        UserRole.TUTOR -> {
+            text = R.string.post_tutor
+            color = PostColors.Roles.tutor
+        }
+        UserRole.USER -> {
+            text = R.string.post_student
+            color = PostColors.Roles.student
+        }
+        null -> {}
     }
 
     Box(
         modifier = Modifier
-            .background(Color.Blue, MaterialTheme.shapes.extraSmall)
+            .background(color, MaterialTheme.shapes.extraSmall)
     ) {
         Text(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),

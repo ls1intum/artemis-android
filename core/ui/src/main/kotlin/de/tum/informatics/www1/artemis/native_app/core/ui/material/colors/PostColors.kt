@@ -8,6 +8,15 @@ object PostColors {
         val delete: Color
             @Composable get() = Color(0xffdc3545)
     }
+    object Roles {
+        val tutor: Color
+            @Composable get() = Color(0xff007bff)
+        val student: Color
+            @Composable get() = Color(0xff28a745)
+        val instructor: Color
+            @Composable get() = Color(0xff6c757d)
+    }
+
     val editedHintText: Color
         @Composable get() = Color.Gray
 
