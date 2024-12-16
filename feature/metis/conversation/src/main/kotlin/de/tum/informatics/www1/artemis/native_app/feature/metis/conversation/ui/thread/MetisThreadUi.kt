@@ -307,7 +307,6 @@ private fun PostAndRepliesList(
             ) {
                 PostWithBottomSheet(
                     modifier = Modifier
-                        .padding(top = 8.dp)
                         .testTag(testTagForPost(post.standalonePostId)),
                     post = post,
                     postItemViewType = PostItemViewType.ThreadContextPostItem,

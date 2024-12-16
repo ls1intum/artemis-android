@@ -75,6 +75,7 @@ sealed class PostItemViewType {
 }
 
 private const val PlaceholderContent = "WWWWWWW"
+private val postHeadlineHeight = 36.dp
 
 /**
  * Displays a post item or a placeholder for it.
@@ -98,15 +99,6 @@ internal fun PostItem(
     }
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
-    val applyPinStatusToModifier: @Composable (Modifier) -> Modifier = {
-        if (isPinned && !isExpanded) {
-            modifier
-                .clip(
-                    MaterialTheme.shapes.small
-                )
-                .background(color = PostColors.pinnedMessageBackground)
-        } else modifier
-    }
 
     // Retrieve post status
     val clientPostId = post?.clientPostId
@@ -128,7 +120,7 @@ internal fun PostItem(
                         .background(color = MaterialTheme.colorScheme.errorContainer)
                         .clickable(onClick = onRequestRetrySend)
                 } else {
-                    applyPinStatusToModifier(it)
+                    it
                         .combinedClickable(
                             onClick = onClick,
                             onLongClick = onLongClick
@@ -141,8 +133,7 @@ internal fun PostItem(
         if (isPinned) {
             IconLabel(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
+                    .fillMaxWidth(),
                 resourceString = R.string.post_is_pinned,
                 icon = Icons.Outlined.PushPin
             )
@@ -166,53 +157,51 @@ internal fun PostItem(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    MarkdownText(
-                        markdown = remember(post?.content, isPlaceholder) {
-                            if (isPlaceholder) {
-                                PlaceholderContent
-                            } else post?.content.orEmpty()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .placeholder(visible = isPlaceholder),
+                MarkdownText(
+                    markdown = remember(post?.content, isPlaceholder) {
+                        if (isPlaceholder) {
+                            PlaceholderContent
+                        } else post?.content.orEmpty()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .placeholder(visible = isPlaceholder),
+                    style = MaterialTheme.typography.bodyMedium,
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                    color = if (post?.serverPostId == null) PostColors.unsentMessageText else Color.Unspecified
+                )
+
+                if (post?.updatedDate != null) {
+                    Text(
+                        text = stringResource(id = R.string.post_edited_hint),
                         style = MaterialTheme.typography.bodyMedium,
-                        onClick = onClick,
-                        onLongClick = onLongClick,
-                        color = if (post?.serverPostId == null) PostColors.unsentMessageText else Color.Unspecified
+                        color = PostColors.editedHintText
                     )
+                }
 
-                    if (post?.updatedDate != null) {
-                        Text(
-                            text = stringResource(id = R.string.post_edited_hint),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = PostColors.editedHintText
-                        )
+                when (post) {
+                    is IStandalonePost -> {
+                        if (post.resolved == true) {
+                            IconLabel(
+                                modifier = Modifier.fillMaxWidth(),
+                                resourceString = R.string.post_is_resolved,
+                                icon = Icons.Default.Check
+                            )
+                        }
                     }
 
-                    when (post) {
-                        is IStandalonePost -> {
-                            if (post.resolved == true) {
-                                IconLabel(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    resourceString = R.string.post_is_resolved,
-                                    icon = Icons.Default.Check
-                                )
-                            }
+                    is IAnswerPost -> {
+                        if (post.resolvesPost) {
+                            IconLabel(
+                                modifier = Modifier.fillMaxWidth(),
+                                resourceString = R.string.post_resolves,
+                                icon = Icons.Default.Check
+                            )
                         }
-
-                        is IAnswerPost -> {
-                            if (post.resolvesPost) {
-                                IconLabel(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    resourceString = R.string.post_resolves,
-                                    icon = Icons.Default.Check
-                                )
-                            }
-                        }
-
-                        else -> {}
                     }
+
+                    else -> {}
                 }
 
                 StandalonePostFooter(
@@ -222,10 +211,6 @@ internal fun PostItem(
                     postItemViewType = postItemViewType,
                     onClickReaction = onClickOnReaction
                 )
-
-                if (!post?.reactions.isNullOrEmpty()) {
-                    Box(modifier = Modifier.height(2.dp))
-                }
             }
         }
     }
@@ -271,7 +256,9 @@ private fun PostHeadline(
             }
 
             HeadlineAuthorInfo(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(postHeadlineHeight),
                 authorName = authorName,
                 authorRole = authorRole,
                 creationDate = creationDate,
@@ -365,7 +352,7 @@ private fun AuthorRoleAndTimeRow(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            HeadlineAuthorIcon(authorRole)
+            HeadlineAuthorRoleBadge(authorRole)
             Spacer(modifier = Modifier.weight(1f))
             creationDateContent()
         }
@@ -376,7 +363,7 @@ private fun AuthorRoleAndTimeRow(
 private fun HeadlineProfilePicture(
     profilePictureData: ProfilePictureData
 ) {
-    val size = 36.dp
+    val size = postHeadlineHeight
     Box(modifier = Modifier.size(size)) {
         ProfilePicture(
             modifier = Modifier
@@ -388,7 +375,7 @@ private fun HeadlineProfilePicture(
 }
 
 @Composable
-private fun HeadlineAuthorIcon(
+private fun HeadlineAuthorRoleBadge(
     authorRole: UserRole?,
 ) {
     var text = R.string.post_student
@@ -416,7 +403,9 @@ private fun HeadlineAuthorIcon(
         Text(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
             text = stringResource(id = text),
-            style = MaterialTheme.typography.bodySmall
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White,
+            fontWeight = FontWeight.Medium
         )
     }
 }

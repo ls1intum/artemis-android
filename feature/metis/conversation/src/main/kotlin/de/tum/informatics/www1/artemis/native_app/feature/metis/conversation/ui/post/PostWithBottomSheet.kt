@@ -1,9 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -12,10 +12,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostContextBottomSheet
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 
 /**
  * Wrapps [PostItem] and can display the bottom sheet for the post
@@ -33,7 +38,16 @@ internal fun PostWithBottomSheet(
 ) {
     var displayBottomSheet by remember(post, postItemViewType) { mutableStateOf(false) }
 
-    var color = MaterialTheme.colorScheme.surface
+    val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
+    val isResolving = post is IAnswerPost && post.resolvesPost
+    val isParentPostInThread = joinedItemType == PostItemViewJoinedType.PARENT
+
+    val cardColor = when {
+        isParentPostInThread-> MaterialTheme.colorScheme.background
+        isResolving -> PostColors.StatusBackground.resolving
+        isPinned -> PostColors.StatusBackground.pinned
+        else -> CardDefaults.cardColors().containerColor
+    }
 
     val cardShape: Shape = when (joinedItemType) {
         PostItemViewJoinedType.HEADER -> MaterialTheme.shapes.small.copy(
@@ -48,23 +62,29 @@ internal fun PostWithBottomSheet(
         PostItemViewJoinedType.SINGLE -> MaterialTheme.shapes.small
     }
 
-    val dynamicModifier = modifier
-        .let {
+    val applyPaddingToModifier: @Composable (modifier: Modifier, paddingValue: Dp) -> Modifier =
+        { modifier, paddingValue ->
             when (joinedItemType) {
-                PostItemViewJoinedType.HEADER -> it.padding(top = 4.dp, bottom = 0.dp)
-                PostItemViewJoinedType.FOOTER -> it.padding(top = 0.dp, bottom = 4.dp)
-                PostItemViewJoinedType.SINGLE, PostItemViewJoinedType.PARENT -> it.padding(vertical = 4.dp)
-                PostItemViewJoinedType.JOINED, -> it.padding(vertical = 0.dp)
+                PostItemViewJoinedType.HEADER -> modifier.padding(top = paddingValue, bottom = 0.dp)
+                PostItemViewJoinedType.FOOTER -> modifier.padding(top = 0.dp, bottom = paddingValue)
+                PostItemViewJoinedType.SINGLE -> modifier.padding(
+                    vertical = paddingValue
+                )
+                PostItemViewJoinedType.JOINED -> modifier.padding(vertical = 0.dp)
+                PostItemViewJoinedType.PARENT -> modifier.padding(0.dp)
             }
         }
-        .background(color)
+
+    val cardModifier = applyPaddingToModifier(modifier, 4.dp)
+    val innerModifier = applyPaddingToModifier(modifier, 8.dp)
 
     Card(
-        modifier = dynamicModifier,
-        shape = cardShape
+        modifier = cardModifier,
+        shape = cardShape,
+        colors = CardDefaults.cardColors(containerColor = cardColor)
     ){
         PostItem(
-            modifier = modifier,
+            modifier = innerModifier,
             post = post,
             postItemViewType = postItemViewType,
             clientId = clientId,
