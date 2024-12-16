@@ -22,14 +22,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -204,6 +200,7 @@ internal fun PostItem(
                                 )
                             }
                         }
+
                         is IAnswerPost -> {
                             if (post.resolvesPost) {
                                 IconLabel(
@@ -213,6 +210,7 @@ internal fun PostItem(
                                 )
                             }
                         }
+
                         else -> {}
                     }
                 }
@@ -245,66 +243,43 @@ private fun PostHeadline(
     displayHeader: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    if (expanded) {
-        Column(modifier = modifier) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                HeadlineProfilePicture(
-                    profilePictureData = profilePictureData,
-                )
+    val doDisplayHeader = displayHeader || postStatus == CreatePostService.Status.FAILED
 
-                HeadlineAuthorInfo(
-                    modifier = Modifier.fillMaxWidth(),
-                    authorName = authorName,
-                    authorRole = authorRole,
-                    creationDate = creationDate,
-                    expanded = true
-                )
-            }
-
-            content()
-        }
-    } else {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Row(
-            modifier = modifier,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            val doDisplayHeader = displayHeader || postStatus == CreatePostService.Status.FAILED
+            if (!doDisplayHeader) {
+                return@Row
+            }
 
             HeadlineProfilePicture(
-                profilePictureData = profilePictureData,
-                displayImage = doDisplayHeader
+                profilePictureData = profilePictureData
             )
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                if (postStatus == CreatePostService.Status.FAILED) {
-                    Text(
-                        text = stringResource(id = R.string.post_sending_failed),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-
-                if (doDisplayHeader) {
-                    HeadlineAuthorInfo(
-                        modifier = Modifier.fillMaxWidth(),
-                        authorName = authorName,
-                        authorRole  = authorRole,
-                        creationDate = creationDate,
-                        expanded = false
-                    )
-                } else {
-                    Box(modifier = Modifier.height(4.dp))
-                }
-
-                content()
+            if (postStatus == CreatePostService.Status.FAILED) {
+                Text(
+                    text = stringResource(id = R.string.post_sending_failed),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
             }
+
+            HeadlineAuthorInfo(
+                modifier = Modifier.fillMaxWidth(),
+                authorName = authorName,
+                authorRole = authorRole,
+                creationDate = creationDate,
+                expanded = expanded
+            )
         }
+
+        content()
     }
 }
 
@@ -339,50 +314,14 @@ private fun HeadlineAuthorInfo(
     authorName: String?,
     authorRole: UserRole?,
     creationDate: Instant?,
-    expanded: Boolean
+    expanded: Boolean,
 ) {
-    val relativeTimeTo = remember(creationDate) {
-        creationDate ?: Clock.System.now()
-    }
-
-    val creationDateContent: @Composable () -> Unit = {
-        val relativeTime = getRelativeTime(to = relativeTimeTo, showDate = false)
-
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = remember(relativeTime) { relativeTime.toString() },
-            style = MaterialTheme.typography.bodySmall
+    Column(modifier = modifier) {
+        AuthorRoleAndTimeRow(
+            expanded = expanded,
+            authorRole = authorRole,
+            creationDate = creationDate,
         )
-    }
-
-    if (expanded) {
-        Column(modifier) {
-            AuthorRoleAndNameRow(authorRole, authorName)
-            creationDateContent()
-        }
-    } else {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            AuthorRoleAndNameRow(authorRole, authorName)
-            creationDateContent()
-        }
-    }
-}
-
-@Composable
-private fun AuthorRoleAndNameRow(
-    authorRole: UserRole?,
-    authorName: String?
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        HeadlineAuthorIcon(authorRole)
-
-        Spacer(modifier = Modifier.width(4.dp))
 
         Text(
             modifier = Modifier,
@@ -395,16 +334,50 @@ private fun AuthorRoleAndNameRow(
 }
 
 @Composable
-private fun HeadlineProfilePicture(
-    profilePictureData: ProfilePictureData,
-    displayImage: Boolean = true
+private fun AuthorRoleAndTimeRow(
+    expanded: Boolean,
+    authorRole: UserRole?,
+    creationDate: Instant?
 ) {
-    val size = 30.dp
-    Box(modifier = Modifier.size(size)) {
-        if (!displayImage) {
-            return
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val relativeTimeTo = remember(creationDate) {
+            creationDate ?: Clock.System.now()
         }
 
+        val creationDateContent: @Composable () -> Unit = {
+            val relativeTime = getRelativeTime(to = relativeTimeTo, showDate = false)
+
+            Text(
+                modifier = Modifier,
+                text = remember(relativeTime) { relativeTime.toString() },
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        if (expanded) {
+            //adjust creation date
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            HeadlineAuthorIcon(authorRole)
+            Spacer(modifier = Modifier.weight(1f))
+            creationDateContent()
+        }
+    }
+}
+
+@Composable
+private fun HeadlineProfilePicture(
+    profilePictureData: ProfilePictureData
+) {
+    val size = 36.dp
+    Box(modifier = Modifier.size(size)) {
         ProfilePicture(
             modifier = Modifier
                 .size(size)
@@ -418,18 +391,23 @@ private fun HeadlineProfilePicture(
 private fun HeadlineAuthorIcon(
     authorRole: UserRole?,
 ) {
-    val icon = when (authorRole) {
-        UserRole.INSTRUCTOR -> Icons.Default.School
-        UserRole.TUTOR -> Icons.Default.SupervisorAccount
-        UserRole.USER -> Icons.Default.Person
-        null -> Icons.Default.Person
+    val text = when (authorRole) {
+        UserRole.INSTRUCTOR -> R.string.post_instructor
+        UserRole.TUTOR -> R.string.post_tutor
+        UserRole.USER -> R.string.post_student
+        null -> R.string.post_student
     }
 
-    Icon(
-        modifier = Modifier.size(16.dp),
-        imageVector = icon,
-        contentDescription = null
-    )
+    Box(
+        modifier = Modifier
+            .background(Color.Blue, MaterialTheme.shapes.extraSmall)
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+            text = stringResource(id = text),
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
 }
 
 /**

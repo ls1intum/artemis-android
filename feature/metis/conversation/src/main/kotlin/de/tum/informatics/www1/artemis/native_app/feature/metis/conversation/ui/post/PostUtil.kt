@@ -12,6 +12,14 @@ internal enum class DisplayPostOrder {
     REGULAR
 }
 
+internal enum class PostItemViewJoinedType {
+    SINGLE,
+    HEADER,
+    JOINED,
+    FOOTER,
+    PARENT
+}
+
 @Composable
 internal fun <T : IBasePost> shouldDisplayHeader(
     index: Int,
@@ -31,5 +39,41 @@ internal fun <T : IBasePost> shouldDisplayHeader(
         if (prefPost != null && post != null && prefPost.authorId == post.authorId && prefPostCreationDate != null && postCreationDate != null) {
             postCreationDate - prefPostCreationDate > MaxDurationJoinMessages
         } else true
+    }
+}
+
+@Composable
+internal fun <T : IBasePost> determinePostItemViewJoinedType(
+    index: Int,
+    post: T?,
+    postCount: Int,
+    order: DisplayPostOrder,
+    getPost: (index: Int) -> T?
+): PostItemViewJoinedType {
+    val isHeader = shouldDisplayHeader(index, post, postCount, order, getPost)
+
+    val nextPostIndex = when (order) {
+        DisplayPostOrder.REVERSED -> index - 1
+        DisplayPostOrder.REGULAR -> index + 1
+    }
+    val nextPost = if (nextPostIndex in 0 until postCount) getPost(nextPostIndex) else null
+    val isNextHeader = nextPost?.let {
+        shouldDisplayHeader(nextPostIndex, it, postCount, order, getPost)
+    } ?: true
+
+    return remember(index, isHeader, post, postCount, nextPost, isNextHeader) {
+        if (isHeader) {
+            if (nextPost == null || isNextHeader) {
+                PostItemViewJoinedType.SINGLE
+            } else {
+                PostItemViewJoinedType.HEADER
+            }
+        } else {
+            if (nextPost == null || isNextHeader) {
+                PostItemViewJoinedType.FOOTER
+            } else {
+                PostItemViewJoinedType.JOINED
+            }
+        }
     }
 }

@@ -39,8 +39,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisPostListHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.testTagForPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewJoinedType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.determinePostItemViewJoinedType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionBar
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
@@ -294,7 +296,6 @@ private fun PostAndRepliesList(
     LazyColumn(
         modifier = modifier,
         contentPadding = listContentPadding,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
         state = state
     ) {
         item {
@@ -312,6 +313,7 @@ private fun PostAndRepliesList(
                     postItemViewType = PostItemViewType.ThreadContextPostItem,
                     postActions = postActions,
                     displayHeader = true,
+                    joinedItemType = PostItemViewJoinedType.PARENT,
                     clientId = clientId,
                     onClick = {}
                 )
@@ -341,6 +343,13 @@ private fun PostAndRepliesList(
                 postItemViewType = PostItemViewType.ThreadAnswerItem,
                 clientId = clientId,
                 displayHeader = shouldDisplayHeader(
+                    index = index,
+                    post = answerPost,
+                    postCount = post.orderedAnswerPostings.size,
+                    order = DisplayPostOrder.REGULAR,
+                    getPost = post.orderedAnswerPostings::get
+                ),
+                joinedItemType = determinePostItemViewJoinedType(
                     index = index,
                     post = answerPost,
                     postCount = post.orderedAnswerPostings.size,

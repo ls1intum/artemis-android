@@ -38,6 +38,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.determinePostItemViewJoinedType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.rememberPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.shouldDisplayHeader
@@ -241,7 +242,6 @@ private fun ChatList(
 ) {
     LazyColumn(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
         contentPadding = listContentPadding,
         state = state,
         reverseLayout = true
@@ -310,6 +310,18 @@ private fun ChatList(
                                 }
                             }
                         ),
+                        joinedItemType = determinePostItemViewJoinedType(
+                                index = index,
+                                post = post,
+                                postCount = posts.itemCount,
+                                order = DisplayPostOrder.REVERSED,
+                                getPost = { getPostIndex ->
+                                    when (val entry = posts.peek(getPostIndex)) {
+                                        is ChatListItem.PostChatListItem -> entry.post
+                                        else -> null
+                                    }
+                                }
+                            ),
                         onClick = {
                             val standalonePostId = post?.standalonePostId
 
