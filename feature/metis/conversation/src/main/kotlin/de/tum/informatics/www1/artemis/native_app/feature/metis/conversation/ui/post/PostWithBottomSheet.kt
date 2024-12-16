@@ -43,7 +43,7 @@ internal fun PostWithBottomSheet(
     val isParentPostInThread = joinedItemType == PostItemViewJoinedType.PARENT
 
     val cardColor = when {
-        isParentPostInThread-> MaterialTheme.colorScheme.background
+        isParentPostInThread -> MaterialTheme.colorScheme.background
         isResolving -> PostColors.StatusBackground.resolving
         isPinned -> PostColors.StatusBackground.pinned
         else -> CardDefaults.cardColors().containerColor
@@ -61,7 +61,7 @@ internal fun PostWithBottomSheet(
         PostItemViewJoinedType.JOINED, PostItemViewJoinedType.PARENT -> MaterialTheme.shapes.small.copy(all = CornerSize(0.dp))
         PostItemViewJoinedType.SINGLE -> MaterialTheme.shapes.small
     }
-
+println(CardDefaults.cardColors().containerColor)
     val applyPaddingToModifier: @Composable (modifier: Modifier, paddingValue: Dp) -> Modifier =
         { modifier, paddingValue ->
             when (joinedItemType) {
@@ -89,6 +89,7 @@ internal fun PostWithBottomSheet(
             postItemViewType = postItemViewType,
             clientId = clientId,
             displayHeader = displayHeader,
+            postItemViewJoinedType = joinedItemType,
             onClickOnReaction = postActions.onClickReaction,
             onClick = onClick,
             onLongClick = {

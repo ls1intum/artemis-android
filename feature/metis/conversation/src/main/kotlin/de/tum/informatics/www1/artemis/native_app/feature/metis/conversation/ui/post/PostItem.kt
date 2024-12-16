@@ -8,6 +8,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
@@ -87,6 +88,7 @@ internal fun PostItem(
     postItemViewType: PostItemViewType,
     clientId: Long,
     displayHeader: Boolean,
+    postItemViewJoinedType: PostItemViewJoinedType,
     onClickOnReaction: ((emojiId: String, create: Boolean) -> Unit)?,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -127,13 +129,19 @@ internal fun PostItem(
                         )
                 }
             }
-            .padding(PaddingValues(horizontal = Spacings.ScreenHorizontalSpacing)),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(PaddingValues(horizontal = Spacings.ScreenHorizontalSpacing))
     ) {
         if (isPinned) {
             IconLabel(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .let {
+                        if (postItemViewJoinedType == PostItemViewJoinedType.JOINED) {
+                            it.padding(top = 4.dp)
+                        } else {
+                            it.padding(bottom = 4.dp)
+                        }
+                    },
                 resourceString = R.string.post_is_pinned,
                 icon = Icons.Outlined.PushPin
             )
@@ -205,7 +213,18 @@ internal fun PostItem(
                 }
 
                 StandalonePostFooter(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .let {
+                            if (postItemViewJoinedType == PostItemViewJoinedType.JOINED && post?.reactions
+                                    .orEmpty()
+                                    .isNotEmpty()
+                            ) {
+                                it.padding(bottom = 4.dp)
+                            } else {
+                                it
+                            }
+                        },
                     clientId = clientId,
                     reactions = remember(post?.reactions) { post?.reactions.orEmpty() },
                     postItemViewType = postItemViewType,
@@ -385,14 +404,17 @@ private fun HeadlineAuthorRoleBadge(
             text = R.string.post_instructor
             color = PostColors.Roles.instructor
         }
+
         UserRole.TUTOR -> {
             text = R.string.post_tutor
             color = PostColors.Roles.tutor
         }
+
         UserRole.USER -> {
             text = R.string.post_student
             color = PostColors.Roles.student
         }
+
         null -> {}
     }
 
@@ -430,7 +452,10 @@ private fun StandalonePostFooter(
         }
     }
 
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
@@ -470,7 +495,7 @@ private fun StandalonePostFooter(
 private data class ReactionData(val reactionCount: Int, val hasClientReacted: Boolean)
 
 @Composable
-private fun AnimatedCounter(currentCount: Int) {
+private fun AnimatedCounter(currentCount: Int, selected: Boolean) {
     AnimatedContent(
         targetState = currentCount,
         transitionSpec = {
@@ -486,7 +511,11 @@ private fun AnimatedCounter(currentCount: Int) {
         },
         label = "Animate reaction count change"
     ) { targetCount ->
-        Text(text = "$targetCount")
+        Text(
+            text = "$targetCount",
+            fontSize = 12.sp,
+            color = if (selected) MaterialTheme.colorScheme.primary else Color.Unspecified
+        )
     }
 }
 
@@ -501,24 +530,33 @@ private fun EmojiChip(
     val shape = CircleShape
 
     val backgroundColor =
-        if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
+        if (selected) PostColors.EmojiChipColors.selectedBackgound else PostColors.EmojiChipColors.background
 
     Box(
         modifier = modifier
             .background(color = backgroundColor, shape)
             .clip(shape)
             .clickable(onClick = onClick)
+            .let {
+                if (selected) {
+                    it.border(1.dp, MaterialTheme.colorScheme.primary, shape)
+                } else {
+                    it
+                }
+            }
     ) {
         Row(
-            modifier = Modifier.padding(4.dp),
+            modifier = Modifier
+                .padding(2.dp)
+                .padding(horizontal = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
                 text = getUnicodeForEmojiId(emojiId = emojiId),
-                fontSize = 14.sp
+                fontSize = 12.sp
             )
 
-            AnimatedCounter(reactionCount)
+            AnimatedCounter(reactionCount, selected)
         }
     }
 }
