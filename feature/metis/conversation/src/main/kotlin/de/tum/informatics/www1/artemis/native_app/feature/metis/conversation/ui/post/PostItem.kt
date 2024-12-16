@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.convertToFormat
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
@@ -181,9 +182,10 @@ internal fun PostItem(
                 )
 
                 if (post?.updatedDate != null) {
+                    val updateTime = convertToFormat(post.updatedDate)
                     Text(
-                        text = stringResource(id = R.string.post_edited_hint),
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = stringResource(id = R.string.post_edited_hint, updateTime),
+                        style = MaterialTheme.typography.bodySmall,
                         color = PostColors.editedHintText
                     )
                 }
@@ -354,17 +356,18 @@ private fun AuthorRoleAndTimeRow(
         }
 
         val creationDateContent: @Composable () -> Unit = {
-            val relativeTime = getRelativeTime(to = relativeTimeTo, showDate = false)
+
+            val relativeTime = if (expanded) {
+                getRelativeTime(to = relativeTimeTo, showDateAndTime = true)
+            } else {
+                getRelativeTime(to = relativeTimeTo, showDate = false)
+            }
 
             Text(
                 modifier = Modifier,
                 text = remember(relativeTime) { relativeTime.toString() },
                 style = MaterialTheme.typography.bodySmall
             )
-        }
-
-        if (expanded) {
-            //adjust creation date
         }
 
         Row(

@@ -27,7 +27,8 @@ fun getRelativeTime(
     to: Instant,
     clock: Clock = Clock.System,
     formatSeconds: Boolean = false,
-    showDate: Boolean = true
+    showDate: Boolean = true,
+    showDateAndTime: Boolean = false
 ): CharSequence {
     val timeDifferenceBelowOneMinuteString =
         stringResource(id = R.string.time_difference_under_one_minute)
@@ -43,6 +44,13 @@ fun getRelativeTime(
                     emit(
                         SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT)
                             .format(Date.from(to.toJavaInstant()))
+                    )
+                } else if (timeDifference >= 1.days && showDateAndTime) {
+                    emit(
+                        SimpleDateFormat.getDateTimeInstance(
+                            SimpleDateFormat.MEDIUM,
+                            SimpleDateFormat.SHORT
+                        ).format(Date.from(to.toJavaInstant()))
                     )
                 } else if (formatSeconds || timeDifference >= 1.minutes) {
                     emit(

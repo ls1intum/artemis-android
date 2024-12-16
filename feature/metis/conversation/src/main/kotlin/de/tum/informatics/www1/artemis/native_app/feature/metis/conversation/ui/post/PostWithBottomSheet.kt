@@ -61,7 +61,7 @@ internal fun PostWithBottomSheet(
         PostItemViewJoinedType.JOINED, PostItemViewJoinedType.PARENT -> MaterialTheme.shapes.small.copy(all = CornerSize(0.dp))
         PostItemViewJoinedType.SINGLE -> MaterialTheme.shapes.small
     }
-println(CardDefaults.cardColors().containerColor)
+
     val applyPaddingToModifier: @Composable (modifier: Modifier, paddingValue: Dp) -> Modifier =
         { modifier, paddingValue ->
             when (joinedItemType) {

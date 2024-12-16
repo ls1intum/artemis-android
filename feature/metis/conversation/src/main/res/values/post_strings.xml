@@ -11,7 +11,7 @@
     <string name="post_is_resolved">Resolved</string>
     <string name="post_is_pinned">Pinned</string>
 
-    <string name="post_edited_hint">(edited)</string>
+    <string name="post_edited_hint">Edited (%1$s)</string>
 
     <string name="post_replies_count">%d Replies</string>
     <plurals name="post_replies_count">
