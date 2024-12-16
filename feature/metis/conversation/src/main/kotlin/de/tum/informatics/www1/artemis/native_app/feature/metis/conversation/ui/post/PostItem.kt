@@ -21,18 +21,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.InsertEmoticon
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +56,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostCo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiDialog
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -91,7 +96,7 @@ internal fun PostItem(
     clientId: Long,
     displayHeader: Boolean,
     postItemViewJoinedType: PostItemViewJoinedType,
-    onClickOnReaction: ((emojiId: String, create: Boolean) -> Unit)?,
+    postActions: PostActions,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onRequestRetrySend: () -> Unit
@@ -238,7 +243,7 @@ internal fun PostItem(
                     clientId = clientId,
                     reactions = remember(post?.reactions) { post?.reactions.orEmpty() },
                     postItemViewType = postItemViewType,
-                    onClickReaction = onClickOnReaction
+                    postActions = postActions
                 )
             }
         }
@@ -438,7 +443,7 @@ private fun StandalonePostFooter(
     clientId: Long,
     reactions: List<IReaction>,
     postItemViewType: PostItemViewType,
-    onClickReaction: ((emojiId: String, create: Boolean) -> Unit)?
+    postActions: PostActions
 ) {
     val reactionCount: Map<String, ReactionData> = remember(reactions, clientId) {
         reactions.groupBy { it.emojiId }.mapValues { groupedReactions ->
@@ -447,6 +452,17 @@ private fun StandalonePostFooter(
                 groupedReactions.value.any { it.creatorId == clientId }
             )
         }
+    }
+    val showEmojiDialog = remember { mutableStateOf(false) }
+
+    if (showEmojiDialog.value) {
+        EmojiDialog(
+            onDismissRequest = { showEmojiDialog.value = false },
+            onSelectEmoji = { emojiId ->
+                postActions.onClickReaction?.invoke(emojiId, true)
+                showEmojiDialog.value = false
+            }
+        )
     }
 
     Column(
@@ -457,7 +473,7 @@ private fun StandalonePostFooter(
             modifier = Modifier
                 .fillMaxSize()
                 .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             reactionCount.forEach { (emoji, reactionData) ->
                 EmojiChip(
@@ -465,9 +481,27 @@ private fun StandalonePostFooter(
                     emojiId = emoji,
                     reactionCount = reactionData.reactionCount,
                     onClick = {
-                        onClickReaction?.invoke(emoji, !reactionData.hasClientReacted)
+                        postActions.onClickReaction?.invoke(emoji, !reactionData.hasClientReacted)
                     }
                 )
+            }
+            if (reactionCount.isNotEmpty() || postItemViewType is PostItemViewType.ThreadContextPostItem) {
+                Box(
+                    modifier = modifier
+                        .background(color = PostColors.EmojiChipColors.background, CircleShape)
+                        .clip(CircleShape)
+                        .clickable(onClick = {
+                            showEmojiDialog.value = true
+                        })
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(27.dp)
+                            .padding(5.dp),
+                        imageVector = Icons.Default.InsertEmoticon,
+                        contentDescription = null,
+                    )
+                }
             }
         }
 
@@ -547,6 +581,7 @@ private fun EmojiChip(
         modifier = modifier
             .background(color = backgroundColor, shape)
             .clip(shape)
+            .heightIn(max = 27.dp)
             .clickable(onClick = onClick)
             .let {
                 if (selected) {

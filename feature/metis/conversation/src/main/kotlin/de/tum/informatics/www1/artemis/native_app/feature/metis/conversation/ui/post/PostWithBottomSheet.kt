@@ -90,7 +90,7 @@ internal fun PostWithBottomSheet(
             clientId = clientId,
             displayHeader = displayHeader,
             postItemViewJoinedType = joinedItemType,
-            onClickOnReaction = postActions.onClickReaction,
+            postActions = postActions,
             onClick = onClick,
             onLongClick = {
                 displayBottomSheet = true
