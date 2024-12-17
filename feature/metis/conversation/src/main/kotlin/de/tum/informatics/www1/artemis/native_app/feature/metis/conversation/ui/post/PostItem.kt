@@ -138,23 +138,33 @@ internal fun PostItem(
             }
             .padding(PaddingValues(horizontal = Spacings.ScreenHorizontalSpacing))
     ) {
+        val applyDistancePaddingToModifier: @Composable (Modifier) -> Modifier = {
+            if (postItemViewJoinedType in listOf(
+                    PostItemViewJoinedType.JOINED,
+                    PostItemViewJoinedType.FOOTER
+                )
+            ) {
+                it.padding(top = 8.dp)
+            } else {
+                it.padding(bottom = 4.dp)
+            }
+        }
+
         if (isPinned) {
             IconLabel(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .let {
-                        if (postItemViewJoinedType in listOf(
-                                PostItemViewJoinedType.JOINED,
-                                PostItemViewJoinedType.FOOTER
-                            )
-                        ) {
-                            it.padding(top = 8.dp)
-                        } else {
-                            it.padding(bottom = 4.dp)
-                        }
-                    },
+                modifier = applyDistancePaddingToModifier(Modifier)
+                    .fillMaxWidth(),
                 resourceString = R.string.post_is_pinned,
                 icon = Icons.Outlined.PushPin
+            )
+        }
+
+        if (post is IAnswerPost && post.resolvesPost) {
+            IconLabel(
+                modifier = applyDistancePaddingToModifier(Modifier)
+                    .fillMaxWidth(),
+                resourceString = R.string.post_resolves,
+                icon = Icons.Default.Check
             )
         }
 
@@ -170,6 +180,7 @@ internal fun PostItem(
             ),
             creationDate = post?.creationDate,
             expanded = isExpanded,
+            isAnswerPost = post is IAnswerPost,
             displayHeader = displayHeader
         ) {
             Column(
@@ -200,28 +211,12 @@ internal fun PostItem(
                     )
                 }
 
-                when (post) {
-                    is IStandalonePost -> {
-                        if (post.resolved == true) {
-                            IconLabel(
-                                modifier = Modifier.fillMaxWidth(),
-                                resourceString = R.string.post_is_resolved,
-                                icon = Icons.Default.Check
-                            )
-                        }
-                    }
-
-                    is IAnswerPost -> {
-                        if (post.resolvesPost) {
-                            IconLabel(
-                                modifier = Modifier.fillMaxWidth(),
-                                resourceString = R.string.post_resolves,
-                                icon = Icons.Default.Check
-                            )
-                        }
-                    }
-
-                    else -> {}
+                if (post is IStandalonePost && post.resolved == true) {
+                    IconLabel(
+                        modifier = Modifier.fillMaxWidth(),
+                        resourceString = R.string.post_is_resolved,
+                        icon = Icons.Default.Check
+                    )
                 }
 
                 StandalonePostFooter(
@@ -259,6 +254,7 @@ private fun PostHeadline(
     creationDate: Instant?,
     postStatus: CreatePostService.Status,
     expanded: Boolean = false,
+    isAnswerPost: Boolean,
     displayHeader: Boolean = true,
     content: @Composable () -> Unit
 ) {
@@ -296,7 +292,8 @@ private fun PostHeadline(
                 authorName = authorName,
                 authorRole = authorRole,
                 creationDate = creationDate,
-                expanded = expanded
+                expanded = expanded,
+                isAnswerPost = isAnswerPost
             )
         }
 
@@ -336,12 +333,14 @@ private fun HeadlineAuthorInfo(
     authorRole: UserRole?,
     creationDate: Instant?,
     expanded: Boolean,
+    isAnswerPost: Boolean
 ) {
     Column(modifier = modifier) {
         AuthorRoleAndTimeRow(
             expanded = expanded,
             authorRole = authorRole,
             creationDate = creationDate,
+            isAnswerPost = isAnswerPost
         )
 
         Text(
@@ -358,7 +357,8 @@ private fun HeadlineAuthorInfo(
 private fun AuthorRoleAndTimeRow(
     expanded: Boolean,
     authorRole: UserRole?,
-    creationDate: Instant?
+    creationDate: Instant?,
+    isAnswerPost: Boolean
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -370,7 +370,7 @@ private fun AuthorRoleAndTimeRow(
 
         val creationDateContent: @Composable () -> Unit = {
 
-            val relativeTime = if (expanded) {
+            val relativeTime = if (expanded || isAnswerPost) {
                 getRelativeTime(to = relativeTimeTo, showDateAndTime = true)
             } else {
                 getRelativeTime(to = relativeTimeTo, showDate = false)
