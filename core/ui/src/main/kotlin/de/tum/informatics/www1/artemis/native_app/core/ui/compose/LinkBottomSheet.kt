@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.webkit.WebView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
@@ -29,6 +30,7 @@ fun LinkBottomSheet(
     serverUrl: String,
     authToken: String,
     link: String,
+    fileName: String?,
     state: LinkBottomSheetState,
     onDismissRequest: () -> Unit
 ) {
@@ -46,7 +48,12 @@ fun LinkBottomSheet(
         ) {
                 when (state) {
                     LinkBottomSheetState.PDFVIEWSTATE -> {
-
+                        ArtemisPdfView(
+                            modifier = Modifier.fillMaxSize(),
+                            url = link,
+                            authToken = authToken,
+                            filename = fileName
+                        )
                     }
                     LinkBottomSheetState.WEBVIEWSTATE -> {
                         ArtemisWebView(

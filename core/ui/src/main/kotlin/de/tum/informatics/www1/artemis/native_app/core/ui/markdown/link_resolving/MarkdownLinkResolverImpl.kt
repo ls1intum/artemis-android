@@ -36,11 +36,13 @@ class MarkdownLinkResolverImpl(
         val (bottomSheetState, setBottomSheetState) = remember { mutableStateOf(LinkBottomSheetState.WEBVIEWSTATE) }
 
         if (bottomSheetLink != null) {
+            val filename = if (bottomSheetState == LinkBottomSheetState.PDFVIEWSTATE) bottomSheetLink.substringAfterLast("/") else null
             LinkBottomSheet(
                 modifier = Modifier.fillMaxSize(),
                 serverUrl = serverUrl,
                 authToken = authToken,
                 link = bottomSheetLink,
+                fileName = filename,
                 state = bottomSheetState,
                 onDismissRequest = { setLinkToShow(null) }
             )
