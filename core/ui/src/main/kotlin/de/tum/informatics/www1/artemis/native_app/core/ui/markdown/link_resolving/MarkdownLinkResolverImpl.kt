@@ -1,19 +1,24 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.markdown.link_resolving
 
 import android.content.Context
+import android.net.Uri
 import android.view.View
-import android.widget.Toast
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheet
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheetState
 import io.noties.markwon.LinkResolver
-
 
 val LocalMarkdownLinkResolver = compositionLocalOf<MarkdownLinkResolver> { error("No MarkdownLinkResolver provided") }
 
@@ -25,41 +30,48 @@ class MarkdownLinkResolverImpl(
     override fun rememberMarkdownLinkResolver(): LinkResolver {
         val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
         val authToken by accountService.authToken.collectAsState(initial = "")
-
         val context = LocalContext.current
 
+        val (bottomSheetLink, setLinkToShow) = remember { mutableStateOf<String?>(null) }
+        val (bottomSheetState, setBottomSheetState) = remember { mutableStateOf(LinkBottomSheetState.WEBVIEWSTATE) }
+
+        if (bottomSheetLink != null) {
+            LinkBottomSheet(
+                modifier = Modifier.fillMaxSize(),
+                serverUrl = serverUrl,
+                authToken = authToken,
+                link = bottomSheetLink,
+                state = bottomSheetState,
+                onDismissRequest = { setLinkToShow(null) }
+            )
+        }
+
         return remember(context, authToken, serverUrl) {
-            BaseMarkdownLinkResolver(context, authToken, serverUrl)
+            BaseMarkdownLinkResolver(context, serverUrl, setLinkToShow, setBottomSheetState)
         }
     }
 }
 
 class BaseMarkdownLinkResolver(
     private val context: Context,
-    private val authorizationToken: String,
     private val serverUrl: String = "",
+    private val showModalBottomSheet: (String) -> Unit,
+    private val setBottomSheetState: (LinkBottomSheetState) -> Unit
 ) : LinkResolver {
-
     override fun resolve(view: View, link: String) {
-        println(serverUrl)
         when {
-            link.startsWith(serverUrl) -> {
-
+            link.endsWith(".pdf") -> {
+                setBottomSheetState(LinkBottomSheetState.PDFVIEWSTATE)
+                showModalBottomSheet(link)
             }
-
-//            link.startsWith("customScheme://") -> {
-//                // Handle custom scheme links
-//                handleCustomScheme(link)
-//            }
-
+            link.startsWith(serverUrl) -> {
+                setBottomSheetState(LinkBottomSheetState.WEBVIEWSTATE)
+                showModalBottomSheet(link)
+            }
             else -> {
-                Toast.makeText(context, "Unsupported link: $link", Toast.LENGTH_SHORT).show()
+                val customTabsIntent = CustomTabsIntent.Builder().build()
+                customTabsIntent.launchUrl(context, Uri.parse(link))
             }
         }
-    }
-
-    private fun handleCustomScheme(link: String) {
-        // Parse and handle custom scheme as needed
-        Toast.makeText(context, "Handling custom scheme: $link", Toast.LENGTH_SHORT).show()
     }
 }
