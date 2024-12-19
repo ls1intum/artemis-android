@@ -30,7 +30,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfFile
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfImage
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.HorizontalPdfReaderState
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.VerticalPdfReaderState
@@ -48,14 +47,15 @@ fun VerticalPdfView(
         val ctx = LocalContext.current
         val coroutineScope = rememberCoroutineScope()
         val lazyState = state.lazyState
+        val pdfFile = state.pdfFile
+
         DisposableEffect(key1 = Unit) {
-            PdfFile().load(
+            pdfFile.load(
                 coroutineScope,
                 ctx,
                 state,
                 constraints.maxWidth,
                 constraints.maxHeight,
-                authToken = state.authToken,
                 true
             )
             onDispose {
@@ -109,14 +109,15 @@ fun HorizontalPdfView(
     ) {
         val ctx = LocalContext.current
         val coroutineScope = rememberCoroutineScope()
+        val pdfFile = state.pdfFile
+
         DisposableEffect(key1 = Unit) {
-            PdfFile().load(
+            pdfFile.load(
                 coroutineScope,
                 ctx,
                 state,
                 constraints.maxWidth,
                 constraints.maxHeight,
-                authToken = state.authToken,
                 constraints.maxHeight > constraints.maxWidth
             )
             onDispose {

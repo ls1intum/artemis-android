@@ -1,18 +1,17 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state
 
-import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
+import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfFile
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.PdfRendering
 import java.io.File
 
 abstract class PdfReaderState(
-    val uri: Uri,
-    val authToken: String,
+    val pdfFile: PdfFile,
     isZoomEnabled: Boolean = false
 ) {
     internal var mError by mutableStateOf<Throwable?>(null)

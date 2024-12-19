@@ -1,18 +1,16 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state
 
-import android.net.Uri
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.core.net.toUri
+import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfFile
 
 class VerticalPdfReaderState(
-    uri: Uri,
-    authToken: String,
+    pdfFile: PdfFile,
     isZoomEnabled: Boolean = false,
-) : PdfReaderState(uri, authToken, isZoomEnabled) {
+) : PdfReaderState(pdfFile, isZoomEnabled) {
 
     internal var lazyState: LazyListState = LazyListState()
         private set
@@ -44,26 +42,24 @@ class VerticalPdfReaderState(
 
     companion object {
         val Saver: Saver<VerticalPdfReaderState, *> = listSaver(
-            save = {
-                val resourceUri = it.file?.toUri() ?: it.uri
-                val authToken = it.authToken
+            save = { state ->
                 listOf(
-                    resourceUri,
-                    authToken,
-                    it.isZoomEnabled,
-                    it.lazyState.firstVisibleItemIndex,
-                    it.lazyState.firstVisibleItemScrollOffset
+                    state.pdfFile.link,
+                    state.pdfFile.authToken,
+                    state.pdfFile.filename,
+                    state.isZoomEnabled,
+                    state.lazyState.firstVisibleItemIndex,
+                    state.lazyState.firstVisibleItemScrollOffset
                 )
             },
-            restore = {
+            restore = { restoredList ->
                 VerticalPdfReaderState(
-                    it[0] as Uri,
-                    it[1] as String,
-                    it[2] as Boolean,
+                    PdfFile(restoredList[0] as String, restoredList[1] as String, restoredList[2] as String?),
+                    restoredList[1] as Boolean,
                 ).apply {
                     lazyState = LazyListState(
-                        firstVisibleItemIndex = it[3] as Int,
-                        firstVisibleItemScrollOffset = it[4] as Int
+                        firstVisibleItemIndex = restoredList[2] as Int,
+                        firstVisibleItemScrollOffset = restoredList[3] as Int
                     )
                 }
             }
@@ -73,11 +69,10 @@ class VerticalPdfReaderState(
 
 @Composable
 fun rememberVerticalPdfReaderState(
-    uri: Uri,
-    authToken: String,
+    pdfFile: PdfFile,
     isZoomEnabled: Boolean = true,
 ): VerticalPdfReaderState {
     return rememberSaveable(saver = VerticalPdfReaderState.Saver) {
-        VerticalPdfReaderState(uri, authToken, isZoomEnabled)
+        VerticalPdfReaderState(pdfFile, isZoomEnabled)
     }
 }
