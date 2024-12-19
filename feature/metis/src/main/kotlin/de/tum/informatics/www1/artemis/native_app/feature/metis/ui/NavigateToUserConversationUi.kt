@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onStart
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 internal class NavigateToUserConversationViewModel(
@@ -138,7 +138,7 @@ internal fun NavigateToUserConversationUi(
     onNavigateBack: () -> Unit
 ) {
     val viewModel: NavigateToUserConversationViewModel =
-        getViewModel { parametersOf(courseId, username) }
+        koinViewModel { parametersOf(courseId, username) }
 
     val conversationIdDataState by viewModel.conversationId.collectAsState()
 

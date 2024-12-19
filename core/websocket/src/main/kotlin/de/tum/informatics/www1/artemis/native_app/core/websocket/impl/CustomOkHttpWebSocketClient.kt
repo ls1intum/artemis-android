@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.io.bytestring.ByteStringBuilder
+import kotlinx.io.bytestring.asReadOnlyByteBuffer
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -18,7 +20,6 @@ import org.hildan.krossbow.websocket.WebSocketConnection
 import org.hildan.krossbow.websocket.WebSocketConnectionException
 import org.hildan.krossbow.websocket.WebSocketFrame
 import org.hildan.krossbow.websocket.WebSocketListenerFlowAdapter
-import java.lang.Exception
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -32,10 +33,11 @@ private const val TAG = "WebSocketClient"
 class CustomOkHttpWebSocketClient(
     private val client: OkHttpClient = OkHttpClient(),
     private val authTokenFlow: Flow<String>,
-    private val onError: () -> Unit
+    private val onError: () -> Unit,
+    override val supportsCustomHeaders: Boolean = false
 ) : WebSocketClient {
 
-    override suspend fun connect(url: String): WebSocketConnection {
+    override suspend fun connect(url: String, protocols: List<String>, headers: Map<String, String>): WebSocketConnection {
         val authToken = authTokenFlow.first()
 
         val request = Request.Builder()
@@ -80,7 +82,9 @@ private class KrossbowToOkHttpListenerAdapter(
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        runBlocking { channelListener.onBinaryMessage(bytes.toByteArray()) }
+        val byteStringBuilder = ByteStringBuilder()
+        byteStringBuilder.append(bytes.toByteArray())
+        runBlocking { channelListener.onBinaryMessage(byteStringBuilder.toByteString()) }
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
@@ -117,7 +121,8 @@ private class KrossbowToOkHttpListenerAdapter(
 private class OkHttpSocketToKrossbowConnectionAdapter(
     private val okSocket: WebSocket,
     override val incomingFrames: Flow<WebSocketFrame>,
-    private val onMissingHeartbeat: () -> Unit
+    private val onMissingHeartbeat: () -> Unit,
+    override val protocol: String? = null
 ) : WebSocketConnection {
 
     override val url: String
@@ -130,8 +135,8 @@ private class OkHttpSocketToKrossbowConnectionAdapter(
         okSocket.send(frameText)
     }
 
-    override suspend fun sendBinary(frameData: ByteArray) {
-        okSocket.send(frameData.toByteString())
+    override suspend fun sendBinary(frameData: kotlinx.io.bytestring.ByteString) {
+        okSocket.send(frameData.asReadOnlyByteBuffer().toByteString())
     }
 
     override suspend fun close(code: Int, reason: String?) {

@@ -36,7 +36,7 @@ repositories {
 
 dependencies {
     if (!B.getBoolean("skip.deps")) {
-        val libs = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
+        val libs = project.libs
         libs.libraryAliases.map { libs.findLibrary(it) }.forEach {
             implementation(it.get())
         }

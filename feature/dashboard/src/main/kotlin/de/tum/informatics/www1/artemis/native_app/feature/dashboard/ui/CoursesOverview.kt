@@ -52,7 +52,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.Beta
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.SurveyHintService
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 internal const val TEST_TAG_COURSE_LIST = "TEST_TAG_COURSE_LIST"
@@ -74,7 +74,7 @@ fun NavGraphBuilder.dashboard(
     composable<DashboardScreen> {
         CoursesOverview(
             modifier = Modifier.fillMaxSize(),
-            viewModel = getViewModel(),
+            viewModel = koinViewModel(),
             onOpenSettings = onOpenSettings,
             onClickRegisterForCourse = onClickRegisterForCourse,
             onViewCourse = onViewCourse

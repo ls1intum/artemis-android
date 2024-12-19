@@ -1,8 +1,15 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
+import android.content.ContentResolver
+import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
+import android.widget.Toast
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
@@ -31,6 +38,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.asMetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants.isImage
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
@@ -66,6 +74,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,6 +92,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -255,15 +265,17 @@ internal open class ConversationViewModel(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
     private val isAbleToPin: StateFlow<Boolean> = conversation
-        .map { conversation -> conversation.bind {
-            when (it) {
-                // Group Chat: Only Creator can pin
-                is GroupChat -> it.isCreator
-                // Channel: Only Moderators can pin
-                is ChannelChat -> it.hasModerationRights
-                else -> true
-            }
-        }.orElse(false) }
+        .map { conversation ->
+            conversation.bind {
+                when (it) {
+                    // Group Chat: Only Creator can pin
+                    is GroupChat -> it.isCreator
+                    // Channel: Only Moderators can pin
+                    is ChannelChat -> it.hasModerationRights
+                    else -> true
+                }
+            }.orElse(false)
+        }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     val postActionFlags: StateFlow<PostActionFlags> = combine(
@@ -305,7 +317,10 @@ internal open class ConversationViewModel(
 
         // Receive websocket updates and store them in the db.
         viewModelScope.launch(coroutineContext) {
-            combine(serverConfigurationService.host, clientId.filterSuccess()) { host, clientId -> host to clientId }
+            combine(
+                serverConfigurationService.host,
+                clientId.filterSuccess()
+            ) { host, clientId -> host to clientId }
                 .collect { (host, clientId) ->
                     webSocketUpdateUseCase.updatePosts(
                         host = host,
@@ -732,7 +747,8 @@ internal open class ConversationViewModel(
                 )
             } ?: return@launch
 
-            val post = metisStorageService.getStandalonePost(clientSidePostId).first() ?: return@launch
+            val post =
+                metisStorageService.getStandalonePost(clientSidePostId).first() ?: return@launch
 
             createPostService.retryCreatePost(
                 courseId = courseId,
@@ -773,4 +789,100 @@ internal open class ConversationViewModel(
     fun updateOpenedThread(newPostId: StandalonePostId?) {
         _postId.value = newPostId
     }
+
+    fun onFileSelected(uri: Uri, context: Context) {
+        val fileName = resolveFileName(context, uri)
+        uploadFileOrImage(context = context, fileUri = uri, fileName = fileName)
+    }
+
+    private fun uploadFileOrImage(context: Context, fileUri: Uri, fileName: String) {
+        viewModelScope.launch(coroutineContext) {
+            try {
+                val fileBytes = withContext(Dispatchers.IO) {
+                    context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
+                        val fileSize = inputStream.available()
+
+                        val maxFileSize = 5 * 1024 * 1024
+                        if (fileSize > maxFileSize) {
+                            throw IllegalArgumentException(
+                                getString(
+                                    context,
+                                    R.string.conversation_vm_file_size_exceed
+                                )
+                            )
+                        }
+                        inputStream.readBytes()
+                    }
+                } ?: throw IllegalArgumentException(
+                    getString(
+                        context,
+                        R.string.conversation_vm_file_upload_failed
+                    )
+                )
+
+                val response = metisModificationService.uploadFileOrImage(
+                    context = metisContext,
+                    fileBytes = fileBytes,
+                    fileName = fileName,
+                    serverUrl = serverConfigurationService.serverUrl.first(),
+                    authToken = accountService.authToken.first()
+                )
+
+                when (response) {
+                    is NetworkResponse.Response -> {
+                        val fileUploadResponse = response.data
+                        val filePath = fileUploadResponse.path
+                            ?.let { if (it.startsWith("/")) it.substring(1) else it }
+                            ?: throw IllegalArgumentException(
+                                getString(
+                                    context,
+                                    R.string.conversation_vm_file_upload_failed
+                                )
+                            )
+
+                        val currentText = newMessageText.value.text
+
+                        val transformer = PostArtemisMarkdownTransformer(
+                            serverUrl = serverConfigurationService.serverUrl.first(),
+                            courseId = metisContext.courseId
+                        )
+
+                        val markdown: String = transformer.transformFileUploadMessageMarkdown(
+                            isImage = isImage(fileName),
+                            fileName = fileName,
+                            filePath = filePath
+                        )
+                        val updatedText = "$currentText\n$markdown\n"
+                        newMessageText.value = TextFieldValue(updatedText)
+                    }
+
+                    else -> {
+                        throw IllegalArgumentException(
+                            getString(
+                                context,
+                                R.string.conversation_vm_file_upload_failed
+                            ))
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        e.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    private fun resolveFileName(context: Context, uri: Uri): String {
+        val resolver: ContentResolver = context.contentResolver
+        return resolver.query(uri, null, null, null, null)?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            cursor.moveToFirst()
+            cursor.getString(nameIndex)
+        } ?: uri.lastPathSegment.orEmpty()
+    }
+
 }
