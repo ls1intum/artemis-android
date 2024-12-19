@@ -123,7 +123,7 @@ fun HorizontalPdfView(
                 state.close()
             }
         }
-        val pagerState = rememberPagerState( state.currentPage ) { state.pdfPageCount }
+        val pagerState = rememberPagerState( state.currentPage - 1 ) { state.pdfPageCount }
 
         state.pdfRender?.let { pdf ->
             HorizontalPager(
@@ -137,7 +137,7 @@ fun HorizontalPdfView(
 
                 LaunchedEffect(pagerState) {
                     snapshotFlow { pagerState.currentPage }.collect { page ->
-                        state.currentPage = page
+                        state.currentPage = page + 1
                     }
                     snapshotFlow { pagerState.isScrollInProgress }.collect { isScrolling ->
                         state.isScrolling = isScrolling
