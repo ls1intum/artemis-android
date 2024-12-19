@@ -19,6 +19,9 @@ captures
 *.apk
 /app/release/output-metadata.json
 
+# Kotlin 2.0
+.kotlin/
+
 # Keystore files
 *.jks
 passwords

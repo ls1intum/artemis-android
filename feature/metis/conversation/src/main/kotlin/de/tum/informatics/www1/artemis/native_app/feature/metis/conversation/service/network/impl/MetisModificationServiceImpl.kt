@@ -1,22 +1,30 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.impl
 
+import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileUploadResponse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.RESOURCE_PATH_SEGMENTS
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.Reaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.delete
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
@@ -92,6 +100,31 @@ internal class MetisModificationServiceImpl(
 
                 contentType(ContentType.Application.Json)
                 setBody(post)
+                cookieAuth(authToken)
+            }.body()
+        }
+    }
+
+    override suspend fun updatePostDisplayPriority(
+        context: MetisContext,
+        post: StandalonePost,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<StandalonePost> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.put(serverUrl) {
+                url {
+                    appendPathSegments(RESOURCE_PATH_SEGMENTS)
+                    appendPathSegments(
+                        context.courseId.toString(),
+                        context.standalonePostResourceEndpoint
+                    )
+                    appendPathSegments(post.id.toString())
+                    appendPathSegments("display-priority")
+                }
+
+                contentType(ContentType.Application.Json)
+                parameter("displayPriority", post.displayPriority)
                 cookieAuth(authToken)
             }.body()
         }
@@ -216,6 +249,34 @@ internal class MetisModificationServiceImpl(
             }
                 .status
                 .isSuccess()
+        }
+    }
+
+    override suspend fun uploadFileOrImage(
+        context: MetisContext.Conversation,
+        fileBytes: ByteArray,
+        fileName: String,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<FileUploadResponse> {
+        return performNetworkCall {
+            val courseId = context.courseId.toString()
+            val conversationId = context.conversationId.toString()
+            val response =  ktorProvider.ktorClient.submitFormWithBinaryData(
+                url = serverUrl +"api/files/courses/$courseId/conversations/$conversationId",
+                formData = formData {
+                    append("file", fileBytes, Headers.build {
+                        append(HttpHeaders.ContentDisposition, "filename=$fileName")
+                    })
+                }
+            ) {
+                cookieAuth(authToken)
+            }
+
+            val rawResponse = response.bodyAsText()
+            Log.d("UploadDebug", "Raw response: $rawResponse")
+
+            response.body<FileUploadResponse>()
         }
     }
 }

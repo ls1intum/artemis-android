@@ -1,24 +1,26 @@
-package de.tum.informatics.www1.artemis.native_app.core.ui.remote_images
+package de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.impl
 
 import android.content.Context
 import coil.ImageLoader
-import coil.request.ImageRequest
+import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
+import coil3.request.ImageRequest
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.BaseImageProvider
 import io.ktor.http.HttpHeaders
-import io.ktor.http.URLBuilder
-import io.ktor.http.appendPathSegments
 
-class DefaultImageProvider : BaseImageProvider {
+class BaseImageProviderImpl : BaseImageProvider {
     override fun createImageRequest(
         context: Context,
-        imagePath: String,
-        serverUrl: String,
+        imageUrl: String,
         authorizationToken: String,
         memoryCacheKey: String?
     ): ImageRequest {
-        val imageUrl = URLBuilder(serverUrl).appendPathSegments(imagePath).buildString()
+        val headers = NetworkHeaders.Builder()
+            .set(HttpHeaders.Cookie, "jwt=$authorizationToken")
+            .build()
 
         val builder = ImageRequest.Builder(context)
-            .addHeader(HttpHeaders.Cookie, "jwt=$authorizationToken")
+            .httpHeaders(headers)
             .data(imageUrl)
 
         memoryCacheKey?.let {

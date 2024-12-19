@@ -52,7 +52,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.Beta
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.SurveyHintService
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 internal const val TEST_TAG_COURSE_LIST = "TEST_TAG_COURSE_LIST"
@@ -74,7 +74,7 @@ fun NavGraphBuilder.dashboard(
     composable<DashboardScreen> {
         CoursesOverview(
             modifier = Modifier.fillMaxSize(),
-            viewModel = getViewModel(),
+            viewModel = koinViewModel(),
             onOpenSettings = onOpenSettings,
             onClickRegisterForCourse = onClickRegisterForCourse,
             onViewCourse = onViewCourse
@@ -98,11 +98,6 @@ internal fun CoursesOverview(
     surveyHintService: SurveyHintService = koinInject()
 ) {
     val coursesDataState by viewModel.dashboard.collectAsState()
-
-    //The course composable needs the serverUrl to build the correct url to fetch the course icon from.
-    val serverUrl by viewModel.serverUrl.collectAsState()
-    //The server wants an authorization token to send the course icon.
-    val authToken by viewModel.authToken.collectAsState()
 
     val topAppBarState = rememberTopAppBarState()
 
@@ -201,8 +196,6 @@ internal fun CoursesOverview(
                             .padding(horizontal = 8.dp)
                             .testTag(TEST_TAG_COURSE_LIST),
                         courses = dashboard.courses,
-                        serverUrl = serverUrl,
-                        authorizationToken = authToken,
                         onClickOnCourse = { course -> onViewCourse(course.id ?: 0L) }
                     )
                 }

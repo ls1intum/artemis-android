@@ -25,21 +25,23 @@ data class StandalonePost(
 //    val plagiarismCase: PlagiarismCase? = null,
     val conversation: Conversation? = null,
     val courseWideContext: CourseWideContext? = null,
-    val displayPriority: DisplayPriority? = null,
+    override val displayPriority: DisplayPriority? = null,
     override val resolved: Boolean? = null
 ) : BasePost(), IStandalonePost {
 
     constructor(post: PostPojo, conversation: Conversation) : this(
         id = post.serverPostId,
         author = User(
-            id = post.authorId
+            id = post.authorId,
+            imageUrl = post.authorImageUrl
         ),
         authorRole = post.authorRole,
         content = post.content,
         conversation = conversation,
         creationDate = post.creationDate,
         title = post.title,
-        resolved = post.resolved
+        resolved = post.resolved,
+        displayPriority = post.displayPriority
     )
 
     @Transient

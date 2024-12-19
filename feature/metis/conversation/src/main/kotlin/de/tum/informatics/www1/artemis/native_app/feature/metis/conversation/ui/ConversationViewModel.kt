@@ -1,10 +1,15 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
+import android.content.ContentResolver
 import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
+import android.widget.Toast
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
-import coil.ImageLoader
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
@@ -27,18 +32,19 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Programmin
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.DefaultImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.asMetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants.isImage
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteCategory
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteHint
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
@@ -49,6 +55,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ConversationWebsocketDto
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
@@ -56,6 +63,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.hasModerationRights
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
@@ -66,6 +74,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,6 +92,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -146,7 +156,7 @@ internal open class ConversationViewModel(
      * Manages updating from the websocket.
      */
     private val webSocketUpdateUseCase = ConversationWebSocketUpdateUseCase(
-        metisService = metisService,
+        websocketProvider = websocketProvider,
         metisStorageService = metisStorageService
     )
 
@@ -165,7 +175,7 @@ internal open class ConversationViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
-    val hasModerationRights: StateFlow<Boolean> = flatMapLatest(
+    private val hasModerationRights: StateFlow<Boolean> = flatMapLatest(
         serverConfigurationService.serverUrl,
         accountService.authToken,
         onRequestReload.onStart { emit(Unit) }
@@ -184,7 +194,7 @@ internal open class ConversationViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
-    val isAtLeastTutorInCourse: StateFlow<Boolean> = flatMapLatest(
+    private val isAtLeastTutorInCourse: StateFlow<Boolean> = flatMapLatest(
         serverConfigurationService.serverUrl,
         accountService.authToken,
         course,
@@ -236,7 +246,7 @@ internal open class ConversationViewModel(
         clientId.filterSuccess()
     ) { conversationDataState, clientId ->
         websocketProvider.subscribeToConversationUpdates(clientId, metisContext.courseId)
-            .filter { it.crudAction == MetisCrudAction.UPDATE }
+            .filter { it.action == MetisCrudAction.UPDATE }
             .map<ConversationWebsocketDto, DataState<Conversation>> { DataState.Success(it.conversation) }
             .onStart { emit(conversationDataState) }
     }
@@ -253,6 +263,40 @@ internal open class ConversationViewModel(
         }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
+
+    private val isAbleToPin: StateFlow<Boolean> = conversation
+        .map { conversation ->
+            conversation.bind {
+                when (it) {
+                    // Group Chat: Only Creator can pin
+                    is GroupChat -> it.isCreator
+                    // Channel: Only Moderators can pin
+                    is ChannelChat -> it.hasModerationRights
+                    else -> true
+                }
+            }.orElse(false)
+        }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
+
+    val postActionFlags: StateFlow<PostActionFlags> = combine(
+        isAbleToPin,
+        hasModerationRights,
+        isAtLeastTutorInCourse
+    ) { isAbleToPin, hasModerationRights, isAtLeastTutorInCourse ->
+        PostActionFlags(
+            isAbleToPin = isAbleToPin,
+            hasModerationRights = hasModerationRights,
+            isAtLeastTutorInCourse = isAtLeastTutorInCourse
+        )
+    }.stateIn(
+        scope = viewModelScope + coroutineContext,
+        started = SharingStarted.Eagerly,
+        initialValue = PostActionFlags(
+            isAbleToPin = false,
+            hasModerationRights = false,
+            isAtLeastTutorInCourse = false
+        )
+    )
 
     override val legalTagChars: List<Char> = listOf('@', '#')
 
@@ -273,7 +317,10 @@ internal open class ConversationViewModel(
 
         // Receive websocket updates and store them in the db.
         viewModelScope.launch(coroutineContext) {
-            combine(serverConfigurationService.host, clientId.filterSuccess()) { host, clientId -> host to clientId }
+            combine(
+                serverConfigurationService.host,
+                clientId.filterSuccess()
+            ) { host, clientId -> host to clientId }
                 .collect { (host, clientId) ->
                     webSocketUpdateUseCase.updatePosts(
                         host = host,
@@ -283,6 +330,8 @@ internal open class ConversationViewModel(
                 }
         }
     }
+
+    var onCloseThread: (() -> Unit)? = null
 
     /**
      * Handles a reaction click. If the client has already reacted, it deletes the reaction.
@@ -370,6 +419,37 @@ internal open class ConversationViewModel(
         }
     }
 
+    fun togglePinPost(post: IStandalonePost): Deferred<MetisModificationFailure?> {
+        return viewModelScope.async(coroutineContext) {
+            val conversation =
+                loadConversation() ?: return@async MetisModificationFailure.UPDATE_POST
+
+            val newDisplayPriority = if (post.displayPriority == DisplayPriority.PINNED) {
+                DisplayPriority.NONE
+            } else {
+                DisplayPriority.PINNED
+            }
+
+            val newPost = when (post) {
+                is StandalonePost -> post.copy(displayPriority = newDisplayPriority)
+                is PostPojo -> StandalonePost(
+                    post = post.copy(displayPriority = newDisplayPriority),
+                    conversation = conversation
+                )
+
+                else -> throw IllegalArgumentException()
+            }
+
+            metisModificationService.updatePostDisplayPriority(
+                context = metisContext,
+                post = newPost,
+                serverUrl = serverConfigurationService.serverUrl.first(),
+                authToken = accountService.authToken.first(),
+            )
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
+        }
+    }
+
     fun deletePost(post: IBasePost): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
             metisModificationService.deletePost(
@@ -380,6 +460,7 @@ internal open class ConversationViewModel(
             )
                 .bind { if (it) null else MetisModificationFailure.DELETE_POST }
                 .or(MetisModificationFailure.DELETE_POST)
+                .also { if (it != MetisModificationFailure.DELETE_POST && post is IStandalonePost) onCloseThread?.invoke() }
         }
     }
 
@@ -666,7 +747,8 @@ internal open class ConversationViewModel(
                 )
             } ?: return@launch
 
-            val post = metisStorageService.getStandalonePost(clientSidePostId).first() ?: return@launch
+            val post =
+                metisStorageService.getStandalonePost(clientSidePostId).first() ?: return@launch
 
             createPostService.retryCreatePost(
                 courseId = courseId,
@@ -708,11 +790,99 @@ internal open class ConversationViewModel(
         _postId.value = newPostId
     }
 
-    fun createMarkdownImageLoader(context: Context): Deferred<ImageLoader> {
-        return viewModelScope.async(coroutineContext) {
-            val imageProvider = DefaultImageProvider()
-            val authorizationToken = accountService.authToken.first()
-            imageProvider.createImageLoader(context, authorizationToken)
+    fun onFileSelected(uri: Uri, context: Context) {
+        val fileName = resolveFileName(context, uri)
+        uploadFileOrImage(context = context, fileUri = uri, fileName = fileName)
+    }
+
+    private fun uploadFileOrImage(context: Context, fileUri: Uri, fileName: String) {
+        viewModelScope.launch(coroutineContext) {
+            try {
+                val fileBytes = withContext(Dispatchers.IO) {
+                    context.contentResolver.openInputStream(fileUri)?.use { inputStream ->
+                        val fileSize = inputStream.available()
+
+                        val maxFileSize = 5 * 1024 * 1024
+                        if (fileSize > maxFileSize) {
+                            throw IllegalArgumentException(
+                                getString(
+                                    context,
+                                    R.string.conversation_vm_file_size_exceed
+                                )
+                            )
+                        }
+                        inputStream.readBytes()
+                    }
+                } ?: throw IllegalArgumentException(
+                    getString(
+                        context,
+                        R.string.conversation_vm_file_upload_failed
+                    )
+                )
+
+                val response = metisModificationService.uploadFileOrImage(
+                    context = metisContext,
+                    fileBytes = fileBytes,
+                    fileName = fileName,
+                    serverUrl = serverConfigurationService.serverUrl.first(),
+                    authToken = accountService.authToken.first()
+                )
+
+                when (response) {
+                    is NetworkResponse.Response -> {
+                        val fileUploadResponse = response.data
+                        val filePath = fileUploadResponse.path
+                            ?.let { if (it.startsWith("/")) it.substring(1) else it }
+                            ?: throw IllegalArgumentException(
+                                getString(
+                                    context,
+                                    R.string.conversation_vm_file_upload_failed
+                                )
+                            )
+
+                        val currentText = newMessageText.value.text
+
+                        val transformer = PostArtemisMarkdownTransformer(
+                            serverUrl = serverConfigurationService.serverUrl.first(),
+                            courseId = metisContext.courseId
+                        )
+
+                        val markdown: String = transformer.transformFileUploadMessageMarkdown(
+                            isImage = isImage(fileName),
+                            fileName = fileName,
+                            filePath = filePath
+                        )
+                        val updatedText = "$currentText\n$markdown\n"
+                        newMessageText.value = TextFieldValue(updatedText)
+                    }
+
+                    else -> {
+                        throw IllegalArgumentException(
+                            getString(
+                                context,
+                                R.string.conversation_vm_file_upload_failed
+                            ))
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        e.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
     }
+
+    private fun resolveFileName(context: Context, uri: Uri): String {
+        val resolver: ContentResolver = context.contentResolver
+        return resolver.query(uri, null, null, null, null)?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            cursor.moveToFirst()
+            cursor.getString(nameIndex)
+        } ?: uri.lastPathSegment.orEmpty()
+    }
+
 }
