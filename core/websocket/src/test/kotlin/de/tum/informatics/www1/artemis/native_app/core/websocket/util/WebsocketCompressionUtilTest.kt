@@ -7,12 +7,12 @@ import org.hildan.krossbow.stomp.frame.FrameBody
 import org.hildan.krossbow.stomp.frame.StompFrame
 import org.hildan.krossbow.stomp.headers.StompMessageHeaders
 import org.junit.Assert.assertEquals
+import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
 import java.util.zip.GZIPOutputStream
-import kotlin.test.Test
 
 
 @Serializable
@@ -45,7 +45,7 @@ class WebsocketCompressionUtilTest {
         val compressedMessage = compressGzip(message.toByteArray())
         val stompFrame = StompFrame.Message(
             headers = createHeaders(mapOf("compressed" to "true")),
-            body = FrameBody.Binary(compressedMessage)
+            body = FrameBody.Binary(compressedMessage.toByteString())
         )
 
         val deserialized = WebsocketCompressionUtil.deserializeMessage(stompFrame, jsonConfig, TestObject.serializer())

@@ -24,7 +24,7 @@ object WebsocketCompressionUtil {
     ): T {
         val bodyJson: String = if (message.headers["compressed"] == "true") {
             val compressed = message.body?.bytes ?: error("Message body should not be null")
-            ungzip(compressed)
+            ungzip(compressed.toByteArray())
         } else message.bodyAsText
 
         return jsonConfig.decodeFromString(deserializer, bodyJson)
