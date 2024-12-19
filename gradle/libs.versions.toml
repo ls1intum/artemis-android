@@ -13,7 +13,7 @@ androidxComposeBom = "2024.11.00"
 androidxDataStore = "1.1.1"
 androidxLifecycle = "2.8.7"
 androidxNavigation = "2.8.4"
-androidxPaging = "3.3.4"
+androidxPaging = "3.3.5"
 androidxPagingCompose = "3.3.4"
 coil = "3.0.4"
 coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github.com/ls1intum/artemis-android/issues/171
@@ -32,7 +32,7 @@ mockk = "1.13.13"
 ossLicensesPlugin = "0.10.6"
 placeholderMaterial = "2.0.0"
 room = "2.6.1"
-sentry-android = "7.17.0"
+sentry-android = "7.19.0"
 work = "2.10.0"
 
 [libraries]
@@ -45,7 +45,7 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJdkLibs" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
-androidx-browser = { group = "androidx.browser", name = "browser", version = "1.7.0" }
+androidx-browser = { group = "androidx.browser", name = "browser", version = "1.8.0" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout" }
