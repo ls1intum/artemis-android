@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -73,7 +73,6 @@ internal fun MetisChatList(
     state: LazyListState = rememberLazyListState(),
     isReplyEnabled: Boolean = true,
     onClickViewPost: (StandalonePostId) -> Unit,
-    title: String? = "Replying..."
 ) {
     ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
 
@@ -146,6 +145,15 @@ fun MetisChatList(
     title: String,
     onFileSelected: (Uri) -> Unit
 ) {
+    val context = LocalContext.current
+
+    // TODO: https://github.com/ls1intum/artemis-android/issues/213
+//    val navigateToChat = { userId: Long ->
+//        val chatLink = "artemis://courses/$courseId/messages?userId=$userId"
+//        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(chatLink))
+//        context.startActivity(intent)
+//    }
+
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
         onCreatePost = onCreatePost,
@@ -205,7 +213,7 @@ fun MetisChatList(
                             onRequestDelete = onDeletePostDelegate,
                             onRequestPin = onPinPostDelegate,
                             onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
-                            onRequestRetrySend = onRequestRetrySend
+                            onRequestRetrySend = onRequestRetrySend,
                         )
                     }
                 }
@@ -397,7 +405,7 @@ private fun DateDivider(modifier: Modifier, date: LocalDate) {
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Divider(modifier = Modifier.weight(1f))
+        HorizontalDivider(modifier = Modifier.weight(1f))
 
         Text(
             text = dateAsString,
@@ -405,6 +413,6 @@ private fun DateDivider(modifier: Modifier, date: LocalDate) {
             fontWeight = FontWeight.Bold
         )
 
-        Divider(modifier = Modifier.weight(1f))
+        HorizontalDivider(modifier = Modifier.weight(1f))
     }
 }

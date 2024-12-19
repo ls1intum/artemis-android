@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="user_role_icon_content_description_instructor">Instructor</string>
+    <string name="conversation_members_content_description_editor">Editor</string>
+    <string name="user_role_icon_content_description_teaching_assistant">Teaching assistant</string>
+    <string name="user_role_icon_content_description_student">Student</string>
+
+    <string name="user_role_icon_content_description_moderator">Moderator</string>
+</resources>
