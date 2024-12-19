@@ -27,4 +27,5 @@ dependencies {
     implementation(libs.kotlinx.datetime)
 
     implementation(libs.koin.core)
+    testImplementation(project(":core:common-test"))
 }

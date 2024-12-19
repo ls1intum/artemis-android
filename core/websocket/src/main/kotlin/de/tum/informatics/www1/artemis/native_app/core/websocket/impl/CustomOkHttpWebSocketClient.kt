@@ -1,12 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.core.websocket.impl
 
 import android.util.Log
+import de.tum.informatics.www1.artemis.native_app.core.websocket.util.toByteString
 import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.io.bytestring.ByteStringBuilder
 import kotlinx.io.bytestring.asReadOnlyByteBuffer
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -82,9 +82,8 @@ private class KrossbowToOkHttpListenerAdapter(
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        val byteStringBuilder = ByteStringBuilder()
-        byteStringBuilder.append(bytes.toByteArray())
-        runBlocking { channelListener.onBinaryMessage(byteStringBuilder.toByteString()) }
+        val byteString = bytes.toByteArray().toByteString()
+        runBlocking { channelListener.onBinaryMessage(byteString) }
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
