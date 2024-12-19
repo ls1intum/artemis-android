@@ -148,13 +148,13 @@ internal class MetisStorageServiceImpl(
             serverId: String,
             clientSidePostId: String,
             serverSidePostId: Long?,
-            conversationId: Long = this.conversationId,
+            conversationId: Long? = null,
             postingType: BasePostingEntity.PostingType
         ): MetisPostContextEntity =
             MetisPostContextEntity(
                 serverId = serverId,
                 courseId = courseId,
-                conversationId = conversationId,
+                conversationId = conversationId ?: this.conversationId,
                 serverPostId = serverSidePostId,
                 clientPostId = clientSidePostId,
                 postingType = postingType
@@ -483,7 +483,7 @@ internal class MetisStorageServiceImpl(
                 serverId = host,
                 clientSidePostId = clientSidePostId,
                 serverSidePostId = standalonePostId,
-                conversationId = conversationId?: metisContext.conversationId,
+                conversationId = conversationId,
                 postingType = BasePostingEntity.PostingType.STANDALONE
             )
 
@@ -501,7 +501,7 @@ internal class MetisStorageServiceImpl(
                 clientSidePostId,
                 standalonePostId,
                 courseId = postMetisContext.courseId,
-                conversationId = metisContext.conversationId
+                conversationId = postMetisContext.conversationId
             )
 
             if (!isPostPresent) {
