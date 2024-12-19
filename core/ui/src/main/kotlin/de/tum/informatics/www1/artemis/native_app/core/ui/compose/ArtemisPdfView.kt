@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.RotateLeft
-import androidx.compose.material.icons.automirrored.filled.RotateRight
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Share
@@ -28,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
@@ -162,7 +161,8 @@ fun ArtemisPdfView(
                 DropdownMenuItem(
                     leadingIcon = {
                         Icon(
-                            imageVector = if (isVertical.value) Icons.AutoMirrored.Filled.RotateLeft else Icons.AutoMirrored.Filled.RotateRight,
+                            modifier = Modifier.height(19.dp),
+                            painter = painterResource(id = R.drawable.rotate),
                             contentDescription = null
                         )
                     },
