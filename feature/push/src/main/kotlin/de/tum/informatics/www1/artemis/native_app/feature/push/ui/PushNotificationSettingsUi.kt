@@ -40,6 +40,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import kotlinx.coroutines.Job
 import org.koin.androidx.compose.koinViewModel
 
+internal const val SWITCH_SCALE = 0.9f
+
 @Composable
 fun PushNotificationSettingsUi(
     modifier: Modifier,
@@ -170,7 +172,7 @@ private fun ReceivePushNotificationsSwitch(
                 )
 
                 Switch(
-                    modifier = Modifier.scale(0.9f),
+                    modifier = Modifier.scale(SWITCH_SCALE),
                     checked = isChecked,
                     onCheckedChange = { isChecked ->
                         // Handle the cases where we need to ask thew user for permission

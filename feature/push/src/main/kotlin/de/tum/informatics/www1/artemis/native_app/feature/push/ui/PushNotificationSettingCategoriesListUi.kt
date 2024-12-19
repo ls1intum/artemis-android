@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
@@ -126,7 +125,7 @@ private fun PushNotificationSettingEntry(
         ) {
             Text(
                 text = getLocalizedNotificationSettingName(settingName = setting.setting),
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.bodyLarge,
             )
 
             val description =
@@ -134,7 +133,7 @@ private fun PushNotificationSettingEntry(
             if (description != null) {
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
 
@@ -168,7 +167,7 @@ private fun PushNotificationSettingEntry(
         if (setting.push != null) {
             Switch(
                 modifier = Modifier
-                    .scale(0.9f)
+                    .scale(SWITCH_SCALE)
                     .testTag(testTagForSwitch(setting.settingId)),
                 checked = setting.push,
                 onCheckedChange = { onUpdate(setting.webapp, setting.email, it) }
