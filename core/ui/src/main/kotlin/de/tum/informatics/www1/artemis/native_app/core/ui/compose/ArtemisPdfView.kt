@@ -1,5 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.compose
 
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,32 +22,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.rizzi.bouquet.HorizontalPDFReader
-import com.rizzi.bouquet.HorizontalPdfReaderState
-import com.rizzi.bouquet.ResourceType
-import com.rizzi.bouquet.VerticalPDFReader
-import com.rizzi.bouquet.VerticalPdfReaderState
-import com.rizzi.bouquet.rememberHorizontalPdfReaderState
-import com.rizzi.bouquet.rememberVerticalPdfReaderState
-import io.ktor.http.HttpHeaders
-
-// Inspired by: https://github.com/GRizzi91/bouquet
-/*
- *   Copyright [2022] [Graziano Rizzi]
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
+import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.HorizontalPdfView
+import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.VerticalPdfView
+import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.HorizontalPdfReaderState
+import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.VerticalPdfReaderState
+import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.rememberHorizontalPdfReaderState
+import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.rememberVerticalPdfReaderState
+import org.hildan.krossbow.stomp.ConnectionException
 
 @Composable
 fun ArtemisPdfView(
@@ -55,21 +40,35 @@ fun ArtemisPdfView(
     authToken: String,
 ) {
     val isVertical = remember { mutableStateOf(true) }
-    val resource = ResourceType.Remote(
-        url = url,
-        headers = hashMapOf(HttpHeaders.Cookie to "jwt=$authToken")
-    )
 
     val verticalPdfState = rememberVerticalPdfReaderState(
-        resource = resource,
-        isZoomEnable = true
+        uri = Uri.parse(url),
+        isZoomEnabled = true,
+        authToken = authToken
     )
     val horizontalPdfState = rememberHorizontalPdfReaderState(
-        resource = resource,
-        isZoomEnable = true
+        uri = Uri.parse(url),
+        isZoomEnabled = true,
+        authToken = authToken
     )
 
     val pdfState = if (isVertical.value) verticalPdfState else horizontalPdfState
+
+    if (pdfState.mError != null) {
+        when (pdfState.mError) {
+            is ConnectionException -> {
+                //TODO
+            }
+            else -> {
+                //TODO
+            }
+        }
+        Toast.makeText(
+            LocalContext.current,
+            "Error loading PDF: ${pdfState.mError?.message}",
+            Toast.LENGTH_LONG
+        ).show()
+    }
 
     Box(
         modifier = modifier.padding(8.dp),
@@ -83,14 +82,14 @@ fun ArtemisPdfView(
                 )
             }
             if (isVertical.value) {
-                VerticalPDFReader(
+                VerticalPdfView(
                     state = pdfState as VerticalPdfReaderState,
                     modifier = Modifier
                         .background(color = MaterialTheme.colorScheme.surface)
                         .fillMaxSize()
                 )
             } else {
-                HorizontalPDFReader(
+                HorizontalPdfView(
                     state = pdfState as HorizontalPdfReaderState,
                     modifier = Modifier
                         .fillMaxSize()
@@ -146,7 +145,7 @@ fun ArtemisPdfView(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.TopStart).padding(top = 58.dp, end = 8.dp)
+                .align(Alignment.TopStart).padding(top = 54.dp, end = 4.dp)
                 .padding(16.dp),
             contentAlignment = Alignment.TopEnd
         ) {

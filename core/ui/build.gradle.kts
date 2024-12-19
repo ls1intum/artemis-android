@@ -44,5 +44,4 @@ dependencies {
     implementation(libs.noties.markwon.simple.ext)
     implementation(libs.noties.markwon.linkify)
     implementation(libs.noties.markwon.image.coil)
-    implementation(libs.girzzi91.bouquet)
 }
