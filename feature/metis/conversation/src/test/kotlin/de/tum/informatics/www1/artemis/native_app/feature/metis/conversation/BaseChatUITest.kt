@@ -14,7 +14,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostActionFlags
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -80,7 +80,9 @@ abstract class BaseChatUITest : BaseComposeTest() {
     fun setupThreadUi(
         post: PostPojo,
         onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?,
-        onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)?
+        onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)?,
+        hasModerationRights: Boolean = true,
+        isAbleToPin: Boolean = true
     ) {
         composeTestRule.setContent {
             MetisThreadUi(
@@ -90,9 +92,9 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 postDataState = DataState.Success(post),
                 conversationDataState = DataState.Success(conversation),
                 postActionFlags = PostActionFlags(
-                    isAbleToPin = true,
+                    isAbleToPin = isAbleToPin,
                     isAtLeastTutorInCourse = false,
-                    hasModerationRights = true,
+                    hasModerationRights = hasModerationRights,
                 ),
                 listContentPadding = PaddingValues(),
                 serverUrl = "",
@@ -106,6 +108,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onRequestReload = {},
                 onRequestRetrySend = { _, _ -> },
+                onFileSelect = { _, _ -> },
             )
         }
     }
@@ -142,7 +145,8 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onClickViewPost = {},
                 onRequestRetrySend = { _ -> },
-                title = "Title"
+                title = "Title",
+                onFileSelected = { _ -> }
             )
         }
     }

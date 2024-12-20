@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -19,7 +20,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Mail
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -34,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -56,6 +57,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
@@ -139,25 +142,14 @@ private fun SettingsScreen(
     val pushNotificationConfigurationService: PushNotificationConfigurationService = koinInject()
 
     val accountService: AccountService = koinInject()
-    val authenticationData: AccountService.AuthenticationData? by accountService.authenticationData.collectAsState(
-        initial = null
-    )
     val serverConfigurationService: ServerConfigurationService = koinInject()
     val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
 
     val scope = rememberCoroutineScope()
 
-    // The auth token if logged in or null otherwise
-    val authToken: String? =
-        (authenticationData as? AccountService.AuthenticationData.LoggedIn)?.authToken
     val hasUserSelectedInstance by serverConfigurationService.hasUserSelectedInstance.collectAsState(
         initial = false
     )
-
-    val username = when (val authData = authenticationData) {
-        is AccountService.AuthenticationData.LoggedIn -> authData.username
-        else -> null
-    }
 
     val accountDataService: AccountDataService = koinInject()
     val networkStatusProvider: NetworkStatusProvider = koinInject()
@@ -209,11 +201,10 @@ private fun SettingsScreen(
                 ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (authToken != null) {
+            accountData?.let {
                 UserInformationSection(
                     modifier = Modifier.fillMaxWidth(),
-                    authData = accountData,
-                    username = username,
+                    accountDataState = it,
                     onRequestLogout = {
                         scope.launch {
                             // the user manually logs out. Therefore we need to tell the server asap.
@@ -268,8 +259,7 @@ private fun SettingsScreen(
 @Composable
 private fun UserInformationSection(
     modifier: Modifier,
-    username: String?,
-    authData: DataState<Account>?,
+    accountDataState: DataState<Account>,
     onRequestLogout: () -> Unit
 ) {
     PreferenceSection(
@@ -278,47 +268,50 @@ private fun UserInformationSection(
     ) {
         val childModifier = Modifier.fillMaxWidth()
 
-        if (authData != null && username != null) {
-            EmptyDataStateUi(
-                dataState = authData,
-                otherwise = {
-                    LinearProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                    )
-                }
-            ) { account ->
-                PreferenceEntry(
-                    modifier = childModifier,
-                    icon = Icons.Default.Person,
-                    text = stringResource(
-                        id = R.string.settings_account_information_full_name,
-                    ),
-                    valueText = account.name.orEmpty(),
-                    onClick = {}
-                )
-
-                PreferenceEntry(
-                    modifier = childModifier,
-                    icon = Icons.Filled.AlternateEmail,
-                    text = stringResource(
-                        id = R.string.settings_account_information_login,
-                    ),
-                    valueText = username,
-                    onClick = {}
-                )
-
-                PreferenceEntry(
-                    modifier = childModifier,
-                    icon = Icons.Default.Mail,
-                    text = stringResource(
-                        id = R.string.settings_account_information_email
-                    ),
-                    valueText = account.email.orEmpty(),
-                    onClick = {}
+        EmptyDataStateUi(
+            dataState = accountDataState,
+            otherwise = {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
                 )
             }
+        ) { account ->
+            PreferenceEntry(
+                modifier = childModifier,
+                leadingContent = {
+                    ProfilePicture(
+                        modifier = Modifier.size(24.dp),
+                        profilePictureData = ProfilePictureData.fromAccount(account)
+                    )
+                },
+                text = stringResource(
+                    id = R.string.settings_account_information_full_name,
+                ),
+                valueText = account.name,
+                onClick = {}
+            )
+
+            PreferenceEntry(
+                modifier = childModifier,
+                icon = Icons.Filled.AlternateEmail,
+                text = stringResource(
+                    id = R.string.settings_account_information_login,
+                ),
+                valueText = account.username,
+                onClick = {}
+            )
+
+            PreferenceEntry(
+                modifier = childModifier,
+                icon = Icons.Default.Mail,
+                text = stringResource(
+                    id = R.string.settings_account_information_email
+                ),
+                valueText = account.email,
+                onClick = {}
+            )
         }
 
         ButtonEntry(
@@ -445,24 +438,38 @@ private fun BuildInformationSection(
 fun PreferenceEntry(
     modifier: Modifier = Modifier,
     text: String,
-    icon: ImageVector? = null,
+    icon: ImageVector,
+    valueText: String? = null,
+    onClick: () -> Unit,
+) = PreferenceEntry(
+    modifier = modifier,
+    text = text,
+    leadingContent = {
+        Icon(icon, contentDescription = null)
+    },
+    valueText = valueText,
+    onClick = onClick
+)
+
+@Composable
+fun PreferenceEntry(
+    modifier: Modifier = Modifier,
+    text: String,
+    leadingContent: @Composable (() -> Unit)? = null,
     valueText: String? = null,
     onClick: () -> Unit,
 ) {
     Row(
         modifier = modifier
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            icon?.let {
-                Icon(
-                    imageVector = it,
-                    contentDescription = null
-                )
-            }
+            leadingContent?.invoke()
 
             Text(
                 text = text,

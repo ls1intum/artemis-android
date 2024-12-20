@@ -50,6 +50,18 @@ internal class ConversationMembersViewModel(
 ) {
     companion object {
         private const val KEY_QUERY = "query"
+
+        private const val PAGE_SIZE = 10
+        // Given by the server, see `ConversationResource.searchMembersOfConversation()`
+        private const val MAX_REQUEST_SIZE = 20
+
+        private val PAGING_CONFIG = PagingConfig(
+            pageSize = PAGE_SIZE,
+            // From PagingConfig.kt:147: "Maximum size must be at least pageSize + 2*prefetchDist"
+            prefetchDistance = (MAX_REQUEST_SIZE - PAGE_SIZE) / 2,
+            initialLoadSize = PAGE_SIZE,
+            maxSize = MAX_REQUEST_SIZE
+        )
     }
 
     val conversation: StateFlow<DataState<Conversation>> = loadedConversation
@@ -64,7 +76,7 @@ internal class ConversationMembersViewModel(
         query.debounce(200.milliseconds)
     ) { _, conversationSettings, serverUrl, authToken, query ->
         Pager(
-            config = PagingConfig(10)
+            config = PAGING_CONFIG
         ) {
             MembersDataSource(
                 courseId = conversationSettings.courseId,

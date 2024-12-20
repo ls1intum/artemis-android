@@ -31,12 +31,8 @@ class MetisSearchPagingSource(
         )
             .map(
                 mapSuccess = { loadedPosts ->
-                    // Currently the server returns duplicate posts when searching for posts. This
-                    // caused a crash in the UI.
-                    // TODO: https://github.com/ls1intum/artemis-android/issues/99
-                    val filteredPosts = loadedPosts.distinctBy { it.id }
                     LoadResult.Page(
-                        data = filteredPosts,
+                        data = loadedPosts,
                         prevKey = if (page > 0) page - 1 else null,
                         nextKey = if (loadedPosts.size == params.loadSize) page + 1 else null
                     )

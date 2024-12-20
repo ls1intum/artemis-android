@@ -213,7 +213,7 @@ internal abstract class QuizParticipationBaseE2eTest(quizType: QuizType.Workable
                         DefaultTimeoutMillis
                     )
 
-                val result = runBlockingWithTestTimeout {
+                val result = runBlockingWithTestTimeout(timeoutMultiplier = 2) {
                     when (quizType) {
                         QuizType.Live -> {
                             val participation = participationService

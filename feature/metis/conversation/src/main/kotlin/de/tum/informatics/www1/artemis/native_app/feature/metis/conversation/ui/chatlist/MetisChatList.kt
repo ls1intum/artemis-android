@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,9 +21,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,10 +36,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.rememberPostActions
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.rememberPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.shouldDisplayHeader
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
@@ -72,7 +73,6 @@ internal fun MetisChatList(
     state: LazyListState = rememberLazyListState(),
     isReplyEnabled: Boolean = true,
     onClickViewPost: (StandalonePostId) -> Unit,
-    title: String? = "Replying..."
 ) {
     ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
 
@@ -90,6 +90,8 @@ internal fun MetisChatList(
             conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
         }
     }
+
+    val context = LocalContext.current
 
     ProvideMarkwon {
         MetisChatList(
@@ -111,7 +113,10 @@ internal fun MetisChatList(
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onClickViewPost = onClickViewPost,
             onRequestRetrySend = viewModel::retryCreatePost,
-            title = updatedTitle
+            title = updatedTitle,
+            onFileSelected = { uri ->
+                viewModel.onFileSelected(uri, context)
+            }
         )
     }
 }
@@ -137,8 +142,18 @@ fun MetisChatList(
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
-    title: String
+    title: String,
+    onFileSelected: (Uri) -> Unit
 ) {
+    val context = LocalContext.current
+
+    // TODO: https://github.com/ls1intum/artemis-android/issues/213
+//    val navigateToChat = { userId: Long ->
+//        val chatLink = "artemis://courses/$courseId/messages?userId=$userId"
+//        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(chatLink))
+//        context.startActivity(intent)
+//    }
+
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
         onCreatePost = onCreatePost,
@@ -198,7 +213,7 @@ fun MetisChatList(
                             onRequestDelete = onDeletePostDelegate,
                             onRequestPin = onPinPostDelegate,
                             onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
-                            onRequestRetrySend = onRequestRetrySend
+                            onRequestRetrySend = onRequestRetrySend,
                         )
                     }
                 }
@@ -210,6 +225,7 @@ fun MetisChatList(
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate,
                     title = title,
+                    onFileSelected = onFileSelected
                 )
             }
         }
@@ -389,7 +405,7 @@ private fun DateDivider(modifier: Modifier, date: LocalDate) {
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Divider(modifier = Modifier.weight(1f))
+        HorizontalDivider(modifier = Modifier.weight(1f))
 
         Text(
             text = dateAsString,
@@ -397,6 +413,6 @@ private fun DateDivider(modifier: Modifier, date: LocalDate) {
             fontWeight = FontWeight.Bold
         )
 
-        Divider(modifier = Modifier.weight(1f))
+        HorizontalDivider(modifier = Modifier.weight(1f))
     }
 }

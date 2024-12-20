@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -67,7 +67,7 @@ fun rememberPostActions(
             onReplyInThread = if (doesPostExistOnServer) onReplyInThread else null,
             onResolvePost = if (hasResolvePostRights) onResolvePost else null,
             onPinPost = if (hasPinPostRights) onPinPost else null,
-            onRequestRetrySend = onRequestRetrySend
+            onRequestRetrySend = onRequestRetrySend,
         )
     }
 }
