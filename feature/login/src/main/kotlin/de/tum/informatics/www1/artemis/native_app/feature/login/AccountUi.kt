@@ -472,6 +472,7 @@ private fun AccountUi(
                         bottom = WindowInsets.systemBars
                             .asPaddingValues()
                             .calculateBottomPadding()
+                        + 8.dp
                     ),
                 text = AnnotatedString(stringResource(id = R.string.account_change_artemis_instance_label)),
                 style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.linkTextColor),

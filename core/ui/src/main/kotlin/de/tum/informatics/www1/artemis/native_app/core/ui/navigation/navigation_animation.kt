@@ -19,7 +19,7 @@ import androidx.navigation.compose.composable
 import kotlin.reflect.KType
 
 
-const val navigationAnimationDuration = 3300
+const val navigationAnimationDuration = 300
 
 inline fun <reified T : Any> NavGraphBuilder.animatedComposable(
     typeMap: Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap(),

@@ -1,14 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -22,10 +22,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -36,7 +34,6 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.feature.login.ArtemisHeader
 import de.tum.informatics.www1.artemis.native_app.feature.login.R
 
 @Composable
@@ -50,20 +47,6 @@ internal fun InstanceSelectionScreen(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.05f)
-        )
-
-        ArtemisHeader(modifier = Modifier.fillMaxWidth())
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.05f)
-        )
-
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(id = R.string.account_select_artemis_instance_select_text),
@@ -73,9 +56,8 @@ internal fun InstanceSelectionScreen(
 
         val windowSizeClass = getWindowSizeClass()
         val columnCount = when {
-            windowSizeClass.widthSizeClass > WindowWidthSizeClass.Expanded -> 6
-            windowSizeClass.widthSizeClass > WindowWidthSizeClass.Medium -> 4
-            else -> 2
+            windowSizeClass.widthSizeClass > WindowWidthSizeClass.Expanded -> 2
+            else -> 1
         }
 
         LazyVerticalGrid(
@@ -118,14 +100,15 @@ private fun ArtemisInstanceGridCell(
     val context = LocalContext.current
 
     Card(modifier = modifier, onClick = onClick) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             val imageModifier = Modifier
-                .fillMaxWidth()
+                .height(64.dp)
                 .aspectRatio(1f)
 
             when (item) {
@@ -153,25 +136,11 @@ private fun ArtemisInstanceGridCell(
                 }
             }
 
-            val name = item.getName()
-
-            var threeLineName: String by remember(name) {
-                mutableStateOf(name)
-            }
-
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                text = threeLineName,
+                textAlign = TextAlign.Left,
+                text = item.getName(),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                maxLines = 3,
-                onTextLayout = {
-                    if (it.lineCount < 3) {
-                        val additionalLines = 3 - it.lineCount
-                        threeLineName += "\n".repeat(additionalLines)
-                    }
-                }
             )
         }
     }
