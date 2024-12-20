@@ -30,9 +30,11 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -66,6 +68,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.linkTextColor
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.defaultScaleIn
 import de.tum.informatics.www1.artemis.native_app.feature.login.custom_instance_selection.CustomInstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginScreen
@@ -74,6 +77,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.register.Registe
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNotificationStorageService
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -128,7 +132,9 @@ fun NavGraphBuilder.loginScreen(
     onFinishedLoginFlow: (deepLink: String?) -> Unit,
     onRequestOpenSettings: () -> Unit
 ) {
-    animatedComposable<LoginScreen> {
+    animatedComposable<LoginScreen>(
+        enterTransition = { defaultScaleIn() },
+    ) {
         val screen = it.toRoute<LoginScreen>()
         val nextDestinationValue = screen.nextDestination
 
@@ -261,6 +267,10 @@ private fun LoginUiScreen(
             )
         }
     ) { paddingValues ->
+        val sheetState = rememberModalBottomSheetState()
+        val scope = rememberCoroutineScope()
+        var showBottomSheet by remember { mutableStateOf(false) }
+
         NavHost(
             modifier = Modifier
                 .fillMaxSize()
@@ -270,7 +280,7 @@ private fun LoginUiScreen(
             navController = nestedNavController,
             startDestination = if (hasSelectedInstance) NestedDestination.Home else NestedDestination.InstanceSelection
         ) {
-            animatedComposable<NestedDestination.Home>() {
+            animatedComposable<NestedDestination.Home> {
                 AccountScreen(
                     modifier = Modifier.fillMaxSize(),
                     canSwitchInstance = !BuildConfig.hasInstanceRestriction,
@@ -282,12 +292,7 @@ private fun LoginUiScreen(
                     },
                     onNavigateToInstanceSelection = {
                         onNavigatedToInstanceSelection()
-
-                        nestedNavController.navigate(NestedDestination.InstanceSelection) {
-                            popUpTo<NestedDestination.Home> {
-                                inclusive = true
-                            }
-                        }
+                        showBottomSheet = true
                     },
                     onLoggedIn = onLoggedIn,
                     onClickSaml2Login = onClickSaml2Login
@@ -344,29 +349,44 @@ private fun LoginUiScreen(
                     }
                 )
             }
+        }
 
-            animatedComposable<NestedDestination.InstanceSelection> {
-                val scope = rememberCoroutineScope()
+        val hideBottomSheet: (action: (suspend CoroutineScope.() -> Unit)?) -> Unit = { action ->
+            scope.launch {
+                if (action != null) {
+                    action()
+                }
+                sheetState.hide()
+            }.invokeOnCompletion {
+                if (!sheetState.isVisible) {
+                    showBottomSheet = false
+                }
+            }
+        }
 
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showBottomSheet = false
+                },
+                sheetState = sheetState
+            ) {
                 InstanceSelectionScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = Spacings.ScreenHorizontalSpacing),
                     availableInstances = ArtemisInstances.instances,
                     onSelectArtemisInstance = { serverUrl ->
-                        scope.launch {
+                        hideBottomSheet {
                             serverConfigurationService.updateServerUrl(serverUrl)
-                            nestedNavController.navigate(NestedDestination.Home) {
-                                popUpTo<NestedDestination.InstanceSelection> {
-                                    inclusive = true
-                                }
-                            }
                         }
                     },
                     onRequestOpenCustomInstanceSelection = {
-                        nestedNavController.navigate(
-                            NestedDestination.CustomInstanceSelection
-                        )
+                        hideBottomSheet {
+                            nestedNavController.navigate(
+                                NestedDestination.CustomInstanceSelection
+                            )
+                        }
                     }
                 )
             }

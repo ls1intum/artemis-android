@@ -1,12 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.settings
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -61,6 +54,9 @@ import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.defaultExitTransition
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.defaultScaleOut
+import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
@@ -95,7 +91,15 @@ fun NavGraphBuilder.settingsScreen(
     onLoggedOut: () -> Unit,
     onDisplayThirdPartyLicenses: () -> Unit
 ) {
-    animatedComposable<SettingsScreen> {
+    animatedComposable<SettingsScreen>(
+        exitTransition = {
+            val toLoginScreen = targetState.destination.route?.startsWith(LoginScreen::class.qualifiedName!!) ?: false
+            if (toLoginScreen) {
+                return@animatedComposable defaultScaleOut()
+            }
+            defaultExitTransition
+        }
+    ) {
         SettingsScreen(
             modifier = Modifier.fillMaxSize(),
             versionCode = versionCode,
@@ -114,33 +118,6 @@ fun NavGraphBuilder.settingsScreen(
             onNavigateBack = onNavigateUp
         )
     }
-}
-
-fun scaleIntoContainer(
-    direction: ScaleTransitionDirection = ScaleTransitionDirection.INWARDS,
-    initialScale: Float = if (direction == ScaleTransitionDirection.OUTWARDS) 0.9f else 1.1f
-): EnterTransition {
-    return scaleIn(
-        animationSpec = tween(220, delayMillis = 90),
-        initialScale = initialScale
-    ) + fadeIn(animationSpec = tween(220, delayMillis = 90))
-}
-
-fun scaleOutOfContainer(
-    direction: ScaleTransitionDirection = ScaleTransitionDirection.OUTWARDS,
-    targetScale: Float = if (direction == ScaleTransitionDirection.INWARDS) 0.9f else 1.1f
-): ExitTransition {
-    return scaleOut(
-        animationSpec = tween(
-            durationMillis = 220,
-            delayMillis = 90
-        ), targetScale = targetScale
-    ) + fadeOut(tween(delayMillis = 90))
-}
-
-enum class ScaleTransitionDirection {
-    INWARDS,
-    OUTWARDS
 }
 
 /**

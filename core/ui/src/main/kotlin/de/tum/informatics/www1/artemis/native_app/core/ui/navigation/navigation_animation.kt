@@ -19,23 +19,23 @@ import androidx.navigation.compose.composable
 import kotlin.reflect.KType
 
 
-const val navigationAnimationDuration = 300
+const val navigationAnimationDuration = 3300
 
 inline fun <reified T : Any> NavGraphBuilder.animatedComposable(
     typeMap: Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap(),
     deepLinks: List<NavDeepLink> = emptyList(),
     noinline enterTransition:
     (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-    EnterTransition?)? = { defaultSlideIn(AnimatedContentTransitionScope.SlideDirection.Left) },
+    EnterTransition?)? = { defaultEnterTransition },
     noinline exitTransition:
     (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-    ExitTransition?)? = { defaultSlideOut(AnimatedContentTransitionScope.SlideDirection.Left) },
+    ExitTransition?)? = { defaultExitTransition },
     noinline popEnterTransition:
     (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-    EnterTransition?)? = { defaultSlideIn(AnimatedContentTransitionScope.SlideDirection.Right) },
+    EnterTransition?)? = { defaultPopEnterTransition },
     noinline popExitTransition:
     (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-    ExitTransition?)? = { defaultSlideOut(AnimatedContentTransitionScope.SlideDirection.Right) },
+    ExitTransition?)? = { defaultPopExitTransition },
     noinline sizeTransform:
     (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
     SizeTransform?)? =
@@ -51,6 +51,19 @@ inline fun <reified T : Any> NavGraphBuilder.animatedComposable(
     deepLinks = deepLinks,
     content = content
 )
+
+val AnimatedContentTransitionScope<NavBackStackEntry>.defaultEnterTransition
+    get() = defaultSlideIn(AnimatedContentTransitionScope.SlideDirection.Left)
+
+val AnimatedContentTransitionScope<NavBackStackEntry>.defaultExitTransition
+    get() = defaultSlideOut(AnimatedContentTransitionScope.SlideDirection.Left)
+
+val AnimatedContentTransitionScope<NavBackStackEntry>.defaultPopEnterTransition
+    get() = defaultSlideIn(AnimatedContentTransitionScope.SlideDirection.Right)
+
+val AnimatedContentTransitionScope<NavBackStackEntry>.defaultPopExitTransition
+    get() = defaultSlideOut(AnimatedContentTransitionScope.SlideDirection.Right)
+
 
 fun AnimatedContentTransitionScope<NavBackStackEntry>.defaultSlideIn(
     direction: AnimatedContentTransitionScope.SlideDirection
@@ -71,9 +84,9 @@ fun defaultScaleIn(
     initialScale: Float = if (direction == ScaleTransitionDirection.OUTWARDS) 0.9f else 1.1f
 ): EnterTransition {
     return scaleIn(
-        animationSpec = tween(220, delayMillis = 90),
+        animationSpec = tween(navigationAnimationDuration),
         initialScale = initialScale
-    ) + fadeIn(animationSpec = tween(220, delayMillis = 90))
+    ) + fadeIn(animationSpec = tween(navigationAnimationDuration))
 }
 
 fun defaultScaleOut(
@@ -82,10 +95,9 @@ fun defaultScaleOut(
 ): ExitTransition {
     return scaleOut(
         animationSpec = tween(
-            durationMillis = 220,
-            delayMillis = 90
+            durationMillis = navigationAnimationDuration,
         ), targetScale = targetScale
-    ) + fadeOut(tween(delayMillis = 90))
+    ) + fadeOut(tween())
 }
 
 enum class ScaleTransitionDirection {
