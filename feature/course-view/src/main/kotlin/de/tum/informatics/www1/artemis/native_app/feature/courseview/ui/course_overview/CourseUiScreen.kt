@@ -2,9 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -42,6 +39,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.GroupedByWeek
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
@@ -343,11 +341,9 @@ internal fun CourseUiScreen(
                 targetState = selectedTabIndex,
                 transitionSpec = {
                     if (targetState > initialState) {
-                        slideInHorizontally { width -> width } togetherWith
-                                slideOutHorizontally { width -> -width }
+                        DefaultTransition.navigateForward
                     } else {
-                        slideInHorizontally { width -> -width } togetherWith
-                                slideOutHorizontally { width -> width }
+                        DefaultTransition.navigateBack
                     }.using(
                         SizeTransform(clip = false)
                     )

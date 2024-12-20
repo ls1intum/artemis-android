@@ -3,9 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.login
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -81,7 +78,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -154,9 +150,7 @@ fun NavGraphBuilder.loginScreen(
         AnimatedContent(
             targetState = currentContent,
             transitionSpec = {
-                // Animation is always the same
-                slideInHorizontally { width -> width } togetherWith
-                        slideOutHorizontally { width -> -width }
+                DefaultTransition.navigateForward
             },
             label = "Login <-> Notification configuration"
         ) { content ->
@@ -315,7 +309,7 @@ private fun LoginUiScreen(
             animatedComposable<NestedDestination.Login> {
                 LoginScreen(
                     modifier = Modifier.fillMaxSize(),
-                    viewModel = getViewModel(),
+                    viewModel = koinViewModel(),
                     onLoggedIn = onLoggedIn,
                     onClickSaml2Login = onClickSaml2Login
                 )
@@ -595,7 +589,7 @@ private fun LoginOrRegister(
             onClickLogin
         )
 
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 8.dp, end = 8.dp, top = 24.dp, bottom = 8.dp)
