@@ -12,7 +12,7 @@ import androidx.compose.animation.togetherWith
 
 
 object DefaultTransition {
-    const val duration = 300
+    const val duration = 220
 
     val fadeIn = fadeIn(tween(duration))
     val fadeOut = fadeOut(tween(duration))

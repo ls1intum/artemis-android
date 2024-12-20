@@ -1,34 +1,31 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
+import androidx.compose.animation.SizeTransform
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
-import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 private const val ConversationOverviewMaxWeight = 0.3f
@@ -67,7 +64,7 @@ fun ConversationScreen(
     }
 
     val viewModel: ConversationViewModel =
-        getViewModel(
+        koinViewModel(
             key = "$courseId|$conversationId",
             viewModelStoreOwner = owner
         ) { parametersOf(courseId, conversationId, threadPostId) }
@@ -77,26 +74,50 @@ fun ConversationScreen(
     }
 
     val widthSizeClass = getWindowSizeClass().widthSizeClass
+    var showThread by remember { mutableStateOf(threadPostId != null) }
+
+    val onNavigateUp = {
+        onCloseThread()
+        showThread = false
+    }
+    val onClickViewPost = { clientPostId: StandalonePostId ->
+        onOpenThread(clientPostId)
+        showThread = true
+    }
 
     when {
         widthSizeClass <= WindowWidthSizeClass.Compact -> {
             Box(modifier = modifier) {
-                ConversationChatListScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = viewModel,
-                    courseId = courseId,
-                    conversationId = conversationId,
-                    onNavigateBack = onCloseConversation,
-                    onNavigateToSettings = onNavigateToSettings,
-                    onClickViewPost = { clientPostId -> onOpenThread(clientPostId) }
-                )
-
-                if (threadPostId != null) {
-                    ConversationThreadScreen(
-                        modifier = Modifier.fillMaxSize(),
-                        viewModel = viewModel,
-                        onNavigateUp = onCloseThread
-                    )
+                AnimatedContent(
+                    targetState = showThread,
+                    transitionSpec = {
+                        if (targetState) {
+                            DefaultTransition.navigateForward
+                        } else {
+                            DefaultTransition.navigateBack
+                        }.using(
+                            SizeTransform(clip = false)
+                        )
+                    },
+                    label = "ConversationScreen chatList thread navigation animation"
+                ) { _showThread ->
+                    if (_showThread) {
+                        ConversationThreadScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            viewModel = viewModel,
+                            onNavigateUp = onNavigateUp
+                        )
+                    } else {
+                        ConversationChatListScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            viewModel = viewModel,
+                            courseId = courseId,
+                            conversationId = conversationId,
+                            onNavigateBack = onCloseConversation,
+                            onNavigateToSettings = onNavigateToSettings,
+                            onClickViewPost = onClickViewPost
+                        )
+                    }
                 }
             }
         }
@@ -108,8 +129,7 @@ fun ConversationScreen(
                 modifier = modifier,
                 horizontalArrangement = arrangement
             ) {
-                val isOverviewVisible =
-                    threadPostId == null || widthSizeClass >= WindowWidthSizeClass.Expanded
+                val isOverviewVisible = !showThread || widthSizeClass >= WindowWidthSizeClass.Expanded
                 AnimatedVisibility(
                     modifier = Modifier
                         .weight(ConversationOverviewMaxWeight)
@@ -132,8 +152,8 @@ fun ConversationScreen(
                 }
 
                 val otherWeight = when {
-                    isOverviewVisible && threadPostId != null -> 0.35f
-                    isOverviewVisible && threadPostId == null -> 0.7f
+                    isOverviewVisible && showThread -> 0.35f
+                    isOverviewVisible && !showThread -> 0.7f
                     else -> 0.5f
                 }
 
@@ -150,29 +170,19 @@ fun ConversationScreen(
                     conversationId = conversationId,
                     onNavigateBack = onCloseConversation,
                     onNavigateToSettings = onNavigateToSettings,
-                    onClickViewPost = { clientPostId -> onOpenThread(clientPostId) }
+                    onClickViewPost = onClickViewPost
                 )
 
-                if (threadPostId != null) {
+                if (showThread) {
                     VerticalDivider()
 
                     ConversationThreadScreen(
                         modifier = otherModifier,
                         viewModel = viewModel,
-                        onNavigateUp = onCloseThread
+                        onNavigateUp = onNavigateUp
                     )
                 }
             }
         }
     }
-}
-
-@Composable
-private fun VerticalDivider() {
-    Box(
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(1.dp)
-            .background(DividerDefaults.color)
-    )
 }
