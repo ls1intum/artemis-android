@@ -16,6 +16,7 @@ dependencies {
 
     implementation(libs.placeholder.material)
     implementation(libs.androidx.browser)
+    implementation(project(":feature:metis:shared"))
 
     testImplementation(project(":feature:login"))
     testImplementation(project(":feature:login-test"))

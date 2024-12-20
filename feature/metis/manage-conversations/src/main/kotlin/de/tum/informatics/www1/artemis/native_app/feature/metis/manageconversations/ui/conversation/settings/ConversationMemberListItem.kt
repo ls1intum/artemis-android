@@ -1,27 +1,29 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddModerator
 import androidx.compose.material.icons.filled.GroupRemove
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RemoveModerator
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.hasModerationRights
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ConversationUserRoleIndicators
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureWithDialog
 
 @Composable
 internal fun ConversationMemberListItem(
@@ -36,7 +38,17 @@ internal fun ConversationMemberListItem(
     ListItem(
         modifier = modifier,
         headlineContent = {
-            Text(text = member.humanReadableName)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                ConversationUserRoleIndicators(
+                    modifier = Modifier.size(20.dp),
+                    user = member
+                )
+
+                Text(text = member.humanReadableName)
+            }
         },
         supportingContent = member.username?.let { username ->
             {
@@ -44,32 +56,9 @@ internal fun ConversationMemberListItem(
             }
         },
         leadingContent = {
-            Row {
-                val personIcon = when {
-                    member.isInstructor -> Icons.Default.School
-                    member.isEditor || member.isTeachingAssistant -> Icons.Default.SupervisorAccount
-                    else -> Icons.Default.Person
-                }
-
-                val contentDescription = when {
-                    member.isInstructor -> R.string.conversation_members_content_description_instructor
-                    member.isEditor -> R.string.conversation_members_content_description_editor
-                    member.isTeachingAssistant -> R.string.conversation_members_content_description_teaching_assistant
-                    else -> R.string.conversation_members_content_description_student
-                }
-
-                Icon(
-                    imageVector = personIcon,
-                    contentDescription = stringResource(id = contentDescription)
-                )
-
-                if (member.isChannelModerator) {
-                    Icon(
-                        imageVector = Icons.Default.Shield,
-                        contentDescription = stringResource(id = R.string.conversation_members_content_description_moderator)
-                    )
-                }
-            }
+            ProfilePictureWithDialog(
+                conversationUser = member
+            )
         },
         trailingContent = {
             if (member.username != clientUsername && conversation.hasModerationRights) {
