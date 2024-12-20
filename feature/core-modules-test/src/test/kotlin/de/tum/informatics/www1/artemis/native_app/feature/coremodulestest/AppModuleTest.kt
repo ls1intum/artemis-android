@@ -41,7 +41,5 @@ class AppModuleTest {
                 QuizType.ViewableQuizType::class,
             )
         )
-
-     // TODO: remove old tests
     }
 }

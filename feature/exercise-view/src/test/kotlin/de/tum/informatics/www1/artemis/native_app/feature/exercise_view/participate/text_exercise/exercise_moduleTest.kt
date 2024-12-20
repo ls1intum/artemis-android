@@ -1,14 +1,16 @@
-package de.tum.informatics.www1.artemis.native_app.feature.login
+package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise
 
-import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
-import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.ServerProfileInfoService
-import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.exerciseModule
+import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.TextExerciseParticipationViewModel
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -18,7 +20,6 @@ import org.koin.test.verify.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.coroutines.CoroutineContext
 
-
 @RunWith(RobolectricTestRunner::class)
 @Category(UnitTest::class)
 internal class login_moduleTest : BaseComposeTest() {
@@ -26,18 +27,19 @@ internal class login_moduleTest : BaseComposeTest() {
     @OptIn(KoinExperimentalAPI::class)
     @Test
     fun checkKoinModule() {
-        loginModule.verify(
+        exerciseModule.verify(
             injections = listOf(
-                definition<Saml2LoginViewModel>(Boolean::class)     // rememberMe
+                definition<ExerciseViewModel>(Long::class),
+                definition<TextExerciseParticipationViewModel>(Long::class, Long::class)
             ),
             extraTypes = listOf(
                 ServerConfigurationService::class,
                 NetworkStatusProvider::class,
-                SavedStateHandle::class,
-                PushNotificationConfigurationService::class,
-                ServerProfileInfoService::class,
                 AccountService::class,
                 CoroutineContext::class,
+                ExerciseService::class,
+                LiveParticipationService::class,
+                CourseExerciseService::class
             )
         )
     }
