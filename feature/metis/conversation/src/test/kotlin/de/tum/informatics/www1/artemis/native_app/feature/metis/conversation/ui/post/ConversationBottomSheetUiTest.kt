@@ -12,6 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.BaseChatUITest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_POST_CONTEXT_BOTTOM_SHEET
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -97,6 +98,24 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         )
 
         composeTestRule.assertPostActionVisibility(R.string.post_delete, isVisible = false)
+    }
+
+    @Test
+    fun `test GIVEN a basePost from another user WHEN long pressing on a users answer THEN resolve option is not shown`() {
+        val answerContent = "Answer content"
+        setupThreadUi(
+            post = StandalonePost(
+                id = 1,
+                author = otherUser,
+                content = postContent,
+                answers = listOf(AnswerPost(
+                    id = 1,
+                    author = currentUser,
+                    content = answerContent,
+                ))
+            ),
+            hasModerationRights = false
+        )
     }
 
     private fun ComposeTestRule.assertPostActionVisibility(

@@ -78,9 +78,9 @@ abstract class BaseChatUITest : BaseComposeTest() {
     }
 
     fun setupThreadUi(
-        post: PostPojo,
-        onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?,
-        onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)?,
+        post: IStandalonePost,
+        onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)? = { CompletableDeferred() },
+        onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)? = { CompletableDeferred() },
         hasModerationRights: Boolean = true,
         isAbleToPin: Boolean = true
     ) {
