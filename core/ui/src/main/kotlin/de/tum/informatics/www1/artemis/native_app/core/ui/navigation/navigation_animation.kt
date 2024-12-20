@@ -10,6 +10,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
@@ -52,53 +55,59 @@ inline fun <reified T : Any> NavGraphBuilder.animatedComposable(
     content = content
 )
 
-val AnimatedContentTransitionScope<NavBackStackEntry>.defaultEnterTransition
+val defaultNavigateForwardTransition = defaultEnterTransition togetherWith defaultExitTransition
+val defaultNavigateBackTransition = defaultPopEnterTransition togetherWith defaultPopExitTransition
+val defaultNeutralTransition = defaultScaleIn() togetherWith defaultScaleOut()
+
+val defaultEnterTransition
     get() = defaultSlideIn(AnimatedContentTransitionScope.SlideDirection.Left)
 
-val AnimatedContentTransitionScope<NavBackStackEntry>.defaultExitTransition
+val defaultExitTransition
     get() = defaultSlideOut(AnimatedContentTransitionScope.SlideDirection.Left)
 
-val AnimatedContentTransitionScope<NavBackStackEntry>.defaultPopEnterTransition
+val defaultPopEnterTransition
     get() = defaultSlideIn(AnimatedContentTransitionScope.SlideDirection.Right)
 
-val AnimatedContentTransitionScope<NavBackStackEntry>.defaultPopExitTransition
+val defaultPopExitTransition
     get() = defaultSlideOut(AnimatedContentTransitionScope.SlideDirection.Right)
 
 
-fun AnimatedContentTransitionScope<NavBackStackEntry>.defaultSlideIn(
+fun defaultSlideIn(
     direction: AnimatedContentTransitionScope.SlideDirection
-) = slideIntoContainer(
-    direction,
-    animationSpec = tween(navigationAnimationDuration)
-)
+): EnterTransition = slideInHorizontally { width ->
+    return@slideInHorizontally when(direction) {
+        AnimatedContentTransitionScope.SlideDirection.Left -> width
+        else -> - width
+    }
+} + fadeIn()
 
-fun AnimatedContentTransitionScope<NavBackStackEntry>.defaultSlideOut(
+fun defaultSlideOut(
     direction: AnimatedContentTransitionScope.SlideDirection
-) = slideOutOfContainer(
-    direction,
-    animationSpec = tween(navigationAnimationDuration)
-)
+): ExitTransition = slideOutHorizontally { width ->
+    return@slideOutHorizontally when(direction) {
+        AnimatedContentTransitionScope.SlideDirection.Left -> - width
+        else -> width
+    }
+} + fadeOut()
 
 fun defaultScaleIn(
     direction: ScaleTransitionDirection = ScaleTransitionDirection.INWARDS,
     initialScale: Float = if (direction == ScaleTransitionDirection.OUTWARDS) 0.9f else 1.1f
-): EnterTransition {
-    return scaleIn(
-        animationSpec = tween(navigationAnimationDuration),
-        initialScale = initialScale
-    ) + fadeIn(animationSpec = tween(navigationAnimationDuration))
-}
+): EnterTransition = scaleIn(
+    animationSpec = tween(navigationAnimationDuration),
+    initialScale = initialScale
+) + fadeIn(animationSpec = tween(navigationAnimationDuration))
+
 
 fun defaultScaleOut(
     direction: ScaleTransitionDirection = ScaleTransitionDirection.OUTWARDS,
     targetScale: Float = if (direction == ScaleTransitionDirection.INWARDS) 0.9f else 1.1f
-): ExitTransition {
-    return scaleOut(
-        animationSpec = tween(
-            durationMillis = navigationAnimationDuration,
-        ), targetScale = targetScale
-    ) + fadeOut(tween())
-}
+): ExitTransition = scaleOut(
+    animationSpec = tween(
+        durationMillis = navigationAnimationDuration,
+    ), targetScale = targetScale
+) + fadeOut(tween())
+
 
 enum class ScaleTransitionDirection {
     INWARDS,

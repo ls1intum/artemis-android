@@ -48,12 +48,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.LectureListUi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
+import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedThread
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ConversationFacadeUi
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NavigateToUserConversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NothingOpened
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.OpenedConversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.OpenedThread
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
