@@ -98,6 +98,9 @@ internal fun SinglePageConversationBody(
                 SizeTransform(clip = false)
             )
         },
+        contentKey = {
+            it.javaClass        // Eg no recomposition of the ChatList when navigating to a thread.
+        },
         label = "SinglePageConversationBody screen transition animation"
     ) { config ->
         when (config) {
