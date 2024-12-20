@@ -61,7 +61,7 @@ internal fun <T : IBasePost> determinePostItemViewJoinedType(
         shouldDisplayHeader(nextPostIndex, it, postCount, order, getPost)
     } ?: true
 
-    return remember(index, isHeader, post, postCount, nextPost, isNextHeader) {
+    return remember(isHeader, postCount, nextPost, isNextHeader) {
         if (isHeader) {
             if (nextPost == null || isNextHeader) {
                 PostItemViewJoinedType.SINGLE

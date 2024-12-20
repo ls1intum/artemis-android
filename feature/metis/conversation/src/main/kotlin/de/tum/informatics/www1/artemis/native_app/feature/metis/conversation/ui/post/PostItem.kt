@@ -64,8 +64,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureWithDialog
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -84,6 +83,7 @@ sealed class PostItemViewType {
 
 private const val PlaceholderContent = "WWWWWWW"
 private val postHeadlineHeight = 36.dp
+private val emojiHeight = 27.dp
 
 /**
  * Displays a post item or a placeholder for it.
@@ -173,11 +173,8 @@ internal fun PostItem(
             postStatus = postStatus,
             authorRole = post?.authorRole,
             authorName = post?.authorName,
-            profilePictureData = ProfilePictureData.create(
-                userId = post?.authorId,
-                username = post?.authorName,
-                imageUrl = post?.authorImageUrl
-            ),
+            authorId = post?.authorId ?: -1,
+            authorImageUrl = post?.authorImageUrl,
             creationDate = post?.creationDate,
             expanded = isExpanded,
             isAnswerPost = post is IAnswerPost,
@@ -250,7 +247,8 @@ private fun PostHeadline(
     modifier: Modifier,
     authorRole: UserRole?,
     authorName: String?,
-    profilePictureData: ProfilePictureData,
+    authorId: Long,
+    authorImageUrl: String?,
     creationDate: Instant?,
     postStatus: CreatePostService.Status,
     expanded: Boolean = false,
@@ -274,7 +272,10 @@ private fun PostHeadline(
             }
 
             HeadlineProfilePicture(
-                profilePictureData = profilePictureData
+                userId = authorId,
+                userName = authorName.orEmpty(),
+                imageUrl = authorImageUrl,
+                userRole = authorRole,
             )
 
             if (postStatus == CreatePostService.Status.FAILED) {
@@ -378,7 +379,7 @@ private fun AuthorRoleAndTimeRow(
 
             Text(
                 modifier = Modifier,
-                text = remember(relativeTime) { relativeTime.toString() },
+                text = relativeTime.toString(),
                 style = MaterialTheme.typography.bodySmall
             )
         }
@@ -396,15 +397,24 @@ private fun AuthorRoleAndTimeRow(
 
 @Composable
 private fun HeadlineProfilePicture(
-    profilePictureData: ProfilePictureData
+    userId: Long,
+    userName: String,
+    imageUrl: String?,
+    userRole: UserRole?,
+    displayImage: Boolean = true
 ) {
-    val size = postHeadlineHeight
+    val size = 30.dp
     Box(modifier = Modifier.size(size)) {
-        ProfilePicture(
-            modifier = Modifier
-                .size(size)
-                .clip(MaterialTheme.shapes.extraSmall),
-            profilePictureData = profilePictureData,
+        if (!displayImage) {
+            return
+        }
+
+        ProfilePictureWithDialog(
+            modifier = Modifier.size(size),
+            userId = userId,
+            userName = userName,
+            userRole = userRole,
+            imageUrl = imageUrl,
         )
     }
 }
@@ -496,7 +506,7 @@ private fun StandalonePostFooter(
                 ) {
                     Icon(
                         modifier = Modifier
-                            .size(27.dp)
+                            .size(emojiHeight)
                             .padding(5.dp),
                         imageVector = Icons.Default.InsertEmoticon,
                         contentDescription = null,
@@ -528,7 +538,6 @@ private fun StandalonePostFooter(
                             count = replyCount,
                             replyCount
                         ),
-                        fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -581,7 +590,7 @@ private fun EmojiChip(
         modifier = modifier
             .background(color = backgroundColor, shape)
             .clip(shape)
-            .heightIn(max = 27.dp)
+            .heightIn(max = emojiHeight)
             .clickable(onClick = onClick)
             .let {
                 if (selected) {

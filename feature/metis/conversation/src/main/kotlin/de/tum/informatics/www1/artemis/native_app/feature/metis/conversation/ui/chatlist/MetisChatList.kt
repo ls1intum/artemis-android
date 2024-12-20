@@ -73,7 +73,6 @@ internal fun MetisChatList(
     state: LazyListState = rememberLazyListState(),
     isReplyEnabled: Boolean = true,
     onClickViewPost: (StandalonePostId) -> Unit,
-    title: String? = "Replying..."
 ) {
     ReportVisibleMetisContext(remember(viewModel.metisContext) { VisiblePostList(viewModel.metisContext) })
 
@@ -146,6 +145,15 @@ fun MetisChatList(
     title: String,
     onFileSelected: (Uri) -> Unit
 ) {
+    val context = LocalContext.current
+
+    // TODO: https://github.com/ls1intum/artemis-android/issues/213
+//    val navigateToChat = { userId: Long ->
+//        val chatLink = "artemis://courses/$courseId/messages?userId=$userId"
+//        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(chatLink))
+//        context.startActivity(intent)
+//    }
+
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
         onCreatePost = onCreatePost,
@@ -206,7 +214,7 @@ fun MetisChatList(
                             onRequestDelete = onDeletePostDelegate,
                             onRequestPin = onPinPostDelegate,
                             onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
-                            onRequestRetrySend = onRequestRetrySend
+                            onRequestRetrySend = onRequestRetrySend,
                         )
                     }
                 }
@@ -414,6 +422,6 @@ private fun DateDivider(modifier: Modifier, date: LocalDate) {
             fontWeight = FontWeight.Bold
         )
 
-        HorizontalDivider()
+        HorizontalDivider(modifier = Modifier.weight(1f))
     }
 }
