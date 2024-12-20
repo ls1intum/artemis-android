@@ -6,7 +6,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.network.Exer
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.exerciseModule
@@ -22,7 +21,7 @@ import kotlin.coroutines.CoroutineContext
 
 @RunWith(RobolectricTestRunner::class)
 @Category(UnitTest::class)
-internal class exercise_moduleTest : BaseComposeTest() {
+internal class exercise_moduleTest {
 
     @OptIn(KoinExperimentalAPI::class)
     @Test

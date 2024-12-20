@@ -5,7 +5,6 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.network.ServerProfileInfoService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
@@ -21,7 +20,7 @@ import kotlin.coroutines.CoroutineContext
 
 @RunWith(RobolectricTestRunner::class)
 @Category(UnitTest::class)
-internal class login_moduleTest : BaseComposeTest() {
+internal class login_moduleTest {
 
     @OptIn(KoinExperimentalAPI::class)
     @Test
