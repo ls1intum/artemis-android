@@ -67,7 +67,7 @@ fun rememberPostActions(
             onReplyInThread = if (doesPostExistOnServer) onReplyInThread else null,
             onResolvePost = if (hasResolvePostRights) onResolvePost else null,
             onPinPost = if (hasPinPostRights) onPinPost else null,
-            onRequestRetrySend = onRequestRetrySend
+            onRequestRetrySend = onRequestRetrySend,
         )
     }
 }
