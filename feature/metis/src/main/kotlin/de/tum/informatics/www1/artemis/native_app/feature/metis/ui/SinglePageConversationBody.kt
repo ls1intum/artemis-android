@@ -12,9 +12,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.defaultNavigateBackTransition
-import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.defaultNavigateForwardTransition
-import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.defaultNeutralTransition
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.feature.metis.AddChannelConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.BrowseChannelConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationConfiguration
@@ -92,9 +90,9 @@ internal fun SinglePageConversationBody(
         transitionSpec = {
             val navigationLevelDiff = targetState.navigationLevel - initialState.navigationLevel
             when (navigationLevelDiff) {
-                1 -> defaultNavigateForwardTransition
-                -1 -> defaultNavigateBackTransition
-                else -> defaultNeutralTransition
+                1 -> DefaultTransition.navigateForward
+                -1 -> DefaultTransition.navigateBack
+                else -> DefaultTransition.navigateNeutral
             }
             .using(
                 SizeTransform(clip = false)

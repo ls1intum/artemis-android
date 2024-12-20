@@ -67,8 +67,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Profi
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.linkTextColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
-import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.defaultScaleIn
 import de.tum.informatics.www1.artemis.native_app.feature.login.custom_instance_selection.CustomInstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginScreen
@@ -88,7 +88,6 @@ import org.koin.core.parameter.parametersOf
 import java.io.IOException
 
 private const val ARG_REMEMBER_ME = "rememberMe"
-private const val NESTED_SAML2_LOGIN_ROUTE = "saml2_login"
 
 @Serializable
 private sealed interface NestedDestination {
@@ -133,7 +132,7 @@ fun NavGraphBuilder.loginScreen(
     onRequestOpenSettings: () -> Unit
 ) {
     animatedComposable<LoginScreen>(
-        enterTransition = { defaultScaleIn() },
+        enterTransition = { DefaultTransition.fadeIn },
     ) {
         val screen = it.toRoute<LoginScreen>()
         val nextDestinationValue = screen.nextDestination

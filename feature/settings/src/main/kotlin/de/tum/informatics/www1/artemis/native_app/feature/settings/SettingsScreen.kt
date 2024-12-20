@@ -53,9 +53,8 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
-import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.defaultExitTransition
-import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.defaultScaleOut
 import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
@@ -95,9 +94,9 @@ fun NavGraphBuilder.settingsScreen(
         exitTransition = {
             val toLoginScreen = targetState.destination.route?.startsWith(LoginScreen::class.qualifiedName!!) ?: false
             if (toLoginScreen) {
-                return@animatedComposable defaultScaleOut()
+                return@animatedComposable DefaultTransition.fadeOut
             }
-            defaultExitTransition
+            DefaultTransition.exit
         }
     ) {
         SettingsScreen(
