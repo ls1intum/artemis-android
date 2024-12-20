@@ -324,6 +324,12 @@ internal fun CourseUiScreen(
                 changeTab = updateSelectedTabIndex,
                 onReloadCourse = onReloadCourse
             )
+        },
+        bottomBar = {
+            BottomNavigationBar(
+                selectedTabIndex = selectedTabIndex,
+                changeTab = updateSelectedTabIndex
+            )
         }
     ) { padding ->
         BasicDataStateUi(
