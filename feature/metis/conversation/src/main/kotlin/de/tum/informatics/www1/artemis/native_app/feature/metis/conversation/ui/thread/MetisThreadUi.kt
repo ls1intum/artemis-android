@@ -51,6 +51,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -73,7 +74,7 @@ internal fun MetisThreadUi(
     listContentPadding: PaddingValues,
     viewModel: ConversationViewModel
 ) {
-    val postDataState: DataState<PostPojo> by viewModel.threadUseCase.post.collectAsState()
+    val postDataState: DataState<IStandalonePost> by viewModel.threadUseCase.post.collectAsState()
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
 
     val serverUrl by viewModel.serverUrl.collectAsState()
@@ -154,7 +155,7 @@ internal fun MetisThreadUi(
     modifier: Modifier,
     courseId: Long,
     clientId: Long,
-    postDataState: DataState<PostPojo>,
+    postDataState: DataState<IStandalonePost>,
     conversationDataState: DataState<Conversation>,
     postActionFlags: PostActionFlags,
     listContentPadding: PaddingValues,
@@ -254,7 +255,7 @@ internal fun MetisThreadUi(
 private fun PostAndRepliesList(
     modifier: Modifier,
     state: LazyListState,
-    post: PostPojo,
+    post: IStandalonePost,
     postActionFlags: PostActionFlags,
     listContentPadding: PaddingValues,
     clientId: Long,
@@ -329,13 +330,13 @@ private fun PostAndRepliesList(
 
         itemsIndexed(
             post.orderedAnswerPostings,
-            key = { _, post -> post.postId }) { index, answerPost ->
+            key = { _, post -> post.clientPostId!! }) { index, answerPost ->
             val postActions = rememberPostActions(answerPost)
 
             PostWithBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag(testTagForAnswerPost(answerPost.clientPostId)),
+                    .testTag(testTagForAnswerPost(answerPost.clientPostId!!)),
                 post = answerPost,
                 postActions = postActions,
                 postItemViewType = PostItemViewType.ThreadAnswerItem,
