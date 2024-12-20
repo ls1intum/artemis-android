@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
+import java.net.UnknownHostException
 import java.util.Date
 
 
@@ -146,7 +147,15 @@ class PdfFile(
             ).show()
 
         } catch (e: Exception) {
-            Toast.makeText(context, "Error downloading file: ${e.message}", Toast.LENGTH_LONG)
+            val errorMessage = when (e) {
+                is UnknownHostException -> {
+                    R.string.pdf_view_error_no_internet
+                }
+                else -> {
+                    R.string.pdf_view_error_downloading
+                }
+            }
+            Toast.makeText(context, getString(context, errorMessage), Toast.LENGTH_LONG)
                 .show()
             e.printStackTrace()
         }

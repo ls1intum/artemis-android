@@ -37,18 +37,15 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.Horiz
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.VerticalPdfReaderState
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.rememberHorizontalPdfReaderState
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.rememberVerticalPdfReaderState
-import org.hildan.krossbow.stomp.ConnectionException
+import java.net.UnknownHostException
 
 @Composable
 fun ArtemisPdfView(
     modifier: Modifier,
-    filename: String? = null,
-    url: String,
-    authToken: String,
+    pdfFile: PdfFile
 ) {
     val isVertical = remember { mutableStateOf(true) }
     val context = LocalContext.current
-    val pdfFile = PdfFile(url, authToken, filename)
 
     val verticalPdfState = rememberVerticalPdfReaderState(
         pdfFile = pdfFile,
@@ -64,18 +61,18 @@ fun ArtemisPdfView(
     val showMenu = remember { mutableStateOf(false) }
 
     if (pdfState.mError != null) {
-        when (pdfState.mError) {
-            is ConnectionException -> {
-                //TODO
+        val errorMessage = when (pdfState.mError) {
+            is UnknownHostException -> {
+                R.string.pdf_view_error_no_internet
             }
-
             else -> {
-                //TODO
+                R.string.pdf_view_error_loading
             }
         }
+
         Toast.makeText(
             LocalContext.current,
-            stringResource(id = R.string.pdf_view_error_loading),
+            stringResource(id = errorMessage),
             Toast.LENGTH_LONG
         ).show()
     }
@@ -86,7 +83,7 @@ fun ArtemisPdfView(
         Column {
             pdfState.file?.let {
                 Text(
-                    text = filename ?: it.name,
+                    text = pdfFile.filename ?: it.name,
                     modifier = Modifier.padding(8.dp),
                     style = MaterialTheme.typography.titleMedium
                 )

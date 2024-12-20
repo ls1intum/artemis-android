@@ -66,10 +66,11 @@ class BaseMarkdownLinkResolver(
                 setBottomSheetState(LinkBottomSheetState.PDFVIEWSTATE)
                 showModalBottomSheet(link)
             }
-            link.startsWith(serverUrl) -> {
-                setBottomSheetState(LinkBottomSheetState.WEBVIEWSTATE)
-                showModalBottomSheet(link)
-            }
+            // TODO: open Artemis link in a Modal Bottom Sheet webview to attach session cookie (https://github.com/ls1intum/artemis-android/issues/245)
+//            link.startsWith(serverUrl) -> {
+//                setBottomSheetState(LinkBottomSheetState.WEBVIEWSTATE)
+//                showModalBottomSheet(link)
+//            }
             else -> {
                 val customTabsIntent = CustomTabsIntent.Builder().build()
                 customTabsIntent.launchUrl(context, Uri.parse(link))
