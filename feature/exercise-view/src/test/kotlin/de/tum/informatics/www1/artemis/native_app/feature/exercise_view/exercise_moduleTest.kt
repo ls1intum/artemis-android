@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise
+package de.tum.informatics.www1.artemis.native_app.feature.exercise_view
 
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
@@ -22,7 +22,7 @@ import kotlin.coroutines.CoroutineContext
 
 @RunWith(RobolectricTestRunner::class)
 @Category(UnitTest::class)
-internal class login_moduleTest : BaseComposeTest() {
+internal class exercise_moduleTest : BaseComposeTest() {
 
     @OptIn(KoinExperimentalAPI::class)
     @Test
