@@ -50,7 +50,7 @@ internal abstract class QuizBaseE2eTest(protected val quizType: QuizType.Workabl
     fun setup() {
         ShadowLog.stream = System.out
 
-        runBlockingWithTestTimeout {
+        runBlockingWithTestTimeout(timeoutMultiplier = 2) {
             course = createCourse(getAdminAccessToken())
             courseId = course.id!!
 

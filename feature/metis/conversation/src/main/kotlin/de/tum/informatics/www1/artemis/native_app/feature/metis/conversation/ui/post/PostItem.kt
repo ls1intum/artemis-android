@@ -27,9 +27,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -60,8 +57,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.UserRoleIcon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureWithDialog
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -157,14 +154,11 @@ internal fun PostItem(
             postStatus = postStatus,
             authorRole = post?.authorRole,
             authorName = post?.authorName,
-            profilePictureData = ProfilePictureData.create(
-                userId = post?.authorId,
-                username = post?.authorName,
-                imageUrl = post?.authorImageUrl
-            ),
+            authorId = post?.authorId ?: -1,
+            authorImageUrl = post?.authorImageUrl,
             creationDate = post?.creationDate,
             expanded = isExpanded,
-            displayHeader = displayHeader
+            displayHeader = displayHeader,
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -238,7 +232,8 @@ private fun PostHeadline(
     modifier: Modifier,
     authorRole: UserRole?,
     authorName: String?,
-    profilePictureData: ProfilePictureData,
+    authorId: Long,
+    authorImageUrl: String?,
     creationDate: Instant?,
     postStatus: CreatePostService.Status,
     expanded: Boolean = false,
@@ -252,7 +247,10 @@ private fun PostHeadline(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 HeadlineProfilePicture(
-                    profilePictureData = profilePictureData,
+                    userId = authorId,
+                    userName = authorName.orEmpty(),
+                    imageUrl = authorImageUrl,
+                    userRole = authorRole,
                 )
 
                 HeadlineAuthorInfo(
@@ -274,7 +272,10 @@ private fun PostHeadline(
             val doDisplayHeader = displayHeader || postStatus == CreatePostService.Status.FAILED
 
             HeadlineProfilePicture(
-                profilePictureData = profilePictureData,
+                userId = authorId,
+                userName = authorName.orEmpty(),
+                imageUrl = authorImageUrl,
+                userRole = authorRole,
                 displayImage = doDisplayHeader
             )
 
@@ -380,7 +381,7 @@ private fun AuthorRoleAndNameRow(
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        HeadlineAuthorIcon(authorRole)
+        UserRoleIcon(userRole = authorRole)
 
         Spacer(modifier = Modifier.width(4.dp))
 
@@ -396,7 +397,10 @@ private fun AuthorRoleAndNameRow(
 
 @Composable
 private fun HeadlineProfilePicture(
-    profilePictureData: ProfilePictureData,
+    userId: Long,
+    userName: String,
+    imageUrl: String?,
+    userRole: UserRole?,
     displayImage: Boolean = true
 ) {
     val size = 30.dp
@@ -405,32 +409,17 @@ private fun HeadlineProfilePicture(
             return
         }
 
-        ProfilePicture(
-            modifier = Modifier
-                .size(size)
-                .clip(MaterialTheme.shapes.extraSmall),
-            profilePictureData = profilePictureData,
+        ProfilePictureWithDialog(
+            modifier = Modifier.size(size),
+            userId = userId,
+            userName = userName,
+            userRole = userRole,
+            imageUrl = imageUrl,
         )
     }
 }
 
-@Composable
-private fun HeadlineAuthorIcon(
-    authorRole: UserRole?,
-) {
-    val icon = when (authorRole) {
-        UserRole.INSTRUCTOR -> Icons.Default.School
-        UserRole.TUTOR -> Icons.Default.SupervisorAccount
-        UserRole.USER -> Icons.Default.Person
-        null -> Icons.Default.Person
-    }
 
-    Icon(
-        modifier = Modifier.size(16.dp),
-        imageVector = icon,
-        contentDescription = null
-    )
-}
 
 /**
  * Display the tags, the reactions and the action buttons like reply, view replies and react with emoji.
