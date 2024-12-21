@@ -37,6 +37,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
     val answers = (0..2).map { index ->
         AnswerPostPojo(
             parentPostId = "client-id",
+            parentAuthorId = clientId,
             postId = "answer-client-id-$index",
             resolvesPost = false,
             basePostingCache = AnswerPostPojo.BasePostingCache(
@@ -81,8 +82,9 @@ abstract class BaseChatUITest : BaseComposeTest() {
         post: IStandalonePost,
         onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)? = { CompletableDeferred() },
         onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)? = { CompletableDeferred() },
+        isAbleToPin: Boolean = true,
+        isAtLeastTutorInCourse: Boolean = false,
         hasModerationRights: Boolean = true,
-        isAbleToPin: Boolean = true
     ) {
         composeTestRule.setContent {
             MetisThreadUi(
@@ -93,7 +95,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 conversationDataState = DataState.Success(conversation),
                 postActionFlags = PostActionFlags(
                     isAbleToPin = isAbleToPin,
-                    isAtLeastTutorInCourse = false,
+                    isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                     hasModerationRights = hasModerationRights,
                 ),
                 listContentPadding = PaddingValues(),

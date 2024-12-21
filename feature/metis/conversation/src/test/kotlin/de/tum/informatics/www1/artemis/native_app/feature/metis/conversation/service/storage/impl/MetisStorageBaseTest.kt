@@ -38,6 +38,7 @@ abstract class MetisStorageBaseTest {
     internal val localAnswerPojo = AnswerPostPojo(
         parentPostId = parentClientPostId,
         postId = answerClientPostId,
+        parentAuthorId = author.id,
         resolvesPost = false,
         basePostingCache = AnswerPostPojo.BasePostingCache(
             serverPostId = 0,

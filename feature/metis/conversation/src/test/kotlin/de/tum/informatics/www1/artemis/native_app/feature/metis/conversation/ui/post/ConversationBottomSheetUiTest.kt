@@ -26,6 +26,7 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
     private val otherUser = User(id = 1234)
 
     private val postContent = "Post content"
+    private val answerContent = "Answer content"
 
     @Test
     fun `test GIVEN a post WHEN long pressing the post THEN Edit action is shown`() {
@@ -101,28 +102,81 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
     }
 
     @Test
+    fun `test GIVEN a basePost from user WHEN long pressing on another user's answer THEN resolve option is shown`() {
+        val answerContent = "Answer content"
+        setupThreadUi(
+            post = simpleThreadPostWithAnswer(
+                postAuthor = currentUser,
+                answerAuthor = otherUser
+            )
+        )
+
+        composeTestRule.assertPostActionVisibility(
+            R.string.post_resolves,
+            isVisible = true,
+            postContentToClick = answerContent
+        )
+    }
+
+    @Test
+    fun `test GIVEN a basePost from another user WHEN long pressing on another user's answer as tutor THEN resolve option is shown`() {
+        val answerContent = "Answer content"
+        setupThreadUi(
+            post = simpleThreadPostWithAnswer(
+                postAuthor = otherUser,
+                answerAuthor = otherUser
+            ),
+            isAtLeastTutorInCourse = true
+        )
+
+        composeTestRule.assertPostActionVisibility(
+            R.string.post_resolves,
+            isVisible = true,
+            postContentToClick = answerContent
+        )
+    }
+
+    @Test
     fun `test GIVEN a basePost from another user WHEN long pressing on a users answer THEN resolve option is not shown`() {
         val answerContent = "Answer content"
         setupThreadUi(
-            post = StandalonePost(
-                id = 1,
-                author = otherUser,
-                content = postContent,
-                answers = listOf(AnswerPost(
-                    id = 1,
-                    author = currentUser,
-                    content = answerContent,
-                ))
-            ),
-            hasModerationRights = false
+            post = simpleThreadPostWithAnswer(
+                postAuthor = otherUser,
+                answerAuthor = currentUser,
+            )
         )
+
+        composeTestRule.assertPostActionVisibility(
+            R.string.post_resolves,
+            isVisible = false,
+            postContentToClick = answerContent
+        )
+    }
+
+    private fun simpleThreadPostWithAnswer(
+        postAuthor: User,
+        answerAuthor: User,
+    ): StandalonePost {
+        val basePost = StandalonePost(
+            id = 1,
+            author = postAuthor,
+            content = postContent,
+        )
+        val answerPost = AnswerPost(
+            id = 2,
+            author = answerAuthor,
+            content = answerContent,
+            post = basePost
+        )
+        return basePost.copy(answers = listOf(answerPost))
     }
 
     private fun ComposeTestRule.assertPostActionVisibility(
         stringResId: Int,
-        isVisible: Boolean
+        isVisible: Boolean,
+        postContentToClick: String = this@ConversationBottomSheetUiTest.postContent,
     ) {
-        onNodeWithText(postContent)
+        onNodeWithText(postContentToClick)
             .performSemanticsAction(SemanticsActions.OnLongClick)
 
         onNodeWithTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET)
