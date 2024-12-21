@@ -8,6 +8,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
@@ -20,44 +21,49 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.InsertEmoticon
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.converDateAndTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiDialog
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.UserRoleIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureWithDialog
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.datetime.Clock
@@ -76,6 +82,8 @@ sealed class PostItemViewType {
 }
 
 private const val PlaceholderContent = "WWWWWWW"
+private val postHeadlineHeight = 36.dp
+private val emojiHeight = 27.dp
 
 /**
  * Displays a post item or a placeholder for it.
@@ -87,7 +95,8 @@ internal fun PostItem(
     postItemViewType: PostItemViewType,
     clientId: Long,
     displayHeader: Boolean,
-    onClickOnReaction: ((emojiId: String, create: Boolean) -> Unit)?,
+    postItemViewJoinedType: PostItemViewJoinedType,
+    postActions: PostActions,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onRequestRetrySend: () -> Unit
@@ -99,15 +108,6 @@ internal fun PostItem(
     }
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
-    val applyPinStatusToModifier: @Composable (Modifier) -> Modifier = {
-        if (isPinned && !isExpanded) {
-            modifier
-                .clip(
-                    MaterialTheme.shapes.small
-                )
-                .background(color = PostColors.pinnedMessageBackground)
-        } else modifier
-    }
 
     // Retrieve post status
     val clientPostId = post?.clientPostId
@@ -129,23 +129,42 @@ internal fun PostItem(
                         .background(color = MaterialTheme.colorScheme.errorContainer)
                         .clickable(onClick = onRequestRetrySend)
                 } else {
-                    applyPinStatusToModifier(it)
+                    it
                         .combinedClickable(
                             onClick = onClick,
                             onLongClick = onLongClick
                         )
                 }
             }
-            .padding(PaddingValues(horizontal = Spacings.ScreenHorizontalSpacing)),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(PaddingValues(horizontal = Spacings.ScreenHorizontalSpacing))
     ) {
+        val applyDistancePaddingToModifier: @Composable (Modifier) -> Modifier = {
+            if (postItemViewJoinedType in listOf(
+                    PostItemViewJoinedType.JOINED,
+                    PostItemViewJoinedType.FOOTER
+                )
+            ) {
+                it.padding(top = 8.dp)
+            } else {
+                it.padding(bottom = 4.dp)
+            }
+        }
+
         if (isPinned) {
             IconLabel(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
+                modifier = applyDistancePaddingToModifier(Modifier)
+                    .fillMaxWidth(),
                 resourceString = R.string.post_is_pinned,
                 icon = Icons.Outlined.PushPin
+            )
+        }
+
+        if (post is IAnswerPost && post.resolvesPost) {
+            IconLabel(
+                modifier = applyDistancePaddingToModifier(Modifier)
+                    .fillMaxWidth(),
+                resourceString = R.string.post_resolves,
+                icon = Icons.Default.Check
             )
         }
 
@@ -158,70 +177,66 @@ internal fun PostItem(
             authorImageUrl = post?.authorImageUrl,
             creationDate = post?.creationDate,
             expanded = isExpanded,
-            displayHeader = displayHeader,
+            isAnswerPost = post is IAnswerPost,
+            displayHeader = displayHeader
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    MarkdownText(
-                        markdown = remember(post?.content, isPlaceholder) {
-                            if (isPlaceholder) {
-                                PlaceholderContent
-                            } else post?.content.orEmpty()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .placeholder(visible = isPlaceholder),
-                        style = MaterialTheme.typography.bodyMedium,
-                        onClick = onClick,
-                        onLongClick = onLongClick,
-                        color = if (post?.serverPostId == null) PostColors.unsentMessageText else Color.Unspecified
+                MarkdownText(
+                    markdown = remember(post?.content, isPlaceholder) {
+                        if (isPlaceholder) {
+                            PlaceholderContent
+                        } else post?.content.orEmpty()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .placeholder(visible = isPlaceholder),
+                    style = MaterialTheme.typography.bodyMedium,
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                    color = if (post?.serverPostId == null) PostColors.unsentMessageText else Color.Unspecified
+                )
+
+                if (post?.updatedDate != null) {
+                    val updateTime = converDateAndTime(post.updatedDate)
+                    Text(
+                        text = stringResource(id = R.string.post_edited_hint, updateTime),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = PostColors.editedHintText
                     )
+                }
 
-                    if (post?.updatedDate != null) {
-                        Text(
-                            text = stringResource(id = R.string.post_edited_hint),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = PostColors.editedHintText
-                        )
-                    }
-
-                    when (post) {
-                        is IStandalonePost -> {
-                            if (post.resolved == true) {
-                                IconLabel(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    resourceString = R.string.post_is_resolved,
-                                    icon = Icons.Default.Check
-                                )
-                            }
-                        }
-                        is IAnswerPost -> {
-                            if (post.resolvesPost) {
-                                IconLabel(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    resourceString = R.string.post_resolves,
-                                    icon = Icons.Default.Check
-                                )
-                            }
-                        }
-                        else -> {}
-                    }
+                if (post is IStandalonePost && post.resolved == true) {
+                    IconLabel(
+                        modifier = Modifier.fillMaxWidth(),
+                        resourceString = R.string.post_is_resolved,
+                        icon = Icons.Default.Check
+                    )
                 }
 
                 StandalonePostFooter(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .let {
+                            if (postItemViewJoinedType in listOf(
+                                    PostItemViewJoinedType.JOINED,
+                                    PostItemViewJoinedType.HEADER
+                                ) && post?.reactions
+                                    .orEmpty()
+                                    .isNotEmpty()
+                            ) {
+                                it.padding(bottom = 8.dp)
+                            } else {
+                                it
+                            }
+                        },
                     clientId = clientId,
                     reactions = remember(post?.reactions) { post?.reactions.orEmpty() },
                     postItemViewType = postItemViewType,
-                    onClickReaction = onClickOnReaction
+                    postActions = postActions
                 )
-
-                if (!post?.reactions.isNullOrEmpty()) {
-                    Box(modifier = Modifier.height(2.dp))
-                }
             }
         }
     }
@@ -237,75 +252,53 @@ private fun PostHeadline(
     creationDate: Instant?,
     postStatus: CreatePostService.Status,
     expanded: Boolean = false,
+    isAnswerPost: Boolean,
     displayHeader: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    if (expanded) {
-        Column(modifier = modifier) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                HeadlineProfilePicture(
-                    userId = authorId,
-                    userName = authorName.orEmpty(),
-                    imageUrl = authorImageUrl,
-                    userRole = authorRole,
-                )
+    val doDisplayHeader = displayHeader || postStatus == CreatePostService.Status.FAILED
 
-                HeadlineAuthorInfo(
-                    modifier = Modifier.fillMaxWidth(),
-                    authorName = authorName,
-                    authorRole = authorRole,
-                    creationDate = creationDate,
-                    expanded = true
-                )
-            }
-
-            content()
-        }
-    } else {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Row(
-            modifier = modifier,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            val doDisplayHeader = displayHeader || postStatus == CreatePostService.Status.FAILED
+            if (!doDisplayHeader) {
+                return@Row
+            }
 
             HeadlineProfilePicture(
                 userId = authorId,
                 userName = authorName.orEmpty(),
                 imageUrl = authorImageUrl,
                 userRole = authorRole,
-                displayImage = doDisplayHeader
             )
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                if (postStatus == CreatePostService.Status.FAILED) {
-                    Text(
-                        text = stringResource(id = R.string.post_sending_failed),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-
-                if (doDisplayHeader) {
-                    HeadlineAuthorInfo(
-                        modifier = Modifier.fillMaxWidth(),
-                        authorName = authorName,
-                        authorRole  = authorRole,
-                        creationDate = creationDate,
-                        expanded = false
-                    )
-                } else {
-                    Box(modifier = Modifier.height(4.dp))
-                }
-
-                content()
+            if (postStatus == CreatePostService.Status.FAILED) {
+                Text(
+                    text = stringResource(id = R.string.post_sending_failed),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
             }
+
+            HeadlineAuthorInfo(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(postHeadlineHeight),
+                authorName = authorName,
+                authorRole = authorRole,
+                creationDate = creationDate,
+                expanded = expanded,
+                isAnswerPost = isAnswerPost
+            )
         }
+
+        content()
     }
 }
 
@@ -340,50 +333,16 @@ private fun HeadlineAuthorInfo(
     authorName: String?,
     authorRole: UserRole?,
     creationDate: Instant?,
-    expanded: Boolean
+    expanded: Boolean,
+    isAnswerPost: Boolean
 ) {
-    val relativeTimeTo = remember(creationDate) {
-        creationDate ?: Clock.System.now()
-    }
-
-    val creationDateContent: @Composable () -> Unit = {
-        val relativeTime = getRelativeTime(to = relativeTimeTo, showDate = false)
-
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = remember(relativeTime) { relativeTime.toString() },
-            style = MaterialTheme.typography.bodySmall
+    Column(modifier = modifier) {
+        AuthorRoleAndTimeRow(
+            expanded = expanded,
+            authorRole = authorRole,
+            creationDate = creationDate,
+            isAnswerPost = isAnswerPost
         )
-    }
-
-    if (expanded) {
-        Column(modifier) {
-            AuthorRoleAndNameRow(authorRole, authorName)
-            creationDateContent()
-        }
-    } else {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            AuthorRoleAndNameRow(authorRole, authorName)
-            creationDateContent()
-        }
-    }
-}
-
-@Composable
-private fun AuthorRoleAndNameRow(
-    authorRole: UserRole?,
-    authorName: String?
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        UserRoleIcon(userRole = authorRole)
-
-        Spacer(modifier = Modifier.width(4.dp))
 
         Text(
             modifier = Modifier,
@@ -392,6 +351,47 @@ private fun AuthorRoleAndNameRow(
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold
         )
+    }
+}
+
+@Composable
+private fun AuthorRoleAndTimeRow(
+    expanded: Boolean,
+    authorRole: UserRole?,
+    creationDate: Instant?,
+    isAnswerPost: Boolean
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val relativeTimeTo = remember(creationDate) {
+            creationDate ?: Clock.System.now()
+        }
+
+        val creationDateContent: @Composable () -> Unit = {
+
+            val relativeTime = if (expanded || isAnswerPost) {
+                getRelativeTime(to = relativeTimeTo, showDateAndTime = true)
+            } else {
+                getRelativeTime(to = relativeTimeTo, showDate = false)
+            }
+
+            Text(
+                modifier = Modifier,
+                text = relativeTime.toString(),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            HeadlineAuthorRoleBadge(authorRole)
+            Spacer(modifier = Modifier.weight(1f))
+            creationDateContent()
+        }
     }
 }
 
@@ -419,7 +419,30 @@ private fun HeadlineProfilePicture(
     }
 }
 
+@Composable
+private fun HeadlineAuthorRoleBadge(
+    authorRole: UserRole?,
+) {
+    val (text, color) = when (authorRole) {
+        UserRole.INSTRUCTOR -> R.string.post_instructor to PostColors.Roles.instructor
+        UserRole.TUTOR -> R.string.post_tutor to PostColors.Roles.tutor
+        UserRole.USER -> R.string.post_student to PostColors.Roles.student
+        null -> R.string.post_student to PostColors.Roles.student
+    }
 
+    Box(
+        modifier = Modifier
+            .background(color, MaterialTheme.shapes.extraSmall)
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+            text = stringResource(id = text),
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
 
 /**
  * Display the tags, the reactions and the action buttons like reply, view replies and react with emoji.
@@ -430,7 +453,7 @@ private fun StandalonePostFooter(
     clientId: Long,
     reactions: List<IReaction>,
     postItemViewType: PostItemViewType,
-    onClickReaction: ((emojiId: String, create: Boolean) -> Unit)?
+    postActions: PostActions
 ) {
     val reactionCount: Map<String, ReactionData> = remember(reactions, clientId) {
         reactions.groupBy { it.emojiId }.mapValues { groupedReactions ->
@@ -440,13 +463,27 @@ private fun StandalonePostFooter(
             )
         }
     }
+    val showEmojiDialog = remember { mutableStateOf(false) }
 
-    Column(modifier = modifier) {
+    if (showEmojiDialog.value) {
+        EmojiDialog(
+            onDismissRequest = { showEmojiDialog.value = false },
+            onSelectEmoji = { emojiId ->
+                postActions.onClickReaction?.invoke(emojiId, true)
+                showEmojiDialog.value = false
+            }
+        )
+    }
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             reactionCount.forEach { (emoji, reactionData) ->
                 EmojiChip(
@@ -454,9 +491,27 @@ private fun StandalonePostFooter(
                     emojiId = emoji,
                     reactionCount = reactionData.reactionCount,
                     onClick = {
-                        onClickReaction?.invoke(emoji, !reactionData.hasClientReacted)
+                        postActions.onClickReaction?.invoke(emoji, !reactionData.hasClientReacted)
                     }
                 )
+            }
+            if (reactionCount.isNotEmpty() || postItemViewType is PostItemViewType.ThreadContextPostItem) {
+                Box(
+                    modifier = modifier
+                        .background(color = PostColors.EmojiChipColors.background, CircleShape)
+                        .clip(CircleShape)
+                        .clickable(onClick = {
+                            showEmojiDialog.value = true
+                        })
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(emojiHeight)
+                            .padding(5.dp),
+                        imageVector = Icons.Default.InsertEmoticon,
+                        contentDescription = null,
+                    )
+                }
             }
         }
 
@@ -464,15 +519,28 @@ private fun StandalonePostFooter(
             val replyCount = postItemViewType.answerPosts.size
 
             if (replyCount > 0) {
-                Text(
-                    style = MaterialTheme.typography.bodyMedium,
-                    text = pluralStringResource(
-                        id = R.plurals.communication_standalone_post_view_replies_button,
-                        count = replyCount,
-                        replyCount
-                    ),
-                    color = MaterialTheme.colorScheme.secondary
-                )
+                Row (
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        modifier = Modifier.size(16.dp),
+                        painter = painterResource(id = R.drawable.replies),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+
+                    Text(
+                        style = MaterialTheme.typography.bodyMedium,
+                        text = pluralStringResource(
+                            id = R.plurals.communication_standalone_post_view_replies_button,
+                            count = replyCount,
+                            replyCount
+                        ),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }
@@ -481,7 +549,7 @@ private fun StandalonePostFooter(
 private data class ReactionData(val reactionCount: Int, val hasClientReacted: Boolean)
 
 @Composable
-private fun AnimatedCounter(currentCount: Int) {
+private fun AnimatedCounter(currentCount: Int, selected: Boolean) {
     AnimatedContent(
         targetState = currentCount,
         transitionSpec = {
@@ -497,7 +565,11 @@ private fun AnimatedCounter(currentCount: Int) {
         },
         label = "Animate reaction count change"
     ) { targetCount ->
-        Text(text = "$targetCount")
+        Text(
+            text = "$targetCount",
+            fontSize = 12.sp,
+            color = if (selected) MaterialTheme.colorScheme.primary else Color.Unspecified
+        )
     }
 }
 
@@ -512,24 +584,34 @@ private fun EmojiChip(
     val shape = CircleShape
 
     val backgroundColor =
-        if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
+        if (selected) PostColors.EmojiChipColors.selectedBackgound else PostColors.EmojiChipColors.background
 
     Box(
         modifier = modifier
             .background(color = backgroundColor, shape)
             .clip(shape)
+            .heightIn(max = emojiHeight)
             .clickable(onClick = onClick)
+            .let {
+                if (selected) {
+                    it.border(1.dp, MaterialTheme.colorScheme.primary, shape)
+                } else {
+                    it
+                }
+            }
     ) {
         Row(
-            modifier = Modifier.padding(4.dp),
+            modifier = Modifier
+                .padding(2.dp)
+                .padding(horizontal = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
                 text = getUnicodeForEmojiId(emojiId = emojiId),
-                fontSize = 14.sp
+                fontSize = 12.sp
             )
 
-            AnimatedCounter(reactionCount)
+            AnimatedCounter(reactionCount, selected)
         }
     }
 }
