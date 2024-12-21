@@ -103,7 +103,6 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
 
     @Test
     fun `test GIVEN a basePost from user WHEN long pressing on another user's answer THEN resolve option is shown`() {
-        val answerContent = "Answer content"
         setupThreadUi(
             post = simpleThreadPostWithAnswer(
                 postAuthor = currentUser,
@@ -120,7 +119,6 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
 
     @Test
     fun `test GIVEN a basePost from another user WHEN long pressing on another user's answer as tutor THEN resolve option is shown`() {
-        val answerContent = "Answer content"
         setupThreadUi(
             post = simpleThreadPostWithAnswer(
                 postAuthor = otherUser,
@@ -138,7 +136,6 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
 
     @Test
     fun `test GIVEN a basePost from another user WHEN long pressing on a users answer THEN resolve option is not shown`() {
-        val answerContent = "Answer content"
         setupThreadUi(
             post = simpleThreadPostWithAnswer(
                 postAuthor = otherUser,

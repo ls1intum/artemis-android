@@ -25,7 +25,7 @@ data class AnswerPost(
     override val authorId: Long? = author?.id
 
     @Transient
-    override val parentAuthorId: Long? = author?.id
+    override val parentAuthorId: Long? = post?.authorId
 
     @Transient
     override val serverPostId: Long? = id
