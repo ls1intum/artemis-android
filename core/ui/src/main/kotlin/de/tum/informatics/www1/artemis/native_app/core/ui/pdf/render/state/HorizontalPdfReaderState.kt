@@ -18,13 +18,12 @@ class HorizontalPdfReaderState(
                     state.pdfFile.link,
                     state.pdfFile.authToken,
                     state.pdfFile.filename,
-                    state.isZoomEnabled,
-                    state.currentPage
+                    state.isZoomEnabled
                 )
             },
             restore = { restoredList ->
                 val pdfFile = PdfFile(restoredList[0] as String, restoredList[1] as String, restoredList[2] as String?)
-                val isZoomEnabled = restoredList[2] as Boolean
+                val isZoomEnabled = restoredList[3] as Boolean
 
                 HorizontalPdfReaderState(
                     pdfFile = pdfFile,

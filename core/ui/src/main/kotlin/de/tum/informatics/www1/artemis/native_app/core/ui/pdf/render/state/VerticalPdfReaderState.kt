@@ -55,11 +55,11 @@ class VerticalPdfReaderState(
             restore = { restoredList ->
                 VerticalPdfReaderState(
                     PdfFile(restoredList[0] as String, restoredList[1] as String, restoredList[2] as String?),
-                    restoredList[1] as Boolean,
+                    restoredList[3] as Boolean,
                 ).apply {
                     lazyState = LazyListState(
-                        firstVisibleItemIndex = restoredList[2] as Int,
-                        firstVisibleItemScrollOffset = restoredList[3] as Int
+                        firstVisibleItemIndex = restoredList[4] as Int,
+                        firstVisibleItemScrollOffset = restoredList[5] as Int
                     )
                 }
             }
