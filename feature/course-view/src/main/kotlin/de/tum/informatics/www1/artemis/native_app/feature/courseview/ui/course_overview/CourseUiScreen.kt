@@ -12,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -307,11 +306,7 @@ internal fun CourseUiScreen(
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit
 ) {
-    val topAppBarState = rememberTopAppBarState()
-
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-        topAppBarState
-    )
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
         modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
@@ -320,16 +315,23 @@ internal fun CourseUiScreen(
                 courseDataState = courseDataState,
                 onNavigateBack = onNavigateBack,
                 scrollBehavior = scrollBehavior,
-                selectedTabIndex = selectedTabIndex,
-                changeTab = updateSelectedTabIndex,
                 onReloadCourse = onReloadCourse
+            )
+        },
+        bottomBar = {
+            BottomNavigationBar(
+                selectedTabIndex = selectedTabIndex,
+                changeTab = updateSelectedTabIndex
             )
         }
     ) { padding ->
         BasicDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
+                .padding(
+                    top = padding.calculateTopPadding(),
+                    bottom = padding.calculateBottomPadding()
+                )
                 .consumeWindowInsets(WindowInsets.systemBars),
             dataState = courseDataState,
             loadingText = stringResource(id = R.string.course_ui_loading_course_loading),
@@ -337,6 +339,12 @@ internal fun CourseUiScreen(
             retryButtonText = stringResource(id = R.string.course_ui_loading_course_try_again),
             onClickRetry = onReloadCourse
         ) { course ->
+            // TODO: use proper navigation for tabs, see:
+            //      https://medium.com/@bharadwaj.rns/bottom-navigation-in-jetpack-compose-using-material3-c153ccbf0593
+            //      https://developer.android.com/develop/ui/compose/navigation
+            // TODO: show navigation bar only in the conversation overview for compact layout (not in the chat)
+            // TODO: remove course top bar when in chat (similar to exercise/lecture details)
+
             AnimatedContent(
                 targetState = selectedTabIndex,
                 transitionSpec = {
