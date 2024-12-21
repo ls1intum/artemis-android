@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":core:device"))
     implementation(project(":core:datastore"))
     implementation(project(":feature:push"))
+    implementation(project(":feature:login"))
 
     implementation(libs.placeholder.material)
     implementation(libs.androidx.browser)

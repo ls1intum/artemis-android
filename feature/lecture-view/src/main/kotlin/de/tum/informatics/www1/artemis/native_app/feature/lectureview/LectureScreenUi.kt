@@ -31,18 +31,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.NavType
-import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
-import io.github.fornewid.placeholder.material3.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
+import io.github.fornewid.placeholder.material3.placeholder
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
@@ -71,7 +69,7 @@ fun NavGraphBuilder.lecture(
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
 ) {
-    composable<LectureScreenUi>(
+    animatedComposable<LectureScreenUi>(
         deepLinks = listOf(
             navDeepLink {
                 uriPattern = "artemis://lectures/{lectureId}"

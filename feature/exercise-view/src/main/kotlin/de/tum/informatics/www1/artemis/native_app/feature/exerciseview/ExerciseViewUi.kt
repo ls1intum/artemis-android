@@ -14,7 +14,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
@@ -25,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.KSerializableNavType
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.ExerciseScreen
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.TextExerciseParticipationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.viewresult.ViewResultScreen
@@ -82,7 +82,7 @@ fun NavGraphBuilder.exercise(
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit
 ) {
-    composable<ExerciseViewUi>(
+    animatedComposable<ExerciseViewUi>(
         typeMap = mapOf(
             typeOf<ExerciseViewMode>() to KSerializableNavType(
                 isNullableAllowed = false,
@@ -131,7 +131,7 @@ fun NavGraphBuilder.exercise(
         }
 
         NavHost(navController = nestedNavController, startDestination = startDestination) {
-            composable<ExerciseViewUiNestedNavigation.Home> {
+            animatedComposable<ExerciseViewUiNestedNavigation.Home> {
                 ExerciseScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = exerciseViewModel,
@@ -156,7 +156,7 @@ fun NavGraphBuilder.exercise(
                 )
             }
 
-            composable<ExerciseViewUiNestedNavigation.Result> {
+            animatedComposable<ExerciseViewUiNestedNavigation.Result> {
                 ViewResultScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = exerciseViewModel,
@@ -164,7 +164,7 @@ fun NavGraphBuilder.exercise(
                 )
             }
 
-            composable<ExerciseViewUiNestedNavigation.ParticipateTextExercise> { backStackEntry ->
+            animatedComposable<ExerciseViewUiNestedNavigation.ParticipateTextExercise> { backStackEntry ->
                 val nestedRoute: ExerciseViewUiNestedNavigation.ParticipateTextExercise =
                     backStackEntry.toRoute()
 

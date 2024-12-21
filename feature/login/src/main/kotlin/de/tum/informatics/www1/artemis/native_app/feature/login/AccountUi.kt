@@ -3,9 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.login
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,13 +23,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,7 +54,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
@@ -66,6 +64,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Profi
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.linkTextColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.login.custom_instance_selection.CustomInstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginScreen
@@ -74,6 +74,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.register.Registe
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNotificationStorageService
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -83,7 +84,6 @@ import org.koin.core.parameter.parametersOf
 import java.io.IOException
 
 private const val ARG_REMEMBER_ME = "rememberMe"
-private const val NESTED_SAML2_LOGIN_ROUTE = "saml2_login"
 
 @Serializable
 private sealed interface NestedDestination {
@@ -127,7 +127,9 @@ fun NavGraphBuilder.loginScreen(
     onFinishedLoginFlow: (deepLink: String?) -> Unit,
     onRequestOpenSettings: () -> Unit
 ) {
-    composable<LoginScreen> {
+    animatedComposable<LoginScreen>(
+        enterTransition = { DefaultTransition.fadeIn },
+    ) {
         val screen = it.toRoute<LoginScreen>()
         val nextDestinationValue = screen.nextDestination
 
@@ -148,9 +150,7 @@ fun NavGraphBuilder.loginScreen(
         AnimatedContent(
             targetState = currentContent,
             transitionSpec = {
-                // Animation is always the same
-                slideInHorizontally { width -> width } togetherWith
-                        slideOutHorizontally { width -> -width }
+                DefaultTransition.navigateForward
             },
             label = "Login <-> Notification configuration"
         ) { content ->
@@ -260,6 +260,10 @@ private fun LoginUiScreen(
             )
         }
     ) { paddingValues ->
+        val sheetState = rememberModalBottomSheetState()
+        val scope = rememberCoroutineScope()
+        var showBottomSheet by remember { mutableStateOf(false) }
+
         NavHost(
             modifier = Modifier
                 .fillMaxSize()
@@ -269,7 +273,7 @@ private fun LoginUiScreen(
             navController = nestedNavController,
             startDestination = if (hasSelectedInstance) NestedDestination.Home else NestedDestination.InstanceSelection
         ) {
-            composable<NestedDestination.Home>() {
+            animatedComposable<NestedDestination.Home> {
                 AccountScreen(
                     modifier = Modifier.fillMaxSize(),
                     canSwitchInstance = !BuildConfig.hasInstanceRestriction,
@@ -281,19 +285,14 @@ private fun LoginUiScreen(
                     },
                     onNavigateToInstanceSelection = {
                         onNavigatedToInstanceSelection()
-
-                        nestedNavController.navigate(NestedDestination.InstanceSelection) {
-                            popUpTo<NestedDestination.Home> {
-                                inclusive = true
-                            }
-                        }
+                        showBottomSheet = true
                     },
                     onLoggedIn = onLoggedIn,
                     onClickSaml2Login = onClickSaml2Login
                 )
             }
 
-            composable<NestedDestination.CustomInstanceSelection> {
+            animatedComposable<NestedDestination.CustomInstanceSelection> {
                 CustomInstanceSelectionScreen(
                     modifier = Modifier
                         .fillMaxSize()
@@ -307,7 +306,7 @@ private fun LoginUiScreen(
                 }
             }
 
-            composable<NestedDestination.Login> {
+            animatedComposable<NestedDestination.Login> {
                 LoginScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = koinViewModel(),
@@ -316,7 +315,7 @@ private fun LoginUiScreen(
                 )
             }
 
-            composable<NestedDestination.Saml2Login> { backStack ->
+            animatedComposable<NestedDestination.Saml2Login> { backStack ->
                 val rememberMe = backStack.arguments?.getBoolean(ARG_REMEMBER_ME)
                 checkNotNull(rememberMe)
 
@@ -330,7 +329,7 @@ private fun LoginUiScreen(
                 )
             }
 
-            composable<NestedDestination.Register> {
+            animatedComposable<NestedDestination.Register> {
                 RegisterUi(
                     modifier = Modifier
                         .fillMaxSize()
@@ -343,29 +342,44 @@ private fun LoginUiScreen(
                     }
                 )
             }
+        }
 
-            composable<NestedDestination.InstanceSelection> {
-                val scope = rememberCoroutineScope()
+        val hideBottomSheet: (action: (suspend CoroutineScope.() -> Unit)?) -> Unit = { action ->
+            scope.launch {
+                if (action != null) {
+                    action()
+                }
+                sheetState.hide()
+            }.invokeOnCompletion {
+                if (!sheetState.isVisible) {
+                    showBottomSheet = false
+                }
+            }
+        }
 
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showBottomSheet = false
+                },
+                sheetState = sheetState
+            ) {
                 InstanceSelectionScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = Spacings.ScreenHorizontalSpacing),
                     availableInstances = ArtemisInstances.instances,
                     onSelectArtemisInstance = { serverUrl ->
-                        scope.launch {
+                        hideBottomSheet {
                             serverConfigurationService.updateServerUrl(serverUrl)
-                            nestedNavController.navigate(NestedDestination.Home) {
-                                popUpTo<NestedDestination.InstanceSelection> {
-                                    inclusive = true
-                                }
-                            }
                         }
                     },
                     onRequestOpenCustomInstanceSelection = {
-                        nestedNavController.navigate(
-                            NestedDestination.CustomInstanceSelection
-                        )
+                        hideBottomSheet {
+                            nestedNavController.navigate(
+                                NestedDestination.CustomInstanceSelection
+                            )
+                        }
                     }
                 )
             }
@@ -451,6 +465,7 @@ private fun AccountUi(
                         bottom = WindowInsets.systemBars
                             .asPaddingValues()
                             .calculateBottomPadding()
+                        + 8.dp
                     ),
                 text = AnnotatedString(stringResource(id = R.string.account_change_artemis_instance_label)),
                 style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.linkTextColor),
@@ -574,7 +589,7 @@ private fun LoginOrRegister(
             onClickLogin
         )
 
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 8.dp, end = 8.dp, top = 24.dp, bottom = 8.dp)
