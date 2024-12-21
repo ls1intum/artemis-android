@@ -141,7 +141,6 @@ internal fun SinglePageConversationBody(
                     modifier = modifier,
                     courseId = courseId,
                     onNavigateToConversation = openConversation,
-                    //onNavigateToCreateChannel = {},
                     onNavigateBack = { configuration = config.prevConfiguration }
                 )
             }
