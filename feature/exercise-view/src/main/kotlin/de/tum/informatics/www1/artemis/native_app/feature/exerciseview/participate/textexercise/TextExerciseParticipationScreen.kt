@@ -41,9 +41,9 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.isInitializationAfterDueDate
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.isInFuture
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.getProblemStatementWebViewState
 

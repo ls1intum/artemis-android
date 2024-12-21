@@ -32,11 +32,12 @@ dependencies {
     debugApi(libs.coil.compose.core)
     debugApi(libs.coil.test)
     api(libs.accompanist.webview)
+    api(libs.noties.markwon.core)
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.browser)
 
-    implementation(libs.noties.markwon.core)
     implementation(libs.noties.markwon.ext.strikethrough)
     implementation(libs.noties.markwon.ext.tables)
     implementation(libs.noties.markwon.html)

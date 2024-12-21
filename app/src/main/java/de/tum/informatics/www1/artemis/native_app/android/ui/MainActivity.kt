@@ -37,6 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalWindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.WindowSizeClassProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.link_resolving.LocalMarkdownLinkResolver
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.courseRegistration
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.navigateToCourseRegistration
@@ -255,7 +256,8 @@ class MainActivity : AppCompatActivity(),
         CompositionLocalProvider(
             LocalWindowSizeClassProvider provides windowSizeClassProvider,
             LocalLinkOpener provides linkOpener,
-            LocalArtemisImageProvider provides koinInject()
+            LocalArtemisImageProvider provides koinInject(),
+            LocalMarkdownLinkResolver provides koinInject()
         ) {
             // Use jetpack compose navigation for the navigation logic.
             NavHost(navController = navController, startDestination = startDestination) {
