@@ -37,7 +37,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
     val answers = (0..2).map { index ->
         AnswerPostPojo(
             parentPostId = "client-id",
-            parentAuthorId = clientId,
+            parentAuthorIdCache = AnswerPostPojo.ParentAuthorIdCache(clientId),
             postId = "answer-client-id-$index",
             resolvesPost = false,
             basePostingCache = AnswerPostPojo.BasePostingCache(
