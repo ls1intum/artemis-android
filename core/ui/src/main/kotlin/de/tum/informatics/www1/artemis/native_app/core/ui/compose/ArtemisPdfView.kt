@@ -34,6 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfFile
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.HorizontalPdfView
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.VerticalPdfView
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.HorizontalPdfReaderState
+import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.PdfReaderState
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.VerticalPdfReaderState
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.rememberHorizontalPdfReaderState
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.state.rememberVerticalPdfReaderState
@@ -56,7 +57,7 @@ fun ArtemisPdfView(
         isZoomEnabled = true,
     )
 
-    val pdfState = if (isVertical.value) verticalPdfState else horizontalPdfState
+    var pdfState = if (isVertical.value) verticalPdfState else horizontalPdfState
 
     val showMenu = remember { mutableStateOf(false) }
 
@@ -124,52 +125,24 @@ fun ArtemisPdfView(
                 Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null)
             }
 
-            DropdownMenu(
+            PdfActionDropDownMenu(
                 modifier = Modifier,
-                expanded = showMenu.value,
-                onDismissRequest = { showMenu.value = false }
-            ) {
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Download,
-                            contentDescription = null
-                        )
-                    },
-                    text = { Text(stringResource(R.string.pdf_view_download_menu_item)) },
-                    onClick = {
-                        showMenu.value = false
-                        verticalPdfState.file?.let { pdfFile.downloadPdf(context) }
-                    }
-                )
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = null
-                        )
-                    },
-                    text = { Text(stringResource(R.string.pdf_view_share_menu_item)) },
-                    onClick = {
-                        showMenu.value = false
-                        verticalPdfState.file?.let { pdfFile.sharePdf(context, it) }
-                    }
-                )
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Icon(
-                            modifier = Modifier.height(19.dp),
-                            painter = painterResource(id = R.drawable.rotate),
-                            contentDescription = null
-                        )
-                    },
-                    text = { Text(stringResource(R.string.pdf_view_rotate_menu_item)) },
-                    onClick = {
-                        showMenu.value = false
-                        isVertical.value = !isVertical.value
-                    }
-                )
-            }
+                isExpanded = showMenu.value,
+                onDismissRequest = { showMenu.value = false },
+                downloadPdf = {
+                    showMenu.value = false
+                    pdfState.file?.let { pdfFile.downloadPdf(context) }
+                },
+                sharePdf = {
+                    showMenu.value = false
+                    pdfState.file?.let { pdfFile.sharePdf(context, it) }
+                },
+                toggleViewMode = {
+                    showMenu.value = false
+                    pdfState = if (isVertical.value) horizontalPdfState else verticalPdfState
+                    isVertical.value = !isVertical.value
+                }
+            )
         }
 
         if (!pdfState.isLoaded) {
@@ -194,23 +167,82 @@ fun ArtemisPdfView(
                 .padding(16.dp),
             contentAlignment = Alignment.TopEnd
         ) {
-            Column(
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                        shape = MaterialTheme.shapes.medium
-                    )
-                    .padding(8.dp)
-            ) {
-                Text(
-                    text = stringResource(
-                        R.string.pdf_view_page_count,
-                        pdfState.currentPage,
-                        pdfState.pdfPageCount
-                    ),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+            PageCountText(
+                modifier = Modifier,
+                pdfState = pdfState
+            )
         }
+    }
+}
+
+@Composable
+private fun PageCountText(
+    modifier: Modifier,
+    pdfState: PdfReaderState
+) {
+    Box(
+        modifier = modifier
+            .background(
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                shape = MaterialTheme.shapes.medium
+            )
+            .padding(8.dp)
+    ) {
+        Text(
+            text = stringResource(
+                R.string.pdf_view_page_count,
+                pdfState.currentPage,
+                pdfState.pdfPageCount
+            ),
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+@Composable
+private fun PdfActionDropDownMenu(
+    modifier: Modifier,
+    isExpanded: Boolean,
+    onDismissRequest: () -> Unit,
+    downloadPdf: () -> Unit,
+    sharePdf: () -> Unit,
+    toggleViewMode: () -> Unit,
+) {
+    DropdownMenu(
+        modifier = Modifier,
+        expanded = isExpanded,
+        onDismissRequest = onDismissRequest
+    ) {
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Download,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(R.string.pdf_view_download_menu_item)) },
+            onClick = downloadPdf
+        )
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(R.string.pdf_view_share_menu_item)) },
+            onClick = sharePdf
+        )
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    modifier = Modifier.height(19.dp),
+                    painter = painterResource(id = R.drawable.rotate),
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(R.string.pdf_view_rotate_menu_item)) },
+            onClick = toggleViewMode
+        )
     }
 }

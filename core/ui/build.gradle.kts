@@ -21,7 +21,6 @@ dependencies {
     api(libs.androidx.compose.material.iconsExtended)
     api(libs.androidx.compose.material3)
     api(libs.androidx.compose.material3.windowsizeclass)
-    implementation(libs.androidx.browser)
     debugApi(libs.androidx.compose.ui.tooling)
     api(libs.androidx.compose.ui.tooling.preview)
     api(libs.androidx.compose.ui.util)
@@ -33,11 +32,12 @@ dependencies {
     debugApi(libs.coil.compose.core)
     debugApi(libs.coil.test)
     api(libs.accompanist.webview)
+    api(libs.noties.markwon.core)
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.browser)
 
-    api(libs.noties.markwon.core)
     implementation(libs.noties.markwon.ext.strikethrough)
     implementation(libs.noties.markwon.ext.tables)
     implementation(libs.noties.markwon.html)
