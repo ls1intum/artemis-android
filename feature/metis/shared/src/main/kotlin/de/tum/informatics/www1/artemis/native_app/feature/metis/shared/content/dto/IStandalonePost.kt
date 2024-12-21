@@ -15,4 +15,7 @@ interface IStandalonePost : IBasePost {
     val key: Any
 
     val standalonePostId: StandalonePostId?
+
+    val orderedAnswerPostings: List<IAnswerPost>
+        get() = answers?.sortedBy { it.creationDate } ?: emptyList()
 }

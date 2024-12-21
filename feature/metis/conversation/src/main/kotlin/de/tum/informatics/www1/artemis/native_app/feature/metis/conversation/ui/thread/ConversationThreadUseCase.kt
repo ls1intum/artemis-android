@@ -8,11 +8,12 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -56,7 +57,7 @@ internal class ConversationThreadUseCase(
     /**
      * The post data state flow as loading from the server.
      */
-    val post: StateFlow<DataState<PostPojo>> = postId.flatMapLatest { postId ->
+    val post: StateFlow<DataState<IStandalonePost>> = postId.flatMapLatest { postId ->
         when (postId) {
             is StandalonePostId.ClientSideId -> metisStorageService
                 .getStandalonePost(postId.clientSideId)
@@ -100,8 +101,8 @@ internal class ConversationThreadUseCase(
     private suspend fun handleServerLoadedStandalonePost(
         metisContext: MetisContext,
         standalonePostDataState: DataState<StandalonePost>
-    ): Flow<DataState<PostPojo>> {
-        val failureFlow: Flow<DataState<PostPojo>> =
+    ): Flow<DataState<out IStandalonePost>> {
+        val failureFlow: Flow<DataState<IStandalonePost>> =
             flowOf(DataState.Failure(RuntimeException("Something went wrong while loading the post.")))
 
         return when (standalonePostDataState) {
