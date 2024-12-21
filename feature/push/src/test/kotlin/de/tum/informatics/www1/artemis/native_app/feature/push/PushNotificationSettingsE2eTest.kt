@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasAnyAncestor
@@ -41,11 +40,7 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.koin.android.ext.koin.androidContext
-import org.koin.compose.LocalKoinApplication
-import org.koin.compose.LocalKoinScope
-import org.koin.core.annotation.KoinInternalApi
 import org.koin.dsl.module
-import org.koin.mp.KoinPlatformTools
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
@@ -203,7 +198,6 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
         }
     }
 
-    @OptIn(KoinInternalApi::class)
     private fun setupUiAndViewModel(): PushNotificationSettingsViewModel {
         val viewModel = PushNotificationSettingsViewModel(
             notificationSettingsService = get(),
@@ -215,16 +209,10 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
         )
 
         composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext()
-                    .get().scopeRegistry.rootScope,
-                LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
-            ) {
-                PushNotificationSettingsUi(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = viewModel
-                )
-            }
+            PushNotificationSettingsUi(
+                modifier = Modifier.fillMaxSize(),
+                viewModel = viewModel
+            )
         }
 
         return viewModel

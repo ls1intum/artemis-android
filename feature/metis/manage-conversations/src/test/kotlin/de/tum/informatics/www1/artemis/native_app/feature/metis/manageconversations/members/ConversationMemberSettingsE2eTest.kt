@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.members
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assert
@@ -31,10 +30,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metistest.Conversation
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
-import org.koin.compose.LocalKoinApplication
-import org.koin.compose.LocalKoinScope
-import org.koin.core.annotation.KoinInternalApi
-import org.koin.mp.KoinPlatformTools
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.seconds
@@ -188,7 +183,6 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
         )
     }
 
-    @OptIn(KoinInternalApi::class)
     private fun setupUiAndViewModel() {
         val viewModel = ConversationMembersViewModel(
             initialCourseId = course.id!!,
@@ -203,18 +197,12 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
         )
 
         composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext()
-                    .get().scopeRegistry.rootScope,
-                LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
-            ) {
-                ConversationMembersBody(
-                    modifier = Modifier.fillMaxSize(),
-                    courseId = course.id!!,
-                    conversationId = channel.id,
-                    viewModel = viewModel
-                )
-            }
+            ConversationMembersBody(
+                modifier = Modifier.fillMaxSize(),
+                courseId = course.id!!,
+                conversationId = channel.id,
+                viewModel = viewModel
+            )
         }
 
         testDispatcher.scheduler.advanceTimeBy(2.seconds)

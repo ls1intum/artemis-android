@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lecture_view
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasParent
@@ -55,10 +54,6 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.koin.android.ext.koin.androidContext
-import org.koin.compose.LocalKoinApplication
-import org.koin.compose.LocalKoinScope
-import org.koin.core.annotation.KoinInternalApi
-import org.koin.mp.KoinPlatformTools
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
@@ -233,7 +228,6 @@ class LectureE2eTest : BaseComposeTest() {
         }
     }
 
-    @OptIn(KoinInternalApi::class)
     private fun setupViewModelAndUi(): LectureViewModel {
         val viewModel = LectureViewModel(
             lectureId = lecture.id!!,
@@ -249,25 +243,19 @@ class LectureE2eTest : BaseComposeTest() {
         )
 
         composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext()
-                    .get().scopeRegistry.rootScope,
-                LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
-            ) {
-                LectureScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    courseId = course.id!!,
-                    lectureId = lecture.id!!,
-                    viewModel = viewModel,
-                    navController = rememberNavController(),
-                    onNavigateBack = { },
-                    onViewExercise = {},
-                    onNavigateToExerciseResultView = {},
-                    onNavigateToTextExerciseParticipation = { _, _ -> },
-                    onParticipateInQuiz = { _, _ -> },
-                    onClickViewQuizResults = { _, _ -> }
-                )
-            }
+            LectureScreen(
+                modifier = Modifier.fillMaxSize(),
+                courseId = course.id!!,
+                lectureId = lecture.id!!,
+                viewModel = viewModel,
+                navController = rememberNavController(),
+                onNavigateBack = { },
+                onViewExercise = {},
+                onNavigateToExerciseResultView = {},
+                onNavigateToTextExerciseParticipation = { _, _ -> },
+                onParticipateInQuiz = { _, _ -> },
+                onClickViewQuizResults = { _, _ -> }
+            )
         }
 
         composeTestRule.waitUntilAtLeastOneExists(
