@@ -82,9 +82,9 @@ abstract class BaseChatUITest : BaseComposeTest() {
         post: IStandalonePost,
         onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)? = { CompletableDeferred() },
         onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)? = { CompletableDeferred() },
-        isAbleToPin: Boolean = true,
+        isAbleToPin: Boolean = false,
         isAtLeastTutorInCourse: Boolean = false,
-        hasModerationRights: Boolean = true,
+        hasModerationRights: Boolean = false,
     ) {
         composeTestRule.setContent {
             MetisThreadUi(
@@ -118,6 +118,8 @@ abstract class BaseChatUITest : BaseComposeTest() {
     fun setupChatUi(
         posts: List<IStandalonePost>,
         currentUser: User = User(id = clientId),
+        isAbleToPin: Boolean = false,
+        isAtLeastTutorInCourse: Boolean = false,
         hasModerationRights: Boolean = false,
         onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure> = { CompletableDeferred() }
     ) {
@@ -129,8 +131,8 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 posts = PostsDataState.Loaded.WithList(list, PostsDataState.NotLoading),
                 clientId = currentUser.id,
                 postActionFlags = PostActionFlags(
-                    isAbleToPin = true,
-                    isAtLeastTutorInCourse = false,
+                    isAbleToPin = isAbleToPin,
+                    isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                     hasModerationRights = hasModerationRights,
                 ),
                 listContentPadding = PaddingValues(),
