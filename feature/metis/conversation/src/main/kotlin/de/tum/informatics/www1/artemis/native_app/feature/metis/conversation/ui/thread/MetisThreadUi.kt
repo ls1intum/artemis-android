@@ -63,7 +63,7 @@ import kotlinx.coroutines.Deferred
 import org.koin.compose.koinInject
 
 internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
-internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
+internal fun testTagForAnswerPost(answerPostId: String?) = "answerPost$answerPostId"
 
 /**
  * Displays a single post with its replies.
@@ -330,13 +330,13 @@ private fun PostAndRepliesList(
 
         itemsIndexed(
             post.orderedAnswerPostings,
-            key = { _, post -> post.clientPostId!! }) { index, answerPost ->
+            key = { index, post -> post.clientPostId ?: index }) { index, answerPost ->
             val postActions = rememberPostActions(answerPost)
 
             PostWithBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag(testTagForAnswerPost(answerPost.clientPostId!!)),
+                    .testTag(testTagForAnswerPost(answerPost.clientPostId)),
                 post = answerPost,
                 postActions = postActions,
                 postItemViewType = PostItemViewType.ThreadAnswerItem,

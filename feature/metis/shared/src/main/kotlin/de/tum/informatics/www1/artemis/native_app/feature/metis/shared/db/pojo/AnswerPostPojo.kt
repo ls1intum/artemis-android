@@ -21,6 +21,13 @@ data class AnswerPostPojo(
     @Relation(
         entity = BasePostingEntity::class,
         entityColumn = "id",
+        parentColumn = "parent_post_id",
+        projection = ["author_id"]
+    )
+    override val parentAuthorId: Long,
+    @Relation(
+        entity = BasePostingEntity::class,
+        entityColumn = "id",
         parentColumn = "post_id",
         projection = ["author_id", "creation_date", "updated_date", "content", "author_role"]
     )
