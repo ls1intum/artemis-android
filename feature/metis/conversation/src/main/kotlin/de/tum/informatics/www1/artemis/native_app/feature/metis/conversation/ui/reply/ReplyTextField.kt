@@ -16,12 +16,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -316,6 +319,9 @@ private fun FormattingOptions(
     currentTextFieldValue: TextFieldValue,
     onTextChanged: (TextFieldValue) -> Unit
 ) {
+
+    var isDropdownExpanded by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -406,33 +412,56 @@ private fun FormattingOptions(
             )
         }
 
-        // OrderedList Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.OrderedList,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
-            )
+        Box(modifier = Modifier.align(Alignment.Top)) {
+            IconButton(
+                onClick = { isDropdownExpanded = true }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.List,
+                    contentDescription = null
+                )
+            }
 
-        }) {
-            Icon(
-                imageVector = Icons.Default.FormatListNumbered,
-                contentDescription = "Ordered List"
-            )
-        }
-
-        // UnorderedList Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.UnorderedList,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
-            )
-        }) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.FormatListBulleted,
-                contentDescription = "Unordered List"
-            )
+            DropdownMenu(
+                expanded = isDropdownExpanded,
+                onDismissRequest = { isDropdownExpanded = false }
+            ) {
+                // Unordered List item
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.FormatListBulleted,
+                            contentDescription = null
+                        )
+                    },
+                    text = { Text(text = stringResource(R.string.reply_format_unordered)) },
+                    onClick = {
+                        isDropdownExpanded = false
+                        applyMarkdownStyle(
+                            style = MarkdownStyle.UnorderedList,
+                            currentTextFieldValue = currentTextFieldValue,
+                            onTextChanged = onTextChanged
+                        )
+                    }
+                )
+                // Ordered List item
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.FormatListNumbered,
+                            contentDescription = null
+                        )
+                    },
+                    text = { Text(stringResource(R.string.reply_format_ordered)) },
+                    onClick = {
+                        isDropdownExpanded = false
+                        applyMarkdownStyle(
+                            style = MarkdownStyle.OrderedList,
+                            currentTextFieldValue = currentTextFieldValue,
+                            onTextChanged = onTextChanged
+                        )
+                    }
+                )
+            }
         }
     }
 }
@@ -464,7 +493,10 @@ private fun applyMarkdownStyle(
             )
         } else {
             // Other styles
-            val newText = text.substring(0, selection.start) + startTag + endTag + text.substring(selection.end)
+            val newText = text.substring(
+                0,
+                selection.start
+            ) + startTag + endTag + text.substring(selection.end)
             val newCursorPosition = selection.start + startTag.length
             onTextChanged(
                 TextFieldValue(
