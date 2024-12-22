@@ -7,7 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.impl
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.impl.DashboardServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.impl.SurveyHintServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CourseOverviewViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val dashboardModule = module {

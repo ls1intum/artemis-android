@@ -1,4 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.android.ui.theme
+
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -10,11 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-
-@Immutable
-data class ExtendedColorScheme(
-    val customColor: ColorFamily,
-)
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -242,60 +238,6 @@ private val highContrastDarkColorScheme = darkColorScheme(
     surfaceContainer = surfaceContainerDarkHighContrast,
     surfaceContainerHigh = surfaceContainerHighDarkHighContrast,
     surfaceContainerHighest = surfaceContainerHighestDarkHighContrast,
-)
-
-val extendedLight = ExtendedColorScheme(
-  customColor = ColorFamily(
-  customColorLight,
-  onCustomColorLight,
-  customColorContainerLight,
-  onCustomColorContainerLight,
-  ),
-)
-
-val extendedDark = ExtendedColorScheme(
-  customColor = ColorFamily(
-  customColorDark,
-  onCustomColorDark,
-  customColorContainerDark,
-  onCustomColorContainerDark,
-  ),
-)
-
-val extendedLightMediumContrast = ExtendedColorScheme(
-  customColor = ColorFamily(
-  customColorLightMediumContrast,
-  onCustomColorLightMediumContrast,
-  customColorContainerLightMediumContrast,
-  onCustomColorContainerLightMediumContrast,
-  ),
-)
-
-val extendedLightHighContrast = ExtendedColorScheme(
-  customColor = ColorFamily(
-  customColorLightHighContrast,
-  onCustomColorLightHighContrast,
-  customColorContainerLightHighContrast,
-  onCustomColorContainerLightHighContrast,
-  ),
-)
-
-val extendedDarkMediumContrast = ExtendedColorScheme(
-  customColor = ColorFamily(
-  customColorDarkMediumContrast,
-  onCustomColorDarkMediumContrast,
-  customColorContainerDarkMediumContrast,
-  onCustomColorContainerDarkMediumContrast,
-  ),
-)
-
-val extendedDarkHighContrast = ExtendedColorScheme(
-  customColor = ColorFamily(
-  customColorDarkHighContrast,
-  onCustomColorDarkHighContrast,
-  customColorContainerDarkHighContrast,
-  onCustomColorContainerDarkHighContrast,
-  ),
 )
 
 @Immutable

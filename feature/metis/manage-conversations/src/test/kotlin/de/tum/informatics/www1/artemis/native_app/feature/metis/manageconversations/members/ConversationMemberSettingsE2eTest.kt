@@ -38,6 +38,7 @@ import org.koin.mp.KoinPlatformTools
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.seconds
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R as R_shared
 
 @OptIn(ExperimentalTestApi::class)
 @Category(EndToEndTest::class)
@@ -81,7 +82,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
             .onNodeWithTag(testTagForMember(user1Username))
             .performScrollTo()
             .assert(hasText(user1Username))
-            .assert(hasContentDescription(context.getString(R.string.conversation_members_content_description_moderator))
+            .assert(hasContentDescription(context.getString(R_shared.string.user_role_icon_content_description_moderator))
         )
 
         composeTestRule
@@ -89,7 +90,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
             .performScrollTo()
             .assert(
                 hasText(user2Username) and !
-                    hasContentDescription(context.getString(R.string.conversation_members_content_description_moderator))
+                    hasContentDescription(context.getString(R_shared.string.user_role_icon_content_description_moderator))
             )
 
         composeTestRule
@@ -97,7 +98,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
             .performScrollTo()
             .assert(
                 hasText(user2Username) and !
-                    hasContentDescription(context.getString(R.string.conversation_members_content_description_moderator))
+                    hasContentDescription(context.getString(R_shared.string.user_role_icon_content_description_moderator))
             )
     }
 
@@ -178,7 +179,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
             .performClick()
 
         val isModeratorCheck = hasContentDescription(
-            context.getString(R.string.conversation_members_content_description_moderator)
+            context.getString(R_shared.string.user_role_icon_content_description_moderator)
         )
 
         composeTestRule.waitUntilExactlyOneExists(

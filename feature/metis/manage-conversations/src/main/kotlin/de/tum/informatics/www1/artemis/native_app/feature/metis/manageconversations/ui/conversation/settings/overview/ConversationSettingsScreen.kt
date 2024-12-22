@@ -26,7 +26,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.navigateToAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.navigateToConversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ConversationDetailsRoute
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 fun NavController.navigateToConversationSettingsScreen(
@@ -75,7 +75,7 @@ fun ConversationSettingsScreen(
 ) {
     ConversationSettingsScreen(
         modifier = modifier,
-        viewModel = getViewModel { parametersOf(courseId, conversationId) },
+        viewModel = koinViewModel { parametersOf(courseId, conversationId) },
         courseId = courseId,
         conversationId = conversationId,
         onNavigateBack = onNavigateBack,

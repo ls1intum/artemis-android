@@ -21,8 +21,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.i
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.androidx.workmanager.dsl.workerOf
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val pushModule = module {

@@ -77,7 +77,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -311,7 +310,7 @@ private fun LoginUiScreen(
             composable<NestedDestination.Login> {
                 LoginScreen(
                     modifier = Modifier.fillMaxSize(),
-                    viewModel = getViewModel(),
+                    viewModel = koinViewModel(),
                     onLoggedIn = onLoggedIn,
                     onClickSaml2Login = onClickSaml2Login
                 )

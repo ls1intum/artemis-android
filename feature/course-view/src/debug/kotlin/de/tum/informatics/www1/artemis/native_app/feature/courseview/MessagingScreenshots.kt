@@ -38,7 +38,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextManager
@@ -222,8 +221,8 @@ fun `Metis - Conversation Channel`() {
                         modifier = Modifier.fillMaxSize(),
                         courseId = ScreenshotCourse.id!!,
                         conversationId = sharedConversation.id,
-                        conversationTitle = sharedConversation.humanReadableName,
-                        isConversationLoaded = true,
+                        conversationDataState = DataState.Success(sharedConversation),
+                        clientId = 1L,
                         query = "",
                         onUpdateQuery = {},
                         onNavigateBack = {},
@@ -265,7 +264,8 @@ fun `Metis - Conversation Channel`() {
                                 bottomItem = null,
                                 onClickViewPost = {},
                                 onRequestRetrySend = {},
-                                title = ""
+                                title = "",
+                                onFileSelected = { _ ->}
                             )
                         }
                     )

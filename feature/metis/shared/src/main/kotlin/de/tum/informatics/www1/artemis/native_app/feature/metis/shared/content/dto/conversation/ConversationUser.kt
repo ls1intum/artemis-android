@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation
 
 import de.tum.informatics.www1.artemis.native_app.core.model.account.BaseAccount
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -24,4 +25,13 @@ data class ConversationUser(
     val isEditor: Boolean = false,
     val isTeachingAssistant: Boolean = false,
     val isStudent: Boolean = false
-) : BaseAccount
+) : BaseAccount {
+
+    fun getUserRole(): UserRole {
+        return when {
+            isInstructor -> UserRole.INSTRUCTOR
+            isTeachingAssistant || isEditor -> UserRole.TUTOR
+            else -> UserRole.USER
+        }
+    }
+}

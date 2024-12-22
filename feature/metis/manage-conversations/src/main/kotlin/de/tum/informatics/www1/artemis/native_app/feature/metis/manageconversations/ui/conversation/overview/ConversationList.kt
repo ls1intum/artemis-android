@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Forum
-import androidx.compose.material.icons.filled.Groups2
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.NotInterested
 import androidx.compose.material.icons.filled.NotificationsActive
@@ -35,6 +34,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -42,6 +42,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,17 +51,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.ChannelIcons
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.CommunicationColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ConversationIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 
 internal const val TEST_TAG_CONVERSATION_LIST = "conversation list"
@@ -98,6 +97,7 @@ internal fun ConversationList(
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
     trailingContent: LazyListScope.() -> Unit
 ) {
+    val clientId by viewModel.clientIdOrDefault.collectAsState()
 
     val listWithHeader: LazyListScope.(ConversationCollections.ConversationCollection<*>, String, String, Int, () -> Unit, @Composable () -> Unit) -> Unit =
         { collection, key, suffix, textRes, onClick, icon ->
@@ -112,6 +112,7 @@ internal fun ConversationList(
             conversationList(
                 keySuffix = suffix,
                 conversations = collection,
+                clientId = clientId,
                 showPrefix = collection.showPrefix,
                 onNavigateToConversation = onNavigateToConversation,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
@@ -217,6 +218,7 @@ private fun LazyListScope.conversationSectionHeader(
                 .fillMaxWidth()
                 .testTag(key)
         ) {
+            HorizontalDivider()
 
             Row(
                 modifier = Modifier
@@ -236,7 +238,7 @@ private fun LazyListScope.conversationSectionHeader(
                             .weight(1f)
                             .padding(start = 8.dp),
                         text = stringResource(id = text),
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        style = MaterialTheme.typography.titleSmall
                     )
                 }
 
@@ -247,12 +249,12 @@ private fun LazyListScope.conversationSectionHeader(
                     Icon(
                         imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.AutoMirrored.Filled.ArrowRight,
                         contentDescription = null,
-                        modifier = Modifier.size(32.dp),
-                        tint = CommunicationColors.ArtemisBlue
+                        modifier = Modifier.size(32.dp)
                     )
                 }
             }
 
+            HorizontalDivider()
         }
     }
 }
@@ -260,6 +262,7 @@ private fun LazyListScope.conversationSectionHeader(
 private fun <T : Conversation> LazyListScope.conversationList(
     keySuffix: String,
     conversations: ConversationCollections.ConversationCollection<T>,
+    clientId: Long,
     showPrefix: Boolean,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
@@ -278,6 +281,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
                 .testTag(itemTag),
             itemBaseTag = itemTag,
             conversation = conversation,
+            clientId = clientId,
             showPrefix = showPrefix,
             onNavigateToConversation = { onNavigateToConversation(conversation.id) },
             onToggleMarkAsFavourite = {
@@ -297,6 +301,7 @@ private fun ConversationListItem(
     modifier: Modifier = Modifier,
     itemBaseTag: String,
     conversation: Conversation,
+    clientId: Long,
     showPrefix: Boolean,
     onNavigateToConversation: () -> Unit,
     onToggleMarkAsFavourite: () -> Unit,
@@ -337,99 +342,47 @@ private fun ConversationListItem(
         else -> conversation.humanReadableName
     }
 
-    Box(modifier = modifier.padding(horizontal = 16.dp)) {
-        when (conversation) {
-            is ChannelChat -> {
-                ListItem(
-                    modifier = Modifier
-                        .clickable(onClick = onNavigateToConversation)
-                        .padding(start = 8.dp),
-                    leadingContent = {
-                        ChannelIcons(channelChat = conversation, hasUnreadMessages = unreadMessagesCount > 0)
-                    },
-                    headlineContent = {
-                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Text(
-                                text = displayName,
-                                maxLines = 1,
-                                color = headlineColor,
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
-                                )
-                            )
-                        }
-                    },
-                    trailingContent = {
-                        UnreadMessages(unreadMessagesCount = unreadMessagesCount)
-                    }
+    Box(modifier = modifier) {
+        ListItem(
+            modifier = Modifier.clickable(onClick = onNavigateToConversation),
+            leadingContent = {
+                ConversationIcon(
+                    conversation = conversation,
+                    clientId = clientId
                 )
+            },
+            headlineContent = {
+                Text(
+                    text = displayName,
+                    maxLines = 1,
+                    color = headlineColor
+                )
+            },
+            trailingContent = {
+                UnreadMessages(unreadMessagesCount = unreadMessagesCount)
             }
+        )
 
-            is GroupChat -> {
-                ListItem(
-                    modifier = Modifier
-                        .clickable(onClick = onNavigateToConversation)
-                        .padding(start = 8.dp),
-                    headlineContent = {
-                        Text(
-                            text = displayName,
-                            color = headlineColor,
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
-                            )
-                        )
-                    },
-                    leadingContent = {
-                        Icon(imageVector = Icons.Default.Groups2, contentDescription = null)
-                    },
-                    trailingContent = {
-                        UnreadMessages(unreadMessagesCount = unreadMessagesCount)
-                    }
-                )
-            }
-
-            is OneToOneChat -> {
-                ListItem(
-                    modifier = Modifier
-                        .clickable(onClick = onNavigateToConversation)
-                        .padding(start = 8.dp),
-                    headlineContent = {
-                        Text(
-                            text = displayName,
-                            color = headlineColor,
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
-                            )
-                        )
-                    },
-                    trailingContent = {
-                        UnreadMessages(unreadMessagesCount = unreadMessagesCount)
-                    }
-                )
-            }
+        IconButton(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .testTag(tagForConversationOptions(itemBaseTag)),
+            onClick = { isContextDialogShown = true }
+        ) {
+            Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null)
         }
 
-        Box(modifier = Modifier.align(Alignment.CenterEnd)) {
-            IconButton(
-                modifier = Modifier.testTag(tagForConversationOptions(itemBaseTag)),
-                onClick = { isContextDialogShown = true }
-            ) {
-                Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null)
-            }
-
-            ConversationListItemDropdownMenu(
-                modifier = Modifier,
-                isContextDialogShown = isContextDialogShown,
-                onDismissRequest = onDismissRequest,
-                conversation = conversation,
-                onToggleMarkAsFavourite = onToggleMarkAsFavourite,
-                onToggleHidden = onToggleHidden,
-                onToggleMuted = onToggleMuted
-            )
-        }
+        ConversationListItemDropdownMenu(
+            modifier = Modifier.align(Alignment.TopEnd),
+            isContextDialogShown = isContextDialogShown,
+            onDismissRequest = onDismissRequest,
+            conversation = conversation,
+            onToggleMarkAsFavourite = onToggleMarkAsFavourite,
+            onToggleHidden = onToggleHidden,
+            onToggleMuted = onToggleMuted
+        )
     }
 }
-
 
 @Composable
 private fun ConversationListItemDropdownMenu(
@@ -517,18 +470,18 @@ private fun UnreadMessages(modifier: Modifier = Modifier, unreadMessagesCount: L
     if (unreadMessagesCount > 0) {
         Box(
             modifier = modifier
-                .padding(end = 32.dp)
+                .padding(end = 24.dp)
                 .size(24.dp)
                 .aspectRatio(1f)
                 .background(
-                    CommunicationColors.ArtemisBlue,
+                    MaterialTheme.colorScheme.primaryContainer,
                     CircleShape
                 ),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = unreadMessagesCount.toString(),
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }
