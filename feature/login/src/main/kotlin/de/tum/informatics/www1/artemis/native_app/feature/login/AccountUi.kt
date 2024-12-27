@@ -88,8 +88,6 @@ private const val ARG_REMEMBER_ME = "rememberMe"
 @Serializable
 private sealed interface NestedDestination {
     @Serializable
-    data object InstanceSelection : NestedDestination
-    @Serializable
     data object CustomInstanceSelection : NestedDestination
     @Serializable
     data object Home : NestedDestination
@@ -212,12 +210,6 @@ private fun LoginUiScreen(
     val nestedNavController = rememberNavController()
     val serverConfigurationService: ServerConfigurationService = koinInject()
 
-    val hasSelectedInstance = serverConfigurationService
-        .hasUserSelectedInstance
-        .collectAsState(initial = null)
-        .value
-        ?: return // Display nothing to avoid switching between destinations
-
     // Force recomposition
     val currentBackStack by nestedNavController.currentBackStackEntryAsState()
     nestedNavController.currentBackStackEntryAsState().value
@@ -271,7 +263,7 @@ private fun LoginUiScreen(
                 .consumeWindowInsets(WindowInsets.systemBars)
                 .padding(top = paddingValues.calculateTopPadding()),
             navController = nestedNavController,
-            startDestination = if (hasSelectedInstance) NestedDestination.Home else NestedDestination.InstanceSelection
+            startDestination = NestedDestination.Home
         ) {
             animatedComposable<NestedDestination.Home> {
                 AccountScreen(
@@ -298,11 +290,7 @@ private fun LoginUiScreen(
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
                 ) {
-                    nestedNavController.navigate(NestedDestination.Home) {
-                        popUpTo<NestedDestination.InstanceSelection> {
-                            inclusive = true
-                        }
-                    }
+                    nestedNavController.navigate(NestedDestination.Home)
                 }
             }
 
