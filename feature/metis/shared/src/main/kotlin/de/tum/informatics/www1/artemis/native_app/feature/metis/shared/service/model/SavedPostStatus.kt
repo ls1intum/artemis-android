@@ -5,3 +5,8 @@ enum class SavedPostStatus {
     COMPLETED,
     ARCHIVED
 }
+
+enum class SavedPostPostingType {
+    POST,
+    ANSWER
+}
