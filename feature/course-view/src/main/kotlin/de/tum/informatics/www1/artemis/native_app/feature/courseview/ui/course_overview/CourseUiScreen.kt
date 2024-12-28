@@ -256,19 +256,24 @@ internal fun CourseUiScreen(
                 val initialConfiguration = remember(conversationId, postId) {
                     when {
                         conversationId != DEFAULT_CONVERSATION_ID && postId != DEFAULT_POST_ID -> OpenedConversation(
-                            conversationId,
-                            OpenedThread(
+                            _prevConfiguration = NothingOpened,
+                            conversationId = conversationId,
+                            openedThread = OpenedThread(
                                 conversationId,
                                 StandalonePostId.ServerSideId(postId)
                             )
                         )
 
                         conversationId != DEFAULT_CONVERSATION_ID -> OpenedConversation(
-                            conversationId,
-                            null
+                            _prevConfiguration = NothingOpened,
+                            conversationId = conversationId,
+                            openedThread = null
                         )
 
-                        username.isNotBlank() -> NavigateToUserConversation(username)
+                        username.isNotBlank() -> NavigateToUserConversation(
+                            _prevConfiguration = NothingOpened,
+                            username = username
+                        )
 
                         else -> NothingOpened
                     }

@@ -144,6 +144,7 @@ fun `Metis - Conversation Overview`() {
                     modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
                     onNavigateToConversation = {},
+                    onNavigateToSavedPosts = {},
                     onRequestCreatePersonalConversation = {},
                     onRequestAddChannel = {},
                     onRequestBrowseChannel = {},

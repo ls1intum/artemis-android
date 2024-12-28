@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -21,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.CreatePersonalCo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedSavedPosts
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedThread
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.browse_channels.BrowseChannelsScreen
@@ -43,25 +45,27 @@ internal fun SinglePageConversationBody(
     }
 
     val openConversation = { conversationId: Long ->
-        configuration = when (configuration) {
-            is OpenedConversation -> OpenedConversation(conversationId, null)
-            else -> OpenedConversation(conversationId, null)
-        }
+        configuration = OpenedConversation(
+            _prevConfiguration = configuration,
+            conversationId = conversationId,
+            openedThread = null
+        )
     }
 
     val canCreateChannel by viewModel.canCreateChannel.collectAsState()
 
+    val navigateToPrevConfig = {
+        when (configuration) {
+            NothingOpened -> {}
+            else -> configuration = configuration.prevConfiguration ?: NothingOpened
+        }
+    }
+
     BackHandler(configuration != NothingOpened) {
         when (val config = configuration) {
-            is ConversationSettings -> configuration = config.prevConfiguration
-            is AddChannelConfiguration -> configuration = config.prevConfiguration
-            is BrowseChannelConfiguration -> configuration = config.prevConfiguration
-            is CreatePersonalConversation -> configuration = config.prevConfiguration
             is OpenedConversation -> configuration =
                 if (config.openedThread != null) config.copy(openedThread = null) else NothingOpened
-
-            is NavigateToUserConversation -> configuration = NothingOpened
-            NothingOpened -> {}
+            else -> navigateToPrevConfig()
         }
     }
 
@@ -70,6 +74,9 @@ internal fun SinglePageConversationBody(
             modifier = m.padding(top = 16.dp),
             courseId = courseId,
             onNavigateToConversation = openConversation,
+            onNavigateToSavedPosts = {
+                configuration = OpenedSavedPosts(configuration, it)
+            },
             onRequestCreatePersonalConversation = {
                 configuration = CreatePersonalConversation(configuration)
             },
@@ -116,8 +123,9 @@ internal fun SinglePageConversationBody(
                     courseId = courseId,
                     onOpenThread = { postId ->
                         configuration = OpenedConversation(
-                            config.conversationId,
-                            OpenedThread(config.conversationId, postId)
+                            _prevConfiguration = config,
+                            conversationId = config.conversationId,
+                            openedThread = OpenedThread(config.conversationId, postId)
                         )
                     },
                     onCloseThread = {
@@ -129,11 +137,16 @@ internal fun SinglePageConversationBody(
                     onNavigateToSettings = {
                         configuration = ConversationSettings(
                             conversationId = config.conversationId,
-                            prevConfiguration = config
+                            _prevConfiguration = config
                         )
                     },
                     conversationsOverview = { mod -> conversationOverview(mod) }
                 )
+            }
+
+            is OpenedSavedPosts -> {
+                // TODO
+                Text(config.status.name)
             }
 
             is BrowseChannelConfiguration -> {
@@ -141,7 +154,7 @@ internal fun SinglePageConversationBody(
                     modifier = modifier,
                     courseId = courseId,
                     onNavigateToConversation = openConversation,
-                    onNavigateBack = { configuration = config.prevConfiguration }
+                    onNavigateBack = navigateToPrevConfig
                 )
             }
 
@@ -151,7 +164,7 @@ internal fun SinglePageConversationBody(
                         modifier = modifier,
                         courseId = courseId,
                         onConversationCreated = openConversation,
-                        onNavigateBack = { configuration = config.prevConfiguration }
+                        onNavigateBack = navigateToPrevConfig
                     )
                 }
             }
@@ -161,7 +174,7 @@ internal fun SinglePageConversationBody(
                     modifier = modifier,
                     courseId = courseId,
                     onConversationCreated = openConversation,
-                    onNavigateBack = { configuration = config.prevConfiguration }
+                    onNavigateBack = navigateToPrevConfig
                 )
             }
 
@@ -172,7 +185,7 @@ internal fun SinglePageConversationBody(
                             modifier = modifier,
                             courseId = courseId,
                             conversationId = config.conversationId,
-                            onNavigateBack = { configuration = config.prevConfiguration }
+                            onNavigateBack = navigateToPrevConfig
                         )
                     }
 
@@ -181,7 +194,7 @@ internal fun SinglePageConversationBody(
                             modifier = modifier,
                             courseId = courseId,
                             conversationId = config.conversationId,
-                            onNavigateBack = { configuration = config.prevConfiguration }
+                            onNavigateBack = navigateToPrevConfig
                         )
                     }
 
@@ -190,17 +203,17 @@ internal fun SinglePageConversationBody(
                             modifier = modifier,
                             courseId = courseId,
                             conversationId = config.conversationId,
-                            onNavigateBack = { configuration = config.prevConfiguration },
+                            onNavigateBack = navigateToPrevConfig,
                             onRequestAddMembers = {
                                 configuration = config.copy(
                                     isAddingMembers = true,
-                                    prevConfiguration = configuration
+                                    _prevConfiguration = configuration
                                 )
                             },
                             onRequestViewAllMembers = {
                                 configuration = config.copy(
                                     isViewingAllMembers = true,
-                                    prevConfiguration = configuration
+                                    _prevConfiguration = configuration
                                 )
                             },
                             onConversationLeft = {
@@ -217,7 +230,11 @@ internal fun SinglePageConversationBody(
                     courseId = courseId,
                     username = config.username,
                     onNavigateToConversation = { conversationId ->
-                        configuration = OpenedConversation(conversationId, null)
+                        configuration = OpenedConversation(
+                            _prevConfiguration = configuration,
+                            conversationId = conversationId,
+                            openedThread = null
+                        )
                     },
                     onNavigateBack = { configuration = NothingOpened }
                 )
