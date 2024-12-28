@@ -147,6 +147,9 @@ fun ConversationOverviewBody(
                         viewModel.setConversationMessagesRead(conversationId)
                         onNavigateToConversation(conversationId)
                     },
+                    onNavigateToSavedPosts = {
+                        // TODO
+                    },
                     onToggleMarkAsFavourite = viewModel::markConversationAsFavorite,
                     onToggleHidden = viewModel::markConversationAsHidden,
                     onToggleMuted = viewModel::markConversationAsMuted,

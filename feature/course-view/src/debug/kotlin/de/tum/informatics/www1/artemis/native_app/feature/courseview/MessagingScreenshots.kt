@@ -114,6 +114,7 @@ fun `Metis - Conversation Overview`() {
                     examsExpanded = true,
                     exercisesExpanded = true,
                     lecturesExpanded = true,
+                    savedPostsExpanded = false
                 )
             )
 

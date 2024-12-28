@@ -20,8 +20,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Forum
@@ -59,6 +62,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.model.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ConversationIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 
@@ -73,6 +77,7 @@ internal const val SECTION_EXERCISES_KEY = "exercises"
 internal const val SECTION_EXAMS_KEY = "exams"
 internal const val SECTION_LECTURES_KEY = "lectures"
 internal const val SECTION_DIRECT_MESSAGES_KEY = "direct-messages"
+internal const val SECTION_SAVED_POSTS_KEY = "saved-posts"
 
 internal const val KEY_SUFFIX_FAVORITES = "_f"
 internal const val KEY_SUFFIX_CHANNELS = "_c"
@@ -82,9 +87,16 @@ internal const val KEY_SUFFIX_LECTURES = "_l"
 internal const val KEY_SUFFIX_GROUPS = "_g"
 internal const val KEY_SUFFIX_PERSONAL = "_p"
 internal const val KEY_SUFFIX_HIDDEN = "_h"
+internal const val KEY_SUFFIX_SAVED_MESSAGES = "_s"
 
 internal fun tagForConversation(conversationId: Long, suffix: String) = "$conversationId$suffix"
 internal fun tagForConversationOptions(tagForConversation: String) = "${tagForConversation}_options"
+
+sealed class ConversationSection(val isExpanded: Boolean) {
+    data class Conversations<T : Conversation>(val conversations: ConversationCollections.ConversationCollection<T>)
+        : ConversationSection(conversations.isExpanded)
+    class SavedPosts(isExpanded: Boolean) : ConversationSection(isExpanded)
+}
 
 @Composable
 internal fun ConversationList(
@@ -92,29 +104,31 @@ internal fun ConversationList(
     viewModel: ConversationOverviewViewModel,
     conversationCollections: ConversationCollections,
     onNavigateToConversation: (conversationId: Long) -> Unit,
+    onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
     trailingContent: LazyListScope.() -> Unit
 ) {
     val clientId by viewModel.clientIdOrDefault.collectAsState()
+    val isSavedPostsExpanded by viewModel.isSavedPostsExpanded.collectAsState()
 
-    val listWithHeader: LazyListScope.(ConversationCollections.ConversationCollection<*>, String, String, Int, () -> Unit, @Composable () -> Unit) -> Unit =
-        { collection, key, suffix, textRes, onClick, icon ->
+    val listWithHeader: LazyListScope.(ConversationSection, String, String, Int, () -> Unit, @Composable () -> Unit) -> Unit =
+        { items, key, suffix, textRes, onClick, icon ->
             conversationSectionHeader(
                 key = key,
                 text = textRes,
-                isExpanded = collection.isExpanded,
+                isExpanded = items.isExpanded,
                 onClick = onClick,
                 icon = icon
             )
 
             conversationList(
                 keySuffix = suffix,
-                conversations = collection,
+                section = items,
                 clientId = clientId,
-                showPrefix = collection.showPrefix,
                 onNavigateToConversation = onNavigateToConversation,
+                onNavigateToSavedPosts = onNavigateToSavedPosts,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
                 onToggleHidden = onToggleHidden,
                 onToggleMuted = onToggleMuted
@@ -124,7 +138,7 @@ internal fun ConversationList(
     LazyColumn(modifier = modifier.testTag(TEST_TAG_CONVERSATION_LIST)) {
         if (conversationCollections.favorites.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.favorites,
+                ConversationSection.Conversations(conversationCollections.favorites),
                 SECTION_FAVORITES_KEY,
                 KEY_SUFFIX_FAVORITES,
                 R.string.conversation_overview_section_favorites,
@@ -134,7 +148,7 @@ internal fun ConversationList(
         }
 
         listWithHeader(
-            conversationCollections.channels,
+            ConversationSection.Conversations(conversationCollections.channels),
             SECTION_CHANNELS_KEY,
             KEY_SUFFIX_CHANNELS,
             R.string.conversation_overview_section_general_channels,
@@ -143,7 +157,7 @@ internal fun ConversationList(
 
         if (conversationCollections.exerciseChannels.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.exerciseChannels,
+                ConversationSection.Conversations(conversationCollections.exerciseChannels),
                 SECTION_EXERCISES_KEY,
                 KEY_SUFFIX_EXERCISES,
                 R.string.conversation_overview_section_exercise_channels,
@@ -153,7 +167,7 @@ internal fun ConversationList(
 
         if (conversationCollections.lectureChannels.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.lectureChannels,
+                ConversationSection.Conversations(conversationCollections.lectureChannels),
                 SECTION_LECTURES_KEY,
                 KEY_SUFFIX_LECTURES,
                 R.string.conversation_overview_section_lecture_channels,
@@ -163,7 +177,7 @@ internal fun ConversationList(
 
         if (conversationCollections.examChannels.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.examChannels,
+                ConversationSection.Conversations(conversationCollections.examChannels),
                 SECTION_EXAMS_KEY,
                 KEY_SUFFIX_EXAMS,
                 R.string.conversation_overview_section_exam_channels,
@@ -173,7 +187,7 @@ internal fun ConversationList(
 
         if (conversationCollections.groupChats.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.groupChats,
+                ConversationSection.Conversations(conversationCollections.groupChats),
                 SECTION_GROUPS_KEY,
                 KEY_SUFFIX_GROUPS,
                 R.string.conversation_overview_section_groups,
@@ -183,7 +197,7 @@ internal fun ConversationList(
 
         if (conversationCollections.directChats.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.directChats,
+                ConversationSection.Conversations(conversationCollections.directChats),
                 SECTION_DIRECT_MESSAGES_KEY,
                 KEY_SUFFIX_PERSONAL,
                 R.string.conversation_overview_section_direct_messages,
@@ -193,13 +207,21 @@ internal fun ConversationList(
 
         if (conversationCollections.hidden.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.hidden,
+                ConversationSection.Conversations(conversationCollections.hidden),
                 SECTION_HIDDEN_KEY,
                 KEY_SUFFIX_HIDDEN,
                 R.string.conversation_overview_section_hidden,
                 viewModel::toggleHiddenExpanded
             ) { Icon(imageVector = Icons.Default.NotInterested, contentDescription = null) }
         }
+
+        listWithHeader(
+            ConversationSection.SavedPosts(isExpanded = isSavedPostsExpanded),
+            SECTION_SAVED_POSTS_KEY,
+            KEY_SUFFIX_SAVED_MESSAGES,
+            R.string.conversation_overview_section_saved_posts,
+            viewModel::toggleSavedPostsExpanded
+        ) { Icon(imageVector = Icons.Default.Bookmark, contentDescription = null) }
 
         trailingContent()
     }
@@ -259,39 +281,91 @@ private fun LazyListScope.conversationSectionHeader(
     }
 }
 
-private fun <T : Conversation> LazyListScope.conversationList(
+private fun LazyListScope.conversationList(
     keySuffix: String,
-    conversations: ConversationCollections.ConversationCollection<T>,
+    section: ConversationSection,
     clientId: Long,
-    showPrefix: Boolean,
     onNavigateToConversation: (conversationId: Long) -> Unit,
+    onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit
 ) {
-    if (!conversations.isExpanded) return
-    items(
-        conversations.conversations,
-        key = { tagForConversation(it.id, keySuffix) }
-    ) { conversation ->
-        val itemTag = tagForConversation(conversation.id, keySuffix)
-        ConversationListItem(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(itemTag),
-            itemBaseTag = itemTag,
-            conversation = conversation,
-            clientId = clientId,
-            showPrefix = showPrefix,
-            onNavigateToConversation = { onNavigateToConversation(conversation.id) },
-            onToggleMarkAsFavourite = {
-                onToggleMarkAsFavourite(
-                    conversation.id,
-                    !conversation.isFavorite
+    if (!section.isExpanded) return
+
+    when(section) {
+        is ConversationSection.SavedPosts -> {
+            items(
+                SavedPostStatus.entries
+            ) {
+                SavedPostsListItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    status = it,
+                    onClick = {
+                        onNavigateToSavedPosts(it)
+                    }
                 )
+            }
+        }
+
+        is ConversationSection.Conversations<*> -> {
+            val conversations = section.conversations
+            items(
+                items = conversations.conversations,
+                key = { tagForConversation(it.id, keySuffix) }
+            ) { conversation ->
+                val itemTag = tagForConversation(conversation.id, keySuffix)
+                ConversationListItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(itemTag),
+                    itemBaseTag = itemTag,
+                    conversation = conversation,
+                    clientId = clientId,
+                    showPrefix = conversations.showPrefix,
+                    onNavigateToConversation = { onNavigateToConversation(conversation.id) },
+                    onToggleMarkAsFavourite = {
+                        onToggleMarkAsFavourite(
+                            conversation.id,
+                            !conversation.isFavorite
+                        )
+                    },
+                    onToggleHidden = { onToggleHidden(conversation.id, !conversation.isHidden) },
+                    onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) }
+                )
+            }
+        }
+    }
+
+}
+
+@Composable
+private fun SavedPostsListItem(
+    modifier: Modifier = Modifier,
+    status: SavedPostStatus,
+    onClick: () -> Unit,
+) {
+    val (stringId, icon) = when (status) {
+        SavedPostStatus.IN_PROGRESS ->
+            R.string.conversation_overview_saved_posts_in_progress to Icons.Default.Bookmark
+        SavedPostStatus.COMPLETED ->
+            R.string.conversation_overview_saved_posts_completed to Icons.Default.CheckBox
+        SavedPostStatus.ARCHIVED ->
+            R.string.conversation_overview_saved_posts_archived to Icons.Default.Archive
+    }
+
+    Box(modifier = modifier) {
+        ListItem(
+            modifier = Modifier.clickable(onClick = onClick),
+            leadingContent = {
+                Icon(imageVector = icon, contentDescription = null)
             },
-            onToggleHidden = { onToggleHidden(conversation.id, !conversation.isHidden) },
-            onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) }
+            headlineContent = {
+                Text(
+                    text = stringResource(stringId),
+                    maxLines = 1,
+                )
+            }
         )
     }
 }
