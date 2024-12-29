@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
@@ -35,6 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.alert.DestructiveMarkd
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadingAnimation
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.KSerializableNavType
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.ViewQuizResultScreen
@@ -68,7 +68,7 @@ fun NavController.navigateToQuizParticipation(
 }
 
 fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
-    composable<QuizParticipationScreen>(
+    animatedComposable<QuizParticipationScreen>(
         typeMap = mapOf(
             typeOf<QuizType.WorkableQuizType>() to KSerializableNavType(
                 isNullableAllowed = false,

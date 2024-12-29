@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.compose.composable
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
@@ -55,6 +54,9 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
+import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
@@ -91,7 +93,15 @@ fun NavGraphBuilder.settingsScreen(
     onLoggedOut: () -> Unit,
     onDisplayThirdPartyLicenses: () -> Unit
 ) {
-    composable<SettingsScreen> {
+    animatedComposable<SettingsScreen>(
+        exitTransition = {
+            val toLoginScreen = targetState.destination.route?.startsWith(LoginScreen::class.qualifiedName!!) ?: false
+            if (toLoginScreen) {
+                return@animatedComposable DefaultTransition.fadeOut
+            }
+            DefaultTransition.exit
+        }
+    ) {
         SettingsScreen(
             modifier = Modifier.fillMaxSize(),
             versionCode = versionCode,
@@ -104,7 +114,7 @@ fun NavGraphBuilder.settingsScreen(
         }
     }
 
-    composable<PushNotificationSettingsScreen> {
+    animatedComposable<PushNotificationSettingsScreen> {
         PushNotificationSettingsScreen(
             modifier = Modifier.fillMaxSize(),
             onNavigateBack = onNavigateUp
