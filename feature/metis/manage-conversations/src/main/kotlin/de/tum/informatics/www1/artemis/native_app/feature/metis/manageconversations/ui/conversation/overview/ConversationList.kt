@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -345,7 +346,8 @@ private fun ConversationListItem(
         ListItem(
             modifier = Modifier
                 .clickable(onClick = onNavigateToConversation)
-                .padding(start = 8.dp),
+                .padding(start = 8.dp)
+                .height(48.dp),
             leadingContent = {
                 ConversationIcon(
                     conversation = conversation,
