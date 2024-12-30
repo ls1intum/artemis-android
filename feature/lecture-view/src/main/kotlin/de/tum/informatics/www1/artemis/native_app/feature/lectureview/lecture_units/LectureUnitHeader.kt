@@ -1,11 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.QuestionMark
@@ -41,19 +42,23 @@ internal fun LectureUnitHeader(
     modifier: Modifier,
     lectureUnit: LectureUnit,
     isUploadingMarkedAsCompleted: Boolean,
-    onMarkAsCompleted: (isCompleted: Boolean) -> Unit
+    onMarkAsCompleted: (isCompleted: Boolean) -> Unit,
+    onHeaderClick: () -> Unit
 ) {
     val (icon, text) = when (lectureUnit) {
         is LectureUnitAttachment -> Icons.Default.Description to R.string.lecture_view_lecture_unit_type_attachment
         is LectureUnitExercise -> Icons.Default.Task to R.string.lecture_view_lecture_unit_type_exercise
         is LectureUnitOnline -> Icons.Default.Link to R.string.lecture_view_lecture_unit_type_online
-        is LectureUnitText -> Icons.Default.Assignment to R.string.lecture_view_lecture_unit_type_text
+        is LectureUnitText -> Icons.AutoMirrored.Default.Assignment to R.string.lecture_view_lecture_unit_type_text
         is LectureUnitUnknown -> Icons.Default.QuestionMark to R.string.lecture_view_lecture_unit_type_unknown
         is LectureUnitVideo -> Icons.Default.Videocam to R.string.lecture_view_lecture_unit_type_video
     }
 
     Row(
-        modifier = modifier,
+        modifier = modifier.clickable {
+            onHeaderClick()
+            onMarkAsCompleted(true)
+        },
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
