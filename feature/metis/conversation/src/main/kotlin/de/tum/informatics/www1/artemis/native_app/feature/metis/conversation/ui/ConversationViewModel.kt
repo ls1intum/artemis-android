@@ -69,6 +69,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entiti
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.SavedPostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToConversationUpdates
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
@@ -103,6 +104,7 @@ internal open class ConversationViewModel(
     private val websocketProvider: WebsocketProvider,
     private val metisModificationService: MetisModificationService,
     private val metisStorageService: MetisStorageService,
+    private val savedPostService: SavedPostService,
     protected val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val networkStatusProvider: NetworkStatusProvider,
@@ -447,6 +449,26 @@ internal open class ConversationViewModel(
                 authToken = accountService.authToken.first(),
             )
                 .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
+        }
+    }
+
+    fun toggleSavePost(post: IBasePost): Deferred<MetisModificationFailure?> {
+        return viewModelScope.async(coroutineContext) {
+            if (post.isSaved == true) {
+                savedPostService.deleteSavedPost(
+                    post = post,
+                    authToken = accountService.authToken.first(),
+                    serverUrl = serverConfigurationService.serverUrl.first()
+                )
+                    .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
+            } else {
+                savedPostService.savePost(
+                    post = post,
+                    authToken = accountService.authToken.first(),
+                    serverUrl = serverConfigurationService.serverUrl.first()
+                )
+                    .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
+            }
         }
     }
 

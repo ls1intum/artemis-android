@@ -19,6 +19,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.AddReaction
+import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
@@ -157,13 +159,27 @@ internal fun PostContextBottomSheet(
                 }
 
                 if (postActions.onPinPost != null && post is IStandalonePost) {
+                    val isPinned = post.displayPriority == DisplayPriority.PINNED
                     ActionButton(
                         modifier = actionButtonModifier,
-                        icon = if (post.displayPriority == DisplayPriority.PINNED) ImageVector.vectorResource(R.drawable.unpin) else ImageVector.vectorResource(R.drawable.pin),
-                        text = if (post.displayPriority == DisplayPriority.PINNED) stringResource(id = R.string.post_unpin) else stringResource(id = R.string.post_pin),
+                        icon = if (isPinned) ImageVector.vectorResource(R.drawable.unpin) else ImageVector.vectorResource(R.drawable.pin),
+                        text = if (isPinned) stringResource(id = R.string.post_unpin) else stringResource(id = R.string.post_pin),
                         onClick = {
                             onDismissRequest()
                             postActions.onPinPost.invoke()
+                        }
+                    )
+                }
+
+                if (postActions.onSavePost != null) {
+                    val isSaved = post.isSaved == true
+                    ActionButton(
+                        modifier = actionButtonModifier,
+                        icon = if (isSaved) Icons.Default.BookmarkRemove else Icons.Default.BookmarkAdd,
+                        text = if (isSaved) stringResource(id = R.string.post_save) else stringResource(id = R.string.post_unsave),
+                        onClick = {
+                            onDismissRequest()
+                            postActions.onSavePost.invoke()
                         }
                     )
                 }

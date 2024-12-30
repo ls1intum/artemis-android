@@ -16,8 +16,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.CreateClientSidePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.SendConversationPostWorker
 import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.androidx.workmanager.dsl.workerOf
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val conversationModule = module {
@@ -38,6 +38,7 @@ val conversationModule = module {
             params[0],
             params[1],
             params[2],
+            get(),
             get(),
             get(),
             get(),
