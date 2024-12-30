@@ -8,8 +8,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.Bas
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_PIN_POST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_POST_DELETE
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_POST_EDIT
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_SAVE_POST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
-import kotlinx.coroutines.CompletableDeferred
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -27,8 +27,6 @@ class PostActionBarUITest: BaseChatUITest() {
         setupThreadUi(
             post = posts[0],
             hasModerationRights = false,
-            onResolvePost = { CompletableDeferred() },
-            onPinPost = { CompletableDeferred() }
         )
 
         composeTestRule.onNodeWithTag(TEST_TAG_POST_EDIT).assertExists().assertIsDisplayed()
@@ -43,8 +41,6 @@ class PostActionBarUITest: BaseChatUITest() {
                 authorRole = otherUserRole
             ),
             hasModerationRights = true,
-            onResolvePost = { CompletableDeferred() },
-            onPinPost = { CompletableDeferred() }
         )
 
         composeTestRule.onNodeWithTag(TEST_TAG_POST_EDIT).assertDoesNotExist()
@@ -59,8 +55,6 @@ class PostActionBarUITest: BaseChatUITest() {
                 authorRole = otherUserRole
             ),
             hasModerationRights = true,
-            onResolvePost = { CompletableDeferred() },
-            onPinPost = { CompletableDeferred() }
         )
 
         composeTestRule.onNodeWithTag(TEST_TAG_POST_DELETE).assertExists().assertIsDisplayed()
@@ -69,9 +63,7 @@ class PostActionBarUITest: BaseChatUITest() {
     @Test
     fun `test GIVEN a post WHEN navigating to the thread view as the post author THEN delete option is shown`() {
         setupThreadUi(
-            post = posts[0],
-            onResolvePost = { CompletableDeferred() },
-            onPinPost = { CompletableDeferred() }
+            post = posts[0]
         )
 
         composeTestRule.onNodeWithTag(TEST_TAG_POST_DELETE).assertExists().assertIsDisplayed()
@@ -86,8 +78,6 @@ class PostActionBarUITest: BaseChatUITest() {
                 authorRole = otherUserRole
             ),
             hasModerationRights = false,
-            onResolvePost = { CompletableDeferred() },
-            onPinPost = { CompletableDeferred() }
         )
 
         composeTestRule.onNodeWithTag(TEST_TAG_POST_DELETE).assertDoesNotExist()
@@ -102,8 +92,6 @@ class PostActionBarUITest: BaseChatUITest() {
                 authorRole = otherUserRole
             ),
             isAbleToPin = true,
-            onResolvePost = { CompletableDeferred() },
-            onPinPost = { CompletableDeferred() }
         )
 
         composeTestRule.onNodeWithTag(TEST_TAG_PIN_POST).assertExists().assertIsDisplayed()
@@ -114,10 +102,17 @@ class PostActionBarUITest: BaseChatUITest() {
         setupThreadUi(
             post = posts[0],
             isAbleToPin = false,
-            onResolvePost = { CompletableDeferred() },
-            onPinPost = { CompletableDeferred() }
         )
 
         composeTestRule.onNodeWithTag(TEST_TAG_PIN_POST).assertDoesNotExist()
+    }
+
+    @Test
+    fun `test GIVEN a post WHEN navigating to the thread view THEN save option is shown`() {
+        setupThreadUi(
+            post = posts[0]
+        )
+
+        composeTestRule.onNodeWithTag(TEST_TAG_SAVE_POST).assertExists().assertIsDisplayed()
     }
 }

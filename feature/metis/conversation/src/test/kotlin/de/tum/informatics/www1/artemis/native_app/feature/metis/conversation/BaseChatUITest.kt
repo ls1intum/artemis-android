@@ -48,6 +48,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 authorRole = UserRole.USER,
                 authorName = "author name",
                 authorImageUrl = null,
+                isSaved = false,
             ),
             reactions = emptyList(),
             serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
@@ -73,14 +74,15 @@ abstract class BaseChatUITest : BaseComposeTest() {
             tags = emptyList(),
             answers = if (index == 0) answers else emptyList(),
             reactions = emptyList(),
-            displayPriority = DisplayPriority.NONE
+            displayPriority = DisplayPriority.NONE,
+            isSaved = false
         )
     }
 
     fun setupThreadUi(
         post: PostPojo,
-        onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?,
-        onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)?,
+        onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)? = { CompletableDeferred() },
+        onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)? = { CompletableDeferred() },
         hasModerationRights: Boolean = true,
         isAbleToPin: Boolean = true
     ) {
@@ -104,6 +106,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 onEditPost = { _, _ -> CompletableDeferred() },
                 onResolvePost = onResolvePost,
                 onPinPost = onPinPost,
+                onSavePost = { CompletableDeferred() },
                 onDeletePost = { CompletableDeferred() },
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onRequestReload = {},
@@ -141,6 +144,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },
                 onPinPost = onPinPost,
+                onSavePost = { CompletableDeferred() },
                 onDeletePost = { CompletableDeferred() },
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onClickViewPost = {},

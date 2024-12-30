@@ -153,6 +153,7 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
                         hasModerationRights = false
                     ),
                     onPinPost = { CompletableDeferred() },
+                    onSavePost = { CompletableDeferred() },
                     listContentPadding = PaddingValues(0.dp),
                     serverUrl = "",
                     courseId = courseId,

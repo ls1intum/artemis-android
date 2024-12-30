@@ -35,10 +35,13 @@ class ConversationAnswerMessagesUITest : BaseChatUITest() {
     fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the first answer post`() {
         var resolvedPost: IBasePost? = null
 
-        setupThreadUi(post, { post ->
-            resolvedPost = post
-            CompletableDeferred()
-        }, { CompletableDeferred() })
+        setupThreadUi(
+            post = post,
+            onResolvePost = { post ->
+                resolvedPost = post
+                CompletableDeferred()
+            }
+        )
 
         composeTestRule.onNodeWithText(answers[0].content!!, useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.OnLongClick)
@@ -54,10 +57,13 @@ class ConversationAnswerMessagesUITest : BaseChatUITest() {
     fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the third answer post`() {
         var resolvedPost: IBasePost? = null
 
-        setupThreadUi(post, { post ->
-            resolvedPost = post
-            CompletableDeferred()
-        }, { CompletableDeferred() })
+        setupThreadUi(
+            post = post,
+            onResolvePost = { post ->
+                resolvedPost = post
+                CompletableDeferred()
+            }
+        )
 
         composeTestRule.onNodeWithText(answers[2].content!!, useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.OnLongClick)
@@ -81,10 +87,13 @@ class ConversationAnswerMessagesUITest : BaseChatUITest() {
 
         var unresolvedPost: IBasePost? = null
 
-        setupThreadUi(resolvedPost, { post ->
-            unresolvedPost = post
-            CompletableDeferred()
-        }, { CompletableDeferred() })
+        setupThreadUi(
+            post = post,
+            onResolvePost = { post ->
+                unresolvedPost = post
+                CompletableDeferred()
+            }
+        )
 
         composeTestRule.onNodeWithText(answers[resolvingIndex].content!!, useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.OnLongClick)
@@ -98,7 +107,7 @@ class ConversationAnswerMessagesUITest : BaseChatUITest() {
 
     @Test
     fun `test GIVEN the post is not resolved and no answer post is resolving THEN the post is shown as not resolved and no answer post is shown as resolving`() {
-        setupThreadUi(post, { CompletableDeferred() }, { CompletableDeferred() })
+        setupThreadUi(post)
 
         composeTestRule.onNodeWithText(post.content).assertExists()
         for (answer in answers) {
@@ -121,7 +130,7 @@ class ConversationAnswerMessagesUITest : BaseChatUITest() {
             answers = modifiedAnswers
         )
 
-        setupThreadUi(resolvedPost, { CompletableDeferred() }, { CompletableDeferred() })
+        setupThreadUi(resolvedPost)
 
         val resolvesAssertion = hasAnyChild(hasText(context.getString(R.string.post_resolves)))
 
