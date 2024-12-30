@@ -36,7 +36,7 @@ class SavedPostServiceImpl(
                 }
 
                 cookieAuth(authToken)
-            }.body()
+            }.body().
         }
     }
 
