@@ -814,45 +814,66 @@ fun continueList(
     findNextPrefix: (previousLine: String) -> String?
 ): TextFieldValue {
     val newText = newValue.text
-
-    //Must have added exactly 1 character
-    if (newText.length != oldValue.length + 1) {
-        return newValue
-    }
-    //That new character must be '\n'
-    if (!newText.endsWith("\n")) {
-        return newValue
-    }
-
     val cursor = newValue.selection.start
-    if (cursor < 1) return newValue
 
-    // If user typed consecutive newlines, skip
-    if (cursor > 1 && newText[cursor - 2] == '\n') {
-        return newValue
+    if (newText.length == oldValue.length + 1 && newText.endsWith("\n")) {
+        // Skip if user typed consecutive newlines
+        if (cursor > 1 && newText[cursor - 2] == '\n') {
+            return newValue
+        }
+        if (cursor < 1) return newValue
+
+        val prevLineBreakIndex = newText.lastIndexOf('\n', startIndex = cursor - 2)
+        val lineStart = if (prevLineBreakIndex == -1) 0 else (prevLineBreakIndex + 1)
+        val previousLine = newText.substring(lineStart, cursor - 1)
+
+        // We do nothing if previous line is blank
+        if (previousLine.isBlank()) return newValue
+
+        val prefix = findNextPrefix(previousLine.trim()) ?: return newValue
+
+        val updatedText = buildString {
+            append(newText.substring(0, cursor))
+            append(prefix)
+            append(newText.substring(cursor))
+        }
+
+        val newCursor = cursor + prefix.length
+        return newValue.copy(
+            text = updatedText,
+            selection = TextRange(newCursor, newCursor)
+        )
     }
 
-    val prevLineBreakIndex = newText.lastIndexOf('\n', startIndex = cursor - 2)
-    val lineStart = if (prevLineBreakIndex == -1) 0 else (prevLineBreakIndex + 1)
-    val previousLine = newText.substring(lineStart, cursor - 1)
+    //Revisiting an existing line to continue
+    if (newText.length >= oldValue.length &&
+        cursor > 0 && cursor <= newText.length &&
+        cursor <= newText.lastIndex &&
+        newText[cursor - 1] == '\n'
+    ) {
+        // Find the line we just "broke" with Enter
+        val prevLineBreakIndex = newText.lastIndexOf('\n', startIndex = cursor - 2)
+        val lineStart = if (prevLineBreakIndex == -1) 0 else (prevLineBreakIndex + 1)
+        val previousLine = newText.substring(lineStart, cursor - 1)
 
-    if (previousLine.isBlank()) {
-        return newValue
+        if (previousLine.isBlank()) return newValue
+
+        val prefix = findNextPrefix(previousLine.trim()) ?: return newValue
+
+        val updatedText = buildString {
+            append(newText.substring(0, cursor))
+            append(prefix)
+            append(newText.substring(cursor))
+        }
+
+        val newCursor = cursor + prefix.length
+        return newValue.copy(
+            text = updatedText,
+            selection = TextRange(newCursor, newCursor)
+        )
     }
 
-    // Let the caller (ordered/unordered) decide if prefix needed
-    val prefix = findNextPrefix(previousLine.trim()) ?: return newValue
-
-    //Insert that prefix right after the newly typed newline
-    val updatedText = buildString {
-        append(newText.substring(0, cursor))
-        append(prefix)
-        append(newText.substring(cursor))
-    }
-
-    val newCursor = cursor + prefix.length
-    return newValue.copy(
-        text = updatedText,
-        selection = TextRange(newCursor, newCursor)
-    )
+    // Fallback: no change
+    return newValue
 }
+
