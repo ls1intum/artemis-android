@@ -454,21 +454,22 @@ internal open class ConversationViewModel(
 
     fun toggleSavePost(post: IBasePost): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
-            if (post.isSaved == true) {
+            val response = if (post.isSaved == true) {
                 savedPostService.deleteSavedPost(
                     post = post,
                     authToken = accountService.authToken.first(),
                     serverUrl = serverConfigurationService.serverUrl.first()
                 )
-                    .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
             } else {
                 savedPostService.savePost(
                     post = post,
                     authToken = accountService.authToken.first(),
                     serverUrl = serverConfigurationService.serverUrl.first()
                 )
-                    .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
             }
+
+            response.bind { requestReload() }   // Currently changing save status does not trigger a websocket update
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
         }
     }
 

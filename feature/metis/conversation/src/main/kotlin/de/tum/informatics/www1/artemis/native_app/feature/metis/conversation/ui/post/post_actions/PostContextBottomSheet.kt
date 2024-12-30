@@ -176,7 +176,7 @@ internal fun PostContextBottomSheet(
                     ActionButton(
                         modifier = actionButtonModifier,
                         icon = if (isSaved) Icons.Default.BookmarkRemove else Icons.Default.BookmarkAdd,
-                        text = if (isSaved) stringResource(id = R.string.post_save) else stringResource(id = R.string.post_unsave),
+                        text = if (isSaved) stringResource(id = R.string.post_unsave) else stringResource(id = R.string.post_save),
                         onClick = {
                             onDismissRequest()
                             postActions.onSavePost.invoke()
