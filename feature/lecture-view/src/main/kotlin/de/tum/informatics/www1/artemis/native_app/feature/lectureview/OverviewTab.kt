@@ -192,7 +192,7 @@ private fun LectureUnitBottomSheetContent(
     val childModifier = Modifier.fillMaxWidth()
     Column(
         modifier = modifier
-            .padding(16.dp)
+            .padding(8.dp)
             .verticalScroll(rememberScrollState())
     ) {
         when (lectureUnit) {

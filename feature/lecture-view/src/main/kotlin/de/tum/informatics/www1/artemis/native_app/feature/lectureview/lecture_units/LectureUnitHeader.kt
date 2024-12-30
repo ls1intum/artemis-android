@@ -70,7 +70,7 @@ internal fun LectureUnitHeader(
 
         Text(
             text = stringResource(id = text),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.weight(1f)
         )
 
