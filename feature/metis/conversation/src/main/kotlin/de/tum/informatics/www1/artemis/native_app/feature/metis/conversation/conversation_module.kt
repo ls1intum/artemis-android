@@ -6,8 +6,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.SavedPostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.impl.MetisModificationServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.impl.MetisServiceImpl
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.impl.SavedPostServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.impl.MetisStorageServiceImpl
@@ -23,6 +25,7 @@ import org.koin.dsl.module
 val conversationModule = module {
     single<MetisService> { MetisServiceImpl(get()) }
     single<MetisModificationService> { MetisModificationServiceImpl(get()) }
+    single<SavedPostService> { SavedPostServiceImpl(get()) }
     single<EmojiService> { EmojiServiceImpl(androidContext()) }
 
     single<MetisStorageService> { MetisStorageServiceImpl(get()) }
