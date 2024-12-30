@@ -88,7 +88,7 @@ class ConversationAnswerMessagesUITest : BaseChatUITest() {
         var unresolvedPost: IBasePost? = null
 
         setupThreadUi(
-            post = post,
+            post = resolvedPost,
             onResolvePost = { post ->
                 unresolvedPost = post
                 CompletableDeferred()
