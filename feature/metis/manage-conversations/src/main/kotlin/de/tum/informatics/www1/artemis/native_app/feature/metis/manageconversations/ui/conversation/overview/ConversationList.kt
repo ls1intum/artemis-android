@@ -92,10 +92,10 @@ internal const val KEY_SUFFIX_SAVED_MESSAGES = "_s"
 internal fun tagForConversation(conversationId: Long, suffix: String) = "$conversationId$suffix"
 internal fun tagForConversationOptions(tagForConversation: String) = "${tagForConversation}_options"
 
-sealed class ConversationSection(val isExpanded: Boolean) {
+private sealed class ConversationSectionState(val isExpanded: Boolean) {
     data class Conversations<T : Conversation>(val conversations: ConversationCollections.ConversationCollection<T>)
-        : ConversationSection(conversations.isExpanded)
-    class SavedPosts(isExpanded: Boolean) : ConversationSection(isExpanded)
+        : ConversationSectionState(conversations.isExpanded)
+    class SavedPosts(isExpanded: Boolean) : ConversationSectionState(isExpanded)
 }
 
 @Composable
@@ -113,7 +113,52 @@ internal fun ConversationList(
     val clientId by viewModel.clientIdOrDefault.collectAsState()
     val isSavedPostsExpanded by viewModel.isSavedPostsExpanded.collectAsState()
 
-    val listWithHeader: LazyListScope.(ConversationSection, String, String, Int, () -> Unit, @Composable () -> Unit) -> Unit =
+    ConversationList(
+        modifier = modifier,
+        clientId = clientId,
+        isSavedPostsSectionExpanded = isSavedPostsExpanded,
+        toggleFavoritesExpanded = viewModel::toggleFavoritesExpanded,
+        toggleGeneralsExpanded = viewModel::toggleGeneralsExpanded,
+        toggleExercisesExpanded = viewModel::toggleExercisesExpanded,
+        toggleLecturesExpanded = viewModel::toggleLecturesExpanded,
+        toggleExamsExpanded = viewModel::toggleExamsExpanded,
+        toggleGroupChatsExpanded = viewModel::toggleGroupChatsExpanded,
+        togglePersonalConversationsExpanded = viewModel::togglePersonalConversationsExpanded,
+        toggleHiddenExpanded = viewModel::toggleHiddenExpanded,
+        toggleSavedPostsExpanded = viewModel::toggleSavedPostsExpanded,
+        conversationCollections = conversationCollections,
+        onNavigateToConversation = onNavigateToConversation,
+        onNavigateToSavedPosts = onNavigateToSavedPosts,
+        onToggleMarkAsFavourite = onToggleMarkAsFavourite,
+        onToggleHidden = onToggleHidden,
+        onToggleMuted = onToggleMuted,
+        trailingContent = trailingContent
+    )
+}
+
+@Composable
+internal fun ConversationList(
+    modifier: Modifier,
+    clientId: Long,
+    isSavedPostsSectionExpanded: Boolean,
+    toggleFavoritesExpanded: () -> Unit,
+    toggleGeneralsExpanded: () -> Unit,
+    toggleExercisesExpanded: () -> Unit,
+    toggleLecturesExpanded: () -> Unit,
+    toggleExamsExpanded: () -> Unit,
+    toggleGroupChatsExpanded: () -> Unit,
+    togglePersonalConversationsExpanded: () -> Unit,
+    toggleHiddenExpanded: () -> Unit,
+    toggleSavedPostsExpanded: () -> Unit,
+    conversationCollections: ConversationCollections,
+    onNavigateToConversation: (conversationId: Long) -> Unit,
+    onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
+    onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
+    onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
+    onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
+    trailingContent: LazyListScope.() -> Unit
+) {
+    val listWithHeader: LazyListScope.(ConversationSectionState, String, String, Int, () -> Unit, @Composable () -> Unit) -> Unit =
         { items, key, suffix, textRes, onClick, icon ->
             conversationSectionHeader(
                 key = key,
@@ -138,89 +183,89 @@ internal fun ConversationList(
     LazyColumn(modifier = modifier.testTag(TEST_TAG_CONVERSATION_LIST)) {
         if (conversationCollections.favorites.conversations.isNotEmpty()) {
             listWithHeader(
-                ConversationSection.Conversations(conversationCollections.favorites),
+                ConversationSectionState.Conversations(conversationCollections.favorites),
                 SECTION_FAVORITES_KEY,
                 KEY_SUFFIX_FAVORITES,
                 R.string.conversation_overview_section_favorites,
-                viewModel::toggleFavoritesExpanded,
+                toggleFavoritesExpanded,
                 { Icon(imageVector = Icons.Default.Favorite, contentDescription = null) }
             )
         }
 
         listWithHeader(
-            ConversationSection.Conversations(conversationCollections.channels),
+            ConversationSectionState.Conversations(conversationCollections.channels),
             SECTION_CHANNELS_KEY,
             KEY_SUFFIX_CHANNELS,
             R.string.conversation_overview_section_general_channels,
-            viewModel::toggleGeneralsExpanded
+            toggleGeneralsExpanded
         ) { Icon(imageVector = Icons.Default.ChatBubble, contentDescription = null) }
 
         if (conversationCollections.exerciseChannels.conversations.isNotEmpty()) {
             listWithHeader(
-                ConversationSection.Conversations(conversationCollections.exerciseChannels),
+                ConversationSectionState.Conversations(conversationCollections.exerciseChannels),
                 SECTION_EXERCISES_KEY,
                 KEY_SUFFIX_EXERCISES,
                 R.string.conversation_overview_section_exercise_channels,
-                viewModel::toggleExercisesExpanded
+                toggleExercisesExpanded
             ) { Icon(imageVector = Icons.AutoMirrored.Filled.List, contentDescription = null) }
         }
 
         if (conversationCollections.lectureChannels.conversations.isNotEmpty()) {
             listWithHeader(
-                ConversationSection.Conversations(conversationCollections.lectureChannels),
+                ConversationSectionState.Conversations(conversationCollections.lectureChannels),
                 SECTION_LECTURES_KEY,
                 KEY_SUFFIX_LECTURES,
                 R.string.conversation_overview_section_lecture_channels,
-                viewModel::toggleLecturesExpanded
+                toggleLecturesExpanded
             ) { Icon(imageVector = Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = null) }
         }
 
         if (conversationCollections.examChannels.conversations.isNotEmpty()) {
             listWithHeader(
-                ConversationSection.Conversations(conversationCollections.examChannels),
+                ConversationSectionState.Conversations(conversationCollections.examChannels),
                 SECTION_EXAMS_KEY,
                 KEY_SUFFIX_EXAMS,
                 R.string.conversation_overview_section_exam_channels,
-                viewModel::toggleExamsExpanded
+                toggleExamsExpanded
             ) { Icon(imageVector = Icons.Default.School, contentDescription = null) }
         }
 
         if (conversationCollections.groupChats.conversations.isNotEmpty()) {
             listWithHeader(
-                ConversationSection.Conversations(conversationCollections.groupChats),
+                ConversationSectionState.Conversations(conversationCollections.groupChats),
                 SECTION_GROUPS_KEY,
                 KEY_SUFFIX_GROUPS,
                 R.string.conversation_overview_section_groups,
-                viewModel::toggleGroupChatsExpanded
+                toggleGroupChatsExpanded
             ) { Icon(imageVector = Icons.Default.Forum, contentDescription = null) }
         }
 
         if (conversationCollections.directChats.conversations.isNotEmpty()) {
             listWithHeader(
-                ConversationSection.Conversations(conversationCollections.directChats),
+                ConversationSectionState.Conversations(conversationCollections.directChats),
                 SECTION_DIRECT_MESSAGES_KEY,
                 KEY_SUFFIX_PERSONAL,
                 R.string.conversation_overview_section_direct_messages,
-                viewModel::togglePersonalConversationsExpanded
+                togglePersonalConversationsExpanded
             ) { Icon(imageVector = Icons.AutoMirrored.Filled.Message, contentDescription = null) }
         }
 
         if (conversationCollections.hidden.conversations.isNotEmpty()) {
             listWithHeader(
-                ConversationSection.Conversations(conversationCollections.hidden),
+                ConversationSectionState.Conversations(conversationCollections.hidden),
                 SECTION_HIDDEN_KEY,
                 KEY_SUFFIX_HIDDEN,
                 R.string.conversation_overview_section_hidden,
-                viewModel::toggleHiddenExpanded
+                toggleHiddenExpanded
             ) { Icon(imageVector = Icons.Default.NotInterested, contentDescription = null) }
         }
 
         listWithHeader(
-            ConversationSection.SavedPosts(isExpanded = isSavedPostsExpanded),
+            ConversationSectionState.SavedPosts(isExpanded = isSavedPostsSectionExpanded),
             SECTION_SAVED_POSTS_KEY,
             KEY_SUFFIX_SAVED_MESSAGES,
             R.string.conversation_overview_section_saved_posts,
-            viewModel::toggleSavedPostsExpanded
+            toggleSavedPostsExpanded
         ) { Icon(imageVector = Icons.Default.Bookmark, contentDescription = null) }
 
         trailingContent()
@@ -283,7 +328,7 @@ private fun LazyListScope.conversationSectionHeader(
 
 private fun LazyListScope.conversationList(
     keySuffix: String,
-    section: ConversationSection,
+    section: ConversationSectionState,
     clientId: Long,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
@@ -294,7 +339,7 @@ private fun LazyListScope.conversationList(
     if (!section.isExpanded) return
 
     when(section) {
-        is ConversationSection.SavedPosts -> {
+        is ConversationSectionState.SavedPosts -> {
             items(
                 SavedPostStatus.entries
             ) {
@@ -308,7 +353,7 @@ private fun LazyListScope.conversationList(
             }
         }
 
-        is ConversationSection.Conversations<*> -> {
+        is ConversationSectionState.Conversations<*> -> {
             val conversations = section.conversations
             items(
                 items = conversations.conversations,
@@ -443,7 +488,10 @@ private fun ConversationListItem(
                 .testTag(tagForConversationOptions(itemBaseTag)),
             onClick = { isContextDialogShown = true }
         ) {
-            Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null)
+            Icon(
+                imageVector = Icons.Default.MoreHoriz,
+                contentDescription = stringResource(R.string.conversation_overview_conversation_item_show_actions)
+            )
         }
 
         ConversationListItemDropdownMenu(

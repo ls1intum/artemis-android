@@ -99,6 +99,36 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         composeTestRule.assertPostActionVisibility(R.string.post_delete, isVisible = false)
     }
 
+    @Test
+    fun `test GIVEN a post WHEN long pressing the post as non-moderator THEN save option is shown`() {
+        setupChatUi(
+            posts = listOf(StandalonePost(
+                id = 1,
+                author = otherUser,
+                content = postContent,
+            )),
+            currentUser = currentUser
+        )
+
+        composeTestRule.assertPostActionVisibility(R.string.post_save, isVisible = true)
+    }
+
+    @Test
+    fun `test GIVEN a saved post WHEN long pressing the post as non-moderator THEN un-save option is shown`() {
+        setupChatUi(
+            posts = listOf(StandalonePost(
+                id = 1,
+                author = otherUser,
+                content = postContent,
+                isSaved = true,
+            )),
+            currentUser = currentUser
+        )
+
+        composeTestRule.assertPostActionVisibility(R.string.post_unsave, isVisible = true)
+    }
+
+
     private fun ComposeTestRule.assertPostActionVisibility(
         stringResId: Int,
         isVisible: Boolean

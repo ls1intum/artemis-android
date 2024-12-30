@@ -2,6 +2,8 @@
 <resources>
     <string name="conversation_overview_search_hint">Search for conversation</string>
 
+    <string name="conversation_overview_conversation_item_show_actions">Show Actions</string>
+
     <string name="conversation_overview_conversation_item_mark_as_favorite">Favorite</string>
     <string name="conversation_overview_conversation_item_unmark_as_favorite">Unfavorite</string>
 
