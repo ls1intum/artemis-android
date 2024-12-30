@@ -75,7 +75,8 @@ internal class MetisStorageServiceImpl(
                 creationDate = creationDate,
                 content = content,
                 authorRole = authorRole?.asDb ?: UserRole.USER,
-                updatedDate = updatedDate
+                updatedDate = updatedDate,
+                isSaved = isSaved
             )
 
             val standalone = StandalonePostingEntity(
@@ -105,7 +106,8 @@ internal class MetisStorageServiceImpl(
                 creationDate = creationDate ?: Instant.fromEpochSeconds(0),
                 content = content,
                 authorRole = authorRole?.asDb ?: UserRole.USER,
-                updatedDate = updatedDate
+                updatedDate = updatedDate,
+                isSaved = isSaved
             )
 
             val answer = AnswerPostingEntity(

@@ -18,6 +18,7 @@ data class AnswerPost(
     override val reactions: List<Reaction>? = null,
     @SerialName("resolvesPost")
     override val resolvesPost: Boolean = false,
+    override val isSaved: Boolean = false,
     val post: StandalonePost? = null
 ) : BasePost(), IAnswerPost {
 

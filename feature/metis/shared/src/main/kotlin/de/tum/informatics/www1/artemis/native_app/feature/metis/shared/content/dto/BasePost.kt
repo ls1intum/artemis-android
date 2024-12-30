@@ -13,6 +13,7 @@ sealed class BasePost : IBasePost {
     abstract override val updatedDate: Instant?
     abstract override val content: String?
     abstract override val reactions: List<Reaction>?
+    abstract override val isSaved: Boolean?
 
     override val authorName: String?
         get() = author?.name

@@ -38,6 +38,8 @@ data class PostPojo(
     override val updatedDate: Instant?,
     @ColumnInfo(name = "resolved")
     override val resolved: Boolean,
+    @ColumnInfo(name = "is_saved")
+    override val isSaved: Boolean,
     @ColumnInfo(name = "context")
     val courseWideContext: BasePostingEntity.CourseWideContext?,
     @ColumnInfo(name = "display_priority")

@@ -18,6 +18,7 @@ data class StandalonePost(
     override val updatedDate: Instant? = null,
     override val content: String = "",
     override val reactions: List<Reaction>? = null,
+    override val isSaved: Boolean? = null,
     override val title: String? = null,
     val visibleForStudents: Boolean = true,
     override val answers: List<AnswerPost>? = null,
@@ -41,7 +42,8 @@ data class StandalonePost(
         creationDate = post.creationDate,
         title = post.title,
         resolved = post.resolved,
-        displayPriority = post.displayPriority
+        displayPriority = post.displayPriority,
+        isSaved = post.isSaved,
     )
 
     @Transient
