@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -252,7 +254,9 @@ private fun LoginUiScreen(
             )
         }
     ) { paddingValues ->
-        val sheetState = rememberModalBottomSheetState()
+        val sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
         val scope = rememberCoroutineScope()
         var showBottomSheet by remember { mutableStateOf(false) }
 
@@ -261,7 +265,8 @@ private fun LoginUiScreen(
                 .fillMaxSize()
                 .imePadding()
                 .consumeWindowInsets(WindowInsets.systemBars)
-                .padding(top = paddingValues.calculateTopPadding()),
+                .padding(top = paddingValues.calculateTopPadding())
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             navController = nestedNavController,
             startDestination = NestedDestination.Home
         ) {
@@ -390,10 +395,12 @@ private fun AccountScreen(
     onClickSaml2Login: (rememberMe: Boolean) -> Unit
 ) {
     val serverProfileInfo by viewModel.serverProfileInfo.collectAsState()
+    val selectedInstance by viewModel.selectedArtemisInstance.collectAsState()
 
     AccountUi(
         modifier = modifier,
         serverProfileInfo = serverProfileInfo,
+        host = selectedInstance.host,
         canSwitchInstance = canSwitchInstance,
         retryLoadServerProfileInfo = viewModel::requestReloadServerProfileInfo,
         onNavigateToLoginScreen = onNavigateToLoginScreen,
@@ -408,6 +415,7 @@ private fun AccountScreen(
 private fun AccountUi(
     modifier: Modifier,
     serverProfileInfo: DataState<ProfileInfo>,
+    host: String,
     canSwitchInstance: Boolean,
     retryLoadServerProfileInfo: () -> Unit,
     onNavigateToLoginScreen: () -> Unit,
@@ -425,7 +433,10 @@ private fun AccountUi(
                 .fillMaxHeight(0.05f)
         )
 
-        ArtemisHeader(modifier = Modifier.fillMaxWidth())
+        ArtemisHeader(
+            modifier = Modifier.fillMaxWidth(),
+            host = host
+        )
 
         Box(
             modifier = Modifier
@@ -509,7 +520,7 @@ private fun RegisterLoginAccount(
                         //Just for the preview.
                         LoginUi(
                             modifier = loginUiModifier,
-                            accountName = "TUm",
+                            accountName = "TUM",
                             needsToAcceptTerms = true,
                             hasUserAcceptedTerms = true,
                             saml2Config = null,
@@ -596,10 +607,16 @@ private fun LoginOrRegister(
 }
 
 @Composable
-internal fun ArtemisHeader(modifier: Modifier) {
-    Column(modifier = modifier) {
+internal fun ArtemisHeader(
+    modifier: Modifier,
+    host: String
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
         Text(
-            modifier = Modifier.fillMaxWidth(),
             text = stringResource(id = R.string.account_screen_title),
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
@@ -607,14 +624,22 @@ internal fun ArtemisHeader(modifier: Modifier) {
         )
 
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp),
             text = stringResource(id = R.string.account_screen_subtitle),
             fontSize = 20.sp,
             fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center
         )
+
+
+        if (BuildConfig.DEBUG) {
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = host,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
     }
 }
 
@@ -625,6 +650,7 @@ fun AccountUiPreviewLoadingProfileInfo() {
         modifier = Modifier.fillMaxSize(),
         canSwitchInstance = true,
         serverProfileInfo = DataState.Loading(),
+        host = "",
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
@@ -641,6 +667,7 @@ fun AccountUiPreviewFailedLoadingProfileInfo() {
         modifier = Modifier.fillMaxSize(),
         canSwitchInstance = true,
         serverProfileInfo = DataState.Failure(IOException()),
+        host = "",
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
@@ -661,6 +688,7 @@ fun AccountUiPreviewWithRegister() {
                 registrationEnabled = true
             )
         ),
+        host = "",
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
@@ -681,6 +709,7 @@ fun AccountUiPreviewWithoutRegister() {
                 registrationEnabled = false
             )
         ),
+        host = "",
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
