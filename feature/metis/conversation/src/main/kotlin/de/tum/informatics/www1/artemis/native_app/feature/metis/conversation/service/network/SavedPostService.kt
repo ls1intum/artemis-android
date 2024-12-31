@@ -84,7 +84,7 @@ interface SavedPostService {
         return when (post) {
             is IStandalonePost -> SavedPostPostingType.POST
             is IAnswerPost -> SavedPostPostingType.ANSWER
-            is SavedPost -> post.savedPostPostingType
+            is SavedPost -> post.postingType
             else -> throw IllegalArgumentException("Post type not supported")}
     }
 

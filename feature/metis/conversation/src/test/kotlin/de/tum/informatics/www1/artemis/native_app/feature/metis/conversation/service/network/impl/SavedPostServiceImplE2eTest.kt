@@ -44,7 +44,75 @@ class SavedPostServiceImplTest : ConversationMessagesBaseTest() {
             assertEquals(1, savedPosts.size)
             val receivedPost = savedPosts.first()
             assertEquals(post.id, receivedPost.id)
-            assertEquals(post.isSaved, true)
+            assertEquals(true, receivedPost.isSaved)
+        }
+    }
+
+    @Test
+    fun `test GIVEN the SavedPostService WHEN deleting a saved post THEN calling getSavedPosts with status InProgress returns no saved post`() {
+        runTest(timeout = DefaultTimeoutMillis.milliseconds) {
+            val post = postDefaultMessage()
+
+            sut.savePost(
+                post = post,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            )
+                .orThrow("Could not save post")
+
+            sut.deleteSavedPost(
+                post = post,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            )
+                .orThrow("Could not remove saved post")
+
+            val savedPosts = sut.getSavedPosts(
+                status = SavedPostStatus.IN_PROGRESS,
+                courseId = course.id!!,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            )
+                .orThrow("Could not get saved posts")
+
+            assertEquals(0, savedPosts.size)
+        }
+    }
+
+    @Test
+    fun `test GIVEN the SavedPostService WHEN changing the status of a saved post THEN calling getSavedPosts with status Done returns this saved post`() {
+        runTest(timeout = DefaultTimeoutMillis.milliseconds) {
+            val post = postDefaultMessage()
+
+            sut.savePost(
+                post = post,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            )
+                .orThrow("Could not save post")
+
+            sut.changeSavedPostStatus(
+                post = post,
+                status = SavedPostStatus.COMPLETED,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            )
+                .orThrow("Could not change status of saved post")
+
+            // TODO: somehow this test does not work; check whether the API really gets called on the BE
+            val savedPosts = sut.getSavedPosts(
+                status = SavedPostStatus.COMPLETED,
+                courseId = course.id!!,
+                authToken = accessToken,
+                serverUrl = testServerUrl
+            )
+                .orThrow("Could not get saved posts")
+
+            assertEquals(1, savedPosts.size)
+            val receivedPost = savedPosts.first()
+            assertEquals(post.id, receivedPost.id)
+            assertEquals(true, receivedPost.isSaved)
+            assertEquals(SavedPostStatus.COMPLETED, receivedPost.savedPostStatus)
         }
     }
 }
