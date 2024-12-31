@@ -4,9 +4,9 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.BasePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.model.SavedPostPostingType
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.model.SavedPostStatus
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostPostingType
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
@@ -23,7 +23,7 @@ class SavedPostServiceImpl(
         courseId: Long,
         authToken: String,
         serverUrl: String
-    ): NetworkResponse<List<BasePost>> {
+    ): NetworkResponse<List<SavedPost>> {
         return performNetworkCall {
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
@@ -36,7 +36,7 @@ class SavedPostServiceImpl(
                 }
 
                 cookieAuth(authToken)
-            }.body().
+            }.body()
         }
     }
 

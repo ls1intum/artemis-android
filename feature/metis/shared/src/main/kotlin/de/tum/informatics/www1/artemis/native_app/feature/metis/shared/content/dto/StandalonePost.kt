@@ -47,17 +47,9 @@ data class StandalonePost(
     )
 
     @Transient
-    override val authorId: Long? = author?.id
-
-    @Transient
-    override val serverPostId: Long? = id
-
-    @Transient
     override val key: Any = id ?: hashCode()
     
     @Transient
     override val standalonePostId = id?.let(StandalonePostId::ServerSideId)
 
-    @Transient
-    override val clientPostId: String? = null
 }

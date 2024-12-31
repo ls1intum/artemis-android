@@ -1,14 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.BasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.model.SavedPostPostingType
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.model.SavedPostStatus
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostPostingType
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 
 interface SavedPostService {
 
@@ -17,7 +15,7 @@ interface SavedPostService {
         courseId: Long,
         authToken: String,
         serverUrl: String
-    ): NetworkResponse<List<BasePost>>
+    ): NetworkResponse<List<SavedPost>>
 
     suspend fun savePost(
         post: IBasePost,
@@ -56,16 +54,13 @@ interface SavedPostService {
     ): NetworkResponse<Unit>
 
     suspend fun changeSavedPostStatus(
-        post: BasePost,
+        post: IBasePost,
         status: SavedPostStatus,
         authToken: String,
         serverUrl: String
     ) = changeSavedPostStatus(
-        postId = post.id ?: -1,
-        postType = when (post) {
-            is StandalonePost -> SavedPostPostingType.POST
-            is AnswerPost -> SavedPostPostingType.ANSWER
-        },
+        postId = getPostId(post),
+        postType = getPostType(post),
         status = status,
         authToken = authToken,
         serverUrl = serverUrl,
@@ -89,8 +84,8 @@ interface SavedPostService {
         return when (post) {
             is IStandalonePost -> SavedPostPostingType.POST
             is IAnswerPost -> SavedPostPostingType.ANSWER
-            else -> throw IllegalArgumentException("Post type not supported")
-        }
+            is SavedPost -> post.savedPostPostingType
+            else -> throw IllegalArgumentException("Post type not supported")}
     }
 
 }
