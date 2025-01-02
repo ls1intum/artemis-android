@@ -12,6 +12,7 @@ import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.http.appendPathSegments
 
 class SavedPostServiceImpl(
@@ -92,7 +93,7 @@ class SavedPostServiceImpl(
         serverUrl: String
     ): NetworkResponse<Unit> {
         return performNetworkCall {
-            ktorProvider.ktorClient.post(serverUrl) {
+            ktorProvider.ktorClient.put(serverUrl) {
                 url {
                     appendPathSegments(
                         "api",

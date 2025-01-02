@@ -99,7 +99,6 @@ class SavedPostServiceImplTest : ConversationMessagesBaseTest() {
             )
                 .orThrow("Could not change status of saved post")
 
-            // TODO: somehow this test does not work; check whether the API really gets called on the BE
             val savedPosts = sut.getSavedPosts(
                 status = SavedPostStatus.COMPLETED,
                 courseId = course.id!!,
