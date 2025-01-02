@@ -16,25 +16,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.BottomSheetActionButton
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisModificationTaskHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getUiText
+import kotlinx.coroutines.Deferred
 
 
 @Composable
-fun SavedPostWithBottomSheet(
+fun SavedPostWithActions(
     modifier: Modifier = Modifier,
     savedPost: ISavedPost,
     onClick: () -> Unit,
-    onChangeStatus: (newStatus: SavedPostStatus) -> Unit,
+    onChangeStatus: (newStatus: SavedPostStatus) -> Deferred<MetisModificationFailure?>,
 ) {
     var displayBottomSheet by remember(savedPost) { mutableStateOf(false) }
+    var isLoading by remember(savedPost) { mutableStateOf(false) }
+
+    var metisModificationTask by remember { mutableStateOf<Deferred<MetisModificationFailure?>?>(null) }
+    MetisModificationTaskHandler(
+        metisModificationTask = metisModificationTask,
+        onTaskCompletion = {
+            isLoading = false
+        }
+    )
 
     SavedPostItem(
         modifier = modifier,
         savedPost = savedPost,
+        isLoading = isLoading,
         onClick = onClick,
         onLongClick = {
             displayBottomSheet = true
@@ -45,8 +58,9 @@ fun SavedPostWithBottomSheet(
         SavedPostBottomSheet(
             currentStatus = savedPost.savedPostStatus,
             onActionClick = { newStatus ->
-                onChangeStatus(newStatus)
+                metisModificationTask = onChangeStatus(newStatus)
                 displayBottomSheet = false
+                isLoading = true
             },
             onDismissRequest = { displayBottomSheet = false }
         )

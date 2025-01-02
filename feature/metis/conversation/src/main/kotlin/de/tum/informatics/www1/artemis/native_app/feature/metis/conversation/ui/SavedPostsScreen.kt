@@ -21,6 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,13 +34,16 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts.SavedPostWithBottomSheet
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts.SavedPostWithActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts.SavedPostsViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisModificationTaskHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getUiText
+import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -77,6 +83,9 @@ internal fun SavedPostsScreen (
     val savedPosts by viewModel.savedPosts.collectAsState()
     val status = viewModel.savedPostStatus
 
+    var metisModificationTask by remember { mutableStateOf<Deferred<MetisModificationFailure?>?>(null) }
+    MetisModificationTaskHandler(metisModificationTask)
+
     SavedPostsScreen(
         modifier = modifier,
         status = status,
@@ -86,9 +95,7 @@ internal fun SavedPostsScreen (
         onNavigateToPost = {
             onNavigateToPost(StandalonePostId.ServerSideId(it.referencePostId))
         },
-        onChangeStatus = { savedPost, newStatus ->
-            viewModel.changeSavedPostStatus(savedPost, newStatus)
-        }
+        onChangeStatus = viewModel::changeSavedPostStatus
     )
 }
 
@@ -100,7 +107,7 @@ internal fun SavedPostsScreen (
     onRequestReload: () -> Unit,
     onNavigateBack: (() -> Unit),
     onNavigateToPost: (ISavedPost) -> Unit,
-    onChangeStatus: (ISavedPost, SavedPostStatus) -> Unit
+    onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>
 ) {
     Scaffold(
         modifier = modifier,
@@ -147,7 +154,7 @@ private fun SavedPostsList(
     status: SavedPostStatus,
     savedPosts: List<ISavedPost>,
     onNavigateToPost: (ISavedPost) -> Unit,
-    onChangeStatus: (ISavedPost, SavedPostStatus) -> Unit
+    onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>
 ) {
     if (savedPosts.isEmpty()) {
         EmptyListHint(
@@ -169,7 +176,7 @@ private fun SavedPostsList(
             items = savedPosts,
             key = { it.serverPostId ?: 0L }
         ) {
-            SavedPostWithBottomSheet(
+            SavedPostWithActions(
                 modifier = Modifier.fillMaxWidth(),
                 savedPost = it,
                 onClick = {

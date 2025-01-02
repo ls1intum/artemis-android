@@ -11,8 +11,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisModificationFailureDialog
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.MetisModificationTaskHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 
 internal sealed class ReplyMode() {
@@ -120,17 +121,11 @@ internal fun <T : IBasePost> MetisReplyHandler(
         updateFailureStateDelegate: (MetisModificationFailure?) -> Unit
     ) -> Unit
 ) {
-    var metisFailure: MetisModificationFailure? by remember() {
+    var metisModificationTask: Deferred<MetisModificationFailure?>? by remember {
         mutableStateOf(null)
     }
+    MetisModificationTaskHandler(metisModificationTask)
 
-    var metisModificationTask: Deferred<MetisModificationFailure?>? by remember() {
-        mutableStateOf(null)
-    }
-
-    AwaitDeferredCompletion(job = metisModificationTask) {
-        metisFailure = it
-    }
 
     var editingPost: T? by remember { mutableStateOf(null) }
     val replyMode = rememberReplyMode(
@@ -163,12 +158,6 @@ internal fun <T : IBasePost> MetisReplyHandler(
                 metisModificationTask = onSavePost(post)
             }
         },
-        { metisFailure = it }
+        { metisModificationTask = CompletableDeferred(it) }
     )
-
-    if (metisFailure != null) {
-        MetisModificationFailureDialog(metisModificationFailure = metisFailure) {
-            metisFailure = null
-        }
-    }
 }

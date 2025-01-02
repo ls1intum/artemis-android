@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -41,17 +43,20 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 fun SavedPostItem(
     modifier: Modifier = Modifier,
     savedPost: ISavedPost,
+    isLoading: Boolean = false,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
 ) {
     ConversationContextInfo(
         modifier = modifier
             .combinedClickable(
+                enabled = !isLoading,
                 onClick = onClick,
                 onLongClick = onLongClick,
             ),
         conversation = savedPost.conversation,
         isThreadReply = savedPost.postingType == SavedPostPostingType.ANSWER,
+        isLoading = isLoading
     ) {
 
         // TODO: try to reuse code from PostItem, as soon as the Redesign is merged.
@@ -72,11 +77,18 @@ private fun ConversationContextInfo(
     modifier: Modifier,
     conversation: ISavedPost.SimpleConversationInfo,
     isThreadReply: Boolean,
+    isLoading: Boolean,
     content: @Composable () -> Unit,
 ) {
     Card(
         modifier = modifier,
     ) {
+        AnimatedVisibility(
+            visible = isLoading,
+        ) {
+            LinearProgressIndicator(Modifier.fillMaxWidth(),)
+        }
+
         Column(
             modifier = Modifier.padding(8.dp),
         ) {
@@ -170,6 +182,7 @@ private fun ConversationContextInfoHeader(
 @Composable
 private fun SavedPostItemPreview() {
     SavedPostItem(
+        isLoading = true,
         savedPost = SavedPost(
             id = 1,
             referencePostId = 1,
