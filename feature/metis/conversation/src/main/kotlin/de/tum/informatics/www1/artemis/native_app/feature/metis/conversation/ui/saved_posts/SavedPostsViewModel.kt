@@ -25,8 +25,8 @@ class SavedPostsViewModel(
     private val courseId: Long,
     val savedPostStatus: SavedPostStatus,
     private val savedPostService: SavedPostService,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
+    serverConfigurationService: ServerConfigurationService,
+    accountService: AccountService,
     private val networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
@@ -50,4 +50,9 @@ class SavedPostsViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
+
+
+    fun requestReload() {
+        onRequestReload.tryEmit(Unit)
+    }
 }

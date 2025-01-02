@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedConversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedSavedPosts
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedThread
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.SavedPostsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.browse_channels.BrowseChannelsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_channel.CreateChannelScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.CreatePersonalConversationScreen
@@ -145,8 +145,16 @@ internal fun SinglePageConversationBody(
             }
 
             is OpenedSavedPosts -> {
-                // TODO
-                Text(config.status.name)
+                // TODO: This should potentially be moved into the ConversationScreen. That allows us to still display the ConvOverview on the left.
+                SavedPostsScreen(
+                    modifier = modifier,
+                    courseId = courseId,
+                    savedPostStatus = config.status,
+                    onNavigateBack = navigateToPrevConfig,
+                    onNavigateToPost = { postId ->
+                        // TODO
+                    }
+                )
             }
 
             is BrowseChannelConfiguration -> {

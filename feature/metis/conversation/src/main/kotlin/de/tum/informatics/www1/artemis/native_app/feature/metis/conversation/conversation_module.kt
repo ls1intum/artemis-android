@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.impl.MetisStorageServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.impl.ReplyTextStorageServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts.SavedPostsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.CreateClientSidePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.SendConversationPostWorker
 import org.koin.android.ext.koin.androidContext
@@ -50,6 +51,17 @@ val conversationModule = module {
             get(),
             get(),
             get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+
+    viewModel { params ->
+        SavedPostsViewModel(
+            params[0],
+            params[1],
             get(),
             get(),
             get(),

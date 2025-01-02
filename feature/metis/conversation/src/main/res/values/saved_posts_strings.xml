@@ -3,8 +3,11 @@
     <string name="saved_posts_title_prefix">Saved Messages</string>
     <string name="saved_posts_removal_notice"> Archived and completed bookmarks will be removed after 100 days.</string>
 
-    <string name="saved_posts_empty_state_title">No saved messages</string>
-    <string name="saved_posts_empty_state_description">Save messages to read them later.</string>
+    <string name="saved_posts_loading_posts_loading">Fetching saved posts from the server …</string>
+    <string name="saved_posts_loading_posts_failed">Something went wrong while loading your saved posts.</string>
+    <string name="saved_posts_loading_posts_try_again">Try again</string>
+
+    <string name="saved_posts_empty_state_title">No saved messages with status \'%1$s\'</string>
 
     <string name="saved_posts_context_private_chat">Chat</string>
     <string name="saved_posts_context_thread">Thread</string>

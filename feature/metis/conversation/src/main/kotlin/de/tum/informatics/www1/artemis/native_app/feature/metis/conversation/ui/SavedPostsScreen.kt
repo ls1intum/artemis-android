@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -15,11 +16,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts.SavedPostsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
@@ -27,6 +33,30 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getUiText
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
+
+
+@Composable
+fun SavedPostsScreen(
+    modifier: Modifier = Modifier,
+    courseId: Long,
+    savedPostStatus: SavedPostStatus,
+    onNavigateBack: (() -> Unit)?,
+    onNavigateToPost: (postId: StandalonePostId) -> Unit
+) {
+    val viewModel = koinViewModel<SavedPostsViewModel>(
+        key = "$courseId|$savedPostStatus"
+    ) { parametersOf(courseId, savedPostStatus) }
+
+    SavedPostsScreen(
+        modifier = modifier,
+        viewModel = viewModel,
+        onNavigateBack = onNavigateBack,
+        onNavigateToPost = onNavigateToPost
+    )
+}
+
 
 @Composable
 internal fun SavedPostsScreen (
@@ -35,13 +65,25 @@ internal fun SavedPostsScreen (
     onNavigateBack: (() -> Unit)?,
     onNavigateToPost: (postId: StandalonePostId) -> Unit
 ) {
+    val savedPosts by viewModel.savedPosts.collectAsState()
+    val status = viewModel.savedPostStatus
+
+    SavedPostsScreen(
+        modifier = modifier,
+        status = status,
+        savedPostsDataState = savedPosts,
+        onRequestReload = viewModel::requestReload,
+        onNavigateBack = onNavigateBack ?: {},
+        onNavigateToPost = onNavigateToPost
+    )
 }
 
 @Composable
 internal fun SavedPostsScreen (
     modifier: Modifier,
     status: SavedPostStatus,
-    savedPosts: List<ISavedPost>,
+    savedPostsDataState: DataState<List<ISavedPost>>,
+    onRequestReload: () -> Unit,
     onNavigateBack: (() -> Unit),
     onNavigateToPost: (postId: StandalonePostId) -> Unit
 ) {
@@ -61,20 +103,35 @@ internal fun SavedPostsScreen (
         }
     ) { paddingValues ->
         Column(
-            modifier = Modifier.padding(paddingValues)
+            modifier = modifier.padding(paddingValues)
         ) {
             if (status == SavedPostStatus.ARCHIVED || status == SavedPostStatus.COMPLETED) {
-                RemovalNotice(
-                    modifier = Modifier.padding(paddingValues)
-                )
+                RemovalNotice()
             }
 
-            // TODO: empty state
-            LazyColumn(
-                modifier = modifier
-                    .padding(paddingValues)
-            ) {
+            BasicDataStateUi(
+                modifier = Modifier.fillMaxSize(),
+                dataState = savedPostsDataState,
+                loadingText = stringResource(R.string.saved_posts_loading_posts_loading),
+                failureText = stringResource(R.string.saved_posts_loading_posts_failed),
+                retryButtonText = stringResource(R.string.saved_posts_loading_posts_try_again),
+                onClickRetry = onRequestReload
+            ) { savedPosts ->
 
+                if (savedPosts.isEmpty()) {
+                    EmptyListHint(
+                        modifier = Modifier.padding(paddingValues),
+                        hint = stringResource(
+                            id = R.string.saved_posts_empty_state_title,
+                            status.getUiText()
+                        ),
+                        icon = status.getIcon()
+                    )
+                }
+
+                LazyColumn() {
+
+                }
             }
         }
     }
@@ -114,7 +171,7 @@ private fun RemovalNotice(
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Icon(
             imageVector = Icons.Default.Info,
