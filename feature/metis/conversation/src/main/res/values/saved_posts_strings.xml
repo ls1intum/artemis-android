@@ -11,4 +11,6 @@
 
     <string name="saved_posts_context_private_chat">Chat</string>
     <string name="saved_posts_context_thread">Thread</string>
+
+    <string name="saved_posts_change_status">Move to \'%1$s\'</string>
 </resources>

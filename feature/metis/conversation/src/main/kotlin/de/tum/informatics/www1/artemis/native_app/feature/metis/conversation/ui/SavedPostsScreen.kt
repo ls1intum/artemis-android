@@ -4,18 +4,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -26,7 +27,9 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts.SavedPostWithBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts.SavedPostsViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
@@ -42,12 +45,16 @@ fun SavedPostsScreen(
     modifier: Modifier = Modifier,
     courseId: Long,
     savedPostStatus: SavedPostStatus,
-    onNavigateBack: (() -> Unit)?,
+    onNavigateBack: (() -> Unit),
     onNavigateToPost: (postId: StandalonePostId) -> Unit
 ) {
     val viewModel = koinViewModel<SavedPostsViewModel>(
         key = "$courseId|$savedPostStatus"
     ) { parametersOf(courseId, savedPostStatus) }
+
+    LaunchedEffect(viewModel) {
+        viewModel.requestReload()
+    }
 
     SavedPostsScreen(
         modifier = modifier,
@@ -62,8 +69,8 @@ fun SavedPostsScreen(
 internal fun SavedPostsScreen (
     modifier: Modifier,
     viewModel: SavedPostsViewModel,
-    onNavigateBack: (() -> Unit)?,
-    onNavigateToPost: (postId: StandalonePostId) -> Unit
+    onNavigateBack: (() -> Unit),
+    onNavigateToPost: (postId: StandalonePostId.ServerSideId) -> Unit
 ) {
     val savedPosts by viewModel.savedPosts.collectAsState()
     val status = viewModel.savedPostStatus
@@ -73,8 +80,13 @@ internal fun SavedPostsScreen (
         status = status,
         savedPostsDataState = savedPosts,
         onRequestReload = viewModel::requestReload,
-        onNavigateBack = onNavigateBack ?: {},
-        onNavigateToPost = onNavigateToPost
+        onNavigateBack = onNavigateBack,
+        onNavigateToPost = {
+            onNavigateToPost(StandalonePostId.ServerSideId(it.referencePostId))
+        },
+        onChangeStatus = { savedPost, newStatus ->
+            viewModel.changeSavedPostStatus(savedPost, newStatus)
+        }
     )
 }
 
@@ -85,20 +97,15 @@ internal fun SavedPostsScreen (
     savedPostsDataState: DataState<List<ISavedPost>>,
     onRequestReload: () -> Unit,
     onNavigateBack: (() -> Unit),
-    onNavigateToPost: (postId: StandalonePostId) -> Unit
+    onNavigateToPost: (ISavedPost) -> Unit,
+    onChangeStatus: (ISavedPost, SavedPostStatus) -> Unit
 ) {
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = {
-                    TopBarTitle(status = status)
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    }
-                }
+                title = { TopBarTitle(status = status) },
+                navigationIcon = { NavigationBackButton(onNavigateBack) }
             )
         }
     ) { paddingValues ->
@@ -106,7 +113,9 @@ internal fun SavedPostsScreen (
             modifier = modifier.padding(paddingValues)
         ) {
             if (status == SavedPostStatus.ARCHIVED || status == SavedPostStatus.COMPLETED) {
-                RemovalNotice()
+                RemovalNotice(
+                    Modifier.padding(bottom = 8.dp)
+                )
             }
 
             BasicDataStateUi(
@@ -118,21 +127,56 @@ internal fun SavedPostsScreen (
                 onClickRetry = onRequestReload
             ) { savedPosts ->
 
-                if (savedPosts.isEmpty()) {
-                    EmptyListHint(
-                        modifier = Modifier.padding(paddingValues),
-                        hint = stringResource(
-                            id = R.string.saved_posts_empty_state_title,
-                            status.getUiText()
-                        ),
-                        icon = status.getIcon()
-                    )
-                }
-
-                LazyColumn() {
-
-                }
+                SavedPostsList(
+                    modifier = Modifier.fillMaxSize(),
+                    status = status,
+                    savedPosts = savedPosts,
+                    onNavigateToPost = onNavigateToPost,
+                    onChangeStatus = onChangeStatus
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun SavedPostsList(
+    modifier: Modifier = Modifier,
+    status: SavedPostStatus,
+    savedPosts: List<ISavedPost>,
+    onNavigateToPost: (ISavedPost) -> Unit,
+    onChangeStatus: (ISavedPost, SavedPostStatus) -> Unit
+) {
+    if (savedPosts.isEmpty()) {
+        EmptyListHint(
+            modifier = modifier,
+            hint = stringResource(
+                id = R.string.saved_posts_empty_state_title,
+                status.getUiText()
+            ),
+            icon = status.getIcon()
+        )
+        return
+    }
+
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(
+            items = savedPosts,
+            key = { it.serverPostId ?: 0L }
+        ) {
+            SavedPostWithBottomSheet(
+                modifier = Modifier.fillMaxWidth(),
+                savedPost = it,
+                onClick = {
+                    onNavigateToPost(it)
+                },
+                onChangeStatus = { newStatus ->
+                    onChangeStatus(it, newStatus)
+                }
+            )
         }
     }
 }

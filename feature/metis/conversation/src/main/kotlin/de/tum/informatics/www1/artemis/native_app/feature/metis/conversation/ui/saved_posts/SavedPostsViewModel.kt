@@ -10,13 +10,17 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.asMetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.SavedPostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -25,10 +29,10 @@ class SavedPostsViewModel(
     private val courseId: Long,
     val savedPostStatus: SavedPostStatus,
     private val savedPostService: SavedPostService,
-    serverConfigurationService: ServerConfigurationService,
-    accountService: AccountService,
+    private val serverConfigurationService: ServerConfigurationService,
+    private val accountService: AccountService,
     private val networkStatusProvider: NetworkStatusProvider,
-    coroutineContext: CoroutineContext = EmptyCoroutineContext
+    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 
     private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -37,7 +41,7 @@ class SavedPostsViewModel(
     val savedPosts: StateFlow<DataState<List<ISavedPost>>> = flatMapLatest(
         serverConfigurationService.serverUrl,
         accountService.authToken,
-        onRequestReload.onStart { emit(Unit) }
+        onRequestReload
     ) { serverUrl, authToken, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             savedPostService.getSavedPosts(
@@ -54,5 +58,21 @@ class SavedPostsViewModel(
 
     fun requestReload() {
         onRequestReload.tryEmit(Unit)
+    }
+
+    fun changeSavedPostStatus(
+        savedPost: ISavedPost,
+        newStatus: SavedPostStatus
+    ): Deferred<MetisModificationFailure?> {
+        return viewModelScope.async(coroutineContext) {
+            savedPostService.changeSavedPostStatus(
+                post = savedPost,
+                status = newStatus,
+                authToken = accountService.authToken.first(),
+                serverUrl = serverConfigurationService.serverUrl.first()
+            )
+                .also { requestReload() }
+                .asMetisModificationFailure(MetisModificationFailure.CHANGE_SAVED_POST_STATUS)
+        }
     }
 }

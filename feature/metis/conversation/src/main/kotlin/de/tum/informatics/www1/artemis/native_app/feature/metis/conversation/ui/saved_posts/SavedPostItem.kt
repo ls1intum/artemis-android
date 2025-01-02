@@ -37,8 +37,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 
 
-// TODO: with bottomSheet
-
 @Composable
 fun SavedPostItem(
     modifier: Modifier = Modifier,
@@ -46,7 +44,6 @@ fun SavedPostItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
 ) {
-
     ConversationContextInfo(
         modifier = modifier
             .combinedClickable(
