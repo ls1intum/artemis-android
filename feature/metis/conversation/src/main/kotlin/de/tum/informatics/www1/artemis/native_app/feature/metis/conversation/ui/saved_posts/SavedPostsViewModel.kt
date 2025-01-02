@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.keepSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
@@ -73,7 +74,19 @@ class SavedPostsViewModel(
                 authToken = accountService.authToken.first(),
                 serverUrl = serverConfigurationService.serverUrl.first()
             )
-                .also { requestReload() }
+                .onSuccess { requestReload() }
+                .asMetisModificationFailure(MetisModificationFailure.CHANGE_SAVED_POST_STATUS)
+        }
+    }
+
+    fun removeFromSavedPosts(savedPost: ISavedPost): Deferred<MetisModificationFailure?> {
+        return viewModelScope.async(coroutineContext) {
+            savedPostService.deleteSavedPost(
+                post = savedPost,
+                authToken = accountService.authToken.first(),
+                serverUrl = serverConfigurationService.serverUrl.first()
+            )
+                .onSuccess { requestReload() }
                 .asMetisModificationFailure(MetisModificationFailure.CHANGE_SAVED_POST_STATUS)
         }
     }

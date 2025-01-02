@@ -12,5 +12,7 @@
     <string name="saved_posts_context_private_chat">Chat</string>
     <string name="saved_posts_context_thread">Thread</string>
 
-    <string name="saved_posts_change_status">Move to \'%1$s\'</string>
+    <string name="saved_posts_action_change_status">Mark as \'%1$s\'</string>
+    <string name="saved_posts_action_mark_as_completed">Mark as completed</string>
+    <string name="saved_posts_action_remove">Remove from Saved Messages</string>
 </resources>

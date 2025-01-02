@@ -5,7 +5,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,35 +36,55 @@ fun SavedPostWithActions(
     savedPost: ISavedPost,
     onClick: () -> Unit,
     onChangeStatus: (newStatus: SavedPostStatus) -> Deferred<MetisModificationFailure?>,
+    onRemoveFromSavedPosts: () -> Deferred<MetisModificationFailure?>
 ) {
-    var displayBottomSheet by remember(savedPost) { mutableStateOf(false) }
-    var isLoading by remember(savedPost) { mutableStateOf(false) }
+    var displayBottomSheet by remember { mutableStateOf(false) }
 
-    var metisModificationTask by remember { mutableStateOf<Deferred<MetisModificationFailure?>?>(null) }
+    var metisModificationTask by remember {
+        mutableStateOf<Deferred<MetisModificationFailure?>?>(
+            null
+        )
+    }
     MetisModificationTaskHandler(
         metisModificationTask = metisModificationTask,
         onTaskCompletion = {
-            isLoading = false
+            metisModificationTask = null
         }
     )
 
-    SavedPostItem(
-        modifier = modifier,
-        savedPost = savedPost,
-        isLoading = isLoading,
-        onClick = onClick,
-        onLongClick = {
-            displayBottomSheet = true
-        },
-    )
+    Column {
+        SavedPostItem(
+            modifier = modifier,
+            savedPost = savedPost,
+            isLoading = metisModificationTask != null,
+            onClick = onClick,
+            onLongClick = {
+                displayBottomSheet = true
+            },
+        )
+
+        if (savedPost.savedPostStatus == SavedPostStatus.IN_PROGRESS) {
+            Button(
+                onClick = {
+                    metisModificationTask = onChangeStatus(SavedPostStatus.COMPLETED)
+                }
+            ) {
+                Text(stringResource(id = R.string.saved_posts_action_mark_as_completed))
+            }
+        }
+    }
+
 
     if (displayBottomSheet) {
         SavedPostBottomSheet(
             currentStatus = savedPost.savedPostStatus,
-            onActionClick = { newStatus ->
+            onChangeStatusActionClick = { newStatus ->
                 metisModificationTask = onChangeStatus(newStatus)
                 displayBottomSheet = false
-                isLoading = true
+            },
+            onRemoveClick = {
+                metisModificationTask = onRemoveFromSavedPosts()
+                displayBottomSheet = false
             },
             onDismissRequest = { displayBottomSheet = false }
         )
@@ -70,7 +94,8 @@ fun SavedPostWithActions(
 @Composable
 private fun SavedPostBottomSheet(
     currentStatus: SavedPostStatus,
-    onActionClick: (SavedPostStatus) -> Unit,
+    onChangeStatusActionClick: (SavedPostStatus) -> Unit,
+    onRemoveClick: () -> Unit,
     onDismissRequest: () -> Unit
 ) {
     ModalBottomSheet(
@@ -82,12 +107,10 @@ private fun SavedPostBottomSheet(
             modifier = Modifier.padding(Spacings.BottomSheetContentPadding)
         ) {
             for (status in SavedPostStatus.entries) {
-                if (status == currentStatus) {
-                    continue
-                }
+                if (status == currentStatus) { continue }
 
                 val text = stringResource(
-                    id = R.string.saved_posts_change_status,
+                    id = R.string.saved_posts_action_change_status,
                     status.getUiText()
                 )
 
@@ -96,9 +119,17 @@ private fun SavedPostBottomSheet(
                         .fillMaxWidth(),
                     text = text,
                     icon = status.getIcon(),
-                    onClick = { onActionClick(status) }
+                    onClick = { onChangeStatusActionClick(status) }
                 )
             }
+
+            BottomSheetActionButton(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                text = stringResource(id = R.string.saved_posts_action_remove),
+                icon = Icons.Default.Delete,
+                onClick = onRemoveClick
+            )
         }
     }
 }

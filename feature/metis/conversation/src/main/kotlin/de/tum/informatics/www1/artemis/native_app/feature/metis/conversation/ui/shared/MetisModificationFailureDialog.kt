@@ -25,6 +25,8 @@ fun MetisModificationTaskHandler(
     onTaskCompletion: (MetisModificationFailure?) -> Unit = {},
     onSuccess: () -> Unit = {}
 ) {
+    if (metisModificationTask == null) { return }
+
     var metisFailure: MetisModificationFailure? by remember {
         mutableStateOf(null)
     }
