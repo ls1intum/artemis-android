@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -153,44 +154,51 @@ private fun SavedPostsList(
     onChangeStatus: (ISavedPost, SavedPostStatus) -> Deferred<MetisModificationFailure?>,
     onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?>
 ) {
-    if (savedPosts.isEmpty()) {
-        EmptyListHint(
-            modifier = modifier,
-            hint = stringResource(
-                id = R.string.saved_posts_empty_state_title,
-                status.getUiText()
-            ),
-            icon = status.getIcon()
-        )
-        return
-    }
-
-    LazyColumn(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(
-            items = savedPosts,
-            key = { "${it.serverPostId}|${it.postingType}" }
-        ) {
-            SavedPostWithActions(
-                modifier = Modifier.fillMaxWidth(),
-                savedPost = it,
-                onClick = {
-                    onNavigateToPost(it)
-                },
-                onChangeStatus = { newStatus ->
-                    onChangeStatus(it, newStatus)
-                },
-                onRemoveFromSavedPosts = {
-                    onRemoveFromSavedPosts(it)
-                }
+    AnimatedContent(
+        targetState = savedPosts,
+        label = "Animated saved posts list: empty <-> not empty"
+    ) { targetSavedPosts ->
+        if (targetSavedPosts.isEmpty()) {
+            EmptyListHint(
+                modifier = modifier,
+                hint = stringResource(
+                    id = R.string.saved_posts_empty_state_title,
+                    status.getUiText()
+                ),
+                icon = status.getIcon()
             )
+            return@AnimatedContent
         }
 
-        item {
-            // Add a spacer at the end to indicate the end of the list
-            Spacer(Modifier.height(32.dp))
+        LazyColumn(
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(
+                items = targetSavedPosts,
+                key = { "${it.serverPostId}|${it.postingType}" }
+            ) {
+                SavedPostWithActions(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateItem(),
+                    savedPost = it,
+                    onClick = {
+                        onNavigateToPost(it)
+                    },
+                    onChangeStatus = { newStatus ->
+                        onChangeStatus(it, newStatus)
+                    },
+                    onRemoveFromSavedPosts = {
+                        onRemoveFromSavedPosts(it)
+                    }
+                )
+            }
+
+            item {
+                // Add a spacer at the end to indicate the end of the list
+                Spacer(Modifier.height(32.dp))
+            }
         }
     }
 }

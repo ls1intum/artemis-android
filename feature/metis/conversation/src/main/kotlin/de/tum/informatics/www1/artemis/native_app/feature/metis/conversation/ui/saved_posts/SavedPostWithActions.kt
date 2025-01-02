@@ -52,9 +52,11 @@ fun SavedPostWithActions(
         }
     )
 
-    Column {
+    Column(
+        modifier = modifier,
+    ) {
         SavedPostItem(
-            modifier = modifier,
+            modifier = Modifier.fillMaxWidth(),
             savedPost = savedPost,
             isLoading = metisModificationTask != null,
             onClick = onClick,
