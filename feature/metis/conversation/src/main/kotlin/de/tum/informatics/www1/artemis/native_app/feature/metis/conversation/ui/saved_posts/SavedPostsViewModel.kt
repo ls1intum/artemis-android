@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.keepSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
@@ -52,6 +53,7 @@ class SavedPostsViewModel(
             ).bind { it as List<ISavedPost> }       // Required by the compiler
         }
     }
+        .keepSuccess()
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
 
