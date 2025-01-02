@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -350,6 +351,9 @@ private fun LoginUiScreen(
 
         if (showBottomSheet) {
             ModalBottomSheet(
+                modifier = Modifier.padding(
+                    top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+                ),
                 onDismissRequest = {
                     showBottomSheet = false
                 },
