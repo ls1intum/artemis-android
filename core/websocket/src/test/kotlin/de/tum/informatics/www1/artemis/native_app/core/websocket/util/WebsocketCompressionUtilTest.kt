@@ -60,9 +60,13 @@ class WebsocketCompressionUtilTest {
     private fun createHeaders(customHeaders: Map<String, String> = mapOf()) = StompMessageHeaders(
         destination = "dest",
         messageId = "msgId",
-        subscription = "subscription",
-        customHeaders = customHeaders
-    )
+        subscription = "subscription"
+    ) {
+        ack = null
+        setAll(
+            customHeaders
+        )
+    }
 
     private fun compressGzip(data: ByteArray): ByteArray {
         val bos = ByteArrayOutputStream()

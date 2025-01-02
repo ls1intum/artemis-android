@@ -12,7 +12,7 @@ import kotlin.text.Charsets.UTF_8
 @OptIn(ExperimentalEncodingApi::class)
 object WebsocketCompressionUtil {
 
-    final val COMPRESSION_HEADER = "X-Compressed"
+    const val COMPRESSION_HEADER = "X-Compressed"
 
     /**
      * Deserializes the message body of a [StompFrame.Message] into a Kotlin object. It decompresses
