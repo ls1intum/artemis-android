@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,12 +27,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -68,14 +65,13 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.linkTe
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.login.custom_instance_selection.CustomInstanceSelectionScreen
-import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionScreen
+import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.RegisterUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNotificationStorageService
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -253,11 +249,7 @@ private fun LoginUiScreen(
             )
         }
     ) { paddingValues ->
-        val sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true
-        )
-        val scope = rememberCoroutineScope()
-        var showBottomSheet by remember { mutableStateOf(false) }
+        var showInstanceSelectionBottomSheet by remember { mutableStateOf(false) }
 
         NavHost(
             modifier = Modifier
@@ -281,7 +273,7 @@ private fun LoginUiScreen(
                     },
                     onNavigateToInstanceSelection = {
                         onNavigatedToInstanceSelection()
-                        showBottomSheet = true
+                        showInstanceSelectionBottomSheet = true
                     },
                     onLoggedIn = onLoggedIn,
                     onClickSaml2Login = onClickSaml2Login
@@ -336,48 +328,20 @@ private fun LoginUiScreen(
             }
         }
 
-        val hideBottomSheet: (action: (suspend CoroutineScope.() -> Unit)?) -> Unit = { action ->
-            scope.launch {
-                if (action != null) {
-                    action()
-                }
-                sheetState.hide()
-            }.invokeOnCompletion {
-                if (!sheetState.isVisible) {
-                    showBottomSheet = false
-                }
-            }
-        }
-
-        if (showBottomSheet) {
-            ModalBottomSheet(
-                modifier = Modifier.padding(
-                    top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-                ),
-                onDismissRequest = {
-                    showBottomSheet = false
+        if (showInstanceSelectionBottomSheet) {
+            InstanceSelectionBottomSheet(
+                onDismiss = {
+                    showInstanceSelectionBottomSheet = false
                 },
-                sheetState = sheetState
-            ) {
-                InstanceSelectionScreen(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = Spacings.ScreenHorizontalSpacing),
-                    availableInstances = ArtemisInstances.instances,
-                    onSelectArtemisInstance = { serverUrl ->
-                        hideBottomSheet {
-                            serverConfigurationService.updateServerUrl(serverUrl)
-                        }
-                    },
-                    onRequestOpenCustomInstanceSelection = {
-                        hideBottomSheet {
-                            nestedNavController.navigate(
-                                NestedDestination.CustomInstanceSelection
-                            )
-                        }
-                    }
-                )
-            }
+                onSelectArtemisInstance = {
+                        serverConfigurationService.updateServerUrl(it)
+                },
+                onRequestOpenCustomInstanceSelection = {
+                    nestedNavController.navigate(
+                        NestedDestination.CustomInstanceSelection
+                    )
+                }
+            )
         }
     }
 }
@@ -402,7 +366,7 @@ private fun AccountScreen(
     AccountUi(
         modifier = modifier,
         serverProfileInfo = serverProfileInfo,
-        host = selectedInstance.host,
+        selectedInstance = selectedInstance,
         canSwitchInstance = canSwitchInstance,
         retryLoadServerProfileInfo = viewModel::requestReloadServerProfileInfo,
         onNavigateToLoginScreen = onNavigateToLoginScreen,
@@ -417,7 +381,7 @@ private fun AccountScreen(
 private fun AccountUi(
     modifier: Modifier,
     serverProfileInfo: DataState<ProfileInfo>,
-    host: String,
+    selectedInstance: ArtemisInstances.ArtemisInstance,
     canSwitchInstance: Boolean,
     retryLoadServerProfileInfo: () -> Unit,
     onNavigateToLoginScreen: () -> Unit,
@@ -437,7 +401,7 @@ private fun AccountUi(
 
         ArtemisHeader(
             modifier = Modifier.fillMaxWidth(),
-            host = host
+            selectedInstance = selectedInstance
         )
 
         Box(
@@ -609,7 +573,7 @@ private fun LoginOrRegister(
 @Composable
 internal fun ArtemisHeader(
     modifier: Modifier,
-    host: String
+    selectedInstance: ArtemisInstances.ArtemisInstance,
 ) {
     Column(
         modifier = modifier,
@@ -631,11 +595,11 @@ internal fun ArtemisHeader(
         )
 
 
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG || selectedInstance.type == ArtemisInstances.ArtemisInstance.Type.CUSTOM) {
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = host,
+                text = selectedInstance.host,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -650,7 +614,7 @@ fun AccountUiPreviewLoadingProfileInfo() {
         modifier = Modifier.fillMaxSize(),
         canSwitchInstance = true,
         serverProfileInfo = DataState.Loading(),
-        host = "",
+        selectedInstance = ArtemisInstances.TumArtemis,
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
@@ -667,7 +631,7 @@ fun AccountUiPreviewFailedLoadingProfileInfo() {
         modifier = Modifier.fillMaxSize(),
         canSwitchInstance = true,
         serverProfileInfo = DataState.Failure(IOException()),
-        host = "",
+        selectedInstance = ArtemisInstances.TumArtemis,
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
@@ -688,7 +652,7 @@ fun AccountUiPreviewWithRegister() {
                 registrationEnabled = true
             )
         ),
-        host = "",
+        selectedInstance = ArtemisInstances.TumArtemis,
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
@@ -709,7 +673,7 @@ fun AccountUiPreviewWithoutRegister() {
                 registrationEnabled = false
             )
         ),
-        host = "",
+        selectedInstance = ArtemisInstances.TumArtemis,
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
