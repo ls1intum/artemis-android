@@ -171,7 +171,7 @@ private fun SavedPostsList(
     ) {
         items(
             items = savedPosts,
-            key = { it.serverPostId ?: 0L }
+            key = { "${it.serverPostId}|${it.postingType}" }
         ) {
             SavedPostWithActions(
                 modifier = Modifier.fillMaxWidth(),
@@ -236,7 +236,6 @@ private fun RemovalNotice(
             contentDescription = null,
         )
         Text(
-            modifier = modifier,
             text = stringResource(R.string.saved_posts_removal_notice),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.secondary
