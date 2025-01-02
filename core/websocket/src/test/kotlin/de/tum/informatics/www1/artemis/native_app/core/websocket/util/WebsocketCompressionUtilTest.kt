@@ -13,6 +13,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
 import java.util.zip.GZIPOutputStream
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 
 @Serializable
@@ -20,6 +22,7 @@ data class TestObject(
     private val value1: String
 )
 
+@OptIn(ExperimentalEncodingApi::class)
 @Category(UnitTest::class)
 @RunWith(RobolectricTestRunner::class)
 class WebsocketCompressionUtilTest {
@@ -43,9 +46,10 @@ class WebsocketCompressionUtilTest {
     @Test
     fun `test GIVEN a compressed message with a compression header WHEN calling the util THEN the deserialized message is returned`() {
         val compressedMessage = compressGzip(message.toByteArray())
+        val base64 = Base64.Default.encode(compressedMessage)
         val stompFrame = StompFrame.Message(
-            headers = createHeaders(mapOf("compressed" to "true")),
-            body = FrameBody.Binary(compressedMessage.toByteString())
+            headers = createHeaders(mapOf(WebsocketCompressionUtil.COMPRESSION_HEADER to "true")),
+            body = FrameBody.Text(base64)
         )
 
         val deserialized = WebsocketCompressionUtil.deserializeMessage(stompFrame, jsonConfig, TestObject.serializer())

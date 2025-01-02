@@ -2,11 +2,17 @@ package de.tum.informatics.www1.artemis.native_app.core.websocket.util
 
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
+import org.hildan.krossbow.stomp.frame.FrameBody
 import org.hildan.krossbow.stomp.frame.StompFrame
 import java.util.zip.GZIPInputStream
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.text.Charsets.UTF_8
 
+@OptIn(ExperimentalEncodingApi::class)
 object WebsocketCompressionUtil {
+
+    final val COMPRESSION_HEADER = "X-Compressed"
 
     /**
      * Deserializes the message body of a [StompFrame.Message] into a Kotlin object. It decompresses
@@ -22,9 +28,11 @@ object WebsocketCompressionUtil {
         jsonConfig: Json,
         deserializer: DeserializationStrategy<T>
     ): T {
-        val bodyJson: String = if (message.headers["compressed"] == "true") {
-            val compressed = message.body?.bytes ?: error("Message body should not be null")
-            ungzip(compressed.toByteArray())
+        val bodyJson: String = if (message.headers[COMPRESSION_HEADER] == "true") {
+            val frameBody = message.body as? FrameBody.Text ?: error("Expected text body")
+            val compressedInBase64 = frameBody.text
+            val compressed = Base64.Default.decode(compressedInBase64)
+            ungzip(compressed)
         } else message.bodyAsText
 
         return jsonConfig.decodeFromString(deserializer, bodyJson)
