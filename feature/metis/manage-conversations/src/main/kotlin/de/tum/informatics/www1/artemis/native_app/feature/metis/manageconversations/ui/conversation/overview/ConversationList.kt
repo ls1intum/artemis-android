@@ -20,11 +20,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Message
-import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ChatBubble
-import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Forum
@@ -64,6 +62,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ConversationIcon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getUiText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 
 internal const val TEST_TAG_CONVERSATION_LIST = "conversation list"
@@ -390,24 +390,18 @@ private fun SavedPostsListItem(
     status: SavedPostStatus,
     onClick: () -> Unit,
 ) {
-    val (stringId, icon) = when (status) {
-        SavedPostStatus.IN_PROGRESS ->
-            R.string.conversation_overview_saved_posts_in_progress to Icons.Default.Bookmark
-        SavedPostStatus.COMPLETED ->
-            R.string.conversation_overview_saved_posts_completed to Icons.Default.CheckBox
-        SavedPostStatus.ARCHIVED ->
-            R.string.conversation_overview_saved_posts_archived to Icons.Default.Archive
-    }
-
     Box(modifier = modifier) {
         ListItem(
             modifier = Modifier.clickable(onClick = onClick),
             leadingContent = {
-                Icon(imageVector = icon, contentDescription = null)
+                Icon(
+                    imageVector = status.getIcon(),
+                    contentDescription = null
+                )
             },
             headlineContent = {
                 Text(
-                    text = stringResource(stringId),
+                    text = status.getUiText(),
                     maxLines = 1,
                 )
             }

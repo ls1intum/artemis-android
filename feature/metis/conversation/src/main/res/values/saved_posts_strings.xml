@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_posts_title_prefix">Saved Messages</string>
+    <string name="saved_posts_removal_notice"> Archived and completed bookmarks will be removed after 100 days.</string>
+
+    <string name="saved_posts_empty_state_title">No saved messages</string>
+    <string name="saved_posts_empty_state_description">Save messages to read them later.</string>
+
+    <string name="saved_posts_context_private_chat">Chat</string>
+    <string name="saved_posts_context_thread">Thread</string>
+</resources>
