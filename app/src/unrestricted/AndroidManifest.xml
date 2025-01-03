@@ -36,7 +36,7 @@
                 <data android:host="artemis.praktomat.cs.kit.edu"/>
                 <data android:host="artemis-test0.artemis.cit.tum.de"/>
                 <data android:host="artemis-test1.artemis.cit.tum.de"/>
-                <data android:host="artemis-test2.cit.tum.de"/>
+                <data android:host="artemis-test2.artemis.cit.tum.de"/>
 
                 <data android:pathPattern="/courses/.*" />
                 <data android:pathPattern="/courses/.*/exercises/.*/" />
