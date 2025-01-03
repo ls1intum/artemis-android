@@ -277,7 +277,15 @@ private fun CreateReplyUi(
                     },
                     onFileSelected = { uri ->
                         onFileSelected(uri)
-                    }
+                    },
+                    formattingOptionButtons = {
+                        if (displayTextField || currentTextFieldValue.text.isNotBlank()) {
+                            FormattingOptions(
+                                currentTextFieldValue = currentTextFieldValue,
+                                onTextChanged = replyMode::onUpdate
+                            )
+                        }
+                    },
                 )
 
                 LaunchedEffect(requestFocus) {
@@ -294,12 +302,6 @@ private fun CreateReplyUi(
             }
         }
 
-        if (displayTextField || currentTextFieldValue.text.isNotBlank()) {
-            FormattingOptions(
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = replyMode::onUpdate
-            )
-        }
     }
 }
 
@@ -769,7 +771,7 @@ private fun String.takeWhileTag(): String {
  * If it starts with "N. ", continue as ordered.
  * Otherwise, do nothing (return the original newValue).
  */
-fun continueListIfApplicable(
+private fun continueListIfApplicable(
     oldText: String,
     newValue: TextFieldValue
 ): TextFieldValue {
