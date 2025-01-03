@@ -249,7 +249,7 @@ private fun LazyListScope.conversationSectionHeader(
                         imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.AutoMirrored.Filled.ArrowRight,
                         contentDescription = null,
                         modifier = Modifier.size(32.dp),
-                        tint = MaterialTheme.colorScheme.primaryContainer
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
