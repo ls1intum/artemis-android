@@ -26,7 +26,7 @@ data class OpenedConversation(
     ConversationConfiguration(10, _prevConfiguration)
 
 @Parcelize
-data class OpenedThread(val conversationId: Long, val postId: StandalonePostId) : Parcelable
+data class OpenedThread(val postId: StandalonePostId) : Parcelable
 
 @Parcelize
 data class OpenedSavedPosts(

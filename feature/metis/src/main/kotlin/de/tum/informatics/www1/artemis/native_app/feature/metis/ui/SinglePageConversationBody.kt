@@ -32,6 +32,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.ConversationAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.ConversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 
 @Composable
 internal fun SinglePageConversationBody(
@@ -125,7 +126,7 @@ internal fun SinglePageConversationBody(
                         configuration = OpenedConversation(
                             _prevConfiguration = config,
                             conversationId = config.conversationId,
-                            openedThread = OpenedThread(config.conversationId, postId)
+                            openedThread = OpenedThread(postId)
                         )
                     },
                     onCloseThread = {
@@ -151,8 +152,14 @@ internal fun SinglePageConversationBody(
                     courseId = courseId,
                     savedPostStatus = config.status,
                     onNavigateBack = navigateToPrevConfig,
-                    onNavigateToPost = { postId ->
-                        // TODO
+                    onNavigateToPost = { savedPost ->
+                        configuration = OpenedConversation(
+                            _prevConfiguration = configuration,
+                            conversationId = savedPost.conversation.id,
+                            openedThread = OpenedThread(
+                                StandalonePostId.ServerSideId(savedPost.referencePostId)
+                            )
+                        )
                     }
                 )
             }

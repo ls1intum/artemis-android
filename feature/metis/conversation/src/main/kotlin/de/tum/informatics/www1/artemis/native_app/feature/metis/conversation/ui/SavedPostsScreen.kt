@@ -35,7 +35,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts.SavedPostWithActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts.SavedPostsViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon
@@ -51,7 +50,7 @@ fun SavedPostsScreen(
     courseId: Long,
     savedPostStatus: SavedPostStatus,
     onNavigateBack: (() -> Unit),
-    onNavigateToPost: (postId: StandalonePostId) -> Unit
+    onNavigateToPost: (ISavedPost) -> Unit
 ) {
     val viewModel = koinViewModel<SavedPostsViewModel>(
         key = "$courseId|$savedPostStatus"
@@ -75,7 +74,7 @@ internal fun SavedPostsScreen (
     modifier: Modifier,
     viewModel: SavedPostsViewModel,
     onNavigateBack: (() -> Unit),
-    onNavigateToPost: (postId: StandalonePostId.ServerSideId) -> Unit
+    onNavigateToPost: (ISavedPost) -> Unit
 ) {
     val savedPosts by viewModel.savedPosts.collectAsState()
     val status = viewModel.savedPostStatus
@@ -86,9 +85,7 @@ internal fun SavedPostsScreen (
         savedPostsDataState = savedPosts,
         onRequestReload = viewModel::requestReload,
         onNavigateBack = onNavigateBack,
-        onNavigateToPost = {
-            onNavigateToPost(StandalonePostId.ServerSideId(it.referencePostId))
-        },
+        onNavigateToPost = onNavigateToPost,
         onChangeStatus = viewModel::changeSavedPostStatus,
         onRemoveFromSavedPosts = viewModel::removeFromSavedPosts
     )

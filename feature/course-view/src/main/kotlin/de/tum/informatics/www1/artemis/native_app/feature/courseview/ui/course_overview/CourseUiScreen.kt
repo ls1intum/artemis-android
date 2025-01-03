@@ -259,7 +259,6 @@ internal fun CourseUiScreen(
                             _prevConfiguration = NothingOpened,
                             conversationId = conversationId,
                             openedThread = OpenedThread(
-                                conversationId,
                                 StandalonePostId.ServerSideId(postId)
                             )
                         )
