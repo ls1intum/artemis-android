@@ -1,6 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.date
 
-import android.icu.text.SimpleDateFormat
+import android.icu.text.DateFormat
 import android.text.format.DateUtils
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -42,15 +42,11 @@ fun getRelativeTime(
 
                 if (timeDifference >= 1.days && !showDate) {
                     emit(
-                        SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT)
-                            .format(Date.from(to.toJavaInstant()))
+                        to.format(DateFormats.OnlyTime.format)
                     )
                 } else if (timeDifference >= 1.days && showDateAndTime) {
                     emit(
-                        SimpleDateFormat.getDateTimeInstance(
-                            SimpleDateFormat.MEDIUM,
-                            SimpleDateFormat.SHORT
-                        ).format(Date.from(to.toJavaInstant()))
+                        to.format(DateFormats.DefaultDateAndTime.format)
                     )
                 } else if (formatSeconds || timeDifference >= 1.minutes) {
                     emit(
@@ -90,3 +86,5 @@ fun getRelativeTime(
 
     return flow.collectAsState(initial = "").value
 }
+
+fun Instant.format(f: DateFormat) = f.format(Date.from(this.toJavaInstant()))

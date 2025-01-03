@@ -49,7 +49,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
-import de.tum.informatics.www1.artemis.native_app.core.ui.date.converDateAndTime
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.DateFormats
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.format
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
@@ -199,8 +200,9 @@ internal fun PostItem(
                     color = if (post?.serverPostId == null) PostColors.unsentMessageText else Color.Unspecified
                 )
 
-                if (post?.updatedDate != null) {
-                    val updateTime = converDateAndTime(post.updatedDate)
+                val instant = post?.updatedDate
+                if (instant != null) {
+                    val updateTime = instant.format(DateFormats.EditTimestamp.format)
                     Text(
                         text = stringResource(id = R.string.post_edited_hint, updateTime),
                         style = MaterialTheme.typography.bodySmall,
