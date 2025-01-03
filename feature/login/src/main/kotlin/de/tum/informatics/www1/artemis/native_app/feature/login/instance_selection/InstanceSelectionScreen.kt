@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,9 +18,12 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,7 +34,62 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.login.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+
+
+@Composable
+fun InstanceSelectionBottomSheet(
+    modifier: Modifier = Modifier,
+    onDismiss: () -> Unit,
+    onSelectArtemisInstance: suspend (String) -> Unit,
+    onRequestOpenCustomInstanceSelection: suspend () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
+    val hideBottomSheet: (action: (suspend CoroutineScope.() -> Unit)?) -> Unit = { action ->
+        scope.launch {
+            if (action != null) {
+                action()
+            }
+            sheetState.hide()
+        }.invokeOnCompletion {
+            if (!sheetState.isVisible) {
+                onDismiss()
+            }
+        }
+    }
+
+    ModalBottomSheet(
+        modifier = modifier.padding(
+            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+        ),
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        InstanceSelectionScreen(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+            availableInstances = ArtemisInstances.instances,
+            onSelectArtemisInstance = { serverUrl ->
+                hideBottomSheet {
+                    onSelectArtemisInstance(serverUrl)
+                }
+            },
+            onRequestOpenCustomInstanceSelection = {
+                hideBottomSheet {
+                    onRequestOpenCustomInstanceSelection()
+                }
+            }
+        )
+    }
+}
 
 @Composable
 internal fun InstanceSelectionScreen(

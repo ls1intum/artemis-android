@@ -134,6 +134,8 @@ internal fun Project.configureReleaseTypeFlavors(
     }
 }
 
+private const val TUM_ARTEMIS_SERVER_URL = "https://artemis.cit.tum.de"
+
 internal fun Project.configureInstanceSelectionFlavors(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
@@ -153,7 +155,7 @@ internal fun Project.configureInstanceSelectionFlavors(
                 buildConfigField(
                     "String",
                     ProductFlavors.BuildConfigFields.DefaultServerUrl,
-                    "\"\""
+                    "\"$TUM_ARTEMIS_SERVER_URL\""
                 )
             }
 
@@ -169,7 +171,7 @@ internal fun Project.configureInstanceSelectionFlavors(
                 buildConfigField(
                     "String",
                     ProductFlavors.BuildConfigFields.DefaultServerUrl,
-                    "\"https://artemis.cit.tum.de\""
+                    "\"$TUM_ARTEMIS_SERVER_URL\""
                 )
             }
         }
