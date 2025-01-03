@@ -69,7 +69,7 @@ internal fun LectureUnitHeader(
         )
 
         Text(
-            text = stringResource(id = text),
+            text =  lectureUnit.name ?: stringResource(id = text),
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.weight(1f)
         )

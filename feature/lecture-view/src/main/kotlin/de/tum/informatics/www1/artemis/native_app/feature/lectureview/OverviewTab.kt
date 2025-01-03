@@ -65,7 +65,7 @@ internal fun OverviewTab(
     exerciseActions: BoundExerciseActions,
     state: LazyListState
 ) {
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var selectedLectureUnit: LectureUnit? by remember { mutableStateOf(null) }
     val coroutineScope = rememberCoroutineScope()
 
