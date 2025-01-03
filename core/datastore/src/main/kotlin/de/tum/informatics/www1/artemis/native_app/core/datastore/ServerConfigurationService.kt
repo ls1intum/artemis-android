@@ -17,10 +17,5 @@ interface ServerConfigurationService {
     val host: Flow<String>
         get() = serverUrl.map { Url(it).host }
 
-    /**
-     * If [updateServerUrl] has ever been called.
-     */
-    val hasUserSelectedInstance: Flow<Boolean>
-
     suspend fun updateServerUrl(serverUrl: String)
 }
