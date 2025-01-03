@@ -3,7 +3,7 @@
 
     <string name="pdf_view_share_menu_item">Share PDF</string>
     <string name="pdf_view_download_menu_item">Download PDF</string>
-    <string name="pdf_view_rotate_menu_item">Rotate PDF</string>
+    <string name="pdf_view_rotate_menu_item">Toggle View Mode</string>
 
     <string name="pdf_view_page_count">Page %1d/%2d</string>
 
