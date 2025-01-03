@@ -152,10 +152,10 @@ private fun SavedPostsList(
     onRemoveFromSavedPosts: (ISavedPost) -> Deferred<MetisModificationFailure?>
 ) {
     AnimatedContent(
-        targetState = savedPosts,
+        targetState = savedPosts.isEmpty(),
         label = "Animated saved posts list: empty <-> not empty"
-    ) { targetSavedPosts ->
-        if (targetSavedPosts.isEmpty()) {
+    ) { isEmpty ->
+        if (isEmpty) {
             EmptyListHint(
                 modifier = modifier,
                 hint = stringResource(
@@ -172,7 +172,7 @@ private fun SavedPostsList(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(
-                items = targetSavedPosts,
+                items = savedPosts,
                 key = { "${it.serverPostId}|${it.postingType}" }
             ) {
                 SavedPostWithActions(
