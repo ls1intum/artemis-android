@@ -8,7 +8,5 @@ import kotlinx.coroutines.flow.flowOf
 class TestServerConfigurationProvider : ServerConfigurationService {
     override val serverUrl: Flow<String> = flowOf(testServerUrl)
 
-    override val hasUserSelectedInstance: Flow<Boolean> = flowOf(true)
-
     override suspend fun updateServerUrl(serverUrl: String) = Unit
 }
