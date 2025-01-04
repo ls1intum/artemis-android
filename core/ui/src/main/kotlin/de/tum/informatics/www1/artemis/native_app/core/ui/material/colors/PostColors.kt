@@ -31,7 +31,7 @@ object PostColors {
         val background: Color
             @Composable get() = if (isSystemInDarkTheme()) Color(0xFF282C30) else Color(0xFFD0D2D8)
         val selectedBackgound: Color
-            @Composable get() = MaterialTheme.colorScheme.primaryContainer
+            @Composable get() = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
     }
 
     val editedHintText: Color
