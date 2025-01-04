@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,7 +36,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
@@ -285,8 +286,6 @@ private fun LazyListScope.conversationSectionHeader(
                 .fillMaxWidth()
                 .testTag(key)
         ) {
-            HorizontalDivider()
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -305,7 +304,7 @@ private fun LazyListScope.conversationSectionHeader(
                             .weight(1f)
                             .padding(start = 8.dp),
                         text = stringResource(id = text),
-                        style = MaterialTheme.typography.titleSmall
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 }
 
@@ -316,12 +315,11 @@ private fun LazyListScope.conversationSectionHeader(
                     Icon(
                         imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.AutoMirrored.Filled.ArrowRight,
                         contentDescription = null,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
-
-            HorizontalDivider()
         }
     }
 }
@@ -381,7 +379,6 @@ private fun LazyListScope.conversationList(
             }
         }
     }
-
 }
 
 @Composable
@@ -444,6 +441,7 @@ private fun ConversationListItem(
                 channelName.removeSectionPrefix()
             }
         }
+
         is GroupChat, is OneToOneChat -> {
             val humanReadableTitle = conversation.humanReadableName
             if (showPrefix) {
@@ -452,40 +450,50 @@ private fun ConversationListItem(
                 humanReadableTitle.removeSectionPrefix()
             }
         }
+
         else -> conversation.humanReadableName
     }
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier.padding(horizontal = 16.dp)) {
         ListItem(
-            modifier = Modifier.clickable(onClick = onNavigateToConversation),
+            modifier = Modifier
+                .clickable(onClick = onNavigateToConversation)
+                .padding(start = 8.dp)
+                .height(48.dp),
             leadingContent = {
                 ConversationIcon(
                     conversation = conversation,
-                    clientId = clientId
+                    clientId = clientId,
+                    hasUnreadMessages = unreadMessagesCount > 0
                 )
             },
             headlineContent = {
-                Text(
-                    text = displayName,
-                    maxLines = 1,
-                    color = headlineColor
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = displayName,
+                        maxLines = 1,
+                        color = headlineColor,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
+                        )
+                    )
+                }
             },
             trailingContent = {
                 UnreadMessages(unreadMessagesCount = unreadMessagesCount)
             }
         )
 
-        IconButton(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .testTag(tagForConversationOptions(itemBaseTag)),
-            onClick = { isContextDialogShown = true }
-        ) {
-            Icon(
+        Box(modifier = Modifier.align(Alignment.CenterEnd)) {
+            IconButton(
+                modifier = Modifier.testTag(tagForConversationOptions(itemBaseTag)),
+                onClick = { isContextDialogShown = true }
+            ) {
+                Icon(
                 imageVector = Icons.Default.MoreHoriz,
                 contentDescription = stringResource(R.string.conversation_overview_conversation_item_show_actions)
             )
+            }
         }
 
         ConversationListItemDropdownMenu(
@@ -586,7 +594,7 @@ private fun UnreadMessages(modifier: Modifier = Modifier, unreadMessagesCount: L
     if (unreadMessagesCount > 0) {
         Box(
             modifier = modifier
-                .padding(end = 24.dp)
+                .padding(end = 32.dp)
                 .size(24.dp)
                 .aspectRatio(1f)
                 .background(
