@@ -22,9 +22,9 @@ import de.tum.informatics.www1.artemis.native_app.core.data.join
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.LocalTemplateStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ProvideDefaultExerciseTemplateStatus
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.getFeedbackViewWebViewState
