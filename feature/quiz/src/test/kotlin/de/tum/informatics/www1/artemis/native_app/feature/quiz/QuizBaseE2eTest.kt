@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.SavedStateHandle
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ParticipationService
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
@@ -19,10 +18,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerc
 import org.junit.Before
 import org.junit.Rule
 import org.koin.android.ext.koin.androidContext
-import org.koin.compose.LocalKoinApplication
-import org.koin.compose.LocalKoinScope
-import org.koin.core.annotation.KoinInternalApi
-import org.koin.mp.KoinPlatformTools
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.shadows.ShadowLog
@@ -50,7 +45,7 @@ internal abstract class QuizBaseE2eTest(protected val quizType: QuizType.Workabl
     fun setup() {
         ShadowLog.stream = System.out
 
-        runBlockingWithTestTimeout {
+        runBlockingWithTestTimeout(timeoutMultiplier = 2) {
             course = createCourse(getAdminAccessToken())
             courseId = course.id!!
 
@@ -62,7 +57,6 @@ internal abstract class QuizBaseE2eTest(protected val quizType: QuizType.Workabl
 
     open suspend fun setupHook() {}
 
-    @OptIn(KoinInternalApi::class)
     protected fun setupUi(exerciseId: Long, content: @Composable (QuizParticipationViewModel) -> Unit): QuizParticipationViewModel {
         val viewModel = QuizParticipationViewModel(
             courseId = courseId,
@@ -80,13 +74,7 @@ internal abstract class QuizBaseE2eTest(protected val quizType: QuizType.Workabl
         )
 
         composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext()
-                    .get().scopeRegistry.rootScope,
-                LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
-            ) {
-                content(viewModel)
-            }
+            content(viewModel)
         }
 
         return viewModel

@@ -2,16 +2,19 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -24,27 +27,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.ConversationDataStatusButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ConversationIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import io.github.fornewid.placeholder.material3.placeholder
+
 
 @Composable
 internal fun ConversationChatListScreen(
@@ -78,12 +88,7 @@ internal fun ConversationChatListScreen(
     val query by viewModel.chatListUseCase.query.collectAsState()
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
     val conversationDataStatus by viewModel.conversationDataStatus.collectAsState()
-
-    val title by remember(conversationDataState) {
-        derivedStateOf {
-            conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
-        }
-    }
+    val clientId by viewModel.clientIdOrDefault.collectAsState()
 
     val chatListState: LazyListState = rememberLazyListState()
 
@@ -94,10 +99,10 @@ internal fun ConversationChatListScreen(
         modifier = modifier,
         courseId = courseId,
         conversationId = conversationId,
-        isConversationLoaded = conversationDataState.isSuccess,
+        clientId = clientId,
+        conversationDataState = conversationDataState,
         conversationDataStatus = conversationDataStatus,
         query = query,
-        conversationTitle = title,
         onNavigateBack = onNavigateBack,
         onNavigateToSettings = onNavigateToSettings,
         onUpdateQuery = viewModel.chatListUseCase::updateQuery,
@@ -111,7 +116,11 @@ internal fun ConversationChatListScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .imePadding()
-                        .padding(bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()),
+                        .padding(
+                            bottom = WindowInsets.systemBars
+                                .asPaddingValues()
+                                .calculateBottomPadding()
+                        ),
                     viewModel = viewModel,
                     listContentPadding = PaddingValues(top = padding.calculateTopPadding()),
                     onClickViewPost = onClickViewPost,
@@ -129,10 +138,10 @@ fun ConversationChatListScreen(
     modifier: Modifier,
     courseId: Long,
     conversationId: Long,
-    conversationTitle: String,
     query: String,
     conversationDataStatus: DataStatus,
-    isConversationLoaded: Boolean,
+    conversationDataState: DataState<Conversation>,
+    clientId: Long,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onUpdateQuery: (String) -> Unit,
@@ -169,11 +178,14 @@ fun ConversationChatListScreen(
                             hintStyle = MaterialTheme.typography.bodyMedium
                         )
                     } else {
-                        Text(
-                            modifier = Modifier.placeholder(!isConversationLoaded),
-                            text = conversationTitle,
-                            maxLines = 1
-                        )
+                        EmptyDataStateUi(
+                            dataState = conversationDataState,
+                            otherwise = {
+                                Text("placeholder", Modifier.placeholder(true))
+                            }
+                        ) {
+                            ConversationTitle(conversation = it, clientId = clientId)
+                        }
                     }
                 },
                 navigationIcon = {
@@ -187,7 +199,7 @@ fun ConversationChatListScreen(
                                 }
                             }
                         ) {
-                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                         }
                     }
                 },
@@ -211,4 +223,31 @@ fun ConversationChatListScreen(
         },
         content = content
     )
+}
+
+
+@Composable
+private fun ConversationTitle(
+    modifier: Modifier = Modifier,
+    conversation: Conversation,
+    clientId: Long
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ConversationIcon(
+            conversation = conversation,
+            clientId = clientId,
+            showDialogOnOneToOneChatClick = true
+        )
+
+        Spacer(Modifier.width(8.dp))
+
+        Text(
+            text = conversation.humanReadableName,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
 }

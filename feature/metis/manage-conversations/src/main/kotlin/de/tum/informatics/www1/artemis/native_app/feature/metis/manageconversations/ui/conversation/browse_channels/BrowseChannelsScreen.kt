@@ -39,8 +39,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.ChannelIcons
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ChannelChatIcon
 import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -156,7 +156,7 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
     ListItem(
         modifier = Modifier.fillMaxWidth(),
         leadingContent = {
-            ChannelIcons(channelChat)
+            ChannelChatIcon(channelChat = channelChat)
         },
         headlineContent = { Text(channelChat.name) },
         supportingContent = {

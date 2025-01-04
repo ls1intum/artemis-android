@@ -14,9 +14,12 @@ dependencies {
 
     implementation(libs.kotlinx.datetime)
 
+    testImplementation(project(":app"))
+    testImplementation(project(":core:core-test"))
     testImplementation(project(":feature:login"))
     testImplementation(project(":feature:login-test"))
-    testImplementation(project(":core:core-test"))
+    testImplementation(project(":feature:metis:shared"))
+    testImplementation(project(":feature:quiz"))
 
     kover(project(":core:data"))
 }
