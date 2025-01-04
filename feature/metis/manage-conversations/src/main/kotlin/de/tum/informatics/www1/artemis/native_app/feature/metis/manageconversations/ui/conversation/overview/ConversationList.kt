@@ -416,32 +416,34 @@ private fun ListItemBase(
 ) {
     val headlineColor = LocalContentColor.current.copy(alpha = if (grayedOut) 0.6f else 1f)
 
-    ListItem(
-        modifier = modifier
-            .clickable(onClick = onClick)
-            .padding(start = 24.dp)
-            .height(48.dp),
-        leadingContent = leadingContent,
-        headlineContent = {
-            Text(
-                text = name,
-                maxLines = 1,
-                color = headlineColor,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
+    Box(modifier = modifier) {
+        ListItem(
+            modifier = Modifier
+                .clickable(onClick = onClick)
+                .padding(start = 24.dp)
+                .height(48.dp),
+            leadingContent = leadingContent,
+            headlineContent = {
+                Text(
+                    text = name,
+                    maxLines = 1,
+                    color = headlineColor,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
+                    )
                 )
-            )
-        },
-        trailingContent = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
-            ) {
-                UnreadMessages(unreadMessagesCount = unreadMessagesCount)
-                otherTrailingContent()
+            },
+            trailingContent = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                ) {
+                    UnreadMessages(unreadMessagesCount = unreadMessagesCount)
+                    otherTrailingContent()
+                }
             }
-        }
-    )
+        )
+    }
 }
 
 @Composable
