@@ -346,6 +346,8 @@ private fun HeadlineAuthorInfo(
             isAnswerPost = isAnswerPost
         )
 
+        Spacer(modifier = Modifier.weight(1f))
+
         Text(
             modifier = Modifier,
             text = remember(authorName) { authorName ?: "Placeholder" },
@@ -405,7 +407,7 @@ private fun HeadlineProfilePicture(
     userRole: UserRole?,
     displayImage: Boolean = true
 ) {
-    val size = 30.dp
+    val size = postHeadlineHeight
     Box(modifier = Modifier.size(size)) {
         if (!displayImage) {
             return
@@ -437,7 +439,7 @@ private fun HeadlineAuthorRoleBadge(
             .background(color, MaterialTheme.shapes.extraSmall)
     ) {
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 1.dp),
             text = stringResource(id = text),
             style = MaterialTheme.typography.bodySmall,
             color = Color.White,

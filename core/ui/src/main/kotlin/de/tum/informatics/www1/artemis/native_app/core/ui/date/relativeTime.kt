@@ -30,6 +30,9 @@ fun getRelativeTime(
     showDate: Boolean = true,
     showDateAndTime: Boolean = false
 ): CharSequence {
+    val isShowDateParameterCombinationIllegal = showDateAndTime && !showDate
+    require(!isShowDateParameterCombinationIllegal)
+
     val timeDifferenceBelowOneMinuteString =
         stringResource(id = R.string.time_difference_under_one_minute)
 
