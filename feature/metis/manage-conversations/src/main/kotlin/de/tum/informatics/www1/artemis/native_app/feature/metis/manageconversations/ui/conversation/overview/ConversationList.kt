@@ -336,6 +336,7 @@ private fun LazyListScope.conversationList(
 ) {
     if (!section.isExpanded) return
 
+
     when(section) {
         is ConversationSectionState.SavedPosts -> {
             items(
@@ -387,23 +388,60 @@ private fun SavedPostsListItem(
     status: SavedPostStatus,
     onClick: () -> Unit,
 ) {
-    Box(modifier = modifier) {
-        ListItem(
-            modifier = Modifier.clickable(onClick = onClick),
-            leadingContent = {
-                Icon(
-                    imageVector = status.getIcon(),
-                    contentDescription = null
+    ListItemBase(
+        modifier = modifier,
+        name = status.getUiText(),
+        unreadMessagesCount = 0,
+        grayedOut = false,
+        onClick = onClick,
+        leadingContent = {
+            Icon(
+                imageVector = status.getIcon(),
+                contentDescription = null
+            )
+        },
+        otherTrailingContent = {}
+    )
+}
+
+@Composable
+private fun ListItemBase(
+    modifier: Modifier = Modifier,
+    name: String,
+    unreadMessagesCount: Long,
+    grayedOut: Boolean,
+    onClick: () -> Unit,
+    leadingContent: @Composable () -> Unit,
+    otherTrailingContent: @Composable () -> Unit
+) {
+    val headlineColor = LocalContentColor.current.copy(alpha = if (grayedOut) 0.6f else 1f)
+
+    ListItem(
+        modifier = modifier
+            .clickable(onClick = onClick)
+            .padding(start = 24.dp)
+            .height(48.dp),
+        leadingContent = leadingContent,
+        headlineContent = {
+            Text(
+                text = name,
+                maxLines = 1,
+                color = headlineColor,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
                 )
-            },
-            headlineContent = {
-                Text(
-                    text = status.getUiText(),
-                    maxLines = 1,
-                )
+            )
+        },
+        trailingContent = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+            ) {
+                UnreadMessages(unreadMessagesCount = unreadMessagesCount)
+                otherTrailingContent()
             }
-        )
-    }
+        }
+    )
 }
 
 @Composable
@@ -418,15 +456,74 @@ private fun ConversationListItem(
     onToggleHidden: () -> Unit,
     onToggleMuted: () -> Unit
 ) {
+    val unreadMessagesCount = conversation.unreadMessagesCount ?: 0
+    val displayName = getConversationTitle(conversation, showPrefix)
+
+    ListItemBase(
+        modifier = modifier,
+        name = displayName,
+        unreadMessagesCount = unreadMessagesCount,
+        grayedOut = conversation.isMuted,
+        onClick = onNavigateToConversation,
+        leadingContent = {
+            ConversationIcon(
+                conversation = conversation,
+                clientId = clientId,
+                hasUnreadMessages = unreadMessagesCount > 0
+            )
+        },
+        otherTrailingContent = {
+            ConversationOptions(
+                modifier = Modifier.testTag(tagForConversationOptions(itemBaseTag)),
+                conversation = conversation,
+                onToggleMarkAsFavourite = onToggleMarkAsFavourite,
+                onToggleHidden = onToggleHidden,
+                onToggleMuted = onToggleMuted
+            )
+        }
+    )
+}
+
+@Composable
+private fun ConversationOptions(
+    modifier: Modifier,
+    conversation: Conversation,
+    onToggleMarkAsFavourite: () -> Unit,
+    onToggleHidden: () -> Unit,
+    onToggleMuted: () -> Unit
+) {
     var isContextDialogShown by remember { mutableStateOf(false) }
     val onDismissRequest = { isContextDialogShown = false }
 
-    val unreadMessagesCount = conversation.unreadMessagesCount ?: 0
+    Box {
+        IconButton(
+            modifier = modifier,
+            onClick = { isContextDialogShown = true }
+        ) {
+            Icon(
+                imageVector = Icons.Default.MoreHoriz,
+                contentDescription = stringResource(R.string.conversation_overview_conversation_item_show_actions)
+            )
+        }
 
-    val headlineColor =
-        LocalContentColor.current.copy(alpha = if (conversation.isMuted) 0.6f else 1f)
+        ConversationListItemDropdownMenu(
+            modifier = Modifier.align(Alignment.TopEnd),
+            isContextDialogShown = isContextDialogShown,
+            onDismissRequest = onDismissRequest,
+            conversation = conversation,
+            onToggleMarkAsFavourite = onToggleMarkAsFavourite,
+            onToggleHidden = onToggleHidden,
+            onToggleMuted = onToggleMuted
+        )
+    }
+}
 
-    val displayName = when (conversation) {
+@Composable
+private fun getConversationTitle(
+    conversation: Conversation,
+    showPrefix: Boolean = true
+): String {
+    return when (conversation) {
         is ChannelChat -> {
             val channelName = if (conversation.isArchived) {
                 stringResource(
@@ -452,59 +549,6 @@ private fun ConversationListItem(
         }
 
         else -> conversation.humanReadableName
-    }
-
-    Box(modifier = modifier.padding(horizontal = 16.dp)) {
-        ListItem(
-            modifier = Modifier
-                .clickable(onClick = onNavigateToConversation)
-                .padding(start = 8.dp)
-                .height(48.dp),
-            leadingContent = {
-                ConversationIcon(
-                    conversation = conversation,
-                    clientId = clientId,
-                    hasUnreadMessages = unreadMessagesCount > 0
-                )
-            },
-            headlineContent = {
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(
-                        text = displayName,
-                        maxLines = 1,
-                        color = headlineColor,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
-                        )
-                    )
-                }
-            },
-            trailingContent = {
-                UnreadMessages(unreadMessagesCount = unreadMessagesCount)
-            }
-        )
-
-        Box(modifier = Modifier.align(Alignment.CenterEnd)) {
-            IconButton(
-                modifier = Modifier.testTag(tagForConversationOptions(itemBaseTag)),
-                onClick = { isContextDialogShown = true }
-            ) {
-                Icon(
-                imageVector = Icons.Default.MoreHoriz,
-                contentDescription = stringResource(R.string.conversation_overview_conversation_item_show_actions)
-            )
-            }
-        }
-
-        ConversationListItemDropdownMenu(
-            modifier = Modifier.align(Alignment.TopEnd),
-            isContextDialogShown = isContextDialogShown,
-            onDismissRequest = onDismissRequest,
-            conversation = conversation,
-            onToggleMarkAsFavourite = onToggleMarkAsFavourite,
-            onToggleHidden = onToggleHidden,
-            onToggleMuted = onToggleMuted
-        )
     }
 }
 
@@ -594,7 +638,6 @@ private fun UnreadMessages(modifier: Modifier = Modifier, unreadMessagesCount: L
     if (unreadMessagesCount > 0) {
         Box(
             modifier = modifier
-                .padding(end = 32.dp)
                 .size(24.dp)
                 .aspectRatio(1f)
                 .background(
