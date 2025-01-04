@@ -91,7 +91,7 @@ fun AcceptCodeOfConductUi(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CodeOfConductUi(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().padding(top = 8.dp),
                 codeOfConductText = codeOfConductText,
                 responsibleUsers = responsibleUsers
             )
