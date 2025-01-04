@@ -12,6 +12,8 @@ import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getStringResId
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -30,13 +32,13 @@ class ConversationListUiTest : BaseComposeTest() {
             .assertExists()
 
         composeTestRule
-            .onNodeWithText(context.getString(R.string.conversation_overview_saved_posts_in_progress))
+            .onNodeWithText(context.getString(SavedPostStatus.IN_PROGRESS.getStringResId()))
             .assertExists()
         composeTestRule
-            .onNodeWithText(context.getString(R.string.conversation_overview_saved_posts_completed))
+            .onNodeWithText(context.getString(SavedPostStatus.COMPLETED.getStringResId()))
             .assertExists()
         composeTestRule
-            .onNodeWithText(context.getString(R.string.conversation_overview_saved_posts_archived))
+            .onNodeWithText(context.getString(SavedPostStatus.ARCHIVED.getStringResId()))
             .assertExists()
     }
 
@@ -45,13 +47,13 @@ class ConversationListUiTest : BaseComposeTest() {
         setupUi()
 
         composeTestRule
-            .onNodeWithText(context.getString(R.string.conversation_overview_saved_posts_in_progress))
+            .onNodeWithText(context.getString(SavedPostStatus.IN_PROGRESS.getStringResId()))
             .assertDoesNotShowShowActionsIconButton()
         composeTestRule
-            .onNodeWithText(context.getString(R.string.conversation_overview_saved_posts_completed))
+            .onNodeWithText(context.getString(SavedPostStatus.COMPLETED.getStringResId()))
             .assertDoesNotShowShowActionsIconButton()
         composeTestRule
-            .onNodeWithText(context.getString(R.string.conversation_overview_saved_posts_archived))
+            .onNodeWithText(context.getString(SavedPostStatus.ARCHIVED.getStringResId()))
             .assertDoesNotShowShowActionsIconButton()
     }
 
