@@ -109,6 +109,8 @@ internal fun PostItem(
     }
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
+    val hasFooter = (post is IStandalonePost && post.answers.orEmpty()
+        .isNotEmpty()) || post?.reactions.orEmpty().isNotEmpty() || isExpanded
 
     // Retrieve post status
     val clientPostId = post?.clientPostId
@@ -137,7 +139,7 @@ internal fun PostItem(
                         )
                 }
             }
-            .padding(PaddingValues(horizontal = Spacings.ScreenHorizontalSpacing))
+            .padding(PaddingValues(horizontal = Spacings.ScreenHorizontalInnerSpacing))
     ) {
         val applyDistancePaddingToModifier: @Composable (Modifier) -> Modifier = {
             if (postItemViewJoinedType in listOf(
@@ -145,7 +147,7 @@ internal fun PostItem(
                     PostItemViewJoinedType.FOOTER
                 )
             ) {
-                it.padding(top = 8.dp)
+                it.padding(top = Spacings.Post.innerSpacing)
             } else {
                 it.padding(bottom = 4.dp)
             }
@@ -182,8 +184,7 @@ internal fun PostItem(
             displayHeader = displayHeader
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 MarkdownText(
                     markdown = remember(post?.content, isPlaceholder) {
@@ -203,6 +204,8 @@ internal fun PostItem(
                 val instant = post?.updatedDate
                 if (instant != null) {
                     val updateTime = instant.format(DateFormats.EditTimestamp.format)
+                    Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
+
                     Text(
                         text = stringResource(id = R.string.post_edited_hint, updateTime),
                         style = MaterialTheme.typography.bodySmall,
@@ -211,11 +214,17 @@ internal fun PostItem(
                 }
 
                 if (post is IStandalonePost && post.resolved == true) {
+                    Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
+
                     IconLabel(
                         modifier = Modifier.fillMaxWidth(),
                         resourceString = R.string.post_is_resolved,
                         icon = Icons.Default.Check
                     )
+                }
+
+                if (hasFooter) {
+                    Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
                 }
 
                 StandalonePostFooter(
@@ -229,7 +238,7 @@ internal fun PostItem(
                                     .orEmpty()
                                     .isNotEmpty()
                             ) {
-                                it.padding(bottom = 8.dp)
+                                it.padding(bottom = Spacings.Post.innerSpacing)
                             } else {
                                 it
                             }
@@ -262,12 +271,12 @@ private fun PostHeadline(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(Spacings.Post.innerSpacing)
         ) {
             if (!doDisplayHeader) {
                 return@Row
@@ -528,7 +537,7 @@ private fun StandalonePostFooter(
             val replyCount = postItemViewType.answerPosts.size
 
             if (replyCount > 0) {
-                Row (
+                Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)

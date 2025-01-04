@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostContextBottomSheet
@@ -76,7 +77,7 @@ internal fun PostWithBottomSheet(
         }
 
     val cardModifier = applyPaddingToModifier(modifier, 4.dp)
-    val innerModifier = applyPaddingToModifier(modifier, 8.dp)
+    val innerModifier = applyPaddingToModifier(modifier, Spacings.Post.innerSpacing)
 
     Card(
         modifier = cardModifier,
