@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -152,8 +151,6 @@ fun ConversationOverviewBody(
                     onToggleHidden = viewModel::markConversationAsHidden,
                     onToggleMuted = viewModel::markConversationAsMuted,
                     trailingContent = {
-                        item { HorizontalDivider() }
-
                         item(key = KEY_BUTTON_SHOW_COC) {
                             Box(
                                 modifier = Modifier

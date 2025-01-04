@@ -1,5 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Campaign
@@ -7,9 +11,13 @@ import androidx.compose.material.icons.filled.Groups2
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
@@ -23,15 +31,23 @@ fun ConversationIcon(
     modifier: Modifier = Modifier,
     conversation: Conversation,
     clientId: Long,
+    hasUnreadMessages: Boolean = false,
     showDialogOnOneToOneChatClick: Boolean = false
 ) {
-    when(conversation) {
-        is ChannelChat -> ChannelChatIcon(modifier, conversation)
-        is GroupChat -> GroupChatIcon(modifier)
-        is OneToOneChat -> OneToOneChatIcon(modifier, conversation, clientId, showDialogOnOneToOneChatClick)
+    Box {
+        when (conversation) {
+            is ChannelChat -> ChannelChatIcon(modifier, conversation)
+            is GroupChat -> GroupChatIcon(modifier)
+            is OneToOneChat -> OneToOneChatIcon(modifier, conversation, clientId, showDialogOnOneToOneChatClick)
+        }
+
+        if (hasUnreadMessages) {
+            UnreadMessagesIndicator(
+                modifier = Modifier.align(Alignment.TopEnd)
+            )
+        }
     }
 }
-
 
 @Composable
 fun ChannelChatIcon(
@@ -86,4 +102,14 @@ fun OneToOneChatIcon(
             profilePictureData = ProfilePictureData.fromAccount(conversationPartner)
         )
     }
+}
+
+@Composable
+fun UnreadMessagesIndicator(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(8.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primaryContainer)
+    )
 }
