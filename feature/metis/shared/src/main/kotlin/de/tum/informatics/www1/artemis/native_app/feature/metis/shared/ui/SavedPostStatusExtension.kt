@@ -21,10 +21,13 @@ fun SavedPostStatus.getIcon(): ImageVector {
 
 @Composable
 fun SavedPostStatus.getUiText(): String {
-    val stringResId = when (this) {
+    return stringResource(id = this.getStringResId())
+}
+
+fun SavedPostStatus.getStringResId(): Int {
+    return when (this) {
         SavedPostStatus.IN_PROGRESS -> R.string.saved_posts_in_progress
         SavedPostStatus.COMPLETED -> R.string.saved_posts_completed
         SavedPostStatus.ARCHIVED -> R.string.saved_posts_archived
     }
-    return stringResource(id = stringResId)
 }

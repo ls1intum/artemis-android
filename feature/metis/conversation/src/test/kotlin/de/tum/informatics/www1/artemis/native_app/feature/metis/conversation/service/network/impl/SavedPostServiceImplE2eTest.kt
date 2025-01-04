@@ -4,6 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ConversationMessagesBaseTest
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.SavedPostsTestUtil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.SavedPostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import kotlinx.coroutines.test.runTest
@@ -92,7 +93,7 @@ class SavedPostServiceImplTest : ConversationMessagesBaseTest() {
                 .orThrow("Could not save post")
 
             sut.changeSavedPostStatus(
-                post = post,
+                post = SavedPostsTestUtil.fromStandalonePost(post),
                 status = SavedPostStatus.COMPLETED,
                 authToken = accessToken,
                 serverUrl = testServerUrl
