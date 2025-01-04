@@ -3,9 +3,12 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.compose
 import android.annotation.SuppressLint
 import android.webkit.WebView
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ModalBottomSheet
@@ -41,7 +44,9 @@ fun LinkBottomSheet(
     val webViewState = getWebViewState(link)
 
     ModalBottomSheet(
-        modifier = modifier,
+        modifier = modifier.padding(
+            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+        ),
         onDismissRequest = onDismissRequest
     ) {
         Box(
@@ -55,6 +60,7 @@ fun LinkBottomSheet(
                     ArtemisPdfView(
                         modifier = Modifier.fillMaxSize(),
                         pdfFile = pdfFile,
+                        dismiss = onDismissRequest
                     )
                 }
 

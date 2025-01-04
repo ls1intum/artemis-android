@@ -43,7 +43,8 @@ import java.net.UnknownHostException
 @Composable
 fun ArtemisPdfView(
     modifier: Modifier,
-    pdfFile: PdfFile
+    pdfFile: PdfFile,
+    dismiss: () -> Unit
 ) {
     val isVertical = remember { mutableStateOf(true) }
     val context = LocalContext.current
@@ -76,6 +77,8 @@ fun ArtemisPdfView(
             stringResource(id = errorMessage),
             Toast.LENGTH_LONG
         ).show()
+
+        dismiss()
     }
 
     Box(
