@@ -427,7 +427,12 @@ private fun HeadlineProfilePicture(
 private fun HeadlineAuthorRoleBadge(
     authorRole: UserRole?,
 ) {
-    val (text, color) = when (authorRole) {
+    /*
+    * remember is needed here to prevent the value from being reset after an update
+    * (the author role is not sent when updating a post)
+    */
+    val initialAuthorRole = remember { mutableStateOf(authorRole) }
+    val (text, color) = when (initialAuthorRole.value) {
         UserRole.INSTRUCTOR -> R.string.post_instructor to PostColors.Roles.instructor
         UserRole.TUTOR -> R.string.post_tutor to PostColors.Roles.tutor
         UserRole.USER -> R.string.post_student to PostColors.Roles.student
