@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.android.appModule
 import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -39,6 +40,7 @@ class AppModuleTest {
                 WorkerParameters::class,
                 QuizType.WorkableQuizType::class,
                 QuizType.ViewableQuizType::class,
+                SavedPostStatus::class,
             )
         )
     }
