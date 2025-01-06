@@ -10,16 +10,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -69,7 +65,9 @@ fun AcceptCodeOfConductUi(
         if (!successful) displayAcceptFailedDialog = true
     }
 
-    Box(modifier = modifier) {
+    Box(
+        modifier = modifier.navigationBarsPadding()
+    ) {
         var parentHeight by remember { mutableIntStateOf(0) }
         var buttonPositionInParent by remember { mutableFloatStateOf(0f) }
         var buttonHeightInParent by remember { mutableIntStateOf(0) }
@@ -103,14 +101,13 @@ fun AcceptCodeOfConductUi(
                     .onGloballyPositioned {
                         buttonPositionInParent = it.positionInParent().y
                         buttonHeightInParent = it.size.height
-                    },
+                    }
+                    .padding(bottom = Spacings.EndOfScrollablePageSpacing),
                 isLoading = acceptDeferred != null,
                 onClick = { acceptDeferred = onRequestAccept() }
             ) {
                 Text(text = stringResource(id = R.string.code_of_conduct_button_accept))
             }
-
-            Spacer(modifier = Modifier.height(4.dp))
         }
 
         if (!isButtonVisible) {
@@ -128,15 +125,11 @@ fun AcceptCodeOfConductUi(
             Icon(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(
-                        bottom = WindowInsets.systemBars
-                            .asPaddingValues()
-                            .calculateBottomPadding()
-                    )
                     .offset {
                         val offsetInDp = 4.dp.toPx()
                         IntOffset(0, (offsetInDp * additionalOffsetPercent).toInt())
                     }
+                    .padding(bottom = Spacings.EndOfScrollablePageSpacing)
                     .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
                     .padding(4.dp),
                 imageVector = Icons.Default.ArrowDownward,
