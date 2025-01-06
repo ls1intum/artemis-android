@@ -20,7 +20,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Mail
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -147,10 +146,6 @@ private fun SettingsScreen(
 
     val scope = rememberCoroutineScope()
 
-    val hasUserSelectedInstance by serverConfigurationService.hasUserSelectedInstance.collectAsState(
-        initial = false
-    )
-
     val accountDataService: AccountDataService = koinInject()
     val networkStatusProvider: NetworkStatusProvider = koinInject()
 
@@ -221,16 +216,15 @@ private fun SettingsScreen(
                         }
                     }
                 )
-            }
 
-            NotificationSection(
-                modifier = Modifier.fillMaxWidth(),
-                onOpenNotificationSettings = onRequestOpenNotificationSettings
-            )
+                NotificationSection(
+                    modifier = Modifier.fillMaxWidth(),
+                    onOpenNotificationSettings = onRequestOpenNotificationSettings
+                )
+            }
 
             AboutSection(
                 modifier = Modifier.fillMaxWidth(),
-                hasUserSelectedInstance = hasUserSelectedInstance,
                 serverUrl = serverUrl,
                 onOpenPrivacyPolicy = {
                     val link = URLBuilder(serverUrl).appendPathSegments("privacy").buildString()
@@ -242,9 +236,6 @@ private fun SettingsScreen(
                     linkOpener.openLink(link)
                 },
                 onOpenThirdPartyLicenses = onDisplayThirdPartyLicenses,
-                // it can only be unselected, if the user has navigated to the settings from the instance selection screen.
-                // Therefore, a simple navigate up will let the user select the server instance.
-                onRequestSelectServerInstance = onNavigateUp
             )
 
             BuildInformationSection(
@@ -341,9 +332,7 @@ private fun NotificationSection(modifier: Modifier, onOpenNotificationSettings: 
 @Composable
 private fun AboutSection(
     modifier: Modifier,
-    hasUserSelectedInstance: Boolean,
     serverUrl: String,
-    onRequestSelectServerInstance: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
     onOpenImprint: () -> Unit,
     onOpenThirdPartyLicenses: () -> Unit
@@ -362,7 +351,7 @@ private fun AboutSection(
             )
         }
 
-        if (hasUserSelectedInstance) {
+        if (serverUrl.isNotEmpty()) {
             ServerURLEntry(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.settings_server_url),
@@ -385,19 +374,12 @@ private fun AboutSection(
                 onClick = onOpenImprint
             )
         } else {
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                Text(
-                    text = stringResource(id = R.string.settings_server_specifics_unavailable),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error
-                )
-
-                Button(
-                    onClick = onRequestSelectServerInstance
-                ) {
-                    Text(text = stringResource(id = R.string.settings_server_specifics_unavailable_select_instance_button))
-                }
-            }
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = stringResource(id = R.string.settings_server_specifics_unavailable),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
+            )
         }
 
         ButtonEntry(

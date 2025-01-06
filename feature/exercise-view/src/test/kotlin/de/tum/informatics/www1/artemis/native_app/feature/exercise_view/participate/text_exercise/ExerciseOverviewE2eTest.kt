@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.exercise_view.participate.text_exercise
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasText
@@ -18,10 +17,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.Exer
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
-import org.koin.compose.LocalKoinApplication
-import org.koin.compose.LocalKoinScope
-import org.koin.core.annotation.KoinInternalApi
-import org.koin.mp.KoinPlatformTools
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
 import de.tum.informatics.www1.artemis.native_app.core.ui.R as CoreUiR
@@ -58,7 +53,6 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
             )
     }
 
-    @OptIn(KoinInternalApi::class)
     private fun setupUiAndViewModel(
         onViewTextExerciseParticipationScreen: (participationId: Long) -> Unit = {}
     ): ExerciseViewModel {
@@ -74,22 +68,16 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
         )
 
         composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext()
-                    .get().scopeRegistry.rootScope,
-                LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
-            ) {
-                ExerciseScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = viewModel,
-                    navController = rememberNavController(),
-                    onNavigateBack = { },
-                    onViewResult = { },
-                    onViewTextExerciseParticipationScreen = onViewTextExerciseParticipationScreen,
-                    onParticipateInQuiz = { _, _ -> },
-                    onClickViewQuizResults = { }
-                )
-            }
+            ExerciseScreen(
+                modifier = Modifier.fillMaxSize(),
+                viewModel = viewModel,
+                navController = rememberNavController(),
+                onNavigateBack = { },
+                onViewResult = { },
+                onViewTextExerciseParticipationScreen = onViewTextExerciseParticipationScreen,
+                onParticipateInQuiz = { _, _ -> },
+                onClickViewQuizResults = { }
+            )
         }
 
         return viewModel

@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,7 +43,7 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
             TopAppBar(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 },
                 title = {
@@ -71,7 +71,7 @@ internal fun PushNotificationSettingsScreen(modifier: Modifier, onNavigateBack: 
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()),
             viewModel = viewModel
