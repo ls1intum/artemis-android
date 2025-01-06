@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -214,44 +213,39 @@ private fun LazyListScope.conversationSectionHeader(
     icon: @Composable () -> Unit
 ) {
     item(key = key) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag(key)
+                .clickable { onClick() }
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onClick() }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.weight(1f)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    icon()
-                    Text(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 8.dp),
-                        text = stringResource(id = text),
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                    )
-                }
+                icon()
+                Text(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp),
+                    text = stringResource(id = text),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
+            }
 
-                IconButton(
-                    modifier = Modifier.testTag(TEST_TAG_HEADER_EXPAND_ICON),
-                    onClick = { onClick() }
-                ) {
-                    Icon(
-                        imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.AutoMirrored.Filled.ArrowRight,
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
+            IconButton(
+                modifier = Modifier.testTag(TEST_TAG_HEADER_EXPAND_ICON),
+                onClick = { onClick() }
+            ) {
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.ArrowDropDown else Icons.AutoMirrored.Filled.ArrowRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
@@ -342,7 +336,7 @@ private fun ConversationListItem(
         else -> conversation.humanReadableName
     }
 
-    Box(modifier = modifier.padding(horizontal = 16.dp)) {
+    Box(modifier = modifier) {
         ListItem(
             modifier = Modifier
                 .clickable(onClick = onNavigateToConversation)

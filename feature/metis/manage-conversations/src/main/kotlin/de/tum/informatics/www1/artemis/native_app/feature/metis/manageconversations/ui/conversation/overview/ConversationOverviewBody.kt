@@ -8,14 +8,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -46,11 +45,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
+import de.tum.informatics.www1.artemis.native_app.core.ui.endOfPagePadding
+import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
@@ -101,7 +102,10 @@ fun ConversationOverviewBody(
         viewModel.requestReload()
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+    ) {
         BasicDataStateUi(
             modifier = modifier,
             dataState = conversationCollectionsDataState,
@@ -132,9 +136,7 @@ fun ConversationOverviewBody(
                 }
 
                 ConversationSearch(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     query = query,
                     updateQuery = viewModel::onUpdateQuery
                 )
@@ -155,8 +157,8 @@ fun ConversationOverviewBody(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp)
-                                    .padding(bottom = 24.dp)
+                                    .padding(top = 16.dp)
+                                    .pagePadding()
                             ) {
                                 TextButton(
                                     modifier = Modifier.align(Alignment.Center),
@@ -175,7 +177,7 @@ fun ConversationOverviewBody(
             }
         }
 
-        ConversationFabMenu(
+        ConversationFabWithDropdownMenu(
             canCreateChannel = canCreateChannel,
             onCreateChat = onRequestCreatePersonalConversation,
             onBrowseChannels = onRequestBrowseChannel,
@@ -193,8 +195,7 @@ fun ConversationOverviewBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
-                    .padding(16.dp)
-                    .padding(bottom = 32.dp),
+                    .pagePadding(),
                 courseId = viewModel.courseId
             )
         }
@@ -202,42 +203,44 @@ fun ConversationOverviewBody(
 }
 
 @Composable
-fun ConversationFabMenu(
+fun ConversationFabWithDropdownMenu(
+    modifier: Modifier = Modifier,
     canCreateChannel: Boolean,
     onCreateChat: () -> Unit,
     onBrowseChannels: () -> Unit,
     onCreateChannel: () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var showDropdownMenu by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
-            .padding(
-                bottom = WindowInsets.systemBars
-                    .asPaddingValues()
-                    .calculateBottomPadding() + 8.dp,
-                end = 16.dp
-            )
-            .imePadding(),
-        contentAlignment = Alignment.BottomEnd
+            .endOfPagePadding()
+            .imePadding()
     ) {
-        Box {
+        Column(
+            modifier = Modifier.align(Alignment.BottomEnd),
+        ) {
+            if (showDropdownMenu) {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
             FloatingActionButton(
-                onClick = { expanded = !expanded },
-                modifier = Modifier.size(56.dp)
+                onClick = { showDropdownMenu = !showDropdownMenu },
             ) {
-                Icon(imageVector = Icons.Default.AddComment, contentDescription = "Add conversation")
+                Icon(
+                    imageVector = Icons.Default.AddComment,
+                    contentDescription = "Add conversation"
+                )
             }
 
             DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                offset = DpOffset(x = 0.dp, y = (12).dp)
+                expanded = showDropdownMenu,
+                onDismissRequest = { showDropdownMenu = false },
             ) {
                 DropdownMenuItem(
                     onClick = {
-                        expanded = false
+                        showDropdownMenu = false
                         onCreateChat()
                     },
                     text = { Text(stringResource(id = R.string.create_chat_title)) },
@@ -247,7 +250,7 @@ fun ConversationFabMenu(
                 )
                 DropdownMenuItem(
                     onClick = {
-                        expanded = false
+                        showDropdownMenu = false
                         onBrowseChannels()
                     },
                     text = { Text(stringResource(id = R.string.browse_channels_title)) },
@@ -258,7 +261,7 @@ fun ConversationFabMenu(
                 if (canCreateChannel) {
                     DropdownMenuItem(
                         onClick = {
-                            expanded = false
+                            showDropdownMenu = false
                             onCreateChannel()
                         },
                         text = { Text(stringResource(id = R.string.create_channel_title)) },

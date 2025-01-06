@@ -2,12 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -27,6 +22,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_uni
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitUnknown
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitAttachmentUi
@@ -41,7 +37,7 @@ internal const val TEST_TAG_OVERVIEW_LIST = "overview_list"
 internal fun getLectureUnitTestTag(lectureUnitId: Long) = "LectureUnit$lectureUnitId"
 
 @Composable
-internal fun OverviewTab(
+internal fun LectureOverviewTab(
     modifier: Modifier,
     description: String?,
     lectureUnits: List<LectureUnitData>,
@@ -56,9 +52,7 @@ internal fun OverviewTab(
         modifier = modifier.testTag(TEST_TAG_OVERVIEW_LIST),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         state = state,
-        contentPadding = PaddingValues(
-            bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
-        )
+        contentPadding = Spacings.calculateEndOfPagePaddingValues()
     ) {
         if (description != null) {
             item {
