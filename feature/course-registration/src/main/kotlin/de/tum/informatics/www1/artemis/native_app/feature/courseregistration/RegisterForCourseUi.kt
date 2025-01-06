@@ -7,10 +7,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -54,6 +55,7 @@ import androidx.navigation.NavOptionsBuilder
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseHeaderViewMode
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseItemHeader
@@ -141,8 +143,8 @@ internal fun RegisterForCourseScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars)
-                .padding(horizontal = 8.dp),
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             courses = courses,
             reloadCourses = viewModel::reloadRegistrableCourses,
             onClickSignup = { course ->
@@ -232,7 +234,7 @@ private fun RegisterForCourseContent(
                 .fillMaxSize()
                 .testTag(TEST_TAG_REGISTRABLE_COURSE_LIST),
             columns = GridCells.Fixed(columnCount),
-            contentPadding = WindowInsets.systemBars.asPaddingValues(),
+            contentPadding = Spacings.calculateEndOfPagePadding(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {

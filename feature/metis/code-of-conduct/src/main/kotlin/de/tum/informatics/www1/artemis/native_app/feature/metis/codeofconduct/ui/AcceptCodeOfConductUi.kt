@@ -41,9 +41,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
-import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadingAnimation
+import de.tum.informatics.www1.artemis.native_app.core.ui.endOfPagePadding
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.R
 import kotlinx.coroutines.CompletableDeferred
@@ -126,7 +126,7 @@ fun AcceptCodeOfConductUi(
                         val offsetInDp = 4.dp.toPx()
                         IntOffset(0, (offsetInDp * additionalOffsetPercent).toInt())
                     }
-                    .padding(bottom = Spacings.EndOfScrollablePageSpacing)
+                    .endOfPagePadding()
                     .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
                     .padding(4.dp),
                 imageVector = Icons.Default.ArrowDownward,
