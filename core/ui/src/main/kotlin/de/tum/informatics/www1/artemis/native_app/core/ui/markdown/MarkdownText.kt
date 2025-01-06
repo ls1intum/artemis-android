@@ -38,7 +38,9 @@ import de.tum.informatics.www1.artemis.native_app.core.common.R
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.TYPE_ICON_RESOURCE_PATH
 import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.LinkResolver
 import io.noties.markwon.Markwon
+import io.noties.markwon.MarkwonConfiguration
 import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tables.TablePlugin
@@ -93,14 +95,15 @@ fun MarkdownText(
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     imageLoader: ImageLoader? = null,
+    linkResolver: LinkResolver? = null
 ) {
     val defaultColor: Color = LocalContentColor.current
     val context: Context = LocalContext.current
     val localMarkwon = LocalMarkwon.current
 
     val imageWidth = context.resources.displayMetrics.widthPixels
-    val markdownRender: Markwon = localMarkwon ?: remember(imageLoader) {
-        createMarkdownRender(context, imageLoader, imageWidth)
+    val markdownRender: Markwon = localMarkwon ?: remember(imageLoader, linkResolver) {
+        createMarkdownRender(context, imageLoader, linkResolver, imageWidth)
     }
 
     val markdownTransformer = LocalMarkdownTransformer.current
@@ -224,7 +227,7 @@ private fun TextView.applyStyleAndColor(
     }
 }
 
-fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, imageWidth: Int): Markwon {
+fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, linkResolver: LinkResolver?, imageWidth: Int): Markwon {
     val imagePlugin: CoilImagesPlugin? =
         if (imageLoader != null) {
             CoilImagesPlugin.create(
@@ -267,6 +270,13 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, imageWidth
         .apply {
             if (imagePlugin != null) {
                 usePlugin(imagePlugin)
+            }
+            if (linkResolver != null) {
+                usePlugin(object : AbstractMarkwonPlugin() {
+                    override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
+                        builder.linkResolver(linkResolver)
+                    }
+                })
             }
         }
         .build()
