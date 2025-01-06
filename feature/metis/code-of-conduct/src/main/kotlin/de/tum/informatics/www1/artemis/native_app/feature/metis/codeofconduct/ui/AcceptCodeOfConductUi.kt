@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -45,6 +44,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletio
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadingAnimation
+import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.R
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -65,9 +65,7 @@ fun AcceptCodeOfConductUi(
         if (!successful) displayAcceptFailedDialog = true
     }
 
-    Box(
-        modifier = modifier.navigationBarsPadding()
-    ) {
+    Box(modifier = modifier) {
         var parentHeight by remember { mutableIntStateOf(0) }
         var buttonPositionInParent by remember { mutableFloatStateOf(0f) }
         var buttonHeightInParent by remember { mutableIntStateOf(0) }
@@ -84,7 +82,7 @@ fun AcceptCodeOfConductUi(
                     parentHeight = it.size.height
                 }
                 .verticalScroll(scrollState)
-                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                .pagePadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -101,8 +99,7 @@ fun AcceptCodeOfConductUi(
                     .onGloballyPositioned {
                         buttonPositionInParent = it.positionInParent().y
                         buttonHeightInParent = it.size.height
-                    }
-                    .padding(bottom = Spacings.EndOfScrollablePageSpacing),
+                    },
                 isLoading = acceptDeferred != null,
                 onClick = { acceptDeferred = onRequestAccept() }
             ) {

@@ -1,5 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 object Spacings {
@@ -13,3 +15,8 @@ object Spacings {
         val innerSpacing = 8.dp
     }
 }
+
+
+fun Modifier.endOfPagePadding() = padding(bottom = Spacings.EndOfScrollablePageSpacing)
+
+fun Modifier.pagePadding() = padding(horizontal = Spacings.ScreenHorizontalSpacing).endOfPagePadding()
