@@ -7,6 +7,8 @@ object Spacings {
     val ScreenHorizontalInnerSpacing = 8.dp
     val FabContentBottomPadding = 80.dp
 
+    val EndOfScrollablePageSpacing = ScreenHorizontalSpacing
+
     object Post {
         val innerSpacing = 8.dp
     }
