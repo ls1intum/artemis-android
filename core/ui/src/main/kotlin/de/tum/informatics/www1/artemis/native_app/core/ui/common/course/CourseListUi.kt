@@ -74,7 +74,7 @@ fun CourseItemGrid(
         columns = GridCells.Fixed(columnCount),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = Spacings.calculateEndOfPagePadding()
+        contentPadding = Spacings.calculateEndOfPagePaddingValues()
     ) {
         items(courses, key = { it.course.id ?: 0L }) { course ->
             courseItem(course, courseItemModifier, isCompact)

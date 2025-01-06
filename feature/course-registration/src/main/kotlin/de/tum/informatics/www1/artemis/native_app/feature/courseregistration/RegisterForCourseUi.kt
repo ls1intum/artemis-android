@@ -234,7 +234,7 @@ private fun RegisterForCourseContent(
                 .fillMaxSize()
                 .testTag(TEST_TAG_REGISTRABLE_COURSE_LIST),
             columns = GridCells.Fixed(columnCount),
-            contentPadding = Spacings.calculateEndOfPagePadding(),
+            contentPadding = Spacings.calculateEndOfPagePaddingValues(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
