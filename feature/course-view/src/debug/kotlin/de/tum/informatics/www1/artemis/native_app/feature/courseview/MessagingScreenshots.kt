@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -251,7 +250,6 @@ fun `Metis - Conversation Channel`() {
                                     isAtLeastTutorInCourse = true,
                                     hasModerationRights = true
                                 ),
-                                listContentPadding = PaddingValues(),
                                 serverUrl = "",
                                 courseId = 0,
                                 state = rememberLazyListState(),
