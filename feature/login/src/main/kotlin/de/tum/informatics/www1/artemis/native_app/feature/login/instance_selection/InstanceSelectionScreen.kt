@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -34,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import de.tum.informatics.www1.artemis.native_app.core.datastore.defaults.ArtemisInstances
-import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.login.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -66,16 +67,15 @@ fun InstanceSelectionBottomSheet(
     }
 
     ModalBottomSheet(
-        modifier = modifier.padding(
-            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-        ),
+        modifier = modifier,
+        contentWindowInsets = { WindowInsets.statusBars },
         onDismissRequest = onDismiss,
         sheetState = sheetState
     ) {
         InstanceSelectionScreen(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                .pagePadding(),
             availableInstances = ArtemisInstances.instances,
             onSelectArtemisInstance = { serverUrl ->
                 hideBottomSheet {

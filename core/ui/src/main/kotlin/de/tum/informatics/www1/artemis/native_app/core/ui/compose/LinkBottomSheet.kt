@@ -4,11 +4,10 @@ import android.annotation.SuppressLint
 import android.webkit.WebView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ModalBottomSheet
@@ -44,9 +43,8 @@ fun LinkBottomSheet(
     val webViewState = getWebViewState(link)
 
     ModalBottomSheet(
-        modifier = modifier.padding(
-            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-        ),
+        modifier = modifier,
+        contentWindowInsets = { WindowInsets.statusBars },
         onDismissRequest = onDismissRequest
     ) {
         Box(
