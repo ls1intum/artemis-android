@@ -1,14 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -73,7 +71,6 @@ fun ConversationScreen(
         viewModel.updateOpenedThread(threadPostId)
     }
 
-    val widthSizeClass = getWindowSizeClass().widthSizeClass
     var showThread by remember { mutableStateOf(threadPostId != null) }
 
     val onNavigateUp = {
@@ -85,86 +82,33 @@ fun ConversationScreen(
         showThread = true
     }
 
-    when {
-        widthSizeClass <= WindowWidthSizeClass.Compact -> {
-            Box(modifier = modifier) {
-                AnimatedContent(
-                    targetState = showThread,
-                    transitionSpec = {
-                        if (targetState) {
-                            DefaultTransition.navigateForward
-                        } else {
-                            DefaultTransition.navigateBack
-                        }.using(
-                            SizeTransform(clip = false)
-                        )
-                    },
-                    label = "ConversationScreen chatList thread navigation animation"
-                ) { _showThread ->
-                    if (_showThread) {
-                        ConversationThreadScreen(
-                            modifier = Modifier.fillMaxSize(),
-                            viewModel = viewModel,
-                            onNavigateUp = onNavigateUp
-                        )
-                    } else {
-                        ConversationChatListScreen(
-                            modifier = Modifier.fillMaxSize(),
-                            viewModel = viewModel,
-                            courseId = courseId,
-                            conversationId = conversationId,
-                            onNavigateBack = onCloseConversation,
-                            onNavigateToSettings = onNavigateToSettings,
-                            onClickViewPost = onClickViewPost
-                        )
-                    }
-                }
-            }
-        }
-
-        else -> {
-            val arrangement = Arrangement.spacedBy(8.dp)
-
-            Row(
-                modifier = modifier,
-                horizontalArrangement = arrangement
-            ) {
-                val isOverviewVisible = !showThread || widthSizeClass >= WindowWidthSizeClass.Expanded
-                AnimatedVisibility(
-                    modifier = Modifier
-                        .weight(ConversationOverviewMaxWeight)
-                        .widthIn(max = ConversationOverviewMaxWidth)
-                        .fillMaxHeight(),
-                    visible = isOverviewVisible
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalArrangement = arrangement
-                    ) {
-                        conversationsOverview(
-                            Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                        )
-
-                        VerticalDivider()
-                    }
-                }
-
-                val otherWeight = when {
-                    isOverviewVisible && showThread -> 0.35f
-                    isOverviewVisible && !showThread -> 0.7f
-                    else -> 0.5f
-                }
-
-                val otherModifier = Modifier
-                    .weight(otherWeight)
-                    .fillMaxHeight()
-
+    WindowSizeAwareTwoColumnLayout(
+        modifier = modifier,
+        optionalColumn = conversationsOverview,
+    ) { innerModifier ->
+        AnimatedContent(
+            modifier = innerModifier,
+            targetState = showThread,
+            transitionSpec = {
+                if (targetState) {
+                    DefaultTransition.navigateForward
+                } else {
+                    DefaultTransition.navigateBack
+                }.using(
+                    SizeTransform(clip = false)
+                )
+            },
+            label = "ConversationScreen chatList thread navigation animation"
+        ) { _showThread ->
+            if (_showThread) {
+                ConversationThreadScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    viewModel = viewModel,
+                    onNavigateUp = onNavigateUp
+                )
+            } else {
                 ConversationChatListScreen(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
+                    modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
                     courseId = courseId,
                     conversationId = conversationId,
@@ -172,16 +116,50 @@ fun ConversationScreen(
                     onNavigateToSettings = onNavigateToSettings,
                     onClickViewPost = onClickViewPost
                 )
+            }
+        }
+    }
+}
 
-                if (showThread) {
-                    VerticalDivider()
 
-                    ConversationThreadScreen(
-                        modifier = otherModifier,
-                        viewModel = viewModel,
-                        onNavigateUp = onNavigateUp
-                    )
-                }
+@Composable
+fun WindowSizeAwareTwoColumnLayout(
+    modifier: Modifier = Modifier,
+    optionalColumnWeight: Float = 1f,
+    priorityColumnWeight: Float = 2f,
+    optionalColumn: @Composable (Modifier) -> Unit,
+    priorityColumn: @Composable (Modifier) -> Unit
+) {
+    val widthSizeClass = getWindowSizeClass().widthSizeClass
+
+    when {
+        widthSizeClass <= WindowWidthSizeClass.Compact -> {
+            Box(modifier = modifier) {
+                priorityColumn(
+                    Modifier.fillMaxSize()
+                )
+            }
+        }
+
+        else -> {
+            Row(
+                modifier = modifier,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                optionalColumn(
+                    Modifier
+                        .weight(optionalColumnWeight)
+                        .fillMaxHeight()
+                )
+
+                VerticalDivider()
+
+                // TODO: priorityColumn is not displayed?
+                priorityColumn(
+                    Modifier
+                        .weight(priorityColumnWeight)
+                        .fillMaxSize()
+                )
             }
         }
     }
