@@ -4,6 +4,10 @@ import androidx.compose.ui.unit.dp
 
 object Spacings {
     val ScreenHorizontalSpacing = 16.dp
-
+    val ScreenHorizontalInnerSpacing = 8.dp
     val FabContentBottomPadding = 80.dp
+
+    object Post {
+        val innerSpacing = 8.dp
+    }
 }
