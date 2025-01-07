@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,7 +20,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -310,19 +307,12 @@ internal fun CourseUiScreen(
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit
 ) {
-    val topAppBarState = rememberTopAppBarState()
-
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-        topAppBarState
-    )
-
     Scaffold(
-        modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
+        modifier = modifier,
         topBar = {
             CourseTopAppBar(
                 courseDataState = courseDataState,
                 onNavigateBack = onNavigateBack,
-                scrollBehavior = scrollBehavior,
                 selectedTabIndex = selectedTabIndex,
                 changeTab = updateSelectedTabIndex
             )

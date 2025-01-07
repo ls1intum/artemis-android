@@ -13,7 +13,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -29,7 +28,6 @@ import io.github.fornewid.placeholder.material3.placeholder
 internal fun CourseTopAppBar(
     selectedTabIndex: Int,
     courseDataState: DataState<Course>,
-    scrollBehavior: TopAppBarScrollBehavior,
     changeTab: (Int) -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -48,8 +46,7 @@ internal fun CourseTopAppBar(
                 IconButton(onClick = onNavigateBack) {
                     Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 }
-            },
-            scrollBehavior = scrollBehavior
+            }
         )
         TabRow(
             modifier = Modifier.fillMaxWidth(),
