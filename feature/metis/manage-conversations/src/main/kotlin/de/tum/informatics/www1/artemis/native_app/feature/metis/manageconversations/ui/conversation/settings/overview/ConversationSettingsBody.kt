@@ -11,12 +11,17 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -31,6 +36,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.PerformActionOnUserDialogs
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.UserAction
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.launch
 
 internal val ConversationSettingsSectionTextStyle: TextStyle
     @Composable get() = MaterialTheme.typography.titleLarge
@@ -136,53 +142,85 @@ internal fun ConversationSettingsBody(
             .fillMaxWidth()
             .padding(horizontal = Spacings.ScreenHorizontalSpacing)
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        var isRefreshing by remember { mutableStateOf(false) }
+        val scope = rememberCoroutineScope()
+        val pullToRefreshState = rememberPullToRefreshState()
+
+        PullToRefreshBox(
+            modifier = Modifier,
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                scope.launch {
+                    viewModel.requestReload()
+                    isRefreshing = false
+                }
+            },
+            state = pullToRefreshState,
+            indicator = {
+                Indicator(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    isRefreshing = isRefreshing,
+                    color = MaterialTheme.colorScheme.primary,
+                    state = pullToRefreshState
+                )
+            }
         ) {
-            ConversationInfoSettings(
-                modifier = conversationSectionModifier,
-                conversation = conversation,
-                editableConversationInfo = editableConversationInfo
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(
+                        bottom = WindowInsets.systemBars
+                            .asPaddingValues()
+                            .calculateBottomPadding()
+                    ),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                ConversationInfoSettings(
+                    modifier = conversationSectionModifier,
+                    conversation = conversation,
+                    editableConversationInfo = editableConversationInfo
+                )
 
-            ConversationMemberSettings(
-                modifier = Modifier.fillMaxWidth(),
-                conversation = conversation,
-                clientUsername = clientUsername,
-                memberCount = conversation.numberOfMembers,
-                members = members,
-                hasMoreMembers = conversation.numberOfMembers > 10,
-                onRequestAddMembers = onRequestAddMembers,
-                onRequestViewAllMembers = onRequestViewAllMembers,
-                onRequestKickMember = {
-                    userActionData = PerformActionOnUserData(it, UserAction.KICK)
-                },
-                onRequestGiveModerationRights = {
-                    userActionData = PerformActionOnUserData(it, UserAction.GIVE_MODERATION_RIGHTS)
-                },
-                onRequestRevokeModerationRights = {
-                    userActionData =
-                        PerformActionOnUserData(it, UserAction.REVOKE_MODERATION_RIGHTS)
-                }
-            )
+                ConversationMemberSettings(
+                    modifier = Modifier.fillMaxWidth(),
+                    conversation = conversation,
+                    clientUsername = clientUsername,
+                    memberCount = conversation.numberOfMembers,
+                    members = members,
+                    hasMoreMembers = conversation.numberOfMembers > 10,
+                    onRequestAddMembers = onRequestAddMembers,
+                    onRequestViewAllMembers = onRequestViewAllMembers,
+                    onRequestKickMember = {
+                        userActionData = PerformActionOnUserData(it, UserAction.KICK)
+                    },
+                    onRequestGiveModerationRights = {
+                        userActionData =
+                            PerformActionOnUserData(it, UserAction.GIVE_MODERATION_RIGHTS)
+                    },
+                    onRequestRevokeModerationRights = {
+                        userActionData =
+                            PerformActionOnUserData(it, UserAction.REVOKE_MODERATION_RIGHTS)
+                    }
+                )
 
-            SectionMoreInfo(
-                modifier = conversationSectionModifier,
-                conversation = conversation
-            )
+                SectionMoreInfo(
+                    modifier = conversationSectionModifier,
+                    conversation = conversation
+                )
 
-            ConversationOtherSettings(
-                modifier = conversationSectionModifier,
-                conversation = conversation,
-                onLeaveConversation = { leaveConversationJob = viewModel.leaveConversation() },
-                onToggleChannelArchivation = {
-                    archiveChannelJob = viewModel.toggleChannelArchivation()
-                }
-            )
+                ConversationOtherSettings(
+                    modifier = conversationSectionModifier,
+                    conversation = conversation,
+                    onLeaveConversation = {
+                        leaveConversationJob = viewModel.leaveConversation()
+                    },
+                    onToggleChannelArchivation = {
+                        archiveChannelJob = viewModel.toggleChannelArchivation()
+                    }
+                )
+            }
         }
 
         PerformActionOnUserDialogs(

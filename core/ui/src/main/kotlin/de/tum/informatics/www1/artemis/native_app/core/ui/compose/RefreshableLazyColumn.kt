@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
@@ -25,6 +27,7 @@ fun RefreshableLazyColumn(
     modifier: Modifier = Modifier,
     onRefresh: suspend () -> Unit,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    state: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
     content: LazyListScope.() -> Unit
 ) {
@@ -55,6 +58,7 @@ fun RefreshableLazyColumn(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = verticalArrangement,
+            state = state,
             contentPadding = contentPadding,
             content = content
         )

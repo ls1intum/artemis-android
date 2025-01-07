@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
@@ -25,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.RefreshableLazyColumn
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 
 @Composable
@@ -32,11 +32,13 @@ internal fun AttachmentsTab(
     modifier: Modifier,
     attachments: List<Attachment>,
     onClickFileAttachment: (Attachment) -> Unit,
-    onClickOpenLinkAttachment: (Attachment) -> Unit
+    onClickOpenLinkAttachment: (Attachment) -> Unit,
+    onRefresh : () -> Unit
 ) {
     if (attachments.isNotEmpty()) {
-        LazyColumn(
+        RefreshableLazyColumn(
             modifier = modifier,
+            onRefresh = onRefresh,
             contentPadding = PaddingValues(
                 bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
             )

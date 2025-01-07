@@ -167,7 +167,8 @@ internal fun LectureScreenBody(
                                 )
                             }
                         ),
-                        state = overviewListState
+                        state = overviewListState,
+                        onRefresh = viewModel::requestReloadLecture
                     )
                 }
 
@@ -190,7 +191,8 @@ internal fun LectureScreenBody(
                             onRequestViewLink(
                                 it.link ?: return@AttachmentsTab
                             )
-                        }
+                        },
+                        onRefresh = viewModel::requestReloadLecture
                     )
                 }
             }
