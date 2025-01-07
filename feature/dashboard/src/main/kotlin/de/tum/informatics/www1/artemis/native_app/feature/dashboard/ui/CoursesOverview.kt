@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -142,13 +141,6 @@ internal fun CoursesOverview(
                     }
                 },
                 actions = {
-                    IconButton(onClick = viewModel::requestReloadDashboard) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = null
-                        )
-                    }
-
                     IconButton(onClick = onClickRegisterForCourse) {
                         Icon(
                             imageVector = Icons.Default.Add,
@@ -196,6 +188,7 @@ internal fun CoursesOverview(
                             .padding(horizontal = 8.dp)
                             .testTag(TEST_TAG_COURSE_LIST),
                         courses = dashboard.courses,
+                        onRefresh = viewModel::requestReloadDashboard,
                         onClickOnCourse = { course -> onViewCourse(course.id ?: 0L) }
                     )
                 }

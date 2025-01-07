@@ -46,11 +46,13 @@ import java.text.DecimalFormat
 fun CourseList(
     modifier: Modifier,
     courses: List<CourseWithScore>,
+    onRefresh: () -> Unit,
     onClickOnCourse: (Course) -> Unit
 ) {
     CourseItemGrid(
         modifier = modifier,
         courses = courses,
+        onRefresh = onRefresh,
     ) { dashboardCourse, courseItemModifier, isCompact ->
         CourseItem(
             modifier = courseItemModifier.testTag(testTagForCourse(dashboardCourse.course.id!!)),

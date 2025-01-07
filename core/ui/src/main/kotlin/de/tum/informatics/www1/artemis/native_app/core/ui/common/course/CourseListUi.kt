@@ -29,10 +29,17 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +61,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
+import kotlinx.coroutines.launch
 
 private val headerHeight = 80.dp
 
@@ -61,25 +69,51 @@ private val headerHeight = 80.dp
 fun CourseItemGrid(
     modifier: Modifier,
     courses: List<CourseWithScore>,
+    onRefresh: () -> Unit,
     courseItem: @Composable LazyGridItemScope.(CourseWithScore, Modifier, isCompact: Boolean) -> Unit
 ) {
     val windowSizeClass = getWindowSizeClass()
     val columnCount = computeCourseColumnCount(windowSizeClass)
+    val scope = rememberCoroutineScope()
 
     val isCompact = windowSizeClass.widthSizeClass <= WindowWidthSizeClass.Compact
     val courseItemModifier = Modifier.computeCourseItemModifier(isCompact)
 
-    LazyVerticalGrid(
-        modifier = modifier,
-        columns = GridCells.Fixed(columnCount),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(
-            bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
-        )
+    val pullToRefreshState = rememberPullToRefreshState()
+    var isRefreshing by remember { mutableStateOf(false) }
+
+    PullToRefreshBox(
+        modifier = Modifier,
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            isRefreshing = true
+            scope.launch {
+                onRefresh()
+                isRefreshing = false
+            }
+        },
+        state = pullToRefreshState,
+        indicator = {
+            Indicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                isRefreshing = isRefreshing,
+                color = MaterialTheme.colorScheme.primary,
+                state = pullToRefreshState
+            )
+        }
     ) {
-        items(courses, key = { it.course.id ?: 0L }) { course ->
-            courseItem(course, courseItemModifier, isCompact)
+        LazyVerticalGrid(
+            modifier = modifier,
+            columns = GridCells.Fixed(columnCount),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(
+                bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+            )
+        ) {
+            items(courses, key = { it.course.id ?: 0L }) { course ->
+                courseItem(course, courseItemModifier, isCompact)
+            }
         }
     }
 }
