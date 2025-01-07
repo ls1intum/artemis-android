@@ -37,7 +37,7 @@ internal fun CourseTopAppBar(
                 Text(
                     modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
                     text = courseDataState.bind { it.title }
-                        .orElse("Placeholder course title"),
+                        .orElse(""),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
