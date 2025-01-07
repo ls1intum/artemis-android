@@ -3,10 +3,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.ListAlt
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,7 +31,6 @@ internal fun CourseTopAppBar(
     courseDataState: DataState<Course>,
     scrollBehavior: TopAppBarScrollBehavior,
     changeTab: (Int) -> Unit,
-    onReloadCourse: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     Column {
@@ -48,12 +46,7 @@ internal fun CourseTopAppBar(
             },
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-                }
-            },
-            actions = {
-                IconButton(onClick = onReloadCourse) {
-                    Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 }
             },
             scrollBehavior = scrollBehavior

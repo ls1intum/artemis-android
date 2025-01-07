@@ -36,7 +36,8 @@ internal fun SinglePageConversationBody(
     modifier: Modifier,
     viewModel: SinglePageConversationBodyViewModel,
     courseId: Long,
-    initialConfiguration: ConversationConfiguration = NothingOpened
+    initialConfiguration: ConversationConfiguration = NothingOpened,
+    onRefresh: () -> Unit
 ) {
     var configuration: ConversationConfiguration by rememberSaveable(initialConfiguration) {
         mutableStateOf(initialConfiguration)
@@ -81,7 +82,8 @@ internal fun SinglePageConversationBody(
             onRequestBrowseChannel = {
                 configuration = BrowseChannelConfiguration(configuration)
             },
-            canCreateChannel = canCreateChannel
+            canCreateChannel = canCreateChannel,
+            onRefresh = onRefresh
         )
     }
 

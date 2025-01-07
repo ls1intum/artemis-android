@@ -17,7 +17,8 @@ import org.koin.core.parameter.parametersOf
 fun ConversationFacadeUi(
     modifier: Modifier,
     courseId: Long,
-    initialConfiguration: ConversationConfiguration = NothingOpened
+    initialConfiguration: ConversationConfiguration = NothingOpened,
+    onRefresh: () -> Unit
 ) {
     CodeOfConductFacadeUi(
         modifier = modifier,
@@ -28,6 +29,7 @@ fun ConversationFacadeUi(
                 viewModel = koinViewModel { parametersOf(courseId) },
                 courseId = courseId,
                 initialConfiguration = initialConfiguration,
+                onRefresh = onRefresh
             )
         }
     )

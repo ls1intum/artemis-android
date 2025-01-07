@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -54,6 +53,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.RefreshableLazyColumn
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
@@ -96,6 +96,7 @@ internal fun ConversationList(
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
+    onRefresh: () -> Unit,
     trailingContent: LazyListScope.() -> Unit
 ) {
     val clientId by viewModel.clientIdOrDefault.collectAsState()
@@ -122,7 +123,10 @@ internal fun ConversationList(
             )
         }
 
-    LazyColumn(modifier = modifier.testTag(TEST_TAG_CONVERSATION_LIST)) {
+    RefreshableLazyColumn (
+        modifier = modifier.testTag(TEST_TAG_CONVERSATION_LIST),
+        onRefresh = onRefresh
+    ) {
         if (conversationCollections.favorites.conversations.isNotEmpty()) {
             listWithHeader(
                 conversationCollections.favorites,

@@ -10,12 +10,11 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.RefreshableLazyColumn
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.GroupedByWeek
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import kotlinx.datetime.Clock
@@ -51,6 +51,7 @@ internal fun <T> WeeklyItemsLazyColumn(
     modifier: Modifier,
     weeklyItemGroups: List<GroupedByWeek<T>>,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
+    onRefresh: () -> Unit,
     getItemId: T.() -> Long,
     itemContent: @Composable (T) -> Unit
 ) {
@@ -75,12 +76,13 @@ internal fun <T> WeeklyItemsLazyColumn(
         }
     }
 
-    LazyColumn(
+    RefreshableLazyColumn(
         modifier = modifier,
         verticalArrangement = verticalArrangement,
         contentPadding = PaddingValues(
             bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
-        )
+        ),
+        onRefresh = onRefresh
     ) {
         weeklyItemGroups.forEachIndexed { index, weeklyItems ->
             item {
@@ -104,11 +106,12 @@ internal fun <T> WeeklyItemsLazyColumn(
             }
 
             if (index < weeklyItemGroups.size - 1) {
-                item { Divider() }
+                item { HorizontalDivider() }
             }
         }
     }
 }
+
 
 /**
  * Display a title with the time range of the week or a text indicating that no time is bound.
