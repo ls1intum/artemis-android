@@ -67,8 +67,7 @@ fun ConversationOverviewBody(
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit,
     onRequestBrowseChannel: () -> Unit,
-    canCreateChannel: Boolean,
-    onRefresh: () -> Unit
+    canCreateChannel: Boolean
 ) {
     ConversationOverviewBody(
         modifier = modifier,
@@ -77,8 +76,7 @@ fun ConversationOverviewBody(
         onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
         onRequestAddChannel = onRequestAddChannel,
         onRequestBrowseChannel = onRequestBrowseChannel,
-        canCreateChannel = canCreateChannel,
-        onRefresh = onRefresh
+        canCreateChannel = canCreateChannel
     )
 }
 
@@ -90,8 +88,7 @@ fun ConversationOverviewBody(
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit,
     onRequestBrowseChannel: () -> Unit,
-    canCreateChannel: Boolean,
-    onRefresh: () -> Unit
+    canCreateChannel: Boolean
 ) {
     var showCodeOfConduct by rememberSaveable { mutableStateOf(false) }
     val conversationCollectionsDataState: DataState<ConversationCollections> by viewModel.conversations.collectAsState()
@@ -153,7 +150,6 @@ fun ConversationOverviewBody(
                     onToggleMarkAsFavourite = viewModel::markConversationAsFavorite,
                     onToggleHidden = viewModel::markConversationAsHidden,
                     onToggleMuted = viewModel::markConversationAsMuted,
-                    onRefresh = onRefresh,
                     trailingContent = {
                         item(key = KEY_BUTTON_SHOW_COC) {
                             Box(

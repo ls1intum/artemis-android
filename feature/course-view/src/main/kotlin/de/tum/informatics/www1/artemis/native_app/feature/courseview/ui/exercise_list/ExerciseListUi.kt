@@ -24,13 +24,11 @@ internal fun ExerciseListUi(
     modifier: Modifier,
     weeklyExercises: List<GroupedByWeek<Exercise>>,
     actions: BoundExerciseActions,
-    onRefresh: () -> Unit = {},
     onClickExercise: (exerciseId: Long) -> Unit
 ) {
     WeeklyItemsLazyColumn(
         modifier = modifier.testTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN),
         weeklyItemGroups = weeklyExercises,
-        onRefresh = onRefresh,
         getItemId = { id ?: 0 }
     ) { exercise ->
         ExerciseListItem(

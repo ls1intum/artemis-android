@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -30,7 +31,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.compose.RefreshableLazyColumn
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelectionBaseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
@@ -72,8 +72,7 @@ internal fun PotentialRecipientsUi(
                 modifier = Modifier.fillMaxSize(),
                 recipients = potentialRecipients,
                 addRecipient = addRecipient,
-                isQueryTooShort = isQueryTooShort,
-                onRefresh = retryLoadPotentialRecipients
+                isQueryTooShort = isQueryTooShort
             )
         }
     }
@@ -117,13 +116,11 @@ private fun PotentialRecipientsList(
     modifier: Modifier,
     recipients: List<User>,
     addRecipient: (User) -> Unit,
-    isQueryTooShort: Boolean,
-    onRefresh: () -> Unit
+    isQueryTooShort: Boolean
 ) {
     if (recipients.isNotEmpty()) {
-        RefreshableLazyColumn(
-            modifier = modifier,
-            onRefresh = onRefresh
+        LazyColumn(
+            modifier = modifier
         ) {
             items(recipients) { user ->
                 ListItem(

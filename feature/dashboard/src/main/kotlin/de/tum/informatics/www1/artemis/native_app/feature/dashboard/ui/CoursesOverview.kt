@@ -178,7 +178,6 @@ internal fun CoursesOverview(
                             .padding(horizontal = 8.dp)
                             .testTag(TEST_TAG_COURSE_LIST),
                         courses = dashboard.courses,
-                        onRefresh = viewModel::requestReloadDashboard,
                         onClickOnCourse = { course -> onViewCourse(course.id ?: 0L) }
                     )
                 }

@@ -211,7 +211,6 @@ internal fun CourseUiScreen(
                 ExerciseListUi(
                     modifier = Modifier.fillMaxSize(),
                     weeklyExercises = weeklyExercises,
-                    onRefresh = onReloadCourse,
                     onClickExercise = onNavigateToExercise,
                     actions = BoundExerciseActions(
                         onClickStartTextExercise = onClickStartTextExercise,
@@ -241,7 +240,6 @@ internal fun CourseUiScreen(
                 LectureListUi(
                     modifier = Modifier.fillMaxSize(),
                     lectures = weeklyLectures,
-                    onRefresh = onReloadCourse,
                     onClickLecture = { onNavigateToLecture(it.id ?: 0L) }
                 )
             }
@@ -276,8 +274,7 @@ internal fun CourseUiScreen(
                 ConversationFacadeUi(
                     modifier = metisModifier,
                     courseId = courseId,
-                    initialConfiguration = initialConfiguration,
-                    onRefresh = onReloadCourse
+                    initialConfiguration = initialConfiguration
                 )
             } else {
                 Box(modifier = metisModifier) {

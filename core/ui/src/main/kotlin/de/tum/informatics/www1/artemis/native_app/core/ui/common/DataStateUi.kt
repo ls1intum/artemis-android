@@ -1,13 +1,15 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.common
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,8 +33,22 @@ inline fun <T> BasicDataStateUi(
     noinline onClickRetry: () -> Unit,
     crossinline successUi: @Composable (BoxScope.(data: T) -> Unit)
 ) {
-    Box(
+    val pullToRefreshState = rememberPullToRefreshState()
+    PullToRefreshBox(
         modifier = modifier,
+        isRefreshing = dataState is DataState.Loading,
+        onRefresh = {
+            onClickRetry()
+        },
+        state = pullToRefreshState,
+        indicator = {
+            Indicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                isRefreshing = dataState is DataState.Loading,
+                color = MaterialTheme.colorScheme.primary,
+                state = pullToRefreshState
+            )
+        },
         contentAlignment = Alignment.Center
     ) {
         when (dataState) {
@@ -64,13 +80,6 @@ inline fun <T> BasicDataStateUi(
                         text = loadingText,
                         textAlign = TextAlign.Center,
                         fontSize = 20.sp,
-                    )
-
-                    LinearProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                            .align(Alignment.CenterHorizontally)
-                            .padding(top = 4.dp)
                     )
                 }
             }

@@ -30,7 +30,6 @@ internal const val TEST_TAG_LECTURE_LIST = "lecture list"
 internal fun LectureListUi(
     modifier: Modifier,
     lectures: List<GroupedByWeek<Lecture>>,
-    onRefresh: () -> Unit,
     onClickLecture: (Lecture) -> Unit
 ) {
     if (lectures.isEmpty()) {
@@ -46,7 +45,6 @@ internal fun LectureListUi(
         WeeklyItemsLazyColumn(
             modifier = modifier.testTag(TEST_TAG_LECTURE_LIST),
             weeklyItemGroups = lectures,
-            onRefresh = onRefresh,
             getItemId = { id ?: 0L }
         ) { lecture ->
             LectureListItem(
