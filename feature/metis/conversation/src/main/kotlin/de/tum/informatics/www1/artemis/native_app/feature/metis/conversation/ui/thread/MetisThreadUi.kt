@@ -199,6 +199,7 @@ internal fun MetisThreadUi(
                             .padding(horizontal = 8.dp)
                             .weight(1f),
                         dataState = postDataState,
+                        enablePullToRefresh = false,
                         loadingText = stringResource(id = R.string.standalone_post_loading),
                         failureText = stringResource(id = R.string.standalone_post_failure),
                         retryButtonText = stringResource(id = R.string.standalone_post_try_again),
