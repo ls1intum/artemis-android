@@ -95,6 +95,10 @@ internal fun ConversationChatListScreen(
     val posts: LazyPagingItems<ChatListItem> =
         viewModel.chatListUseCase.postPagingData.collectAsLazyPagingItems()
 
+    LaunchedEffect(courseId, conversationId) {
+        chatListState.scrollToItem(0)
+    }
+
     ConversationChatListScreen(
         modifier = modifier,
         courseId = courseId,
