@@ -11,6 +11,8 @@ interface VisibleMetisContextManager {
     fun registerMetisContext(metisContext: VisibleMetisContext)
 
     fun unregisterMetisContext(metisContext: VisibleMetisContext)
+
+    fun getVisibleMetisContexts(): List<VisibleMetisContext>
 }
 
 @Composable

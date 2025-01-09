@@ -7,4 +7,6 @@ object EmptyVisibleMetisContextManager : VisibleMetisContextManager {
     override fun registerMetisContext(metisContext: VisibleMetisContext) = Unit
 
     override fun unregisterMetisContext(metisContext: VisibleMetisContext) = Unit
+
+    override fun getVisibleMetisContexts(): List<VisibleMetisContext> = emptyList()
 }
