@@ -26,9 +26,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.S
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-private const val ConversationOverviewMaxWeight = 0.3f
-private val ConversationOverviewMaxWidth = 600.dp
-
 /**
  * Displays a conversation. Uses [ConversationChatListScreen] and [ConversationThreadScreen] to show the conversations.
  * @param conversationId the conversation that should be displayed
@@ -135,9 +132,7 @@ fun WindowSizeAwareTwoColumnLayout(
     when {
         widthSizeClass <= WindowWidthSizeClass.Compact -> {
             Box(modifier = modifier) {
-                priorityColumn(
-                    Modifier.fillMaxSize()
-                )
+                priorityColumn(Modifier.fillMaxSize())
             }
         }
 
@@ -146,20 +141,23 @@ fun WindowSizeAwareTwoColumnLayout(
                 modifier = modifier,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                optionalColumn(
-                    Modifier
+                Box(
+                    modifier = Modifier
                         .weight(optionalColumnWeight)
                         .fillMaxHeight()
-                )
+                ) {
+                    optionalColumn(Modifier.fillMaxSize())
+                }
 
                 VerticalDivider()
 
-                // TODO: priorityColumn is not displayed?
-                priorityColumn(
-                    Modifier
+                Box(
+                    modifier = Modifier
                         .weight(priorityColumnWeight)
-                        .fillMaxSize()
-                )
+                        .fillMaxHeight()
+                ) {
+                    priorityColumn(Modifier.fillMaxSize())
+                }
             }
         }
     }
