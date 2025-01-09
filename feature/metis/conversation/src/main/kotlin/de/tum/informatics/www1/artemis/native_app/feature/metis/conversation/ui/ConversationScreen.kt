@@ -14,7 +14,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
@@ -50,15 +49,8 @@ fun ConversationScreen(
         viewModel.updateOpenedThread(threadPostId)
     }
 
-    var showThread by remember { mutableStateOf(threadPostId != null) }
-
-    val onNavigateUp = {
-        onCloseThread()
-        showThread = false
-    }
-    val onClickViewPost = { clientPostId: StandalonePostId ->
-        onOpenThread(clientPostId)
-        showThread = true
+    val showThread by remember(threadPostId) {
+        mutableStateOf(threadPostId != null)
     }
 
     WindowSizeAwareTwoColumnLayout(
@@ -83,7 +75,7 @@ fun ConversationScreen(
                 ConversationThreadScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
-                    onNavigateUp = onNavigateUp
+                    onNavigateUp = onCloseThread
                 )
             } else {
                 ConversationChatListScreen(
@@ -93,7 +85,7 @@ fun ConversationScreen(
                     conversationId = conversationId,
                     onNavigateBack = onCloseConversation,
                     onNavigateToSettings = onNavigateToSettings,
-                    onClickViewPost = onClickViewPost
+                    onClickViewPost = onOpenThread
                 )
             }
         }
