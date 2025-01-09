@@ -40,6 +40,13 @@ interface ConversationService {
         serverUrl: String
     ): NetworkResponse<OneToOneChat>
 
+    suspend fun createOneToOneConversation(
+        courseId: Long,
+        partnerId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<OneToOneChat>
+
     suspend fun createGroupChat(
         courseId: Long,
         groupMembers: List<String>,

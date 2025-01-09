@@ -27,7 +27,12 @@ data class OpenedThread(val conversationId: Long, val postId: StandalonePostId) 
  * In this configuration, we simply show a loading bar while we load the necessary data to show the chat.
  */
 @Parcelize
-data class NavigateToUserConversation(val username: String) : ConversationConfiguration(0)
+sealed class NavigateToUserConversation : ConversationConfiguration(0)
+
+@Parcelize
+data class NavigateToUserConversationByUsername(val username: String) : NavigateToUserConversation()
+
+@Parcelize data class NavigateToUserConversationById(val userId: Long) : NavigateToUserConversation()
 
 @Parcelize
 internal data class AddChannelConfiguration(

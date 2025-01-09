@@ -30,6 +30,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.ConversationAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.ConversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.user_conversation.NavigateToUserConversationUi
 
 @Composable
 internal fun SinglePageConversationBody(
@@ -215,7 +216,7 @@ internal fun SinglePageConversationBody(
                 NavigateToUserConversationUi(
                     modifier = modifier,
                     courseId = courseId,
-                    username = config.username,
+                    navigation = config,
                     onNavigateToConversation = { conversationId ->
                         configuration = OpenedConversation(conversationId, null)
                     },
