@@ -240,7 +240,7 @@ internal fun SinglePageConversationBody(
             }
 
             is IgnoreCustomBackHandling -> {
-                throw IllegalStateException("IgnoreCustomBackHandling should not be handled in SinglePageConversationBody")
+                throw IllegalStateException("IgnoreCustomBackHandling is only a technical configuration and should not be handled in SinglePageConversationBody")
             }
         }
     }

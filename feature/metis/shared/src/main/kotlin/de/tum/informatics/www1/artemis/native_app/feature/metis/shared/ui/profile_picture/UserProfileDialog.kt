@@ -47,7 +47,9 @@ fun UserProfileDialog(
 
     val courseId = metisContext.first().metisContext.courseId
 
-    val viewModel = koinViewModel<UserProfileDialogViewModel> {
+    val viewModel = koinViewModel<UserProfileDialogViewModel>(
+        key = "$courseId|$userId",
+    ) {
         parametersOf(courseId, userId)
     }
 
