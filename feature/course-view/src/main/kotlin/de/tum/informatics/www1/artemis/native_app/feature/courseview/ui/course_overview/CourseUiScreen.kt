@@ -96,7 +96,7 @@ fun NavGraphBuilder.course(
             generateLinks("courses/{courseId}") +
             generateLinks("courses/{courseId}/exercises") +
             generateLinks("courses/{courseId}/messages?conversationId={conversationId}") +
-            generateLinks("courses/{courseId}/messages?username={username}")
+            generateLinks("courses/{courseId}/messages?username={username}") +
             generateLinks("courses/{courseId}/messages?userId={userId}")
     animatedComposable<CourseUiScreen>(
         deepLinks = deepLinks
