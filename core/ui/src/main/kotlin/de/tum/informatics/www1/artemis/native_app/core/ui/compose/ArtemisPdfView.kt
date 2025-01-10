@@ -21,8 +21,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
+import de.tum.informatics.www1.artemis.native_app.core.ui.endOfPagePadding
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.PdfFile
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.HorizontalPdfView
 import de.tum.informatics.www1.artemis.native_app.core.ui.pdf.render.VerticalPdfView
@@ -60,7 +63,7 @@ fun ArtemisPdfView(
 
     var pdfState = if (isVertical.value) verticalPdfState else horizontalPdfState
 
-    val showMenu = remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
 
     if (pdfState.mError != null) {
         val errorMessage = when (pdfState.mError) {
@@ -115,14 +118,14 @@ fun ArtemisPdfView(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp)
+                .endOfPagePadding()
         ) {
-            if (showMenu.value) {
+            if (showMenu) {
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
             FloatingActionButton(
-                onClick = { showMenu.value = !showMenu.value },
+                onClick = { showMenu = !showMenu },
                 modifier = Modifier
             ) {
                 Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null)
@@ -130,18 +133,18 @@ fun ArtemisPdfView(
 
             PdfActionDropDownMenu(
                 modifier = Modifier,
-                isExpanded = showMenu.value,
-                onDismissRequest = { showMenu.value = false },
+                isExpanded = showMenu,
+                onDismissRequest = { showMenu = false },
                 downloadPdf = {
-                    showMenu.value = false
+                    showMenu = false
                     pdfState.file?.let { pdfFile.downloadPdf(context) }
                 },
                 sharePdf = {
-                    showMenu.value = false
+                    showMenu = false
                     pdfState.file?.let { pdfFile.sharePdf(context, it) }
                 },
                 toggleViewMode = {
-                    showMenu.value = false
+                    showMenu = false
                     pdfState = if (isVertical.value) horizontalPdfState else verticalPdfState
                     isVertical.value = !isVertical.value
                 }
@@ -212,7 +215,7 @@ private fun PdfActionDropDownMenu(
     toggleViewMode: () -> Unit,
 ) {
     DropdownMenu(
-        modifier = Modifier,
+        modifier = modifier,
         expanded = isExpanded,
         onDismissRequest = onDismissRequest
     ) {

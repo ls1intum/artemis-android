@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -69,7 +68,6 @@ internal fun MetisChatList(
     modifier: Modifier,
     viewModel: ConversationViewModel,
     posts: LazyPagingItems<ChatListItem>,
-    listContentPadding: PaddingValues,
     state: LazyListState = rememberLazyListState(),
     isReplyEnabled: Boolean = true,
     onClickViewPost: (StandalonePostId) -> Unit,
@@ -100,7 +98,6 @@ internal fun MetisChatList(
             posts = posts.asPostsDataState(),
             clientId = clientId,
             postActionFlags = postActionFlags,
-            listContentPadding = listContentPadding,
             serverUrl = serverUrl,
             courseId = viewModel.courseId,
             state = state,
@@ -129,7 +126,6 @@ fun MetisChatList(
     bottomItem: PostPojo?,
     clientId: Long,
     postActionFlags: PostActionFlags,
-    listContentPadding: PaddingValues,
     serverUrl: String,
     courseId: Long,
     state: LazyListState,
@@ -204,7 +200,6 @@ fun MetisChatList(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .testTag(TEST_TAG_METIS_POST_LIST),
-                            listContentPadding = listContentPadding,
                             state = state,
                             posts = posts,
                             clientId = clientId,
@@ -236,7 +231,6 @@ fun MetisChatList(
 @Composable
 private fun ChatList(
     modifier: Modifier,
-    listContentPadding: PaddingValues,
     state: LazyListState,
     posts: PostsDataState.Loaded,
     postActionFlags: PostActionFlags,
@@ -250,7 +244,6 @@ private fun ChatList(
 ) {
     LazyColumn(
         modifier = modifier,
-        contentPadding = listContentPadding,
         state = state,
         reverseLayout = true
     ) {
