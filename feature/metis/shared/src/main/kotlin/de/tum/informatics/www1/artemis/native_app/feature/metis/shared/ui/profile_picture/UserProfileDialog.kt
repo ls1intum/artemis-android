@@ -46,10 +46,10 @@ fun UserProfileDialog(
     profilePictureData: ProfilePictureData,
     onDismiss: () -> Unit,
 ) {
-    val metisContext = LocalVisibleMetisContextManager.current.getVisibleMetisContexts()
-    require(metisContext.isNotEmpty()) { "No MetisContext provided." }
+    val metisContext= LocalVisibleMetisContextManager.current.getMostRecentMetisContext()
+    require(metisContext != null) { "No MetisContext provided." }
 
-    val courseId = metisContext.first().metisContext.courseId
+    val courseId = metisContext.metisContext.courseId
 
     val viewModel = koinViewModel<UserProfileDialogViewModel>(
         key = "$courseId|$userId",

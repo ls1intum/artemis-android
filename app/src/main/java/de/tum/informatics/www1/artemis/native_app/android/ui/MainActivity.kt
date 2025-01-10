@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity(),
                 visibleMetisContexts.value -= metisContext
             }
 
-            override fun getVisibleMetisContexts(): List<VisibleMetisContext> {
+            override fun getRegisteredMetisContexts(): List<VisibleMetisContext> {
                 return visibleMetisContexts.value
             }
         }

@@ -199,7 +199,7 @@ fun `Metis - Conversation Channel`() {
     val visibleMetisContextManagerStub = object : VisibleMetisContextManager {
         override fun registerMetisContext(metisContext: VisibleMetisContext) = Unit
         override fun unregisterMetisContext(metisContext: VisibleMetisContext) = Unit
-        override fun getVisibleMetisContexts(): List<VisibleMetisContext> = emptyList()
+        override fun getRegisteredMetisContexts(): List<VisibleMetisContext> = emptyList()
     }
 
     // TODO: Provide artemis image provider

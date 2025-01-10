@@ -12,7 +12,11 @@ interface VisibleMetisContextManager {
 
     fun unregisterMetisContext(metisContext: VisibleMetisContext)
 
-    fun getVisibleMetisContexts(): List<VisibleMetisContext>
+    fun getRegisteredMetisContexts(): List<VisibleMetisContext>
+
+    fun getMostRecentMetisContext(): VisibleMetisContext? {
+        return getRegisteredMetisContexts().lastOrNull()
+    }
 }
 
 @Composable
