@@ -23,12 +23,13 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 class SavedPostsViewModel(
-    private val courseId: Long,
+    val courseId: Long,
     val savedPostStatus: SavedPostStatus,
     private val savedPostService: SavedPostService,
     private val serverConfigurationService: ServerConfigurationService,
@@ -39,9 +40,11 @@ class SavedPostsViewModel(
 
     private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
+    val serverUrl: StateFlow<String> = serverConfigurationService.serverUrl
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, "")
 
     val savedPosts: StateFlow<DataState<List<ISavedPost>>> = flatMapLatest(
-        serverConfigurationService.serverUrl,
+        serverUrl,
         accountService.authToken,
         onRequestReload
     ) { serverUrl, authToken, _ ->
@@ -72,7 +75,7 @@ class SavedPostsViewModel(
                 post = savedPost,
                 status = newStatus,
                 authToken = accountService.authToken.first(),
-                serverUrl = serverConfigurationService.serverUrl.first()
+                serverUrl = serverUrl.first()
             )
                 .onSuccess { requestReload() }
                 .asMetisModificationFailure(MetisModificationFailure.CHANGE_SAVED_POST_STATUS)
@@ -84,7 +87,7 @@ class SavedPostsViewModel(
             savedPostService.deleteSavedPost(
                 post = savedPost,
                 authToken = accountService.authToken.first(),
-                serverUrl = serverConfigurationService.serverUrl.first()
+                serverUrl = serverUrl.first()
             )
                 .onSuccess { requestReload() }
                 .asMetisModificationFailure(MetisModificationFailure.CHANGE_SAVED_POST_STATUS)

@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,6 +30,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.rememberPostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts.SavedPostWithActions
@@ -77,16 +80,22 @@ internal fun SavedPostsScreen (
     val savedPosts by viewModel.savedPosts.collectAsState()
     val status = viewModel.savedPostStatus
 
-    SavedPostsScreen(
-        modifier = modifier,
-        status = status,
-        savedPostsDataState = savedPosts,
-        onRequestReload = viewModel::requestReload,
-        onNavigateBack = onNavigateBack,
-        onNavigateToPost = onNavigateToPost,
-        onChangeStatus = viewModel::changeSavedPostStatus,
-        onRemoveFromSavedPosts = viewModel::removeFromSavedPosts
-    )
+    val courseId = viewModel.courseId
+    val serverUrl by viewModel.serverUrl.collectAsState()
+    val markdownTransformer = rememberPostArtemisMarkdownTransformer(serverUrl, courseId)
+
+    CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
+        SavedPostsScreen(
+            modifier = modifier,
+            status = status,
+            savedPostsDataState = savedPosts,
+            onRequestReload = viewModel::requestReload,
+            onNavigateBack = onNavigateBack,
+            onNavigateToPost = onNavigateToPost,
+            onChangeStatus = viewModel::changeSavedPostStatus,
+            onRemoveFromSavedPosts = viewModel::removeFromSavedPosts
+        )
+    }
 }
 
 @Composable
