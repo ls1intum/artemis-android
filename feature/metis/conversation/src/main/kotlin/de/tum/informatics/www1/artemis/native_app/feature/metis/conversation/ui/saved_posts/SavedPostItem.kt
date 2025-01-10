@@ -1,10 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -27,12 +25,12 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemMainContent
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostPostingType
@@ -59,16 +57,12 @@ fun SavedPostItem(
         isLoading = isLoading
     ) {
 
-        // TODO: try to reuse code from PostItem, as soon as the Redesign is merged.
-        // TODO: this is currently just a placeholder
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .background(color = Color.Red)
-        ) {
-            Text(savedPost.content.orEmpty())
-        }
+        PostItemMainContent(
+            modifier = Modifier,
+            post = savedPost,
+            onClick = onClick,
+            onLongClick = onLongClick,
+        )
     }
 }
 

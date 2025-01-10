@@ -230,8 +230,8 @@ fun PostItemMainContent(
     displayHeader: Boolean = true,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    leadingContent: @Composable ColumnScope.() -> Unit,
-    trailingContent: @Composable ColumnScope.() -> Unit
+    leadingContent: @Composable ColumnScope.() -> Unit = {},
+    trailingContent: @Composable ColumnScope.() -> Unit = {}
 ) {
     Column(
         modifier = modifier
