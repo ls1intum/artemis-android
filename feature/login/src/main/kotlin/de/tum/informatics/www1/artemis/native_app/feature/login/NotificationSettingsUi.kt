@@ -1,16 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -29,7 +27,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncChangesDialog
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncFailedDialog
 import kotlinx.coroutines.Job
 import org.koin.androidx.compose.koinViewModel
 
@@ -38,7 +40,7 @@ import org.koin.androidx.compose.koinViewModel
  */
 @Composable
 internal fun NotificationSettingsUi(modifier: Modifier, onDone: () -> Unit) {
-    val viewModel: de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel = koinViewModel()
+    val viewModel: PushNotificationSettingsViewModel = koinViewModel()
     val isDirty by viewModel.isDirty.collectAsState(initial = false)
 
     var saveJob: Job? by remember { mutableStateOf(null) }
@@ -79,31 +81,25 @@ internal fun NotificationSettingsUi(modifier: Modifier, onDone: () -> Unit) {
                 },
                 icon = {
                     Icon(
-                        imageVector = if (isDirty) Icons.Default.Save else Icons.Default.ArrowForward,
+                        imageVector = if (isDirty) Icons.Default.Save else Icons.AutoMirrored.Filled.ArrowForward,
                         contentDescription = null
                     )
                 }
             )
         }
     ) { padding ->
-        Column(
+        PushNotificationSettingsUi(
             modifier = Modifier
                 .fillMaxSize()
-                .imePadding()
-                .padding(top = padding.calculateTopPadding())
-                .padding(horizontal = 8.dp)
                 .verticalScroll(rememberScrollState())
-        ) {
-            de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi(
-                modifier = Modifier.fillMaxWidth(),
-                viewModel = viewModel
-            )
-
-            Spacer(modifier = Modifier.height(64.dp))
-        }
+                .padding(padding)
+                .consumeWindowInsets(WindowInsets.systemBars)
+                .pagePadding(),
+            viewModel = viewModel
+        )
 
         if (saveJob != null) {
-            de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncChangesDialog(
+            PushNotificationSyncChangesDialog(
                 onDismissRequest = {
                     saveJob?.cancel()
                     saveJob = null
@@ -112,7 +108,7 @@ internal fun NotificationSettingsUi(modifier: Modifier, onDone: () -> Unit) {
         }
 
         if (displaySyncFailedDialog) {
-            de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSyncFailedDialog {
+            PushNotificationSyncFailedDialog {
                 displaySyncFailedDialog = false
             }
         }

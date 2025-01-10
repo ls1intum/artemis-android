@@ -4,8 +4,10 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.MaterialTheme
@@ -330,7 +332,7 @@ internal fun CourseUiScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars),
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
             dataState = courseDataState,
             loadingText = stringResource(id = R.string.course_ui_loading_course_loading),
             failureText = stringResource(id = R.string.course_ui_loading_course_failed),
