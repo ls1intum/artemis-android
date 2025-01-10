@@ -10,16 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
@@ -44,39 +40,17 @@ fun ConversationScreen(
     onNavigateToSettings: () -> Unit,
     conversationsOverview: @Composable (Modifier) -> Unit
 ) {
-    val store = remember { ViewModelStore() }
-
-    val owner = remember(store) {
-        object : ViewModelStoreOwner {
-            override val viewModelStore: ViewModelStore = store
-        }
-    }
-
-    DisposableEffect(courseId, conversationId) {
-        onDispose {
-            store.clear()
-        }
-    }
-
     val viewModel: ConversationViewModel =
         koinViewModel(
             key = "$courseId|$conversationId",
-            viewModelStoreOwner = owner
-        ) { parametersOf(courseId, conversationId, threadPostId) }
+    ) { parametersOf(courseId, conversationId, threadPostId) }
 
     LaunchedEffect(threadPostId, viewModel) {
         viewModel.updateOpenedThread(threadPostId)
     }
 
-    var showThread by remember { mutableStateOf(threadPostId != null) }
-
-    val onNavigateUp = {
-        onCloseThread()
-        showThread = false
-    }
-    val onClickViewPost = { clientPostId: StandalonePostId ->
-        onOpenThread(clientPostId)
-        showThread = true
+    val showThread by remember(threadPostId) {
+        mutableStateOf(threadPostId != null)
     }
 
     WindowSizeAwareTwoColumnLayout(
@@ -101,7 +75,7 @@ fun ConversationScreen(
                 ConversationThreadScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
-                    onNavigateUp = onNavigateUp
+                    onNavigateUp = onCloseThread
                 )
             } else {
                 ConversationChatListScreen(
@@ -111,7 +85,7 @@ fun ConversationScreen(
                     conversationId = conversationId,
                     onNavigateBack = onCloseConversation,
                     onNavigateToSettings = onNavigateToSettings,
-                    onClickViewPost = onClickViewPost
+                    onClickViewPost = onOpenThread
                 )
             }
         }
