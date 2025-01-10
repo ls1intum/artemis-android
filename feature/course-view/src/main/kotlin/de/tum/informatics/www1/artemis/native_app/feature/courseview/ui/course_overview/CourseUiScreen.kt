@@ -51,8 +51,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserCo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedThread
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleCourse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ConversationFacadeUi
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
@@ -216,6 +219,8 @@ internal fun CourseUiScreen(
 
         mutableIntStateOf(initialTab)
     }
+
+    ReportVisibleMetisContext(VisibleCourse(MetisContext.Course(courseId)))
 
     CourseUiScreen(
         modifier = modifier,
