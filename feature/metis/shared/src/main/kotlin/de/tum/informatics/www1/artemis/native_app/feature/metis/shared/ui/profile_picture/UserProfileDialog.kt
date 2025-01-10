@@ -35,6 +35,7 @@ import org.koin.core.parameter.parametersOf
 
 
 const val TEST_TAG_USER_PROFILE_DIALOG = "TEST_TAG_USER_PROFILE_DIALOG"
+const val TEST_TAG_USER_PROFILE_DIALOG_SEND_MESSAGE = "TEST_TAG_USER_PROFILE_DIALOG_SEND_MESSAGE"
 
 
 @Composable
@@ -98,6 +99,7 @@ private fun UserProfileDialogImpl(
         text = {
             if (isSendMessageAvailable) {
                 Button(
+                    modifier = Modifier.testTag(TEST_TAG_USER_PROFILE_DIALOG_SEND_MESSAGE),
                     onClick = onSendMessageClick,
                 ) {
                     Row(
@@ -180,7 +182,7 @@ private fun UserRoleRow(userRole: UserRole) {
 
 @Preview
 @Composable
-fun UserProfileDialogPreview() {
+private fun UserProfileDialogPreview() {
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {

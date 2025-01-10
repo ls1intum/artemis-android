@@ -12,6 +12,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseVi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseUiScreen
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.DEFAULT_CONVERSATION_ID
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.DEFAULT_POST_ID
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.DEFAULT_USERNAME
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.DEFAULT_USER_ID
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
@@ -61,7 +63,8 @@ abstract class BaseCourseTest : BaseComposeTest() {
                 courseId = course.id!!,
                 conversationId = DEFAULT_CONVERSATION_ID,
                 postId = DEFAULT_POST_ID,
-                username = "",
+                username = DEFAULT_USERNAME,
+                userId = DEFAULT_USER_ID,
                 onNavigateToExercise = {},
                 onNavigateToExerciseResultView = {},
                 onNavigateToTextExerciseParticipation = { _, _ -> },
