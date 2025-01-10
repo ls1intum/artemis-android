@@ -42,11 +42,13 @@ internal fun PostWithBottomSheet(
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
     val isResolving = post is IAnswerPost && post.resolvesPost
     val isParentPostInThread = joinedItemType == PostItemViewJoinedType.PARENT
+    val isSaved = post?.isSaved == true
 
     val cardColor = when {
         isParentPostInThread -> MaterialTheme.colorScheme.background
         isResolving -> PostColors.StatusBackground.resolving
         isPinned -> PostColors.StatusBackground.pinned
+        isSaved -> PostColors.StatusBackground.saved
         else -> CardDefaults.cardColors().containerColor
     }
 

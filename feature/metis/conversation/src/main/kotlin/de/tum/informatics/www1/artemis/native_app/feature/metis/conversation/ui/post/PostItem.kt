@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.InsertEmoticon
+import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -111,6 +112,7 @@ internal fun PostItem(
     }
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
+    val isSaved = post?.isSaved == true
     val hasFooter = (post is IStandalonePost && post.answers.orEmpty()
         .isNotEmpty()) || post?.reactions.orEmpty().isNotEmpty() || isExpanded
 
@@ -168,6 +170,15 @@ internal fun PostItem(
                         .fillMaxWidth(),
                     resourceString = R.string.post_is_pinned,
                     icon = Icons.Outlined.PushPin
+                )
+            }
+
+            if (isSaved) {
+                IconLabel(
+                    modifier = applyDistancePaddingToModifier(Modifier)
+                        .fillMaxWidth(),
+                    resourceString = R.string.post_is_saved,
+                    icon = Icons.Outlined.Bookmark
                 )
             }
 
