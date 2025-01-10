@@ -1,13 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
@@ -154,7 +152,6 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
                     ),
                     onPinPost = { CompletableDeferred() },
                     onSavePost = { CompletableDeferred() },
-                    listContentPadding = PaddingValues(0.dp),
                     serverUrl = "",
                     courseId = courseId,
                     state = LazyListState(),

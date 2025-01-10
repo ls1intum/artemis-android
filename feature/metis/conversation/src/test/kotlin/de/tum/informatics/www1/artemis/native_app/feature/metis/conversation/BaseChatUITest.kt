@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.remember
@@ -100,7 +99,6 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                     hasModerationRights = hasModerationRights,
                 ),
-                listContentPadding = PaddingValues(),
                 serverUrl = "",
                 emojiService = EmojiServiceStub,
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
@@ -138,7 +136,6 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                     hasModerationRights = hasModerationRights,
                 ),
-                listContentPadding = PaddingValues(),
                 serverUrl = "",
                 courseId = course.id!!,
                 state = rememberLazyListState(),
