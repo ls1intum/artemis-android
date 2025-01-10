@@ -6,19 +6,22 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import coil.ImageLoader
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.link_resolving.LocalMarkdownLinkResolver
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import io.noties.markwon.Markwon
 
 val LocalMarkwon: ProvidableCompositionLocal<Markwon?> =
     compositionLocalOf { null }
 
 @Composable
-fun ProvideMarkwon(imageLoader: ImageLoader? = null, content: @Composable () -> Unit) {
+fun ProvideMarkwon(content: @Composable () -> Unit) {
+    val imageLoader = LocalArtemisImageProvider.current.rememberArtemisImageLoader()
+    val linkResolver = LocalMarkdownLinkResolver.current.rememberMarkdownLinkResolver()
     val context = LocalContext.current
 
-    val imageWith = context.resources.displayMetrics.widthPixels
-    val markdownRender: Markwon = remember(imageLoader) {
-        createMarkdownRender(context, imageLoader, imageWith)
+    val imageWidth = context.resources.displayMetrics.widthPixels
+    val markdownRender: Markwon = remember(imageLoader, linkResolver) {
+        createMarkdownRender(context, imageLoader, linkResolver, imageWidth)
     }
 
     CompositionLocalProvider(LocalMarkwon provides markdownRender) {

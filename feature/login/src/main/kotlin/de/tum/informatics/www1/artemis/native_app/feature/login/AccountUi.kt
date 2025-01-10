@@ -3,35 +3,36 @@ package de.tum.informatics.www1.artemis.native_app.feature.login
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -54,12 +54,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -68,31 +65,28 @@ import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Profi
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.linkTextColor
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.login.custom_instance_selection.CustomInstanceSelectionScreen
-import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionScreen
+import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.RegisterUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNotificationStorageService
-import io.ktor.http.encodeURLPathPart
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import java.io.IOException
 
 private const val ARG_REMEMBER_ME = "rememberMe"
-private const val NESTED_SAML2_LOGIN_ROUTE = "saml2_login"
 
 @Serializable
 private sealed interface NestedDestination {
-    @Serializable
-    data object InstanceSelection : NestedDestination
     @Serializable
     data object CustomInstanceSelection : NestedDestination
     @Serializable
@@ -131,7 +125,9 @@ fun NavGraphBuilder.loginScreen(
     onFinishedLoginFlow: (deepLink: String?) -> Unit,
     onRequestOpenSettings: () -> Unit
 ) {
-    composable<LoginScreen> {
+    animatedComposable<LoginScreen>(
+        enterTransition = { DefaultTransition.fadeIn },
+    ) {
         val screen = it.toRoute<LoginScreen>()
         val nextDestinationValue = screen.nextDestination
 
@@ -152,9 +148,7 @@ fun NavGraphBuilder.loginScreen(
         AnimatedContent(
             targetState = currentContent,
             transitionSpec = {
-                // Animation is always the same
-                slideInHorizontally { width -> width } togetherWith
-                        slideOutHorizontally { width -> -width }
+                DefaultTransition.navigateForward
             },
             label = "Login <-> Notification configuration"
         ) { content ->
@@ -216,12 +210,6 @@ private fun LoginUiScreen(
     val nestedNavController = rememberNavController()
     val serverConfigurationService: ServerConfigurationService = koinInject()
 
-    val hasSelectedInstance = serverConfigurationService
-        .hasUserSelectedInstance
-        .collectAsState(initial = null)
-        .value
-        ?: return // Display nothing to avoid switching between destinations
-
     // Force recomposition
     val currentBackStack by nestedNavController.currentBackStackEntryAsState()
     nestedNavController.currentBackStackEntryAsState().value
@@ -264,18 +252,22 @@ private fun LoginUiScreen(
             )
         }
     ) { paddingValues ->
+        var showInstanceSelectionBottomSheet by remember { mutableStateOf(false) }
+
         NavHost(
             modifier = Modifier
                 .fillMaxSize()
-                .imePadding()
-                .consumeWindowInsets(WindowInsets.systemBars)
-                .padding(top = paddingValues.calculateTopPadding()),
+                .padding(top = paddingValues.calculateTopPadding())
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             navController = nestedNavController,
-            startDestination = if (hasSelectedInstance) NestedDestination.Home else NestedDestination.InstanceSelection
+            startDestination = NestedDestination.Home
         ) {
-            composable<NestedDestination.Home>() {
+            animatedComposable<NestedDestination.Home> {
                 AccountScreen(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .systemBarsPadding(),
                     canSwitchInstance = !BuildConfig.hasInstanceRestriction,
                     onNavigateToLoginScreen = {
                         nestedNavController.navigate(NestedDestination.Login)
@@ -285,42 +277,35 @@ private fun LoginUiScreen(
                     },
                     onNavigateToInstanceSelection = {
                         onNavigatedToInstanceSelection()
-
-                        nestedNavController.navigate(NestedDestination.InstanceSelection) {
-                            popUpTo<NestedDestination.Home> {
-                                inclusive = true
-                            }
-                        }
+                        showInstanceSelectionBottomSheet = true
                     },
                     onLoggedIn = onLoggedIn,
                     onClickSaml2Login = onClickSaml2Login
                 )
             }
 
-            composable<NestedDestination.CustomInstanceSelection> {
+            animatedComposable<NestedDestination.CustomInstanceSelection> {
                 CustomInstanceSelectionScreen(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 16.dp)
+                        .imePadding()
                 ) {
-                    nestedNavController.navigate(NestedDestination.Home) {
-                        popUpTo<NestedDestination.InstanceSelection> {
-                            inclusive = true
-                        }
-                    }
+                    nestedNavController.navigate(NestedDestination.Home)
                 }
             }
 
-            composable<NestedDestination.Login> {
+            animatedComposable<NestedDestination.Login> {
                 LoginScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = getViewModel(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .imePadding(),
+                    viewModel = koinViewModel(),
                     onLoggedIn = onLoggedIn,
                     onClickSaml2Login = onClickSaml2Login
                 )
             }
 
-            composable<NestedDestination.Saml2Login> { backStack ->
+            animatedComposable<NestedDestination.Saml2Login> { backStack ->
                 val rememberMe = backStack.arguments?.getBoolean(ARG_REMEMBER_ME)
                 checkNotNull(rememberMe)
 
@@ -328,18 +313,20 @@ private fun LoginUiScreen(
                     koinViewModel { parametersOf(rememberMe) }
 
                 Saml2LoginScreen(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .imePadding(),
                     viewModel = saml2LoginViewModel,
                     onLoggedIn = onLoggedIn
                 )
             }
 
-            composable<NestedDestination.Register> {
+            animatedComposable<NestedDestination.Register> {
                 RegisterUi(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                        .imePadding(),
                     viewModel = koinViewModel(),
                     onRegistered = {
                         nestedNavController.popBackStack()
@@ -347,32 +334,22 @@ private fun LoginUiScreen(
                     }
                 )
             }
+        }
 
-            composable<NestedDestination.InstanceSelection> {
-                val scope = rememberCoroutineScope()
-
-                InstanceSelectionScreen(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = Spacings.ScreenHorizontalSpacing),
-                    availableInstances = ArtemisInstances.instances,
-                    onSelectArtemisInstance = { serverUrl ->
-                        scope.launch {
-                            serverConfigurationService.updateServerUrl(serverUrl)
-                            nestedNavController.navigate(NestedDestination.Home) {
-                                popUpTo<NestedDestination.InstanceSelection> {
-                                    inclusive = true
-                                }
-                            }
-                        }
-                    },
-                    onRequestOpenCustomInstanceSelection = {
-                        nestedNavController.navigate(
-                            NestedDestination.CustomInstanceSelection
-                        )
-                    }
-                )
-            }
+        if (showInstanceSelectionBottomSheet) {
+            InstanceSelectionBottomSheet(
+                onDismiss = {
+                    showInstanceSelectionBottomSheet = false
+                },
+                onSelectArtemisInstance = {
+                        serverConfigurationService.updateServerUrl(it)
+                },
+                onRequestOpenCustomInstanceSelection = {
+                    nestedNavController.navigate(
+                        NestedDestination.CustomInstanceSelection
+                    )
+                }
+            )
         }
     }
 }
@@ -392,10 +369,12 @@ private fun AccountScreen(
     onClickSaml2Login: (rememberMe: Boolean) -> Unit
 ) {
     val serverProfileInfo by viewModel.serverProfileInfo.collectAsState()
+    val selectedInstance by viewModel.selectedArtemisInstance.collectAsState()
 
     AccountUi(
         modifier = modifier,
         serverProfileInfo = serverProfileInfo,
+        selectedInstance = selectedInstance,
         canSwitchInstance = canSwitchInstance,
         retryLoadServerProfileInfo = viewModel::requestReloadServerProfileInfo,
         onNavigateToLoginScreen = onNavigateToLoginScreen,
@@ -410,6 +389,7 @@ private fun AccountScreen(
 private fun AccountUi(
     modifier: Modifier,
     serverProfileInfo: DataState<ProfileInfo>,
+    selectedInstance: ArtemisInstances.ArtemisInstance,
     canSwitchInstance: Boolean,
     retryLoadServerProfileInfo: () -> Unit,
     onNavigateToLoginScreen: () -> Unit,
@@ -418,48 +398,42 @@ private fun AccountUi(
     onLoggedIn: () -> Unit,
     onClickSaml2Login: (rememberMe: Boolean) -> Unit
 ) {
-    Column(
-        modifier = modifier
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.05f)
-        )
+    Box(modifier = modifier) {
+        Column(
+            modifier = Modifier.imePadding()
+        ) {
+            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
 
-        ArtemisHeader(modifier = Modifier.fillMaxWidth())
+            ArtemisHeader(
+                modifier = Modifier.fillMaxWidth(),
+                selectedInstance = selectedInstance
+            )
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.05f)
-        )
+            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
 
-        RegisterLoginAccount(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            serverProfileInfo = serverProfileInfo,
-            retryLoadServerProfileInfo = retryLoadServerProfileInfo,
-            onLoggedIn = onLoggedIn,
-            onNavigateToLoginScreen = onNavigateToLoginScreen,
-            onNavigateToRegisterScreen = onNavigateToRegisterScreen,
-            onClickSaml2Login = onClickSaml2Login
-        )
+            RegisterLoginAccount(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                serverProfileInfo = serverProfileInfo,
+                retryLoadServerProfileInfo = retryLoadServerProfileInfo,
+                onLoggedIn = onLoggedIn,
+                onNavigateToLoginScreen = onNavigateToLoginScreen,
+                onNavigateToRegisterScreen = onNavigateToRegisterScreen,
+                onClickSaml2Login = onClickSaml2Login
+            )
+        }
 
         if (canSwitchInstance) {
-            ClickableText(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(
-                        bottom = WindowInsets.systemBars
-                            .asPaddingValues()
-                            .calculateBottomPadding()
-                    ),
-                text = AnnotatedString(stringResource(id = R.string.account_change_artemis_instance_label)),
-                style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.linkTextColor),
-                onClick = { onNavigateToInstanceSelection() }
-            )
+            TextButton(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                onClick = onNavigateToInstanceSelection
+            ) {
+                Text(
+                    text = stringResource(id = R.string.account_change_artemis_instance_label),
+                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.linkTextColor)
+                )
+            }
         }
     }
 }
@@ -510,7 +484,7 @@ private fun RegisterLoginAccount(
                         //Just for the preview.
                         LoginUi(
                             modifier = loginUiModifier,
-                            accountName = "TUm",
+                            accountName = "TUM",
                             needsToAcceptTerms = true,
                             hasUserAcceptedTerms = true,
                             saml2Config = null,
@@ -578,7 +552,7 @@ private fun LoginOrRegister(
             onClickLogin
         )
 
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 8.dp, end = 8.dp, top = 24.dp, bottom = 8.dp)
@@ -597,10 +571,16 @@ private fun LoginOrRegister(
 }
 
 @Composable
-internal fun ArtemisHeader(modifier: Modifier) {
-    Column(modifier = modifier) {
+internal fun ArtemisHeader(
+    modifier: Modifier,
+    selectedInstance: ArtemisInstances.ArtemisInstance,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
         Text(
-            modifier = Modifier.fillMaxWidth(),
             text = stringResource(id = R.string.account_screen_title),
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
@@ -608,14 +588,22 @@ internal fun ArtemisHeader(modifier: Modifier) {
         )
 
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp),
             text = stringResource(id = R.string.account_screen_subtitle),
             fontSize = 20.sp,
             fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center
         )
+
+
+        if (BuildConfig.DEBUG || selectedInstance.type == ArtemisInstances.ArtemisInstance.Type.CUSTOM) {
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = selectedInstance.host,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
     }
 }
 
@@ -626,6 +614,7 @@ fun AccountUiPreviewLoadingProfileInfo() {
         modifier = Modifier.fillMaxSize(),
         canSwitchInstance = true,
         serverProfileInfo = DataState.Loading(),
+        selectedInstance = ArtemisInstances.TumArtemis,
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
@@ -642,6 +631,7 @@ fun AccountUiPreviewFailedLoadingProfileInfo() {
         modifier = Modifier.fillMaxSize(),
         canSwitchInstance = true,
         serverProfileInfo = DataState.Failure(IOException()),
+        selectedInstance = ArtemisInstances.TumArtemis,
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
@@ -662,6 +652,7 @@ fun AccountUiPreviewWithRegister() {
                 registrationEnabled = true
             )
         ),
+        selectedInstance = ArtemisInstances.TumArtemis,
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},
@@ -682,6 +673,7 @@ fun AccountUiPreviewWithoutRegister() {
                 registrationEnabled = false
             )
         ),
+        selectedInstance = ArtemisInstances.TumArtemis,
         retryLoadServerProfileInfo = {},
         onNavigateToLoginScreen = {},
         onNavigateToRegisterScreen = {},

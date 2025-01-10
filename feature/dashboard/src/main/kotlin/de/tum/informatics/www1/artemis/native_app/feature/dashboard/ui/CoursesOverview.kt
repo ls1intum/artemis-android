@@ -6,15 +6,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -23,8 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,7 +34,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -43,16 +41,17 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.compose.composable
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.R
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.BetaHintService
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.SurveyHintService
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 internal const val TEST_TAG_COURSE_LIST = "TEST_TAG_COURSE_LIST"
@@ -71,10 +70,10 @@ fun NavGraphBuilder.dashboard(
     onClickRegisterForCourse: () -> Unit,
     onViewCourse: (courseId: Long) -> Unit
 ) {
-    composable<DashboardScreen> {
+    animatedComposable<DashboardScreen> {
         CoursesOverview(
             modifier = Modifier.fillMaxSize(),
-            viewModel = getViewModel(),
+            viewModel = koinViewModel(),
             onOpenSettings = onOpenSettings,
             onClickRegisterForCourse = onClickRegisterForCourse,
             onViewCourse = onViewCourse
@@ -99,17 +98,6 @@ internal fun CoursesOverview(
 ) {
     val coursesDataState by viewModel.dashboard.collectAsState()
 
-    //The course composable needs the serverUrl to build the correct url to fetch the course icon from.
-    val serverUrl by viewModel.serverUrl.collectAsState()
-    //The server wants an authorization token to send the course icon.
-    val authToken by viewModel.authToken.collectAsState()
-
-    val topAppBarState = rememberTopAppBarState()
-
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
-        topAppBarState
-    )
-
     val shouldDisplayBetaDialog by betaHintService.shouldShowBetaHint.collectAsState(initial = false)
     var displayBetaDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -119,7 +107,7 @@ internal fun CoursesOverview(
     }
 
     Scaffold(
-        modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
@@ -147,13 +135,6 @@ internal fun CoursesOverview(
                     }
                 },
                 actions = {
-                    IconButton(onClick = viewModel::requestReloadDashboard) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = null
-                        )
-                    }
-
                     IconButton(onClick = onClickRegisterForCourse) {
                         Icon(
                             imageVector = Icons.Default.Add,
@@ -164,19 +145,18 @@ internal fun CoursesOverview(
                     IconButton(onClick = onOpenSettings) {
                         Icon(imageVector = Icons.Default.Settings, contentDescription = null)
                     }
-                },
-                scrollBehavior = scrollBehavior
+                }
             )
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(top = padding.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars)
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
         ) {
             SurveyHint(
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(vertical = 8.dp, horizontal = Spacings.ScreenHorizontalSpacing)
                     .fillMaxWidth(),
                 surveyHintService = surveyHintService
             )
@@ -198,11 +178,9 @@ internal fun CoursesOverview(
                     CourseList(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 8.dp)
+                            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                             .testTag(TEST_TAG_COURSE_LIST),
                         courses = dashboard.courses,
-                        serverUrl = serverUrl,
-                        authorizationToken = authToken,
                         onClickOnCourse = { course -> onViewCourse(course.id ?: 0L) }
                     )
                 }

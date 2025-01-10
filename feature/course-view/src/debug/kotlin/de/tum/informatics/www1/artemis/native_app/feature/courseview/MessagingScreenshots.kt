@@ -1,13 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.data.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -19,12 +17,12 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseUiScreen
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.TAB_COMMUNICATION
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.PostsDataState
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.storage.ConversationPreferenceService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview.ConversationOverviewBody
@@ -36,8 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ProvideLocalVisibleMetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextManager
 import kotlinx.coroutines.CompletableDeferred
@@ -145,7 +142,7 @@ fun `Metis - Conversation Overview`() {
                     onRequestCreatePersonalConversation = {},
                     onRequestAddChannel = {},
                     onRequestBrowseChannel = {},
-                    canCreateChannel = false,
+                    canCreateChannel = false
                 )
             },
             onNavigateBack = { },
@@ -157,9 +154,6 @@ fun `Metis - Conversation Overview`() {
 @PlayStoreScreenshots
 @Composable
 fun `Metis - Conversation Channel`() {
-    val context = LocalContext.current
-    val emojiService = remember { EmojiServiceImpl(context) }
-
     val date = LocalDate(2023, 7, 29)
     val firstMessageTime = date.atTime(13, 34).toInstant(TimeZone.UTC)
 
@@ -195,6 +189,15 @@ fun `Metis - Conversation Channel`() {
         ),
     ).reversed()
 
+    val visibleMetisContextManagerStub = object : VisibleMetisContextManager {
+        override fun registerMetisContext(metisContext: VisibleMetisContext) =
+            Unit
+
+        override fun unregisterMetisContext(metisContext: VisibleMetisContext) =
+            Unit
+    }
+
+    // TODO: Provide artemis image provider
     ScreenshotFrame(title = "Send and receive messages directly from the app") {
         CourseUiScreen(
             modifier = Modifier.fillMaxSize(),
@@ -204,21 +207,15 @@ fun `Metis - Conversation Channel`() {
             exerciseTabContent = { },
             lectureTabContent = { },
             communicationTabContent = {
-                ProvideLocalVisibleMetisContextManager(
-                    visibleMetisContextManager = object : VisibleMetisContextManager {
-                        override fun registerMetisContext(metisContext: VisibleMetisContext) =
-                            Unit
-
-                        override fun unregisterMetisContext(metisContext: VisibleMetisContext) =
-                            Unit
-                    }
+                CompositionLocalProvider(
+                    LocalVisibleMetisContextManager provides visibleMetisContextManagerStub,
                 ) {
                     ConversationChatListScreen(
                         modifier = Modifier.fillMaxSize(),
                         courseId = ScreenshotCourse.id!!,
                         conversationId = sharedConversation.id,
-                        conversationTitle = sharedConversation.humanReadableName,
-                        isConversationLoaded = true,
+                        conversationDataState = DataState.Success(sharedConversation),
+                        clientId = 1L,
                         query = "",
                         onUpdateQuery = {},
                         onNavigateBack = {},
@@ -242,9 +239,11 @@ fun `Metis - Conversation Channel`() {
                                     PostsDataState.NotLoading
                                 ),
                                 clientId = 0L,
-                                hasModerationRights = true,
-                                isAtLeastTutorInCourse = true,
-                                listContentPadding = PaddingValues(),
+                                postActionFlags = PostActionFlags(
+                                    isAbleToPin = true,
+                                    isAtLeastTutorInCourse = true,
+                                    hasModerationRights = true
+                                ),
                                 serverUrl = "",
                                 courseId = 0,
                                 state = rememberLazyListState(),
@@ -252,11 +251,13 @@ fun `Metis - Conversation Channel`() {
                                 onCreatePost = { CompletableDeferred() },
                                 onEditPost = { _, _ -> CompletableDeferred() },
                                 onDeletePost = { CompletableDeferred() },
+                                onPinPost = { CompletableDeferred() },
                                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                                 bottomItem = null,
                                 onClickViewPost = {},
                                 onRequestRetrySend = {},
-                                title = ""
+                                title = "",
+                                onFileSelected = { _ ->}
                             )
                         }
                     )
@@ -284,13 +285,15 @@ private fun generateMessage(
             authorName = name,
             authorRole = UserRole.USER,
             authorId = authorId,
+            authorImageUrl = null,
             creationDate = time,
             updatedDate = null,
             resolved = false,
             courseWideContext = null,
             tags = emptyList(),
             answers = emptyList(),
-            reactions = emptyList()
+            reactions = emptyList(),
+            displayPriority = null
         )
     )
 }

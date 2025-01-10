@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,8 +34,14 @@ import coil.ImageLoader
 import coil.request.Disposable
 import coil.request.ImageRequest
 import coil.size.Scale
+import de.tum.informatics.www1.artemis.native_app.core.common.R
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.TYPE_ICON_RESOURCE_PATH
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.LinkResolver
 import io.noties.markwon.Markwon
+import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.html.HtmlPlugin
@@ -71,6 +78,9 @@ import io.noties.markwon.linkify.LinkifyPlugin
 val LocalMarkdownTransformer =
     compositionLocalOf<ArtemisMarkdownTransformer> { ArtemisMarkdownTransformer }
 
+private const val DEFAULT_IMAGE_HEIGHT = 800
+private const val LINK_TYPE_HINT_ICON_HEIGHT = 52
+
 @Composable
 fun MarkdownText(
     markdown: String,
@@ -85,14 +95,15 @@ fun MarkdownText(
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     imageLoader: ImageLoader? = null,
+    linkResolver: LinkResolver? = null
 ) {
     val defaultColor: Color = LocalContentColor.current
     val context: Context = LocalContext.current
     val localMarkwon = LocalMarkwon.current
 
-    val imageWith = context.resources.displayMetrics.widthPixels
-    val markdownRender: Markwon = localMarkwon ?: remember(imageLoader) {
-        createMarkdownRender(context, imageLoader, imageWith)
+    val imageWidth = context.resources.displayMetrics.widthPixels
+    val markdownRender: Markwon = localMarkwon ?: remember(imageLoader, linkResolver) {
+        createMarkdownRender(context, imageLoader, linkResolver, imageWidth)
     }
 
     val markdownTransformer = LocalMarkdownTransformer.current
@@ -102,6 +113,8 @@ fun MarkdownText(
             markdownTransformer.transformMarkdown(markdown)
         }
     }
+
+    val previousTransformedMarkdown = remember { mutableStateOf<String?>(null) }
 
     AndroidView(
         // Added semantics for ui testing.
@@ -127,7 +140,12 @@ fun MarkdownText(
             )
         },
         update = { textView ->
-            markdownRender.setMarkdown(textView, transformedMarkdown)
+            // Only update if the transformed markdown has changed
+            if (transformedMarkdown != previousTransformedMarkdown.value) {
+                markdownRender.setMarkdown(textView, transformedMarkdown)
+                previousTransformedMarkdown.value = transformedMarkdown
+            }
+
             textView.movementMethod = LinkMovementMethod.getInstance()
 
             onClick?.let { textView.setOnClickListener { onClick() } }
@@ -209,18 +227,22 @@ private fun TextView.applyStyleAndColor(
     }
 }
 
-fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, imageWith: Int): Markwon {
-    // Setting the size of the output image is important to avoid jittering UIs.
+fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, linkResolver: LinkResolver?, imageWidth: Int): Markwon {
     val imagePlugin: CoilImagesPlugin? =
         if (imageLoader != null) {
             CoilImagesPlugin.create(
                 object : CoilImagesPlugin.CoilStore {
                     override fun load(drawable: AsyncDrawable): ImageRequest {
+                        var height = DEFAULT_IMAGE_HEIGHT
+                        if (drawable.destination.contains(TYPE_ICON_RESOURCE_PATH)) {
+                            height = LINK_TYPE_HINT_ICON_HEIGHT
+                        }
+
                         return ImageRequest.Builder(context)
                             .defaults(imageLoader.defaults)
                             .data(drawable.destination)
                             .crossfade(true)
-                            .size(imageWith, 800) // We set a fixed height and set the width of the image to the screen width.
+                            .size(imageWidth, height) // We set a fixed height and set the width of the image to the screen width.
                             .scale(Scale.FIT)
                             .build()
                     }
@@ -238,9 +260,23 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, imageWith:
         .usePlugin(StrikethroughPlugin.create())
         .usePlugin(TablePlugin.create(context))
         .usePlugin(LinkifyPlugin.create())
+        .usePlugin(object : AbstractMarkwonPlugin() {
+            override fun configureTheme(builder: MarkwonTheme.Builder) {
+                builder
+                    .linkColor(context.getColor(R.color.link_color))
+                    .isLinkUnderlined(false)
+            }
+        })
         .apply {
             if (imagePlugin != null) {
                 usePlugin(imagePlugin)
+            }
+            if (linkResolver != null) {
+                usePlugin(object : AbstractMarkwonPlugin() {
+                    override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
+                        builder.linkResolver(linkResolver)
+                    }
+                })
             }
         }
         .build()

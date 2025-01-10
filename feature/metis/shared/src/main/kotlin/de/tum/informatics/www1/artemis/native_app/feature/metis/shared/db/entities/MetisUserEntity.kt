@@ -13,5 +13,7 @@ class MetisUserEntity(
     @ColumnInfo(name = "id")
     val id: Long,
     @ColumnInfo(name = "name")
-    val displayName: String
+    val displayName: String,
+    @ColumnInfo(name = "image_url")
+    val imageUrl: String?
 )

@@ -7,24 +7,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -56,11 +48,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalCourseImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 
 private val headerHeight = 80.dp
 
@@ -77,18 +70,17 @@ fun CourseItemGrid(
     val courseItemModifier = Modifier.computeCourseItemModifier(isCompact)
 
     LazyVerticalGrid(
-        modifier = modifier,
+        modifier = modifier.consumeWindowInsets(WindowInsets.navigationBars),
         columns = GridCells.Fixed(columnCount),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(
-            bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
-        )
+        contentPadding = Spacings.calculateEndOfPagePaddingValues()
     ) {
         items(courses, key = { it.course.id ?: 0L }) { course ->
             courseItem(course, courseItemModifier, isCompact)
         }
     }
+
 }
 
 fun Modifier.computeCourseItemModifier(isCompact: Boolean): Modifier {
@@ -107,13 +99,11 @@ fun Modifier.computeCourseItemModifier(isCompact: Boolean): Modifier {
 fun CompactCourseItemHeader(
     modifier: Modifier,
     course: Course,
-    serverUrl: String,
-    authorizationToken: String,
     compactCourseHeaderViewMode: CompactCourseHeaderViewMode,
     onClick: () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val painter = getCourseIconPainter(course, serverUrl, authorizationToken)
+    val painter = getCourseIconPainter(course)
 
     Card(modifier = modifier, onClick = onClick) {
         Column(
@@ -180,14 +170,10 @@ fun CompactCourseItemHeader(
 @Composable
 private fun getCourseIconPainter(
     course: Course,
-    serverUrl: String,
-    authorizationToken: String
 ): Painter {
     return if (course.courseIconPath != null) {
-        LocalCourseImageProvider.current.rememberCourseImagePainter(
-            courseIconPath = course.courseIconPath.orEmpty(),
-            serverUrl = serverUrl,
-            authorizationToken = authorizationToken
+        LocalArtemisImageProvider.current.rememberArtemisAsyncImagePainter(
+            imagePath = course.courseIconPath.orEmpty()
         )
     } else rememberVectorPainter(image = Icons.Default.QuestionMark)
 }
@@ -196,13 +182,11 @@ private fun getCourseIconPainter(
 fun ExpandedCourseItemHeader(
     modifier: Modifier,
     course: Course,
-    serverUrl: String,
-    authorizationToken: String,
     onClick: () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
     rightHeaderContent: @Composable BoxScope.() -> Unit
 ) {
-    val courseIconPainter = getCourseIconPainter(course, serverUrl, authorizationToken)
+    val courseIconPainter = getCourseIconPainter(course)
 
     val courseColor: Color? = remember {
         try {

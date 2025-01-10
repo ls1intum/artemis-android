@@ -8,6 +8,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
@@ -37,6 +38,7 @@ abstract class MetisStorageBaseTest {
     internal val localAnswerPojo = AnswerPostPojo(
         parentPostId = parentClientPostId,
         postId = answerClientPostId,
+        parentAuthorIdCache = AnswerPostPojo.ParentAuthorIdCache(author.id),
         resolvesPost = false,
         basePostingCache = AnswerPostPojo.BasePostingCache(
             serverPostId = 0,
@@ -45,7 +47,8 @@ abstract class MetisStorageBaseTest {
             updatedDate = null,
             content = "Answer post content 0",
             authorRole = UserRole.USER,
-            authorName = author.name!!
+            authorName = author.name!!,
+            authorImageUrl = null
         ),
         reactions = emptyList(),
         serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
@@ -64,10 +67,12 @@ abstract class MetisStorageBaseTest {
         title = null,
         authorName = author.name!!,
         authorRole = UserRole.USER,
+        authorImageUrl = null,
         courseWideContext = null,
         tags = emptyList(),
         answers = emptyList(),
-        reactions = emptyList()
+        reactions = emptyList(),
+        displayPriority = DisplayPriority.NONE
     )
 
     internal val basePost = StandalonePost(basePostPojo, conversation)

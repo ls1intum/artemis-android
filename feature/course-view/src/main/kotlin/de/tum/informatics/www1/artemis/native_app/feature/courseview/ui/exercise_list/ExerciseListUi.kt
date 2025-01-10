@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseListItem
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.GroupedByWeek
@@ -34,7 +34,7 @@ internal fun ExerciseListUi(
         ExerciseListItem(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             exercise = exercise,
             exerciseActions = remember(exercise, actions) { actions.getUnbound(exerciseId = exercise.id ?: 0) },
             onClickExercise = { onClickExercise(exercise.id ?: 0) }

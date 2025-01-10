@@ -6,13 +6,14 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
-import org.gradle.api.artifacts.VersionCatalog
-import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
+import util.libs
 import java.lang.Boolean
+import kotlin.String
+import kotlin.Suppress
 import kotlin.Unit
 import kotlin.apply
 
@@ -56,8 +57,6 @@ object ProductFlavors {
 internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
-    val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
-
     commonExtension.apply {
         compileSdk = libs.findVersion("compileSdk").get().toString().toInt()
         buildToolsVersion = libs.findVersion("buildToolsVersion").get().toString()
@@ -135,6 +134,8 @@ internal fun Project.configureReleaseTypeFlavors(
     }
 }
 
+private const val TUM_ARTEMIS_SERVER_URL = "https://artemis.cit.tum.de"
+
 internal fun Project.configureInstanceSelectionFlavors(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
@@ -154,7 +155,7 @@ internal fun Project.configureInstanceSelectionFlavors(
                 buildConfigField(
                     "String",
                     ProductFlavors.BuildConfigFields.DefaultServerUrl,
-                    "\"\""
+                    "\"$TUM_ARTEMIS_SERVER_URL\""
                 )
             }
 
@@ -170,7 +171,7 @@ internal fun Project.configureInstanceSelectionFlavors(
                 buildConfigField(
                     "String",
                     ProductFlavors.BuildConfigFields.DefaultServerUrl,
-                    "\"https://artemis.cit.tum.de\""
+                    "\"$TUM_ARTEMIS_SERVER_URL\""
                 )
             }
         }

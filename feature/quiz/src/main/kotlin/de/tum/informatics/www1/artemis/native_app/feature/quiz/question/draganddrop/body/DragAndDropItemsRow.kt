@@ -27,8 +27,6 @@ internal sealed interface DragAndDropDragItemsRowType {
 internal fun DragAndDropAvailableDragItemsContainer(
     modifier: Modifier,
     dragItems: List<DragAndDropQuizQuestion.DragItem>,
-    serverUrl: String,
-    authToken: String,
     type: DragAndDropDragItemsRowType
 ) {
     Box(
@@ -49,8 +47,7 @@ internal fun DragAndDropAvailableDragItemsContainer(
                     DragItemUiElement(
                         modifier = Modifier,
                         text = dragItem.text,
-                        pictureFilePath = dragItem.backgroundPictureServerUrl(serverUrl),
-                        authToken = authToken
+                        pictureFilePath = dragItem.pictureFilePath,
                     )
                 }
 

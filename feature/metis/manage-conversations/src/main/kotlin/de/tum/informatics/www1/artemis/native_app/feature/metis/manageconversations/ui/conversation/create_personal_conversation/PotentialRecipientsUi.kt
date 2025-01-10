@@ -34,6 +34,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelectionBaseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 
 internal fun testTagForPotentialRecipient(username: String) = "potentialRecipient$username"
 
@@ -114,15 +116,22 @@ private fun PotentialRecipientsList(
     modifier: Modifier,
     recipients: List<User>,
     addRecipient: (User) -> Unit,
-    isQueryTooShort: Boolean,
+    isQueryTooShort: Boolean
 ) {
     if (recipients.isNotEmpty()) {
-        LazyColumn(modifier = modifier) {
+        LazyColumn(
+            modifier = modifier
+        ) {
             items(recipients) { user ->
                 ListItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag(testTagForPotentialRecipient(user.username.orEmpty())),
+                    leadingContent = {
+                        ProfilePicture(
+                            profilePictureData = ProfilePictureData.fromAccount(user)
+                        )
+                    },
                     headlineContent = {
                         val username = remember(user) { user.humanReadableName }
 

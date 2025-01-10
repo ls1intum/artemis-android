@@ -2,40 +2,32 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.NavType
-import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -46,17 +38,19 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.GroupedByWeek
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.LectureListUi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
+import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedThread
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ConversationFacadeUi
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NavigateToUserConversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NothingOpened
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.OpenedConversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.OpenedThread
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -98,7 +92,7 @@ fun NavGraphBuilder.course(
             generateLinks("courses/{courseId}/exercises") +
             generateLinks("courses/{courseId}/messages?conversationId={conversationId}") +
             generateLinks("courses/{courseId}/messages?username={username}")
-    composable<CourseUiScreen>(
+    animatedComposable<CourseUiScreen>(
         deepLinks = deepLinks
     ) { backStackEntry ->
         val route: CourseUiScreen = backStackEntry.toRoute()
@@ -312,22 +306,14 @@ internal fun CourseUiScreen(
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit
 ) {
-    val topAppBarState = rememberTopAppBarState()
-
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-        topAppBarState
-    )
-
     Scaffold(
-        modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
+        modifier = modifier,
         topBar = {
             CourseTopAppBar(
                 courseDataState = courseDataState,
                 onNavigateBack = onNavigateBack,
-                scrollBehavior = scrollBehavior,
                 selectedTabIndex = selectedTabIndex,
-                changeTab = updateSelectedTabIndex,
-                onReloadCourse = onReloadCourse
+                changeTab = updateSelectedTabIndex
             )
         }
     ) { padding ->
@@ -335,7 +321,7 @@ internal fun CourseUiScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars),
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
             dataState = courseDataState,
             loadingText = stringResource(id = R.string.course_ui_loading_course_loading),
             failureText = stringResource(id = R.string.course_ui_loading_course_failed),
@@ -346,11 +332,9 @@ internal fun CourseUiScreen(
                 targetState = selectedTabIndex,
                 transitionSpec = {
                     if (targetState > initialState) {
-                        slideInHorizontally { width -> width } togetherWith
-                                slideOutHorizontally { width -> -width }
+                        DefaultTransition.navigateForward
                     } else {
-                        slideInHorizontally { width -> -width } togetherWith
-                                slideOutHorizontally { width -> width }
+                        DefaultTransition.navigateBack
                     }.using(
                         SizeTransform(clip = false)
                     )

@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
@@ -20,10 +19,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginMo
 import org.junit.Before
 import org.junit.Rule
 import org.koin.android.ext.koin.androidContext
-import org.koin.compose.LocalKoinApplication
-import org.koin.compose.LocalKoinScope
-import org.koin.core.annotation.KoinInternalApi
-import org.koin.mp.KoinPlatformTools
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 
@@ -47,7 +42,6 @@ abstract class BaseCourseTest : BaseComposeTest() {
         }
     }
 
-    @OptIn(KoinInternalApi::class)
     internal fun setupAndDisplayCourseUi(): CourseViewModel {
         val viewModel = CourseViewModel(
             courseId = course.id!!,
@@ -61,27 +55,21 @@ abstract class BaseCourseTest : BaseComposeTest() {
         )
 
         composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext()
-                    .get().scopeRegistry.rootScope,
-                LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
-            ) {
-                CourseUiScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = viewModel,
-                    courseId = course.id!!,
-                    conversationId = DEFAULT_CONVERSATION_ID,
-                    postId = DEFAULT_POST_ID,
-                    username = "",
-                    onNavigateToExercise = {},
-                    onNavigateToExerciseResultView = {},
-                    onNavigateToTextExerciseParticipation = { _, _ -> },
-                    onParticipateInQuiz = { _, _ -> },
-                    onClickViewQuizResults = { _, _ -> },
-                    onNavigateToLecture = {},
-                    onNavigateBack = {}
-                )
-            }
+            CourseUiScreen(
+                modifier = Modifier.fillMaxSize(),
+                viewModel = viewModel,
+                courseId = course.id!!,
+                conversationId = DEFAULT_CONVERSATION_ID,
+                postId = DEFAULT_POST_ID,
+                username = "",
+                onNavigateToExercise = {},
+                onNavigateToExerciseResultView = {},
+                onNavigateToTextExerciseParticipation = { _, _ -> },
+                onParticipateInQuiz = { _, _ -> },
+                onClickViewQuizResults = { _, _ -> },
+                onNavigateToLecture = {},
+                onNavigateBack = {}
+            )
         }
 
         return viewModel

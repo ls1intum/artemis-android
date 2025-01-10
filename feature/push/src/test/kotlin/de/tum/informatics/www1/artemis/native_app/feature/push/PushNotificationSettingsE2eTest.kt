@@ -1,14 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
@@ -26,10 +25,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.N
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.network.impl.NotificationSettingsServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsUi
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.push.ui.TEST_TAG_PUSH_CHECK_BOX
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.model.group
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.testTagForSetting
 import de.tum.informatics.www1.artemis.native_app.feature.push.ui.testTagForSettingCategory
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.testTagForSwitch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -41,11 +40,7 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.koin.android.ext.koin.androidContext
-import org.koin.compose.LocalKoinApplication
-import org.koin.compose.LocalKoinScope
-import org.koin.core.annotation.KoinInternalApi
 import org.koin.dsl.module
-import org.koin.mp.KoinPlatformTools
 import org.koin.test.KoinTestRule
 import org.koin.test.get
 import org.robolectric.RobolectricTestRunner
@@ -140,15 +135,9 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
 
         Logger.info("Selected setting for switch=$setting")
 
-        // Click on push checkbox of setting
-        composeTestRule
-            .onNode(
-                hasAnyAncestor(hasTestTag(testTagForSettingCategory(category.categoryId)))
-                        and hasAnyAncestor(hasTestTag(testTagForSetting(setting.settingId)))
-                        and hasAnyAncestor(hasTestTag(TEST_TAG_PUSH_CHECK_BOX))
-                        and hasClickAction()
-            )
-            .performScrollTo()
+        // Click on push switch of setting
+        composeTestRule.onNodeWithTag(testTagForSwitch(setting.settingId))
+            .assertHasClickAction()
             .performClick()
 
         val saveSettingsResult = runBlocking {
@@ -203,7 +192,6 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
         }
     }
 
-    @OptIn(KoinInternalApi::class)
     private fun setupUiAndViewModel(): PushNotificationSettingsViewModel {
         val viewModel = PushNotificationSettingsViewModel(
             notificationSettingsService = get(),
@@ -215,16 +203,10 @@ class PushNotificationSettingsE2eTest : BaseComposeTest() {
         )
 
         composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalKoinScope provides KoinPlatformTools.defaultContext()
-                    .get().scopeRegistry.rootScope,
-                LocalKoinApplication provides KoinPlatformTools.defaultContext().get()
-            ) {
-                PushNotificationSettingsUi(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = viewModel
-                )
-            }
+            PushNotificationSettingsUi(
+                modifier = Modifier.fillMaxSize(),
+                viewModel = viewModel
+            )
         }
 
         return viewModel

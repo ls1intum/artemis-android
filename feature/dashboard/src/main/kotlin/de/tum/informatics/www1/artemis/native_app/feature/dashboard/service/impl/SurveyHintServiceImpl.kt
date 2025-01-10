@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 
 private val SURVEY_START_DATE = LocalDate.of(2024, 11, 28)
-private val SURVEY_END_DATE = LocalDate.of(2024, 12, 16)
+private val SURVEY_END_DATE = LocalDate.of(2025, 1, 31)
 
 class SurveyHintServiceImpl(
     private val context: Context,

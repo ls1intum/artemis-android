@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <plurals name="communication_standalone_post_view_replies_button">
-        <item quantity="one">Show 1 reply</item>
-        <item quantity="other">Show %1$d replies</item>
+        <item quantity="one">1 reply</item>
+        <item quantity="other">%1$d replies</item>
     </plurals>
 
     <string name="communication_create_post_button">Create post</string>
@@ -48,5 +48,5 @@
 
     <string name="standalone_post_loading">Loading post…</string>
     <string name="standalone_post_failure">Something went wrong while loading the post.</string>
-    <string name="standalone_post_try_again">Try gain</string>
+    <string name="standalone_post_try_again">Try again</string>
 </resources>

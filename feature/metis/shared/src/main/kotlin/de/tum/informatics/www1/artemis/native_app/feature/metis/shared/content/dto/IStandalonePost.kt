@@ -7,6 +7,7 @@ interface IStandalonePost : IBasePost {
     val answers: List<IAnswerPost>?
     val tags: List<String>?
     val resolved: Boolean?
+    val displayPriority: DisplayPriority?
 
     /**
      * A unique key which can be used to reference this post uniquely
@@ -14,4 +15,7 @@ interface IStandalonePost : IBasePost {
     val key: Any
 
     val standalonePostId: StandalonePostId?
+
+    val orderedAnswerPostings: List<IAnswerPost>
+        get() = answers?.sortedBy { it.creationDate } ?: emptyList()
 }

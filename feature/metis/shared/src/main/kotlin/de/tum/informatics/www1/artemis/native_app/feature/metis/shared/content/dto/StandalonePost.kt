@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -25,21 +24,25 @@ data class StandalonePost(
 //    val plagiarismCase: PlagiarismCase? = null,
     val conversation: Conversation? = null,
     val courseWideContext: CourseWideContext? = null,
-    val displayPriority: DisplayPriority? = null,
+    override val displayPriority: DisplayPriority? = null,
     override val resolved: Boolean? = null
 ) : BasePost(), IStandalonePost {
 
-    constructor(post: PostPojo, conversation: Conversation) : this(
+    constructor(post: IStandalonePost, conversation: Conversation) : this(
         id = post.serverPostId,
-        author = User(
-            id = post.authorId
-        ),
+        author = post.authorId?.let {
+            User(
+                id = it,
+                imageUrl = post.authorImageUrl
+            )
+        },
         authorRole = post.authorRole,
-        content = post.content,
+        content = post.content.orEmpty(),
         conversation = conversation,
-        creationDate = post.creationDate,
+        creationDate = post.creationDate ?: Clock.System.now(),
         title = post.title,
-        resolved = post.resolved
+        resolved = post.resolved,
+        displayPriority = post.displayPriority
     )
 
     @Transient

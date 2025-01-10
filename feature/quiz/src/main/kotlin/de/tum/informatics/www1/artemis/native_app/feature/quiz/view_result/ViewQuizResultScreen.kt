@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.join
@@ -25,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExerci
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
@@ -43,7 +43,7 @@ fun NavController.navigateToQuizResult(
 }
 
 fun NavGraphBuilder.quizResults(onRequestLeaveQuizResults: () -> Unit) {
-    composable<ViewQuizResultScreen> { backStackEntry ->
+    animatedComposable<ViewQuizResultScreen> { backStackEntry ->
         val route: ViewQuizResultScreen = backStackEntry.toRoute()
 
         ViewQuizResultScreen(
@@ -69,9 +69,6 @@ internal fun ViewQuizResultScreen(
     val result by viewModel.result.collectAsState()
     val quizQuestions by viewModel.quizQuestionsWithData.collectAsState()
     val maxPoints by viewModel.maxPoints.collectAsState()
-
-    val serverUrl by viewModel.serverUrl.collectAsState()
-    val authToken by viewModel.authToken.collectAsState()
 
     Scaffold(
         modifier = modifier,
@@ -118,8 +115,6 @@ internal fun ViewQuizResultScreen(
                 modifier = Modifier.fillMaxSize(),
                 quizQuestions = data.quizExercise.quizQuestions,
                 quizQuestionsWithData = data.quizQuestions,
-                serverUrl = serverUrl,
-                authToken = authToken,
                 achievedPoints = data.submission.scoreInPoints ?: 0.0,
                 maxPoints = data.maxPoints,
                 quizTitle = data.quizExercise.title.orEmpty()

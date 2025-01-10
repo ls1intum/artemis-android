@@ -25,7 +25,7 @@ import org.robolectric.RobolectricTestRunner
 @Ignore("There is an open issue about onClick events not working for the ModalBottomSheetLayout with" +
         "the robolectric test runner. Enable this test again as soon as the following issue is resolved:" +
         "https://github.com/robolectric/robolectric/issues/9595")
-class ConversationAnswerMessagesUITest : BaseChatUItest() {
+class ConversationAnswerMessagesUITest : BaseChatUITest() {
 
     private fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
 
@@ -35,10 +35,13 @@ class ConversationAnswerMessagesUITest : BaseChatUItest() {
     fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the first answer post`() {
         var resolvedPost: IBasePost? = null
 
-        setupThreadUi(post) { post ->
-            resolvedPost = post
-            CompletableDeferred()
-        }
+        setupThreadUi(
+            post = post,
+            onResolvePost = { post ->
+                resolvedPost = post
+                CompletableDeferred()
+            }
+        )
 
         composeTestRule.onNodeWithText(answers[0].content!!, useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.OnLongClick)
@@ -54,10 +57,13 @@ class ConversationAnswerMessagesUITest : BaseChatUItest() {
     fun `test GIVEN post is not resolved WHEN resolving the post THEN the post is resolved with the third answer post`() {
         var resolvedPost: IBasePost? = null
 
-        setupThreadUi(post) { post ->
-            resolvedPost = post
-            CompletableDeferred()
-        }
+        setupThreadUi(
+            post = post,
+            onResolvePost = { post ->
+                resolvedPost = post
+                CompletableDeferred()
+            }
+        )
 
         composeTestRule.onNodeWithText(answers[2].content!!, useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.OnLongClick)
@@ -81,10 +87,13 @@ class ConversationAnswerMessagesUITest : BaseChatUItest() {
 
         var unresolvedPost: IBasePost? = null
 
-        setupThreadUi(resolvedPost) { post ->
-            unresolvedPost = post
-            CompletableDeferred()
-        }
+        setupThreadUi(
+            post = resolvedPost,
+            onResolvePost = { post ->
+                unresolvedPost = post
+                CompletableDeferred()
+            },
+        )
 
         composeTestRule.onNodeWithText(answers[resolvingIndex].content!!, useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.OnLongClick)
@@ -98,7 +107,7 @@ class ConversationAnswerMessagesUITest : BaseChatUItest() {
 
     @Test
     fun `test GIVEN the post is not resolved and no answer post is resolving THEN the post is shown as not resolved and no answer post is shown as resolving`() {
-        setupThreadUi(post) { CompletableDeferred() }
+        setupThreadUi(post)
 
         composeTestRule.onNodeWithText(post.content).assertExists()
         for (answer in answers) {
@@ -121,7 +130,7 @@ class ConversationAnswerMessagesUITest : BaseChatUItest() {
             answers = modifiedAnswers
         )
 
-        setupThreadUi(resolvedPost) { CompletableDeferred() }
+        setupThreadUi(resolvedPost)
 
         val resolvesAssertion = hasAnyChild(hasText(context.getString(R.string.post_resolves)))
 

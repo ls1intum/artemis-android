@@ -4,15 +4,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ListItem
@@ -40,8 +41,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.ChannelIcons
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ChannelChatIcon
 import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -107,7 +108,7 @@ internal fun BrowseChannelsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars),
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
             dataState = channelsDataState,
             loadingText = stringResource(id = R.string.browse_channel_list_loading),
             failureText = stringResource(id = R.string.browse_channel_list_failure),
@@ -117,7 +118,7 @@ internal fun BrowseChannelsScreen(
             if (channels.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = Spacings.FabContentBottomPadding)
+                    contentPadding = PaddingValues(bottom = Spacings.EndOfScrollablePageSpacing)
                 ) {
                     items(channels) { channelChat ->
                         ChannelChatItem(
@@ -157,7 +158,7 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
     ListItem(
         modifier = Modifier.fillMaxWidth(),
         leadingContent = {
-            ChannelIcons(channelChat)
+            ChannelChatIcon(channelChat = channelChat)
         },
         headlineContent = { Text(channelChat.name) },
         supportingContent = {
@@ -171,7 +172,7 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
                             .padding(end = 8.dp)
                             .background(
                                 MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(4.dp)
+                                shape = MaterialTheme.shapes.extraSmall
                             )
                             .padding(horizontal = 8.dp, vertical = 4.dp),
                         color = MaterialTheme.colorScheme.onPrimary,
@@ -199,7 +200,7 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
-                    shape = RoundedCornerShape(4.dp),
+                    shape = MaterialTheme.shapes.extraSmall,
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
 
                 ) {

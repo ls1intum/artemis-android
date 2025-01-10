@@ -3,10 +3,10 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationConfiguration
+import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductFacadeUi
-import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 /**
@@ -27,7 +27,7 @@ fun ConversationFacadeUi(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = koinViewModel { parametersOf(courseId) },
                 courseId = courseId,
-                initialConfiguration = initialConfiguration,
+                initialConfiguration = initialConfiguration
             )
         }
     )
