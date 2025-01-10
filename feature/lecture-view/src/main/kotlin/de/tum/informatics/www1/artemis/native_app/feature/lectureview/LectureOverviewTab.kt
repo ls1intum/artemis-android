@@ -2,12 +2,11 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -73,9 +72,8 @@ internal fun LectureOverviewTab(
     // Only render the bottom sheet when selectedLectureUnit is not null
     if (selectedLectureUnit != null) {
         ModalBottomSheet(
-            modifier = Modifier.padding(
-                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-            ),
+            modifier = Modifier.statusBarsPadding(),
+            contentWindowInsets = { WindowInsets.statusBars },
             sheetState = bottomSheetState,
             onDismissRequest = { selectedLectureUnit = null }
         ) {

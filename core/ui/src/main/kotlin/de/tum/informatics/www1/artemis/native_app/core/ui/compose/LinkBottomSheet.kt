@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ModalBottomSheet
@@ -43,7 +44,7 @@ fun LinkBottomSheet(
     val webViewState = getWebViewState(link)
 
     ModalBottomSheet(
-        modifier = modifier,
+        modifier = modifier.statusBarsPadding(),
         contentWindowInsets = { WindowInsets.statusBars },
         onDismissRequest = onDismissRequest
     ) {
