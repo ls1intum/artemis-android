@@ -10,8 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
-import de.tum.informatics.www1.artemis.native_app.core.data.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.test.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProviderStub

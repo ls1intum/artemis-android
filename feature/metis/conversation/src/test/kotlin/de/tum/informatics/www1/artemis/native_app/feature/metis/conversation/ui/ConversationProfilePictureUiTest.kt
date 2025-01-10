@@ -4,8 +4,8 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
-import de.tum.informatics.www1.artemis.native_app.core.data.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.test.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
