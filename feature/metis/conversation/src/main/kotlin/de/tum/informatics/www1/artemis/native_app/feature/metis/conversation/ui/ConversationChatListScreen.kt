@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
@@ -116,13 +119,10 @@ internal fun ConversationChatListScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .imePadding()
-                        .padding(
-                            bottom = WindowInsets.systemBars
-                                .asPaddingValues()
-                                .calculateBottomPadding()
-                        ),
+                        .navigationBarsPadding()
+                        .padding(top = padding.calculateTopPadding())
+                        .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
                     viewModel = viewModel,
-                    listContentPadding = PaddingValues(top = padding.calculateTopPadding()),
                     onClickViewPost = onClickViewPost,
                     isReplyEnabled = isReplyEnabled,
                     state = chatListState,

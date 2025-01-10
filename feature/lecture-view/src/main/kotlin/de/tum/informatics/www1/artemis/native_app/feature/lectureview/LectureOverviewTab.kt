@@ -2,19 +2,18 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -38,6 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_uni
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitUnknown
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitAttachmentUi
@@ -54,7 +54,7 @@ internal fun getLectureUnitTestTag(lectureUnitId: Long) = "LectureUnit$lectureUn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun OverviewTab(
+internal fun LectureOverviewTab(
     modifier: Modifier,
     description: String?,
     lectureUnits: List<LectureUnitData>,
@@ -72,9 +72,8 @@ internal fun OverviewTab(
     // Only render the bottom sheet when selectedLectureUnit is not null
     if (selectedLectureUnit != null) {
         ModalBottomSheet(
-            modifier = Modifier.padding(
-                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
-            ),
+            modifier = Modifier.statusBarsPadding(),
+            contentWindowInsets = { WindowInsets.statusBars },
             sheetState = bottomSheetState,
             onDismissRequest = { selectedLectureUnit = null }
         ) {
@@ -93,9 +92,7 @@ internal fun OverviewTab(
         modifier = modifier.testTag(TEST_TAG_OVERVIEW_LIST),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         state = state,
-        contentPadding = PaddingValues(
-            bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
-        )
+        contentPadding = Spacings.calculateEndOfPagePaddingValues()
     ) {
         if (description != null) {
             item {
@@ -174,7 +171,7 @@ private fun LazyListScope.lectureUnitSection(
 
         if (index < lectureUnits.size - 1) {
             item {
-                Divider()
+                HorizontalDivider()
             }
         }
     }
