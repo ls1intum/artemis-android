@@ -33,7 +33,7 @@ import kotlinx.coroutines.Job
 import org.koin.androidx.compose.koinViewModel
 
 /**
- * Display the notification settings screen.
+ * Displays the notification settings screen.
  * Contains PushNotificationSettingsUi and is used in the settings screen and after login.
  */
 @Composable
