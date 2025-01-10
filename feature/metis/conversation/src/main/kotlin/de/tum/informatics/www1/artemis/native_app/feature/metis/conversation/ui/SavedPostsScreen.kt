@@ -11,10 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -30,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -115,8 +113,9 @@ internal fun SavedPostsScreen (
             modifier = modifier.padding(paddingValues)
         ) {
             if (status == SavedPostStatus.ARCHIVED || status == SavedPostStatus.COMPLETED) {
-                RemovalNotice(
-                    Modifier.padding(bottom = 8.dp)
+                InfoMessageCard(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    infoText = stringResource(R.string.saved_posts_removal_notice)
                 )
             }
 
@@ -193,6 +192,7 @@ private fun SavedPostsList(
             }
 
             item {
+                // TODO: Use new merged Spacings.EndOfScrollablePage
                 // Add a spacer at the end to indicate the end of the list
                 Spacer(Modifier.height(32.dp))
             }
@@ -223,27 +223,6 @@ private fun TopBarTitle(
             text = text,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
-private fun RemovalNotice(
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Icon(
-            imageVector = Icons.Default.Info,
-            contentDescription = null,
-        )
-        Text(
-            text = stringResource(R.string.saved_posts_removal_notice),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary
         )
     }
 }

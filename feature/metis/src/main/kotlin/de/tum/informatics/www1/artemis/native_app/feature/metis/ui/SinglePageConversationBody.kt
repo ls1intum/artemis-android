@@ -147,6 +147,7 @@ internal fun SinglePageConversationBody(
 
             is OpenedSavedPosts -> {
                 // TODO: This should potentially be moved into the ConversationScreen. That allows us to still display the ConvOverview on the left.
+                //      https://github.com/ls1intum/artemis-android/issues/288
                 SavedPostsScreen(
                     modifier = modifier,
                     courseId = courseId,
