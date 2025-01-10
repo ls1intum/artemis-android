@@ -66,15 +66,15 @@ internal fun PostWithBottomSheet(
     }
 
     val applyPaddingToModifier: @Composable (modifier: Modifier, paddingValue: Dp) -> Modifier =
-        { modifier, paddingValue ->
+        { mod, paddingValue ->
             when (joinedItemType) {
-                PostItemViewJoinedType.HEADER -> modifier.padding(top = paddingValue, bottom = 0.dp)
-                PostItemViewJoinedType.FOOTER -> modifier.padding(top = 0.dp, bottom = paddingValue)
-                PostItemViewJoinedType.SINGLE -> modifier.padding(
+                PostItemViewJoinedType.HEADER -> mod.padding(top = paddingValue, bottom = 0.dp)
+                PostItemViewJoinedType.FOOTER -> mod.padding(top = 0.dp, bottom = paddingValue)
+                PostItemViewJoinedType.SINGLE -> mod.padding(
                     vertical = paddingValue
                 )
-                PostItemViewJoinedType.JOINED -> modifier.padding(vertical = 0.dp)
-                PostItemViewJoinedType.PARENT -> modifier.padding(0.dp)
+                PostItemViewJoinedType.JOINED -> mod.padding(vertical = 0.dp)
+                PostItemViewJoinedType.PARENT -> mod.padding(0.dp)
             }
         }
 

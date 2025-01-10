@@ -32,7 +32,7 @@ class SavedPostsViewModel(
     val courseId: Long,
     val savedPostStatus: SavedPostStatus,
     private val savedPostService: SavedPostService,
-    private val serverConfigurationService: ServerConfigurationService,
+    serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
