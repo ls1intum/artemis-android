@@ -6,17 +6,29 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
@@ -34,11 +46,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_un
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitOnlineUi
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitTextUi
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitVideoUi
+import kotlinx.coroutines.launch
 
 internal const val TEST_TAG_OVERVIEW_LIST = "overview_list"
 
 internal fun getLectureUnitTestTag(lectureUnitId: Long) = "LectureUnit$lectureUnitId"
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun OverviewTab(
     modifier: Modifier,
@@ -51,6 +65,30 @@ internal fun OverviewTab(
     exerciseActions: BoundExerciseActions,
     state: LazyListState
 ) {
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    var selectedLectureUnit: LectureUnit? by remember { mutableStateOf(null) }
+    val coroutineScope = rememberCoroutineScope()
+
+    // Only render the bottom sheet when selectedLectureUnit is not null
+    if (selectedLectureUnit != null) {
+        ModalBottomSheet(
+            modifier = Modifier.padding(
+                top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
+            ),
+            sheetState = bottomSheetState,
+            onDismissRequest = { selectedLectureUnit = null }
+        ) {
+            LectureUnitBottomSheetContent(
+                modifier = modifier,
+                lectureUnit = selectedLectureUnit!!,
+                onViewExercise = onViewExercise,
+                onRequestViewLink = onRequestViewLink,
+                onRequestOpenAttachment = onRequestOpenAttachment,
+                exerciseActions = exerciseActions
+            )
+        }
+    }
+
     LazyColumn(
         modifier = modifier.testTag(TEST_TAG_OVERVIEW_LIST),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -72,11 +110,13 @@ internal fun OverviewTab(
             lectureUnitSection(
                 modifier = Modifier.fillMaxWidth(),
                 lectureUnits = lectureUnits,
-                onViewExercise = onViewExercise,
                 onMarkAsCompleted = onMarkAsCompleted,
-                onRequestViewLink = onRequestViewLink,
-                onRequestOpenAttachment = onRequestOpenAttachment,
-                exerciseActions = exerciseActions
+                onHeaderClick = { lectureUnit ->
+                    selectedLectureUnit = lectureUnit
+                    coroutineScope.launch {
+                        bottomSheetState.show()
+                    }
+                }
             )
         }
     }
@@ -87,8 +127,12 @@ private fun DescriptionSection(modifier: Modifier, description: String) {
     Column(modifier = modifier) {
         Text(
             text = stringResource(id = R.string.lecture_view_overview_section_description),
-            modifier = Modifier.fillMaxWidth(),
-            style = MaterialTheme.typography.headlineMedium
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Medium
+            )
         )
 
         MarkdownText(
@@ -102,33 +146,29 @@ private fun DescriptionSection(modifier: Modifier, description: String) {
 private fun LazyListScope.lectureUnitSection(
     modifier: Modifier,
     lectureUnits: List<LectureUnitData>,
-    onViewExercise: (exerciseId: Long) -> Unit,
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
-    onRequestViewLink: (String) -> Unit,
-    onRequestOpenAttachment: (Attachment) -> Unit,
-    exerciseActions: BoundExerciseActions
+    onHeaderClick: (LectureUnit) -> Unit
 ) {
     item {
         Text(
             modifier = modifier,
             text = stringResource(id = R.string.lecture_view_overview_section_lecture_units),
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Medium
+            )
         )
     }
 
     lectureUnits.forEachIndexed { index, lectureUnitWithData ->
         item(lectureUnitWithData.lectureUnit.id) {
-            LectureUnitListItem(
+            LectureUnitHeader(
                 modifier = modifier.testTag(getLectureUnitTestTag(lectureUnitWithData.lectureUnit.id)),
                 lectureUnit = lectureUnitWithData.lectureUnit,
-                isUploadingMarkedAsCompleted = lectureUnitWithData.isUploadingChanges,
-                onViewExercise = onViewExercise,
                 onMarkAsCompleted = { isCompleted ->
                     onMarkAsCompleted(lectureUnitWithData.lectureUnit.id, isCompleted)
                 },
-                onRequestViewLink = onRequestViewLink,
-                onRequestOpenAttachment = onRequestOpenAttachment,
-                exerciseActions = exerciseActions
+                isUploadingMarkedAsCompleted = lectureUnitWithData.isUploadingChanges,
+                onHeaderClick = { onHeaderClick(lectureUnitWithData.lectureUnit) }
             )
         }
 
@@ -141,26 +181,20 @@ private fun LazyListScope.lectureUnitSection(
 }
 
 @Composable
-private fun LectureUnitListItem(
+private fun LectureUnitBottomSheetContent(
     modifier: Modifier,
     lectureUnit: LectureUnit,
-    isUploadingMarkedAsCompleted: Boolean,
-    onMarkAsCompleted: (isCompleted: Boolean) -> Unit,
     onViewExercise: (exerciseId: Long) -> Unit,
     onRequestViewLink: (String) -> Unit,
     onRequestOpenAttachment: (Attachment) -> Unit,
     exerciseActions: BoundExerciseActions
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        val childModifier = Modifier.fillMaxWidth()
-
-        LectureUnitHeader(
-            modifier = childModifier,
-            lectureUnit = lectureUnit,
-            onMarkAsCompleted = onMarkAsCompleted,
-            isUploadingMarkedAsCompleted = isUploadingMarkedAsCompleted
-        )
-
+    val childModifier = Modifier.fillMaxWidth()
+    Column(
+        modifier = modifier
+            .padding(8.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
         when (lectureUnit) {
             is LectureUnitAttachment -> {
                 LectureUnitAttachmentUi(
@@ -201,6 +235,7 @@ private fun LectureUnitListItem(
             }
 
             is LectureUnitUnknown -> {}
+
             is LectureUnitVideo -> {
                 LectureUnitVideoUi(
                     modifier = childModifier,

@@ -175,7 +175,7 @@ internal fun LectureScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = lectureTitle ?: "",
+                            text = lectureTitle.orEmpty(),
                             modifier = Modifier.placeholder(lectureTitle == null),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis

@@ -381,17 +381,17 @@ private fun ConversationListItem(
             ) {
                 Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null)
             }
-        }
 
-        ConversationListItemDropdownMenu(
-            modifier = Modifier.align(Alignment.TopEnd),
-            isContextDialogShown = isContextDialogShown,
-            onDismissRequest = onDismissRequest,
-            conversation = conversation,
-            onToggleMarkAsFavourite = onToggleMarkAsFavourite,
-            onToggleHidden = onToggleHidden,
-            onToggleMuted = onToggleMuted
-        )
+            ConversationListItemDropdownMenu(
+                modifier = Modifier.align(Alignment.TopEnd),
+                isContextDialogShown = isContextDialogShown,
+                onDismissRequest = onDismissRequest,
+                conversation = conversation,
+                onToggleMarkAsFavourite = onToggleMarkAsFavourite,
+                onToggleHidden = onToggleHidden,
+                onToggleMuted = onToggleMuted
+            )
+        }
     }
 }
 

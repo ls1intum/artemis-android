@@ -31,20 +31,24 @@ internal fun CourseTopAppBar(
     changeTab: (Int) -> Unit,
     onNavigateBack: () -> Unit
 ) {
+    val courseTitle = courseDataState.bind<String?> { it.title }.orElse(null)
+
     Column {
         TopAppBar(
             title = {
                 Text(
                     modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
-                    text = courseDataState.bind { it.title }
-                        .orElse(""),
+                    text = courseTitle.orEmpty(),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             },
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
-                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null
+                    )
                 }
             }
         )
