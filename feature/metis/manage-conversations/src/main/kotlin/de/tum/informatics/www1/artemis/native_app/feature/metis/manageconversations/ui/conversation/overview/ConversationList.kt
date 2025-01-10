@@ -552,56 +552,6 @@ private fun getConversationTitle(
 
         else -> conversation.humanReadableName
     }
-
-    Box(modifier = modifier.padding(horizontal = 16.dp)) {
-        ListItem(
-            modifier = Modifier
-                .clickable(onClick = onNavigateToConversation)
-                .padding(start = 8.dp)
-                .height(48.dp),
-            leadingContent = {
-                ConversationIcon(
-                    conversation = conversation,
-                    clientId = clientId,
-                    hasUnreadMessages = unreadMessagesCount > 0
-                )
-            },
-            headlineContent = {
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(
-                        text = displayName,
-                        maxLines = 1,
-                        color = headlineColor,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
-                        )
-                    )
-                }
-            },
-            trailingContent = {
-                UnreadMessages(unreadMessagesCount = unreadMessagesCount)
-            }
-        )
-
-        Box(modifier = Modifier.align(Alignment.CenterEnd)) {
-            IconButton(
-                modifier = Modifier.testTag(tagForConversationOptions(itemBaseTag)),
-                onClick = { isContextDialogShown = true }
-            ) {
-                Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null)
-            }
-
-            ConversationListItemDropdownMenu(
-                modifier = Modifier.align(Alignment.TopEnd),
-                isContextDialogShown = isContextDialogShown,
-                onDismissRequest = onDismissRequest,
-                conversation = conversation,
-                onToggleMarkAsFavourite = onToggleMarkAsFavourite,
-                onToggleHidden = onToggleHidden,
-                onToggleMuted = onToggleMuted
-            )
-        }
-    }
 }
 
 @Composable
