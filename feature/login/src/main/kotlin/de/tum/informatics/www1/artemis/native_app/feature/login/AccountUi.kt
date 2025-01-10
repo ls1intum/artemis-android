@@ -72,6 +72,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.register.Registe
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNotificationStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsScreen
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -172,8 +173,9 @@ fun NavGraphBuilder.loginScreen(
                 }
 
                 LoginScreenContent.NOTIFICATION_SETTINGS -> {
-                    NotificationSettingsUi(
+                    PushNotificationSettingsScreen(
                         modifier = Modifier.fillMaxSize(),
+                        isInitialNotificationSettingsScreen = true,
                         onDone = {
                             scope.launch {
                                 serverNotificationStorageService.setHasDisplayed(
