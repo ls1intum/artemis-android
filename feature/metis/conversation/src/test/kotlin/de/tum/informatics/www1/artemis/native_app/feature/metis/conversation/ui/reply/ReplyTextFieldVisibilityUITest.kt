@@ -18,7 +18,7 @@ class ReplyTextFieldVisibilityUITest : BaseChatUITest() {
 
     @Test
     fun `test GIVEN the thread view is shown containing one post and three answer posts WHEN the markdown text field is clicked THEN the keyboard is shown below the markdown text field`() {
-        setupThreadUi(posts[0], { CompletableDeferred() }, { CompletableDeferred() })
+        setupThreadUi(posts[0])
         runTest()
     }
 

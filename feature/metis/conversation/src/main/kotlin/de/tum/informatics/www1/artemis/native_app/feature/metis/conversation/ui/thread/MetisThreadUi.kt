@@ -52,6 +52,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -63,7 +64,7 @@ import kotlinx.coroutines.Deferred
 import org.koin.compose.koinInject
 
 internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
-internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
+internal fun testTagForAnswerPost(answerPostId: String?) = "answerPost$answerPostId"
 
 /**
  * Displays a single post with its replies.
@@ -73,7 +74,7 @@ internal fun MetisThreadUi(
     modifier: Modifier,
     viewModel: ConversationViewModel
 ) {
-    val postDataState: DataState<PostPojo> by viewModel.threadUseCase.post.collectAsState()
+    val postDataState: DataState<IStandalonePost> by viewModel.threadUseCase.post.collectAsState()
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
 
     val serverUrl by viewModel.serverUrl.collectAsState()
@@ -153,7 +154,7 @@ internal fun MetisThreadUi(
     modifier: Modifier,
     courseId: Long,
     clientId: Long,
-    postDataState: DataState<PostPojo>,
+    postDataState: DataState<IStandalonePost>,
     conversationDataState: DataState<Conversation>,
     postActionFlags: PostActionFlags,
     serverUrl: String,
@@ -251,7 +252,7 @@ internal fun MetisThreadUi(
 private fun PostAndRepliesList(
     modifier: Modifier,
     state: LazyListState,
-    post: PostPojo,
+    post: IStandalonePost,
     postActionFlags: PostActionFlags,
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
@@ -323,7 +324,7 @@ private fun PostAndRepliesList(
 
         itemsIndexed(
             post.orderedAnswerPostings,
-            key = { _, post -> post.postId }) { index, answerPost ->
+            key = { index, post -> post.clientPostId ?: index }) { index, answerPost ->
             val postActions = rememberPostActions(answerPost)
 
             PostWithBottomSheet(
