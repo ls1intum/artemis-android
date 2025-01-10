@@ -402,7 +402,7 @@ internal open class ConversationViewModel(
      * It updates the post accordingly.
      */
     fun toggleResolvePost(
-        parentPost: PostPojo,
+        parentPost: IStandalonePost,
         post: AnswerPostPojo
     ): Deferred<MetisModificationFailure?> {
         return viewModelScope.async(coroutineContext) {
@@ -515,7 +515,7 @@ internal open class ConversationViewModel(
     }
 
     fun editAnswerPost(
-        parentPost: PostPojo,
+        parentPost: IStandalonePost,
         post: AnswerPostPojo,
         newText: String
     ): Deferred<MetisModificationFailure?> {

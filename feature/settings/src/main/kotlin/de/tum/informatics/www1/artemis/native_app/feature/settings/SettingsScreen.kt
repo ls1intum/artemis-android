@@ -216,12 +216,12 @@ private fun SettingsScreen(
                         }
                     }
                 )
-            }
 
-            NotificationSection(
-                modifier = Modifier.fillMaxWidth(),
-                onOpenNotificationSettings = onRequestOpenNotificationSettings
-            )
+                NotificationSection(
+                    modifier = Modifier.fillMaxWidth(),
+                    onOpenNotificationSettings = onRequestOpenNotificationSettings
+                )
+            }
 
             AboutSection(
                 modifier = Modifier.fillMaxWidth(),

@@ -303,7 +303,7 @@ fun BottomSheetActionButton(
 }
 
 @Composable
-private fun EmojiDialog(
+fun EmojiDialog(
     onDismissRequest: () -> Unit,
     onSelectEmoji: (emojiId: String) -> Unit
 ) {

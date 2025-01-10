@@ -92,7 +92,7 @@ class ConversationAnswerMessagesUITest : BaseChatUITest() {
             onResolvePost = { post ->
                 unresolvedPost = post
                 CompletableDeferred()
-            }
+            },
         )
 
         composeTestRule.onNodeWithText(answers[resolvingIndex].content!!, useUnmergedTree = true)

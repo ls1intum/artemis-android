@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,6 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.determinePostItemViewJoinedType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.rememberPostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.shouldDisplayHeader
@@ -174,6 +174,7 @@ fun MetisChatList(
             MetisPostListHandler(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
                     .weight(1f),
                 serverUrl = serverUrl,
                 courseId = courseId,
@@ -254,7 +255,6 @@ private fun ChatList(
 ) {
     LazyColumn(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
         contentPadding = listContentPadding,
         state = state,
         reverseLayout = true
@@ -324,6 +324,18 @@ private fun ChatList(
                                 }
                             }
                         ),
+                        joinedItemType = determinePostItemViewJoinedType(
+                                index = index,
+                                post = post,
+                                postCount = posts.itemCount,
+                                order = DisplayPostOrder.REVERSED,
+                                getPost = { getPostIndex ->
+                                    when (val entry = posts.peek(getPostIndex)) {
+                                        is ChatListItem.PostChatListItem -> entry.post
+                                        else -> null
+                                    }
+                                }
+                            ),
                         onClick = {
                             val standalonePostId = post?.standalonePostId
 
@@ -406,13 +418,10 @@ private fun DateDivider(modifier: Modifier, date: LocalDate) {
         )
     }
 
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = modifier.padding(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        HorizontalDivider(modifier = Modifier.weight(1f))
-
         Text(
             text = dateAsString,
             style = MaterialTheme.typography.bodyMedium,

@@ -32,6 +32,7 @@ import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.currentUserPoints
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
@@ -39,7 +40,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCateg
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseInfoChip
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseInfoChipTextHorizontalPadding
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePointsDecimalFormat
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import kotlinx.datetime.Instant
 

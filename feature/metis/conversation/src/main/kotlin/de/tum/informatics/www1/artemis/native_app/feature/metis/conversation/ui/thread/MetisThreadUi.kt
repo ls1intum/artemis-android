@@ -39,8 +39,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisPostListHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.testTagForPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewJoinedType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostItemViewType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.PostWithBottomSheet
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.determinePostItemViewJoinedType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionBar
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
@@ -51,6 +53,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -62,7 +65,7 @@ import kotlinx.coroutines.Deferred
 import org.koin.compose.koinInject
 
 internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
-internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
+internal fun testTagForAnswerPost(answerPostId: String?) = "answerPost$answerPostId"
 
 /**
  * Displays a single post with its replies.
@@ -73,7 +76,7 @@ internal fun MetisThreadUi(
     listContentPadding: PaddingValues,
     viewModel: ConversationViewModel
 ) {
-    val postDataState: DataState<PostPojo> by viewModel.threadUseCase.post.collectAsState()
+    val postDataState: DataState<IStandalonePost> by viewModel.threadUseCase.post.collectAsState()
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
 
     val serverUrl by viewModel.serverUrl.collectAsState()
@@ -161,7 +164,7 @@ internal fun MetisThreadUi(
     modifier: Modifier,
     courseId: Long,
     clientId: Long,
-    postDataState: DataState<PostPojo>,
+    postDataState: DataState<IStandalonePost>,
     conversationDataState: DataState<Conversation>,
     postActionFlags: PostActionFlags,
     listContentPadding: PaddingValues,
@@ -264,7 +267,7 @@ internal fun MetisThreadUi(
 private fun PostAndRepliesList(
     modifier: Modifier,
     state: LazyListState,
-    post: PostPojo,
+    post: IStandalonePost,
     postActionFlags: PostActionFlags,
     listContentPadding: PaddingValues,
     clientId: Long,
@@ -306,7 +309,6 @@ private fun PostAndRepliesList(
     LazyColumn(
         modifier = modifier,
         contentPadding = listContentPadding,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
         state = state
     ) {
         item {
@@ -318,12 +320,12 @@ private fun PostAndRepliesList(
             ) {
                 PostWithBottomSheet(
                     modifier = Modifier
-                        .padding(top = 8.dp)
                         .testTag(testTagForPost(post.standalonePostId)),
                     post = post,
                     postItemViewType = PostItemViewType.ThreadContextPostItem,
                     postActions = postActions,
                     displayHeader = true,
+                    joinedItemType = PostItemViewJoinedType.PARENT,
                     clientId = clientId,
                     onClick = {}
                 )
@@ -341,7 +343,7 @@ private fun PostAndRepliesList(
 
         itemsIndexed(
             post.orderedAnswerPostings,
-            key = { _, post -> post.postId }) { index, answerPost ->
+            key = { index, post -> post.clientPostId ?: index }) { index, answerPost ->
             val postActions = rememberPostActions(answerPost)
 
             PostWithBottomSheet(
@@ -353,6 +355,13 @@ private fun PostAndRepliesList(
                 postItemViewType = PostItemViewType.ThreadAnswerItem,
                 clientId = clientId,
                 displayHeader = shouldDisplayHeader(
+                    index = index,
+                    post = answerPost,
+                    postCount = post.orderedAnswerPostings.size,
+                    order = DisplayPostOrder.REGULAR,
+                    getPost = post.orderedAnswerPostings::get
+                ),
+                joinedItemType = determinePostItemViewJoinedType(
                     index = index,
                     post = answerPost,
                     postCount = post.orderedAnswerPostings.size,

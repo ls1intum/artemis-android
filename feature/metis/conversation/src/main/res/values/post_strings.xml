@@ -13,7 +13,7 @@
     <string name="post_is_resolved">Resolved</string>
     <string name="post_is_pinned">Pinned</string>
 
-    <string name="post_edited_hint">(edited)</string>
+    <string name="post_edited_hint">Edited (%1$s)</string>
 
     <string name="post_replies_count">%d Replies</string>
     <plurals name="post_replies_count">
@@ -22,4 +22,8 @@
     </plurals>
 
     <string name="post_sending_failed">Sending post failed. Click to try again.</string>
+
+    <string name="post_instructor">Instructor</string>
+    <string name="post_student">Student</string>
+    <string name="post_tutor">Tutor</string>
 </resources>

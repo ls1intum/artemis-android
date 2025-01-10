@@ -5,6 +5,7 @@ import androidx.room.Ignore
 import androidx.room.Relation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
@@ -70,7 +71,7 @@ data class PostPojo(
     override val key: Any = clientPostId
 
     @Ignore
-    val orderedAnswerPostings = answers.sortedBy { it.creationDate }
+    override val orderedAnswerPostings: List<IAnswerPost> = super.orderedAnswerPostings
 
     @Ignore
     override val standalonePostId: StandalonePostId = StandalonePostId.ClientSideId(clientPostId)

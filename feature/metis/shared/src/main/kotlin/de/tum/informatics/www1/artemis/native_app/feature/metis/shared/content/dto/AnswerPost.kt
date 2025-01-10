@@ -5,6 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.A
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class AnswerPost(
@@ -20,6 +21,9 @@ data class AnswerPost(
     override val isSaved: Boolean = false,
     val post: StandalonePost? = null
 ) : BasePost(), IAnswerPost {
+
+    @Transient
+    override val parentAuthorId: Long? = post?.authorId
 
     constructor(answerPostDb: AnswerPostPojo, post: StandalonePost) : this(
         id = answerPostDb.serverPostId,

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 
 data class PostActions(
@@ -55,10 +56,11 @@ fun rememberPostActions(
         }
 
         val doesPostExistOnServer = post.serverPostId != null
-        val hasResolvePostRights =
-            postActionFlags.isAtLeastTutorInCourse || post.authorId == clientId
-        val hasPinPostRights = postActionFlags.isAbleToPin
         val isPostAuthor = post.authorId == clientId
+        val isParentPostAuthor = post is IAnswerPost && post.parentAuthorId == clientId
+        val hasResolvePostRights =
+            postActionFlags.isAtLeastTutorInCourse || isParentPostAuthor
+        val hasPinPostRights = postActionFlags.isAbleToPin
 
         PostActions(
             requestEditPost = if (doesPostExistOnServer && isPostAuthor) onRequestEdit else null,
