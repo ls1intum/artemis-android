@@ -24,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.ConversationDataStatusButton
@@ -54,10 +55,12 @@ internal fun ConversationThreadScreen(
                     }
                 },
                 actions = {
-                    ConversationDataStatusButton(
-                        dataStatus = dataStatus,
-                        onRequestSoftReload = viewModel::requestReload
-                    )
+                    if (BuildConfig.DEBUG){
+                        ConversationDataStatusButton(
+                            dataStatus = dataStatus,
+                            onRequestSoftReload = viewModel::requestReload
+                        )
+                    }
                 }
             )
         }
