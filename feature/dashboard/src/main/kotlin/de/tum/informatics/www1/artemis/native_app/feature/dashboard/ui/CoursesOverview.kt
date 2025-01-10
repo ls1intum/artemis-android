@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +42,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.BuildConfig
@@ -149,11 +152,11 @@ internal fun CoursesOverview(
         Column(
             modifier = Modifier
                 .padding(top = padding.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars)
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
         ) {
             SurveyHint(
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(vertical = 8.dp, horizontal = Spacings.ScreenHorizontalSpacing)
                     .fillMaxWidth(),
                 surveyHintService = surveyHintService
             )
@@ -175,7 +178,7 @@ internal fun CoursesOverview(
                     CourseList(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 8.dp)
+                            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                             .testTag(TEST_TAG_COURSE_LIST),
                         courses = dashboard.courses,
                         onClickOnCourse = { course -> onViewCourse(course.id ?: 0L) }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -73,7 +72,6 @@ internal fun testTagForAnswerPost(answerPostId: String?) = "answerPost$answerPos
 @Composable
 internal fun MetisThreadUi(
     modifier: Modifier,
-    listContentPadding: PaddingValues,
     viewModel: ConversationViewModel
 ) {
     val postDataState: DataState<IStandalonePost> by viewModel.threadUseCase.post.collectAsState()
@@ -104,7 +102,6 @@ internal fun MetisThreadUi(
             conversationDataState = conversationDataState,
             postDataState = postDataState,
             postActionFlags = postActionFlags,
-            listContentPadding = listContentPadding,
             serverUrl = serverUrl,
             emojiService = koinInject(),
             clientId = clientId,
@@ -160,7 +157,6 @@ internal fun MetisThreadUi(
     postDataState: DataState<IStandalonePost>,
     conversationDataState: DataState<Conversation>,
     postActionFlags: PostActionFlags,
-    listContentPadding: PaddingValues,
     serverUrl: String,
     emojiService: EmojiService,
     initialReplyTextProvider: InitialReplyTextProvider,
@@ -222,7 +218,6 @@ internal fun MetisThreadUi(
                                     .testTag(TEST_TAG_THREAD_LIST),
                                 post = post,
                                 postActionFlags = postActionFlags,
-                                listContentPadding = listContentPadding,
                                 clientId = clientId,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
@@ -260,7 +255,6 @@ private fun PostAndRepliesList(
     state: LazyListState,
     post: IStandalonePost,
     postActionFlags: PostActionFlags,
-    listContentPadding: PaddingValues,
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
@@ -297,7 +291,6 @@ private fun PostAndRepliesList(
 
     LazyColumn(
         modifier = modifier,
-        contentPadding = listContentPadding,
         state = state
     ) {
         item {

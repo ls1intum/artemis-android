@@ -4,9 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.wrapContentSize
@@ -106,7 +108,7 @@ internal fun BrowseChannelsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars),
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
             dataState = channelsDataState,
             loadingText = stringResource(id = R.string.browse_channel_list_loading),
             failureText = stringResource(id = R.string.browse_channel_list_failure),
@@ -116,7 +118,7 @@ internal fun BrowseChannelsScreen(
             if (channels.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = Spacings.FabContentBottomPadding)
+                    contentPadding = PaddingValues(bottom = Spacings.EndOfScrollablePageSpacing)
                 ) {
                     items(channels) { channelChat ->
                         ChannelChatItem(

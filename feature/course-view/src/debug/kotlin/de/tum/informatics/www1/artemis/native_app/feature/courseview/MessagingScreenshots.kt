@@ -1,14 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.data.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -20,7 +17,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseUiScreen
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.TAB_COMMUNICATION
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
@@ -158,9 +154,6 @@ fun `Metis - Conversation Overview`() {
 @PlayStoreScreenshots
 @Composable
 fun `Metis - Conversation Channel`() {
-    val context = LocalContext.current
-    val emojiService = remember { EmojiServiceImpl(context) }
-
     val date = LocalDate(2023, 7, 29)
     val firstMessageTime = date.atTime(13, 34).toInstant(TimeZone.UTC)
 
@@ -251,7 +244,6 @@ fun `Metis - Conversation Channel`() {
                                     isAtLeastTutorInCourse = true,
                                     hasModerationRights = true
                                 ),
-                                listContentPadding = PaddingValues(),
                                 serverUrl = "",
                                 courseId = 0,
                                 state = rememberLazyListState(),
