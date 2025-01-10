@@ -160,7 +160,8 @@ internal fun ConversationSettingsBody(
                     userActionData = PerformActionOnUserData(it, UserAction.KICK)
                 },
                 onRequestGiveModerationRights = {
-                    userActionData = PerformActionOnUserData(it, UserAction.GIVE_MODERATION_RIGHTS)
+                    userActionData =
+                        PerformActionOnUserData(it, UserAction.GIVE_MODERATION_RIGHTS)
                 },
                 onRequestRevokeModerationRights = {
                     userActionData =
@@ -176,7 +177,9 @@ internal fun ConversationSettingsBody(
             ConversationOtherSettings(
                 modifier = conversationSectionModifier,
                 conversation = conversation,
-                onLeaveConversation = { leaveConversationJob = viewModel.leaveConversation() },
+                onLeaveConversation = {
+                    leaveConversationJob = viewModel.leaveConversation()
+                },
                 onToggleChannelArchivation = {
                     archiveChannelJob = viewModel.toggleChannelArchivation()
                 }

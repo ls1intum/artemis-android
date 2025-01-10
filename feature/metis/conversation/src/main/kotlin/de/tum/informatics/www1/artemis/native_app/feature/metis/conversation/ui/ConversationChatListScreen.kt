@@ -45,6 +45,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
+import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
@@ -209,10 +210,12 @@ fun ConversationChatListScreen(
                 },
                 actions = {
                     if (!isSearchBarOpen) {
-                        ConversationDataStatusButton(
-                            dataStatus = conversationDataStatus,
-                            onRequestSoftReload = onRequestSoftReload
-                        )
+                        if (BuildConfig.DEBUG){
+                            ConversationDataStatusButton(
+                                dataStatus = conversationDataStatus,
+                                onRequestSoftReload = onRequestSoftReload
+                            )
+                        }
 
                         IconButton(onClick = { isSearchBarOpen = true }) {
                             Icon(imageVector = Icons.Default.Search, contentDescription = null)
