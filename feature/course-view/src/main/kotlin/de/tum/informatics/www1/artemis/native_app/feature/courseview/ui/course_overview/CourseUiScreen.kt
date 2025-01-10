@@ -46,6 +46,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.LectureListUi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.IgnoreCustomBackHandling
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversationById
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversationByUsername
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
@@ -268,21 +269,28 @@ internal fun CourseUiScreen(
                 val initialConfiguration = remember(conversationId, postId) {
                     when {
                         conversationId != DEFAULT_CONVERSATION_ID && postId != DEFAULT_POST_ID -> OpenedConversation(
-                            conversationId,
-                            OpenedThread(
-                                conversationId,
+                            _prevConfiguration = IgnoreCustomBackHandling,
+                            conversationId = conversationId,
+                            openedThread = OpenedThread(
                                 StandalonePostId.ServerSideId(postId)
                             )
                         )
 
                         conversationId != DEFAULT_CONVERSATION_ID -> OpenedConversation(
-                            conversationId,
-                            null
+                            _prevConfiguration = IgnoreCustomBackHandling,
+                            conversationId = conversationId,
+                            openedThread = null
                         )
 
-                        username != DEFAULT_USERNAME -> NavigateToUserConversationByUsername(username)
+                        username != DEFAULT_USERNAME -> NavigateToUserConversationByUsername(
+                            _prevConfiguration = IgnoreCustomBackHandling,
+                            username = username
+                        )
 
-                        userId != DEFAULT_USER_ID -> NavigateToUserConversationById(userId)
+                        userId != DEFAULT_USER_ID -> NavigateToUserConversationById(
+                            _prevConfiguration = IgnoreCustomBackHandling,
+                            userId = userId
+                        )
 
                         else -> NothingOpened
                     }
