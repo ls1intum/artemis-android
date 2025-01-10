@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,8 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -64,6 +68,7 @@ fun UserProfileDialog(
         isSendMessageAvailable = isSendMessageAvailable,
         onSendMessageClick = {
             viewModel.navigateToOneToOneChat(context)
+            onDismiss()
         },
         onDismiss = onDismiss
     )
@@ -92,10 +97,17 @@ private fun UserProfileDialogImpl(
         },
         text = {
             if (isSendMessageAvailable) {
-                FilledTonalButton(
+                Button(
                     onClick = onSendMessageClick,
                 ) {
-                    Text(stringResource(R.string.user_profile_dialog_send_message_action))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.Message, contentDescription = null)
+
+                        Text(stringResource(R.string.user_profile_dialog_send_message_action))
+                    }
                 }
             } else {
                 Text(

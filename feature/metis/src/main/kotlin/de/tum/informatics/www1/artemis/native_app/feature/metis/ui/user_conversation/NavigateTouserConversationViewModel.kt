@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
@@ -24,7 +25,7 @@ import kotlinx.coroutines.flow.onStart
 
 internal class NavigateToUserConversationViewModel(
     private val courseId: Long,
-    private val navigationType: NavigateToUserConversationType,
+    private val userIdentifier: UserIdentifier,
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
     conversationService: ConversationService,
@@ -75,24 +76,24 @@ internal class NavigateToUserConversationViewModel(
                 existingConversationsDataState join accountDataDataState) {
                 is DataState.Success -> {
                     val (existingConversations, accountData) = combinedDataState.data
-                    if (navigationType.isRequestedAccount(accountData)) {
+                    if (userIdentifier.matches(accountData)) {
                         // We cannot start a chat with ourselves
                         flowOf(DataState.Success(null))
                     } else {
                         val existingId = existingConversations
                             .filterIsInstance<OneToOneChat>()
-                            .firstOrNull { conv -> conv.members.any { navigationType.isRequestedAccount(accountData) } }
+                            .firstOrNull { conv -> conv.members.any { userIdentifier.matches(accountData) } }
                             ?.id
 
                         if (existingId != null) {
                             flowOf(DataState.Success(existingId))
                         } else {
                             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                                navigationType.createConversation(
-                                    conversationService,
-                                    courseId,
-                                    authToken,
-                                    serverUrl
+                                conversationService.createOneToOneConversation(
+                                    courseId = courseId,
+                                    partnerUserIdentifier = userIdentifier,
+                                    authToken = authToken,
+                                    serverUrl = serverUrl
                                 )
                                     .bind { chat -> chat.id }
                             }

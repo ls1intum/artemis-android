@@ -28,10 +28,8 @@ internal fun NavigateToUserConversationUi(
     onNavigateToConversation: (Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    val navigationType = NavigateToUserConversationType.from(navigation)
-
     val viewModel: NavigateToUserConversationViewModel =
-        koinViewModel { parametersOf(courseId, navigationType) }
+        koinViewModel { parametersOf(courseId, navigation.userIdentifier) }
 
     val conversationIdDataState by viewModel.conversationId.collectAsState()
 

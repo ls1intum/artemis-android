@@ -47,12 +47,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseVi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.LectureListUi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.IgnoreCustomBackHandling
-import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversationById
-import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversationByUsername
+import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedThread
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ConversationFacadeUi
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
@@ -282,14 +282,14 @@ internal fun CourseUiScreen(
                             openedThread = null
                         )
 
-                        username != DEFAULT_USERNAME -> NavigateToUserConversationByUsername(
+                        username != DEFAULT_USERNAME -> NavigateToUserConversation(
                             _prevConfiguration = IgnoreCustomBackHandling,
-                            username = username
+                            userIdentifier = UserIdentifier.Username(username)
                         )
 
-                        userId != DEFAULT_USER_ID -> NavigateToUserConversationById(
+                        userId != DEFAULT_USER_ID -> NavigateToUserConversation(
                             _prevConfiguration = IgnoreCustomBackHandling,
-                            userId = userId
+                            userIdentifier = UserIdentifier.UserId(userId)
                         )
 
                         else -> NothingOpened
