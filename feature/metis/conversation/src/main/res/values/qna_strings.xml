@@ -10,7 +10,7 @@
     <string name="post_view_edit_post">Edit</string>
     <string name="post_view_delete_post">Delete</string>
 
-    <string name="standalone_screen_title">View post</string>
+    <string name="thread_view_title">Thread</string>
 
     <string name="course_wide_context_organization">Organization</string>
     <string name="course_wide_context_tech_support">Tech Support</string>
