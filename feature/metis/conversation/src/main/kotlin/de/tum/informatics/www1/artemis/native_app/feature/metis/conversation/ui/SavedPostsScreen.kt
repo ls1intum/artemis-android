@@ -4,10 +4,8 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
@@ -177,7 +176,8 @@ private fun SavedPostsList(
 
         LazyColumn(
             modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = Spacings.calculateEndOfPagePaddingValues()
         ) {
             items(
                 items = savedPosts,
@@ -198,12 +198,6 @@ private fun SavedPostsList(
                         onRemoveFromSavedPosts(it)
                     }
                 )
-            }
-
-            item {
-                // TODO: Use new merged Spacings.EndOfScrollablePage
-                // Add a spacer at the end to indicate the end of the list
-                Spacer(Modifier.height(32.dp))
             }
         }
     }
