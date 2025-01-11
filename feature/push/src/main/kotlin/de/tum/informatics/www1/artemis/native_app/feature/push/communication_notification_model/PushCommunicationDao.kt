@@ -8,8 +8,6 @@ import androidx.room.Query
 import androidx.room.Transaction
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import kotlinx.datetime.Instant
 
@@ -43,63 +41,30 @@ interface PushCommunicationDao {
         val parentId = artemisNotification.parentId
 
         val message: CommunicationMessageEntity = try {
-
-            val courseTitle: String = artemisNotification.notificationPlaceholders[0]
-
-            val postContent: String = artemisNotification.notificationPlaceholders[1]
-
-            val postAuthor: String = when (artemisNotification.type) {
-                is StandalonePostCommunicationNotificationType -> when (artemisNotification.notificationPlaceholders[5]) {
-                    "channel" -> artemisNotification.notificationPlaceholders[4]
-                    else -> artemisNotification.notificationPlaceholders[3]
-                }
-
-                is ReplyPostCommunicationNotificationType -> artemisNotification.notificationPlaceholders[3]
-            }
-
-            val containerTitle: String = when (artemisNotification.type) {
-                is StandalonePostCommunicationNotificationType -> when (artemisNotification.notificationPlaceholders[5]) {
-                    "channel" -> artemisNotification.notificationPlaceholders[3]
-                    else -> artemisNotification.notificationPlaceholders[4]
-                }
-
-                is ReplyPostCommunicationNotificationType -> artemisNotification.notificationPlaceholders[7]
-            }
+            val placeholderContent = CommunicationNotificationPlaceholderContent
+                .fromArtemisNotification(artemisNotification)
 
             if (hasPushCommunication(parentId)) {
-                updatePushCommunication(parentId, courseTitle)
+                updatePushCommunication(
+                    parentId = parentId,
+                    courseTitle = placeholderContent.courseTitle
+                )
             } else {
                 val pushCommunicationEntity = PushCommunicationEntity(
                     parentId = parentId,
                     notificationId = generateNotificationId(),
-                    courseTitle = courseTitle,
-                    containerTitle = containerTitle,
+                    courseTitle = placeholderContent.courseTitle,
+                    containerTitle = placeholderContent.containerTitle,
                     target = artemisNotification.target
                 )
 
                 insertPushCommunication(pushCommunicationEntity)
             }
 
-            when (artemisNotification.type) {
-                is StandalonePostCommunicationNotificationType -> CommunicationMessageEntity(
-                    communicationParentId = parentId,
-                    text = postContent,
-                    authorName = postAuthor,
-                    date = artemisNotification.date
-                )
-
-                is ReplyPostCommunicationNotificationType -> {
-                    val answerPostContent = artemisNotification.notificationPlaceholders[4]
-                    val answerPostAuthor = artemisNotification.notificationPlaceholders[6]
-
-                    CommunicationMessageEntity(
-                        communicationParentId = parentId,
-                        text = answerPostContent,
-                        authorName = answerPostAuthor,
-                        date = artemisNotification.date
-                    )
-                }
-            }
+            placeholderContent.toCommunicationMessageEntity(
+                parentId = parentId,
+                date = artemisNotification.date
+            )
         } catch (e: Exception) {
             Log.e(TAG, "Error while parsing artemis communication notification", e)
             return
