@@ -43,7 +43,9 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +53,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.getTextBeforeSelection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -77,7 +81,7 @@ internal fun ReplyTextField(
     replyMode: ReplyMode,
     onFileSelected: (Uri) -> Unit,
     updateFailureState: (MetisModificationFailure?) -> Unit,
-    title: String
+    conversationName: String
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
 
@@ -106,7 +110,7 @@ internal fun ReplyTextField(
                                 .testTag(TEST_TAG_CAN_CREATE_REPLY),
                             replyMode = replyMode,
                             onReply = { targetReplyState.onCreateReply() },
-                            title = stringResource(R.string.create_reply_click_to_write, title),
+                            conversationName = conversationName,
                             onFileSelected = { uri -> onFileSelected(uri) }
                         )
                     }
@@ -166,7 +170,7 @@ private fun CreateReplyUi(
     focusRequester: FocusRequester = remember { FocusRequester() },
     onReply: () -> Unit,
     onFileSelected: (Uri) -> Unit,
-    title: String?
+    conversationName: String
 ) {
     var prevReplyContent by remember { mutableStateOf("") }
     var displayTextField: Boolean by remember { mutableStateOf(false) }
@@ -279,10 +283,14 @@ private fun CreateReplyUi(
                     }
                 }
             } else {
-                UnfocusedPreviewReplyTextField({
-                    displayTextField = true
-                    requestFocus = true
-                }, title = title)
+                UnfocusedPreviewReplyTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    conversationName = conversationName,
+                    onRequestShowTextField = {
+                        displayTextField = true
+                        requestFocus = true
+                    }
+                )
             }
         }
 
@@ -472,9 +480,13 @@ private fun applyMarkdownStyle(
 
 
 @Composable
-private fun UnfocusedPreviewReplyTextField(onRequestShowTextField: () -> Unit, title: String?) {
+private fun UnfocusedPreviewReplyTextField(
+    modifier: Modifier = Modifier,
+    onRequestShowTextField: () -> Unit,
+    conversationName: String
+) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onRequestShowTextField)
             .padding(horizontal = 16.dp)
@@ -482,10 +494,18 @@ private fun UnfocusedPreviewReplyTextField(onRequestShowTextField: () -> Unit, t
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = title.toString(),
             modifier = Modifier
                 .padding(vertical = 8.dp)
-                .weight(1f)
+                .weight(1f),
+            text = buildAnnotatedString {
+                append(stringResource(R.string.create_reply_click_to_write_prefix) + " '")
+                withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
+                    append(conversationName)
+                }
+                append("'")
+            },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
 
         Icon(
@@ -652,7 +672,7 @@ private fun ReplyTextFieldPreview() {
                 CompletableDeferred()
             },
             updateFailureState = {},
-            title = "Replying..",
+            conversationName = "PreviewChat",
             onFileSelected = { _ -> }
         )
     }

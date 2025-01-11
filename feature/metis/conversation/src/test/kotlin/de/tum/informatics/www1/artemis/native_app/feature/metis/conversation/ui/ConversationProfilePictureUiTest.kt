@@ -162,7 +162,7 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
                     onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                     onClickViewPost = {},
                     onRequestRetrySend = {},
-                    title = "title",
+                    conversationName = "title",
                     onFileSelected =  { _ -> }
                 )
             }

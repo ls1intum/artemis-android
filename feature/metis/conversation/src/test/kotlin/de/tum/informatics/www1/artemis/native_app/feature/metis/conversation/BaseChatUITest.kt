@@ -146,7 +146,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onClickViewPost = {},
                 onRequestRetrySend = { _ -> },
-                title = "Title",
+                conversationName = "Title",
                 onFileSelected = { _ -> }
             )
         }

@@ -173,7 +173,7 @@ internal fun MetisThreadUi(
     val listState = rememberLazyListState()
     val isReplyEnabled = isReplyEnabled(conversationDataState = conversationDataState)
     val context = LocalContext.current
-    val title by remember(conversationDataState) {
+    val conversationName by remember(conversationDataState) {
         derivedStateOf {
             conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
         }
@@ -237,7 +237,7 @@ internal fun MetisThreadUi(
                                 .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
                             replyMode = replyMode,
                             updateFailureState = updateFailureStateDelegate,
-                            title = title,
+                            conversationName = conversationName,
                             onFileSelected = { uri, ->
                                 onFileSelect(uri, context)
                             }

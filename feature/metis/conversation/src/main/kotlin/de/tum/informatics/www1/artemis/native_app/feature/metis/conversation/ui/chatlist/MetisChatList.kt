@@ -83,7 +83,7 @@ internal fun MetisChatList(
 
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
 
-    val updatedTitle by remember(conversationDataState) {
+    val conversationName by remember(conversationDataState) {
         derivedStateOf {
             conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
         }
@@ -110,7 +110,7 @@ internal fun MetisChatList(
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onClickViewPost = onClickViewPost,
             onRequestRetrySend = viewModel::retryCreatePost,
-            title = updatedTitle,
+            conversationName = conversationName,
             onFileSelected = { uri ->
                 viewModel.onFileSelected(uri, context)
             }
@@ -138,7 +138,7 @@ fun MetisChatList(
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
-    title: String,
+    conversationName: String,
     onFileSelected: (Uri) -> Unit
 ) {
     val context = LocalContext.current
@@ -220,7 +220,7 @@ fun MetisChatList(
                     modifier = Modifier.fillMaxWidth(),
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate,
-                    title = title,
+                    conversationName = conversationName,
                     onFileSelected = onFileSelected
                 )
             }
