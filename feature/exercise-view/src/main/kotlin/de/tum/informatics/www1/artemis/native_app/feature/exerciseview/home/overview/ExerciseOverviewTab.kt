@@ -6,12 +6,12 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.currentUserPoints
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
@@ -41,7 +40,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActio
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCategoryChipRow
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseInfoChip
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseInfoChipTextHorizontalPadding
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePointsDecimalFormat
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import kotlinx.datetime.Instant
 
@@ -64,6 +62,16 @@ internal fun ExerciseOverviewTab(
             .verticalScroll(rememberScrollState())
             .fillMaxSize()
     ) {
+        ParticipationStatusUi(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            exercise = exercise,
+            actions = actions
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         ExerciseInformation(
             modifier = Modifier
                 .fillMaxWidth()
@@ -77,13 +85,7 @@ internal fun ExerciseOverviewTab(
             isLongToolbar = isLongToolbar
         )
 
-        ParticipationStatusUi(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            exercise = exercise,
-            actions = actions
-        )
+        Spacer(modifier = Modifier.height(16.dp))
 
         if (exercise !is QuizExercise && webViewState != null) {
             ArtemisWebView(
@@ -103,7 +105,7 @@ internal fun ExerciseOverviewTab(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
     }
@@ -140,8 +142,6 @@ private fun ExerciseInformation(
             exercise = exercise
         )
 
-        ExercisePointInfo(exercise)
-
         nullableDueDateTextInfo(
             exercise.releaseDate,
             R.string.exercise_view_overview_hint_assessment_release_date
@@ -167,36 +167,33 @@ private fun ExerciseInformation(
     }
 
     // Actual UI
-    Column(
-        modifier = modifier.padding(10.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
+    Column(modifier = modifier) {
         Text(
             text = stringResource(R.string.exercise_view_overview_title),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
-                .padding(bottom = 1.dp)
+                .padding(4.dp)
                 .fillMaxWidth(),
             textAlign = TextAlign.Start
         )
+
         HorizontalDivider(
-            modifier = Modifier.padding(vertical = 0.dp),
-            thickness = 2.dp,
-            color = Color.Black
+            modifier = Modifier,
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.primary
         )
 
         // Here we make the distinction in the layout between long toolbar and short toolbar
         if (isLongToolbar) {
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
                 Column(modifier = Modifier.weight(1f)) {
                     categoryPointsReleaseDateUi()
                 }
 
-                dueDateColumnUi(
-                    Modifier
-                        .width(IntrinsicSize.Max)
-                        .align(Alignment.Bottom)
-                )
+                dueDateColumnUi(Modifier.weight(1f))
             }
         } else {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -204,49 +201,45 @@ private fun ExerciseInformation(
                 dueDateColumnUi(Modifier.fillMaxWidth())
             }
         }
+
+        HorizontalDivider(
+            modifier = Modifier,
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Text(
+            text = stringResource(R.string.exercise_view_overview_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(4.dp)
+                .fillMaxWidth(),
+            textAlign = TextAlign.Start
+        )
     }
 }
 
 @Composable
 private fun ExerciseCompliantPossibleInfo(exercise: Exercise) {
     val complaintPossible = exercise.allowComplaintsForAutomaticAssessments ?: false
-    val complaintPossibleText = stringResource(
-        R.string.exercise_view_overview_hint_assessment_complaint_possible,
-        stringResource(if (complaintPossible) R.string.exercise_view_overview_hint_assessment_complaint_possible_yes else R.string.exercise_view_overview_hint_assessment_complaint_possible_no)
-    )
 
-    Text(
-        modifier = Modifier.padding(bottom = 4.dp),
-        text = complaintPossibleText,
-        style = MaterialTheme.typography.bodyLarge
-    )
-}
-
-@Composable
-private fun ExercisePointInfo(exercise: Exercise) {
-    val currentUserPoints = exercise.currentUserPoints?.let(ExercisePointsDecimalFormat::format)
-    val maxPoints = exercise.maxPoints?.let(ExercisePointsDecimalFormat::format)
-
-    val pointsHintText = when {
-        currentUserPoints != null && maxPoints != null -> stringResource(
-            id = R.string.exercise_view_overview_points_reached,
-            currentUserPoints,
-            maxPoints
+    Row(
+        modifier = Modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            modifier = Modifier.padding(4.dp),
+            text = stringResource(R.string.exercise_view_overview_hint_assessment_complaint_possible),
+            style = MaterialTheme.typography.bodyMedium
         )
-
-        maxPoints != null -> stringResource(
-            id = R.string.exercise_view_overview_points_max,
-            maxPoints
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            modifier = Modifier.padding(4.dp),
+            text = stringResource(if (complaintPossible) R.string.exercise_view_overview_hint_assessment_complaint_possible_yes else R.string.exercise_view_overview_hint_assessment_complaint_possible_no),
+            style = MaterialTheme.typography.bodyMedium
         )
-
-        else -> stringResource(id = R.string.exercise_view_overview_points_none)
     }
-
-    Text(
-        modifier = Modifier.padding(bottom = 4.dp),
-        text = pointsHintText,
-        style = MaterialTheme.typography.bodyLarge
-    )
 }
 
 @Composable
@@ -256,15 +249,20 @@ private fun DueDateTextInfo(
     maxWidth: Int,
     updateMaxWidth: (Int) -> Unit
 ) = TextInformation(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 1.dp),
+        modifier = Modifier.fillMaxWidth(),
         hintColumnWidth = maxWidth,
         hint = stringResource(id = hintRes),
         dataText = getRelativeTime(to = dueDate).toString(),
         dataColor = getDueDateColor(dueDate),
         updateHintColumnWidth = updateMaxWidth
     )
+
+@Composable
+private fun ExerciseChannelLink(
+    modifier: Modifier,
+    exercise: Exercise
+) {
+}
 
 /**
  * Text information composable that achieves a table like layout, where the hint is the first column
@@ -296,13 +294,14 @@ private fun TextInformation(
                 layout(width = assignedWidth, height = placeable.height) {
                     placeable.placeRelative(0, 0)
                 }
-            },
+            }.padding(4.dp),
             text = hint,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
         )
 
-        val dataModifier = Modifier
+        Spacer(modifier = Modifier.weight(1f))
 
+        val dataModifier = Modifier.padding(4.dp)
         if (dataColor != null) {
             ExerciseInfoChip(modifier = dataModifier, color = dataColor, text = dataText)
         } else {

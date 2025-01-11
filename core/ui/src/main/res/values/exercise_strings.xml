@@ -13,10 +13,10 @@
     <string name="exercise_is_bonus">Bonus</string>
     <string name="exercise_live_quiz">Live</string>
 
-    <string name="exercise_user_not_started_exercise">Not yet started.</string>
+    <string name="exercise_user_not_started_exercise">You have not started this exercise yet.</string>
     <string name="exercise_user_not_assigned_to_team">No team yet.</string>
     <string name="exercise_exercise_not_submitted">No Submission</string>
-    <string name="exercise_exercise_missed_deadline">Deadline missed.</string>
+    <string name="exercise_exercise_missed_deadline">You have missed the deadline.</string>
     <string name="exercise_quiz_not_started">Not yet started.</string>
     <string name="exercise_user_not_started_quiz">Not yet started.</string>
     <string name="exercise_user_not_participated">Not participated.</string>

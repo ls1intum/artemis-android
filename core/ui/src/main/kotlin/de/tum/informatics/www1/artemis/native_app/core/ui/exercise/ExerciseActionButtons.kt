@@ -138,7 +138,7 @@ fun ExerciseActionButtons(
                 // Do not show participation not possible info card for quiz exercises
             //}
             else -> {
-                Row(modifier=Modifier.padding(top=2.dp, bottom = 2.dp)) {
+                Row(modifier = Modifier) {
                     ParticipationNotPossibleInfoMessageCard()
                 }
             }

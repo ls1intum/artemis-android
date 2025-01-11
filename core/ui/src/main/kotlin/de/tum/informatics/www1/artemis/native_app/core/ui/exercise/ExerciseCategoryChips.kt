@@ -90,7 +90,7 @@ fun ExerciseInfoChip(
         Text(
             modifier = Modifier.padding(ExerciseInfoChipTextPaddingValues),
             text = text,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.labelMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             color = Color.White

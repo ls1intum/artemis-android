@@ -43,7 +43,7 @@ fun ParticipationStatusUi(
                 participation = participation,
                 exercise = exercise
             ),
-            style = MaterialTheme.typography.labelLarge
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
