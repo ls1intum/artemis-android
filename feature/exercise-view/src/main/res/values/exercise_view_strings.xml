@@ -14,6 +14,7 @@
     <string name="exercise_view_overview_points_reached">Points: %1$s of %2$s</string>
     <string name="exercise_view_overview_points_none">No points</string>
     <string name="exercise_view_overview_hint_submission_due_date">Submission due:</string>
+    <string name="exercise_view_overview_no_submission_due_date">No due date</string>
     <string name="exercise_view_overview_hint_assessment_due_date">Assessment due:</string>
     <string name="exercise_view_overview_hint_assessment_complaint_possible">Complaint possible:</string>
     <string name="exercise_view_overview_hint_assessment_release_date">Release date:</string>

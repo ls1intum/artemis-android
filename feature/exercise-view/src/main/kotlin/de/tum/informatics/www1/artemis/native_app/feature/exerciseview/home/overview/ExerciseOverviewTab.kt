@@ -104,8 +104,7 @@ internal fun ExerciseOverviewTab(
                 text = stringResource(id = R.string.exercise_view_overview_problem_statement_not_available),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                color = MaterialTheme.colorScheme.onPrimary
+                    .padding(16.dp)
             )
         }
     }
@@ -124,6 +123,7 @@ private fun ExerciseInformation(
 ) {
     var maxWidth: Int by remember { mutableIntStateOf(0) }
     val updateMaxWidth = { new: Int -> maxWidth = new }
+    val complaintPossible = exercise.allowComplaintsForAutomaticAssessments ?: false
 
     val nullableDueDateTextInfo = @Composable { dueDate: Instant?, hintRes: Int ->
         if (dueDate != null) {
@@ -149,20 +149,34 @@ private fun ExerciseInformation(
     }
 
     val dueDateColumnUi = @Composable { contentModifier: Modifier ->
+        val complaintPossibleText =
+            if (complaintPossible) R.string.exercise_view_overview_hint_assessment_complaint_possible_yes else R.string.exercise_view_overview_hint_assessment_complaint_possible_no
+
         Column(
             modifier = contentModifier,
         ) {
-            nullableDueDateTextInfo(
-                exercise.assessmentDueDate,
-                R.string.exercise_view_overview_hint_assessment_due_date
-            )
+            // We always want to display a submission due date
+            if (exercise.dueDate == null) {
+                TextAndValueRow(
+                    hintRes = R.string.exercise_view_overview_hint_submission_due_date,
+                    value = R.string.exercise_view_overview_no_submission_due_date
+                )
+            } else {
+                nullableDueDateTextInfo(
+                    exercise.dueDate,
+                    R.string.exercise_view_overview_hint_submission_due_date
+                )
+            }
 
             nullableDueDateTextInfo(
                 exercise.assessmentDueDate,
                 R.string.exercise_view_overview_hint_assessment_due_date
             )
 
-            ExerciseCompliantPossibleInfo(exercise)
+            TextAndValueRow(
+                hintRes = R.string.exercise_view_overview_hint_assessment_complaint_possible,
+                value = complaintPossibleText
+            )
         }
     }
 
@@ -220,9 +234,7 @@ private fun ExerciseInformation(
 }
 
 @Composable
-private fun ExerciseCompliantPossibleInfo(exercise: Exercise) {
-    val complaintPossible = exercise.allowComplaintsForAutomaticAssessments ?: false
-
+private fun TextAndValueRow(@StringRes hintRes: Int, @StringRes value: Int) {
     Row(
         modifier = Modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -230,13 +242,13 @@ private fun ExerciseCompliantPossibleInfo(exercise: Exercise) {
     ) {
         Text(
             modifier = Modifier.padding(4.dp),
-            text = stringResource(R.string.exercise_view_overview_hint_assessment_complaint_possible),
+            text = stringResource(hintRes),
             style = MaterialTheme.typography.bodyMedium
         )
         Spacer(modifier = Modifier.weight(1f))
         Text(
             modifier = Modifier.padding(4.dp),
-            text = stringResource(if (complaintPossible) R.string.exercise_view_overview_hint_assessment_complaint_possible_yes else R.string.exercise_view_overview_hint_assessment_complaint_possible_no),
+            text = stringResource(value),
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -283,18 +295,20 @@ private fun TextInformation(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            modifier = Modifier.layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
+            modifier = Modifier
+                .layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
 
-                val assignedWidth = maxOf(hintColumnWidth, placeable.width)
-                if (assignedWidth > hintColumnWidth) {
-                    updateHintColumnWidth(assignedWidth)
-                }
+                    val assignedWidth = maxOf(hintColumnWidth, placeable.width)
+                    if (assignedWidth > hintColumnWidth) {
+                        updateHintColumnWidth(assignedWidth)
+                    }
 
-                layout(width = assignedWidth, height = placeable.height) {
-                    placeable.placeRelative(0, 0)
+                    layout(width = assignedWidth, height = placeable.height) {
+                        placeable.placeRelative(0, 0)
+                    }
                 }
-            }.padding(4.dp),
+                .padding(4.dp),
             text = hint,
             style = MaterialTheme.typography.bodyMedium,
         )
