@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebView
@@ -47,7 +46,6 @@ fun ArtemisWebView(
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val value = if (isSystemInDarkTheme) "DARK" else "LIGHT"
     var webViewHeight by remember { mutableIntStateOf(0) }
-    val density = LocalDensity.current
 
     WebView(
         modifier = if (adjustHeightForContent) {
