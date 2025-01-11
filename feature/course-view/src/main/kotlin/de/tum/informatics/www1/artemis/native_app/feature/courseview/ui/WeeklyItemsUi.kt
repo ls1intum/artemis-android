@@ -105,6 +105,7 @@ internal fun <T> WeeklyItemsLazyColumn(
     }
 }
 
+
 /**
  * Display a title with the time range of the week or a text indicating that no time is bound.
  * Displays an icon button that lets the user expand and collapse the weekly items

@@ -80,6 +80,7 @@ fun CourseItemGrid(
             courseItem(course, courseItemModifier, isCompact)
         }
     }
+
 }
 
 fun Modifier.computeCourseItemModifier(isCompact: Boolean): Modifier {

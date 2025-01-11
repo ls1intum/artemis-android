@@ -142,7 +142,7 @@ fun `Metis - Conversation Overview`() {
                     onRequestCreatePersonalConversation = {},
                     onRequestAddChannel = {},
                     onRequestBrowseChannel = {},
-                    canCreateChannel = false,
+                    canCreateChannel = false
                 )
             },
             onNavigateBack = { },
