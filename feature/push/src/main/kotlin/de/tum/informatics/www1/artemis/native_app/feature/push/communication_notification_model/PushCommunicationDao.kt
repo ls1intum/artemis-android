@@ -26,11 +26,10 @@ interface PushCommunicationDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPushCommunication(pushCommunicationEntity: PushCommunicationEntity)
 
-    @Query("update push_communication set course_title = :courseTitle, title = :title where parent_id = :parentId")
+    @Query("update push_communication set course_title = :courseTitle where parent_id = :parentId")
     suspend fun updatePushCommunication(
         parentId: Long,
         courseTitle: String,
-        title: String?
     )
 
     @Insert
@@ -46,7 +45,6 @@ interface PushCommunicationDao {
         val message: CommunicationMessageEntity = try {
 
             val courseTitle: String = artemisNotification.notificationPlaceholders[0]
-            val postTitle: String? = null
 
             val postContent: String = artemisNotification.notificationPlaceholders[1]
 
@@ -69,14 +67,13 @@ interface PushCommunicationDao {
             }
 
             if (hasPushCommunication(parentId)) {
-                updatePushCommunication(parentId, courseTitle, postTitle)
+                updatePushCommunication(parentId, courseTitle)
             } else {
                 val pushCommunicationEntity = PushCommunicationEntity(
                     parentId = parentId,
                     notificationId = generateNotificationId(),
                     courseTitle = courseTitle,
                     containerTitle = containerTitle,
-                    title = postTitle,
                     target = artemisNotification.target
                 )
 
@@ -86,7 +83,6 @@ interface PushCommunicationDao {
             when (artemisNotification.type) {
                 is StandalonePostCommunicationNotificationType -> CommunicationMessageEntity(
                     communicationParentId = parentId,
-                    title = postTitle,
                     text = postContent,
                     authorName = postAuthor,
                     date = artemisNotification.date
@@ -98,7 +94,6 @@ interface PushCommunicationDao {
 
                     CommunicationMessageEntity(
                         communicationParentId = parentId,
-                        title = null,
                         text = answerPostContent,
                         authorName = answerPostAuthor,
                         date = artemisNotification.date
@@ -124,7 +119,6 @@ interface PushCommunicationDao {
             insertCommunicationMessage(
                 CommunicationMessageEntity(
                     communicationParentId = parentId,
-                    title = null,
                     text = body,
                     authorName = authorName,
                     date = date
