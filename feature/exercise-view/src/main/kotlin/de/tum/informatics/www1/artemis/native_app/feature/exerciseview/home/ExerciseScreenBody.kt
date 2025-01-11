@@ -4,7 +4,6 @@ import android.webkit.WebView
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.HelpCenter
@@ -17,7 +16,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -71,12 +69,7 @@ internal fun ExerciseScreenBody(
                     )
                 }
 
-                exerciseOverviewTab(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 8.dp)
-                        .padding(bottom = 8.dp)
-                )
+                exerciseOverviewTab(Modifier.fillMaxSize())
 
                 // Commented out as we may need that code again once we display communications for exercises
 

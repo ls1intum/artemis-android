@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.ove
 import android.annotation.SuppressLint
 import android.webkit.WebView
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +31,7 @@ import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.currentUserPoints
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
@@ -65,11 +65,10 @@ internal fun ExerciseOverviewTab(
         ExerciseInformation(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                 .border(
-                    width = 2.dp,
-                    color = Color.Black,
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.primary,
                     shape = MaterialTheme.shapes.extraSmall
                 ),
             exercise = exercise,
@@ -167,7 +166,7 @@ private fun ExerciseInformation(
     // Actual UI
     Column(
         modifier = modifier.padding(10.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
             text = stringResource(R.string.exercise_view_overview_title),
