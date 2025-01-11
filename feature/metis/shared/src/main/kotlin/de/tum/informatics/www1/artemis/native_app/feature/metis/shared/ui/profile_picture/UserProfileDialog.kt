@@ -28,7 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.UserRoleIcon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.UserRoleBadge
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -148,34 +148,15 @@ private fun UserProfileDialogHeader(
         Column(
             modifier = Modifier.padding(start = 16.dp),
         ) {
+            UserRoleBadge(
+                userRole = userRole,
+            )
+
             Text(
                 text = username,
                 style = MaterialTheme.typography.titleMedium,
             )
-
-            userRole?.let {
-                 UserRoleRow(userRole = it)
-            }
         }
-    }
-}
-
-@Composable
-private fun UserRoleRow(userRole: UserRole) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        UserRoleIcon(
-            modifier = Modifier
-                .size(30.dp)
-                .padding(end = 4.dp),
-            userRole = userRole,
-        )
-
-        Text(
-            text = userRole.toString(),
-            style = MaterialTheme.typography.labelMedium,
-        )
     }
 }
 

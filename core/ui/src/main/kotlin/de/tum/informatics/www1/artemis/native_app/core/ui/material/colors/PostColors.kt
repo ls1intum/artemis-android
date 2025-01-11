@@ -18,6 +18,8 @@ object PostColors {
             @Composable get() = Color(0xFF0C9EB6)
         val instructor: Color
             @Composable get() = Color(0xFFB60000)
+        val moderator: Color
+            @Composable get() = Color(0xFF6F42C1)
     }
 
     object StatusBackground {
