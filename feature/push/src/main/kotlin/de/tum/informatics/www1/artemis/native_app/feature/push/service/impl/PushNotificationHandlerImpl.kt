@@ -35,6 +35,22 @@ class PushNotificationHandlerImpl(
     }
 
     override fun handleServerPushNotification(payload: String) {
+        if (!validatePushNotificationVersion(payload)) return
+
+        val notification = decodeNotification(payload) ?: return
+
+        // if the metis context this notification is about is already visible we do not pop that notification.
+        if (isNotificationContextAlreadyObservedByUser(notification)) return
+
+        runBlocking {
+            notificationManager.popNotification(
+                context = context,
+                artemisNotification = notification
+            )
+        }
+    }
+
+    private fun validatePushNotificationVersion(payload: String): Boolean {
         val version: PushNotificationVersion? = try {
             notificationJson.decodeFromString(payload)
         } catch (e: SerializationException) {
@@ -49,7 +65,7 @@ class PushNotificationHandlerImpl(
                     TAG,
                     "Received push notification does not have a version we could read -> discarding"
                 )
-                return
+                return false
             }
 
             version.version != supportedPushNotificationVersion -> {
@@ -57,49 +73,45 @@ class PushNotificationHandlerImpl(
                     TAG,
                     "Received push notification has version ${version.version}, but we only support $supportedPushNotificationVersion -> discarding"
                 )
-                return
+                return false
             }
         }
+        return true
+    }
 
-        val notification: ArtemisNotification<NotificationType> = try {
+    private fun decodeNotification(payload: String): ArtemisNotification<NotificationType>? {
+        return try {
             notificationJson.decodeFromString(payload)
         } catch (e: SerializationException) {
             Log.d(TAG, "Cannot decode push notification -> discarding", e)
-            return
+            return null
         } catch (e: IllegalArgumentException) {
             Log.d(TAG, "Cannot decode push notification -> discarding", e)
-            return
-        }
-
-        // if the metis context this notification is about is already visible we do not pop that notification.
-        val currentActivity = (context as? CurrentActivityListener)?.currentActivity?.value
-
-        val visibleMetisContexts: List<VisibleMetisContext> =
-            (currentActivity as? VisibleMetisContextReporter)?.visibleMetisContexts?.value.orEmpty()
-
-        val notificationType = notification.type
-        if (notificationType is CommunicationNotificationType) {
-            val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
-                notification.target
-            )
-
-            val visibleMetisContext =
-                VisibleStandalonePostDetails(
-                    metisTarget.metisContext,
-                    metisTarget.postId
-                )
-
-            // If the context is already visible cancel now!
-            if (visibleMetisContext in visibleMetisContexts) return
-        }
-
-        runBlocking {
-            notificationManager.popNotification(
-                context = context,
-                artemisNotification = notification
-            )
+            return null
         }
     }
+
+    private fun isNotificationContextAlreadyObservedByUser(notification: ArtemisNotification<NotificationType>): Boolean {
+        val currentActivity = (context as? CurrentActivityListener)?.currentActivity?.value ?: return false
+
+        val visibleMetisContexts: List<VisibleMetisContext> =
+            (currentActivity as? VisibleMetisContextReporter)?.visibleMetisContexts?.value ?: return false
+
+        val notificationType = notification.type
+        if (notificationType !is CommunicationNotificationType) return false
+
+        val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
+            target = notification.target
+        )
+
+        val visibleMetisContext = VisibleStandalonePostDetails(
+            metisContext = metisTarget.metisContext,
+            postId = metisTarget.postId
+        )
+
+        return visibleMetisContext in visibleMetisContexts
+    }
+
 
     @Serializable
     private data class PushNotificationVersion(val version: Int)
