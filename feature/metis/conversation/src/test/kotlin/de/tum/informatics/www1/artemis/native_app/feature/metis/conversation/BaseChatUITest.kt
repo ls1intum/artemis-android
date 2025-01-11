@@ -30,6 +30,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.A
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
+import de.tum.informatics.www1.artemis.native_app.feature.metistest.VisibleMetisContextManagerMock
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.datetime.Clock
@@ -166,7 +167,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
         composeTestRule.setContent {
             CompositionLocalProvider(
                 LocalArtemisImageProvider provides ArtemisImageProviderStub(),
-                LocalVisibleMetisContextManager provides MockVisibleMetisContextManager.also {
+                LocalVisibleMetisContextManager provides VisibleMetisContextManagerMock.also {
                     it.registerMetisContext(VisiblePostList(MetisContext.Conversation(
                         courseId = course.id!!,
                         conversationId = conversation.id

@@ -21,6 +21,7 @@ dependencies {
 
     testImplementation(project(":feature:login"))
     testImplementation(project(":feature:login-test"))
+    testImplementation(project(":feature:metis-test"))
 
     kover(project(":core:data"))
 }
