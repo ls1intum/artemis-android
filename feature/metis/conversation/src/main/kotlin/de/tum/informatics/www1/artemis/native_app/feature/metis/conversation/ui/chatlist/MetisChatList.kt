@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,11 +42,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.util.rememberDerivedConversationName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import kotlinx.coroutines.Deferred
@@ -83,11 +82,7 @@ internal fun MetisChatList(
 
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
 
-    val conversationName by remember(conversationDataState) {
-        derivedStateOf {
-            conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
-        }
-    }
+    val conversationName by rememberDerivedConversationName(conversationDataState)
 
     val context = LocalContext.current
 

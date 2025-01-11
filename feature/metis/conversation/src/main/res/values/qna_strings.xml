@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="conversation_name_fallback">Conversation</string>
+
     <plurals name="communication_standalone_post_view_replies_button">
         <item quantity="one">1 reply</item>
         <item quantity="other">%1$d replies</item>
