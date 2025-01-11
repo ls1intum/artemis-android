@@ -149,8 +149,7 @@ internal fun ExerciseScreen(
                     ExerciseScreenTopAppBar(
                         modifier = Modifier.fillMaxWidth(),
                         onNavigateBack = onNavigateBack,
-                        exerciseDataState = exerciseDataState,
-                        onRequestReloadExercise = viewModel::requestReloadExercise
+                        exerciseDataState = exerciseDataState
                     )
                 },
                 floatingActionButton = floatingActionButton

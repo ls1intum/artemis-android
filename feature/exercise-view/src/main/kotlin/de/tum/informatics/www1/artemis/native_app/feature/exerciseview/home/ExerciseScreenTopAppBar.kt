@@ -6,7 +6,6 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
@@ -35,8 +34,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTy
 internal fun ExerciseScreenTopAppBar(
     modifier: Modifier,
     exerciseDataState: DataState<Exercise>,
-    onNavigateBack: () -> Unit,
-    onRequestReloadExercise: () -> Unit
+    onNavigateBack: () -> Unit
 ) {
     Column(modifier = modifier) {
         TopAppBar(
@@ -44,9 +42,6 @@ internal fun ExerciseScreenTopAppBar(
             title = { TitleText(modifier = modifier, maxLines = 1, exerciseDataState = exerciseDataState) },
             navigationIcon = {
                 TopAppBarNavigationIcon(onNavigateBack = onNavigateBack)
-            },
-            actions = {
-                TopAppBarActions(onRequestRefresh = onRequestReloadExercise)
             }
         )
     }
@@ -56,13 +51,6 @@ internal fun ExerciseScreenTopAppBar(
 private fun TopAppBarNavigationIcon(onNavigateBack: () -> Unit) {
     IconButton(onClick = onNavigateBack) {
         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-    }
-}
-
-@Composable
-private fun TopAppBarActions(onRequestRefresh: () -> Unit) {
-    IconButton(onClick = onRequestRefresh) {
-        Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
     }
 }
 
@@ -110,8 +98,7 @@ private fun rememberTitleTextWithInlineContent(
         appendInlineContent("icon")
         append(" ")
         append(
-            exerciseDataState.bind { it.title }.orNull()
-                ?: "Exercise name placeholder"
+            exerciseDataState.bind { it.title }.orNull().orEmpty()
         )
     }
 
