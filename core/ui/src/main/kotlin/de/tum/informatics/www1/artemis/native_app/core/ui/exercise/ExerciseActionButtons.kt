@@ -25,7 +25,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExerci
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.hasEnded
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isStartExerciseAvailable
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
@@ -45,7 +44,7 @@ fun ExerciseActionButtons(
 ) {
     // TODO: Team mode is currently not supported. Therefore, the buttons are disabled in team mode exercises
 
-    val latestParticipation = exercise.latestParticipation
+    val latestParticipation = exercise.getSpecificStudentParticipation(false)
 
     if (exercise is TextExercise) {
         if (latestParticipation == null && isStartExerciseAvailable(exercise)) {

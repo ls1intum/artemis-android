@@ -32,7 +32,6 @@ import androidx.navigation.NavController
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
@@ -42,7 +41,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.getProble
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import kotlinx.coroutines.Deferred
-import me.onebone.toolbar.ExperimentalToolbarApi
 
 val LocalExerciseScreenFloatingActionButton =
     compositionLocalOf { ExerciseScreenFloatingActionButtonProvider() }
@@ -50,7 +48,6 @@ val LocalExerciseScreenFloatingActionButton =
 /**
  * Display the exercise screen with tabs for the problem statement, the exercise info and the questions and answer.
  */
-@OptIn(ExperimentalToolbarApi::class)
 @Composable
 internal fun ExerciseScreen(
     modifier: Modifier,
@@ -80,7 +77,7 @@ internal fun ExerciseScreen(
             exerciseDataState.bind { exercise ->
                 // Only relevant for programming exercises
                 if (exercise is ProgrammingExercise) {
-                    exercise.latestParticipation?.id
+                    exercise.getSpecificStudentParticipation(false)?.id
                 } else null
             }.orNull()
         }

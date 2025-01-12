@@ -126,10 +126,12 @@ internal class ExerciseViewModel(
         exerciseDataState.map { exerciseData ->
             exerciseData.bind { exercise ->
                 val participation =
-                    exercise.studentParticipations.orEmpty().firstOrNull()
+                    exercise.getSpecificStudentParticipation(false)
 
-                participation?.results.orEmpty().sortedByDescending { it.completionDate }
+                val it = participation?.results.orEmpty().sortedByDescending { it.completionDate }
                     .firstOrNull()
+                print(it)
+                it
             }
         }
             .flowOn(coroutineContext)

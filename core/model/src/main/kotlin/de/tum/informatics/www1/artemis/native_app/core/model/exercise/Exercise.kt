@@ -5,6 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.isInFutureFlow
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation.InitializationState
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -145,6 +146,15 @@ sealed class Exercise {
         if (dueDate == null) null else {
             participation?.individualDueDate ?: dueDate
         }
+
+    fun getSpecificStudentParticipation(testRun: Boolean): Participation? {
+        return studentParticipations.orEmpty().firstOrNull {
+            when (it) {
+                is StudentParticipation -> it.testRun == testRun
+                else -> false
+            }
+        }
+    }
 }
 
 // Extensions

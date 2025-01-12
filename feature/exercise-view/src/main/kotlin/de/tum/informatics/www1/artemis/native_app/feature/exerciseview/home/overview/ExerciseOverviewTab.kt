@@ -186,7 +186,7 @@ private fun ExerciseInformation(
             text = stringResource(R.string.exercise_view_overview_title),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
-                .padding(4.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
                 .fillMaxWidth(),
             textAlign = TextAlign.Start
         )
@@ -226,7 +226,7 @@ private fun ExerciseInformation(
             text = stringResource(R.string.exercise_view_overview_title),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
-                .padding(4.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
                 .fillMaxWidth(),
             textAlign = TextAlign.Start
         )
@@ -241,13 +241,13 @@ private fun TextAndValueRow(@StringRes hintRes: Int, @StringRes value: Int) {
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            modifier = Modifier.padding(4.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             text = stringResource(hintRes),
             style = MaterialTheme.typography.bodyMedium
         )
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            modifier = Modifier.padding(4.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             text = stringResource(value),
             style = MaterialTheme.typography.bodyMedium
         )
@@ -308,14 +308,14 @@ private fun TextInformation(
                         placeable.placeRelative(0, 0)
                     }
                 }
-                .padding(4.dp),
+                .padding(horizontal = 8.dp, vertical = 4.dp),
             text = hint,
             style = MaterialTheme.typography.bodyMedium,
         )
 
         Spacer(modifier = Modifier.weight(1f))
 
-        val dataModifier = Modifier.padding(4.dp)
+        val dataModifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
         if (dataColor != null) {
             ExerciseInfoChip(modifier = dataModifier, color = dataColor, text = dataText)
         } else {

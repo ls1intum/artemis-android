@@ -10,7 +10,6 @@ import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isUninitialized
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.notStarted
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation.InitializationState
@@ -26,13 +25,16 @@ fun ParticipationStatusUi(
     modifier: Modifier,
     exercise: Exercise
 ) {
-    val participation = remember(exercise) { exercise.latestParticipation }
+    val showUngradedResults = false
 
-    if (participation != null && participation.results.orEmpty().isNotEmpty()) {
+    val participation = remember(exercise) { exercise.getSpecificStudentParticipation(showUngradedResults) }
+    val result = if (showUngradedResults) participation?.results.orEmpty().first() else participation?.results?.firstOrNull { it.rated == true }
+
+    if (participation != null && result != null) {
         // Display dynamic updates component
         ExerciseResult(
             modifier = modifier,
-            showUngradedResults = true,
+            showUngradedResults = showUngradedResults,
             exercise = exercise
         )
     } else {
@@ -55,8 +57,10 @@ private fun getSubmissionResultStatusText(
     participation: Participation?,
     exercise: Exercise
 ): String {
+    println(participation)
     val isAfterDueDate = exercise.dueDate?.hasPassed() ?: false
-    val exerciseMissedDeadline = isAfterDueDate && exercise.latestParticipation == null
+    val exerciseMissedDeadline = isAfterDueDate && participation == null
+    println("exerciseMissedDeadline: $exerciseMissedDeadline")
 
     val uninitialized =
         if (exercise is QuizExercise) exercise.isUninitializedC else !isAfterDueDate && participation == null

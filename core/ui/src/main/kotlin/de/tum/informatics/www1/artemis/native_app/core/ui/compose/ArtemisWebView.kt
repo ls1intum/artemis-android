@@ -143,7 +143,7 @@ private class ThemeClient(
                         val buffer = (contentHeight * 0.15).roundToInt()
                         onHeightChanged(contentHeight + buffer)
                     }
-                }, 100)
+                }, 500)
             }
         }
 

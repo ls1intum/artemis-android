@@ -48,7 +48,7 @@ val resultBad: Color
 @Composable
 fun ExerciseResult(
     modifier: Modifier,
-    showUngradedResults: Boolean = true,
+    showUngradedResults: Boolean = false,
     templateStatus: ResultTemplateStatus? = LocalTemplateStatusProvider.current(),
     exercise: Exercise
 ) {
@@ -100,7 +100,7 @@ fun ExerciseResult(
 }
 
 private val statusTextStyle: TextStyle
-    @Composable get() = MaterialTheme.typography.labelMedium
+    @Composable get() = MaterialTheme.typography.bodyMedium
 
 
 @Composable
@@ -212,13 +212,6 @@ private fun IconTextStatus(
     textStyle: TextStyle = statusTextStyle
 ) {
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = text,
-            color = textColor,
-            style = textStyle,
-            modifier = Modifier.align(Alignment.CenterVertically)
-        )
-
         Icon(
             imageVector = icon,
             tint = iconColor,
@@ -226,6 +219,13 @@ private fun IconTextStatus(
                 .fillMaxHeight()
                 .aspectRatio(1f, matchHeightConstraintsFirst = true),
             contentDescription = null
+        )
+
+        Text(
+            text = text,
+            color = textColor,
+            style = textStyle,
+            modifier = Modifier.align(Alignment.CenterVertically)
         )
     }
 }
