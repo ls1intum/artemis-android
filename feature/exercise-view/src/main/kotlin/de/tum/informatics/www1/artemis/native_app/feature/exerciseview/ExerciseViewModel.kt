@@ -18,6 +18,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -36,6 +39,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -46,6 +50,7 @@ internal class ExerciseViewModel(
     private val exerciseService: ExerciseService,
     private val liveParticipationService: LiveParticipationService,
     private val courseExerciseService: CourseExerciseService,
+    private val channelService: ChannelService,
     private val networkStatusProvider: NetworkStatusProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
@@ -128,10 +133,8 @@ internal class ExerciseViewModel(
                 val participation =
                     exercise.getSpecificStudentParticipation(false)
 
-                val it = participation?.results.orEmpty().sortedByDescending { it.completionDate }
+                participation?.results.orEmpty().sortedByDescending { it.completionDate }
                     .firstOrNull()
-                print(it)
-                it
             }
         }
             .flowOn(coroutineContext)
@@ -139,6 +142,23 @@ internal class ExerciseViewModel(
 
     val serverUrl: StateFlow<String> = serverUrlStateFlow(serverConfigurationService)
     val authToken: StateFlow<String> = authTokenStateFlow(accountService)
+
+    val channelDataState: StateFlow<DataState<ChannelChat>> = exerciseDataState
+        .flatMapLatest { exerciseState ->
+            when (exerciseState) {
+                is DataState.Success -> {
+                    val courseId = exerciseState.data.course?.id.let { it ?: 0L }
+                    baseConfigurationFlow.flatMapLatest { (serverUrl, authToken) ->
+                        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                            channelService.getExerciseChannel(exerciseId, courseId, serverUrl, authToken)
+                        }
+                    }
+                }
+                else -> flowOf(DataState.Loading())
+            }
+        }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
 
     fun requestReloadExercise() {
         requestReloadExercise.tryEmit(Unit)

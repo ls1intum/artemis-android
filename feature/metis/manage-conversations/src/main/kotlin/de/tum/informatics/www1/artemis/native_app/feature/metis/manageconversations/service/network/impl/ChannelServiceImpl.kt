@@ -4,8 +4,8 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -37,6 +37,33 @@ class ChannelServiceImpl(private val ktorProvider: KtorProvider) : ChannelServic
                 cookieAuth(authToken)
                 contentType(ContentType.Application.Json)
             }.body()
+        }
+    }
+
+    override suspend fun getExerciseChannel(
+        exerciseId: Long,
+        courseId: Long,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<ChannelChat> {
+        return performNetworkCall {
+            val x = ktorProvider.ktorClient.get(serverUrl) {
+                url {
+                    appendPathSegments(
+                        "api",
+                        "courses",
+                        courseId.toString(),
+                        "exercises",
+                        exerciseId.toString(),
+                        "channel"
+                    )
+                }
+
+                cookieAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }
+            println(x)
+            x.body()
         }
     }
 

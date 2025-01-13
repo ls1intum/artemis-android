@@ -63,6 +63,7 @@ internal fun ExerciseScreen(
     val authToken: String by viewModel.authToken.collectAsState()
 
     val exerciseDataState by viewModel.exerciseDataState.collectAsState()
+    val channelDataState by viewModel.channelDataState.collectAsState()
 
     val courseId: Long? = exerciseDataState.courseId
 
@@ -188,6 +189,7 @@ internal fun ExerciseScreen(
                         .padding(top = padding.calculateTopPadding())
                         .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
                     exerciseDataState = exerciseDataState,
+                    exerciseChannelDataState = channelDataState,
                     isLongToolbar = isLongToolbar,
                     displayCommunicationOnSide = displayCommunicationOnSide,
                     navController = navController,

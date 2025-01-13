@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.DefaultTab
@@ -26,6 +27,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseD
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.overview.ExerciseOverviewTab
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 
 // Ratio of metis content in contrast to the actual exercise content
 const val METIS_RATIO = 0.3f
@@ -35,6 +37,7 @@ const val METIS_RATIO = 0.3f
 internal fun ExerciseScreenBody(
     modifier: Modifier,
     exerciseDataState: DataState<Exercise>,
+    exerciseChannelDataState: DataState<ChannelChat>,
     isLongToolbar: Boolean,
     displayCommunicationOnSide: Boolean,
     navController: NavController,
@@ -55,10 +58,13 @@ internal fun ExerciseScreenBody(
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
+                val exerciseChannel = exerciseChannelDataState.bind { it }.orNull()
+
                 val exerciseOverviewTab: @Composable (Modifier) -> Unit = { modifier: Modifier ->
                     ExerciseOverviewTab(
                         modifier = modifier,
                         exercise = exercise,
+                        exerciseChannel = exerciseChannel,
                         isLongToolbar = isLongToolbar,
                         webViewState = webViewState,
                         setWebView = setWebView,

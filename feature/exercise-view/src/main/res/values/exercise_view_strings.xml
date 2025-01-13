@@ -21,6 +21,7 @@
     <string name="exercise_view_overview_hint_difficulty">Difficulty:</string>
     <string name="exercise_view_overview_hint_exercise_type">Exercise type:</string>
     <string name="exercise_view_overview_hint_exercise_categories">Categories:</string>
+    <string name="exercise_view_overview_hint_exercise_communication">Communication:</string>
 
     <string name="exercise_view_overview_hint_assessment_complaint_possible_yes">Yes</string>
     <string name="exercise_view_overview_hint_assessment_complaint_possible_no">No</string>

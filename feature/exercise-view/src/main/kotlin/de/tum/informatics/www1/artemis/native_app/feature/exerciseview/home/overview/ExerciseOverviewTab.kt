@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.webkit.WebView
 import androidx.annotation.StringRes
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,18 +16,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,9 +38,10 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCategoryChipRow
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseInfoChip
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseInfoChipTextHorizontalPadding
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.datetime.Instant
 
 
@@ -50,6 +50,7 @@ import kotlinx.datetime.Instant
 internal fun ExerciseOverviewTab(
     modifier: Modifier = Modifier,
     exercise: Exercise,
+    exerciseChannel: ChannelChat?,
     isLongToolbar: Boolean,
     webViewState: WebViewState?,
     serverUrl: String,
@@ -83,6 +84,7 @@ internal fun ExerciseOverviewTab(
                     shape = MaterialTheme.shapes.extraSmall
                 ),
             exercise = exercise,
+            exerciseChannel = exerciseChannel,
             isLongToolbar = isLongToolbar
         )
 
@@ -120,25 +122,24 @@ internal fun ExerciseOverviewTab(
 private fun ExerciseInformation(
     modifier: Modifier,
     exercise: Exercise,
+    exerciseChannel: ChannelChat?,
     isLongToolbar: Boolean
 ) {
-    var maxWidth: Int by remember { mutableIntStateOf(0) }
-    val updateMaxWidth = { new: Int -> maxWidth = new }
     val complaintPossible = exercise.allowComplaintsForAutomaticAssessments ?: false
 
-    val nullableDueDateTextInfo = @Composable { dueDate: Instant?, hintRes: Int ->
+    val nullableDateTextInfo = @Composable { dueDate: Instant?, hintRes: Int ->
         if (dueDate != null) {
-            DueDateTextInfo(
-                dueDate = dueDate,
+            DateInfoText(
+                modifier = Modifier.fillMaxWidth(),
+                dueDate = getRelativeTime(to = dueDate, showDateAndTime = true),
                 hintRes = hintRes,
-                maxWidth = maxWidth,
-                updateMaxWidth = updateMaxWidth
+                dataColor = ExerciseColors.getDueDateColor(dueDate)
             )
         }
     }
 
     val leftColumnUi = @Composable {
-        nullableDueDateTextInfo(
+        nullableDateTextInfo(
             exercise.releaseDate,
             R.string.exercise_view_overview_hint_assessment_release_date
         )
@@ -152,13 +153,13 @@ private fun ExerciseInformation(
                 value = R.string.exercise_view_overview_no_submission_due_date
             )
         } else {
-            nullableDueDateTextInfo(
+            nullableDateTextInfo(
                 exercise.dueDate,
                 R.string.exercise_view_overview_hint_submission_due_date
             )
         }
 
-        nullableDueDateTextInfo(
+        nullableDateTextInfo(
             exercise.assessmentDueDate,
             R.string.exercise_view_overview_hint_assessment_due_date
         )
@@ -280,13 +281,9 @@ private fun ExerciseInformation(
             color = MaterialTheme.colorScheme.primary
         )
 
-        Text(
-            text = stringResource(R.string.exercise_view_overview_title),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 4.dp)
-                .fillMaxWidth(),
-            textAlign = TextAlign.Start
+        ExerciseChannelLink(
+            modifier = Modifier.fillMaxWidth(),
+            exerciseChannel = exerciseChannel
         )
     }
 }
@@ -294,9 +291,9 @@ private fun ExerciseInformation(
 @Composable
 private fun TextAndValueRow(
     modifier: Modifier,
+    exercise: Exercise,
     @StringRes hintRes: Int,
     @StringRes value: Int? = null,
-    exercise: Exercise,
     dataColor: Color? = null,
 ) {
     Row(
@@ -339,39 +336,54 @@ private fun TextAndValueRow(
 }
 
 @Composable
-private fun DueDateTextInfo(
-    dueDate: Instant,
-    @StringRes hintRes: Int,
-    maxWidth: Int,
-    updateMaxWidth: (Int) -> Unit
-) = TextInformation(
-        modifier = Modifier.fillMaxWidth(),
-        hintColumnWidth = maxWidth,
-        hint = stringResource(id = hintRes),
-        dataText = getRelativeTime(to = dueDate).toString(),
-        dataColor = ExerciseColors.getDueDateColor(dueDate),
-        updateHintColumnWidth = updateMaxWidth
-    )
-
-@Composable
 private fun ExerciseChannelLink(
     modifier: Modifier,
-    exercise: Exercise
+    exerciseChannel: ChannelChat?
 ) {
+    Row(
+        modifier = modifier.padding(start = 8.dp, top = 4.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            modifier = Modifier,
+            text = stringResource(R.string.exercise_view_overview_hint_exercise_communication),
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Row(
+            modifier = Modifier.clickable {
+
+            },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (exerciseChannel != null) {
+                Text(
+                    modifier = Modifier,
+                    text = exerciseChannel.humanReadableName.removePrefix("exercise-"),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Icon(
+                    modifier = Modifier,
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
 }
 
-/**
- * Text information composable that achieves a table like layout, where the hint is the first column
- * and the data is the second column.
- */
 @Composable
-private fun TextInformation(
+private fun DateInfoText(
     modifier: Modifier,
-    hintColumnWidth: Int,
-    hint: String,
-    dataText: String,
-    dataColor: Color?,
-    updateHintColumnWidth: (Int) -> Unit
+    @StringRes hintRes: Int,
+    dueDate: CharSequence,
+    dataColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
     Row(
         modifier = modifier,
@@ -379,35 +391,18 @@ private fun TextInformation(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            modifier = Modifier
-                .layout { measurable, constraints ->
-                    val placeable = measurable.measure(constraints)
-
-                    val assignedWidth = maxOf(hintColumnWidth, placeable.width)
-                    if (assignedWidth > hintColumnWidth) {
-                        updateHintColumnWidth(assignedWidth)
-                    }
-
-                    layout(width = assignedWidth, height = placeable.height) {
-                        placeable.placeRelative(0, 0)
-                    }
-                }
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            text = hint,
-            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            text = stringResource(hintRes),
+            style = MaterialTheme.typography.bodyMedium
         )
 
         Spacer(modifier = Modifier.weight(1f))
 
-        val dataModifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-        if (dataColor != null) {
-            ExerciseInfoChip(modifier = dataModifier, color = dataColor, text = dataText)
-        } else {
-            Text(
-                modifier = dataModifier.padding(horizontal = ExerciseInfoChipTextHorizontalPadding),
-                text = dataText,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
+        Text(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            text = dueDate.toString(),
+            color = dataColor,
+            style = MaterialTheme.typography.bodyMedium,
+        )
     }
 }
