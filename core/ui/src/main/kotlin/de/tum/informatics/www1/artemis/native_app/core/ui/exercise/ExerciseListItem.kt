@@ -136,10 +136,7 @@ private fun ExerciseDataText(
     // Format a relative time if the distant is
     val dueDate = exercise.dueDate
     val formattedDueDate = if (dueDate != null) {
-        stringResource(
-            id = R.string.exercise_item_due_date_set,
-            getRelativeTime(to = dueDate)
-        )
+        getRelativeTime(to = dueDate).toString()
     } else stringResource(id = R.string.exercise_item_due_date_not_set)
 
     Column(modifier = modifier) {

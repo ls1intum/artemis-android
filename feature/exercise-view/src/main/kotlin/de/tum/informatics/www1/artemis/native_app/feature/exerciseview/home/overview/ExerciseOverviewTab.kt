@@ -147,6 +147,7 @@ private fun ExerciseInformation(
         if (exercise.dueDate == null) {
             TextAndValueRow(
                 modifier = Modifier.fillMaxWidth(),
+                exercise = exercise,
                 hintRes = R.string.exercise_view_overview_hint_submission_due_date,
                 value = R.string.exercise_view_overview_no_submission_due_date
             )
@@ -155,12 +156,12 @@ private fun ExerciseInformation(
                 exercise.dueDate,
                 R.string.exercise_view_overview_hint_submission_due_date
             )
-
-            nullableDueDateTextInfo(
-                exercise.assessmentDueDate,
-                R.string.exercise_view_overview_hint_assessment_due_date
-            )
         }
+
+        nullableDueDateTextInfo(
+            exercise.assessmentDueDate,
+            R.string.exercise_view_overview_hint_assessment_due_date
+        )
     }
 
     val rightColumnUi = @Composable { contentModifier: Modifier ->
@@ -172,6 +173,7 @@ private fun ExerciseInformation(
         ) {
             TextAndValueRow(
                 modifier = Modifier.fillMaxWidth(),
+                exercise = exercise,
                 hintRes = R.string.exercise_view_overview_hint_assessment_complaint_possible,
                 value = complaintPossibleText
             )
@@ -191,6 +193,7 @@ private fun ExerciseInformation(
 
                 TextAndValueRow(
                     modifier = Modifier.fillMaxWidth(),
+                    exercise = exercise,
                     hintRes = R.string.exercise_view_overview_hint_exercise_type,
                     value = text,
                     dataColor = color
@@ -216,18 +219,20 @@ private fun ExerciseInformation(
 
                 TextAndValueRow(
                     modifier = Modifier.fillMaxWidth(),
+                    exercise = exercise,
                     hintRes = R.string.exercise_view_overview_hint_difficulty,
                     value = text,
                     dataColor = color
                 )
             }
 
-            ExerciseCategoryChipRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                exercise = exercise
-            )
+            if (exercise.categories.isNotEmpty()) {
+                TextAndValueRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    exercise = exercise,
+                    hintRes = R.string.exercise_view_overview_hint_exercise_categories
+                )
+            }
         }
     }
 
@@ -290,8 +295,9 @@ private fun ExerciseInformation(
 private fun TextAndValueRow(
     modifier: Modifier,
     @StringRes hintRes: Int,
-    @StringRes value: Int,
-    dataColor: Color? = null
+    @StringRes value: Int? = null,
+    exercise: Exercise,
+    dataColor: Color? = null,
 ) {
     Row(
         modifier = modifier,
@@ -305,6 +311,16 @@ private fun TextAndValueRow(
         )
 
         Spacer(modifier = Modifier.weight(1f))
+
+        if (value == null) {
+            ExerciseCategoryChipRow(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                exercise = exercise,
+                includeType = false
+            )
+            return
+        }
 
         if (dataColor != null) {
             ExerciseInfoChip(

@@ -49,6 +49,7 @@ fun ParticipationStatusUi(
         Text(
             modifier = modifier,
             text = text,
+            color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.bodyMedium
         )
     }

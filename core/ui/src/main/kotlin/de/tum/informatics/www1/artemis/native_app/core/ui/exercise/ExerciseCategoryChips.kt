@@ -21,12 +21,17 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quizStatus
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 
 /**
  * Display a row of the categories this exercise is associated with
  */
 @Composable
-fun ExerciseCategoryChipRow(modifier: Modifier, exercise: Exercise) {
+fun ExerciseCategoryChipRow(
+    modifier: Modifier,
+    exercise: Exercise,
+    includeType: Boolean = true
+) {
     val context = LocalContext.current
 
     val quizStatus = if (exercise is QuizExercise) {
@@ -34,7 +39,12 @@ fun ExerciseCategoryChipRow(modifier: Modifier, exercise: Exercise) {
     } else QuizExercise.QuizStatus.INVISIBLE
 
     val chips = remember(exercise, quizStatus) {
-        collectExerciseCategoryChips(context, exercise, quizStatus)
+        collectExerciseCategoryChips(
+            context = context,
+            exercise = exercise,
+            quizStatus = quizStatus,
+            includeType = includeType
+        )
     }
 
     ExerciseCategoryChipRow(modifier = modifier, chips = chips)
@@ -106,7 +116,8 @@ fun ExerciseInfoChip(
 private fun collectExerciseCategoryChips(
     context: Context,
     exercise: Exercise,
-    quizStatus: QuizExercise.QuizStatus
+    quizStatus: QuizExercise.QuizStatus,
+    includeType: Boolean = true
 ): List<ExerciseCategoryChipData> {
     val liveQuizChips =
         if (exercise is QuizExercise && quizStatus == QuizExercise.QuizStatus.ACTIVE)
@@ -117,15 +128,21 @@ private fun collectExerciseCategoryChips(
                 )
             ) else emptyList()
 
-    val bonusChips =
-        if (exercise.includedInOverallScore == Exercise.IncludedInOverallScore.INCLUDED_AS_BONUS) {
-            listOf(
-                ExerciseCategoryChipData(
-                    context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_is_bonus),
-                    Color.Cyan
-                )
+    val typeChips = when (exercise.includedInOverallScore) {
+        Exercise.IncludedInOverallScore.INCLUDED_AS_BONUS -> listOf(
+            ExerciseCategoryChipData(
+                context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_is_bonus),
+                ExerciseColors.Type.bonus
             )
-        } else emptyList()
+        )
+        Exercise.IncludedInOverallScore.NOT_INCLUDED -> listOf(
+            ExerciseCategoryChipData(
+                context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_is_optional),
+                ExerciseColors.Type.notIncluded
+            )
+        )
+        else -> emptyList()
+    }
 
     val categoryChips = exercise.categories.map { category ->
         ExerciseCategoryChipData(
@@ -134,5 +151,6 @@ private fun collectExerciseCategoryChips(
         )
     }
 
-    return liveQuizChips + categoryChips + bonusChips
+    if (!includeType) return liveQuizChips + categoryChips
+    return liveQuizChips + categoryChips + typeChips
 }
