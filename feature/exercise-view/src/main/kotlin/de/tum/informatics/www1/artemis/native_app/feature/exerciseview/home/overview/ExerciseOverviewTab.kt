@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -35,11 +36,11 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExerci
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
-import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseCategoryChipRow
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseInfoChip
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseInfoChipTextHorizontalPadding
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.R
 import kotlinx.datetime.Instant
 
@@ -136,46 +137,96 @@ private fun ExerciseInformation(
         }
     }
 
-    val categoryPointsReleaseDateUi = @Composable {
-        ExerciseCategoryChipRow(
-            modifier = Modifier.fillMaxWidth(),
-            exercise = exercise
-        )
-
+    val leftColumnUi = @Composable {
         nullableDueDateTextInfo(
             exercise.releaseDate,
             R.string.exercise_view_overview_hint_assessment_release_date
         )
+
+        // We always want to display a submission due date
+        if (exercise.dueDate == null) {
+            TextAndValueRow(
+                modifier = Modifier.fillMaxWidth(),
+                hintRes = R.string.exercise_view_overview_hint_submission_due_date,
+                value = R.string.exercise_view_overview_no_submission_due_date
+            )
+        } else {
+            nullableDueDateTextInfo(
+                exercise.dueDate,
+                R.string.exercise_view_overview_hint_submission_due_date
+            )
+
+            nullableDueDateTextInfo(
+                exercise.assessmentDueDate,
+                R.string.exercise_view_overview_hint_assessment_due_date
+            )
+        }
     }
 
-    val dueDateColumnUi = @Composable { contentModifier: Modifier ->
+    val rightColumnUi = @Composable { contentModifier: Modifier ->
         val complaintPossibleText =
             if (complaintPossible) R.string.exercise_view_overview_hint_assessment_complaint_possible_yes else R.string.exercise_view_overview_hint_assessment_complaint_possible_no
 
         Column(
             modifier = contentModifier,
         ) {
-            // We always want to display a submission due date
-            if (exercise.dueDate == null) {
+            TextAndValueRow(
+                modifier = Modifier.fillMaxWidth(),
+                hintRes = R.string.exercise_view_overview_hint_assessment_complaint_possible,
+                value = complaintPossibleText
+            )
+
+            if (exercise.includedInOverallScore != Exercise.IncludedInOverallScore.INCLUDED_COMPLETELY) {
+                val (text, color) = when (exercise.includedInOverallScore) {
+                    Exercise.IncludedInOverallScore.INCLUDED_AS_BONUS -> Pair(
+                        R.string.exercise_view_overview_hint_exercise_type_bonus,
+                        ExerciseColors.Type.bonus
+                    )
+                    Exercise.IncludedInOverallScore.NOT_INCLUDED -> Pair(
+                        R.string.exercise_view_overview_hint_exercise_type_optional,
+                        ExerciseColors.Type.notIncluded
+                    )
+                    else -> Pair(R.string.exercise_type_unknown, null)
+                }
+
                 TextAndValueRow(
-                    hintRes = R.string.exercise_view_overview_hint_submission_due_date,
-                    value = R.string.exercise_view_overview_no_submission_due_date
-                )
-            } else {
-                nullableDueDateTextInfo(
-                    exercise.dueDate,
-                    R.string.exercise_view_overview_hint_submission_due_date
+                    modifier = Modifier.fillMaxWidth(),
+                    hintRes = R.string.exercise_view_overview_hint_exercise_type,
+                    value = text,
+                    dataColor = color
                 )
             }
 
-            nullableDueDateTextInfo(
-                exercise.assessmentDueDate,
-                R.string.exercise_view_overview_hint_assessment_due_date
-            )
+            if (exercise.difficulty != null) {
+                val (text, color) = when (exercise.difficulty) {
+                    Exercise.Difficulty.EASY -> Pair(
+                        R.string.exercise_view_overview_hint_difficulty_easy,
+                        ExerciseColors.Difficulty.easy
+                    )
+                    Exercise.Difficulty.MEDIUM -> Pair(
+                        R.string.exercise_view_overview_hint_difficulty_medium,
+                        ExerciseColors.Difficulty.medium
+                    )
+                    Exercise.Difficulty.HARD -> Pair(
+                        R.string.exercise_view_overview_hint_difficulty_hard,
+                        ExerciseColors.Difficulty.hard
+                    )
+                    else -> Pair(R.string.exercise_type_unknown, null)
+                }
 
-            TextAndValueRow(
-                hintRes = R.string.exercise_view_overview_hint_assessment_complaint_possible,
-                value = complaintPossibleText
+                TextAndValueRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    hintRes = R.string.exercise_view_overview_hint_difficulty,
+                    value = text,
+                    dataColor = color
+                )
+            }
+
+            ExerciseCategoryChipRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                exercise = exercise
             )
         }
     }
@@ -204,15 +255,17 @@ private fun ExerciseInformation(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    categoryPointsReleaseDateUi()
+                    leftColumnUi()
                 }
 
-                dueDateColumnUi(Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(16.dp))
+
+                rightColumnUi(Modifier.weight(1f))
             }
         } else {
             Column(modifier = Modifier.fillMaxWidth()) {
-                categoryPointsReleaseDateUi()
-                dueDateColumnUi(Modifier.fillMaxWidth())
+                leftColumnUi()
+                rightColumnUi(Modifier.fillMaxWidth())
             }
         }
 
@@ -234,9 +287,14 @@ private fun ExerciseInformation(
 }
 
 @Composable
-private fun TextAndValueRow(@StringRes hintRes: Int, @StringRes value: Int) {
+private fun TextAndValueRow(
+    modifier: Modifier,
+    @StringRes hintRes: Int,
+    @StringRes value: Int,
+    dataColor: Color? = null
+) {
     Row(
-        modifier = Modifier,
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -245,12 +303,22 @@ private fun TextAndValueRow(@StringRes hintRes: Int, @StringRes value: Int) {
             text = stringResource(hintRes),
             style = MaterialTheme.typography.bodyMedium
         )
+
         Spacer(modifier = Modifier.weight(1f))
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            text = stringResource(value),
-            style = MaterialTheme.typography.bodyMedium
-        )
+
+        if (dataColor != null) {
+            ExerciseInfoChip(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                color = dataColor,
+                text = stringResource(value)
+            )
+        } else {
+            Text(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                text = stringResource(value),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }
 
@@ -265,7 +333,7 @@ private fun DueDateTextInfo(
         hintColumnWidth = maxWidth,
         hint = stringResource(id = hintRes),
         dataText = getRelativeTime(to = dueDate).toString(),
-        dataColor = getDueDateColor(dueDate),
+        dataColor = ExerciseColors.getDueDateColor(dueDate),
         updateHintColumnWidth = updateMaxWidth
     )
 
@@ -327,7 +395,3 @@ private fun TextInformation(
         }
     }
 }
-
-@Composable
-private fun getDueDateColor(dueDate: Instant): Color =
-    if (dueDate.hasPassed()) Color.Red else Color.Green

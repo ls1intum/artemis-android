@@ -58,7 +58,7 @@ internal fun ParticipationStatusUi(
 
 @Composable
 private fun ExercisePointInfo(exercise: Exercise) {
-    val currentUserPoints = exercise.currentUserPoints?.let(ExercisePointsDecimalFormat::format)
+    val currentUserPoints = exercise.currentUserPoints.let(ExercisePointsDecimalFormat::format)
     val maxPoints = exercise.maxPoints?.let(ExercisePointsDecimalFormat::format)
 
     val pointsHintText = when {

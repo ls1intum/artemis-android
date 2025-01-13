@@ -39,12 +39,16 @@ fun ParticipationStatusUi(
         )
     } else {
         // Simply display text
+        val text = getSubmissionResultStatusText(
+            participation = participation,
+            exercise = exercise
+        )
+
+        if (text == null) return
+
         Text(
             modifier = modifier,
-            text = getSubmissionResultStatusText(
-                participation = participation,
-                exercise = exercise
-            ),
+            text = text,
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -56,11 +60,9 @@ fun ParticipationStatusUi(
 private fun getSubmissionResultStatusText(
     participation: Participation?,
     exercise: Exercise
-): String {
-    println(participation)
+): String? {
     val isAfterDueDate = exercise.dueDate?.hasPassed() ?: false
     val exerciseMissedDeadline = isAfterDueDate && participation == null
-    println("exerciseMissedDeadline: $exerciseMissedDeadline")
 
     val uninitialized =
         if (exercise is QuizExercise) exercise.isUninitializedC else !isAfterDueDate && participation == null
@@ -81,7 +83,7 @@ private fun getSubmissionResultStatusText(
         participation?.initializationState == InitializationState.FINISHED -> R.string.exercise_user_submitted
         participation?.initializationState == InitializationState.INITIALIZED && exercise is QuizExercise -> R.string.exercise_user_participating
         exercise is QuizExercise && exercise.notStartedC -> R.string.exercise_quiz_not_started
-        else -> R.string.exercise_user_unknown
+        else -> return null
     }
 
     return stringResource(id = id)

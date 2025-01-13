@@ -28,7 +28,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isStartExe
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ParticipationNotPossibleInfoMessageCardColors
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 
 /**
  * This composable composes up to two buttons. The modifier parameter is applied to every button
@@ -221,10 +221,10 @@ fun ParticipationNotPossibleInfoMessageCard() {
         modifier = Modifier
             .border(
                 width = 1.dp,
-                color = ParticipationNotPossibleInfoMessageCardColors.border,
+                color = ExerciseColors.ParticipationNotPossibleInfoMessageCardColors.border,
                 shape = MaterialTheme.shapes.extraSmall
             )
-            .background(ParticipationNotPossibleInfoMessageCardColors.background)
+            .background(ExerciseColors.ParticipationNotPossibleInfoMessageCardColors.background)
             .padding(8.dp)
             .fillMaxWidth()
     ) {
@@ -233,12 +233,12 @@ fun ParticipationNotPossibleInfoMessageCard() {
                 imageVector = Icons.Outlined.Info,
                 contentDescription = null,
                 modifier = Modifier.padding(end = 8.dp),
-                tint = ParticipationNotPossibleInfoMessageCardColors.text
+                tint = ExerciseColors.ParticipationNotPossibleInfoMessageCardColors.text
             )
             Text(
                 text = stringResource(id = R.string.exercise_participation_not_possible),
                 fontSize = 16.sp,
-                color = ParticipationNotPossibleInfoMessageCardColors.text
+                color = ExerciseColors.ParticipationNotPossibleInfoMessageCardColors.text
             )
         }
     }

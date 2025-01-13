@@ -27,19 +27,11 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import java.text.DecimalFormat
 
 private const val MIN_SCORE_GREEN = 80
 private const val MIN_SCORE_ORANGE = 40
-
-val resultSuccess: Color
-    get() = Color(0xFF4CAF50)
-val resultMedium: Color
-    get() = Color(0xFFB18502)
-val resultBad: Color
-    get() = Color.Red
-
-
 
 /**
  * Display the result of an exercise. The result is displayed in a single row.
@@ -138,9 +130,9 @@ private fun StatusHasResult(
     }
 
     val textAndIconColor = when {
-        resultScore >= MIN_SCORE_GREEN -> resultSuccess
-        resultScore >= MIN_SCORE_ORANGE -> resultMedium
-        else -> resultBad
+        resultScore >= MIN_SCORE_GREEN -> ExerciseColors.Result.success
+        resultScore >= MIN_SCORE_ORANGE -> ExerciseColors.Result.medium
+        else -> ExerciseColors.Result.bad
     }
 
     val context = LocalContext.current
