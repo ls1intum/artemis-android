@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.ArtemisWebView
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
@@ -283,6 +284,7 @@ private fun ExerciseInformation(
 
         ExerciseChannelLink(
             modifier = Modifier.fillMaxWidth(),
+            exercise = exercise,
             exerciseChannel = exerciseChannel
         )
     }
@@ -338,8 +340,11 @@ private fun TextAndValueRow(
 @Composable
 private fun ExerciseChannelLink(
     modifier: Modifier,
+    exercise: Exercise,
     exerciseChannel: ChannelChat?
 ) {
+    val localLinkOpener = LocalLinkOpener.current
+
     Row(
         modifier = modifier.padding(start = 8.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -355,7 +360,10 @@ private fun ExerciseChannelLink(
 
         Row(
             modifier = Modifier.clickable {
-
+                val courseId = exercise.course?.id
+                if (exerciseChannel != null && courseId != null) {
+                    localLinkOpener.openLink("artemis://courses/$courseId/messages?conversationId=${exerciseChannel.id}")
+                }
             },
             verticalAlignment = Alignment.CenterVertically
         ) {
