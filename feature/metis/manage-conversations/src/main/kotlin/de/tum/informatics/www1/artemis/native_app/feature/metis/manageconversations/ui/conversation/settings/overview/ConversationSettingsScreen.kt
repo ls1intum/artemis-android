@@ -1,15 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -113,11 +111,6 @@ internal fun ConversationSettingsScreen(
                 },
                 navigationIcon = {
                     NavigationBackButton(onNavigateBack)
-                },
-                actions = {
-                    IconButton(onClick = viewModel::requestReload) {
-                        Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
-                    }
                 }
             )
         }
@@ -127,7 +120,7 @@ internal fun ConversationSettingsScreen(
                 .fillMaxSize()
                 .imePadding()
                 .padding(top = paddingValues.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars),
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
             viewModel = viewModel,
             onRequestViewAllMembers = onRequestViewAllMembers,
             onRequestAddMembers = onRequestAddMembers,

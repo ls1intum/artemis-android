@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -76,7 +77,9 @@ internal fun PostContextBottomSheet(
 
     if (!displayAllEmojis) {
         ModalBottomSheet(
-            modifier = Modifier.testTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET),
+            modifier = Modifier
+                .statusBarsPadding()
+                .testTag(TEST_TAG_POST_CONTEXT_BOTTOM_SHEET),
             contentWindowInsets = { WindowInsets.statusBars },
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = onDismissRequest

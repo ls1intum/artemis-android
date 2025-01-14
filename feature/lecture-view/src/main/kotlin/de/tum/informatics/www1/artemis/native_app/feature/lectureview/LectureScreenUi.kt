@@ -7,11 +7,16 @@ import android.os.Environment
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -175,7 +180,7 @@ internal fun LectureScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = lectureTitle ?: "Placeholder",
+                            text = lectureTitle.orEmpty(),
                             modifier = Modifier.placeholder(lectureTitle == null),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
@@ -183,7 +188,7 @@ internal fun LectureScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
-                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                         }
                     }
                 )
@@ -192,6 +197,7 @@ internal fun LectureScreen(
             val bodyModifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
 
             contentBody(
                 bodyModifier

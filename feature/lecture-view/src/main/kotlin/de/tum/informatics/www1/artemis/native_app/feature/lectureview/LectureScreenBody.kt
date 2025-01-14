@@ -123,7 +123,7 @@ internal fun LectureScreenBody(
                         }
                     }
 
-                    OverviewTab(
+                    LectureOverviewTab(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 8.dp),

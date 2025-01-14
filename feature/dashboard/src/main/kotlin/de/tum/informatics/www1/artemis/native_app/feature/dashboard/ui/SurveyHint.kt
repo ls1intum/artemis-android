@@ -126,6 +126,7 @@ private fun SurveyDialog(
 ) {
 
     AlertDialog(
+        modifier = modifier,
         onDismissRequest = { onClose(false) },
         title = { Text(text = stringResource(R.string.survey_dialog_title)) },
         text = {
