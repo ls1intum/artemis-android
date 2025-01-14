@@ -65,14 +65,17 @@ fun ExerciseListItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     //Displays the icon of the exercise
-                    Icon(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .padding(end = 8.dp)
-                            .fillMaxSize(),
-                        painter = getExerciseTypeIconPainter(exercise),
-                        contentDescription = null
-                    )
+                    val painter = getExerciseTypeIconPainter(exercise)
+                    if (painter != null) {
+                        Icon(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .padding(end = 8.dp)
+                                .fillMaxSize(),
+                            painter = painter,
+                            contentDescription = null
+                        )
+                    }
 
                     //Displays the title of the exercise
                     Text(

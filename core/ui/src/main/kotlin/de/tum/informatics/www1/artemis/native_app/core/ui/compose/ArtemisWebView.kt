@@ -126,6 +126,8 @@ private class ThemeClient(
         if (view != null) {
             setLocalStorage(view)
 
+            // The following code is inspired by: https://github.com/ls1intum/artemis-ios/blob/71596a9949bacd29c142cbdfe3a9825d6921628f/ArtemisKit/Sources/CourseView/ExerciseTab/ExerciseDetailViewModel.swift
+            // The code can be found in the artemis-ios repository: https://github.com/ls1intum/artemis-ios
             if (adjustHeightForContent) {
                 view.postDelayed({
                     view.evaluateJavascript(
@@ -140,10 +142,9 @@ private class ThemeClient(
                     """.trimIndent(),
                     ) { heightString ->
                         val contentHeight = heightString?.toFloatOrNull()?.roundToInt() ?: 0
-                        val buffer = (contentHeight * 0.15).roundToInt()
-                        onHeightChanged(contentHeight + buffer)
+                        onHeightChanged(contentHeight)
                     }
-                }, 500)
+                }, 750)
             }
         }
 

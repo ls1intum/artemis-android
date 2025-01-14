@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
@@ -16,14 +15,14 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExerci
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 
 @Composable
-fun getExerciseTypeIconPainter(exercise: Exercise?): Painter {
+fun getExerciseTypeIconPainter(exercise: Exercise?): Painter? {
     return when (exercise) {
         is TextExercise -> painterResource(id = R.drawable.font)
         is ModelingExercise -> painterResource(id = R.drawable.diagram_project)
         is FileUploadExercise -> painterResource(id = R.drawable.file_arrow_up)
         is ProgrammingExercise -> painterResource(id = R.drawable.keyboard)
         is QuizExercise -> painterResource(id = R.drawable.check_double)
-        null -> rememberVectorPainter(image = Icons.Default.Downloading)
+        null -> null
         else -> rememberVectorPainter(image = Icons.Default.QuestionMark)
     }
 }
