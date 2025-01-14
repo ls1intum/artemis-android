@@ -280,12 +280,10 @@ private fun CreateReplyUi(
                         onFileSelected(uri)
                     },
                     formattingOptionButtons = {
-                        if (displayTextField || currentTextFieldValue.text.isNotBlank()) {
-                            FormattingOptions(
-                                currentTextFieldValue = currentTextFieldValue,
-                                onTextChanged = replyMode::onUpdate
-                            )
-                        }
+                        FormattingOptions(
+                            currentTextFieldValue = currentTextFieldValue,
+                            onTextChanged = replyMode::onUpdate
+                        )
                     },
                 )
 
