@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MarkdownListContinuationUtil.continueListIfApplicable
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -81,7 +82,7 @@ class MarkdownListContinuationUtilTest {
         val newText = buildString {
             append(oldText.substring(0, insertionIndex))
             append("\n")
-            append(oldText.substring(insertionIndex)) 
+            append(oldText.substring(insertionIndex))
         }
 
         val cursor = insertionIndex + 1
