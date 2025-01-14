@@ -23,7 +23,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
 @Composable
 fun ParticipationStatusUi(
     modifier: Modifier,
-    exercise: Exercise
+    exercise: Exercise,
+    showLargeIcon: Boolean = false
 ) {
     val showUngradedResults = false
 
@@ -35,7 +36,8 @@ fun ParticipationStatusUi(
         ExerciseResult(
             modifier = modifier,
             showUngradedResults = showUngradedResults,
-            exercise = exercise
+            exercise = exercise,
+            showLargeIcon = showLargeIcon,
         )
     } else {
         // Simply display text

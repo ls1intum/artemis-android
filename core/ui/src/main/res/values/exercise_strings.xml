@@ -14,7 +14,7 @@
     <string name="exercise_live_quiz">Live</string>
 
     <string name="exercise_user_not_started_exercise">You have not started this exercise yet.</string>
-    <string name="exercise_user_not_assigned_to_team">No team yet.</string>
+    <string name="exercise_user_not_assigned_to_team">You have not been assigned to a team yet.</string>
     <string name="exercise_exercise_not_submitted">No Submission</string>
     <string name="exercise_exercise_missed_deadline">You have missed the deadline.</string>
     <string name="exercise_quiz_not_started">Not yet started.</string>
@@ -32,8 +32,19 @@
     <string name="exercise_result_submitted_waiting_for_grading">Submitted, waiting for grading.</string>
     <string name="exercise_result_late_submission">Late submission, waiting for feedback.</string>
 
-    <string name="exercise_result_has_result_score">%1$s (%2$s)</string>
-    <string name="exercise_result_has_result_score_late">Late: %1$s (%2$s)</string>
+    <string name="exercise_result_has_result_score">%s, %s points</string>
+    <string name="exercise_result_has_result_score_without_points">%s</string>
+    <string name="exercise_result_has_result_score_with_date">%1$s (%2$s)</string>
+    <string name="exercise_result_has_result_score_late_with_date">Late: %1$s (%2$s)</string>
+    <string name="exercise_result_build_failed">Build failed</string>
+    <string name="exercise_result_build_successful_no_tests">Build successful, no tests executed</string>
+    <string name="exercise_result_build_successful_tests">%1$s of %2$s passed</string>
+    <string name="exercise_result_code_issues">%s, %s, %s issues, %s points</string>
+    <string name="exercise_result_no_code_issues">%s, %s, %s points</string>
+    <string name="exercise_result_code_issues_without_points">%s, %s, %s issues</string>
+    <string name="exercise_result_no_code_issues_without_points">%s, %s</string>
+    <string name="exercise_result_is_preliminary">preliminary</string>
+
     <!--  When a result exists but the score field is not set.  -->
     <string name="exercise_result_has_result_score_unknown">Unknown</string>
 

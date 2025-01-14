@@ -159,7 +159,8 @@ private fun ExerciseDataText(
 
                 ParticipationStatusUi(
                     modifier = Modifier,
-                    exercise = exercise
+                    exercise = exercise,
+                    showLargeIcon = true
                 )
             }
 

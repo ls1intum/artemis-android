@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
@@ -60,7 +61,7 @@ internal fun ParticipationStatusUi(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(
-                    modifier = Modifier
+                    modifier = Modifier.weight(1f),
                 ) {
                     ExercisePointInfo(exercise)
 
@@ -70,7 +71,7 @@ internal fun ParticipationStatusUi(
                     )
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(16.dp))
 
                 ExerciseActionButtons(
                     modifier = Modifier,
