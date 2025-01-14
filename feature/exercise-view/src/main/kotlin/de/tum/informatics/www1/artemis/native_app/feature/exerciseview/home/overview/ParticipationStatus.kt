@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -54,21 +55,28 @@ internal fun ParticipationStatusUi(
                 ParticipationNotPossibleInfoMessageCard()
             }
 
-            ExerciseActionButtons(
-                modifier = Modifier,
-                exercise = exercise,
-                showResult = showResult,
-                actions = actions
-            )
-
-            Column(
-                modifier = Modifier
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                ExercisePointInfo(exercise)
+                Column(
+                    modifier = Modifier
+                ) {
+                    ExercisePointInfo(exercise)
 
-                ParticipationStatusUi(
+                    ParticipationStatusUi(
+                        modifier = Modifier,
+                        exercise = exercise
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                ExerciseActionButtons(
                     modifier = Modifier,
-                    exercise = exercise
+                    exercise = exercise,
+                    showResult = showResult,
+                    actions = actions
                 )
             }
         }

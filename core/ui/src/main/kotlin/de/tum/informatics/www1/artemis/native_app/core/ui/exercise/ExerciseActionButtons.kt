@@ -1,24 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
@@ -28,7 +15,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isStartExe
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 
 /**
  * This composable composes up to two buttons. The modifier parameter is applied to every button
@@ -45,9 +31,10 @@ fun ExerciseActionButtons(
     // TODO: Team mode is currently not supported. Therefore, the buttons are disabled in team mode exercises
 
     val latestParticipation = exercise.getSpecificStudentParticipation(false)
+    val isStartExerciseAvailable = exercise.isStartExerciseAvailable.collectAsState(initial = false).value
 
     if (exercise is TextExercise) {
-        if (latestParticipation == null && isStartExerciseAvailable(exercise)) {
+        if (latestParticipation == null && isStartExerciseAvailable) {
             Button(
                 modifier = modifier,
                 onClick = actions.onClickStartTextExercise,
@@ -96,49 +83,38 @@ fun ExerciseActionButtons(
     }
 
     if (templateStatus != null) {
-        when (exercise) {
-            is TextExercise -> {
-                if (latestParticipation?.initializationState == Participation.InitializationState.INITIALIZED) {
-                    Button(
-                        modifier = modifier,
-                        onClick = {
-                            actions.onClickOpenTextExercise(
-                                latestParticipation.id ?: return@Button
-                            )
-                        },
-                        enabled = !exercise.teamMode
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.exercise_actions_open_exercise_button)
+        if (exercise is TextExercise) {
+            if (latestParticipation?.initializationState == Participation.InitializationState.INITIALIZED) {
+                Button(
+                    modifier = modifier,
+                    onClick = {
+                        actions.onClickOpenTextExercise(
+                            latestParticipation.id ?: return@Button
                         )
-                    }
-                }
-
-                if (latestParticipation?.initializationState == Participation.InitializationState.FINISHED &&
-                    (latestParticipation.results.isNullOrEmpty() || !showResult)
+                    },
+                    enabled = !exercise.teamMode
                 ) {
-                    Button(
-                        modifier = modifier,
-                        onClick = {
-                            actions.onClickOpenTextExercise(
-                                latestParticipation.id ?: return@Button
-                            )
-                        },
-                        enabled = !exercise.teamMode
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.exercise_actions_view_submission_button)
-                        )
-                    }
+                    Text(
+                        text = stringResource(id = R.string.exercise_actions_open_exercise_button)
+                    )
                 }
             }
-            // TODO: The following code is temporarily disabled. See https://github.com/ls1intum/artemis-android/issues/107
-            //is QuizExercise -> {
-                // Do not show participation not possible info card for quiz exercises
-            //}
-            else -> {
-                Row(modifier = Modifier) {
-                    ParticipationNotPossibleInfoMessageCard()
+
+            if (latestParticipation?.initializationState == Participation.InitializationState.FINISHED &&
+                (latestParticipation.results.isNullOrEmpty() || !showResult)
+            ) {
+                Button(
+                    modifier = modifier,
+                    onClick = {
+                        actions.onClickOpenTextExercise(
+                            latestParticipation.id ?: return@Button
+                        )
+                    },
+                    enabled = !exercise.teamMode
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.exercise_actions_view_submission_button)
+                    )
                 }
             }
         }
@@ -152,11 +128,6 @@ fun ExerciseActionButtons(
             }
         }
     }
-}
-
-@Composable
-private fun isStartExerciseAvailable(exercise: Exercise): Boolean {
-    return exercise.isStartExerciseAvailable.collectAsState(initial = false).value
 }
 
 /**
@@ -212,34 +183,4 @@ class BoundExerciseActions(
         onClickViewResult = { onClickViewResult(exerciseId) },
         onClickViewQuizResults = { onClickViewQuizResults(exerciseId) }
     )
-}
-
-
-@Composable
-fun ParticipationNotPossibleInfoMessageCard() {
-    Box(
-        modifier = Modifier
-            .border(
-                width = 1.dp,
-                color = ExerciseColors.ParticipationNotPossibleInfoMessageCardColors.border,
-                shape = MaterialTheme.shapes.extraSmall
-            )
-            .background(ExerciseColors.ParticipationNotPossibleInfoMessageCardColors.background)
-            .padding(8.dp)
-            .fillMaxWidth()
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Outlined.Info,
-                contentDescription = null,
-                modifier = Modifier.padding(end = 8.dp),
-                tint = ExerciseColors.ParticipationNotPossibleInfoMessageCardColors.text
-            )
-            Text(
-                text = stringResource(id = R.string.exercise_participation_not_possible),
-                fontSize = 16.sp,
-                color = ExerciseColors.ParticipationNotPossibleInfoMessageCardColors.text
-            )
-        }
-    }
 }

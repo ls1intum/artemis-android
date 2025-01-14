@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -142,33 +143,35 @@ private fun ExerciseDataText(
         getRelativeTime(to = dueDate).toString()
     } else stringResource(id = R.string.exercise_item_due_date_not_set)
 
-    Column(modifier = modifier) {
-        Text(
-            text = formattedDueDate,
-            style = MaterialTheme.typography.bodyMedium
-        )
+    ProvideDefaultExerciseTemplateStatus(exercise) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Column(modifier = modifier) {
+                Text(
+                    text = formattedDueDate,
+                    style = MaterialTheme.typography.bodyMedium
+                )
 
-        ProvideDefaultExerciseTemplateStatus(exercise) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
                 ParticipationStatusUi(
                     modifier = Modifier,
                     exercise = exercise
                 )
+            }
 
-                if (displayActionButtons) {
-                    ExerciseActionButtons(
-                        modifier = Modifier,
-                        exercise = exercise,
-                        showResult = true,
-                        actions = exerciseActions
-                    )
-                }
+            Spacer(modifier = Modifier.weight(1f))
+
+            if (displayActionButtons) {
+                ExerciseActionButtons(
+                    modifier = Modifier,
+                    exercise = exercise,
+                    showResult = true,
+                    actions = exerciseActions
+                )
             }
         }
     }
