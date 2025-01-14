@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -424,7 +425,10 @@ private fun FormattingOptions(
 
             DropdownMenu(
                 expanded = isDropdownExpanded,
-                onDismissRequest = { isDropdownExpanded = false }
+                onDismissRequest = { isDropdownExpanded = false },
+                properties = PopupProperties(
+                    focusable = false
+                )
             ) {
                 // Unordered List item
                 DropdownMenuItem(
