@@ -21,7 +21,7 @@
     <string name="exercise_user_not_started_quiz">Not yet started.</string>
     <string name="exercise_user_not_participated">Not participated.</string>
     <string name="exercise_user_participating">Currently participating.</string>
-    <string name="exercise_user_submitted">Already submitted.</string>
+    <string name="exercise_user_submitted">You have already submitted.</string>
     <!--  Display nothing like the webapp does.  -->
     <string name="exercise_user_unknown"> </string>
 

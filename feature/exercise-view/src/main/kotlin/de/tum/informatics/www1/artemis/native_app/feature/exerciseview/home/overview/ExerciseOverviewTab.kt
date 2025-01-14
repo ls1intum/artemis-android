@@ -128,13 +128,13 @@ private fun ExerciseInformation(
 ) {
     val complaintPossible = exercise.allowComplaintsForAutomaticAssessments ?: false
 
-    val nullableDateTextInfo = @Composable { dueDate: Instant?, hintRes: Int ->
+    val nullableDateTextInfo = @Composable { dueDate: Instant?, hintRes: Int, showColor: Boolean ->
         if (dueDate != null) {
             DateInfoText(
                 modifier = Modifier.fillMaxWidth(),
                 dueDate = getRelativeTime(to = dueDate, showDateAndTime = true),
                 hintRes = hintRes,
-                dataColor = ExerciseColors.getDueDateColor(dueDate)
+                dataColor = if (showColor) ExerciseColors.getDueDateColor(dueDate) else null
             )
         }
     }
@@ -142,7 +142,8 @@ private fun ExerciseInformation(
     val leftColumnUi = @Composable {
         nullableDateTextInfo(
             exercise.releaseDate,
-            R.string.exercise_view_overview_hint_assessment_release_date
+            R.string.exercise_view_overview_hint_assessment_release_date,
+            false
         )
 
         // We always want to display a submission due date
@@ -156,13 +157,15 @@ private fun ExerciseInformation(
         } else {
             nullableDateTextInfo(
                 exercise.dueDate,
-                R.string.exercise_view_overview_hint_submission_due_date
+                R.string.exercise_view_overview_hint_submission_due_date,
+                true
             )
         }
 
         nullableDateTextInfo(
             exercise.assessmentDueDate,
-            R.string.exercise_view_overview_hint_assessment_due_date
+            R.string.exercise_view_overview_hint_assessment_due_date,
+            true
         )
     }
 
@@ -391,7 +394,7 @@ private fun DateInfoText(
     modifier: Modifier,
     @StringRes hintRes: Int,
     dueDate: CharSequence,
-    dataColor: Color = MaterialTheme.colorScheme.onSurface
+    dataColor: Color?
 ) {
     Row(
         modifier = modifier,
@@ -409,7 +412,7 @@ private fun DateInfoText(
         Text(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             text = dueDate.toString(),
-            color = dataColor,
+            color = dataColor ?: MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyMedium,
         )
     }
