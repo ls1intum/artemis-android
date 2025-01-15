@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.widget.Toast
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
@@ -98,7 +99,7 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-private const val undoDeleteDelay = 5000L
+private const val undoDeleteDelay = 6000L
 
 internal open class ConversationViewModel(
     val courseId: Long,
@@ -134,7 +135,7 @@ internal open class ConversationViewModel(
     val postId: StateFlow<StandalonePostId?> = _postId
 
     private val deleteJobs = mutableMapOf<IBasePost, Job>()
-    val isMarkedAsDeleteList = mutableListOf<IBasePost>()
+    val isMarkedAsDeleteList = mutableStateListOf<IBasePost>()
 
     val chatListUseCase = ConversationChatListUseCase(
         viewModelScope = viewModelScope,
