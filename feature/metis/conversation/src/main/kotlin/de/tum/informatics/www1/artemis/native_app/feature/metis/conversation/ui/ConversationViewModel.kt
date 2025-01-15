@@ -99,7 +99,9 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-private const val undoDeleteDelay = 6000L
+// The delay is longer than in the view to account for additional delays
+// NOTE: This is only for the viewModel. Check PostItem.kt for the visible delay in the UI.
+private const val undoDeleteDelay = 7000L
 
 internal open class ConversationViewModel(
     val courseId: Long,
