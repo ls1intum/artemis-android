@@ -1,7 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -129,6 +131,7 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
             .assertExists()
     }
 
+    @SuppressLint("UnrememberedMutableState")
     private fun setupUi(
         post: IStandalonePost
     ) {
@@ -153,12 +156,14 @@ class ConversationProfilePictureUiTest : BaseComposeTest() {
                     onPinPost = { CompletableDeferred() },
                     serverUrl = "",
                     courseId = courseId,
+                    isMarkedAsDeleteList = mutableStateListOf(),
                     state = LazyListState(),
                     isReplyEnabled = false,
                     emojiService = EmojiServiceStub,
                     onCreatePost = { CompletableDeferred() },
                     onEditPost = { _, _ -> CompletableDeferred() },
                     onDeletePost = { CompletableDeferred() },
+                    onUndoDeletePost = { },
                     onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                     onClickViewPost = {},
                     onRequestRetrySend = {},

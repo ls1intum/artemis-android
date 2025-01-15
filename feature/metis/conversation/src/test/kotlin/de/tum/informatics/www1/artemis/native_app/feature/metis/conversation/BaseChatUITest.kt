@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -98,6 +99,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     hasModerationRights = hasModerationRights,
                 ),
                 serverUrl = "",
+                isMarkedAsDeleteList = mutableStateListOf(),
                 emojiService = EmojiServiceStub,
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
@@ -105,6 +107,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 onResolvePost = onResolvePost,
                 onPinPost = onPinPost,
                 onDeletePost = { CompletableDeferred() },
+                onUndoDeletePost = {},
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onRequestReload = {},
                 onRequestRetrySend = { _, _ -> },
@@ -137,12 +140,14 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 courseId = course.id!!,
                 state = rememberLazyListState(),
                 emojiService = EmojiServiceStub,
+                isMarkedAsDeleteList = mutableStateListOf(),
                 bottomItem = null,
                 isReplyEnabled = true,
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },
                 onPinPost = onPinPost,
                 onDeletePost = { CompletableDeferred() },
+                onUndoDeletePost = {},
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onClickViewPost = {},
                 onRequestRetrySend = { _ -> },
