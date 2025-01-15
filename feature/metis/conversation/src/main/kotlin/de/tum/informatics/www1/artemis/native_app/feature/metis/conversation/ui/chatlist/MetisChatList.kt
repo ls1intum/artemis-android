@@ -19,6 +19,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -44,6 +45,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
@@ -101,6 +103,7 @@ internal fun MetisChatList(
             serverUrl = serverUrl,
             courseId = viewModel.courseId,
             state = state,
+            isMarkedAsDeleteList = viewModel.isMarkedAsDeleteList,
             bottomItem = bottomItem,
             isReplyEnabled = isReplyEnabled,
             onCreatePost = viewModel::createPost,
@@ -110,6 +113,7 @@ internal fun MetisChatList(
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onClickViewPost = onClickViewPost,
             onRequestRetrySend = viewModel::retryCreatePost,
+            onUndoDeletePost = viewModel::undoDeletePost,
             title = updatedTitle,
             onFileSelected = { uri ->
                 viewModel.onFileSelected(uri, context)
@@ -130,6 +134,7 @@ fun MetisChatList(
     courseId: Long,
     state: LazyListState,
     emojiService: EmojiService = koinInject(),
+    isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     isReplyEnabled: Boolean,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
@@ -137,6 +142,7 @@ fun MetisChatList(
     onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
+    onUndoDeletePost: (IStandalonePost) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
     title: String,
     onFileSelected: (Uri) -> Unit
@@ -203,10 +209,12 @@ fun MetisChatList(
                             state = state,
                             posts = posts,
                             clientId = clientId,
+                            isMarkedAsDeleteList = isMarkedAsDeleteList,
                             onClickViewPost = onClickViewPost,
                             postActionFlags = postActionFlags,
                             onRequestEdit = onEditPostDelegate,
                             onRequestDelete = onDeletePostDelegate,
+                            onRequestUndoDelete = onUndoDeletePost,
                             onRequestPin = onPinPostDelegate,
                             onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                             onRequestRetrySend = onRequestRetrySend,
@@ -235,9 +243,11 @@ private fun ChatList(
     posts: PostsDataState.Loaded,
     postActionFlags: PostActionFlags,
     clientId: Long,
+    isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
     onRequestDelete: (IStandalonePost) -> Unit,
+    onRequestUndoDelete: (IStandalonePost) -> Unit,
     onRequestPin: (IStandalonePost) -> Unit,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit
@@ -270,6 +280,9 @@ private fun ChatList(
                         onRequestDelete = {
                             onRequestDelete(post ?: return@rememberPostActions)
                         },
+                        onRequestUndoDelete = {
+                            onRequestUndoDelete(post ?: return@rememberPostActions)
+                        },
                         onClickReaction = { id, create ->
                             onRequestReactWithEmoji(post ?: return@rememberPostActions, id, create)
                         },
@@ -295,6 +308,7 @@ private fun ChatList(
                             },
                         post = post,
                         clientId = clientId,
+                        isMarkedAsDeleteList = isMarkedAsDeleteList,
                         postItemViewType = remember(post?.answers) {
                             PostItemViewType.ChatListItem(post?.answers.orEmpty())
                         },
