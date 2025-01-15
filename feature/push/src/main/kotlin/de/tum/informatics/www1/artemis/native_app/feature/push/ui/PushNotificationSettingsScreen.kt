@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,7 +29,11 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFloatingActionButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -48,6 +53,35 @@ fun PushNotificationSettingsScreen(
     var displaySyncFailedDialog: Boolean by rememberSaveable { mutableStateOf(false) }
     var displayUnsavedChangesDialog: Boolean by rememberSaveable { mutableStateOf(false) }
 
+    val onNavigateBack: () -> Unit = {
+        if (isDirty) {
+            displayUnsavedChangesDialog = true
+        } else {
+            onDone()
+        }
+    }
+    val saveChanges: () -> Unit = {
+        saveJob = viewModel.saveSettings()
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val isSuccessful = (saveJob as Deferred<Boolean>).await()
+                if (isSuccessful) {
+                    onDone()
+                } else {
+                    displayUnsavedChangesDialog = false
+                    displaySyncFailedDialog = true
+                }
+            } catch (e: Exception) {
+                displayUnsavedChangesDialog = false
+                displaySyncFailedDialog = true
+            }
+        }
+    }
+
+    BackHandler {
+        onNavigateBack()
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -56,11 +90,7 @@ fun PushNotificationSettingsScreen(
                     if (isInitialNotificationSettingsScreen) return@TopAppBar
 
                     NavigationBackButton(onNavigateBack = {
-                        if (isDirty) {
-                            displayUnsavedChangesDialog = true
-                        } else {
-                            onDone()
-                        }
+                        onNavigateBack()
                     })
                 },
                 title = {
@@ -77,10 +107,7 @@ fun PushNotificationSettingsScreen(
                 ExtendedFloatingActionButton(
                     onClick = {
                         // If changes have been made, these need to be synced first.
-                        if (isDirty) {
-                            saveJob = viewModel.saveSettings()
-                            onDone()
-                        } else onDone()
+                        if (isDirty) saveChanges() else onDone()
                     },
                     text = {
                         Text(
@@ -139,10 +166,7 @@ fun PushNotificationSettingsScreen(
                     displayUnsavedChangesDialog = false
                     onDone()
                 },
-                onSaveChanges = {
-                    saveJob = viewModel.saveSettings()
-                    onDone()
-                }
+                onSaveChanges = saveChanges
             )
         }
 
