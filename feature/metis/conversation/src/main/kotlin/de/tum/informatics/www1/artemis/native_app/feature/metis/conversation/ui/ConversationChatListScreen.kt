@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
@@ -42,6 +45,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
+import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
@@ -95,6 +99,10 @@ internal fun ConversationChatListScreen(
     val posts: LazyPagingItems<ChatListItem> =
         viewModel.chatListUseCase.postPagingData.collectAsLazyPagingItems()
 
+    LaunchedEffect(courseId, conversationId) {
+        chatListState.scrollToItem(0)
+    }
+
     ConversationChatListScreen(
         modifier = modifier,
         courseId = courseId,
@@ -116,13 +124,10 @@ internal fun ConversationChatListScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .imePadding()
-                        .padding(
-                            bottom = WindowInsets.systemBars
-                                .asPaddingValues()
-                                .calculateBottomPadding()
-                        ),
+                        .navigationBarsPadding()
+                        .padding(top = padding.calculateTopPadding())
+                        .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
                     viewModel = viewModel,
-                    listContentPadding = PaddingValues(top = padding.calculateTopPadding()),
                     onClickViewPost = onClickViewPost,
                     isReplyEnabled = isReplyEnabled,
                     state = chatListState,
@@ -205,10 +210,12 @@ fun ConversationChatListScreen(
                 },
                 actions = {
                     if (!isSearchBarOpen) {
-                        ConversationDataStatusButton(
-                            dataStatus = conversationDataStatus,
-                            onRequestSoftReload = onRequestSoftReload
-                        )
+                        if (BuildConfig.DEBUG){
+                            ConversationDataStatusButton(
+                                dataStatus = conversationDataStatus,
+                                onRequestSoftReload = onRequestSoftReload
+                            )
+                        }
 
                         IconButton(onClick = { isSearchBarOpen = true }) {
                             Icon(imageVector = Icons.Default.Search, contentDescription = null)

@@ -8,12 +8,10 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -28,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFloatingActionButton
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import kotlinx.coroutines.Job
 import org.koin.androidx.compose.koinViewModel
@@ -54,20 +53,15 @@ fun PushNotificationSettingsScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    if (!isInitialNotificationSettingsScreen) {
-                        IconButton(onClick = {
-                            if (isDirty) {
-                                displayUnsavedChangesDialog = true
-                            } else {
-                                onDone()
-                            }
-                        }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = null
-                            )
+                    if (isInitialNotificationSettingsScreen) return@TopAppBar
+
+                    NavigationBackButton(onNavigateBack = {
+                        if (isDirty) {
+                            displayUnsavedChangesDialog = true
+                        } else {
+                            onDone()
                         }
-                    }
+                    })
                 },
                 title = {
                     if (isInitialNotificationSettingsScreen) {

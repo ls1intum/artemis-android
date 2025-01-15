@@ -3,10 +3,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.ListAlt
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -14,7 +13,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -30,33 +28,29 @@ import io.github.fornewid.placeholder.material3.placeholder
 internal fun CourseTopAppBar(
     selectedTabIndex: Int,
     courseDataState: DataState<Course>,
-    scrollBehavior: TopAppBarScrollBehavior,
     changeTab: (Int) -> Unit,
-    onReloadCourse: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
+    val courseTitle = courseDataState.bind<String?> { it.title }.orElse(null)
+
     Column {
         TopAppBar(
             title = {
                 Text(
                     modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
-                    text = courseDataState.bind { it.title }
-                        .orElse("Placeholder course title"),
+                    text = courseTitle.orEmpty(),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             },
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null
+                    )
                 }
-            },
-            actions = {
-                IconButton(onClick = onReloadCourse) {
-                    Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
-                }
-            },
-            scrollBehavior = scrollBehavior
+            }
         )
         TabRow(
             modifier = Modifier.fillMaxWidth(),

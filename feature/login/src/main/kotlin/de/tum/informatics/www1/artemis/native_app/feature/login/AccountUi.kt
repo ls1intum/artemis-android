@@ -9,14 +9,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -256,16 +259,17 @@ private fun LoginUiScreen(
         NavHost(
             modifier = Modifier
                 .fillMaxSize()
-                .imePadding()
-                .consumeWindowInsets(WindowInsets.systemBars)
                 .padding(top = paddingValues.calculateTopPadding())
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             navController = nestedNavController,
             startDestination = NestedDestination.Home
         ) {
             animatedComposable<NestedDestination.Home> {
                 AccountScreen(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .systemBarsPadding(),
                     canSwitchInstance = !BuildConfig.hasInstanceRestriction,
                     onNavigateToLoginScreen = {
                         nestedNavController.navigate(NestedDestination.Login)
@@ -286,7 +290,7 @@ private fun LoginUiScreen(
                 CustomInstanceSelectionScreen(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 16.dp)
+                        .imePadding()
                 ) {
                     nestedNavController.navigate(NestedDestination.Home)
                 }
@@ -294,7 +298,9 @@ private fun LoginUiScreen(
 
             animatedComposable<NestedDestination.Login> {
                 LoginScreen(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .imePadding(),
                     viewModel = koinViewModel(),
                     onLoggedIn = onLoggedIn,
                     onClickSaml2Login = onClickSaml2Login
@@ -309,7 +315,9 @@ private fun LoginUiScreen(
                     koinViewModel { parametersOf(rememberMe) }
 
                 Saml2LoginScreen(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .imePadding(),
                     viewModel = saml2LoginViewModel,
                     onLoggedIn = onLoggedIn
                 )
@@ -320,7 +328,7 @@ private fun LoginUiScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                        .imePadding(),
                     viewModel = koinViewModel(),
                     onRegistered = {
                         nestedNavController.popBackStack()
@@ -392,43 +400,35 @@ private fun AccountUi(
     onLoggedIn: () -> Unit,
     onClickSaml2Login: (rememberMe: Boolean) -> Unit
 ) {
-    Column(
-        modifier = modifier
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.05f)
-        )
+    Box(modifier = modifier) {
+        Column(
+            modifier = Modifier.imePadding()
+        ) {
+            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
 
-        ArtemisHeader(
-            modifier = Modifier.fillMaxWidth(),
-            selectedInstance = selectedInstance
-        )
+            ArtemisHeader(
+                modifier = Modifier.fillMaxWidth(),
+                selectedInstance = selectedInstance
+            )
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.05f)
-        )
+            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
 
-        RegisterLoginAccount(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            serverProfileInfo = serverProfileInfo,
-            retryLoadServerProfileInfo = retryLoadServerProfileInfo,
-            onLoggedIn = onLoggedIn,
-            onNavigateToLoginScreen = onNavigateToLoginScreen,
-            onNavigateToRegisterScreen = onNavigateToRegisterScreen,
-            onClickSaml2Login = onClickSaml2Login
-        )
+            RegisterLoginAccount(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                serverProfileInfo = serverProfileInfo,
+                retryLoadServerProfileInfo = retryLoadServerProfileInfo,
+                onLoggedIn = onLoggedIn,
+                onNavigateToLoginScreen = onNavigateToLoginScreen,
+                onNavigateToRegisterScreen = onNavigateToRegisterScreen,
+                onClickSaml2Login = onClickSaml2Login
+            )
+        }
 
         if (canSwitchInstance) {
             TextButton(
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .align(Alignment.CenterHorizontally),
+                modifier = Modifier.align(Alignment.BottomCenter),
                 onClick = onNavigateToInstanceSelection
             ) {
                 Text(

@@ -90,8 +90,8 @@
 
     <string name="push_notification_settings_unsaved_changes_dialog_title">You have unsaved changes!</string>
     <string name="push_notification_settings_unsaved_changes_dialog_message">Would you like to save your changes before continuing?</string>
-    <string name="push_notification_settings_unsaved_changes_dialog_positive">Yes</string>
-    <string name="push_notification_settings_changes_dialog_negative">No</string>
+    <string name="push_notification_settings_unsaved_changes_dialog_positive">Save</string>
+    <string name="push_notification_settings_unsaved_changes_dialog_negative">Discard</string>
 
     <string name="settings_push_notification_settings_screen_title">Notification settings</string>
 

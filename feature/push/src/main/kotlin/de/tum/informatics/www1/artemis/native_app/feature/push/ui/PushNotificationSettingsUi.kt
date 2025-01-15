@@ -229,7 +229,7 @@ fun PushNotificationUnsavedChangesDialog(
         title = stringResource(id = R.string.push_notification_settings_unsaved_changes_dialog_title),
         text = stringResource(id = R.string.push_notification_settings_unsaved_changes_dialog_message),
         confirmButtonText = stringResource(id = R.string.push_notification_settings_unsaved_changes_dialog_positive),
-        dismissButtonText = stringResource(id = R.string.push_notification_settings_changes_dialog_negative),
+        dismissButtonText = stringResource(id = R.string.push_notification_settings_unsaved_changes_dialog_negative),
         onPressPositiveButton = onSaveChanges,
         onDismissRequest = onDismissRequest
     )
