@@ -180,7 +180,9 @@ internal fun ConversationList(
             )
         }
 
-    LazyColumn(modifier = modifier.testTag(TEST_TAG_CONVERSATION_LIST)) {
+    LazyColumn (
+        modifier = modifier.testTag(TEST_TAG_CONVERSATION_LIST)
+    ) {
         if (conversationCollections.favorites.conversations.isNotEmpty()) {
             listWithHeader(
                 ConversationSectionState.Conversations(conversationCollections.favorites),

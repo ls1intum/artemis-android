@@ -113,10 +113,12 @@ private fun PotentialRecipientsList(
     modifier: Modifier,
     recipients: List<User>,
     addRecipient: (User) -> Unit,
-    isQueryTooShort: Boolean,
+    isQueryTooShort: Boolean
 ) {
     if (recipients.isNotEmpty()) {
-        LazyColumn(modifier = modifier) {
+        LazyColumn(
+            modifier = modifier
+        ) {
             items(recipients) { user ->
                 ListItem(
                     modifier = Modifier

@@ -117,6 +117,7 @@ fun ConversationOverviewBody(
             loadingText = stringResource(id = R.string.conversation_overview_loading),
             failureText = stringResource(id = R.string.conversation_overview_loading_failed),
             retryButtonText = stringResource(id = R.string.conversation_overview_loading_try_again),
+            enablePullToRefresh = false,
             onClickRetry = viewModel::requestReload
         ) { conversationCollection ->
             Column(

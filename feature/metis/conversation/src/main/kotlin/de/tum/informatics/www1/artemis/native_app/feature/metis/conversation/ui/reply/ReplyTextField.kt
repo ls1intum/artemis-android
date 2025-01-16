@@ -15,11 +15,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -53,10 +58,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MarkdownListContinuationUtil.continueListIfApplicable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ReplyState
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -238,7 +245,10 @@ private fun CreateReplyUi(
                         .padding(8.dp)
                         .testTag(TEST_TAG_REPLY_TEXT_FIELD),
                     textFieldValue = currentTextFieldValue,
-                    onTextChanged = replyMode::onUpdate,
+                    onTextChanged = { newValue ->
+                        val finalValue = continueListIfApplicable(prevReplyContent, newValue)
+                        replyMode.onUpdate(finalValue)
+                    },
                     focusRequester = focusRequester,
                     onFocusLost = {
                         if (displayTextField && currentTextFieldValue.text.isEmpty()) {
@@ -269,7 +279,13 @@ private fun CreateReplyUi(
                     },
                     onFileSelected = { uri ->
                         onFileSelected(uri)
-                    }
+                    },
+                    formattingOptionButtons = {
+                        FormattingOptions(
+                            currentTextFieldValue = currentTextFieldValue,
+                            onTextChanged = replyMode::onUpdate
+                        )
+                    },
                 )
 
                 LaunchedEffect(requestFocus) {
@@ -286,12 +302,6 @@ private fun CreateReplyUi(
             }
         }
 
-        if (displayTextField || currentTextFieldValue.text.isNotBlank()) {
-            FormattingOptions(
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = replyMode::onUpdate
-            )
-        }
     }
 }
 
@@ -301,7 +311,9 @@ enum class MarkdownStyle(val startTag: String, val endTag: String) {
     Underline("<ins>", "</ins>"),
     InlineCode("`", "`"),
     CodeBlock("```", "```"),
-    Blockquote("> ", "")
+    Blockquote("> ", ""),
+    OrderedList("1. ", ""),
+    UnorderedList("- ", "")
 }
 
 @Composable
@@ -309,6 +321,9 @@ private fun FormattingOptions(
     currentTextFieldValue: TextFieldValue,
     onTextChanged: (TextFieldValue) -> Unit
 ) {
+
+    var isDropdownExpanded by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -398,6 +413,61 @@ private fun FormattingOptions(
                 style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic)
             )
         }
+
+        Box(modifier = Modifier.align(Alignment.Top)) {
+            IconButton(
+                onClick = { isDropdownExpanded = true }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.List,
+                    contentDescription = null
+                )
+            }
+
+            DropdownMenu(
+                expanded = isDropdownExpanded,
+                onDismissRequest = { isDropdownExpanded = false },
+                properties = PopupProperties(
+                    focusable = false
+                )
+            ) {
+                // Unordered List item
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.FormatListBulleted,
+                            contentDescription = null
+                        )
+                    },
+                    text = { Text(text = stringResource(R.string.reply_format_unordered)) },
+                    onClick = {
+                        isDropdownExpanded = false
+                        applyMarkdownStyle(
+                            style = MarkdownStyle.UnorderedList,
+                            currentTextFieldValue = currentTextFieldValue,
+                            onTextChanged = onTextChanged
+                        )
+                    }
+                )
+                // Ordered List item
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.FormatListNumbered,
+                            contentDescription = null
+                        )
+                    },
+                    text = { Text(stringResource(R.string.reply_format_ordered)) },
+                    onClick = {
+                        isDropdownExpanded = false
+                        applyMarkdownStyle(
+                            style = MarkdownStyle.OrderedList,
+                            currentTextFieldValue = currentTextFieldValue,
+                            onTextChanged = onTextChanged
+                        )
+                    }
+                )
+            }
+        }
     }
 }
 
@@ -428,7 +498,10 @@ private fun applyMarkdownStyle(
             )
         } else {
             // Other styles
-            val newText = text.substring(0, selection.start) + startTag + endTag + text.substring(selection.end)
+            val newText = text.substring(
+                0,
+                selection.start
+            ) + startTag + endTag + text.substring(selection.end)
             val newCursorPosition = selection.start + startTag.length
             onTextChanged(
                 TextFieldValue(
@@ -694,3 +767,4 @@ private fun String.takeWhileTag(): String {
 
     return this
 }
+

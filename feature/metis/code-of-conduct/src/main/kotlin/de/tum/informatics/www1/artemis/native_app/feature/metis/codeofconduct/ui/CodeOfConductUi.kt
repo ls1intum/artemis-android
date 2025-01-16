@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui
 
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -78,6 +77,7 @@ internal fun <T> CodeOfConductDataStateUi(
         failureText = stringResource(id = R.string.code_of_conduct_failure),
         retryButtonText = stringResource(id = R.string.code_of_conduct_try_again),
         onClickRetry = onClickRetry,
+        enablePullToRefresh = false,
         successUi = successUi
     )
 }
