@@ -4,9 +4,14 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
@@ -118,7 +123,10 @@ internal fun SavedPostsScreen (
         }
     ) { paddingValues ->
         Column(
-            modifier = modifier.padding(paddingValues)
+            modifier = modifier
+                .padding(top = paddingValues.calculateTopPadding())
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+                .padding(horizontal = 8.dp)
         ) {
             if (status == SavedPostStatus.ARCHIVED || status == SavedPostStatus.COMPLETED) {
                 InfoMessageCard(
