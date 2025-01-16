@@ -59,6 +59,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiDialog
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MarkdownStyle
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -186,6 +187,9 @@ internal fun PostItem(
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
+                val needsCornerClipping = post?.content.orEmpty()
+                    .startsWith(MarkdownStyle.CodeBlock.startTag)
+
                 MarkdownText(
                     markdown = remember(post?.content, isPlaceholder) {
                         if (isPlaceholder) {
@@ -194,6 +198,13 @@ internal fun PostItem(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
+                        .then(
+                            if (needsCornerClipping) {
+                                Modifier.clip(MaterialTheme.shapes.extraSmall)
+                            } else {
+                                Modifier
+                            }
+                        )
                         .placeholder(visible = isPlaceholder),
                     style = MaterialTheme.typography.bodyMedium,
                     onClick = onClick,
