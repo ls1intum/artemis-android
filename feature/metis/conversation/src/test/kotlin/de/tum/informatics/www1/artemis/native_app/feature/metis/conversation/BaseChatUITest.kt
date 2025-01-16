@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.remember
@@ -37,6 +36,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
     val answers = (0..2).map { index ->
         AnswerPostPojo(
             parentPostId = "client-id",
+            parentAuthorIdCache = AnswerPostPojo.ParentAuthorIdCache(clientId),
             postId = "answer-client-id-$index",
             resolvesPost = false,
             basePostingCache = AnswerPostPojo.BasePostingCache(
@@ -78,11 +78,12 @@ abstract class BaseChatUITest : BaseComposeTest() {
     }
 
     fun setupThreadUi(
-        post: PostPojo,
-        onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)?,
-        onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)?,
-        hasModerationRights: Boolean = true,
-        isAbleToPin: Boolean = true
+        post: IStandalonePost,
+        onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure>)? = { CompletableDeferred() },
+        onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure>)? = { CompletableDeferred() },
+        isAbleToPin: Boolean = false,
+        isAtLeastTutorInCourse: Boolean = false,
+        hasModerationRights: Boolean = false,
     ) {
         composeTestRule.setContent {
             MetisThreadUi(
@@ -93,10 +94,9 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 conversationDataState = DataState.Success(conversation),
                 postActionFlags = PostActionFlags(
                     isAbleToPin = isAbleToPin,
-                    isAtLeastTutorInCourse = false,
+                    isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                     hasModerationRights = hasModerationRights,
                 ),
-                listContentPadding = PaddingValues(),
                 serverUrl = "",
                 emojiService = EmojiServiceStub,
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
@@ -116,6 +116,8 @@ abstract class BaseChatUITest : BaseComposeTest() {
     fun setupChatUi(
         posts: List<IStandalonePost>,
         currentUser: User = User(id = clientId),
+        isAbleToPin: Boolean = false,
+        isAtLeastTutorInCourse: Boolean = false,
         hasModerationRights: Boolean = false,
         onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure> = { CompletableDeferred() }
     ) {
@@ -127,11 +129,10 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 posts = PostsDataState.Loaded.WithList(list, PostsDataState.NotLoading),
                 clientId = currentUser.id,
                 postActionFlags = PostActionFlags(
-                    isAbleToPin = true,
-                    isAtLeastTutorInCourse = false,
+                    isAbleToPin = isAbleToPin,
+                    isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                     hasModerationRights = hasModerationRights,
                 ),
-                listContentPadding = PaddingValues(),
                 serverUrl = "",
                 courseId = course.id!!,
                 state = rememberLazyListState(),

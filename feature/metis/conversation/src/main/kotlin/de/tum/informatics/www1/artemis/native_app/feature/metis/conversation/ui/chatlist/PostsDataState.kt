@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemKey
 
 /**
  * Abstract layer over the loaded posts state, so we can use both a Pager and a simple list to display posts.
@@ -72,7 +71,13 @@ sealed interface PostsDataState {
 }
 
 fun LazyPagingItems<ChatListItem>.asPostsDataState(): PostsDataState = when {
-    itemCount == 0 -> PostsDataState.Empty
+    itemCount == 0 -> {
+        if (loadState.isIdle) {
+            PostsDataState.Empty
+        } else {
+            PostsDataState.Loading
+        }
+    }
     loadState.refresh is LoadState.Loading -> PostsDataState.Loading
     loadState.refresh is LoadState.Error -> PostsDataState.Error(::retry)
     else -> PostsDataState.Loaded.WithLazyPagingItems(

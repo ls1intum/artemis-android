@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -53,6 +52,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -64,7 +64,7 @@ import kotlinx.coroutines.Deferred
 import org.koin.compose.koinInject
 
 internal const val TEST_TAG_THREAD_LIST = "TEST_TAG_THREAD_LIST"
-internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPostId"
+internal fun testTagForAnswerPost(answerPostId: String?) = "answerPost$answerPostId"
 
 /**
  * Displays a single post with its replies.
@@ -72,10 +72,9 @@ internal fun testTagForAnswerPost(answerPostId: String) = "answerPost$answerPost
 @Composable
 internal fun MetisThreadUi(
     modifier: Modifier,
-    listContentPadding: PaddingValues,
     viewModel: ConversationViewModel
 ) {
-    val postDataState: DataState<PostPojo> by viewModel.threadUseCase.post.collectAsState()
+    val postDataState: DataState<IStandalonePost> by viewModel.threadUseCase.post.collectAsState()
     val clientId: Long by viewModel.clientIdOrDefault.collectAsState()
 
     val serverUrl by viewModel.serverUrl.collectAsState()
@@ -103,7 +102,6 @@ internal fun MetisThreadUi(
             conversationDataState = conversationDataState,
             postDataState = postDataState,
             postActionFlags = postActionFlags,
-            listContentPadding = listContentPadding,
             serverUrl = serverUrl,
             emojiService = koinInject(),
             clientId = clientId,
@@ -156,10 +154,9 @@ internal fun MetisThreadUi(
     modifier: Modifier,
     courseId: Long,
     clientId: Long,
-    postDataState: DataState<PostPojo>,
+    postDataState: DataState<IStandalonePost>,
     conversationDataState: DataState<Conversation>,
     postActionFlags: PostActionFlags,
-    listContentPadding: PaddingValues,
     serverUrl: String,
     emojiService: EmojiService,
     initialReplyTextProvider: InitialReplyTextProvider,
@@ -199,6 +196,7 @@ internal fun MetisThreadUi(
                             .padding(horizontal = 8.dp)
                             .weight(1f),
                         dataState = postDataState,
+                        enablePullToRefresh = false,
                         loadingText = stringResource(id = R.string.standalone_post_loading),
                         failureText = stringResource(id = R.string.standalone_post_failure),
                         retryButtonText = stringResource(id = R.string.standalone_post_try_again),
@@ -220,7 +218,6 @@ internal fun MetisThreadUi(
                                     .testTag(TEST_TAG_THREAD_LIST),
                                 post = post,
                                 postActionFlags = postActionFlags,
-                                listContentPadding = listContentPadding,
                                 clientId = clientId,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
@@ -256,9 +253,8 @@ internal fun MetisThreadUi(
 private fun PostAndRepliesList(
     modifier: Modifier,
     state: LazyListState,
-    post: PostPojo,
+    post: IStandalonePost,
     postActionFlags: PostActionFlags,
-    listContentPadding: PaddingValues,
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
@@ -295,7 +291,6 @@ private fun PostAndRepliesList(
 
     LazyColumn(
         modifier = modifier,
-        contentPadding = listContentPadding,
         state = state
     ) {
         item {
@@ -330,7 +325,7 @@ private fun PostAndRepliesList(
 
         itemsIndexed(
             post.orderedAnswerPostings,
-            key = { _, post -> post.postId }) { index, answerPost ->
+            key = { index, post -> post.clientPostId ?: index }) { index, answerPost ->
             val postActions = rememberPostActions(answerPost)
 
             PostWithBottomSheet(

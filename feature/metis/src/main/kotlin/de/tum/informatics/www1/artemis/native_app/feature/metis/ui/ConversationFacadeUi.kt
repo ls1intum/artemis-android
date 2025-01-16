@@ -27,7 +27,7 @@ fun ConversationFacadeUi(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = koinViewModel { parametersOf(courseId) },
                 courseId = courseId,
-                initialConfiguration = initialConfiguration,
+                initialConfiguration = initialConfiguration
             )
         }
     )

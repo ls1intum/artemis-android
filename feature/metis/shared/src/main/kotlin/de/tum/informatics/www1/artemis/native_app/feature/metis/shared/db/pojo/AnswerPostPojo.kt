@@ -38,7 +38,14 @@ data class AnswerPostPojo(
         parentColumn = "post_id",
         projection = ["client_post_id", "server_post_id"]
     )
-    val serverPostIdCache: ServerPostIdCache
+    val serverPostIdCache: ServerPostIdCache,
+    @Relation(
+        entity = BasePostingEntity::class,
+        entityColumn = "id",
+        parentColumn = "parent_post_id",
+        projection = ["author_id"]
+    )
+    val parentAuthorIdCache: ParentAuthorIdCache
 ) : IAnswerPost {
     @Ignore
     override val creationDate: Instant = basePostingCache.creationDate
@@ -66,6 +73,9 @@ data class AnswerPostPojo(
 
     @Ignore
     override val clientPostId: String = postId
+
+    @Ignore
+    override val parentAuthorId: Long = parentAuthorIdCache.authorId
 
     data class BasePostingCache(
         @ColumnInfo(name = "id")
@@ -96,8 +106,14 @@ data class AnswerPostPojo(
         val authorImageUrl: String?
     )
 
+    // The ids have primitive types (Long), that's why we need to add the wrapper cache class around them.
     data class ServerPostIdCache(
         @ColumnInfo(name = "server_post_id")
         val serverPostId: Long?
+    )
+
+    data class ParentAuthorIdCache(
+        @ColumnInfo(name = "author_id")
+        val authorId: Long
     )
 }
