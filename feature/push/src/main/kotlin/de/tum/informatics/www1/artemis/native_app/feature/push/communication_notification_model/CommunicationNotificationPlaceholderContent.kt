@@ -15,7 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
  *
  * This class is used to parse the relevant information of this list into a structured object.
  */
-data class CommunicationNotificationInfo(
+data class CommunicationNotificationPlaceholderContent(
     val authorName: String,
     val channelName: String,
     val courseName: String,
@@ -37,14 +37,14 @@ data class CommunicationNotificationInfo(
         fun fromNotificationsPlaceholders(
             type: CommunicationNotificationType,
             notificationPlaceholders: List<String>,
-        ): CommunicationNotificationInfo? {
+        ): CommunicationNotificationPlaceholderContent? {
             return when (type) {
                 StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_POST -> {
                     // ["courseTitle", "postTitle", "postContent", "postCreationDate", "postAuthorName", "imageUrl", "authorId", "postId"]
                     if (notificationPlaceholders.size <= 7) return null
                     val profilePic = notificationPlaceholders[5].takeIf { it.isNotEmpty() }
 
-                    CommunicationNotificationInfo(
+                    CommunicationNotificationPlaceholderContent(
                         authorName = notificationPlaceholders[4],
                         channelName = "New Announcement Post",
                         courseName = notificationPlaceholders[0],
@@ -62,7 +62,7 @@ data class CommunicationNotificationInfo(
                     if (notificationPlaceholders.size <= 8) return null
                     val profilePic = notificationPlaceholders[6].takeIf { it.isNotEmpty() }
 
-                    CommunicationNotificationInfo(
+                    CommunicationNotificationPlaceholderContent(
                         authorName = notificationPlaceholders[4],
                         channelName = notificationPlaceholders[3],
                         courseName = notificationPlaceholders[0],
@@ -70,7 +70,7 @@ data class CommunicationNotificationInfo(
                         messageId = notificationPlaceholders[8],
                         profilePicUrl = profilePic,
                         messageContent = notificationPlaceholders[1],
-                        type = CommunicationNotificationInfo.ConversationType.valueOf(
+                        type = CommunicationNotificationPlaceholderContent.ConversationType.valueOf(
                             notificationPlaceholders[5]
                         ),
                         isReply = false
@@ -82,7 +82,7 @@ data class CommunicationNotificationInfo(
                     if (notificationPlaceholders.size <= 11) return null
                     val profilePic = notificationPlaceholders[8].takeIf { it.isNotEmpty() }
 
-                    CommunicationNotificationInfo(
+                    CommunicationNotificationPlaceholderContent(
                         authorName = "Replied to ${notificationPlaceholders[6]} by ${notificationPlaceholders[3]}",
                         channelName = notificationPlaceholders[7],
                         courseName = notificationPlaceholders[0],
