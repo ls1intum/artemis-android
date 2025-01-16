@@ -265,6 +265,10 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, linkResolv
                 builder
                     .linkColor(context.getColor(R.color.link_color))
                     .isLinkUnderlined(false)
+                    .codeTextColor(context.getColor(R.color.code_text_color))
+                    .codeBlockTextColor(context.getColor(R.color.code_block_text_color))
+                    .codeBackgroundColor(context.getColor(R.color.code_background_color))
+                    .codeBlockBackgroundColor(context.getColor(R.color.code_block_background_color))
             }
         })
         .apply {
