@@ -51,6 +51,8 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -197,7 +199,8 @@ internal fun PostItem(
             creationDate = post?.creationDate,
             expanded = isExpanded,
             isAnswerPost = post is IAnswerPost,
-            displayHeader = displayHeader
+            displayHeader = displayHeader,
+            isDeleting = isDeleting
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()
@@ -291,6 +294,7 @@ private fun PostHeadline(
     expanded: Boolean = false,
     isAnswerPost: Boolean,
     displayHeader: Boolean = true,
+    isDeleting: Boolean,
     content: @Composable () -> Unit
 ) {
     val doDisplayHeader = displayHeader || postStatus == CreatePostService.Status.FAILED
@@ -313,6 +317,7 @@ private fun PostHeadline(
                 userName = authorName.orEmpty(),
                 imageUrl = authorImageUrl,
                 userRole = authorRole,
+                isGrayscale = isDeleting
             )
 
             if (postStatus == CreatePostService.Status.FAILED) {
@@ -331,7 +336,8 @@ private fun PostHeadline(
                 authorRole = authorRole,
                 creationDate = creationDate,
                 expanded = expanded,
-                isAnswerPost = isAnswerPost
+                isAnswerPost = isAnswerPost,
+                isGrayscale = isDeleting
             )
         }
 
@@ -371,14 +377,16 @@ private fun HeadlineAuthorInfo(
     authorRole: UserRole?,
     creationDate: Instant?,
     expanded: Boolean,
-    isAnswerPost: Boolean
+    isAnswerPost: Boolean,
+    isGrayscale: Boolean
 ) {
     Column(modifier = modifier) {
         AuthorRoleAndTimeRow(
             expanded = expanded,
             authorRole = authorRole,
             creationDate = creationDate,
-            isAnswerPost = isAnswerPost
+            isAnswerPost = isAnswerPost,
+            isGrayscale = isGrayscale
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -398,7 +406,8 @@ private fun AuthorRoleAndTimeRow(
     expanded: Boolean,
     authorRole: UserRole?,
     creationDate: Instant?,
-    isAnswerPost: Boolean
+    isAnswerPost: Boolean,
+    isGrayscale: Boolean
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -427,7 +436,7 @@ private fun AuthorRoleAndTimeRow(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            HeadlineAuthorRoleBadge(authorRole)
+            HeadlineAuthorRoleBadge(authorRole, isGrayscale)
             Spacer(modifier = Modifier.weight(1f))
             creationDateContent()
         }
@@ -440,10 +449,15 @@ private fun HeadlineProfilePicture(
     userName: String,
     imageUrl: String?,
     userRole: UserRole?,
-    displayImage: Boolean = true
+    displayImage: Boolean = true,
+    isGrayscale: Boolean = false
 ) {
     val size = postHeadlineHeight
-    Box(modifier = Modifier.size(size)) {
+    Box(
+        modifier = Modifier
+            .size(size)
+            .applyGrayscale(isGrayscale)
+    ) {
         if (!displayImage) {
             return
         }
@@ -461,6 +475,7 @@ private fun HeadlineProfilePicture(
 @Composable
 private fun HeadlineAuthorRoleBadge(
     authorRole: UserRole?,
+    isGrayscale: Boolean
 ) {
     /*
     * remember is needed here to prevent the value from being reset after an update
@@ -477,6 +492,7 @@ private fun HeadlineAuthorRoleBadge(
     Box(
         modifier = Modifier
             .background(color, MaterialTheme.shapes.extraSmall)
+            .applyGrayscale(isGrayscale)
     ) {
         Text(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 1.dp),
@@ -726,5 +742,19 @@ fun UndoDeleteHeader(
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
+    }
+}
+
+fun Modifier.applyGrayscale(isGrayscale: Boolean): Modifier {
+    return if (isGrayscale) {
+        this
+            .drawWithCache {
+                onDrawWithContent {
+                    drawContent()
+                    drawRect(Color.Black, blendMode = BlendMode.Saturation)
+                }
+            }
+    } else {
+        this
     }
 }
