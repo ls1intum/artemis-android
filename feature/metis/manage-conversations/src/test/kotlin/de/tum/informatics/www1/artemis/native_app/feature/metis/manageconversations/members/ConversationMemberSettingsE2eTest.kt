@@ -42,6 +42,10 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
 
     private lateinit var channel: ChannelChat
 
+    private val isModeratorCheck = hasContentDescription(
+        context.getString(R_shared.string.user_role_moderator)
+    )
+
     override fun setup() {
         super.setup()
 
@@ -77,23 +81,20 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
             .onNodeWithTag(testTagForMember(user1Username))
             .performScrollTo()
             .assert(hasText(user1Username))
-            .assert(hasContentDescription(context.getString(R_shared.string.user_role_icon_content_description_moderator))
-        )
+            .assert(isModeratorCheck)
 
         composeTestRule
             .onNodeWithTag(testTagForMember(user2Username))
             .performScrollTo()
             .assert(
-                hasText(user2Username) and !
-                    hasContentDescription(context.getString(R_shared.string.user_role_icon_content_description_moderator))
+                hasText(user2Username) and !isModeratorCheck
             )
 
         composeTestRule
             .onNodeWithTag(testTagForMember(user2Username))
             .performScrollTo()
             .assert(
-                hasText(user2Username) and !
-                    hasContentDescription(context.getString(R_shared.string.user_role_icon_content_description_moderator))
+                hasText(user2Username) and !isModeratorCheck
             )
     }
 
@@ -172,10 +173,6 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
                 )
             )
             .performClick()
-
-        val isModeratorCheck = hasContentDescription(
-            context.getString(R_shared.string.user_role_icon_content_description_moderator)
-        )
 
         composeTestRule.waitUntilExactlyOneExists(
             hasTestTag(testTagForMember(user2Username)) and if (makeModerator) isModeratorCheck else !isModeratorCheck,
