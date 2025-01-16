@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.ICourseUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
 
@@ -39,12 +40,12 @@ private sealed class ExtendedUserRole {
 
 
 @Composable
-fun ConversationUserRoleBadgesRow(
+fun CourseUserRoleBadgesRow(
     modifier: Modifier = Modifier,
-    user: ConversationUser
+    user: ICourseUser
 ) {
     val roles = mutableListOf(user.getUserRole().toExtendedUserRole())
-    if (user.isChannelModerator) roles.add(ExtendedUserRole.Moderator)
+    if (user is ConversationUser && user.isChannelModerator) roles.add(ExtendedUserRole.Moderator)
 
     UserRoleBadgesRow(
         modifier = modifier,

@@ -7,20 +7,15 @@ import androidx.compose.material.icons.filled.GroupRemove
 import androidx.compose.material.icons.filled.RemoveModerator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.CourseUserListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.hasModerationRights
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ConversationUserRoleBadgesRow
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureWithDialog
 
 @Composable
 internal fun ConversationMemberListItem(
@@ -32,27 +27,9 @@ internal fun ConversationMemberListItem(
     onRequestGrantModerationPermission: (ConversationUser) -> Unit,
     onRequestRevokeModerationPermission: (ConversationUser) -> Unit
 ) {
-    ListItem(
+    CourseUserListItem(
         modifier = modifier,
-        headlineContent = {
-            ConversationUserRoleBadgesRow(
-                user = member
-            )
-        },
-        supportingContent = member.name?.let {
-            {
-                Text(
-                    text = it,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        },
-        leadingContent = {
-            ProfilePictureWithDialog(
-                conversationUser = member
-            )
-        },
+        user = member,
         trailingContent = {
             if (member.username != clientUsername && conversation.hasModerationRights) {
                 Row {

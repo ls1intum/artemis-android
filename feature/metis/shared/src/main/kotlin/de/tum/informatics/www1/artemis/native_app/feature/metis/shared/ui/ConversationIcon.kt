@@ -94,7 +94,7 @@ fun OneToOneChatIcon(
     if (showDialogOnClick) {
         ProfilePictureWithDialog(
             modifier = modifier,
-            conversationUser = conversationPartner
+            courseUser = conversationPartner
         )
     } else {
         ProfilePicture(
