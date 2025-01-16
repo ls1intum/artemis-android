@@ -126,6 +126,8 @@ internal open class ConversationViewModel(
     coroutineContext
 ), InitialReplyTextProvider, ReplyAutoCompleteHintProvider {
 
+    private var currentlySavingPost = false
+
     private val onRequestSoftReload = onReloadRequestAndWebsocketReconnect
 
     val metisContext = MetisContext.Conversation(courseId, conversationId)
@@ -455,6 +457,11 @@ internal open class ConversationViewModel(
     }
 
     fun toggleSavePost(post: IBasePost): Deferred<MetisModificationFailure?> {
+        // TODO: this is a quick fix to prevent multiple save requests.
+        //      https://github.com/ls1intum/artemis-android/issues/307
+        if (currentlySavingPost) return CompletableDeferred(null)
+        currentlySavingPost = true
+
         return viewModelScope.async(coroutineContext) {
             val response = if (post.isSaved == true) {
                 savedPostService.deleteSavedPost(
@@ -470,8 +477,10 @@ internal open class ConversationViewModel(
                 )
             }
 
+            currentlySavingPost = false
             response.bind { requestReload() }   // Currently changing save status does not trigger a websocket update
                 .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
+
         }
     }
 
