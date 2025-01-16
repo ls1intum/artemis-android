@@ -31,6 +31,9 @@ class PushNotificationHandlerImpl(
             coerceInputValues = true
         }
 
+        /// The version is 1, as of Artemis 6.6.7.
+        ///
+        /// The version is declared in the constants of Artemis, see [source](https://github.com/ls1intum/Artemis/blob/6.6.7/src/main/java/de/tum/in/www1/artemis/config/Constants.java#L318).
         private const val PUSH_NOTIFICATION_VERSION = 1
     }
 
@@ -39,7 +42,6 @@ class PushNotificationHandlerImpl(
 
         val notification = decodeNotification(payload) ?: return
 
-        // if the metis context this notification is about is already visible we do not pop that notification.
         if (isNotificationContextAlreadyObservedByUser(notification)) return
 
         runBlocking {

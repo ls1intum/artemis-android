@@ -41,28 +41,32 @@ interface PushCommunicationDao {
         val parentId = artemisNotification.parentId
 
         val message: CommunicationMessageEntity = try {
-            val placeholderContent = CommunicationNotificationPlaceholderContent
-                .fromArtemisNotification(artemisNotification)
+            val notificationInfo = CommunicationNotificationInfo.fromNotificationsPlaceholders(
+                type = artemisNotification.type,
+                notificationPlaceholders = artemisNotification.notificationPlaceholders
+            ) ?: return
 
             if (hasPushCommunication(parentId)) {
                 updatePushCommunication(
                     parentId = parentId,
-                    courseTitle = placeholderContent.courseTitle
+                    courseTitle = notificationInfo.courseName
                 )
             } else {
                 val pushCommunicationEntity = PushCommunicationEntity(
                     parentId = parentId,
                     notificationId = generateNotificationId(),
-                    courseTitle = placeholderContent.courseTitle,
-                    containerTitle = placeholderContent.containerTitle,
+                    courseTitle = notificationInfo.courseName,
+                    containerTitle = notificationInfo.channelName,
                     target = artemisNotification.target
                 )
 
                 insertPushCommunication(pushCommunicationEntity)
             }
 
-            placeholderContent.toCommunicationMessageEntity(
-                parentId = parentId,
+            CommunicationMessageEntity(
+                communicationParentId = parentId,
+                text = notificationInfo.messageContent,
+                authorName = notificationInfo.authorName,
                 date = artemisNotification.date
             )
         } catch (e: Exception) {
