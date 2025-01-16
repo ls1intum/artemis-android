@@ -61,11 +61,12 @@ fun rememberPostActions(
         val hasResolvePostRights =
             postActionFlags.isAtLeastTutorInCourse || isParentPostAuthor
         val hasPinPostRights = postActionFlags.isAbleToPin
+        val hasDeletePostRights = isPostAuthor || postActionFlags.hasModerationRights
 
         PostActions(
             requestEditPost = if (doesPostExistOnServer && isPostAuthor) onRequestEdit else null,
-            requestDeletePost = if (isPostAuthor || postActionFlags.hasModerationRights) onRequestDelete else null,
-            requestUndoDeletePost = if (isPostAuthor || postActionFlags.hasModerationRights) onRequestUndoDelete else null,
+            requestDeletePost = if (hasDeletePostRights) onRequestDelete else null,
+            requestUndoDeletePost = if (hasDeletePostRights) onRequestUndoDelete else null,
             onClickReaction = if (doesPostExistOnServer) onClickReaction else null,
             onCopyText = {
                 clipboardManager.setText(AnnotatedString(post.content.orEmpty()))

@@ -99,9 +99,11 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-// The delay is longer than in the view to account for additional delays
+// A buffer is added to the delay to account for additional delays
 // NOTE: This is only for the viewModel. Check PostItem.kt for the visible delay in the UI.
-private const val undoDeleteDelay = 7000L
+private const val undoDeleteDelayFromUi = 6000L
+private const val bufferDelay = 1000L
+private const val undoDeleteDelay = undoDeleteDelayFromUi + bufferDelay
 
 internal open class ConversationViewModel(
     val courseId: Long,

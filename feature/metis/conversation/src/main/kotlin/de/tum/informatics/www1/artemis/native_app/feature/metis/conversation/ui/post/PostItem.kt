@@ -85,6 +85,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.koin.compose.koinInject
+import java.time.Duration
 
 sealed class PostItemViewType {
 
@@ -680,9 +681,9 @@ private fun EmojiChip(
 fun UndoDeleteHeader(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    delay: Long = 6000L
+    delay: Duration = Duration.ofSeconds(6)
 ) {
-    var remainingTime by remember { mutableLongStateOf(delay / 1000) }
+    var remainingTime by remember { mutableLongStateOf(delay.seconds) }
     val animatedProgress = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
@@ -690,13 +691,13 @@ fun UndoDeleteHeader(
             animatedProgress.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = delay.toInt(),
+                    durationMillis = delay.toMillis().toInt(),
                     easing = LinearEasing
                 )
             )
         }
         while (remainingTime > 0) {
-            delay(1000L)
+            delay(Duration.ofSeconds(1).toMillis())
             remainingTime--
         }
     }
@@ -721,7 +722,7 @@ fun UndoDeleteHeader(
             modifier = Modifier
                 .width(120.dp)
                 .height(34.dp)
-                .clip(MaterialTheme.shapes.medium)
+                .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
                 .clickable(onClick = onClick)
         ) {
@@ -729,7 +730,6 @@ fun UndoDeleteHeader(
                 modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(animatedProgress.value)
-                    .clip(MaterialTheme.shapes.small)
                     .background(MaterialTheme.colorScheme.primary),
             )
 
