@@ -8,6 +8,10 @@
     </plurals>
 
     <string name="thread_view_title">Thread</string>
+    <plurals name="conversation_name_member_count">
+        <item quantity="one">1 Member</item>
+        <item quantity="other">%1$d Members</item>
+    </plurals>
 
     <string name="course_wide_context_organization">Organization</string>
     <string name="course_wide_context_tech_support">Tech Support</string>
