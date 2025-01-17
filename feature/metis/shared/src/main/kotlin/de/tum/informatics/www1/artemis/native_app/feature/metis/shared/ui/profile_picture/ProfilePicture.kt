@@ -84,6 +84,7 @@ fun ProfilePictureWithDialog(
 
     if (displayUserProfileDialog) {
         UserProfileDialog(
+            userId = userId,
             username = userName,
             userRole = userRole,
             profilePictureData = profilePictureData,

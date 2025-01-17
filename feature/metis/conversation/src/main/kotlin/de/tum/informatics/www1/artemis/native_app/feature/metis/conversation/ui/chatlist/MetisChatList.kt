@@ -136,15 +136,6 @@ fun MetisChatList(
     conversationName: String,
     onFileSelected: (Uri) -> Unit
 ) {
-    val context = LocalContext.current
-
-    // TODO: https://github.com/ls1intum/artemis-android/issues/213
-//    val navigateToChat = { userId: Long ->
-//        val chatLink = "artemis://courses/$courseId/messages?userId=$userId"
-//        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(chatLink))
-//        context.startActivity(intent)
-//    }
-
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
         onCreatePost = onCreatePost,

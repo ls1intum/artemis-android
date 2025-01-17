@@ -9,8 +9,8 @@ androidDesugarJdkLibs = "2.1.4"
 androidGradlePlugin = "8.7.1"
 androidxActivity = "1.9.3"
 androidxAppCompat = "1.7.0"
-androidxComposeBom = "2024.12.01"
-androidxDataStore = "1.1.1"
+androidxComposeBom = "2025.01.00"
+androidxDataStore = "1.1.2"
 androidxLifecycle = "2.8.7"
 androidxNavigation = "2.8.5"
 androidxPaging = "3.3.5"
@@ -136,7 +136,7 @@ kotlin-kover = { group = "org.jetbrains.kotlinx", name = "kover-gradle-plugin", 
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.0.0" }
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.1.0" }
 google-ksp = { id = "com.google.devtools.ksp", version = "2.1.0-1.0.29" }
 google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
