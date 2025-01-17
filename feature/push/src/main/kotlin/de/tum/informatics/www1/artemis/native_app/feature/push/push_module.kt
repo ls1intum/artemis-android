@@ -41,6 +41,7 @@ val pushModule = module {
     single<CommunicationNotificationManager> {
         CommunicationNotificationManagerImpl(
             androidContext(),
+            get(),
             get()
         )
     }

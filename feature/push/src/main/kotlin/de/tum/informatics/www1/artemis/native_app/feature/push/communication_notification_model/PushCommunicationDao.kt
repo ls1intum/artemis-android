@@ -66,8 +66,9 @@ interface PushCommunicationDao {
             CommunicationMessageEntity(
                 communicationParentId = parentId,
                 text = content.messageContent,
+                authorId = content.authorId,
                 authorName = content.authorName,
-                authorImageUrl = content.profilePicUrl,
+                authorImageUrl = content.authorImageUrl,
                 date = artemisNotification.date
             )
         } catch (e: Exception) {
@@ -91,6 +92,7 @@ interface PushCommunicationDao {
                 CommunicationMessageEntity(
                     communicationParentId = parentId,
                     text = body,
+                    authorId = "self",      // TODO
                     authorName = authorName,
                     authorImageUrl = authorImageUrl,
                     date = date
