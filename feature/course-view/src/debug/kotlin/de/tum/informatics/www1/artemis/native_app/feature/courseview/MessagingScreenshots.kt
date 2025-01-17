@@ -213,7 +213,6 @@ fun `Metis - Conversation Channel`() {
                         courseId = ScreenshotCourse.id!!,
                         conversationId = sharedConversation.id,
                         conversationDataState = DataState.Success(sharedConversation),
-                        clientId = 1L,
                         query = "",
                         onUpdateQuery = {},
                         onNavigateBack = {},

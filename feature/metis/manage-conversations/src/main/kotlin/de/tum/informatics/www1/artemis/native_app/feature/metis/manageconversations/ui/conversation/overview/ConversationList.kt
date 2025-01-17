@@ -41,7 +41,6 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -97,8 +96,6 @@ internal fun ConversationList(
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
     trailingContent: LazyListScope.() -> Unit
 ) {
-    val clientId by viewModel.clientIdOrDefault.collectAsState()
-
     val listWithHeader: LazyListScope.(ConversationCollections.ConversationCollection<*>, String, String, Int, () -> Unit, @Composable () -> Unit) -> Unit =
         { collection, key, suffix, textRes, onClick, icon ->
             conversationSectionHeader(
@@ -112,7 +109,6 @@ internal fun ConversationList(
             conversationList(
                 keySuffix = suffix,
                 conversations = collection,
-                clientId = clientId,
                 showPrefix = collection.showPrefix,
                 onNavigateToConversation = onNavigateToConversation,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
@@ -256,7 +252,6 @@ private fun LazyListScope.conversationSectionHeader(
 private fun <T : Conversation> LazyListScope.conversationList(
     keySuffix: String,
     conversations: ConversationCollections.ConversationCollection<T>,
-    clientId: Long,
     showPrefix: Boolean,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
@@ -275,7 +270,6 @@ private fun <T : Conversation> LazyListScope.conversationList(
                 .testTag(itemTag),
             itemBaseTag = itemTag,
             conversation = conversation,
-            clientId = clientId,
             showPrefix = showPrefix,
             onNavigateToConversation = { onNavigateToConversation(conversation.id) },
             onToggleMarkAsFavourite = {
@@ -295,7 +289,6 @@ private fun ConversationListItem(
     modifier: Modifier = Modifier,
     itemBaseTag: String,
     conversation: Conversation,
-    clientId: Long,
     showPrefix: Boolean,
     onNavigateToConversation: () -> Unit,
     onToggleMarkAsFavourite: () -> Unit,
@@ -347,7 +340,6 @@ private fun ConversationListItem(
             leadingContent = {
                 ConversationIcon(
                     conversation = conversation,
-                    clientId = clientId,
                     hasUnreadMessages = unreadMessagesCount > 0
                 )
             },
