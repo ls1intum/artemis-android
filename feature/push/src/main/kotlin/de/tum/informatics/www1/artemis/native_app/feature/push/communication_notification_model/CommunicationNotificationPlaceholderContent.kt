@@ -27,10 +27,15 @@ data class CommunicationNotificationPlaceholderContent(
     val type: ConversationType?,
     val isReply: Boolean
 ) {
-    enum class ConversationType {
-        CHANNEL,
-        ONE_TO_ONE_CHAT,
-        GROUP_CHAT
+    enum class ConversationType(val rawValue: String) {
+        CHANNEL("channel"),
+        ONE_TO_ONE_CHAT("oneToOneChat"),
+        GROUP_CHAT("groupChat");
+
+        companion object {
+            fun fromString(rawValue: String): ConversationType =
+                entries.first { it.rawValue == rawValue }
+        }
     }
 
     companion object {
@@ -73,9 +78,7 @@ data class CommunicationNotificationPlaceholderContent(
                         messageId = notificationPlaceholders[8],
                         profilePicUrl = profilePic,
                         messageContent = notificationPlaceholders[1],
-                        type = CommunicationNotificationPlaceholderContent.ConversationType.valueOf(
-                            notificationPlaceholders[5]
-                        ),
+                        type = ConversationType.fromString(notificationPlaceholders[5]),
                         isReply = false
                     )
                 }
