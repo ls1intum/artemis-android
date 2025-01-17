@@ -55,6 +55,11 @@ class SavedPostsViewModel(
                 authToken = authToken,
                 serverUrl = serverUrl
             ).bind { it as List<ISavedPost> }       // Required by the compiler
+                // TODO: this is currently required of a bug allowing duplicate items in the list
+                //  https://github.com/ls1intum/artemis-android/issues/307
+                .bind {
+                    it.distinct()
+                }
         }
     }
         .keepSuccess()
