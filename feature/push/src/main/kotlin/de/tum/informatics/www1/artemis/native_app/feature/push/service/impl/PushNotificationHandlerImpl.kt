@@ -23,28 +23,6 @@ class PushNotificationHandlerImpl(
     private val supportedPushNotificationVersion: Int = PUSH_NOTIFICATION_VERSION
 ) : PushNotificationHandler {
 
-    // TODO
-    init {
-//        runBlocking {
-//            delay(3000)
-//
-//            val payload = "{\n" +
-//                    "  \"notificationPlaceholders\" : [ \"Practical Course: Interactive Learning WS24/25\", \"debug2\", \"2025-01-11T12:06:20.918711873Z[Etc/UTC]\", \"Test User 20 Artemis\", \"Test User 20 Artemis\", \"oneToOneChat\", \"/api/files/user/profile-pictures/52/ProfilePicture_2025-01-11T12-06-09-097_843dd81f.jpeg\", \"52\", \"1410\" ],\n" +
-//                    "  \"target\" : \"{\\\"message\\\":\\\"new-message\\\",\\\"entity\\\":\\\"message\\\",\\\"mainPage\\\":\\\"courses\\\",\\\"id\\\":1410,\\\"course\\\":78,\\\"conversation\\\":974}\",\n" +
-//                    "  \"type\" : \"CONVERSATION_NEW_MESSAGE\",\n" +
-//                    "  \"date\" : \"2025-01-11T12:06:21.081088386Z\",\n" +
-//                    "  \"version\" : 1\n" +
-//                    "}"
-//            val notification = decodeNotification(payload)!!
-//
-//            notificationManager.popNotification(
-//                context = context,
-//                artemisNotification = notification
-//            )
-//        }
-    }
-
-
     companion object {
         private const val TAG = "PushNotificationHandlerImpl"
 
