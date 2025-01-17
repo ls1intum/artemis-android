@@ -30,6 +30,8 @@ data class CommunicationMessageEntity(
     val id: Long = 0,
     @ColumnInfo(name = "communication_parent_id")
     val communicationParentId: Long,
+    @ColumnInfo(name = "title")
+    val title: String?,
     @ColumnInfo(name = "text")
     val text: String,
     @ColumnInfo(name = "author_name")

@@ -23,6 +23,8 @@ data class PushCommunicationEntity(
      */
     @ColumnInfo(name = "container_title")
     val containerTitle: String?,
+    @ColumnInfo(name = "title")
+    val title: String?,
     @ColumnInfo(name = "target")
     val target: String
 )
