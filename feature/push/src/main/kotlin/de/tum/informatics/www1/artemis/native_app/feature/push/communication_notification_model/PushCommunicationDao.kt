@@ -55,9 +55,11 @@ interface PushCommunicationDao {
                 val pushCommunicationEntity = PushCommunicationEntity(
                     parentId = parentId,
                     notificationId = generateNotificationId(),
+                    notificationTypeString = artemisNotification.type.toString(),
                     courseTitle = content.courseName,
                     containerTitle = content.channelName,
-                    target = artemisNotification.target
+                    target = artemisNotification.target,
+                    conversationTypeString = content.conversationType?.rawValue
                 )
 
                 insertPushCommunication(pushCommunicationEntity)

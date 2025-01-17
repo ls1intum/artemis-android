@@ -21,9 +21,11 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisI
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationMessageEntity
+import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationNotificationConversationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.PushCommunicationEntity
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import kotlinx.coroutines.Dispatchers
@@ -115,7 +117,7 @@ internal class CommunicationNotificationManagerImpl(
 
         val notification = NotificationCompat.Builder(context, notificationChannel.id)
             .setStyle(buildMessagingStyle(communication, messages))
-            .setSmallIcon(R.drawable.baseline_chat_bubble_24)
+            .setSmallIcon(R.drawable.push_notification_icon)
             .setAutoCancel(true)
             .setContentIntent(
                 NotificationTargetManager.getMetisContentIntent(
@@ -185,12 +187,25 @@ internal class CommunicationNotificationManagerImpl(
             )
         }
 
-        style.isGroupConversation = true
-        style.conversationTitle = context.getString(
-            R.string.conversation_title_conversation,
-            communication.courseTitle,
-            communication.containerTitle
-        )
+        style.isGroupConversation = when (communication.conversationType) {
+            CommunicationNotificationConversationType.ONE_TO_ONE_CHAT -> false
+            else -> true
+        }
+
+        val isThread = communication.notificationType is ReplyPostCommunicationNotificationType
+        style.conversationTitle = if (isThread) {
+            context.getString(
+                R.string.conversation_title_conversation_thread,
+                communication.courseTitle,
+                communication.containerTitle
+            )
+        } else {
+            context.getString(
+                R.string.conversation_title_conversation,
+                communication.courseTitle,
+                communication.containerTitle
+            )
+        }
 
         return@runBlocking style
     }

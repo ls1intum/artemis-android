@@ -24,20 +24,9 @@ data class CommunicationNotificationPlaceholderContent(
     val authorImageUrl: String?,
     val messageId: String,
     val messageContent: String,
-    val type: ConversationType?,
+    val conversationType: CommunicationNotificationConversationType?,
     val isReply: Boolean
 ) {
-    enum class ConversationType(val rawValue: String) {
-        CHANNEL("channel"),
-        ONE_TO_ONE_CHAT("oneToOneChat"),
-        GROUP_CHAT("groupChat");
-
-        companion object {
-            fun fromString(rawValue: String): ConversationType =
-                entries.first { it.rawValue == rawValue }
-        }
-    }
-
     companion object {
 
         fun fromNotificationsPlaceholders(
@@ -60,7 +49,7 @@ data class CommunicationNotificationPlaceholderContent(
                         messageId = notificationPlaceholders[7],
                         authorImageUrl = profilePic,
                         messageContent = "${notificationPlaceholders[1]}\n${notificationPlaceholders[2]}",
-                        type = null,
+                        conversationType = null,
                         isReply = false
                     )
                 }
@@ -78,7 +67,7 @@ data class CommunicationNotificationPlaceholderContent(
                         messageId = notificationPlaceholders[8],
                         authorImageUrl = profilePic,
                         messageContent = notificationPlaceholders[1],
-                        type = ConversationType.fromString(notificationPlaceholders[5]),
+                        conversationType = CommunicationNotificationConversationType.fromRawValue(notificationPlaceholders[5]),
                         isReply = false
                     )
                 }
@@ -89,14 +78,14 @@ data class CommunicationNotificationPlaceholderContent(
                     val profilePic = notificationPlaceholders[8].takeIf { it.isNotEmpty() }
 
                     CommunicationNotificationPlaceholderContent(
-                        authorName = "Replied to ${notificationPlaceholders[6]} by ${notificationPlaceholders[3]}",
+                        authorName = notificationPlaceholders[6],
                         channelName = notificationPlaceholders[7],
                         courseName = notificationPlaceholders[0],
                         authorId = notificationPlaceholders[9],
                         messageId = notificationPlaceholders[11],
                         authorImageUrl = profilePic,
                         messageContent = notificationPlaceholders[4],
-                        type = null,
+                        conversationType = null,
                         isReply = true
                     )
                 }
