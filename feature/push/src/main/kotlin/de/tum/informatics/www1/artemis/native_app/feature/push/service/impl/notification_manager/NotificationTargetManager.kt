@@ -102,7 +102,7 @@ internal object NotificationTargetManager {
 
     fun getCommunicationNotificationTarget(
         target: String
-    ): MetisTarget {
+    ): CommunicationPostTarget {
         return json.decodeFromString<CommunicationPostTarget>(target)
     }
 

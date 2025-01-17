@@ -23,5 +23,5 @@ class CommunicationPostTarget(
         const val MESSAGE_NEW_REPLY = "new-reply"
     }
 
-    override val metisContext: MetisContext = MetisContext.Conversation(courseId, conversationId)
+    override val metisContext: MetisContext.Conversation = MetisContext.Conversation(courseId, conversationId)
 }

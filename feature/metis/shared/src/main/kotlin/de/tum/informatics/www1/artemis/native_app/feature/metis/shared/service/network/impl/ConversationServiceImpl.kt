@@ -133,6 +133,24 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         }
     }
 
+    override suspend fun createOneToOneConversation(
+        courseId: Long,
+        partnerId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<OneToOneChat> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments("api", "courses", courseId.toString(), "one-to-one-chats", partnerId.toString())
+                }
+
+                accept(ContentType.Application.Json)
+                cookieAuth(authToken)
+            }.body()
+        }
+    }
+
     override suspend fun createChannel(
         courseId: Long,
         name: String,
