@@ -12,7 +12,9 @@ sealed interface VisibleMetisContext {
     }
 }
 
-data class VisiblePostList(override val metisContext: MetisContext) : VisibleMetisContext
+data class VisibleCourse(override val metisContext: MetisContext.Course) : VisibleMetisContext
 
-data class VisibleStandalonePostDetails(override val metisContext: MetisContext, val postId: Long) :
+data class VisiblePostList(override val metisContext: MetisContext.Conversation) : VisibleMetisContext
+
+data class VisibleStandalonePostDetails(override val metisContext: MetisContext.Conversation, val postId: Long) :
     VisibleMetisContext
