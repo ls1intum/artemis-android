@@ -55,9 +55,6 @@ internal class CommunicationNotificationManagerImpl(
         popCommunicationNotification(communication, messages)
     }
 
-    /**
-     * Add a message to the notification sent by the user themself using direct reply.
-     */
     override suspend fun addSelfMessage(
         parentId: Long,
         authorName: String,
@@ -165,20 +162,11 @@ internal class CommunicationNotificationManagerImpl(
         }
 
         style.isGroupConversation = true
-        style.conversationTitle = if (communication.title != null) {
-            context.getString(
-                R.string.conversation_title_conversation_thread,
-                communication.courseTitle,
-                communication.containerTitle,
-                communication.title
-            )
-        } else {
-            context.getString(
-                R.string.conversation_title_conversation,
-                communication.courseTitle,
-                communication.containerTitle
-            )
-        }
+        style.conversationTitle = context.getString(
+            R.string.conversation_title_conversation,
+            communication.courseTitle,
+            communication.containerTitle
+        )
 
         return style
     }

@@ -6,7 +6,6 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performSemanticsAction
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.BaseChatUITest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -15,9 +14,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @Category(UnitTest::class)
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class ConversationBottomSheetUiTest : BaseChatUITest() {
 
     // ###################################### EDIT ###########################################
