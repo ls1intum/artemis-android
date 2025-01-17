@@ -67,6 +67,7 @@ interface PushCommunicationDao {
                 communicationParentId = parentId,
                 text = content.messageContent,
                 authorName = content.authorName,
+                authorImageUrl = content.profilePicUrl,
                 date = artemisNotification.date
             )
         } catch (e: Exception) {
@@ -81,6 +82,7 @@ interface PushCommunicationDao {
     suspend fun insertSelfMessage(
         parentId: Long,
         authorName: String,
+        authorImageUrl: String?,
         body: String,
         date: Instant
     ) {
@@ -90,6 +92,7 @@ interface PushCommunicationDao {
                     communicationParentId = parentId,
                     text = body,
                     authorName = authorName,
+                    authorImageUrl = authorImageUrl,
                     date = date
                 )
             )

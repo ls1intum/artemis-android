@@ -58,10 +58,17 @@ internal class CommunicationNotificationManagerImpl(
     override suspend fun addSelfMessage(
         parentId: Long,
         authorName: String,
+        authorImageUrl: String?,
         body: String,
         date: Instant
     ) {
-        dbProvider.pushCommunicationDao.insertSelfMessage(parentId, authorName, body, date)
+        dbProvider.pushCommunicationDao.insertSelfMessage(
+            parentId = parentId,
+            authorName = authorName,
+            authorImageUrl = authorImageUrl,
+            body = body,
+            date = date
+        )
         repopNotification(parentId)
     }
 
