@@ -219,7 +219,7 @@ internal class CommunicationNotificationManagerImpl(
         when (result) {
             is SuccessResult -> {
                 val bitmap = result.image.toBitmap()
-                return IconCompat.createWithBitmap(bitmap)
+                return IconCompat.createWithBitmap(bitmap.toCircleShape())
             }
 
             is ErrorResult -> {
