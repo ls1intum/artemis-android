@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
-import de.tum.informatics.www1.artemis.native_app.core.data.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.test.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProviderStub
@@ -190,11 +190,9 @@ fun `Metis - Conversation Channel`() {
     ).reversed()
 
     val visibleMetisContextManagerStub = object : VisibleMetisContextManager {
-        override fun registerMetisContext(metisContext: VisibleMetisContext) =
-            Unit
-
-        override fun unregisterMetisContext(metisContext: VisibleMetisContext) =
-            Unit
+        override fun registerMetisContext(metisContext: VisibleMetisContext) = Unit
+        override fun unregisterMetisContext(metisContext: VisibleMetisContext) = Unit
+        override fun getRegisteredMetisContexts(): List<VisibleMetisContext> = emptyList()
     }
 
     // TODO: Provide artemis image provider
@@ -256,7 +254,7 @@ fun `Metis - Conversation Channel`() {
                                 bottomItem = null,
                                 onClickViewPost = {},
                                 onRequestRetrySend = {},
-                                title = "",
+                                conversationName = "",
                                 onFileSelected = { _ ->}
                             )
                         }
