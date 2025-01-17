@@ -55,6 +55,7 @@ internal fun MarkdownTextField(
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
     onFileSelected: (Uri) -> Unit = { _ -> },
+    formattingOptionButtons: @Composable () -> Unit = {},
 ) {
     val text = textFieldValue.text
     val context = LocalContext.current
@@ -135,26 +136,38 @@ internal fun MarkdownTextField(
             val textModifier = Modifier.weight(1f)
             when (selectedType) {
                 ViewType.TEXT -> {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Column(modifier = Modifier.weight(1f)) {
 
-                    OutlinedTextField(
-                        modifier = textModifier
-                            .focusRequester(focusRequester)
-                            .onFocusChanged { focusState ->
-                                if (focusState.hasFocus) {
-                                    hadFocus = true
-                                    onFocusAcquired()
-                                }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                modifier = textModifier
+                                    .weight(1f)
+                                    .focusRequester(focusRequester)
+                                    .onFocusChanged { focusState ->
+                                        if (focusState.hasFocus) {
+                                            hadFocus = true
+                                            onFocusAcquired()
+                                        }
+                                        if (!focusState.hasFocus && hadFocus) {
+                                            onFocusLost()
+                                            hadFocus = false
+                                        }
+                                    }
+                                    .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
+                                value = textFieldValue,
+                                onValueChange = onTextChanged
+                            )
 
-                                if (!focusState.hasFocus && hadFocus) {
-                                    onFocusLost()
-                                    hadFocus = false
-                                }
-                            }
-                            .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
-                        value = textFieldValue,
-                        onValueChange = onTextChanged,
-                    )
+                            sendButton()
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        formattingOptionButtons()
+                    }
                 }
 
                 ViewType.PREVIEW -> {
@@ -162,9 +175,10 @@ internal fun MarkdownTextField(
                         markdown = text,
                         modifier = textModifier
                     )
+
+                    sendButton()
                 }
             }
-            sendButton()
         }
     }
 }
