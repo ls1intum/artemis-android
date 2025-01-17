@@ -109,13 +109,17 @@ class MainActivity : AppCompatActivity(),
         val visibleMetisContextManager = object :
             VisibleMetisContextManager {
             override fun registerMetisContext(metisContext: VisibleMetisContext) {
-                visibleMetisContexts.value = visibleMetisContexts.value + metisContext
+                visibleMetisContexts.value += metisContext
 
                 cancelCommunicationNotifications(metisContext)
             }
 
             override fun unregisterMetisContext(metisContext: VisibleMetisContext) {
-                visibleMetisContexts.value = visibleMetisContexts.value - metisContext
+                visibleMetisContexts.value -= metisContext
+            }
+
+            override fun getRegisteredMetisContexts(): List<VisibleMetisContext> {
+                return visibleMetisContexts.value
             }
         }
 
