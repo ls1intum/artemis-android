@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model
 
+import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType
@@ -7,7 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 
 // The code in this file is heavily inspired by the iOS implementation.
 // See here: https://github.com/ls1intum/artemis-ios-core-modules/blob/main/Sources/PushNotifications/Models/PushNotification%2BCommunication.swift
-
+private const val TAG = "CommunicationNotificationPlaceholderContent"
 
 /**
  * The important information of a notification is sent not in json so it can not easily be
@@ -38,6 +39,8 @@ data class CommunicationNotificationPlaceholderContent(
             type: CommunicationNotificationType,
             notificationPlaceholders: List<String>,
         ): CommunicationNotificationPlaceholderContent? {
+            Log.d(TAG, "Parsing notification placeholders ($type): $notificationPlaceholders")
+
             return when (type) {
                 StandalonePostCommunicationNotificationType.NEW_ANNOUNCEMENT_POST -> {
                     // ["courseTitle", "postTitle", "postContent", "postCreationDate", "postAuthorName", "imageUrl", "authorId", "postId"]
