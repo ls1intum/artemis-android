@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -188,7 +189,7 @@ internal fun MetisThreadUi(
                 Column(modifier = Modifier.fillMaxSize()) {
                     BasicDataStateUi(
                         modifier = Modifier
-                            .padding(horizontal = 8.dp)
+                            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                             .weight(1f),
                         dataState = postDataState,
                         enablePullToRefresh = false,
@@ -229,6 +230,7 @@ internal fun MetisThreadUi(
                         ReplyTextField(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .padding(horizontal = Spacings.ReplyTextFieldHorizontalSpacing)
                                 .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
                             replyMode = replyMode,
                             updateFailureState = updateFailureStateDelegate,

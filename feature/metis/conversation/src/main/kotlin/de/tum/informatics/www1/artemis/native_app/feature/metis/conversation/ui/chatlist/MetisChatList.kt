@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
@@ -153,7 +154,7 @@ fun MetisChatList(
             MetisPostListHandler(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                     .weight(1f),
                 serverUrl = serverUrl,
                 courseId = courseId,
@@ -203,7 +204,9 @@ fun MetisChatList(
 
             if (isReplyEnabled) {
                 ReplyTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacings.ReplyTextFieldHorizontalSpacing),
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate,
                     conversationName = conversationName,

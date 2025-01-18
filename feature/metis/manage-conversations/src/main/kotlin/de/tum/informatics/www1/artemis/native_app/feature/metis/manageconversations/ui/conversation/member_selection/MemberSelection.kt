@@ -31,7 +31,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.PotentialRecipientsUi
@@ -57,7 +56,6 @@ internal fun MemberSelection(
         RecipientsTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                 .padding(bottom = 4.dp),
             recipients = recipients,
             query = query,
