@@ -17,6 +17,7 @@ sealed class Conversation {
     abstract val isCreator: Boolean
     abstract val isMember: Boolean
     abstract val numberOfMembers: Int
+    abstract val subTypeReferenceId: Long?
 
     abstract val typeAsString: String
 
