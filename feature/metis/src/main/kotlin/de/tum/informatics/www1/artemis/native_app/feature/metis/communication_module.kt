@@ -4,8 +4,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.co
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.conversationModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.manageConversationsModule
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.sharedConversationModule
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NavigateToUserConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SinglePageConversationBodyViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.user_conversation.NavigateToUserConversationViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 

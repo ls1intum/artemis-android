@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -44,12 +43,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.util.rememberDerivedConversationName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import kotlinx.coroutines.Deferred
@@ -85,11 +84,7 @@ internal fun MetisChatList(
 
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
 
-    val updatedTitle by remember(conversationDataState) {
-        derivedStateOf {
-            conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
-        }
-    }
+    val conversationName by rememberDerivedConversationName(conversationDataState)
 
     val context = LocalContext.current
 
@@ -114,7 +109,7 @@ internal fun MetisChatList(
             onClickViewPost = onClickViewPost,
             onRequestRetrySend = viewModel::retryCreatePost,
             onUndoDeletePost = viewModel::undoDeletePost,
-            title = updatedTitle,
+            conversationName = conversationName,
             onFileSelected = { uri ->
                 viewModel.onFileSelected(uri, context)
             }
@@ -144,18 +139,9 @@ fun MetisChatList(
     onClickViewPost: (StandalonePostId) -> Unit,
     onUndoDeletePost: (IStandalonePost) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
-    title: String,
+    conversationName: String,
     onFileSelected: (Uri) -> Unit
 ) {
-    val context = LocalContext.current
-
-    // TODO: https://github.com/ls1intum/artemis-android/issues/213
-//    val navigateToChat = { userId: Long ->
-//        val chatLink = "artemis://courses/$courseId/messages?userId=$userId"
-//        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(chatLink))
-//        context.startActivity(intent)
-//    }
-
     MetisReplyHandler(
         initialReplyTextProvider = initialReplyTextProvider,
         onCreatePost = onCreatePost,
@@ -228,7 +214,7 @@ fun MetisChatList(
                     modifier = Modifier.fillMaxWidth(),
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate,
-                    title = title,
+                    conversationName = conversationName,
                     onFileSelected = onFileSelected
                 )
             }

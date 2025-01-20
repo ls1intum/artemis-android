@@ -48,6 +48,13 @@ open class ConversationServiceStub(
         serverUrl: String
     ): NetworkResponse<OneToOneChat> = NetworkResponse.Failure(StubException)
 
+    override suspend fun createOneToOneConversation(
+        courseId: Long,
+        partnerId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<OneToOneChat> = NetworkResponse.Failure(StubException)
+
     override suspend fun createGroupChat(
         courseId: Long,
         groupMembers: List<String>,

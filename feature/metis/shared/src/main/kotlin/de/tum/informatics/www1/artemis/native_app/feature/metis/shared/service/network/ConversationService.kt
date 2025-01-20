@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
@@ -35,7 +36,28 @@ interface ConversationService {
 
     suspend fun createOneToOneConversation(
         courseId: Long,
+        partnerUserIdentifier: UserIdentifier,
+        authToken: String,
+        serverUrl: String
+    ) = when (partnerUserIdentifier) {
+        is UserIdentifier.Username -> {
+            createOneToOneConversation(courseId, partnerUserIdentifier.username, authToken, serverUrl)
+        }
+        is UserIdentifier.UserId -> {
+            createOneToOneConversation(courseId, partnerUserIdentifier.userId, authToken, serverUrl)
+        }
+    }
+
+    suspend fun createOneToOneConversation(
+        courseId: Long,
         partner: String,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<OneToOneChat>
+
+    suspend fun createOneToOneConversation(
+        courseId: Long,
+        partnerId: Long,
         authToken: String,
         serverUrl: String
     ): NetworkResponse<OneToOneChat>
