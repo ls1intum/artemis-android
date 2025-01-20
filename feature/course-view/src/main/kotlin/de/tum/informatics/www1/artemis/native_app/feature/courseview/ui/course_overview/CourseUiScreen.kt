@@ -45,11 +45,16 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.LectureListUi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.IgnoreCustomBackHandling
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedThread
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleCourse
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.ConversationFacadeUi
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
@@ -61,13 +66,16 @@ internal const val TAB_COMMUNICATION = 2
 
 internal const val DEFAULT_CONVERSATION_ID = -1L
 internal const val DEFAULT_POST_ID = -1L
+internal const val DEFAULT_USERNAME = ""
+internal const val DEFAULT_USER_ID = -1L
 
 @Serializable
 private data class CourseUiScreen(
     val courseId: Long,
     val conversationId: Long = DEFAULT_CONVERSATION_ID,
     val postId: Long = DEFAULT_POST_ID,
-    val username: String = ""
+    val username: String = DEFAULT_USERNAME,
+    val userId: Long = DEFAULT_USER_ID
 )
 
 fun NavController.navigateToCourse(courseId: Long, builder: NavOptionsBuilder.() -> Unit) {
@@ -91,7 +99,8 @@ fun NavGraphBuilder.course(
             generateLinks("courses/{courseId}") +
             generateLinks("courses/{courseId}/exercises") +
             generateLinks("courses/{courseId}/messages?conversationId={conversationId}") +
-            generateLinks("courses/{courseId}/messages?username={username}")
+            generateLinks("courses/{courseId}/messages?username={username}") +
+            generateLinks("courses/{courseId}/messages?userId={userId}")
     animatedComposable<CourseUiScreen>(
         deepLinks = deepLinks
     ) { backStackEntry ->
@@ -101,6 +110,7 @@ fun NavGraphBuilder.course(
         val conversationId = route.conversationId
         val postId = route.postId
         val username = route.username
+        val userId = route.userId
 
         CourseUiScreen(
             modifier = Modifier.fillMaxSize(),
@@ -109,6 +119,7 @@ fun NavGraphBuilder.course(
             conversationId = conversationId,
             postId = postId,
             username = username,
+            userId = userId,
             onNavigateToExercise = onNavigateToExercise,
             onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
             onNavigateToExerciseResultView = onNavigateToExerciseResultView,
@@ -134,6 +145,7 @@ fun CourseUiScreen(
     conversationId: Long,
     postId: Long,
     username: String,
+    userId: Long,
     onNavigateToExercise: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
@@ -151,6 +163,7 @@ fun CourseUiScreen(
         conversationId = conversationId,
         courseDataState = courseDataState,
         username = username,
+        userId = userId,
         onNavigateBack = onNavigateBack,
         weeklyExercisesDataState = weeklyExercisesDataState,
         onNavigateToExercise = onNavigateToExercise,
@@ -181,6 +194,7 @@ internal fun CourseUiScreen(
     conversationId: Long,
     postId: Long,
     username: String,
+    userId: Long,
     courseDataState: DataState<Course>,
     weeklyExercisesDataState: DataState<List<GroupedByWeek<Exercise>>>,
     weeklyLecturesDataState: DataState<List<GroupedByWeek<Lecture>>>,
@@ -196,12 +210,16 @@ internal fun CourseUiScreen(
 ) {
     var selectedTabIndex by rememberSaveable(conversationId) {
         val initialTab = when {
-            conversationId != DEFAULT_CONVERSATION_ID || username.isNotBlank() -> TAB_COMMUNICATION
+            conversationId != DEFAULT_CONVERSATION_ID -> TAB_COMMUNICATION
+            username != DEFAULT_USERNAME -> TAB_COMMUNICATION
+            userId != DEFAULT_USER_ID -> TAB_COMMUNICATION
             else -> TAB_EXERCISES
         }
 
         mutableIntStateOf(initialTab)
     }
+
+    ReportVisibleMetisContext(VisibleCourse(MetisContext.Course(courseId)))
 
     CourseUiScreen(
         modifier = modifier,
@@ -255,19 +273,28 @@ internal fun CourseUiScreen(
                 val initialConfiguration = remember(conversationId, postId) {
                     when {
                         conversationId != DEFAULT_CONVERSATION_ID && postId != DEFAULT_POST_ID -> OpenedConversation(
-                            conversationId,
-                            OpenedThread(
-                                conversationId,
+                            _prevConfiguration = IgnoreCustomBackHandling,
+                            conversationId = conversationId,
+                            openedThread = OpenedThread(
                                 StandalonePostId.ServerSideId(postId)
                             )
                         )
 
                         conversationId != DEFAULT_CONVERSATION_ID -> OpenedConversation(
-                            conversationId,
-                            null
+                            _prevConfiguration = IgnoreCustomBackHandling,
+                            conversationId = conversationId,
+                            openedThread = null
                         )
 
-                        username.isNotBlank() -> NavigateToUserConversation(username)
+                        username != DEFAULT_USERNAME -> NavigateToUserConversation(
+                            _prevConfiguration = IgnoreCustomBackHandling,
+                            userIdentifier = UserIdentifier.Username(username)
+                        )
+
+                        userId != DEFAULT_USER_ID -> NavigateToUserConversation(
+                            _prevConfiguration = IgnoreCustomBackHandling,
+                            userIdentifier = UserIdentifier.UserId(userId)
+                        )
 
                         else -> NothingOpened
                     }

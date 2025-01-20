@@ -18,6 +18,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.BrowseChannelCon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationSettings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.CreatePersonalConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.IgnoreCustomBackHandling
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedConversation
@@ -30,6 +31,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.ConversationAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.ConversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.user_conversation.NavigateToUserConversationUi
 
 @Composable
 internal fun SinglePageConversationBody(
@@ -43,25 +45,33 @@ internal fun SinglePageConversationBody(
     }
 
     val openConversation = { conversationId: Long ->
-        configuration = when (configuration) {
-            is OpenedConversation -> OpenedConversation(conversationId, null)
-            else -> OpenedConversation(conversationId, null)
-        }
+        configuration = OpenedConversation(
+            _prevConfiguration = configuration,
+            conversationId = conversationId,
+            openedThread = null
+        )
     }
 
     val canCreateChannel by viewModel.canCreateChannel.collectAsState()
 
-    BackHandler(configuration != NothingOpened) {
+    val navigateToPrevConfig = {
+        when (configuration) {
+            NothingOpened -> {}
+            else -> configuration = configuration.prevConfiguration ?: NothingOpened
+        }
+    }
+
+    val useCustomBackHandling = when {
+        configuration.prevConfiguration is IgnoreCustomBackHandling -> false
+        configuration is NothingOpened -> false
+        else -> true
+    }
+
+    BackHandler(useCustomBackHandling) {
         when (val config = configuration) {
-            is ConversationSettings -> configuration = config.prevConfiguration
-            is AddChannelConfiguration -> configuration = config.prevConfiguration
-            is BrowseChannelConfiguration -> configuration = config.prevConfiguration
-            is CreatePersonalConversation -> configuration = config.prevConfiguration
             is OpenedConversation -> configuration =
                 if (config.openedThread != null) config.copy(openedThread = null) else NothingOpened
-
-            is NavigateToUserConversation -> configuration = NothingOpened
-            NothingOpened -> {}
+            else -> navigateToPrevConfig()
         }
     }
 
@@ -116,8 +126,9 @@ internal fun SinglePageConversationBody(
                     courseId = courseId,
                     onOpenThread = { postId ->
                         configuration = OpenedConversation(
-                            config.conversationId,
-                            OpenedThread(config.conversationId, postId)
+                            _prevConfiguration = configuration,
+                            conversationId = config.conversationId,
+                            openedThread = OpenedThread(postId)
                         )
                     },
                     onCloseThread = {
@@ -129,7 +140,7 @@ internal fun SinglePageConversationBody(
                     onNavigateToSettings = {
                         configuration = ConversationSettings(
                             conversationId = config.conversationId,
-                            prevConfiguration = config
+                            _prevConfiguration = config
                         )
                     },
                     conversationsOverview = { mod -> conversationOverview(mod) }
@@ -141,7 +152,7 @@ internal fun SinglePageConversationBody(
                     modifier = modifier,
                     courseId = courseId,
                     onNavigateToConversation = openConversation,
-                    onNavigateBack = { configuration = config.prevConfiguration }
+                    onNavigateBack = navigateToPrevConfig
                 )
             }
 
@@ -151,7 +162,7 @@ internal fun SinglePageConversationBody(
                         modifier = modifier,
                         courseId = courseId,
                         onConversationCreated = openConversation,
-                        onNavigateBack = { configuration = config.prevConfiguration }
+                        onNavigateBack = navigateToPrevConfig
                     )
                 }
             }
@@ -161,7 +172,7 @@ internal fun SinglePageConversationBody(
                     modifier = modifier,
                     courseId = courseId,
                     onConversationCreated = openConversation,
-                    onNavigateBack = { configuration = config.prevConfiguration }
+                    onNavigateBack = navigateToPrevConfig
                 )
             }
 
@@ -172,7 +183,7 @@ internal fun SinglePageConversationBody(
                             modifier = modifier,
                             courseId = courseId,
                             conversationId = config.conversationId,
-                            onNavigateBack = { configuration = config.prevConfiguration }
+                            onNavigateBack = navigateToPrevConfig
                         )
                     }
 
@@ -181,7 +192,7 @@ internal fun SinglePageConversationBody(
                             modifier = modifier,
                             courseId = courseId,
                             conversationId = config.conversationId,
-                            onNavigateBack = { configuration = config.prevConfiguration }
+                            onNavigateBack = navigateToPrevConfig
                         )
                     }
 
@@ -190,17 +201,17 @@ internal fun SinglePageConversationBody(
                             modifier = modifier,
                             courseId = courseId,
                             conversationId = config.conversationId,
-                            onNavigateBack = { configuration = config.prevConfiguration },
+                            onNavigateBack = navigateToPrevConfig,
                             onRequestAddMembers = {
                                 configuration = config.copy(
                                     isAddingMembers = true,
-                                    prevConfiguration = configuration
+                                    _prevConfiguration = configuration
                                 )
                             },
                             onRequestViewAllMembers = {
                                 configuration = config.copy(
                                     isViewingAllMembers = true,
-                                    prevConfiguration = configuration
+                                    _prevConfiguration = configuration
                                 )
                             },
                             onConversationLeft = {
@@ -215,12 +226,21 @@ internal fun SinglePageConversationBody(
                 NavigateToUserConversationUi(
                     modifier = modifier,
                     courseId = courseId,
-                    username = config.username,
+                    navigation = config,
                     onNavigateToConversation = { conversationId ->
-                        configuration = OpenedConversation(conversationId, null)
+                        configuration = OpenedConversation(
+                            // We want to skip the NavigateToUserConversationUi when navigating back, as it is only a utility loading screen
+                            _prevConfiguration = configuration.prevConfiguration ?: NothingOpened,
+                            conversationId = conversationId,
+                            openedThread = null
+                        )
                     },
                     onNavigateBack = { configuration = NothingOpened }
                 )
+            }
+
+            is IgnoreCustomBackHandling -> {
+                throw IllegalStateException("IgnoreCustomBackHandling is only a technical configuration and should not be handled in SinglePageConversationBody")
             }
         }
     }

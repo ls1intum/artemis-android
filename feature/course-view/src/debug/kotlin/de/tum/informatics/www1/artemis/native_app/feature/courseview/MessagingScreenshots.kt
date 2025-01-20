@@ -261,7 +261,7 @@ fun `Metis - Conversation Channel`() {
                                 bottomItem = null,
                                 onClickViewPost = {},
                                 onRequestRetrySend = {},
-                                title = "",
+                                conversationName = "",
                                 onFileSelected = { _ ->}
                             )
                         }
