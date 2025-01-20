@@ -205,8 +205,7 @@ fun MetisChatList(
             if (isReplyEnabled) {
                 ReplyTextField(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Spacings.ReplyTextFieldHorizontalSpacing),
+                        .fillMaxWidth(),
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate,
                     conversationName = conversationName,

@@ -2,22 +2,29 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import android.net.Uri
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
@@ -27,7 +34,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,13 +47,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
@@ -94,12 +103,17 @@ internal fun ReplyTextField(
 
     Surface(
         modifier = modifier.defaultMinSize(minHeight = 48.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)),
+        color = MaterialTheme.colorScheme.background,
         shape = MaterialTheme.shapes.large
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(4.dp)
+                .padding(
+                    bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+                )
                 .height(IntrinsicSize.Max)
         ) {
             AnimatedContent(
@@ -174,10 +188,10 @@ private fun SendingReplyUi(modifier: Modifier, onCancel: () -> Unit, title: Stri
 private fun CreateReplyUi(
     modifier: Modifier,
     replyMode: ReplyMode,
+    conversationName: String,
     focusRequester: FocusRequester = remember { FocusRequester() },
     onReply: () -> Unit,
-    onFileSelected: (Uri) -> Unit,
-    conversationName: String
+    onFileSelected: (Uri) -> Unit
 ) {
     var prevReplyContent by remember { mutableStateOf("") }
     var displayTextField: Boolean by remember { mutableStateOf(false) }
@@ -187,6 +201,14 @@ private fun CreateReplyUi(
 
     var mayShowAutoCompletePopup by remember { mutableStateOf(true) }
     var requestDismissAutoCompletePopup by remember { mutableStateOf(false) }
+
+    val hintText = buildAnnotatedString {
+        append(stringResource(R.string.create_reply_click_to_write_prefix) + " '")
+        withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
+            append(conversationName)
+        }
+        append("'")
+    }
 
     LaunchedEffect(displayTextField, currentTextFieldValue) {
         if (!displayTextField && currentTextFieldValue.text.isNotBlank() && prevReplyContent.isBlank()) {
@@ -249,6 +271,7 @@ private fun CreateReplyUi(
                         .padding(8.dp)
                         .testTag(TEST_TAG_REPLY_TEXT_FIELD),
                     textFieldValue = currentTextFieldValue,
+                    hintText = hintText,
                     onTextChanged = { newValue ->
                         val finalValue = continueListIfApplicable(prevReplyContent, newValue)
                         replyMode.onUpdate(finalValue)
@@ -260,18 +283,29 @@ private fun CreateReplyUi(
                         }
                     },
                     sendButton = {
-                        IconButton(
-                            modifier = Modifier.testTag(TEST_TAG_REPLY_SEND_BUTTON),
-                            onClick = onReply,
-                            enabled = currentTextFieldValue.text.isNotBlank()
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary),
                         ) {
-                            Icon(
-                                imageVector = when (replyMode) {
-                                    is ReplyMode.EditMessage -> Icons.Default.Edit
-                                    is ReplyMode.NewMessage -> Icons.AutoMirrored.Filled.Send
-                                },
-                                contentDescription = null
-                            )
+                            IconButton(
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .align(Alignment.Center)
+                                    .testTag(TEST_TAG_REPLY_SEND_BUTTON),
+                                onClick = onReply,
+                                enabled = currentTextFieldValue.text.isNotBlank()
+                            ) {
+                                Icon(
+                                    imageVector = when (replyMode) {
+                                        is ReplyMode.EditMessage -> Icons.Default.Edit
+                                        is ReplyMode.NewMessage -> Icons.AutoMirrored.Filled.Send
+                                    },
+                                    tint = Color.White,
+                                    contentDescription = null
+                                )
+                            }
                         }
                     },
                     topRightButton = {
@@ -301,7 +335,7 @@ private fun CreateReplyUi(
             } else {
                 UnfocusedPreviewReplyTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    conversationName = conversationName,
+                    hintText = hintText,
                     onRequestShowTextField = {
                         displayTextField = true
                         requestFocus = true
@@ -556,7 +590,7 @@ private fun applyMarkdownStyle(
 private fun UnfocusedPreviewReplyTextField(
     modifier: Modifier = Modifier,
     onRequestShowTextField: () -> Unit,
-    conversationName: String
+    hintText: AnnotatedString
 ) {
     Row(
         modifier = modifier
@@ -570,22 +604,27 @@ private fun UnfocusedPreviewReplyTextField(
             modifier = Modifier
                 .padding(vertical = 8.dp)
                 .weight(1f),
-            text = buildAnnotatedString {
-                append(stringResource(R.string.create_reply_click_to_write_prefix) + " '")
-                withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
-                    append(conversationName)
-                }
-                append("'")
-            },
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = DisabledContentAlpha),
+            text = hintText,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
 
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.Send,
-            contentDescription = null,
-            tint = LocalContentColor.current.copy(alpha = DisabledContentAlpha)
-        )
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary),
+        ) {
+            Icon(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(4.dp),
+                imageVector = Icons.Default.Add,
+                contentDescription = null,
+                tint = Color.White
+            )
+        }
     }
 }
 

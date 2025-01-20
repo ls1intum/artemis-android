@@ -31,6 +31,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
@@ -48,6 +49,7 @@ const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
 internal fun MarkdownTextField(
     modifier: Modifier,
     textFieldValue: TextFieldValue,
+    hintText: AnnotatedString,
     focusRequester: FocusRequester = remember { FocusRequester() },
     sendButton: @Composable () -> Unit = {},
     topRightButton: @Composable RowScope.() -> Unit = {},
@@ -136,11 +138,13 @@ internal fun MarkdownTextField(
             val textModifier = Modifier.weight(1f)
             when (selectedType) {
                 ViewType.TEXT -> {
-                    Column(modifier = Modifier.weight(1f)) {
-
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             OutlinedTextField(
                                 modifier = textModifier
@@ -158,6 +162,7 @@ internal fun MarkdownTextField(
                                     }
                                     .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
                                 value = textFieldValue,
+                                placeholder = { Text(hintText) },
                                 onValueChange = onTextChanged
                             )
 
