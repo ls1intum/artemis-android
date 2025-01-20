@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -186,10 +187,12 @@ internal fun MetisThreadUi(
             onRequestReactWithEmoji = onRequestReactWithEmoji
         ) { replyMode, onEditPostDelegate, onResolvePostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, onPinPostDelegate, updateFailureStateDelegate ->
             BoxWithConstraints(modifier = modifier) {
-                Column(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
                     BasicDataStateUi(
                         modifier = Modifier
-                            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                             .weight(1f),
                         dataState = postDataState,
                         enablePullToRefresh = false,
@@ -199,7 +202,8 @@ internal fun MetisThreadUi(
                         onClickRetry = onRequestReload
                     ) { post ->
                         MetisPostListHandler(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize(),
                             serverUrl = serverUrl,
                             courseId = courseId,
                             state = listState,
@@ -211,6 +215,7 @@ internal fun MetisThreadUi(
                             PostAndRepliesList(
                                 modifier = Modifier
                                     .fillMaxSize()
+                                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                                     .testTag(TEST_TAG_THREAD_LIST),
                                 post = post,
                                 postActionFlags = postActionFlags,
@@ -230,7 +235,6 @@ internal fun MetisThreadUi(
                         ReplyTextField(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = Spacings.ReplyTextFieldHorizontalSpacing)
                                 .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
                             replyMode = replyMode,
                             updateFailureState = updateFailureStateDelegate,
@@ -288,6 +292,7 @@ private fun PostAndRepliesList(
 
     LazyColumn(
         modifier = modifier,
+        contentPadding = PaddingValues(bottom = 4.dp),
         state = state
     ) {
         item {
