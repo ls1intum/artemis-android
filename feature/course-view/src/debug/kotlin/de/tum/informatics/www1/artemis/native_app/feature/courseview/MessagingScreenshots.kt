@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
-import de.tum.informatics.www1.artemis.native_app.core.data.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.data.CourseServiceFake
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.test.AccountDataServiceStub
