@@ -19,6 +19,7 @@
     <string name="conversation_overview_section_groups">Group Chats</string>
     <string name="conversation_overview_section_direct_messages">Direct Messages</string>
     <string name="conversation_overview_section_hidden">Hidden</string>
+    <string name="conversation_overview_section_recent">Recent</string>
 
     <string name="conversation_overview_section_add_channel_browse">Browse channels</string>
     <string name="conversation_overview_section_add_channel_create">Create channel</string>
