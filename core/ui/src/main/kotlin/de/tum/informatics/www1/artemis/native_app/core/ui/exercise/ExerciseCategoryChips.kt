@@ -124,9 +124,18 @@ private fun collectExerciseCategoryChips(
             listOf(
                 ExerciseCategoryChipData(
                     context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_live_quiz),
-                    Color(0xff28a745)
+                    ExerciseColors.Category.live
                 )
             ) else emptyList()
+
+    val categoryChips = exercise.categories.map { category ->
+        ExerciseCategoryChipData(
+            category.category,
+            category.colorValue?.let { Color(it) } ?: ExerciseColors.Category.unknown
+        )
+    }
+
+    if (!includeType) return liveQuizChips + categoryChips
 
     val typeChips = when (exercise.includedInOverallScore) {
         Exercise.IncludedInOverallScore.INCLUDED_AS_BONUS -> listOf(
@@ -144,13 +153,5 @@ private fun collectExerciseCategoryChips(
         else -> emptyList()
     }
 
-    val categoryChips = exercise.categories.map { category ->
-        ExerciseCategoryChipData(
-            category.category,
-            Color(category.colorValue ?: 0xFFFFFFFF)
-        )
-    }
-
-    if (!includeType) return liveQuizChips + categoryChips
     return liveQuizChips + categoryChips + typeChips
 }

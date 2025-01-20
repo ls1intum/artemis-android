@@ -106,7 +106,10 @@ fun ExerciseResult(
         }
 
         ResultTemplateStatus.Missing, null -> {
-            // TODO
+            TextStatus(
+                modifier = modifier,
+                text = stringResource(id = R.string.exercise_result_missing)
+            )
         }
     }
 }

@@ -8,8 +8,6 @@ import kotlinx.datetime.Instant
 
 object ExerciseColors {
 
-
-
     object Result {
         val success: Color
             get() = Color(0xFF4CAF50)
@@ -33,6 +31,13 @@ object ExerciseColors {
             get() = Color(0xffffc107)
         val notIncluded: Color
             get() = Color.Gray
+    }
+
+    object Category {
+        val live: Color
+            get() = Color(0xff28a745)
+        val unknown: Color
+            get() = Color(0xFFFFFFFF)
     }
 
     @Composable

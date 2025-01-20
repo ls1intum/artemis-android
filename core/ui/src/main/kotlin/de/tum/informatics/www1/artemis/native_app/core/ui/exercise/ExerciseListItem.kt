@@ -67,13 +67,13 @@ fun ExerciseListItem(
                 ) {
                     //Displays the icon of the exercise
                     val painter = getExerciseTypeIconPainter(exercise)
-                    if (painter != null) {
+                    painter?.let {
                         Icon(
                             modifier = Modifier
                                 .size(40.dp)
                                 .padding(end = 8.dp)
                                 .fillMaxSize(),
-                            painter = painter,
+                            painter = it,
                             contentDescription = null
                         )
                     }

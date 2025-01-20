@@ -106,7 +106,7 @@ private fun rememberTitleTextWithInlineContent(
             )
         ) {
             val painter = getExerciseTypeIconPainter(exerciseDataState.orNull())
-            if (painter != null) {
+            painter?.let {
                 Icon(
                     painter = painter,
                     contentDescription = null

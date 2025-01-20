@@ -31,6 +31,7 @@
     <string name="exercise_result_submitted">Submitted, you can still submit updates.</string>
     <string name="exercise_result_submitted_waiting_for_grading">Submitted, waiting for grading.</string>
     <string name="exercise_result_late_submission">Late submission, waiting for feedback.</string>
+    <string name="exercise_result_missing">Missing result. Please try again later.</string>
 
     <string name="exercise_result_has_result_score">%s, %s points</string>
     <string name="exercise_result_has_result_score_without_points">%s</string>

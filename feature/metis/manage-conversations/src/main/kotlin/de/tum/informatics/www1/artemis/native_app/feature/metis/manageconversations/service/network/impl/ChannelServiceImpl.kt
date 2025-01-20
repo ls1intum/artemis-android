@@ -47,7 +47,7 @@ class ChannelServiceImpl(private val ktorProvider: KtorProvider) : ChannelServic
         authToken: String
     ): NetworkResponse<ChannelChat> {
         return performNetworkCall {
-            val x = ktorProvider.ktorClient.get(serverUrl) {
+            ktorProvider.ktorClient.get(serverUrl) {
                 url {
                     appendPathSegments(
                         "api",
@@ -61,9 +61,7 @@ class ChannelServiceImpl(private val ktorProvider: KtorProvider) : ChannelServic
 
                 cookieAuth(authToken)
                 contentType(ContentType.Application.Json)
-            }
-            println(x)
-            x.body()
+            }.body()
         }
     }
 

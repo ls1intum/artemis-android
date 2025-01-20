@@ -45,6 +45,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.datetime.Instant
 
+private val exerciseInformationColumnModifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -246,8 +247,7 @@ private fun ExerciseInformation(
         Text(
             text = stringResource(R.string.exercise_view_overview_title),
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+            modifier = exerciseInformationColumnModifier
                 .fillMaxWidth(),
             textAlign = TextAlign.Start
         )
@@ -307,7 +307,7 @@ private fun TextAndValueRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            modifier = exerciseInformationColumnModifier,
             text = stringResource(hintRes),
             style = MaterialTheme.typography.bodyMedium
         )
@@ -316,8 +316,7 @@ private fun TextAndValueRow(
 
         if (value == null) {
             ExerciseCategoryChipRow(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                modifier = exerciseInformationColumnModifier,
                 exercise = exercise,
                 includeType = false
             )
@@ -326,13 +325,13 @@ private fun TextAndValueRow(
 
         if (dataColor != null) {
             ExerciseInfoChip(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                modifier = exerciseInformationColumnModifier,
                 color = dataColor,
                 text = stringResource(value)
             )
         } else {
             Text(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                modifier = exerciseInformationColumnModifier,
                 text = stringResource(value),
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -349,7 +348,7 @@ private fun ExerciseChannelLink(
     val localLinkOpener = LocalLinkOpener.current
 
     Row(
-        modifier = modifier.padding(start = 8.dp, top = 4.dp, bottom = 4.dp),
+        modifier = modifier.padding(start = 8.dp).padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -402,7 +401,7 @@ private fun DateInfoText(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            modifier = exerciseInformationColumnModifier,
             text = stringResource(hintRes),
             style = MaterialTheme.typography.bodyMedium
         )
@@ -410,7 +409,7 @@ private fun DateInfoText(
         Spacer(modifier = Modifier.weight(1f))
 
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            modifier = exerciseInformationColumnModifier,
             text = dueDate.toString(),
             color = dataColor ?: MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyMedium,
