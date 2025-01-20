@@ -61,6 +61,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
+import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
@@ -117,7 +118,7 @@ fun NavGraphBuilder.settingsScreen(
     animatedComposable<PushNotificationSettingsScreen> {
         PushNotificationSettingsScreen(
             modifier = Modifier.fillMaxSize(),
-            onNavigateBack = onNavigateUp
+            onDone = onNavigateUp
         )
     }
 }

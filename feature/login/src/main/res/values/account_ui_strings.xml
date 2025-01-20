@@ -106,9 +106,4 @@
     <string name="login_saml_screen_login_response_unexpected_error">An unexpected error occurred. Please try again or use a different login method.</string>
     <string name="login_saml_screen_login_webview_loading">Loading authentication website…</string>
     <string name="login_saml_screen_login_webview_try_again">Reload now</string>
-
-    <!--  Push notification settings  -->
-    <string name="push_notification_settings_title">Notification configuration</string>
-    <string name="push_notification_settings_fab_text_with_save">Save &amp; Continue</string>
-    <string name="push_notification_settings_fab_text_without_save">Continue</string>
 </resources>
