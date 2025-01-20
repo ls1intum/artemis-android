@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Groups2
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Numbers
@@ -32,6 +33,7 @@ fun ConversationIcon(
     conversation: Conversation,
     clientId: Long,
     hasUnreadMessages: Boolean = false,
+    isFavoritesSection: Boolean = false,
     showDialogOnOneToOneChatClick: Boolean = false
 ) {
     Box {
@@ -44,6 +46,13 @@ fun ConversationIcon(
         if (hasUnreadMessages) {
             UnreadMessagesIndicator(
                 modifier = Modifier.align(Alignment.TopEnd)
+            )
+        }
+
+        if (conversation.isFavorite && !isFavoritesSection) {
+            FavoriteIndicator(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
             )
         }
     }
@@ -111,5 +120,16 @@ fun UnreadMessagesIndicator(modifier: Modifier = Modifier) {
             .size(8.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primaryContainer)
+    )
+}
+
+@Composable
+fun FavoriteIndicator(modifier: Modifier = Modifier) {
+    Icon(
+        modifier = modifier
+            .size(8.dp),
+        imageVector = Icons.Default.Favorite,
+        contentDescription = "Favorite",
+        tint = MaterialTheme.colorScheme.error
     )
 }
