@@ -8,6 +8,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.data.AccountDataServiceStub
+import de.tum.informatics.www1.artemis.native_app.core.data.CourseServiceFake
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationServiceStub
@@ -110,7 +111,8 @@ fun `Metis - Conversation Overview`() {
                     examsExpanded = true,
                     exercisesExpanded = true,
                     lecturesExpanded = true,
-                )
+                    recentExpanded = true
+                ),
             )
 
             override suspend fun updatePreferences(
@@ -121,7 +123,8 @@ fun `Metis - Conversation Overview`() {
         },
         websocketProvider = WebsocketProviderStub(),
         networkStatusProvider = NetworkStatusProviderStub(),
-        accountDataService = AccountDataServiceStub()
+        accountDataService = AccountDataServiceStub(),
+        courseService = CourseServiceFake(ScreenshotCourse)
     )
 
     val course = DataState.Success(ScreenshotCourse)

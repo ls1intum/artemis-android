@@ -10,13 +10,16 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState.Success
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.keepSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection
@@ -59,8 +62,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.seconds
 
 class ConversationOverviewViewModel(
@@ -73,6 +79,7 @@ class ConversationOverviewViewModel(
     websocketProvider: WebsocketProvider,
     networkStatusProvider: NetworkStatusProvider,
     accountDataService: AccountDataService,
+    private val courseService: CourseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
     serverConfigurationService,
@@ -93,6 +100,7 @@ class ConversationOverviewViewModel(
         websocketProvider: WebsocketProvider,
         networkStatusProvider: NetworkStatusProvider,
         accountDataService: AccountDataService,
+        courseService: CourseService,
         coroutineContext: CoroutineContext = EmptyCoroutineContext
     ) : this(
         application as? CurrentActivityListener,
@@ -104,6 +112,7 @@ class ConversationOverviewViewModel(
         websocketProvider,
         networkStatusProvider,
         accountDataService,
+        courseService,
         coroutineContext
     )
 
@@ -194,6 +203,22 @@ class ConversationOverviewViewModel(
             }
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
+    private val course: StateFlow<DataState<Course>> = flatMapLatest(
+        serverConfigurationService.serverUrl,
+        accountService.authToken,
+        onRequestReload.onStart { emit(Unit) }
+    ) { serverUrl, authToken, _ ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            courseService.getCourse(
+                courseId,
+                serverUrl,
+                authToken
+            ).bind { it.course }
+        }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+
     private val conversationsAsCollections: StateFlow<DataState<ConversationCollections>> =
         combine(
             updatedConversations,
@@ -202,7 +227,6 @@ class ConversationOverviewViewModel(
         ) { conversationsDataState, preferences, query ->
             conversationsDataState.bind { conversations ->
                 val isFiltering = query.isNotBlank()
-
                 ConversationCollections(
                     channels = conversations.filterNotHiddenNorFavourite<ChannelChat>()
                         .filter { !it.filterPredicate("exercise") && !it.filterPredicate("lecture") && !it.filterPredicate("exam") }
@@ -233,13 +257,51 @@ class ConversationOverviewViewModel(
                     examChannels = conversations.filter {
                         it is ChannelChat && !it.isFavorite && !it.isHidden && it.filterPredicate("exam")
                     }.map { it as ChannelChat }
-                        .asCollection(isFiltering || preferences.examsExpanded, showPrefix = false)
+                        .asCollection(isFiltering || preferences.examsExpanded, showPrefix = false),
+
+                    recentChannels = conversations.filter { isRecent(
+                        it,
+                        course.value.orNull()
+                    ) }
+                        .asCollection(
+                            isFiltering || preferences.recentExpanded,
+                            showPrefix = false
+                        )
                 )
             }
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
+    private fun isRecent(conversation: Conversation, course: Course?): Boolean {
+        if (conversation !is ChannelChat) return false
 
+        val now = Clock.System.now()
+        val startDateRange = now.minus(10.days)
+        val endDateRange = now.plus(10.days)
+
+        val exercise = course?.exercises?.firstOrNull { it.id == conversation.subTypeReferenceId }
+        val lecture = course?.lectures?.firstOrNull { it.id == conversation.subTypeReferenceId }
+
+        val exerciseStart = exercise?.releaseDate ?: Instant.DISTANT_PAST
+        val exerciseEnd = exercise?.dueDate ?: Instant.DISTANT_FUTURE
+
+        val lectureStart = lecture?.startDate ?: Instant.DISTANT_PAST
+        val lectureEnd = lecture?.endDate ?: Instant.DISTANT_FUTURE
+
+        return when {
+            conversation.filterPredicate("exercise") ->
+                exerciseStart in startDateRange..endDateRange || exerciseEnd in startDateRange..endDateRange
+
+            conversation.filterPredicate("lecture") ->
+                lectureStart in startDateRange..endDateRange || lectureEnd in startDateRange..endDateRange
+
+            conversation.filterPredicate("exam") -> {
+                val creationDate = conversation.creationDate ?: Instant.DISTANT_PAST
+                creationDate in startDateRange..endDateRange
+            }
+            else -> false
+        }
+    }
 
 
     /**
@@ -420,6 +482,10 @@ class ConversationOverviewViewModel(
 
     fun toggleHiddenExpanded() {
         expandOrCollapseSection { copy(hiddenExpanded = !hiddenExpanded) }
+    }
+
+    fun toggleRecentExpanded() {
+        expandOrCollapseSection { copy(recentExpanded = !recentExpanded) }
     }
 
     private fun expandOrCollapseSection(update: ConversationPreferenceService.Preferences.() -> ConversationPreferenceService.Preferences) {

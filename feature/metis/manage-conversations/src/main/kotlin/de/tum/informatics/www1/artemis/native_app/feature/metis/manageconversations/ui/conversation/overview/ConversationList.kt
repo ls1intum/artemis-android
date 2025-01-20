@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material.icons.filled.AccessTimeFilled
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Favorite
@@ -73,6 +74,7 @@ internal const val SECTION_EXERCISES_KEY = "exercises"
 internal const val SECTION_EXAMS_KEY = "exams"
 internal const val SECTION_LECTURES_KEY = "lectures"
 internal const val SECTION_DIRECT_MESSAGES_KEY = "direct-messages"
+internal const val SECTION_RECENT_KEY = "recents"
 
 internal const val KEY_SUFFIX_FAVORITES = "_f"
 internal const val KEY_SUFFIX_CHANNELS = "_c"
@@ -82,6 +84,7 @@ internal const val KEY_SUFFIX_LECTURES = "_l"
 internal const val KEY_SUFFIX_GROUPS = "_g"
 internal const val KEY_SUFFIX_PERSONAL = "_p"
 internal const val KEY_SUFFIX_HIDDEN = "_h"
+internal const val KEY_SUFFIX_RECENT = "_r"
 
 internal fun tagForConversation(conversationId: Long, suffix: String) = "$conversationId$suffix"
 internal fun tagForConversationOptions(tagForConversation: String) = "${tagForConversation}_options"
@@ -132,6 +135,17 @@ internal fun ConversationList(
                 R.string.conversation_overview_section_favorites,
                 viewModel::toggleFavoritesExpanded,
                 { Icon(imageVector = Icons.Default.Favorite, contentDescription = null) }
+            )
+        }
+
+        if (conversationCollections.recentChannels.conversations.isNotEmpty()) {
+            listWithHeader(
+                conversationCollections.recentChannels,
+                SECTION_RECENT_KEY,
+                KEY_SUFFIX_RECENT,
+                R.string.conversation_overview_section_recent,
+                viewModel::toggleRecentExpanded,
+                { Icon(imageVector = Icons.Default.AccessTimeFilled, contentDescription = null) }
             )
         }
 

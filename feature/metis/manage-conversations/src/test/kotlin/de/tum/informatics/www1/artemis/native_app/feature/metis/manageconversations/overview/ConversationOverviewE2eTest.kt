@@ -379,7 +379,8 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             websocketProvider = get(),
             networkStatusProvider = get(),
             accountDataService = get(),
-            coroutineContext = testDispatcher
+            coroutineContext = testDispatcher,
+            courseService = get()
         )
 
         composeTestRule.setContent {
