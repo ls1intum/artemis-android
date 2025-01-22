@@ -1,9 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
 import android.net.Uri
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -43,7 +42,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -51,10 +49,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.getString
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
 import kotlinx.coroutines.launch
 
 
@@ -68,6 +64,7 @@ internal fun MarkdownTextField(
     modifier: Modifier,
     textFieldValue: TextFieldValue,
     hintText: AnnotatedString,
+    filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>,
     focusRequester: FocusRequester = remember { FocusRequester() },
     sendButton: @Composable () -> Unit = {},
     topRightButton: @Composable RowScope.() -> Unit = {},
@@ -78,25 +75,7 @@ internal fun MarkdownTextField(
     formattingOptionButtons: @Composable () -> Unit = {},
 ) {
     val text = textFieldValue.text
-    val context = LocalContext.current
-
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
-
-    val filePickerLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            if (uri == null) return@rememberLauncherForActivityResult
-
-            val mimeType = context.contentResolver.getType(uri)
-            if (mimeType in FileValidationConstants.ALLOWED_MIME_TYPES) {
-                onFileSelected(uri)
-            } else {
-                Toast.makeText(
-                    context,
-                    getString(context, R.string.markdown_textfield_unsupported_warning),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
 
     Column(
         modifier = modifier,
@@ -235,6 +214,7 @@ private fun TextFieldOptions(
         .clip(CircleShape)
         .size(32.dp)
         .background(MaterialTheme.colorScheme.surfaceContainer)
+    val iconModifier = Modifier.padding(6.dp)
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -256,6 +236,7 @@ private fun TextFieldOptions(
                         onClick = onOpenImagePicker
                     ) {
                         Icon(
+                            modifier = iconModifier,
                             painter = painterResource(id = R.drawable.image),
                             tint = MaterialTheme.colorScheme.primary,
                             contentDescription = null
@@ -267,6 +248,7 @@ private fun TextFieldOptions(
                         onClick = onOpenFilePicker
                     ) {
                         Icon(
+                            modifier = iconModifier,
                             painter = painterResource(id = R.drawable.attachment),
                             tint = MaterialTheme.colorScheme.primary,
                             contentDescription = null
@@ -278,6 +260,7 @@ private fun TextFieldOptions(
                         onClick = { expanded = !expanded }
                     ) {
                         Icon(
+                            modifier = iconModifier,
                             painter = painterResource(id = R.drawable.format_text),
                             tint = MaterialTheme.colorScheme.primary,
                             contentDescription = null
@@ -289,6 +272,7 @@ private fun TextFieldOptions(
                         onClick = {}
                     ) {
                         Icon(
+                            modifier = iconModifier,
                             painter = painterResource(id = R.drawable.tag),
                             tint = MaterialTheme.colorScheme.primary,
                             contentDescription = null
@@ -308,13 +292,11 @@ private fun TextFieldOptions(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         IconButton(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .size(32.dp)
-                                .background(MaterialTheme.colorScheme.surfaceContainer),
+                            modifier = iconButtonModifier,
                             onClick = { expanded = false }
                         ) {
                             Icon(
+                                modifier = iconModifier,
                                 imageVector = Icons.Default.Clear,
                                 tint = MaterialTheme.colorScheme.primary,
                                 contentDescription = null

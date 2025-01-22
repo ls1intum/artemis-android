@@ -1,6 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
 import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -56,6 +60,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -74,10 +79,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
+import androidx.core.content.ContextCompat.getString
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MarkdownListContinuationUtil.continueListIfApplicable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ReplyState
 import kotlinx.coroutines.CompletableDeferred
@@ -205,6 +212,8 @@ private fun CreateReplyUi(
     onReply: () -> Unit,
     onFileSelected: (Uri) -> Unit
 ) {
+    val context = LocalContext.current
+
     var prevReplyContent by remember { mutableStateOf("") }
     var displayTextField: Boolean by remember { mutableStateOf(false) }
     var requestFocus: Boolean by remember { mutableStateOf(false) }
@@ -221,6 +230,22 @@ private fun CreateReplyUi(
         }
         append("'")
     }
+
+    val filePickerLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+
+            val mimeType = context.contentResolver.getType(uri)
+            if (mimeType in FileValidationConstants.ALLOWED_MIME_TYPES) {
+                onFileSelected(uri)
+            } else {
+                Toast.makeText(
+                    context,
+                    getString(context, R.string.markdown_textfield_unsupported_warning),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
 
     LaunchedEffect(displayTextField, currentTextFieldValue) {
         if (!displayTextField && currentTextFieldValue.text.isNotBlank() && prevReplyContent.isBlank()) {
@@ -284,6 +309,7 @@ private fun CreateReplyUi(
                         .testTag(TEST_TAG_REPLY_TEXT_FIELD),
                     textFieldValue = currentTextFieldValue,
                     hintText = hintText,
+                    filePickerLauncher = filePickerLauncher,
                     onTextChanged = { newValue ->
                         val finalValue = continueListIfApplicable(prevReplyContent, newValue)
                         replyMode.onUpdate(finalValue)
@@ -358,6 +384,7 @@ private fun CreateReplyUi(
                 UnfocusedPreviewReplyTextField(
                     modifier = Modifier.fillMaxWidth(),
                     hintText = hintText,
+                    filePickerLauncher = filePickerLauncher,
                     onRequestShowTextField = {
                         displayTextField = true
                         requestFocus = true
@@ -470,7 +497,6 @@ private fun FormattingOptions(
                     focusable = false
                 )
             ) {
-                // Unordered List item
                 DropdownMenuItem(
                     leadingIcon = {
                         Icon(
@@ -488,7 +514,7 @@ private fun FormattingOptions(
                         )
                     }
                 )
-                // Ordered List item
+
                 DropdownMenuItem(
                     leadingIcon = {
                         Text(
@@ -683,8 +709,11 @@ private fun applyMarkdownStyle(
 private fun UnfocusedPreviewReplyTextField(
     modifier: Modifier = Modifier,
     onRequestShowTextField: () -> Unit,
+    filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>,
     hintText: AnnotatedString
 ) {
+    var isFileDropdownExpanded by remember { mutableStateOf(false) }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -703,20 +732,61 @@ private fun UnfocusedPreviewReplyTextField(
             overflow = TextOverflow.Ellipsis
         )
 
-        Box(
-            modifier = Modifier
-                .size(28.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary),
-        ) {
-            Icon(
+        Box(modifier = Modifier.align(Alignment.Top)) {
+            Box(
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(4.dp),
-                imageVector = Icons.Default.Add,
-                contentDescription = null,
-                tint = Color.White
-            )
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        isFileDropdownExpanded = !isFileDropdownExpanded
+                    }
+                    .background(MaterialTheme.colorScheme.primary),
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(4.dp),
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    tint = Color.White
+                )
+            }
+
+            DropdownMenu(
+                expanded = isFileDropdownExpanded,
+                onDismissRequest = { isFileDropdownExpanded = false },
+                properties = PopupProperties(
+                    focusable = false
+                )
+            ) {
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.attachment),
+                            contentDescription = null
+                        )
+                    },
+                    text = { Text(text = stringResource(R.string.reply_format_file_upload)) },
+                    onClick = {
+                        isFileDropdownExpanded = false
+                        filePickerLauncher.launch("*/*")
+                    }
+                )
+
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.image),
+                            contentDescription = null
+                        )
+                    },
+                    text = { Text(stringResource(R.string.reply_format_image_upload)) },
+                    onClick = {
+                        isFileDropdownExpanded = false
+                        filePickerLauncher.launch("image/*")
+                    }
+                )
+            }
         }
     }
 }
