@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.BaseChatUITest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_PIN_POST
@@ -13,9 +12,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @Category(UnitTest::class)
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class PostActionBarUITest: BaseChatUITest() {
 
     private val otherUserId = 1234L

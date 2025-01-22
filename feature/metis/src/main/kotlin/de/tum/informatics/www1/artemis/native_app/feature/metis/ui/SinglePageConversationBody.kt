@@ -18,6 +18,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.BrowseChannelCon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationSettings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.CreatePersonalConversation
+import de.tum.informatics.www1.artemis.native_app.feature.metis.IgnoreCustomBackHandling
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
 import de.tum.informatics.www1.artemis.native_app.feature.metis.OpenedConversation
@@ -32,6 +33,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.ConversationAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.ConversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsScreen
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.user_conversation.NavigateToUserConversationUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 
 @Composable
@@ -62,7 +64,13 @@ internal fun SinglePageConversationBody(
         }
     }
 
-    BackHandler(configuration != NothingOpened) {
+    val useCustomBackHandling = when {
+        configuration.prevConfiguration is IgnoreCustomBackHandling -> false
+        configuration is NothingOpened -> false
+        else -> true
+    }
+
+    BackHandler(useCustomBackHandling) {
         when (val config = configuration) {
             is OpenedConversation -> configuration =
                 if (config.openedThread != null) config.copy(openedThread = null) else NothingOpened
@@ -244,16 +252,21 @@ internal fun SinglePageConversationBody(
                 NavigateToUserConversationUi(
                     modifier = modifier,
                     courseId = courseId,
-                    username = config.username,
+                    navigation = config,
                     onNavigateToConversation = { conversationId ->
                         configuration = OpenedConversation(
-                            _prevConfiguration = configuration,
+                            // We want to skip the NavigateToUserConversationUi when navigating back, as it is only a utility loading screen
+                            _prevConfiguration = configuration.prevConfiguration ?: NothingOpened,
                             conversationId = conversationId,
                             openedThread = null
                         )
                     },
                     onNavigateBack = { configuration = NothingOpened }
                 )
+            }
+
+            is IgnoreCustomBackHandling -> {
+                throw IllegalStateException("IgnoreCustomBackHandling is only a technical configuration and should not be handled in SinglePageConversationBody")
             }
         }
     }

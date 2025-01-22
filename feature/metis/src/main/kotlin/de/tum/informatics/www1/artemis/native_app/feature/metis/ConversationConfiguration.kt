@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis
 import android.os.Parcelable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -28,21 +29,19 @@ data class OpenedConversation(
 @Parcelize
 data class OpenedThread(val postId: StandalonePostId) : Parcelable
 
-@Parcelize
 data class OpenedSavedPosts(
     private val _prevConfiguration: ConversationConfiguration,
     val status: SavedPostStatus
 )
     : ConversationConfiguration(5, _prevConfiguration)
-
 /**
- * Special configuration in which we want to navigate to the 1-to-1 conversation with the user with the specified username.
+ * Special configuration in which we want to navigate to the 1-to-1 conversation with the user with the specified identifier.
  * In this configuration, we simply show a loading bar while we load the necessary data to show the chat.
  */
 @Parcelize
 data class NavigateToUserConversation(
     private val _prevConfiguration: ConversationConfiguration,
-    val username: String
+    val userIdentifier: UserIdentifier,
 ) : ConversationConfiguration(0, _prevConfiguration)
 
 @Parcelize
@@ -72,4 +71,17 @@ internal data class ConversationSettings(
 ) : ConversationConfiguration(
     navigationLevel = _prevConfiguration.navigationLevel + 1,
     prevConfiguration = _prevConfiguration
+)
+
+/**
+ * Technical configuration in which we want to ignore custom back handling and simply navigate back to the previous screen.
+ *
+ * This is useful eg for the back navigation after clicking on "send message" in the user profile dialog. This navigation
+ * is implemented via a deeplink, so a new SinglePageConversationBody gets created. When pressing back, we want to navigate
+ * back to the previous SinglePageConversationBody.
+ */
+@Parcelize
+data object IgnoreCustomBackHandling : ConversationConfiguration(
+    navigationLevel = 0,
+    prevConfiguration = null
 )
