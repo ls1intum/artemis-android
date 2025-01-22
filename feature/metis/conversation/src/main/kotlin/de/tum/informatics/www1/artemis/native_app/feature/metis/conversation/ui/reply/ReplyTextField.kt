@@ -717,14 +717,13 @@ private fun UnfocusedPreviewReplyTextField(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onRequestShowTextField)
             .padding(horizontal = 16.dp)
+            .clickable(onClick = onRequestShowTextField)
             .testTag(TEST_TAG_UNFOCUSED_TEXT_FIELD),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             modifier = Modifier
-                .padding(vertical = 8.dp)
                 .weight(1f),
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = DisabledContentAlpha),
             text = hintText,
