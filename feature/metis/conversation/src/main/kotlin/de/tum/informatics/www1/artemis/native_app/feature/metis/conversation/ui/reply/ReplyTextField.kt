@@ -65,6 +65,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.getTextBeforeSelection
 import androidx.compose.ui.text.style.TextAlign
@@ -298,7 +299,13 @@ private fun CreateReplyUi(
                             modifier = Modifier
                                 .size(28.dp)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary),
+                                .then(
+                                    if (currentTextFieldValue.text.isEmpty()) {
+                                        Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                                    } else {
+                                        Modifier.background(MaterialTheme.colorScheme.primary)
+                                    }
+                                )
                         ) {
                             IconButton(
                                 modifier = Modifier
@@ -322,7 +329,11 @@ private fun CreateReplyUi(
                     topRightButton = {
                         if (replyMode is ReplyMode.EditMessage) {
                             IconButton(onClick = replyMode.onCancelEditMessage) {
-                                Icon(imageVector = Icons.Default.Cancel, contentDescription = null)
+                                Icon(
+                                    imageVector = Icons.Default.Cancel,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
                             }
                         }
                     },
@@ -362,6 +373,7 @@ enum class MarkdownStyle(val startTag: String, val endTag: String) {
     Bold("**", "**"),
     Italic("*", "*"),
     Underline("<ins>", "</ins>"),
+    Strikethrough("~~", "~~"),
     InlineCode("`", "`"),
     CodeBlock("```", "```"),
     Blockquote("> ", ""),
@@ -390,81 +402,66 @@ private fun FormattingOptions(
         Spacer(modifier = Modifier.width(8.dp))
 
         // Bold Button
-        Box(
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable {
-                    applyMarkdownStyle(
-                        style = MarkdownStyle.Bold,
-                        currentTextFieldValue = currentTextFieldValue,
-                        onTextChanged = onTextChanged
-                    )
-                }
-                .padding(8.dp)
-        ){
-            Icon(
-                painter = painterResource(id = R.drawable.bold),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                contentDescription = null,
-            )
-        }
+        FormattingButton(
+            modifier = Modifier,
+            applyMarkdown = {
+                applyMarkdownStyle(
+                    style = MarkdownStyle.Bold,
+                    currentTextFieldValue = currentTextFieldValue,
+                    onTextChanged = onTextChanged
+                )
+            },
+            drawableId = R.drawable.bold
+        )
 
         // Italic Button
-        Box(
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable {
-                    applyMarkdownStyle(
-                        style = MarkdownStyle.Italic,
-                        currentTextFieldValue = currentTextFieldValue,
-                        onTextChanged = onTextChanged
-                    )
-                }
-                .padding(8.dp)
-        ){
-            Icon(
-                painter = painterResource(id = R.drawable.italic),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                contentDescription = null,
-            )
-        }
+        FormattingButton(
+            modifier = Modifier,
+            applyMarkdown = {
+                applyMarkdownStyle(
+                    style = MarkdownStyle.Italic,
+                    currentTextFieldValue = currentTextFieldValue,
+                    onTextChanged = onTextChanged
+                )
+            },
+            drawableId = R.drawable.italic
+        )
 
         // Underline Button
-        Box(
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable {
-                    applyMarkdownStyle(
-                        style = MarkdownStyle.Underline,
-                        currentTextFieldValue = currentTextFieldValue,
-                        onTextChanged = onTextChanged
-                    )
-                }
-                .padding(8.dp)
-        ){
-            Icon(
-                painter = painterResource(id = R.drawable.underline),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                contentDescription = null,
-            )
-        }
+        FormattingButton(
+            modifier = Modifier,
+            applyMarkdown = {
+                applyMarkdownStyle(
+                    style = MarkdownStyle.Underline,
+                    currentTextFieldValue = currentTextFieldValue,
+                    onTextChanged = onTextChanged
+                )
+            },
+            drawableId = R.drawable.underline
+        )
+
+        // Strikethrough Button
+        FormattingButton(
+            modifier = Modifier,
+            applyMarkdown = {
+                applyMarkdownStyle(
+                    style = MarkdownStyle.Strikethrough,
+                    currentTextFieldValue = currentTextFieldValue,
+                    onTextChanged = onTextChanged
+                )
+            },
+            drawableId = R.drawable.strikethrough
+        )
 
         // Code Button
         Box(modifier = Modifier.align(Alignment.Top)) {
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .clickable {
-                        isCodeDropdownExpanded = !isCodeDropdownExpanded
-                    }
-                    .padding(8.dp)
-            ){
-                Icon(
-                    painter = painterResource(id = R.drawable.code),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    contentDescription = null,
-                )
-            }
+            FormattingButton(
+                modifier = Modifier,
+                applyMarkdown = {
+                    isCodeDropdownExpanded = !isCodeDropdownExpanded
+                },
+                drawableId = R.drawable.code
+            )
 
             DropdownMenu(
                 expanded = isCodeDropdownExpanded,
@@ -481,7 +478,7 @@ private fun FormattingOptions(
                             contentDescription = null
                         )
                     },
-                    text = { Text(text = stringResource(R.string.reply_format_unordered)) },
+                    text = { Text(text = stringResource(R.string.reply_format_inline_code)) },
                     onClick = {
                         isCodeDropdownExpanded = false
                         applyMarkdownStyle(
@@ -494,12 +491,15 @@ private fun FormattingOptions(
                 // Ordered List item
                 DropdownMenuItem(
                     leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.FormatListNumbered,
-                            contentDescription = null
+                        Text(
+                            modifier = Modifier.padding(start = 4.dp),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            text = "{ }"
                         )
                     },
-                    text = { Text(stringResource(R.string.reply_format_ordered)) },
+                    text = { Text(stringResource(R.string.reply_format_code_block)) },
                     onClick = {
                         isCodeDropdownExpanded = false
                         applyMarkdownStyle(
@@ -513,40 +513,26 @@ private fun FormattingOptions(
         }
 
         // Blockquote Button
-        Box(
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable {
-                    applyMarkdownStyle(
-                        style = MarkdownStyle.Blockquote,
-                        currentTextFieldValue = currentTextFieldValue,
-                        onTextChanged = onTextChanged
-                    )
-                }
-                .padding(8.dp)
-        ){
-            Icon(
-                painter = painterResource(id = R.drawable.quote),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                contentDescription = null,
-            )
-        }
+        FormattingButton(
+            modifier = Modifier,
+            applyMarkdown = {
+                applyMarkdownStyle(
+                    style = MarkdownStyle.Blockquote,
+                    currentTextFieldValue = currentTextFieldValue,
+                    onTextChanged = onTextChanged
+                )
+            },
+            drawableId = R.drawable.quote
+        )
 
         Box(modifier = Modifier.align(Alignment.Top)) {
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .clickable {
-                        isListDropDownExpanded = !isListDropDownExpanded
-                    }
-                    .padding(8.dp)
-            ){
-                Icon(
-                    painter = painterResource(id = R.drawable.list),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    contentDescription = null,
-                )
-            }
+            FormattingButton(
+                modifier = Modifier,
+                applyMarkdown = {
+                    isListDropDownExpanded = !isListDropDownExpanded
+                },
+                drawableId = R.drawable.list
+            )
 
             DropdownMenu(
                 expanded = isListDropDownExpanded,
@@ -595,6 +581,28 @@ private fun FormattingOptions(
         }
 
         Spacer(modifier = Modifier.width(8.dp))
+    }
+}
+
+@Composable
+private fun FormattingButton(
+    modifier: Modifier,
+    applyMarkdown: () -> Unit,
+    drawableId: Int,
+) {
+    Box(
+        modifier = modifier
+            .clip(CircleShape)
+            .clickable {
+                applyMarkdown()
+            }
+            .padding(8.dp)
+    ){
+        Icon(
+            painter = painterResource(id = drawableId),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            contentDescription = null,
+        )
     }
 }
 

@@ -121,22 +121,19 @@ internal fun MarkdownTextField(
                         onFocusAcquired = onFocusAcquired,
                         onFocusLost = onFocusLost
                     )
-
-                    sendButton()
-
-
                 }
 
                 ViewType.PREVIEW -> {
-
                     MarkdownText(
                         markdown = text,
                         modifier = Modifier.weight(1f)
                     )
-
-                    sendButton()
                 }
             }
+
+            sendButton()
+
+            topRightButton()
         }
 
         TextFieldOptions(
@@ -144,7 +141,9 @@ internal fun MarkdownTextField(
             isPreviewEnabled = text.isNotEmpty(),
             showFormattingOptions = selectedType == ViewType.TEXT,
             onChangeViewType = { selectedType = it },
-            formattingOptionButtons = formattingOptionButtons
+            formattingOptionButtons = formattingOptionButtons,
+            onOpenImagePicker = { filePickerLauncher.launch("image/*") },
+            onOpenFilePicker = { filePickerLauncher.launch("*/*") },
         )
     }
 }
@@ -226,9 +225,11 @@ private fun TextFieldOptions(
     modifier: Modifier = Modifier,
     selectedType: ViewType,
     isPreviewEnabled: Boolean,
-    showFormattingOptions: Boolean = true,
+    showFormattingOptions: Boolean,
     onChangeViewType: (ViewType) -> Unit,
     formattingOptionButtons: @Composable () -> Unit = {},
+    onOpenFilePicker: () -> Unit = {},
+    onOpenImagePicker: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
     val offsetY by animateDpAsState(targetValue = if (expanded) 0.dp else 200.dp)
@@ -255,7 +256,7 @@ private fun TextFieldOptions(
                 ) {
                     IconButton(
                         modifier = iconButtonModifier,
-                        onClick = {}
+                        onClick = onOpenImagePicker
                     ) {
                         Icon(
                             imageVector = Icons.Default.Image,
@@ -266,7 +267,7 @@ private fun TextFieldOptions(
 
                     IconButton(
                         modifier = iconButtonModifier,
-                        onClick = {}
+                        onClick = onOpenFilePicker
                     ) {
                         Icon(
                             imageVector = Icons.Default.AttachFile,
