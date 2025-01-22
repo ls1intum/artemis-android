@@ -101,53 +101,51 @@ internal fun MarkdownTextField(
             }
         }
 
-    Column(modifier = modifier) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            val textModifier = Modifier.weight(1f)
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             when (selectedType) {
                 ViewType.TEXT -> {
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            BasicMarkdownTextField(
-                                modifier = textModifier,
-                                textFieldValue = textFieldValue,
-                                onTextChanged = onTextChanged,
-                                hintText = hintText,
-                                focusRequester = focusRequester,
-                                onFocusAcquired = onFocusAcquired,
-                                onFocusLost = onFocusLost
-                            )
+                    BasicMarkdownTextField(
+                        modifier = Modifier.weight(1f),
+                        textFieldValue = textFieldValue,
+                        onTextChanged = onTextChanged,
+                        hintText = hintText,
+                        focusRequester = focusRequester,
+                        onFocusAcquired = onFocusAcquired,
+                        onFocusLost = onFocusLost
+                    )
 
-                            sendButton()
-                        }
+                    sendButton()
 
-                        Spacer(modifier = Modifier.height(16.dp))
 
-                        TextFieldOptions(
-                            selectedType = selectedType,
-                            isPreviewEnabled = true,
-                            onChangeViewType = { selectedType = it },
-                            formattingOptionButtons = formattingOptionButtons
-                        )
-                    }
                 }
 
                 ViewType.PREVIEW -> {
+
                     MarkdownText(
                         markdown = text,
-                        modifier = textModifier
+                        modifier = Modifier.weight(1f)
                     )
 
                     sendButton()
                 }
             }
         }
+
+        TextFieldOptions(
+            selectedType = selectedType,
+            isPreviewEnabled = text.isNotEmpty(),
+            showFormattingOptions = selectedType == ViewType.TEXT,
+            onChangeViewType = { selectedType = it },
+            formattingOptionButtons = formattingOptionButtons
+        )
     }
 }
 
@@ -228,6 +226,7 @@ private fun TextFieldOptions(
     modifier: Modifier = Modifier,
     selectedType: ViewType,
     isPreviewEnabled: Boolean,
+    showFormattingOptions: Boolean = true,
     onChangeViewType: (ViewType) -> Unit,
     formattingOptionButtons: @Composable () -> Unit = {},
 ) {
@@ -244,88 +243,92 @@ private fun TextFieldOptions(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .weight(1f),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Row(
-                modifier = modifier,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                IconButton(
-                    modifier = iconButtonModifier,
-                    onClick = {}
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Image,
-                        tint = MaterialTheme.colorScheme.primary,
-                        contentDescription = null
-                    )
-                }
-
-                IconButton(
-                    modifier = iconButtonModifier,
-                    onClick = {}
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AttachFile,
-                        tint = MaterialTheme.colorScheme.primary,
-                        contentDescription = null
-                    )
-                }
-
-                IconButton(
-                    modifier = iconButtonModifier,
-                    onClick = { expanded = !expanded }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.format_text),
-                        tint = MaterialTheme.colorScheme.primary,
-                        contentDescription = null
-                    )
-                }
-
-                IconButton(
-                    modifier = iconButtonModifier,
-                    onClick = {}
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AlternateEmail,
-                        tint = MaterialTheme.colorScheme.primary,
-                        contentDescription = null
-                    )
-                }
-            }
-
+        if (showFormattingOptions) {
             Box(
                 modifier = Modifier
-                    .offset(y = offsetY)
-                    .background(MaterialTheme.colorScheme.background)
+                    .weight(1f),
+                contentAlignment = Alignment.CenterStart
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = modifier,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     IconButton(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .size(32.dp)
-                            .background(MaterialTheme.colorScheme.surfaceContainer),
-                        onClick = { expanded = false }
+                        modifier = iconButtonModifier,
+                        onClick = {}
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Clear,
+                            imageVector = Icons.Default.Image,
                             tint = MaterialTheme.colorScheme.primary,
                             contentDescription = null
                         )
                     }
 
-                    formattingOptionButtons()
+                    IconButton(
+                        modifier = iconButtonModifier,
+                        onClick = {}
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AttachFile,
+                            tint = MaterialTheme.colorScheme.primary,
+                            contentDescription = null
+                        )
+                    }
+
+                    IconButton(
+                        modifier = iconButtonModifier,
+                        onClick = { expanded = !expanded }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.format_text),
+                            tint = MaterialTheme.colorScheme.primary,
+                            contentDescription = null
+                        )
+                    }
+
+                    IconButton(
+                        modifier = iconButtonModifier,
+                        onClick = {}
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AlternateEmail,
+                            tint = MaterialTheme.colorScheme.primary,
+                            contentDescription = null
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .offset(y = offsetY)
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        IconButton(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .size(32.dp)
+                                .background(MaterialTheme.colorScheme.surfaceContainer),
+                            onClick = { expanded = false }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                tint = MaterialTheme.colorScheme.primary,
+                                contentDescription = null
+                            )
+                        }
+
+                        formattingOptionButtons()
+                    }
                 }
             }
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
         }
 
         Row(
@@ -351,9 +354,7 @@ private fun TextFieldOptions(
             )
         }
     }
-
 }
-
 
 private enum class ViewType {
     TEXT,

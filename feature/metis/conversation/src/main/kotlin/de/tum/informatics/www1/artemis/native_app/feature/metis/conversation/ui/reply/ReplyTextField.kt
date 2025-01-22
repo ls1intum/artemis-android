@@ -593,6 +593,8 @@ private fun FormattingOptions(
                 )
             }
         }
+
+        Spacer(modifier = Modifier.width(8.dp))
     }
 }
 
