@@ -35,6 +35,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.rememberPostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -144,14 +145,16 @@ internal fun SavedPostsScreen (
                 onClickRetry = onRequestReload
             ) { savedPosts ->
 
-                SavedPostsList(
-                    modifier = Modifier.fillMaxSize(),
-                    status = status,
-                    savedPosts = savedPosts,
-                    onNavigateToPost = onNavigateToPost,
-                    onChangeStatus = onChangeStatus,
-                    onRemoveFromSavedPosts = onRemoveFromSavedPosts
-                )
+                ProvideMarkwon {
+                    SavedPostsList(
+                        modifier = Modifier.fillMaxSize(),
+                        status = status,
+                        savedPosts = savedPosts,
+                        onNavigateToPost = onNavigateToPost,
+                        onChangeStatus = onChangeStatus,
+                        onRemoveFromSavedPosts = onRemoveFromSavedPosts
+                    )
+                }
             }
         }
     }
