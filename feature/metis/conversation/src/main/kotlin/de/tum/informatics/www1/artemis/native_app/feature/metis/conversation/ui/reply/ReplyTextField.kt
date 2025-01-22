@@ -50,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
@@ -102,8 +103,18 @@ internal fun ReplyTextField(
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
 
     Surface(
-        modifier = modifier.defaultMinSize(minHeight = 48.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)),
+        modifier = modifier.defaultMinSize(minHeight = 84.dp),
+        border = BorderStroke(
+            1.dp,
+            Brush.verticalGradient(
+                listOf(
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                    MaterialTheme.colorScheme.background
+                ),
+                startY = 0f,
+                endY = 100f
+            )
+        ),
         color = MaterialTheme.colorScheme.background,
         shape = MaterialTheme.shapes.large
     ) {

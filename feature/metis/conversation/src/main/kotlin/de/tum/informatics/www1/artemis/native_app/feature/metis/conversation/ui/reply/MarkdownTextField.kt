@@ -4,33 +4,38 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachFile
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material3.Icon
-import androidx.compose.material3.InputChip
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -38,6 +43,7 @@ import androidx.core.content.ContextCompat.getString
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
+import kotlinx.coroutines.launch
 
 
 const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
@@ -63,7 +69,6 @@ internal fun MarkdownTextField(
     val context = LocalContext.current
 
     var selectedType by remember { mutableStateOf(ViewType.TEXT) }
-    var hadFocus by remember { mutableStateOf(false) }
 
     val filePickerLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -82,57 +87,6 @@ internal fun MarkdownTextField(
         }
 
     Column(modifier = modifier) {
-        Row(
-            modifier = Modifier,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            InputChip(
-                selected = selectedType == ViewType.TEXT,
-                onClick = { selectedType = ViewType.TEXT },
-                label = {
-                    Text(text = stringResource(id = R.string.markdown_textfield_tab_text))
-                }
-            )
-
-            InputChip(
-                selected = selectedType == ViewType.PREVIEW,
-                onClick = { selectedType = ViewType.PREVIEW },
-                enabled = text.isNotEmpty(),
-                label = {
-                    Text(text = stringResource(id = R.string.markdown_textfield_tab_preview))
-                }
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            InputChip(
-                selected = true,
-                onClick = {
-                    filePickerLauncher.launch("*/*")
-                },
-                enabled = true,
-                label = {
-                    Icon(
-                        Icons.Default.AttachFile,
-                        contentDescription = "Attach File"
-                    )
-                }
-            )
-
-            InputChip(
-                selected = true,
-                onClick = { filePickerLauncher.launch("image/*") },
-                enabled = true,
-                label = {
-                    Icon(
-                        Icons.Default.Image,
-                        contentDescription = "Select Image"
-                    )
-                }
-            )
-
-            topRightButton()
-        }
 
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             val textModifier = Modifier.weight(1f)
@@ -146,24 +100,14 @@ internal fun MarkdownTextField(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            OutlinedTextField(
-                                modifier = textModifier
-                                    .weight(1f)
-                                    .focusRequester(focusRequester)
-                                    .onFocusChanged { focusState ->
-                                        if (focusState.hasFocus) {
-                                            hadFocus = true
-                                            onFocusAcquired()
-                                        }
-                                        if (!focusState.hasFocus && hadFocus) {
-                                            onFocusLost()
-                                            hadFocus = false
-                                        }
-                                    }
-                                    .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
-                                value = textFieldValue,
-                                placeholder = { Text(hintText) },
-                                onValueChange = onTextChanged
+                            BasicMarkdownTextField(
+                                modifier = textModifier,
+                                textFieldValue = textFieldValue,
+                                onTextChanged = onTextChanged,
+                                hintText = hintText,
+                                focusRequester = focusRequester,
+                                onFocusAcquired = onFocusAcquired,
+                                onFocusLost = onFocusLost
                             )
 
                             sendButton()
@@ -172,6 +116,7 @@ internal fun MarkdownTextField(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         formattingOptionButtons()
+
                     }
                 }
 
@@ -185,6 +130,78 @@ internal fun MarkdownTextField(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun BasicMarkdownTextField(
+    modifier: Modifier = Modifier,
+    textFieldValue: TextFieldValue,
+    hintText: AnnotatedString,
+    focusRequester: FocusRequester,
+    maxVisibleLines: Int = 8,
+    onTextChanged: (TextFieldValue) -> Unit,
+    onFocusAcquired: () -> Unit = {},
+    onFocusLost: () -> Unit = {}
+) {
+    var hadFocus by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+
+    val localDensity = LocalDensity.current
+    val localTextStyle = LocalTextStyle.current
+    val lineHeight = with(localDensity) { localTextStyle.lineHeight.toPx() }
+
+    LaunchedEffect(textFieldValue.selection) {
+        val cursorLine = textFieldValue.text.take(textFieldValue.selection.start)
+            .count { it == '\n' }
+        val cursorOffset = (cursorLine * lineHeight).toInt()
+        coroutineScope.launch {
+            scrollState.animateScrollTo(cursorOffset)
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .heightIn(max = (localTextStyle.fontSize.value * maxVisibleLines).dp)
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(scrollState)
+    ){
+        BasicTextField(
+            modifier = modifier
+                .focusRequester(focusRequester)
+                .onFocusChanged { focusState ->
+                    if (focusState.hasFocus) {
+                        hadFocus = true
+                        onFocusAcquired()
+                    }
+                    if (!focusState.hasFocus && hadFocus) {
+                        onFocusLost()
+                        hadFocus = false
+                    }
+                }
+                .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
+            value = textFieldValue,
+            onValueChange = onTextChanged,
+            decorationBox = { innerTextField ->
+                Box(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
+                    if (textFieldValue.text.isEmpty()) {
+                        Text(
+                            modifier = Modifier.align(Alignment.CenterStart),
+                            text = hintText,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = localTextStyle,
+                        )
+                    }
+                    innerTextField()
+                }
+            },
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            textStyle = localTextStyle.copy(color = MaterialTheme.colorScheme.onSurface)
+        )
     }
 }
 
