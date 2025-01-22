@@ -56,10 +56,12 @@ abstract class BaseChatUITest : BaseComposeTest() {
 
     fun simplePost(
         postAuthor: User,
+        isSaved: Boolean = false
     ): StandalonePost = StandalonePost(
         id = 1,
         author = postAuthor,
         content = simplePostContent,
+        isSaved = isSaved
     )
 
     fun simpleThreadPostWithAnswer(
