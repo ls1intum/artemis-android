@@ -71,7 +71,6 @@ internal fun MarkdownTextField(
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
-    onFileSelected: (Uri) -> Unit = { _ -> },
     formattingOptionButtons: @Composable () -> Unit = {},
 ) {
     val text = textFieldValue.text

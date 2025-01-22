@@ -363,9 +363,6 @@ private fun CreateReplyUi(
                             }
                         }
                     },
-                    onFileSelected = { uri ->
-                        onFileSelected(uri)
-                    },
                     formattingOptionButtons = {
                         FormattingOptions(
                             currentTextFieldValue = currentTextFieldValue,
