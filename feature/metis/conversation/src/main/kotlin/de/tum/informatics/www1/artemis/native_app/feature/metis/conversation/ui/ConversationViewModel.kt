@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.widget.Toast
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
@@ -75,7 +76,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisV
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -95,6 +98,12 @@ import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+
+// A buffer is added to the delay to account for additional delays
+// NOTE: This is only for the viewModel. Check PostItem.kt for the visible delay in the UI.
+private const val undoDeleteDelayFromUi = 6000L
+private const val bufferDelay = 1000L
+private const val undoDeleteDelay = undoDeleteDelayFromUi + bufferDelay
 
 internal open class ConversationViewModel(
     val courseId: Long,
@@ -128,6 +137,9 @@ internal open class ConversationViewModel(
 
     private val _postId: MutableStateFlow<StandalonePostId?> = MutableStateFlow(initialPostId)
     val postId: StateFlow<StandalonePostId?> = _postId
+
+    private val deleteJobs = mutableMapOf<IBasePost, Job>()
+    val isMarkedAsDeleteList = mutableStateListOf<IBasePost>()
 
     val chatListUseCase = ConversationChatListUseCase(
         viewModelScope = viewModelScope,
@@ -451,17 +463,40 @@ internal open class ConversationViewModel(
     }
 
     fun deletePost(post: IBasePost): Deferred<MetisModificationFailure?> {
-        return viewModelScope.async(coroutineContext) {
-            metisModificationService.deletePost(
-                metisContext,
-                post.getAsAffectedPost() ?: return@async MetisModificationFailure.DELETE_POST,
-                serverConfigurationService.serverUrl.first(),
-                accountService.authToken.first()
-            )
-                .bind { if (it) null else MetisModificationFailure.DELETE_POST }
-                .or(MetisModificationFailure.DELETE_POST)
-                .also { if (it != MetisModificationFailure.DELETE_POST && post is IStandalonePost) onCloseThread?.invoke() }
+        isMarkedAsDeleteList.add(post)
+        deleteJobs[post]?.cancel()
+
+        val deleteJob = viewModelScope.async(coroutineContext) {
+            try {
+                delay(undoDeleteDelay)
+
+                if (isMarkedAsDeleteList.contains(post)) {
+                    metisModificationService.deletePost(
+                        metisContext,
+                        post.getAsAffectedPost() ?: return@async MetisModificationFailure.DELETE_POST,
+                        serverConfigurationService.serverUrl.first(),
+                        accountService.authToken.first()
+                    )
+                        .bind { if (it) null else MetisModificationFailure.DELETE_POST }
+                        .or(MetisModificationFailure.DELETE_POST)
+                        .also { if (it != MetisModificationFailure.DELETE_POST && post is IStandalonePost) onCloseThread?.invoke() }
+                } else {
+                    null
+                }
+            } finally {
+                deleteJobs.remove(post)
+                isMarkedAsDeleteList.remove(post)
+            }
         }
+        deleteJobs[post] = deleteJob
+
+        return deleteJob
+    }
+
+    fun undoDeletePost(post: IBasePost) {
+        deleteJobs[post]?.cancel()
+        deleteJobs.remove(post)
+        isMarkedAsDeleteList.remove(post)
     }
 
     fun editPost(post: IStandalonePost, newText: String): Deferred<MetisModificationFailure?> {

@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -103,6 +104,7 @@ internal fun MetisThreadUi(
             postActionFlags = postActionFlags,
             serverUrl = serverUrl,
             emojiService = koinInject(),
+            isMarkedAsDeleteList = viewModel.isMarkedAsDeleteList,
             clientId = clientId,
             onCreatePost = viewModel::createReply,
             onEditPost = { post, newText ->
@@ -138,6 +140,7 @@ internal fun MetisThreadUi(
                 }
             },
             onDeletePost = viewModel::deletePost,
+            onUndoDeletePost = viewModel::undoDeletePost,
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onRequestReload = viewModel::requestReload,
             onRequestRetrySend = viewModel::retryCreateReply,
@@ -157,6 +160,7 @@ internal fun MetisThreadUi(
     conversationDataState: DataState<Conversation>,
     postActionFlags: PostActionFlags,
     serverUrl: String,
+    isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     emojiService: EmojiService,
     initialReplyTextProvider: InitialReplyTextProvider,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
@@ -164,6 +168,7 @@ internal fun MetisThreadUi(
     onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
     onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
     onDeletePost: (IBasePost) -> Deferred<MetisModificationFailure?>,
+    onUndoDeletePost: (IBasePost) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onRequestReload: () -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit,
@@ -214,9 +219,11 @@ internal fun MetisThreadUi(
                                 post = post,
                                 postActionFlags = postActionFlags,
                                 clientId = clientId,
+                                isMarkedAsDeleteList = isMarkedAsDeleteList,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
                                 onRequestDelete = onDeletePostDelegate,
+                                onRequestUndoDelete = onUndoDeletePost,
                                 onRequestResolve = onResolvePostDelegate,
                                 onRequestPin = onPinPostDelegate,
                                 state = listState,
@@ -250,9 +257,11 @@ private fun PostAndRepliesList(
     state: LazyListState,
     post: IStandalonePost,
     postActionFlags: PostActionFlags,
+    isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
+    onRequestUndoDelete: (IBasePost) -> Unit,
     onRequestResolve: (IBasePost) -> Unit,
     onRequestPin: (IBasePost) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
@@ -265,6 +274,7 @@ private fun PostAndRepliesList(
             clientId,
             onRequestEdit = { onRequestEdit(affectedPost) },
             onRequestDelete = { onRequestDelete(affectedPost) },
+            onRequestUndoDelete = { onRequestUndoDelete(affectedPost) },
             onClickReaction = { emojiId, create ->
                 onRequestReactWithEmoji(
                     affectedPost,
@@ -301,6 +311,7 @@ private fun PostAndRepliesList(
                     post = post,
                     postItemViewType = PostItemViewType.ThreadContextPostItem,
                     postActions = postActions,
+                    isMarkedAsDeleteList = isMarkedAsDeleteList,
                     displayHeader = true,
                     joinedItemType = PostItemViewJoinedType.PARENT,
                     clientId = clientId,
@@ -329,6 +340,7 @@ private fun PostAndRepliesList(
                     .testTag(testTagForAnswerPost(answerPost.clientPostId)),
                 post = answerPost,
                 postActions = postActions,
+                isMarkedAsDeleteList = isMarkedAsDeleteList,
                 postItemViewType = PostItemViewType.ThreadAnswerItem,
                 clientId = clientId,
                 displayHeader = shouldDisplayHeader(
