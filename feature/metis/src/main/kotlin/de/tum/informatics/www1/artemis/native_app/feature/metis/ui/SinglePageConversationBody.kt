@@ -33,8 +33,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.ConversationAddMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.ConversationMembersScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.user_conversation.NavigateToUserConversationUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.user_conversation.NavigateToUserConversationUi
 
 @Composable
 internal fun SinglePageConversationBody(
@@ -71,11 +71,7 @@ internal fun SinglePageConversationBody(
     }
 
     BackHandler(useCustomBackHandling) {
-        when (val config = configuration) {
-            is OpenedConversation -> configuration =
-                if (config.openedThread != null) config.copy(openedThread = null) else NothingOpened
-            else -> navigateToPrevConfig()
-        }
+        navigateToPrevConfig()
     }
 
     val conversationOverview: @Composable (Modifier) -> Unit = { m ->
@@ -105,9 +101,9 @@ internal fun SinglePageConversationBody(
         targetState = configuration,
         transitionSpec = {
             val navigationLevelDiff = targetState.navigationLevel - initialState.navigationLevel
-            when (navigationLevelDiff) {
-                1 -> DefaultTransition.navigateForward
-                -1 -> DefaultTransition.navigateBack
+            when {
+                navigationLevelDiff > 0 -> DefaultTransition.navigateForward
+                navigationLevelDiff < 0 -> DefaultTransition.navigateBack
                 else -> DefaultTransition.navigateNeutral
             }
             .using(
@@ -137,9 +133,7 @@ internal fun SinglePageConversationBody(
                             openedThread = OpenedThread(postId)
                         )
                     },
-                    onCloseThread = {
-                        configuration = config.copy(openedThread = null)
-                    },
+                    onCloseThread = navigateToPrevConfig,
                     onCloseConversation = {
                         configuration = NothingOpened
                     },
