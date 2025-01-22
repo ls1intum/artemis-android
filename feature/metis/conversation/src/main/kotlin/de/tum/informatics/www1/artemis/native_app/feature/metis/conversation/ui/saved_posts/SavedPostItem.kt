@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,6 +45,7 @@ fun SavedPostItem(
     isLoading: Boolean = false,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    trailingCardContent: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     ConversationContextInfo(
         modifier = modifier
@@ -54,7 +56,8 @@ fun SavedPostItem(
             ),
         conversation = savedPost.conversation,
         isThreadReply = savedPost.postingType == SavedPostPostingType.ANSWER,
-        isLoading = isLoading
+        isLoading = isLoading,
+        trailingCardContent = trailingCardContent
     ) {
 
         PostItemMainContent(
@@ -72,7 +75,8 @@ private fun ConversationContextInfo(
     conversation: ISavedPost.SimpleConversationInfo,
     isThreadReply: Boolean,
     isLoading: Boolean,
-    content: @Composable () -> Unit,
+    trailingCardContent: (@Composable ColumnScope.() -> Unit)? = null,
+    postContent: @Composable () -> Unit,
 ) {
     Card(
         modifier = modifier,
@@ -95,7 +99,8 @@ private fun ConversationContextInfo(
             Spacer(modifier = Modifier.height(4.dp))
 
             if (!isThreadReply) {
-                content()
+                postContent()
+                trailingCardContent?.invoke(this@Column)
                 return@Card
             }
 
@@ -120,8 +125,10 @@ private fun ConversationContextInfo(
 
                 Spacer(Modifier.width(4.dp))
 
-                content()
+                postContent()
             }
+
+            trailingCardContent?.invoke(this@Column)
         }
     }
 }

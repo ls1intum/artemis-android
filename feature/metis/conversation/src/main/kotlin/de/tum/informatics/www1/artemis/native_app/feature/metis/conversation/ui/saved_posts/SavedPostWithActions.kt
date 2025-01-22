@@ -1,13 +1,17 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.saved_posts
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -16,8 +20,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -63,17 +69,19 @@ fun SavedPostWithActions(
             onLongClick = {
                 displayBottomSheet = true
             },
-        )
-
-        if (savedPost.savedPostStatus == SavedPostStatus.IN_PROGRESS) {
-            Button(
-                onClick = {
-                    metisModificationTask = onChangeStatus(SavedPostStatus.COMPLETED)
+            trailingCardContent = {
+                if (savedPost.savedPostStatus == SavedPostStatus.IN_PROGRESS) {
+                    CompleteButton(
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .padding(4.dp),
+                        onClick = {
+                            metisModificationTask = onChangeStatus(SavedPostStatus.COMPLETED)
+                        }
+                    )
                 }
-            ) {
-                Text(stringResource(id = R.string.saved_posts_action_mark_as_completed))
             }
-        }
+        )
     }
 
 
@@ -90,6 +98,28 @@ fun SavedPostWithActions(
             },
             onDismissRequest = { displayBottomSheet = false }
         )
+    }
+}
+
+@Composable
+private fun CompleteButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    Button(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.CheckBox,
+                contentDescription = null
+            )
+            Text(text = stringResource(id = R.string.saved_posts_action_mark_as_completed))
+        }
     }
 }
 
