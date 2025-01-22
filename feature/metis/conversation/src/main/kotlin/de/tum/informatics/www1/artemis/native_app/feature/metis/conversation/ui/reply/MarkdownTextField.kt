@@ -22,10 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AlternateEmail
-import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
@@ -259,7 +256,7 @@ private fun TextFieldOptions(
                         onClick = onOpenImagePicker
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Image,
+                            painter = painterResource(id = R.drawable.image),
                             tint = MaterialTheme.colorScheme.primary,
                             contentDescription = null
                         )
@@ -270,7 +267,7 @@ private fun TextFieldOptions(
                         onClick = onOpenFilePicker
                     ) {
                         Icon(
-                            imageVector = Icons.Default.AttachFile,
+                            painter = painterResource(id = R.drawable.attachment),
                             tint = MaterialTheme.colorScheme.primary,
                             contentDescription = null
                         )
@@ -292,7 +289,7 @@ private fun TextFieldOptions(
                         onClick = {}
                     ) {
                         Icon(
-                            imageVector = Icons.Default.AlternateEmail,
+                            painter = painterResource(id = R.drawable.tag),
                             tint = MaterialTheme.colorScheme.primary,
                             contentDescription = null
                         )
