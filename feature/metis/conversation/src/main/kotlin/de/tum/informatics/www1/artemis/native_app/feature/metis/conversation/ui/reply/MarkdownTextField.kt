@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.TextFormat
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
@@ -50,6 +49,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
@@ -127,7 +127,7 @@ internal fun MarkdownTextField(
                             sendButton()
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         TextFieldOptions(
                             selectedType = selectedType,
@@ -241,7 +241,8 @@ private fun TextFieldOptions(
 
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Box(
             modifier = Modifier
@@ -279,7 +280,7 @@ private fun TextFieldOptions(
                     onClick = { expanded = !expanded }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.TextFormat,
+                        painter = painterResource(id = R.drawable.format_text),
                         tint = MaterialTheme.colorScheme.primary,
                         contentDescription = null
                     )
@@ -328,7 +329,7 @@ private fun TextFieldOptions(
         }
 
         Row(
-            modifier = Modifier,
+            modifier = Modifier.height(32.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {

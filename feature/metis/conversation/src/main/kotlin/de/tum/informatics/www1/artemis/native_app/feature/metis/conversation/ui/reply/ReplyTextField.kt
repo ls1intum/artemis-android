@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
@@ -20,11 +21,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cancel
@@ -58,18 +58,16 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.getTextBeforeSelection
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -281,8 +279,7 @@ private fun CreateReplyUi(
                             val textFieldRootTopLeft = coordinates.localToRoot(Offset.Zero)
                             popupMaxHeight = textFieldRootTopLeft.y.toInt()
                         }
-                        .padding(top = 8.dp)
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                         .testTag(TEST_TAG_REPLY_TEXT_FIELD),
                     textFieldValue = currentTextFieldValue,
                     hintText = hintText,
@@ -377,113 +374,101 @@ private fun FormattingOptions(
     currentTextFieldValue: TextFieldValue,
     onTextChanged: (TextFieldValue) -> Unit
 ) {
-
-    var isDropdownExpanded by remember { mutableStateOf(false) }
+    var isListDropDownExpanded by remember { mutableStateOf(false) }
+    var isCodeDropdownExpanded by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
             .fillMaxWidth()
+            .height(32.dp)
             .horizontalScroll(rememberScrollState())
             .background(MaterialTheme.colorScheme.surfaceContainer),
-        horizontalArrangement = Arrangement.Start
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        Spacer(modifier = Modifier.width(8.dp))
+
         // Bold Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.Bold,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
-            )
-        }) {
-            Text(
-                text = "B",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable {
+                    applyMarkdownStyle(
+                        style = MarkdownStyle.Bold,
+                        currentTextFieldValue = currentTextFieldValue,
+                        onTextChanged = onTextChanged
+                    )
+                }
+                .padding(8.dp)
+        ){
+            Icon(
+                painter = painterResource(id = R.drawable.bold),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                contentDescription = null,
             )
         }
 
         // Italic Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.Italic,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
-            )
-        }) {
-            Text(
-                text = "I",
-                style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic)
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable {
+                    applyMarkdownStyle(
+                        style = MarkdownStyle.Italic,
+                        currentTextFieldValue = currentTextFieldValue,
+                        onTextChanged = onTextChanged
+                    )
+                }
+                .padding(8.dp)
+        ){
+            Icon(
+                painter = painterResource(id = R.drawable.italic),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                contentDescription = null,
             )
         }
 
         // Underline Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.Underline,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
-            )
-        }) {
-            Text(
-                text = "U",
-                style = MaterialTheme.typography.bodyMedium.copy(textDecoration = TextDecoration.Underline)
-            )
-        }
-
-        // Inline Code Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.InlineCode,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
-            )
-        }) {
-            Text(
-                text = "</>",
-                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable {
+                    applyMarkdownStyle(
+                        style = MarkdownStyle.Underline,
+                        currentTextFieldValue = currentTextFieldValue,
+                        onTextChanged = onTextChanged
+                    )
+                }
+                .padding(8.dp)
+        ){
+            Icon(
+                painter = painterResource(id = R.drawable.underline),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                contentDescription = null,
             )
         }
 
-        // Code Block Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.CodeBlock,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
-            )
-        }) {
-            Text(
-                text = "{ }",
-                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
-            )
-        }
-
-        // Blockquote Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.Blockquote,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
-            )
-        }) {
-            Text(
-                text = "\"",
-                style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic)
-            )
-        }
-
+        // Code Button
         Box(modifier = Modifier.align(Alignment.Top)) {
-            IconButton(
-                onClick = { isDropdownExpanded = true }) {
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable {
+                        isCodeDropdownExpanded = !isCodeDropdownExpanded
+                    }
+                    .padding(8.dp)
+            ){
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.List,
-                    contentDescription = null
+                    painter = painterResource(id = R.drawable.code),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    contentDescription = null,
                 )
             }
 
             DropdownMenu(
-                expanded = isDropdownExpanded,
-                onDismissRequest = { isDropdownExpanded = false },
+                expanded = isCodeDropdownExpanded,
+                onDismissRequest = { isCodeDropdownExpanded = false },
                 properties = PopupProperties(
                     focusable = false
                 )
@@ -492,13 +477,95 @@ private fun FormattingOptions(
                 DropdownMenuItem(
                     leadingIcon = {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.FormatListBulleted,
+                            painter = painterResource(id = R.drawable.code),
                             contentDescription = null
                         )
                     },
                     text = { Text(text = stringResource(R.string.reply_format_unordered)) },
                     onClick = {
-                        isDropdownExpanded = false
+                        isCodeDropdownExpanded = false
+                        applyMarkdownStyle(
+                            style = MarkdownStyle.InlineCode,
+                            currentTextFieldValue = currentTextFieldValue,
+                            onTextChanged = onTextChanged
+                        )
+                    }
+                )
+                // Ordered List item
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.FormatListNumbered,
+                            contentDescription = null
+                        )
+                    },
+                    text = { Text(stringResource(R.string.reply_format_ordered)) },
+                    onClick = {
+                        isCodeDropdownExpanded = false
+                        applyMarkdownStyle(
+                            style = MarkdownStyle.CodeBlock,
+                            currentTextFieldValue = currentTextFieldValue,
+                            onTextChanged = onTextChanged
+                        )
+                    }
+                )
+            }
+        }
+
+        // Blockquote Button
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable {
+                    applyMarkdownStyle(
+                        style = MarkdownStyle.Blockquote,
+                        currentTextFieldValue = currentTextFieldValue,
+                        onTextChanged = onTextChanged
+                    )
+                }
+                .padding(8.dp)
+        ){
+            Icon(
+                painter = painterResource(id = R.drawable.quote),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                contentDescription = null,
+            )
+        }
+
+        Box(modifier = Modifier.align(Alignment.Top)) {
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable {
+                        isListDropDownExpanded = !isListDropDownExpanded
+                    }
+                    .padding(8.dp)
+            ){
+                Icon(
+                    painter = painterResource(id = R.drawable.list),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    contentDescription = null,
+                )
+            }
+
+            DropdownMenu(
+                expanded = isListDropDownExpanded,
+                onDismissRequest = { isListDropDownExpanded = false },
+                properties = PopupProperties(
+                    focusable = false
+                )
+            ) {
+                // Unordered List item
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.list),
+                            contentDescription = null
+                        )
+                    },
+                    text = { Text(text = stringResource(R.string.reply_format_unordered)) },
+                    onClick = {
+                        isListDropDownExpanded = false
                         applyMarkdownStyle(
                             style = MarkdownStyle.UnorderedList,
                             currentTextFieldValue = currentTextFieldValue,
@@ -516,7 +583,7 @@ private fun FormattingOptions(
                     },
                     text = { Text(stringResource(R.string.reply_format_ordered)) },
                     onClick = {
-                        isDropdownExpanded = false
+                        isListDropDownExpanded = false
                         applyMarkdownStyle(
                             style = MarkdownStyle.OrderedList,
                             currentTextFieldValue = currentTextFieldValue,
