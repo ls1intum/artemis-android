@@ -74,7 +74,7 @@ fun SavedPostWithActions(
                     CompleteButton(
                         modifier = Modifier
                             .align(Alignment.End)
-                            .padding(4.dp),
+                            .padding(top = 4.dp),
                         onClick = {
                             metisModificationTask = onChangeStatus(SavedPostStatus.COMPLETED)
                         }
