@@ -8,6 +8,9 @@ interface ISavedPost : IBasePost {
     val savedPostStatus: SavedPostStatus
     val conversation: SimpleConversationInfo
 
+    val key
+        get() = "$serverPostId|$postingType"
+
     @Serializable
     data class SimpleConversationInfo(
         val id: Long,

@@ -58,7 +58,7 @@ class SavedPostsViewModel(
                 // TODO: this is currently required of a bug allowing duplicate items in the list
                 //  https://github.com/ls1intum/artemis-android/issues/307
                 .bind {
-                    it.distinct()
+                    it.distinctBy { savedPost -> savedPost.key }
                 }
         }
     }

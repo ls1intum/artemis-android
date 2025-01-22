@@ -189,7 +189,7 @@ private fun SavedPostsList(
         ) {
             items(
                 items = savedPosts,
-                key = { "${it.serverPostId}|${it.postingType}" }
+                key = { it.key }
             ) {
                 SavedPostWithActions(
                     modifier = Modifier
