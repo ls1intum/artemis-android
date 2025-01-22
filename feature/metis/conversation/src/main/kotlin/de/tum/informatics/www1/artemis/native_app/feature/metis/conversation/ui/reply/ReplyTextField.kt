@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
@@ -279,7 +281,8 @@ private fun CreateReplyUi(
                             val textFieldRootTopLeft = coordinates.localToRoot(Offset.Zero)
                             popupMaxHeight = textFieldRootTopLeft.y.toInt()
                         }
-                        .padding(8.dp)
+                        .padding(top = 8.dp)
+                        .padding(horizontal = 16.dp)
                         .testTag(TEST_TAG_REPLY_TEXT_FIELD),
                     textFieldValue = currentTextFieldValue,
                     hintText = hintText,
@@ -379,8 +382,10 @@ private fun FormattingOptions(
 
     Row(
         modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .horizontalScroll(rememberScrollState())
+            .background(MaterialTheme.colorScheme.surfaceContainer),
         horizontalArrangement = Arrangement.Start
     ) {
         // Bold Button

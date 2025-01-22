@@ -4,6 +4,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,9 +15,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AlternateEmail
+import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.TextFormat
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,6 +42,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -36,6 +50,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -87,7 +102,6 @@ internal fun MarkdownTextField(
         }
 
     Column(modifier = modifier) {
-
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             val textModifier = Modifier.weight(1f)
             when (selectedType) {
@@ -115,8 +129,12 @@ internal fun MarkdownTextField(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        formattingOptionButtons()
-
+                        TextFieldOptions(
+                            selectedType = selectedType,
+                            isPreviewEnabled = true,
+                            onChangeViewType = { selectedType = it },
+                            formattingOptionButtons = formattingOptionButtons
+                        )
                     }
                 }
 
@@ -204,6 +222,137 @@ fun BasicMarkdownTextField(
         )
     }
 }
+
+@Composable
+private fun TextFieldOptions(
+    modifier: Modifier = Modifier,
+    selectedType: ViewType,
+    isPreviewEnabled: Boolean,
+    onChangeViewType: (ViewType) -> Unit,
+    formattingOptionButtons: @Composable () -> Unit = {},
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val offsetY by animateDpAsState(targetValue = if (expanded) 0.dp else 200.dp)
+
+    val iconButtonModifier = Modifier
+        .clip(CircleShape)
+        .size(32.dp)
+        .background(MaterialTheme.colorScheme.surfaceContainer)
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(1f),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Row(
+                modifier = modifier,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                IconButton(
+                    modifier = iconButtonModifier,
+                    onClick = {}
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Image,
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = null
+                    )
+                }
+
+                IconButton(
+                    modifier = iconButtonModifier,
+                    onClick = {}
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AttachFile,
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = null
+                    )
+                }
+
+                IconButton(
+                    modifier = iconButtonModifier,
+                    onClick = { expanded = !expanded }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.TextFormat,
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = null
+                    )
+                }
+
+                IconButton(
+                    modifier = iconButtonModifier,
+                    onClick = {}
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AlternateEmail,
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = null
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .offset(y = offsetY)
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    IconButton(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .size(32.dp)
+                            .background(MaterialTheme.colorScheme.surfaceContainer),
+                        onClick = { expanded = false }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            tint = MaterialTheme.colorScheme.primary,
+                            contentDescription = null
+                        )
+                    }
+
+                    formattingOptionButtons()
+                }
+            }
+        }
+
+        Row(
+            modifier = Modifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            InputChip(
+                selected = selectedType == ViewType.TEXT,
+                onClick = { onChangeViewType(ViewType.TEXT) },
+                label = {
+                    Text(text = stringResource(id = R.string.markdown_textfield_tab_text))
+                }
+            )
+
+            InputChip(
+                selected = selectedType == ViewType.PREVIEW,
+                onClick = { onChangeViewType(ViewType.PREVIEW) },
+                enabled = isPreviewEnabled,
+                label = {
+                    Text(text = stringResource(id = R.string.markdown_textfield_tab_preview))
+                }
+            )
+        }
+    }
+
+}
+
 
 private enum class ViewType {
     TEXT,
