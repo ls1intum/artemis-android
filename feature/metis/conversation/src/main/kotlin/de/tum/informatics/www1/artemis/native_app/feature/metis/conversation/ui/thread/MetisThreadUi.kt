@@ -138,13 +138,7 @@ internal fun MetisThreadUi(
                     throw NotImplementedError()
                 }
             },
-            onSavePost = { post ->
-                if (post is PostPojo) {
-                    viewModel.toggleSavePost(post)
-                } else {
-                    throw NotImplementedError()
-                }
-            },
+            onSavePost = viewModel::toggleSavePost,
             onDeletePost = viewModel::deletePost,
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onRequestReload = viewModel::requestReload,
