@@ -45,12 +45,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -166,10 +164,12 @@ internal fun PostItem(
         post = post,
         isExpanded = isExpanded,
         isPlaceholder = isPlaceholder,
+        isDeleting = isDeleting,
         postStatus = postStatus,
         displayHeader = displayHeader,
         onClick = onClick,
         onLongClick = onLongClick,
+        onUndoDelete = { postActions.requestUndoDeletePost?.invoke() },
         leadingContent = {
             val applyDistancePaddingToModifier: @Composable (Modifier) -> Modifier = {
                 if (postItemViewJoinedType in listOf(
@@ -256,10 +256,12 @@ fun PostItemMainContent(
     post: IBasePost?,
     isExpanded: Boolean = true,
     isPlaceholder: Boolean = false,
+    isDeleting: Boolean = false,
     postStatus: CreatePostService.Status = CreatePostService.Status.FINISHED,
     displayHeader: Boolean = true,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    onUndoDelete: () -> Unit = {},
     leadingContent: @Composable ColumnScope.() -> Unit = {},
     trailingContent: @Composable ColumnScope.() -> Unit = {}
 ) {
@@ -287,9 +289,7 @@ fun PostItemMainContent(
                 if (isDeleting) {
                     UndoDeleteHeader(
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            postActions.requestUndoDeletePost?.invoke()
-                        }
+                        onClick = onUndoDelete
                     )
                     return@PostHeadline
                 }
