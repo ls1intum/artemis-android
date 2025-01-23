@@ -107,6 +107,7 @@ internal fun MetisChatList(
             onEditPost = viewModel::editPost,
             onDeletePost = viewModel::deletePost,
             onPinPost = viewModel::togglePinPost,
+            onSavePost = viewModel::toggleSavePost,
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onClickViewPost = onClickViewPost,
             onRequestRetrySend = viewModel::retryCreatePost,
@@ -137,6 +138,7 @@ fun MetisChatList(
     onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
     onDeletePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
     onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
+    onSavePost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onUndoDeletePost: (IStandalonePost) -> Unit,
@@ -150,9 +152,10 @@ fun MetisChatList(
         onEditPost = onEditPost,
         onResolvePost = null,
         onPinPost = onPinPost,
+        onSavePost = onSavePost,
         onDeletePost = onDeletePost,
         onRequestReactWithEmoji = onRequestReactWithEmoji,
-    ) { replyMode, onEditPostDelegate, _, onRequestReactWithEmojiDelegate, onDeletePostDelegate, onPinPostDelegate, updateFailureStateDelegate ->
+    ) { replyMode, onEditPostDelegate, _, onRequestReactWithEmojiDelegate, onDeletePostDelegate, onPinPostDelegate, onSavePostDelegate, updateFailureStateDelegate ->
         Column(modifier = modifier) {
             val informationModifier = Modifier
                 .fillMaxSize()
@@ -204,6 +207,7 @@ fun MetisChatList(
                             onRequestDelete = onDeletePostDelegate,
                             onRequestUndoDelete = onUndoDeletePost,
                             onRequestPin = onPinPostDelegate,
+                            onRequestSave = onSavePostDelegate,
                             onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                             onRequestRetrySend = onRequestRetrySend,
                         )
@@ -238,6 +242,7 @@ private fun ChatList(
     onRequestDelete: (IStandalonePost) -> Unit,
     onRequestUndoDelete: (IStandalonePost) -> Unit,
     onRequestPin: (IStandalonePost) -> Unit,
+    onRequestSave: (IStandalonePost) -> Unit,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit
 ) {
@@ -281,6 +286,7 @@ private fun ChatList(
                         },
                         onResolvePost = null,
                         onPinPost = { onRequestPin(post ?: return@rememberPostActions) },
+                        onSavePost = { onRequestSave(post ?: return@rememberPostActions) },
                         onRequestRetrySend = {
                             onRequestRetrySend(
                                 post?.standalonePostId ?: return@rememberPostActions

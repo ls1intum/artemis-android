@@ -141,6 +141,7 @@ internal fun MetisThreadUi(
                     throw NotImplementedError()
                 }
             },
+            onSavePost = viewModel::toggleSavePost,
             onDeletePost = viewModel::deletePost,
             onUndoDeletePost = viewModel::undoDeletePost,
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
@@ -169,6 +170,7 @@ internal fun MetisThreadUi(
     onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
     onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
     onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
+    onSavePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
     onDeletePost: (IBasePost) -> Deferred<MetisModificationFailure?>,
     onUndoDeletePost: (IBasePost) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
@@ -189,13 +191,11 @@ internal fun MetisThreadUi(
             onResolvePost = onResolvePost,
             onDeletePost = onDeletePost,
             onPinPost = onPinPost,
+            onSavePost = onSavePost,
             onRequestReactWithEmoji = onRequestReactWithEmoji
-        ) { replyMode, onEditPostDelegate, onResolvePostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, onPinPostDelegate, updateFailureStateDelegate ->
+        ) { replyMode, onEditPostDelegate, onResolvePostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, onPinPostDelegate, onSavePostDelegate, updateFailureStateDelegate ->
             BoxWithConstraints(modifier = modifier) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
+                Column(modifier = Modifier.fillMaxSize()) {
                     BasicDataStateUi(
                         modifier = Modifier
                             .weight(1f),
@@ -232,6 +232,7 @@ internal fun MetisThreadUi(
                                 onRequestUndoDelete = onUndoDeletePost,
                                 onRequestResolve = onResolvePostDelegate,
                                 onRequestPin = onPinPostDelegate,
+                                onRequestSave = onSavePostDelegate,
                                 state = listState,
                                 onRequestRetrySend = onRequestRetrySend
                             )
@@ -270,6 +271,7 @@ private fun PostAndRepliesList(
     onRequestUndoDelete: (IBasePost) -> Unit,
     onRequestResolve: (IBasePost) -> Unit,
     onRequestPin: (IBasePost) -> Unit,
+    onRequestSave: (IBasePost) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
 ) {
@@ -291,6 +293,7 @@ private fun PostAndRepliesList(
             onReplyInThread = null,
             onResolvePost = { onRequestResolve(affectedPost) },
             onPinPost = { onRequestPin(affectedPost) },
+            onSavePost = { onRequestSave(affectedPost) },
             onRequestRetrySend = {
                 onRequestRetrySend(
                     affectedPost.clientPostId ?: return@rememberPostActions,
