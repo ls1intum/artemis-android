@@ -41,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -444,7 +443,7 @@ private fun AuthorRoleAndTimeRow(
             * remember is needed here to prevent the value from being reset after an update
             * (the author role is not sent when updating a post)
             */
-            val initialAuthorRole by remember { mutableStateOf(authorRole, isGrayscale) }
+            val initialAuthorRole by remember { mutableStateOf(authorRole) }
             UserRoleBadge(
                 modifier = Modifier.applyGrayscale(isGrayscale),
                 userRole = initialAuthorRole
