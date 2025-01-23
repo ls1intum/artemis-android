@@ -1,24 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
@@ -28,8 +18,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isStartExe
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.InfoMessageCard
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ParticipationNotPossibleInfoMessageCardColors
 
 /**
  * This composable composes up to two buttons. The modifier parameter is applied to every button
@@ -139,7 +129,9 @@ fun ExerciseActionButtons(
             //}
             else -> {
                 Row(modifier=Modifier.padding(top=2.dp, bottom = 2.dp)) {
-                    ParticipationNotPossibleInfoMessageCard()
+                    InfoMessageCard(
+                        infoText = stringResource(id = R.string.exercise_participation_not_possible),
+                    )
                 }
             }
         }
@@ -213,34 +205,4 @@ class BoundExerciseActions(
         onClickViewResult = { onClickViewResult(exerciseId) },
         onClickViewQuizResults = { onClickViewQuizResults(exerciseId) }
     )
-}
-
-
-@Composable
-fun ParticipationNotPossibleInfoMessageCard() {
-    Box(
-        modifier = Modifier
-            .border(
-                width = 1.dp,
-                color = ParticipationNotPossibleInfoMessageCardColors.border,
-                shape = MaterialTheme.shapes.extraSmall
-            )
-            .background(ParticipationNotPossibleInfoMessageCardColors.background)
-            .padding(8.dp)
-            .fillMaxWidth()
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Outlined.Info,
-                contentDescription = null,
-                modifier = Modifier.padding(end = 8.dp),
-                tint = ParticipationNotPossibleInfoMessageCardColors.text
-            )
-            Text(
-                text = stringResource(id = R.string.exercise_participation_not_possible),
-                fontSize = 16.sp,
-                color = ParticipationNotPossibleInfoMessageCardColors.text
-            )
-        }
-    }
 }

@@ -18,7 +18,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -34,6 +34,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.InsertEmoticon
+import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -128,6 +129,7 @@ internal fun PostItem(
 
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
+    val isSaved = post?.isSaved == true
     val hasFooter = (post is IStandalonePost && post.answers.orEmpty()
         .isNotEmpty()) || post?.reactions.orEmpty().isNotEmpty() || isExpanded
 
@@ -143,7 +145,7 @@ internal fun PostItem(
         }
     }
 
-    Column(
+    PostItemMainContent(
         modifier = modifier
             .let {
                 if (postStatus == CreatePostService.Status.FAILED) {
@@ -158,37 +160,115 @@ internal fun PostItem(
                         )
                 }
             }
-            .padding(PaddingValues(horizontal = Spacings.ScreenHorizontalInnerSpacing))
-    ) {
-        val applyDistancePaddingToModifier: @Composable (Modifier) -> Modifier = {
-            if (postItemViewJoinedType in listOf(
-                    PostItemViewJoinedType.JOINED,
-                    PostItemViewJoinedType.FOOTER
-                )
-            ) {
-                it.padding(top = Spacings.Post.innerSpacing)
-            } else {
-                it.padding(bottom = 4.dp)
+            .padding(horizontal = Spacings.Post.innerSpacing),
+        post = post,
+        isExpanded = isExpanded,
+        isPlaceholder = isPlaceholder,
+        isDeleting = isDeleting,
+        postStatus = postStatus,
+        displayHeader = displayHeader,
+        onClick = onClick,
+        onLongClick = onLongClick,
+        onUndoDelete = { postActions.requestUndoDeletePost?.invoke() },
+        leadingContent = {
+            val applyDistancePaddingToModifier: @Composable (Modifier) -> Modifier = {
+                if (postItemViewJoinedType in listOf(
+                        PostItemViewJoinedType.JOINED,
+                        PostItemViewJoinedType.FOOTER
+                    )
+                ) {
+                    it.padding(top = Spacings.Post.innerSpacing)
+                } else {
+                    it.padding(bottom = 4.dp)
+                }
             }
-        }
 
-        if (isPinned) {
-            IconLabel(
-                modifier = applyDistancePaddingToModifier(Modifier)
-                    .fillMaxWidth(),
-                resourceString = R.string.post_is_pinned,
-                icon = Icons.Outlined.PushPin
+            if (isPinned) {
+                IconLabel(
+                    modifier = applyDistancePaddingToModifier(Modifier)
+                        .fillMaxWidth(),
+                    resourceString = R.string.post_is_pinned,
+                    icon = Icons.Outlined.PushPin
+                )
+            }
+
+            if (isSaved) {
+                IconLabel(
+                    modifier = applyDistancePaddingToModifier(Modifier)
+                        .fillMaxWidth(),
+                    resourceString = R.string.post_is_saved,
+                    icon = Icons.Outlined.Bookmark
+                )
+            }
+
+            if (post is IAnswerPost && post.resolvesPost) {
+                IconLabel(
+                    modifier = applyDistancePaddingToModifier(Modifier)
+                        .fillMaxWidth(),
+                    resourceString = R.string.post_resolves,
+                    icon = Icons.Default.Check
+                )
+            }
+        },
+        trailingContent = {
+            if (post is IStandalonePost && post.resolved == true) {
+                Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
+
+                IconLabel(
+                    modifier = Modifier.fillMaxWidth(),
+                    resourceString = R.string.post_is_resolved,
+                    icon = Icons.Default.Check
+                )
+            }
+
+            if (hasFooter) {
+                Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
+            }
+
+            StandalonePostFooter(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .let {
+                        if (postItemViewJoinedType in listOf(
+                                PostItemViewJoinedType.JOINED,
+                                PostItemViewJoinedType.HEADER
+                            ) && post?.reactions
+                                .orEmpty()
+                                .isNotEmpty()
+                        ) {
+                            it.padding(bottom = Spacings.Post.innerSpacing)
+                        } else {
+                            it
+                        }
+                    },
+                clientId = clientId,
+                reactions = remember(post?.reactions) { post?.reactions.orEmpty() },
+                postItemViewType = postItemViewType,
+                postActions = postActions
             )
         }
+    )
+}
 
-        if (post is IAnswerPost && post.resolvesPost) {
-            IconLabel(
-                modifier = applyDistancePaddingToModifier(Modifier)
-                    .fillMaxWidth(),
-                resourceString = R.string.post_resolves,
-                icon = Icons.Default.Check
-            )
-        }
+@Composable
+fun PostItemMainContent(
+    modifier: Modifier = Modifier,
+    post: IBasePost?,
+    isExpanded: Boolean = true,
+    isPlaceholder: Boolean = false,
+    isDeleting: Boolean = false,
+    postStatus: CreatePostService.Status = CreatePostService.Status.FINISHED,
+    displayHeader: Boolean = true,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    onUndoDelete: () -> Unit = {},
+    leadingContent: @Composable ColumnScope.() -> Unit = {},
+    trailingContent: @Composable ColumnScope.() -> Unit = {}
+) {
+    Column(
+        modifier = modifier
+    ) {
+        leadingContent()
 
         PostHeadline(
             modifier = Modifier.fillMaxWidth(),
@@ -209,9 +289,7 @@ internal fun PostItem(
                 if (isDeleting) {
                     UndoDeleteHeader(
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            postActions.requestUndoDeletePost?.invoke()
-                        }
+                        onClick = onUndoDelete
                     )
                     return@PostHeadline
                 }
@@ -233,9 +311,9 @@ internal fun PostItem(
 
                 val instant = post?.updatedDate
                 if (instant != null) {
-                    val updateTime = instant.format(DateFormats.EditTimestamp.format)
                     Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
 
+                    val updateTime = instant.format(DateFormats.EditTimestamp.format)
                     Text(
                         text = stringResource(id = R.string.post_edited_hint, updateTime),
                         style = MaterialTheme.typography.bodySmall,
@@ -243,41 +321,7 @@ internal fun PostItem(
                     )
                 }
 
-                if (post is IStandalonePost && post.resolved == true) {
-                    Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
-
-                    IconLabel(
-                        modifier = Modifier.fillMaxWidth(),
-                        resourceString = R.string.post_is_resolved,
-                        icon = Icons.Default.Check
-                    )
-                }
-
-                if (hasFooter) {
-                    Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
-                }
-
-                StandalonePostFooter(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .let {
-                            if (postItemViewJoinedType in listOf(
-                                    PostItemViewJoinedType.JOINED,
-                                    PostItemViewJoinedType.HEADER
-                                ) && post?.reactions
-                                    .orEmpty()
-                                    .isNotEmpty()
-                            ) {
-                                it.padding(bottom = Spacings.Post.innerSpacing)
-                            } else {
-                                it
-                            }
-                        },
-                    clientId = clientId,
-                    reactions = remember(post?.reactions) { post?.reactions.orEmpty() },
-                    postItemViewType = postItemViewType,
-                    postActions = postActions
-                )
+                trailingContent()
             }
         }
     }
@@ -524,14 +568,14 @@ private fun StandalonePostFooter(
             )
         }
     }
-    val showEmojiDialog = remember { mutableStateOf(false) }
+    var showEmojiDialog by remember { mutableStateOf(false) }
 
-    if (showEmojiDialog.value) {
+    if (showEmojiDialog) {
         EmojiDialog(
-            onDismissRequest = { showEmojiDialog.value = false },
+            onDismissRequest = { showEmojiDialog = false },
             onSelectEmoji = { emojiId ->
                 postActions.onClickReaction?.invoke(emojiId, true)
-                showEmojiDialog.value = false
+                showEmojiDialog = false
             }
         )
     }
@@ -562,7 +606,7 @@ private fun StandalonePostFooter(
                         .background(color = PostColors.EmojiChipColors.background, CircleShape)
                         .clip(CircleShape)
                         .clickable(onClick = {
-                            showEmojiDialog.value = true
+                            showEmojiDialog = true
                         })
                 ) {
                     Icon(

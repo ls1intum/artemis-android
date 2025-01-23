@@ -76,10 +76,12 @@ abstract class BaseChatUITest : BaseComposeTest() {
 
     fun simplePost(
         postAuthor: User,
+        isSaved: Boolean = false
     ): StandalonePost = StandalonePost(
         id = 1,
         author = postAuthor,
         content = simplePostContent,
+        isSaved = isSaved
     )
 
     fun simpleThreadPostWithAnswer(
@@ -111,6 +113,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 authorRole = UserRole.USER,
                 authorName = "author name",
                 authorImageUrl = null,
+                isSaved = false,
             ),
             reactions = emptyList(),
             serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
@@ -136,7 +139,8 @@ abstract class BaseChatUITest : BaseComposeTest() {
             tags = emptyList(),
             answers = if (index == 0) answers else emptyList(),
             reactions = emptyList(),
-            displayPriority = DisplayPriority.NONE
+            displayPriority = DisplayPriority.NONE,
+            isSaved = false
         )
     }
 
@@ -168,6 +172,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 onEditPost = { _, _ -> CompletableDeferred() },
                 onResolvePost = onResolvePost,
                 onPinPost = onPinPost,
+                onSavePost = { CompletableDeferred() },
                 onDeletePost = { CompletableDeferred() },
                 onUndoDeletePost = {},
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
@@ -219,12 +224,12 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     onCreatePost = { CompletableDeferred() },
                     onEditPost = { _, _ -> CompletableDeferred() },
                     onPinPost = onPinPost,
-                    onDeletePost = { CompletableDeferred() },
-                    onUndoDeletePost = {},
-                    onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                    onClickViewPost = {},
-                    onRequestRetrySend = { _ -> },
-                    conversationName = "Title",
+                    onSavePost = { CompletableDeferred() },
+                onDeletePost = { CompletableDeferred() },
+                onUndoDeletePost = {},onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                onClickViewPost = {},
+                onRequestRetrySend = { _ -> },
+                conversationName = "Title",
                     onFileSelected = { _ -> }
                 )
             }

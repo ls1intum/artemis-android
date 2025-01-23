@@ -8,7 +8,8 @@ enum class MetisModificationFailure(val messageRes: Int) {
     DELETE_REACTION(R.string.metis_modification_failure_dialog_message_delete_reaction),
     CREATE_POST(R.string.metis_modification_failure_dialog_message_create_post),
     DELETE_POST(R.string.metis_modification_failure_dialog_message_delete_post),
-    UPDATE_POST(R.string.metis_modification_failure_dialog_message_update_post)
+    UPDATE_POST(R.string.metis_modification_failure_dialog_message_update_post),
+    CHANGE_SAVED_POST_STATUS(R.string.metis_modification_failure_dialog_message_change_saved_post_status)
 }
 
 sealed class MetisModificationResponse<T> {

@@ -19,8 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.rememberPostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
@@ -106,15 +106,7 @@ internal fun <T : Any> MetisPostListHandler(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            val markdownTransformer = remember(serverUrl, courseId) {
-                val strippedServerUrl =
-                    if (serverUrl.endsWith("/")) serverUrl.substring(
-                        0,
-                        serverUrl.length - 1
-                    ) else serverUrl
-
-                PostArtemisMarkdownTransformer(serverUrl = strippedServerUrl, courseId = courseId)
-            }
+            val markdownTransformer = rememberPostArtemisMarkdownTransformer(serverUrl, courseId)
 
             ProvideEmojis(emojiService) {
                 CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
