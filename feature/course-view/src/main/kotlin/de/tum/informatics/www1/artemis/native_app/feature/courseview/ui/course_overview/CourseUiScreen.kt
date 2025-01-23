@@ -265,9 +265,7 @@ internal fun CourseUiScreen(
             }
         },
         communicationTabContent = { course ->
-            val metisModifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 8.dp)
+            val metisModifier = Modifier.fillMaxSize()
 
             if (course.courseInformationSharingConfiguration.supportsMessaging) {
                 val initialConfiguration = remember(conversationId, postId) {
@@ -308,7 +306,9 @@ internal fun CourseUiScreen(
             } else {
                 Box(modifier = metisModifier) {
                     Text(
-                        modifier = Modifier.align(Alignment.Center),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .align(Alignment.Center),
                         text = stringResource(id = R.string.course_ui_communication_disabled),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyLarge

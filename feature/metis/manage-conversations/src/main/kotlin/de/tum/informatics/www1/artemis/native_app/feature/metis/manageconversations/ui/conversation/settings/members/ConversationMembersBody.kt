@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
@@ -28,7 +27,6 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import de.tum.informatics.www1.artemis.native_app.core.data.join
-import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.ConversationMemberListItem
@@ -83,9 +81,7 @@ internal fun ConversationMembersBody(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                modifier = Modifier.fillMaxWidth(),
                 value = query,
                 onValueChange = viewModel::updateQuery,
                 singleLine = true,
@@ -137,7 +133,6 @@ private fun ConversationMembersList(
                 contentAlignment = Alignment.Center
             ) {
                 Column(
-                    modifier = Modifier.padding(horizontal = Spacings.ScreenHorizontalSpacing),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
@@ -152,7 +147,7 @@ private fun ConversationMembersList(
 
         is LoadState.Error -> {
             Box(
-                modifier = modifier.padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                modifier = modifier,
                 contentAlignment = Alignment.Center
             ) {
                 PagingStateError(
@@ -188,9 +183,7 @@ private fun ConversationMembersList(
                     LoadState.Loading -> {
                         item {
                             LinearProgressIndicator(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                                modifier = Modifier.fillMaxWidth(),
                             )
                         }
                     }
@@ -198,9 +191,7 @@ private fun ConversationMembersList(
                     is LoadState.Error -> {
                         item {
                             PagingStateError(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+                                modifier = Modifier.fillMaxWidth(),
                                 errorText = R.string.conversation_members_failure,
                                 buttonText = R.string.conversation_members_try_again,
                                 retry = members::retry

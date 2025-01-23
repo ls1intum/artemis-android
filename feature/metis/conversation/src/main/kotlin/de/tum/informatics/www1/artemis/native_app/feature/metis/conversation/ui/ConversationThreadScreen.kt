@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
@@ -91,7 +92,8 @@ internal fun ConversationThreadScreen(
                         .fillMaxWidth()
                         .weight(1f)
                         .padding(top = padding.calculateTopPadding())
-                        .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
+                        .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+                        .padding(horizontal = Spacings.ScreenHorizontalSpacing),
                     viewModel = viewModel
                 )
             }
