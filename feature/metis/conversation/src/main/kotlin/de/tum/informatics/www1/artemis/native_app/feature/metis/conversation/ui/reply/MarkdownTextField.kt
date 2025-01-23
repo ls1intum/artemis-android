@@ -113,7 +113,7 @@ internal fun MarkdownTextField(
 
         TextFieldOptions(
             selectedType = selectedType,
-            isPreviewEnabled = text.isNotEmpty(),
+            isPreviewEnabled = text.isNotBlank(),
             showFormattingOptions = selectedType == ViewType.TEXT,
             onChangeViewType = { selectedType = it },
             formattingOptionButtons = formattingOptionButtons,

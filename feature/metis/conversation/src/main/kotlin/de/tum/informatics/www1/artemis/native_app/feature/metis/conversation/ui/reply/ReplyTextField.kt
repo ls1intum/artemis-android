@@ -326,7 +326,7 @@ private fun CreateReplyUi(
                                 .size(28.dp)
                                 .clip(CircleShape)
                                 .then(
-                                    if (currentTextFieldValue.text.isEmpty()) {
+                                    if (currentTextFieldValue.text.isBlank()) {
                                         Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                                     } else {
                                         Modifier.background(MaterialTheme.colorScheme.primary)
