@@ -4,10 +4,8 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.MaterialTheme
@@ -339,6 +337,10 @@ internal fun CourseUiScreen(
             CourseTopAppBar(
                 courseDataState = courseDataState,
                 onNavigateBack = onNavigateBack,
+            )
+        },
+        bottomBar = {
+            BottomNavigationBar(
                 selectedTabIndex = selectedTabIndex,
                 changeTab = updateSelectedTabIndex
             )
@@ -347,14 +349,24 @@ internal fun CourseUiScreen(
         BasicDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
+                .padding(
+                    top = padding.calculateTopPadding(),
+                    bottom = padding.calculateBottomPadding()
+                )
+                .consumeWindowInsets(WindowInsets.systemBars),
             dataState = courseDataState,
             loadingText = stringResource(id = R.string.course_ui_loading_course_loading),
             failureText = stringResource(id = R.string.course_ui_loading_course_failed),
             retryButtonText = stringResource(id = R.string.course_ui_loading_course_try_again),
             onClickRetry = onReloadCourse
         ) { course ->
+            // TODO: use proper navigation for tabs, see:
+            //      https://medium.com/@bharadwaj.rns/bottom-navigation-in-jetpack-compose-using-material3-c153ccbf0593
+            //      https://developer.android.com/develop/ui/compose/navigation
+            // TODO: show navigation bar only in the conversation overview for compact layout (not in the chat)
+            // TODO: remove course top bar when in chat (similar to exercise/lecture details)
+
+
             AnimatedContent(
                 targetState = selectedTabIndex,
                 transitionSpec = {
