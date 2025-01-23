@@ -61,7 +61,7 @@ fun ChannelChatIcon(
     )
 }
 
-private fun getChannelIconImageVector(channelChat: ChannelChat): ImageVector {
+fun getChannelIconImageVector(channelChat: ChannelChat): ImageVector {
     if (channelChat.isArchived) {
         return Icons.Default.Archive
     }
