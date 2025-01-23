@@ -10,6 +10,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 data class PostActions(
     val requestEditPost: (() -> Unit)? = null,
     val requestDeletePost: (() -> Unit)? = null,
+    val requestUndoDeletePost: (() -> Unit)? = null,
     val onClickReaction: ((emojiId: String, create: Boolean) -> Unit)? = null,
     val onCopyText: () -> Unit = {},
     val onReplyInThread: (() -> Unit)? = null,
@@ -27,6 +28,7 @@ fun rememberPostActions(
     clientId: Long,
     onRequestEdit: () -> Unit,
     onRequestDelete: () -> Unit,
+    onRequestUndoDelete: () -> Unit,
     onClickReaction: (emojiId: String, create: Boolean) -> Unit,
     onReplyInThread: (() -> Unit)?,
     onResolvePost: (() -> Unit)?,
@@ -41,6 +43,7 @@ fun rememberPostActions(
         clientId,
         onRequestEdit,
         onRequestDelete,
+        onRequestUndoDelete,
         onClickReaction,
         onReplyInThread,
         onResolvePost,
@@ -58,10 +61,12 @@ fun rememberPostActions(
         val hasResolvePostRights =
             postActionFlags.isAtLeastTutorInCourse || isParentPostAuthor
         val hasPinPostRights = postActionFlags.isAbleToPin
+        val hasDeletePostRights = isPostAuthor || postActionFlags.hasModerationRights
 
         PostActions(
             requestEditPost = if (doesPostExistOnServer && isPostAuthor) onRequestEdit else null,
-            requestDeletePost = if (isPostAuthor || postActionFlags.hasModerationRights) onRequestDelete else null,
+            requestDeletePost = if (hasDeletePostRights) onRequestDelete else null,
+            requestUndoDeletePost = if (hasDeletePostRights) onRequestUndoDelete else null,
             onClickReaction = if (doesPostExistOnServer) onClickReaction else null,
             onCopyText = {
                 clipboardManager.setText(AnnotatedString(post.content.orEmpty()))
