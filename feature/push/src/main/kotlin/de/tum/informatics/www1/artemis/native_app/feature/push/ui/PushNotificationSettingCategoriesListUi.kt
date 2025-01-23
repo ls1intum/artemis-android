@@ -3,8 +3,10 @@ package de.tum.informatics.www1.artemis.native_app.feature.push.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
@@ -105,6 +107,8 @@ private fun PushNotificationSettingsList(
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 

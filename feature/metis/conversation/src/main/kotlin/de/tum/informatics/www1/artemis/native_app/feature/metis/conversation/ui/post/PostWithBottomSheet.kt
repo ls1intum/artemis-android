@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
@@ -31,6 +32,7 @@ internal fun PostWithBottomSheet(
     modifier: Modifier,
     post: IBasePost?,
     postItemViewType: PostItemViewType,
+    isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     postActions: PostActions,
     clientId: Long,
     displayHeader: Boolean,
@@ -93,6 +95,7 @@ internal fun PostWithBottomSheet(
             clientId = clientId,
             displayHeader = displayHeader,
             postItemViewJoinedType = joinedItemType,
+            isMarkedAsDeleteList = isMarkedAsDeleteList,
             postActions = postActions,
             onClick = onClick,
             onLongClick = {

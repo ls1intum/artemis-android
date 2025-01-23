@@ -2,6 +2,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -18,12 +21,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -35,14 +40,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -70,9 +83,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureWithDialog
 import io.github.fornewid.placeholder.material3.placeholder
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.koin.compose.koinInject
+import java.time.Duration
 
 sealed class PostItemViewType {
 
@@ -100,6 +116,7 @@ internal fun PostItem(
     clientId: Long,
     displayHeader: Boolean,
     postItemViewJoinedType: PostItemViewJoinedType,
+    isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     postActions: PostActions,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -110,6 +127,8 @@ internal fun PostItem(
         PostItemViewType.ThreadContextPostItem -> true
         else -> false
     }
+    val isDeleting by remember(post) { derivedStateOf { isMarkedAsDeleteList.contains(post) } }
+
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
     val isSaved = post?.isSaved == true
@@ -259,11 +278,22 @@ fun PostItemMainContent(
             creationDate = post?.creationDate,
             expanded = isExpanded,
             isAnswerPost = post is IAnswerPost,
-            displayHeader = displayHeader
+            displayHeader = displayHeader,
+            isDeleting = isDeleting
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
+                if (isDeleting) {
+                    UndoDeleteHeader(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            postActions.requestUndoDeletePost?.invoke()
+                        }
+                    )
+                    return@PostHeadline
+                }
+
                 MarkdownText(
                     markdown = remember(post?.content, isPlaceholder) {
                         if (isPlaceholder) {
@@ -309,6 +339,7 @@ private fun PostHeadline(
     expanded: Boolean = false,
     isAnswerPost: Boolean,
     displayHeader: Boolean = true,
+    isDeleting: Boolean,
     content: @Composable () -> Unit
 ) {
     val doDisplayHeader = displayHeader || postStatus == CreatePostService.Status.FAILED
@@ -331,6 +362,7 @@ private fun PostHeadline(
                 userName = authorName.orEmpty(),
                 imageUrl = authorImageUrl,
                 userRole = authorRole,
+                isGrayscale = isDeleting
             )
 
             if (postStatus == CreatePostService.Status.FAILED) {
@@ -349,7 +381,8 @@ private fun PostHeadline(
                 authorRole = authorRole,
                 creationDate = creationDate,
                 expanded = expanded,
-                isAnswerPost = isAnswerPost
+                isAnswerPost = isAnswerPost,
+                isGrayscale = isDeleting
             )
         }
 
@@ -389,14 +422,16 @@ private fun HeadlineAuthorInfo(
     authorRole: UserRole?,
     creationDate: Instant?,
     expanded: Boolean,
-    isAnswerPost: Boolean
+    isAnswerPost: Boolean,
+    isGrayscale: Boolean
 ) {
     Column(modifier = modifier) {
         AuthorRoleAndTimeRow(
             expanded = expanded,
             authorRole = authorRole,
             creationDate = creationDate,
-            isAnswerPost = isAnswerPost
+            isAnswerPost = isAnswerPost,
+            isGrayscale = isGrayscale
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -416,7 +451,8 @@ private fun AuthorRoleAndTimeRow(
     expanded: Boolean,
     authorRole: UserRole?,
     creationDate: Instant?,
-    isAnswerPost: Boolean
+    isAnswerPost: Boolean,
+    isGrayscale: Boolean
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -445,7 +481,7 @@ private fun AuthorRoleAndTimeRow(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            HeadlineAuthorRoleBadge(authorRole)
+            HeadlineAuthorRoleBadge(authorRole, isGrayscale)
             Spacer(modifier = Modifier.weight(1f))
             creationDateContent()
         }
@@ -458,10 +494,15 @@ private fun HeadlineProfilePicture(
     userName: String,
     imageUrl: String?,
     userRole: UserRole?,
-    displayImage: Boolean = true
+    displayImage: Boolean = true,
+    isGrayscale: Boolean = false
 ) {
     val size = postHeadlineHeight
-    Box(modifier = Modifier.size(size)) {
+    Box(
+        modifier = Modifier
+            .size(size)
+            .applyGrayscale(isGrayscale)
+    ) {
         if (!displayImage) {
             return
         }
@@ -479,6 +520,7 @@ private fun HeadlineProfilePicture(
 @Composable
 private fun HeadlineAuthorRoleBadge(
     authorRole: UserRole?,
+    isGrayscale: Boolean
 ) {
     /*
     * remember is needed here to prevent the value from being reset after an update
@@ -495,6 +537,7 @@ private fun HeadlineAuthorRoleBadge(
     Box(
         modifier = Modifier
             .background(color, MaterialTheme.shapes.extraSmall)
+            .applyGrayscale(isGrayscale)
     ) {
         Text(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 1.dp),
@@ -675,5 +718,87 @@ private fun EmojiChip(
 
             AnimatedCounter(reactionCount, selected)
         }
+    }
+}
+
+@Composable
+fun UndoDeleteHeader(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    delay: Duration = Duration.ofSeconds(6)
+) {
+    var remainingTime by remember { mutableLongStateOf(delay.seconds) }
+    val animatedProgress = remember { Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        launch {
+            animatedProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = delay.toMillis().toInt(),
+                    easing = LinearEasing
+                )
+            )
+        }
+        while (remainingTime > 0) {
+            delay(Duration.ofSeconds(1).toMillis())
+            remainingTime--
+        }
+    }
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            modifier = Modifier.weight(1f),
+            text = pluralStringResource(
+                id = R.plurals.post_is_being_deleted,
+                count = remainingTime.toInt(),
+                remainingTime.toInt()
+            ),
+            color = MaterialTheme.colorScheme.secondary,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+
+        Box(
+            modifier = Modifier
+                .width(120.dp)
+                .height(34.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+                .clickable(onClick = onClick)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(animatedProgress.value)
+                    .background(MaterialTheme.colorScheme.primary),
+            )
+
+            Text(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(4.dp),
+                text = stringResource(id = R.string.post_undo_delete),
+                color = MaterialTheme.colorScheme.onPrimary,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+    }
+}
+
+fun Modifier.applyGrayscale(isGrayscale: Boolean): Modifier {
+    return if (isGrayscale) {
+        this
+            .drawWithCache {
+                onDrawWithContent {
+                    drawContent()
+                    drawRect(Color.Black, blendMode = BlendMode.Saturation)
+                }
+            }
+    } else {
+        this
     }
 }

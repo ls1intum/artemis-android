@@ -1,8 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -145,6 +147,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     hasModerationRights = hasModerationRights,
                 ),
                 serverUrl = "",
+                isMarkedAsDeleteList = mutableStateListOf(),
                 emojiService = EmojiServiceStub,
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
@@ -153,6 +156,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 onPinPost = onPinPost,
                 onSavePost = { CompletableDeferred() },
                 onDeletePost = { CompletableDeferred() },
+                onUndoDeletePost = {},
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onRequestReload = {},
                 onRequestRetrySend = { _, _ -> },
@@ -161,6 +165,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
         }
     }
 
+    @SuppressLint("UnrememberedMutableState")
     fun setupChatUi(
         posts: List<IStandalonePost>,
         currentUser: User = User(id = clientId),
@@ -195,6 +200,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     courseId = course.id!!,
                     state = rememberLazyListState(),
                     emojiService = EmojiServiceStub,
+                    isMarkedAsDeleteList = mutableStateListOf(),
                     bottomItem = null,
                     isReplyEnabled = true,
                     onCreatePost = { CompletableDeferred() },
@@ -202,7 +208,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     onPinPost = onPinPost,
                     onSavePost = { CompletableDeferred() },
                 onDeletePost = { CompletableDeferred() },
-                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                onUndoDeletePost = {},onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onClickViewPost = {},
                 onRequestRetrySend = { _ -> },
                 conversationName = "Title",

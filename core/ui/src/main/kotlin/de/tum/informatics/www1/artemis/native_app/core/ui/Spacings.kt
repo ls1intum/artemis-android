@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 
 object Spacings {
     val ScreenHorizontalSpacing = 16.dp
+    val ReplyTextFieldHorizontalSpacing = ScreenHorizontalSpacing / 2
     val EndOfScrollablePageSpacing = ScreenHorizontalSpacing
 
     object Post {
