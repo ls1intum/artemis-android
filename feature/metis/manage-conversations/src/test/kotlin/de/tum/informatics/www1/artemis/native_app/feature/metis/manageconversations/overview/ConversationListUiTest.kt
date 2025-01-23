@@ -69,7 +69,6 @@ class ConversationListUiTest : BaseComposeTest() {
         composeTestRule.setContent {
             ConversationList(
                 modifier = Modifier,
-                clientId = 1L,
                 isSavedPostsSectionExpanded = isSavedPostSectionExpanded,
                 toggleFavoritesExpanded = {},
                 toggleGeneralsExpanded = {},
