@@ -1,7 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -141,6 +144,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     hasModerationRights = hasModerationRights,
                 ),
                 serverUrl = "",
+                isMarkedAsDeleteList = mutableStateListOf(),
                 emojiService = EmojiServiceStub,
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
@@ -148,6 +152,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 onResolvePost = onResolvePost,
                 onPinPost = onPinPost,
                 onDeletePost = { CompletableDeferred() },
+                onUndoDeletePost = {},
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onRequestReload = {},
                 onRequestRetrySend = { _, _ -> },
@@ -156,6 +161,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
         }
     }
 
+    @SuppressLint("UnrememberedMutableState")
     fun setupChatUi(
         posts: List<IStandalonePost>,
         currentUser: User = User(id = clientId),
@@ -183,23 +189,23 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     postActionFlags = PostActionFlags(
                         isAbleToPin = isAbleToPin,
                         isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-                        hasModerationRights = hasModerationRights,
-                    ),
+                        hasModerationRights = hasModerationRights,),
+
 
                     serverUrl = "",
                     courseId = course.id!!,
                     state = rememberLazyListState(),
-                    emojiService = EmojiServiceStub,
+                    emojiService = EmojiServiceStub,isMarkedAsDeleteList = mutableStateListOf(),
                     bottomItem = null,
                     isReplyEnabled = true,
                     onCreatePost = { CompletableDeferred() },
                     onEditPost = { _, _ -> CompletableDeferred() },
                     onPinPost = onPinPost,
-                    onDeletePost = { CompletableDeferred() },
+                    onDeletePost = { CompletableDeferred() },onUndoDeletePost = {},
                     onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                     onClickViewPost = {},
                     onRequestRetrySend = { _ -> },
-                    title = "Title",
+                    conversationName = "Title",
                     onFileSelected = { _ -> }
                 )
             }

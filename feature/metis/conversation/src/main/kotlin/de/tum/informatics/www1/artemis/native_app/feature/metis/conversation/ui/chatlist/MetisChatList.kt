@@ -16,9 +16,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
@@ -43,11 +44,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MetisReplyHandler
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyTextField
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.util.rememberDerivedConversationName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.PagingStateError
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.ReportVisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import kotlinx.coroutines.Deferred
@@ -83,11 +85,7 @@ internal fun MetisChatList(
 
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
 
-    val updatedTitle by remember(conversationDataState) {
-        derivedStateOf {
-            conversationDataState.bind { it.humanReadableName }.orElse("Conversation")
-        }
-    }
+    val conversationName by rememberDerivedConversationName(conversationDataState)
 
     val context = LocalContext.current
 
@@ -101,6 +99,7 @@ internal fun MetisChatList(
             serverUrl = serverUrl,
             courseId = viewModel.courseId,
             state = state,
+            isMarkedAsDeleteList = viewModel.isMarkedAsDeleteList,
             bottomItem = bottomItem,
             isReplyEnabled = isReplyEnabled,
             onCreatePost = viewModel::createPost,
@@ -110,7 +109,8 @@ internal fun MetisChatList(
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onClickViewPost = onClickViewPost,
             onRequestRetrySend = viewModel::retryCreatePost,
-            title = updatedTitle,
+            onUndoDeletePost = viewModel::undoDeletePost,
+            conversationName = conversationName,
             onFileSelected = { uri ->
                 viewModel.onFileSelected(uri, context)
             }
@@ -130,6 +130,7 @@ fun MetisChatList(
     courseId: Long,
     state: LazyListState,
     emojiService: EmojiService = koinInject(),
+    isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     isReplyEnabled: Boolean,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IStandalonePost, String) -> Deferred<MetisModificationFailure?>,
@@ -137,8 +138,9 @@ fun MetisChatList(
     onPinPost: (IStandalonePost) -> Deferred<MetisModificationFailure?>,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onClickViewPost: (StandalonePostId) -> Unit,
+    onUndoDeletePost: (IStandalonePost) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit,
-    title: String,
+    conversationName: String,
     onFileSelected: (Uri) -> Unit
 ) {
     MetisReplyHandler(
@@ -158,7 +160,7 @@ fun MetisChatList(
             MetisPostListHandler(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                     .weight(1f),
                 serverUrl = serverUrl,
                 courseId = courseId,
@@ -194,10 +196,12 @@ fun MetisChatList(
                             state = state,
                             posts = posts,
                             clientId = clientId,
+                            isMarkedAsDeleteList = isMarkedAsDeleteList,
                             onClickViewPost = onClickViewPost,
                             postActionFlags = postActionFlags,
                             onRequestEdit = onEditPostDelegate,
                             onRequestDelete = onDeletePostDelegate,
+                            onRequestUndoDelete = onUndoDeletePost,
                             onRequestPin = onPinPostDelegate,
                             onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                             onRequestRetrySend = onRequestRetrySend,
@@ -208,10 +212,12 @@ fun MetisChatList(
 
             if (isReplyEnabled) {
                 ReplyTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacings.ReplyTextFieldHorizontalSpacing),
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate,
-                    title = title,
+                    conversationName = conversationName,
                     onFileSelected = onFileSelected
                 )
             }
@@ -226,9 +232,11 @@ private fun ChatList(
     posts: PostsDataState.Loaded,
     postActionFlags: PostActionFlags,
     clientId: Long,
+    isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
     onRequestDelete: (IStandalonePost) -> Unit,
+    onRequestUndoDelete: (IStandalonePost) -> Unit,
     onRequestPin: (IStandalonePost) -> Unit,
     onRequestReactWithEmoji: (IStandalonePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (StandalonePostId) -> Unit
@@ -261,6 +269,9 @@ private fun ChatList(
                         onRequestDelete = {
                             onRequestDelete(post ?: return@rememberPostActions)
                         },
+                        onRequestUndoDelete = {
+                            onRequestUndoDelete(post ?: return@rememberPostActions)
+                        },
                         onClickReaction = { id, create ->
                             onRequestReactWithEmoji(post ?: return@rememberPostActions, id, create)
                         },
@@ -286,6 +297,7 @@ private fun ChatList(
                             },
                         post = post,
                         clientId = clientId,
+                        isMarkedAsDeleteList = isMarkedAsDeleteList,
                         postItemViewType = remember(post?.answers) {
                             PostItemViewType.ChatListItem(post?.answers.orEmpty())
                         },

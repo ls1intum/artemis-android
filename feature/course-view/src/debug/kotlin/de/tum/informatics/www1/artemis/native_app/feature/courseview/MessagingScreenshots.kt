@@ -1,10 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -151,6 +153,7 @@ fun `Metis - Conversation Overview`() {
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @PlayStoreScreenshots
 @Composable
 fun `Metis - Conversation Channel`() {
@@ -246,9 +249,11 @@ fun `Metis - Conversation Channel`() {
                                 courseId = 0,
                                 state = rememberLazyListState(),
                                 isReplyEnabled = true,
+                                isMarkedAsDeleteList = mutableStateListOf(),
                                 onCreatePost = { CompletableDeferred() },
                                 onEditPost = { _, _ -> CompletableDeferred() },
                                 onDeletePost = { CompletableDeferred() },
+                                onUndoDeletePost = {},
                                 onPinPost = { CompletableDeferred() },
                                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                                 bottomItem = null,
