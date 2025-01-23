@@ -1,36 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="conversation_name_fallback">Conversation</string>
+
     <plurals name="communication_standalone_post_view_replies_button">
         <item quantity="one">1 reply</item>
         <item quantity="other">%1$d replies</item>
     </plurals>
 
-    <string name="communication_create_post_button">Create post</string>
-
-    <string name="post_view_edit_post">Edit</string>
-    <string name="post_view_delete_post">Delete</string>
-
-    <string name="standalone_screen_title">View post</string>
+    <string name="thread_view_title">Thread</string>
+    <plurals name="conversation_name_member_count">
+        <item quantity="one">1 Member</item>
+        <item quantity="other">%1$d Members</item>
+    </plurals>
 
     <string name="course_wide_context_organization">Organization</string>
     <string name="course_wide_context_tech_support">Tech Support</string>
     <string name="course_wide_context_random">Random</string>
     <string name="course_wide_context_announcement">Announcement</string>
-
-    <string name="metis_filter_client_created">Own</string>
-    <string name="metis_filter_with_reaction">Reacted</string>
-    <string name="metis_filter_unresolved">Unresolved</string>
-
-    <string name="metis_sorting_strategy_criteria_title">Sort by:</string>
-    <string name="metis_sorting_strategy_criteria_date">Date</string>
-    <string name="metis_sorting_strategy_criteria_votes">Votes</string>
-    <string name="metis_sorting_strategy_criteria_replies">Replies</string>
-
-    <string name="metis_query_placeholder">Search for a post, use # to find a specific post (e.g. #1)</string>
-
-    <string name="metis_sorting_strategy_order_title">Order by:</string>
-    <string name="metis_sorting_strategy_order_ascending">Ascending</string>
-    <string name="metis_sorting_strategy_order_descending">Descending</string>
 
     <string name="metis_post_list_empty">No posts found.</string>
     <string name="metis_post_list_loading">Loading posts…</string>
@@ -45,6 +31,7 @@
     <string name="metis_modification_failure_dialog_message_create_post">Could not create post.</string>
     <string name="metis_modification_failure_dialog_message_delete_post">Could not delete post.</string>
     <string name="metis_modification_failure_dialog_message_update_post">Could not update post.</string>
+    <string name="metis_modification_failure_dialog_message_change_saved_post_status">Could change the saved post\'s status.</string>
 
     <string name="standalone_post_loading">Loading post…</string>
     <string name="standalone_post_failure">Something went wrong while loading the post.</string>

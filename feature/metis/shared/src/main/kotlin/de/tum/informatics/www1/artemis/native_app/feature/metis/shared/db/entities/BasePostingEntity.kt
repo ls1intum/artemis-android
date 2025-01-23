@@ -37,6 +37,8 @@ data class BasePostingEntity(
     val content: String?,
     @ColumnInfo(name = "author_role")
     val authorRole: UserRole?,
+    @ColumnInfo(name = "is_saved")
+    val isSaved: Boolean?,
 ) {
     enum class CourseWideContext {
         @ColumnInfo(name = "tech_support")

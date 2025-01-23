@@ -11,7 +11,7 @@ import coil3.SingletonImageLoader
 import coil3.memory.MemoryCache
 import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
-import io.sentry.Sentry
+import io.sentry.android.core.SentryAndroid
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.koin.workManagerFactory
@@ -24,7 +24,7 @@ class ArtemisApplication : Application(), SingletonImageLoader.Factory, CurrentA
     override fun onCreate() {
         super.onCreate()
 
-        Sentry.init {
+        SentryAndroid.init(this) {
             it.dsn =
                 if (BuildConfig.DEBUG) "" else "https://8b4d69ac628d4462995ee6178365541f@sentry.ase.in.tum.de/3"
         }

@@ -1,5 +1,6 @@
-package de.tum.informatics.www1.artemis.native_app.core.data
+package de.tum.informatics.www1.artemis.native_app.core.data.test
 
+import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 

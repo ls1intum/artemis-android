@@ -1,14 +1,16 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
-import de.tum.informatics.www1.artemis.native_app.core.data.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.test.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProviderStub
@@ -17,6 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseUiScreen
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.TAB_COMMUNICATION
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
@@ -110,6 +113,7 @@ fun `Metis - Conversation Overview`() {
                     examsExpanded = true,
                     exercisesExpanded = true,
                     lecturesExpanded = true,
+                    savedPostsExpanded = false
                 )
             )
 
@@ -139,6 +143,7 @@ fun `Metis - Conversation Overview`() {
                     modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
                     onNavigateToConversation = {},
+                    onNavigateToSavedPosts = {},
                     onRequestCreatePersonalConversation = {},
                     onRequestAddChannel = {},
                     onRequestBrowseChannel = {},
@@ -151,6 +156,7 @@ fun `Metis - Conversation Overview`() {
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @PlayStoreScreenshots
 @Composable
 fun `Metis - Conversation Channel`() {
@@ -190,6 +196,8 @@ fun `Metis - Conversation Channel`() {
     ).reversed()
 
     val visibleMetisContextManagerStub = object : VisibleMetisContextManager {
+        override fun getRegisteredMetisContexts(): List<VisibleMetisContext> = emptyList()
+
         override fun registerMetisContext(metisContext: VisibleMetisContext) =
             Unit
 
@@ -248,16 +256,20 @@ fun `Metis - Conversation Channel`() {
                                 courseId = 0,
                                 state = rememberLazyListState(),
                                 isReplyEnabled = true,
+                                isMarkedAsDeleteList = mutableStateListOf(),
                                 onCreatePost = { CompletableDeferred() },
                                 onEditPost = { _, _ -> CompletableDeferred() },
                                 onDeletePost = { CompletableDeferred() },
+                                onUndoDeletePost = {},
                                 onPinPost = { CompletableDeferred() },
+                                onSavePost = { CompletableDeferred() },
                                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                                 bottomItem = null,
                                 onClickViewPost = {},
                                 onRequestRetrySend = {},
-                                title = "",
-                                onFileSelected = { _ ->}
+                                onFileSelected = { _ -> },
+                                conversationName = "Chat",
+                                emojiService = EmojiServiceStub,
                             )
                         }
                     )
@@ -289,6 +301,7 @@ private fun generateMessage(
             creationDate = time,
             updatedDate = null,
             resolved = false,
+            isSaved = false,
             courseWideContext = null,
             tags = emptyList(),
             answers = emptyList(),

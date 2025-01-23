@@ -22,6 +22,4 @@
     <string name="settings_build_section">Build information</string>
     <string name="settings_build_version_code">Version code:</string>
     <string name="settings_build_version_name">Version name:</string>
-
-    <string name="notification_settings_screen_title">Notification settings</string>
 </resources>

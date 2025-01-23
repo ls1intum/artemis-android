@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.browse_channels
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -11,11 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -108,7 +105,8 @@ internal fun BrowseChannelsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             dataState = channelsDataState,
             loadingText = stringResource(id = R.string.browse_channel_list_loading),
             failureText = stringResource(id = R.string.browse_channel_list_failure),
@@ -118,10 +116,11 @@ internal fun BrowseChannelsScreen(
             if (channels.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = Spacings.EndOfScrollablePageSpacing)
+                    contentPadding = Spacings.calculateEndOfPagePaddingValues()
                 ) {
                     items(channels) { channelChat ->
                         ChannelChatItem(
+                            modifier = Modifier.fillMaxWidth(),
                             channelChat = channelChat,
                             onClick = {
                                 if (registerInChannelJob == null) {
@@ -154,9 +153,13 @@ internal fun BrowseChannelsScreen(
 }
 
 @Composable
-private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
+private fun ChannelChatItem(
+    modifier: Modifier = Modifier,
+    channelChat: ChannelChat,
+    onClick: () -> Unit
+) {
     ListItem(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         leadingContent = {
             ChannelChatIcon(channelChat = channelChat)
         },
@@ -192,17 +195,8 @@ private fun ChannelChatItem(channelChat: ChannelChat, onClick: () -> Unit) {
         trailingContent = {
             if (!channelChat.isMember) {
                 Button(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .testTag(testTagForBrowsedChannelItem(channelChat.id)),
+                    modifier = Modifier.testTag(testTagForBrowsedChannelItem(channelChat.id)),
                     onClick = onClick,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    shape = MaterialTheme.shapes.extraSmall,
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-
                 ) {
                     Text(text = stringResource(id = R.string.join_button_title))
                 }

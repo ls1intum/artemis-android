@@ -6,27 +6,19 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performSemanticsAction
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
-import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.BaseChatUITest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_POST_CONTEXT_BOTTOM_SHEET
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.AnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @Category(UnitTest::class)
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class ConversationBottomSheetUiTest : BaseChatUITest() {
-
-    private val currentUser = User(id = clientId)
-    private val otherUser = User(id = 1234)
-
-    private val postContent = "Post content"
-    private val answerContent = "Answer content"
 
     // ###################################### EDIT ###########################################
 
@@ -96,7 +88,7 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         composeTestRule.assertPostActionVisibility(
             R.string.post_resolves,
             isVisible = true,
-            postContentToClick = answerContent
+            postContentToClick = simpleAnswerContent
         )
     }
 
@@ -113,7 +105,7 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         composeTestRule.assertPostActionVisibility(
             R.string.post_resolves,
             isVisible = true,
-            postContentToClick = answerContent
+            postContentToClick = simpleAnswerContent
         )
     }
 
@@ -129,7 +121,7 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         composeTestRule.assertPostActionVisibility(
             R.string.post_resolves,
             isVisible = false,
-            postContentToClick = answerContent
+            postContentToClick = simpleAnswerContent
         )
     }
 
@@ -142,7 +134,7 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
             posts = listOf(StandalonePost(
                 id = 1,
                 author = otherUser,
-                content = postContent,
+                content = simplePostContent,
             )),
             isAbleToPin = true
         )
@@ -172,39 +164,36 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         composeTestRule.assertPostActionVisibility(
             R.string.post_pin,
             isVisible = false,
-            postContentToClick = answerContent
+            postContentToClick = simpleAnswerContent
         )
     }
 
 
     // ###################################### UTIL METHODS ###########################################
 
-    private fun simplePost(
-        postAuthor: User,
-    ): StandalonePost = StandalonePost(
-        id = 1,
-        author = postAuthor,
-        content = postContent,
-    )
-
-    private fun simpleThreadPostWithAnswer(
-        postAuthor: User,
-        answerAuthor: User,
-    ): StandalonePost {
-        val basePost = simplePost(postAuthor)
-        val answerPost = AnswerPost(
-            id = 2,
-            author = answerAuthor,
-            content = answerContent,
-            post = basePost
+    @Test
+    fun `test GIVEN a post WHEN long pressing the post as non-moderator THEN save option is shown`() {
+        setupChatUi(
+            posts = listOf(simplePost(otherUser))
         )
-        return basePost.copy(answers = listOf(answerPost))
+
+        composeTestRule.assertPostActionVisibility(R.string.post_save, isVisible = true)
     }
+
+    @Test
+    fun `test GIVEN a saved post WHEN long pressing the post as non-moderator THEN un-save option is shown`() {
+        setupChatUi(
+            posts = listOf(simplePost(otherUser, isSaved = true)),
+        )
+
+        composeTestRule.assertPostActionVisibility(R.string.post_unsave, isVisible = true)
+    }
+
 
     private fun ComposeTestRule.assertPostActionVisibility(
         stringResId: Int,
         isVisible: Boolean,
-        postContentToClick: String = this@ConversationBottomSheetUiTest.postContent,
+        postContentToClick: String = this@ConversationBottomSheetUiTest.simplePostContent,
     ) {
         onNodeWithText(postContentToClick)
             .performSemanticsAction(SemanticsActions.OnLongClick)
