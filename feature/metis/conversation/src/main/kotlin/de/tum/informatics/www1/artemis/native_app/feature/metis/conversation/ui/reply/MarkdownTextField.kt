@@ -21,7 +21,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Tag
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
@@ -48,7 +53,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import kotlinx.coroutines.launch
@@ -71,7 +78,7 @@ internal fun MarkdownTextField(
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
-    showAutoCompletePopup: ((String) -> Unit)? = null,
+    showAutoCompletePopup: ((AutocompleteType) -> Unit)? = null,
     formattingOptionButtons: @Composable () -> Unit = {},
 ) {
     val text = textFieldValue.text
@@ -158,7 +165,7 @@ fun BasicMarkdownTextField(
             .heightIn(max = (localTextStyle.fontSize.value * maxVisibleLines).dp)
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scrollState)
-    ){
+    ) {
         BasicTextField(
             modifier = modifier
                 .focusRequester(focusRequester)
@@ -184,6 +191,8 @@ fun BasicMarkdownTextField(
                         Text(
                             modifier = Modifier.align(Alignment.CenterStart),
                             text = hintText,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = localTextStyle,
                         )
@@ -204,13 +213,14 @@ private fun TextFieldOptions(
     isPreviewEnabled: Boolean,
     showFormattingOptions: Boolean,
     onChangeViewType: (ViewType) -> Unit,
-    showAutoCompletePopup: ((String) -> Unit)? = null,
+    showAutoCompletePopup: ((AutocompleteType) -> Unit)? = null,
     formattingOptionButtons: @Composable () -> Unit = {},
     onOpenFilePicker: () -> Unit = {},
     onOpenImagePicker: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
     val offsetY by animateDpAsState(targetValue = if (expanded) 0.dp else 200.dp)
+    var isTaggingDropdownExpanded by remember { mutableStateOf(false) }
 
     val iconButtonModifier = Modifier
         .clip(CircleShape)
@@ -271,11 +281,7 @@ private fun TextFieldOptions(
 
                     IconButton(
                         modifier = iconButtonModifier,
-                        onClick = {
-                            if (showAutoCompletePopup != null) {
-                                showAutoCompletePopup("")
-                            }
-                        }
+                        onClick = { isTaggingDropdownExpanded = !isTaggingDropdownExpanded }
                     ) {
                         Icon(
                             modifier = iconModifier,
@@ -284,6 +290,71 @@ private fun TextFieldOptions(
                             contentDescription = null
                         )
                     }
+                }
+
+                DropdownMenu(
+                    expanded = isTaggingDropdownExpanded,
+                    onDismissRequest = { isTaggingDropdownExpanded = false },
+                    properties = PopupProperties(
+                        focusable = false
+                    )
+                ) {
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.tag),
+                                contentDescription = null
+                            )
+                        },
+                        text = { Text(text = stringResource(R.string.reply_format_mention_members)) },
+                        onClick = {
+                            isTaggingDropdownExpanded = false
+                            showAutoCompletePopup?.invoke(AutocompleteType.USERS)
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Tag,
+                                contentDescription = null
+                            )
+                        },
+                        text = { Text(stringResource(R.string.reply_format_mention_channels)) },
+                        onClick = {
+                            isTaggingDropdownExpanded = false
+                            showAutoCompletePopup?.invoke(AutocompleteType.CHANNELS)
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ListAlt,
+                                contentDescription = null
+                            )
+                        },
+                        text = { Text(stringResource(R.string.reply_format_mention_exercises)) },
+                        onClick = {
+                            isTaggingDropdownExpanded = false
+                            showAutoCompletePopup?.invoke(AutocompleteType.EXERCISES)
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.School,
+                                contentDescription = null
+                            )
+                        },
+                        text = { Text(stringResource(R.string.reply_format_mention_lectures)) },
+                        onClick = {
+                            isTaggingDropdownExpanded = false
+                            showAutoCompletePopup?.invoke(AutocompleteType.LECTURES)
+                        }
+                    )
+
                 }
 
                 Box(

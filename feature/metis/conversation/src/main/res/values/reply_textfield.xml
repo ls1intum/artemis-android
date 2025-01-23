@@ -6,4 +6,8 @@
     <string name="reply_format_inline_code">Inline code</string>
     <string name="reply_format_image_upload">Upload Image</string>
     <string name="reply_format_file_upload">Upload Attachment</string>
+    <string name="reply_format_mention_members">Members</string>
+    <string name="reply_format_mention_channels">Channels</string>
+    <string name="reply_format_mention_exercises">Exercises</string>
+    <string name="reply_format_mention_lectures">Lectures</string>
 </resources>

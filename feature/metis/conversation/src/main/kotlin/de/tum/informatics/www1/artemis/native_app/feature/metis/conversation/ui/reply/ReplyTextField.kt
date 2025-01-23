@@ -263,6 +263,7 @@ private fun CreateReplyUi(
         if (requestDismissAutoCompletePopup) {
             delay(100)
             mayShowAutoCompletePopup = false
+            requestedAutocompleteType = null
         }
     }
 
@@ -323,7 +324,17 @@ private fun CreateReplyUi(
                         }
                     },
                     showAutoCompletePopup = {
-                        requestedAutocompleteType = AutocompleteType.CHANNELS
+                        requestedAutocompleteType = it
+                        applyMarkdownStyle(
+                            style = when (it) {
+                                AutocompleteType.USERS -> MarkdownStyle.UserMention
+                                AutocompleteType.CHANNELS -> MarkdownStyle.ChannelMention
+                                AutocompleteType.LECTURES -> MarkdownStyle.LectureMention
+                                AutocompleteType.EXERCISES -> MarkdownStyle.ExerciseMention
+                            },
+                            currentTextFieldValue = currentTextFieldValue,
+                            onTextChanged = replyMode::onUpdate
+                        )
                     },
                     sendButton = {
                         Box(
@@ -411,7 +422,11 @@ enum class MarkdownStyle(val startTag: String, val endTag: String) {
     CodeBlock("```", "```"),
     Blockquote("> ", ""),
     OrderedList("1. ", ""),
-    UnorderedList("- ", "")
+    UnorderedList("- ", ""),
+    UserMention("@", ""),
+    ChannelMention("#", ""),
+    LectureMention("#", ""),
+    ExerciseMention("#", "")
 }
 
 @Composable
@@ -887,21 +902,17 @@ private fun manageAutoCompleteHints(
     }
 
     val tagChars = replyAutoCompleteHintProvider.legalTagChars
-    LaunchedEffect(textFieldValue, replyAutoCompleteHintProvider, requestedAutocompleteType) {
+    LaunchedEffect(textFieldValue, replyAutoCompleteHintProvider) {
         // Check that no text is selected, and instead we have a simple cursor
-        val tagIndex = textFieldValue.getAutoCompleteReplacementTextFirstIndex(tagChars)
-        var replacementWord = ""
-        val tagChar = when {
-            tagIndex == null && requestedAutocompleteType != null -> requestedAutocompleteType.tagChar
-            tagIndex != null -> {
-                val char = textFieldValue.text[tagIndex]
-                replacementWord = textFieldValue.text.substring(tagIndex + 1).takeWhileTag()
-                char
-            }
-            else -> return@LaunchedEffect
-        }
+        replyAutoCompleteHintProducer =
+            textFieldValue.getAutoCompleteReplacementTextFirstIndex(tagChars)?.let { tagIndex ->
+                val tagChar = textFieldValue.text[tagIndex]
+                val replacementWord = if (textFieldValue.text.length > tagIndex + 1) {
+                    textFieldValue.text.substring(tagIndex + 1).takeWhileTag()
+                } else ""
 
-        replyAutoCompleteHintProducer = replyAutoCompleteHintProvider.produceAutoCompleteHints(tagChar, replacementWord)
+                replyAutoCompleteHintProvider.produceAutoCompleteHints(tagChar, replacementWord)
+            }
     }
 
     val replyAutoCompleteHints = replyAutoCompleteHintProducer
@@ -909,7 +920,12 @@ private fun manageAutoCompleteHints(
         ?.value
         ?.orElse(emptyList())
         .orEmpty()
-        .filter { it.name == requestedAutocompleteType?.title }
+        .toMutableList()
+        .apply {
+            requestedAutocompleteType?.let { type ->
+                retainAll { it.name == type.title }
+            }
+        }
 
     var latestValidAutoCompleteHints: List<AutoCompleteCategory>? by remember {
         mutableStateOf(null)
@@ -926,11 +942,11 @@ private fun manageAutoCompleteHints(
     return latestValidAutoCompleteHints
 }
 
-private enum class AutocompleteType(@StringRes val title: Int, val tagChar: Char) {
-    USERS(R.string.markdown_textfield_autocomplete_category_users, '@'),
-    CHANNELS(R.string.markdown_textfield_autocomplete_category_channels, '#'),
-    LECTURES(R.string.markdown_textfield_autocomplete_category_lectures, '#'),
-    EXERCISES(R.string.markdown_textfield_autocomplete_category_exercises, '#'),
+enum class AutocompleteType(@StringRes val title: Int) {
+    USERS(R.string.markdown_textfield_autocomplete_category_users),
+    CHANNELS(R.string.markdown_textfield_autocomplete_category_channels),
+    LECTURES(R.string.markdown_textfield_autocomplete_category_lectures),
+    EXERCISES(R.string.markdown_textfield_autocomplete_category_exercises),
 }
 
 /**
