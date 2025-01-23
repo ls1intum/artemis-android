@@ -16,6 +16,7 @@ data class PostActions(
     val onReplyInThread: (() -> Unit)? = null,
     val onResolvePost: (() -> Unit)? = null,
     val onPinPost: (() -> Unit)? = null,
+    val onSavePost: (() -> Unit)? = null,
     val onRequestRetrySend: () -> Unit = {}
 ) {
     val canPerformAnyAction: Boolean get() = requestDeletePost != null || requestEditPost != null
@@ -33,6 +34,7 @@ fun rememberPostActions(
     onReplyInThread: (() -> Unit)?,
     onResolvePost: (() -> Unit)?,
     onPinPost: (() -> Unit)?,
+    onSavePost: (() -> Unit)?,
     onRequestRetrySend: () -> Unit
 ): PostActions {
     val clipboardManager = LocalClipboardManager.current
@@ -48,6 +50,7 @@ fun rememberPostActions(
         onReplyInThread,
         onResolvePost,
         onPinPost,
+        onSavePost,
         onRequestRetrySend,
         clipboardManager
     ) {
@@ -74,6 +77,7 @@ fun rememberPostActions(
             onReplyInThread = if (doesPostExistOnServer) onReplyInThread else null,
             onResolvePost = if (hasResolvePostRights) onResolvePost else null,
             onPinPost = if (hasPinPostRights) onPinPost else null,
+            onSavePost = if (doesPostExistOnServer) onSavePost else null,
             onRequestRetrySend = onRequestRetrySend,
         )
     }

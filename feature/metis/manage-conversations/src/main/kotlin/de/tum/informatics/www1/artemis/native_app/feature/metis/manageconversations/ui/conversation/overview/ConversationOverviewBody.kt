@@ -56,6 +56,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -66,6 +67,7 @@ fun ConversationOverviewBody(
     modifier: Modifier,
     courseId: Long,
     onNavigateToConversation: (conversationId: Long) -> Unit,
+    onNavigateToSavedPosts: (SavedPostStatus) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit,
     onRequestBrowseChannel: () -> Unit,
@@ -75,6 +77,7 @@ fun ConversationOverviewBody(
         modifier = modifier,
         viewModel = koinViewModel { parametersOf(courseId) },
         onNavigateToConversation = onNavigateToConversation,
+        onNavigateToSavedPosts = onNavigateToSavedPosts,
         onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
         onRequestAddChannel = onRequestAddChannel,
         onRequestBrowseChannel = onRequestBrowseChannel,
@@ -87,6 +90,7 @@ fun ConversationOverviewBody(
     modifier: Modifier,
     viewModel: ConversationOverviewViewModel,
     onNavigateToConversation: (conversationId: Long) -> Unit,
+    onNavigateToSavedPosts: (SavedPostStatus) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit,
     onRequestBrowseChannel: () -> Unit,
@@ -151,6 +155,7 @@ fun ConversationOverviewBody(
                         viewModel.setConversationMessagesRead(conversationId)
                         onNavigateToConversation(conversationId)
                     },
+                    onNavigateToSavedPosts = onNavigateToSavedPosts,
                     onToggleMarkAsFavourite = viewModel::markConversationAsFavorite,
                     onToggleHidden = viewModel::markConversationAsHidden,
                     onToggleMuted = viewModel::markConversationAsMuted,

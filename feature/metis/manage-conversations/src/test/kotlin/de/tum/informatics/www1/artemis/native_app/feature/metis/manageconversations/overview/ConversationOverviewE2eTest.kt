@@ -387,6 +387,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
                 onNavigateToConversation = {},
+                onNavigateToSavedPosts = {},
                 onRequestCreatePersonalConversation = { },
                 onRequestAddChannel = {},
                 onRequestBrowseChannel = {},
