@@ -25,8 +25,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.nav
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.quizParticipation
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.navigateToQuizResult
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.quizResults
-import de.tum.informatics.www1.artemis.native_app.feature.settings.navigateToSettings
-import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsScreen
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.navigateToSettings
+import de.tum.informatics.www1.artemis.native_app.feature.settings.ui.settingsNavGraph
 
 fun NavGraphBuilder.rootNavGraph(
     navController: NavController,
@@ -167,14 +167,10 @@ fun NavGraphBuilder.rootNavGraph(
         onRequestLeaveQuizResults = navController::navigateUp
     )
 
-    settingsScreen(
+    settingsNavGraph(
         navController = navController,
         versionCode = BuildConfig.VERSION_CODE,
         versionName = BuildConfig.VERSION_NAME,
-        onNavigateUp = navController::navigateUp,
-        onLoggedOut = {
-            // Nothing to do here, automatically moved to login screen
-        },
         onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses
     )
 }
