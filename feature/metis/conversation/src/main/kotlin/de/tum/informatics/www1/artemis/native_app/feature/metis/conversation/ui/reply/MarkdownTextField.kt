@@ -55,6 +55,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isUnspecified
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -149,7 +151,15 @@ fun BasicMarkdownTextField(
 
     val localDensity = LocalDensity.current
     val localTextStyle = LocalTextStyle.current
-    val lineHeight = with(localDensity) { localTextStyle.lineHeight.toPx() }
+
+    // This check is needed for the UI Test to explicitly set the font size if it is unspecified
+    val lineHeight = with(localDensity) {
+        if (localTextStyle.lineHeight.isUnspecified) {
+            16.sp.toPx()
+        } else {
+            localTextStyle.lineHeight.toPx()
+        }
+    }
 
     LaunchedEffect(textFieldValue.selection) {
         val cursorLine = textFieldValue.text.take(textFieldValue.selection.start)
