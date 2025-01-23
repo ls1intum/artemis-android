@@ -77,7 +77,7 @@ private fun ReplyAutoCompletePopupBody(
     ) {
 
         autoCompleteCategories.forEachIndexed { categoryIndex, category ->
-            item {
+            stickyHeader {
                 AutoCompleteCategoryComposable(
                     modifier = Modifier.fillMaxWidth(),
                     name = stringResource(id = category.name)
@@ -117,8 +117,10 @@ private fun AutoCompleteCategoryComposable(modifier: Modifier, name: String) {
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = HintHorizontalPadding),
+                .background(color = MaterialTheme.colorScheme.surfaceContainer)
+                .padding(horizontal = HintHorizontalPadding, vertical = 4.dp),
             text = name,
+            color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.labelLarge,
             textAlign = TextAlign.Center
         )

@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -219,6 +220,7 @@ private fun CreateReplyUi(
     var requestFocus: Boolean by remember { mutableStateOf(false) }
 
     val currentTextFieldValue by replyMode.currentText
+    var requestedAutocompleteType by remember { mutableStateOf<AutocompleteType?>(null) }
 
     var mayShowAutoCompletePopup by remember { mutableStateOf(true) }
     var requestDismissAutoCompletePopup by remember { mutableStateOf(false) }
@@ -268,7 +270,7 @@ private fun CreateReplyUi(
         Box(modifier = Modifier.fillMaxWidth()) {
             if (displayTextField || currentTextFieldValue.text.isNotBlank()) {
                 val tagChars = LocalReplyAutoCompleteHintProvider.current.legalTagChars
-                val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue)
+                val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue, requestedAutocompleteType)
 
                 var textFieldWidth by remember { mutableIntStateOf(0) }
                 var popupMaxHeight by remember { mutableIntStateOf(0) }
@@ -320,6 +322,9 @@ private fun CreateReplyUi(
                             displayTextField = false
                         }
                     },
+                    showAutoCompletePopup = {
+                        requestedAutocompleteType = AutocompleteType.CHANNELS
+                    },
                     sendButton = {
                         Box(
                             modifier = Modifier
@@ -327,7 +332,11 @@ private fun CreateReplyUi(
                                 .clip(CircleShape)
                                 .then(
                                     if (currentTextFieldValue.text.isBlank()) {
-                                        Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                                        Modifier.background(
+                                            MaterialTheme.colorScheme.primary.copy(
+                                                alpha = 0.2f
+                                            )
+                                        )
                                     } else {
                                         Modifier.background(MaterialTheme.colorScheme.primary)
                                     }
@@ -866,7 +875,10 @@ private fun rememberReplyState(
  * @return a list of auto complete hints that should be displayed, or null if no auto complete hints are to be displayed.
  */
 @Composable
-private fun manageAutoCompleteHints(textFieldValue: TextFieldValue): List<AutoCompleteCategory>? {
+private fun manageAutoCompleteHints(
+    textFieldValue: TextFieldValue,
+    requestedAutocompleteType: AutocompleteType? = null
+): List<AutoCompleteCategory>? {
     val replyAutoCompleteHintProvider = LocalReplyAutoCompleteHintProvider.current
     var replyAutoCompleteHintProducer: Flow<DataState<List<AutoCompleteCategory>>>? by remember {
         mutableStateOf(
@@ -875,17 +887,21 @@ private fun manageAutoCompleteHints(textFieldValue: TextFieldValue): List<AutoCo
     }
 
     val tagChars = replyAutoCompleteHintProvider.legalTagChars
-    LaunchedEffect(textFieldValue, replyAutoCompleteHintProvider) {
+    LaunchedEffect(textFieldValue, replyAutoCompleteHintProvider, requestedAutocompleteType) {
         // Check that no text is selected, and instead we have a simple cursor
-        replyAutoCompleteHintProducer =
-            textFieldValue.getAutoCompleteReplacementTextFirstIndex(tagChars)?.let { tagIndex ->
-                val tagChar = textFieldValue.text[tagIndex]
-                val replacementWord = if (textFieldValue.text.length > tagIndex + 1) {
-                    textFieldValue.text.substring(tagIndex + 1).takeWhileTag()
-                } else ""
-
-                replyAutoCompleteHintProvider.produceAutoCompleteHints(tagChar, replacementWord)
+        val tagIndex = textFieldValue.getAutoCompleteReplacementTextFirstIndex(tagChars)
+        var replacementWord = ""
+        val tagChar = when {
+            tagIndex == null && requestedAutocompleteType != null -> requestedAutocompleteType.tagChar
+            tagIndex != null -> {
+                val char = textFieldValue.text[tagIndex]
+                replacementWord = textFieldValue.text.substring(tagIndex + 1).takeWhileTag()
+                char
             }
+            else -> return@LaunchedEffect
+        }
+
+        replyAutoCompleteHintProducer = replyAutoCompleteHintProvider.produceAutoCompleteHints(tagChar, replacementWord)
     }
 
     val replyAutoCompleteHints = replyAutoCompleteHintProducer
@@ -893,6 +909,7 @@ private fun manageAutoCompleteHints(textFieldValue: TextFieldValue): List<AutoCo
         ?.value
         ?.orElse(emptyList())
         .orEmpty()
+        .filter { it.name == requestedAutocompleteType?.title }
 
     var latestValidAutoCompleteHints: List<AutoCompleteCategory>? by remember {
         mutableStateOf(null)
@@ -907,6 +924,13 @@ private fun manageAutoCompleteHints(textFieldValue: TextFieldValue): List<AutoCo
     }
 
     return latestValidAutoCompleteHints
+}
+
+private enum class AutocompleteType(@StringRes val title: Int, val tagChar: Char) {
+    USERS(R.string.markdown_textfield_autocomplete_category_users, '@'),
+    CHANNELS(R.string.markdown_textfield_autocomplete_category_channels, '#'),
+    LECTURES(R.string.markdown_textfield_autocomplete_category_lectures, '#'),
+    EXERCISES(R.string.markdown_textfield_autocomplete_category_exercises, '#'),
 }
 
 /**
@@ -985,4 +1009,3 @@ private fun String.takeWhileTag(): String {
 
     return this
 }
-

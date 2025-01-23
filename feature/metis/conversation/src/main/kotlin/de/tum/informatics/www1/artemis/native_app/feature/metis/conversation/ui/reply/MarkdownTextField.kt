@@ -71,6 +71,7 @@ internal fun MarkdownTextField(
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
+    showAutoCompletePopup: ((String) -> Unit)? = null,
     formattingOptionButtons: @Composable () -> Unit = {},
 ) {
     val text = textFieldValue.text
@@ -117,6 +118,7 @@ internal fun MarkdownTextField(
             showFormattingOptions = selectedType == ViewType.TEXT,
             onChangeViewType = { selectedType = it },
             formattingOptionButtons = formattingOptionButtons,
+            showAutoCompletePopup = showAutoCompletePopup,
             onOpenImagePicker = { filePickerLauncher.launch("image/*") },
             onOpenFilePicker = { filePickerLauncher.launch("*/*") },
         )
@@ -202,6 +204,7 @@ private fun TextFieldOptions(
     isPreviewEnabled: Boolean,
     showFormattingOptions: Boolean,
     onChangeViewType: (ViewType) -> Unit,
+    showAutoCompletePopup: ((String) -> Unit)? = null,
     formattingOptionButtons: @Composable () -> Unit = {},
     onOpenFilePicker: () -> Unit = {},
     onOpenImagePicker: () -> Unit = {}
@@ -268,7 +271,11 @@ private fun TextFieldOptions(
 
                     IconButton(
                         modifier = iconButtonModifier,
-                        onClick = {}
+                        onClick = {
+                            if (showAutoCompletePopup != null) {
+                                showAutoCompletePopup("")
+                            }
+                        }
                     ) {
                         Icon(
                             modifier = iconModifier,
