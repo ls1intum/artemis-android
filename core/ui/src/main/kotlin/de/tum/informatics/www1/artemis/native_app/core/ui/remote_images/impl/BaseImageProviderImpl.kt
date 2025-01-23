@@ -13,7 +13,6 @@ class BaseImageProviderImpl : BaseImageProvider {
         context: Context,
         imageUrl: String,
         authorizationToken: String,
-        memoryCacheKey: String?
     ): ImageRequest {
         val headers = NetworkHeaders.Builder()
             .set(HttpHeaders.Cookie, "jwt=$authorizationToken")
@@ -23,9 +22,6 @@ class BaseImageProviderImpl : BaseImageProvider {
             .httpHeaders(headers)
             .data(imageUrl)
 
-        memoryCacheKey?.let {
-            builder.memoryCacheKey(it)
-        }
         return builder.build()
     }
 

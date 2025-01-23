@@ -34,7 +34,6 @@ class ArtemisImageProviderImpl(
                 context = context,
                 imageUrl = imageUrl,
                 authorizationToken = authToken,
-                memoryCacheKey = serverUrl + imagePath
             )
         }
     }
