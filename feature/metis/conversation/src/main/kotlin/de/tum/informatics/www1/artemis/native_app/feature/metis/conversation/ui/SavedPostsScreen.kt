@@ -127,7 +127,7 @@ internal fun SavedPostsScreen (
             modifier = modifier
                 .padding(top = paddingValues.calculateTopPadding())
                 .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
         ) {
             if (status == SavedPostStatus.ARCHIVED || status == SavedPostStatus.COMPLETED) {
                 InfoMessageCard(

@@ -196,9 +196,7 @@ internal fun MetisThreadUi(
             BoxWithConstraints(modifier = modifier) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     BasicDataStateUi(
-                        modifier = Modifier
-                            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
-                            .weight(1f),
+                        modifier = Modifier.weight(1f),
                         dataState = postDataState,
                         enablePullToRefresh = false,
                         loadingText = stringResource(id = R.string.standalone_post_loading),
