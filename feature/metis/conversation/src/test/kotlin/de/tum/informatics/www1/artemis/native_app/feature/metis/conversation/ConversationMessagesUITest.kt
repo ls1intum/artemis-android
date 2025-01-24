@@ -30,10 +30,10 @@ class ConversationMessagesUITest : BaseChatUITest() {
     fun `test GIVEN post is not pinned WHEN pinning the post THEN the correct post gets pinned`() {
         var changedPost: IBasePost? = null
 
-        setupChatUi(posts) { post ->
+        setupChatUi(posts = posts, onPinPost =  { post ->
             changedPost = post
             CompletableDeferred()
-        }
+        })
 
         composeTestRule.onNodeWithTag(
             testTagForPost(posts[0].standalonePostId),
@@ -52,10 +52,10 @@ class ConversationMessagesUITest : BaseChatUITest() {
         val modifiedPosts = posts.toMutableList()
         modifiedPosts[0] = modifiedPosts[0].copy(displayPriority = DisplayPriority.PINNED)
 
-        setupChatUi(modifiedPosts) { post ->
+        setupChatUi(posts = modifiedPosts, onPinPost =  { post ->
             changedPost = post
             CompletableDeferred()
-        }
+        })
 
         composeTestRule.onNodeWithTag(
             testTagForPost(posts[0].standalonePostId),
@@ -117,7 +117,7 @@ class ConversationMessagesUITest : BaseChatUITest() {
 
     @Test
     fun `test GIVEN the post is not pinned THEN the post is not shown as pinned`() {
-        setupChatUi(posts) { CompletableDeferred() }
+        setupChatUi(posts)
 
         testPinnedLabelInvisibility()
     }
@@ -133,16 +133,14 @@ class ConversationMessagesUITest : BaseChatUITest() {
     fun `test GIVEN the post is pinned THEN the post is shown as pinned`() {
         val modifiedPosts = posts.toMutableList()
         modifiedPosts[0] = modifiedPosts[0].copy(displayPriority = DisplayPriority.PINNED)
-        setupChatUi(modifiedPosts) { CompletableDeferred() }
+        setupChatUi(modifiedPosts)
 
         testPinnedLabelVisibility()
     }
 
     @Test
     fun `test GIVEN the post is pinned in thread THEN the post is shown as pinned in thread`() {
-        setupThreadUi(
-            posts[0].copy(displayPriority = DisplayPriority.PINNED)
-        )
+        setupThreadUi(posts[0].copy(displayPriority = DisplayPriority.PINNED))
 
         testPinnedLabelVisibility()
     }

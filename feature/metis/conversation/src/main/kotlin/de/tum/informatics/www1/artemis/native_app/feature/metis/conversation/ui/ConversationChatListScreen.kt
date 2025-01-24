@@ -96,7 +96,6 @@ internal fun ConversationChatListScreen(
     val query by viewModel.chatListUseCase.query.collectAsState()
     val conversationDataState by viewModel.latestUpdatedConversation.collectAsState()
     val conversationDataStatus by viewModel.conversationDataStatus.collectAsState()
-    val clientId by viewModel.clientIdOrDefault.collectAsState()
 
     val chatListState: LazyListState = rememberLazyListState()
 
@@ -111,7 +110,6 @@ internal fun ConversationChatListScreen(
         modifier = modifier,
         courseId = courseId,
         conversationId = conversationId,
-        clientId = clientId,
         conversationDataState = conversationDataState,
         conversationDataStatus = conversationDataStatus,
         query = query,
@@ -150,7 +148,6 @@ fun ConversationChatListScreen(
     query: String,
     conversationDataStatus: DataStatus,
     conversationDataState: DataState<Conversation>,
-    clientId: Long,
     onNavigateBack: (() -> Unit)?,
     onNavigateToSettings: () -> Unit,
     onUpdateQuery: (String) -> Unit,
@@ -193,7 +190,7 @@ fun ConversationChatListScreen(
                                 Text("placeholder", Modifier.placeholder(true))
                             }
                         ) {
-                            ConversationTitle(conversation = it, clientId = clientId)
+                            ConversationTitle(conversation = it)
                         }
                     }
                 },
@@ -241,7 +238,6 @@ fun ConversationChatListScreen(
 private fun ConversationTitle(
     modifier: Modifier = Modifier,
     conversation: Conversation,
-    clientId: Long
 ) {
     Row(
         modifier = modifier,
@@ -249,7 +245,6 @@ private fun ConversationTitle(
     ) {
         ConversationIcon(
             conversation = conversation,
-            clientId = clientId,
             showDialogOnOneToOneChatClick = true
         )
 

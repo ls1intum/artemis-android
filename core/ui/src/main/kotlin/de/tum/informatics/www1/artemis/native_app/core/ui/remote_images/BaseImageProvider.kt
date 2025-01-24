@@ -9,7 +9,6 @@ interface BaseImageProvider {
         context: Context,
         imageUrl: String,
         authorizationToken: String,
-        memoryCacheKey: String? = null
     ): ImageRequest
 
     fun createImageLoader(context: Context, authorizationToken: String): ImageLoader

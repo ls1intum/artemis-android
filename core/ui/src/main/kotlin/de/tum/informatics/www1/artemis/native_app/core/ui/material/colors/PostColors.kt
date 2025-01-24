@@ -27,6 +27,8 @@ object PostColors {
             @Composable get() = Color(0xFF28A745).copy(alpha = 0.2f)
         val pinned: Color
             @Composable get() = Color(0xFFFFA500).copy(alpha = 0.25f)
+        val saved: Color
+            @Composable get() = Color(0xFF007BFF).copy(alpha = 0.2f)
     }
 
     object EmojiChipColors {

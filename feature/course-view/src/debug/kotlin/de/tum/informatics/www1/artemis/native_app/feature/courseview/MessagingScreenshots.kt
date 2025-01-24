@@ -19,6 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseUiScreen
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.TAB_COMMUNICATION
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
@@ -112,6 +113,7 @@ fun `Metis - Conversation Overview`() {
                     examsExpanded = true,
                     exercisesExpanded = true,
                     lecturesExpanded = true,
+                    savedPostsExpanded = false
                 )
             )
 
@@ -141,6 +143,7 @@ fun `Metis - Conversation Overview`() {
                     modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
                     onNavigateToConversation = {},
+                    onNavigateToSavedPosts = {},
                     onRequestCreatePersonalConversation = {},
                     onRequestAddChannel = {},
                     onRequestBrowseChannel = {},
@@ -216,7 +219,6 @@ fun `Metis - Conversation Channel`() {
                         courseId = ScreenshotCourse.id!!,
                         conversationId = sharedConversation.id,
                         conversationDataState = DataState.Success(sharedConversation),
-                        clientId = 1L,
                         query = "",
                         onUpdateQuery = {},
                         onNavigateBack = {},
@@ -255,12 +257,14 @@ fun `Metis - Conversation Channel`() {
                                 onDeletePost = { CompletableDeferred() },
                                 onUndoDeletePost = {},
                                 onPinPost = { CompletableDeferred() },
+                                onSavePost = { CompletableDeferred() },
                                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                                 bottomItem = null,
                                 onClickViewPost = {},
                                 onRequestRetrySend = {},
-                                conversationName = "",
-                                onFileSelected = { _ ->}
+                                onFileSelected = { _ -> },
+                                conversationName = "Chat",
+                                emojiService = EmojiServiceStub,
                             )
                         }
                     )
@@ -292,6 +296,7 @@ private fun generateMessage(
             creationDate = time,
             updatedDate = null,
             resolved = false,
+            isSaved = false,
             courseWideContext = null,
             tags = emptyList(),
             answers = emptyList(),

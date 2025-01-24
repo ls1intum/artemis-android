@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -55,11 +56,14 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ConversationIcon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getIcon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getUiText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 
 internal const val TEST_TAG_CONVERSATION_LIST = "conversation list"
@@ -73,6 +77,7 @@ internal const val SECTION_EXERCISES_KEY = "exercises"
 internal const val SECTION_EXAMS_KEY = "exams"
 internal const val SECTION_LECTURES_KEY = "lectures"
 internal const val SECTION_DIRECT_MESSAGES_KEY = "direct-messages"
+internal const val SECTION_SAVED_POSTS_KEY = "saved-posts"
 
 internal const val KEY_SUFFIX_FAVORITES = "_f"
 internal const val KEY_SUFFIX_CHANNELS = "_c"
@@ -82,9 +87,16 @@ internal const val KEY_SUFFIX_LECTURES = "_l"
 internal const val KEY_SUFFIX_GROUPS = "_g"
 internal const val KEY_SUFFIX_PERSONAL = "_p"
 internal const val KEY_SUFFIX_HIDDEN = "_h"
+internal const val KEY_SUFFIX_SAVED_MESSAGES = "_s"
 
 internal fun tagForConversation(conversationId: Long, suffix: String) = "$conversationId$suffix"
 internal fun tagForConversationOptions(tagForConversation: String) = "${tagForConversation}_options"
+
+private sealed class ConversationSectionState(val isExpanded: Boolean) {
+    data class Conversations<T : Conversation>(val conversations: ConversationCollections.ConversationCollection<T>)
+        : ConversationSectionState(conversations.isExpanded)
+    class SavedPosts(isExpanded: Boolean) : ConversationSectionState(isExpanded)
+}
 
 @Composable
 internal fun ConversationList(
@@ -92,29 +104,72 @@ internal fun ConversationList(
     viewModel: ConversationOverviewViewModel,
     conversationCollections: ConversationCollections,
     onNavigateToConversation: (conversationId: Long) -> Unit,
+    onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
     trailingContent: LazyListScope.() -> Unit
 ) {
-    val clientId by viewModel.clientIdOrDefault.collectAsState()
+    val isSavedPostsExpanded by viewModel.isSavedPostsExpanded.collectAsState()
 
-    val listWithHeader: LazyListScope.(ConversationCollections.ConversationCollection<*>, String, String, Int, () -> Unit, @Composable () -> Unit) -> Unit =
-        { collection, key, suffix, textRes, onClick, icon ->
+    ConversationList(
+        modifier = modifier,
+        isSavedPostsSectionExpanded = isSavedPostsExpanded,
+        toggleFavoritesExpanded = viewModel::toggleFavoritesExpanded,
+        toggleGeneralsExpanded = viewModel::toggleGeneralsExpanded,
+        toggleExercisesExpanded = viewModel::toggleExercisesExpanded,
+        toggleLecturesExpanded = viewModel::toggleLecturesExpanded,
+        toggleExamsExpanded = viewModel::toggleExamsExpanded,
+        toggleGroupChatsExpanded = viewModel::toggleGroupChatsExpanded,
+        togglePersonalConversationsExpanded = viewModel::togglePersonalConversationsExpanded,
+        toggleHiddenExpanded = viewModel::toggleHiddenExpanded,
+        toggleSavedPostsExpanded = viewModel::toggleSavedPostsExpanded,
+        conversationCollections = conversationCollections,
+        onNavigateToConversation = onNavigateToConversation,
+        onNavigateToSavedPosts = onNavigateToSavedPosts,
+        onToggleMarkAsFavourite = onToggleMarkAsFavourite,
+        onToggleHidden = onToggleHidden,
+        onToggleMuted = onToggleMuted,
+        trailingContent = trailingContent
+    )
+}
+
+@Composable
+internal fun ConversationList(
+    modifier: Modifier,
+    isSavedPostsSectionExpanded: Boolean,
+    toggleFavoritesExpanded: () -> Unit,
+    toggleGeneralsExpanded: () -> Unit,
+    toggleExercisesExpanded: () -> Unit,
+    toggleLecturesExpanded: () -> Unit,
+    toggleExamsExpanded: () -> Unit,
+    toggleGroupChatsExpanded: () -> Unit,
+    togglePersonalConversationsExpanded: () -> Unit,
+    toggleHiddenExpanded: () -> Unit,
+    toggleSavedPostsExpanded: () -> Unit,
+    conversationCollections: ConversationCollections,
+    onNavigateToConversation: (conversationId: Long) -> Unit,
+    onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
+    onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
+    onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
+    onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
+    trailingContent: LazyListScope.() -> Unit
+) {
+    val listWithHeader: LazyListScope.(ConversationSectionState, String, String, Int, () -> Unit, @Composable () -> Unit) -> Unit =
+        { items, key, suffix, textRes, onClick, icon ->
             conversationSectionHeader(
                 key = key,
                 text = textRes,
-                isExpanded = collection.isExpanded,
+                isExpanded = items.isExpanded,
                 onClick = onClick,
                 icon = icon
             )
 
             conversationList(
                 keySuffix = suffix,
-                conversations = collection,
-                clientId = clientId,
-                showPrefix = collection.showPrefix,
+                section = items,
                 onNavigateToConversation = onNavigateToConversation,
+                onNavigateToSavedPosts = onNavigateToSavedPosts,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
                 onToggleHidden = onToggleHidden,
                 onToggleMuted = onToggleMuted
@@ -126,82 +181,90 @@ internal fun ConversationList(
     ) {
         if (conversationCollections.favorites.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.favorites,
+                ConversationSectionState.Conversations(conversationCollections.favorites),
                 SECTION_FAVORITES_KEY,
                 KEY_SUFFIX_FAVORITES,
                 R.string.conversation_overview_section_favorites,
-                viewModel::toggleFavoritesExpanded,
+                toggleFavoritesExpanded,
                 { Icon(imageVector = Icons.Default.Favorite, contentDescription = null) }
             )
         }
 
         listWithHeader(
-            conversationCollections.channels,
+            ConversationSectionState.Conversations(conversationCollections.channels),
             SECTION_CHANNELS_KEY,
             KEY_SUFFIX_CHANNELS,
             R.string.conversation_overview_section_general_channels,
-            viewModel::toggleGeneralsExpanded
+            toggleGeneralsExpanded
         ) { Icon(imageVector = Icons.Default.ChatBubble, contentDescription = null) }
 
         if (conversationCollections.exerciseChannels.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.exerciseChannels,
+                ConversationSectionState.Conversations(conversationCollections.exerciseChannels),
                 SECTION_EXERCISES_KEY,
                 KEY_SUFFIX_EXERCISES,
                 R.string.conversation_overview_section_exercise_channels,
-                viewModel::toggleExercisesExpanded
+                toggleExercisesExpanded
             ) { Icon(imageVector = Icons.AutoMirrored.Filled.List, contentDescription = null) }
         }
 
         if (conversationCollections.lectureChannels.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.lectureChannels,
+                ConversationSectionState.Conversations(conversationCollections.lectureChannels),
                 SECTION_LECTURES_KEY,
                 KEY_SUFFIX_LECTURES,
                 R.string.conversation_overview_section_lecture_channels,
-                viewModel::toggleLecturesExpanded
+                toggleLecturesExpanded
             ) { Icon(imageVector = Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = null) }
         }
 
         if (conversationCollections.examChannels.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.examChannels,
+                ConversationSectionState.Conversations(conversationCollections.examChannels),
                 SECTION_EXAMS_KEY,
                 KEY_SUFFIX_EXAMS,
                 R.string.conversation_overview_section_exam_channels,
-                viewModel::toggleExamsExpanded
+                toggleExamsExpanded
             ) { Icon(imageVector = Icons.Default.School, contentDescription = null) }
         }
 
         if (conversationCollections.groupChats.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.groupChats,
+                ConversationSectionState.Conversations(conversationCollections.groupChats),
                 SECTION_GROUPS_KEY,
                 KEY_SUFFIX_GROUPS,
                 R.string.conversation_overview_section_groups,
-                viewModel::toggleGroupChatsExpanded
+                toggleGroupChatsExpanded
             ) { Icon(imageVector = Icons.Default.Forum, contentDescription = null) }
         }
 
         if (conversationCollections.directChats.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.directChats,
+                ConversationSectionState.Conversations(conversationCollections.directChats),
                 SECTION_DIRECT_MESSAGES_KEY,
                 KEY_SUFFIX_PERSONAL,
                 R.string.conversation_overview_section_direct_messages,
-                viewModel::togglePersonalConversationsExpanded
+                togglePersonalConversationsExpanded
             ) { Icon(imageVector = Icons.AutoMirrored.Filled.Message, contentDescription = null) }
         }
 
         if (conversationCollections.hidden.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.hidden,
+                ConversationSectionState.Conversations(conversationCollections.hidden),
                 SECTION_HIDDEN_KEY,
                 KEY_SUFFIX_HIDDEN,
                 R.string.conversation_overview_section_hidden,
-                viewModel::toggleHiddenExpanded
+                toggleHiddenExpanded
             ) { Icon(imageVector = Icons.Default.NotInterested, contentDescription = null) }
         }
+
+        listWithHeader(
+            ConversationSectionState.SavedPosts(isExpanded = isSavedPostsSectionExpanded),
+            SECTION_SAVED_POSTS_KEY,
+            KEY_SUFFIX_SAVED_MESSAGES,
+            R.string.conversation_overview_section_saved_posts,
+            toggleSavedPostsExpanded
+        ) { Icon(imageVector = Icons.Default.Bookmark, contentDescription = null) }
 
         trailingContent()
     }
@@ -253,39 +316,122 @@ private fun LazyListScope.conversationSectionHeader(
     }
 }
 
-private fun <T : Conversation> LazyListScope.conversationList(
+private fun LazyListScope.conversationList(
     keySuffix: String,
-    conversations: ConversationCollections.ConversationCollection<T>,
-    clientId: Long,
-    showPrefix: Boolean,
+    section: ConversationSectionState,
     onNavigateToConversation: (conversationId: Long) -> Unit,
+    onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit
 ) {
-    if (!conversations.isExpanded) return
-    items(
-        conversations.conversations,
-        key = { tagForConversation(it.id, keySuffix) }
-    ) { conversation ->
-        val itemTag = tagForConversation(conversation.id, keySuffix)
-        ConversationListItem(
+    if (!section.isExpanded) return
+
+
+    when(section) {
+        is ConversationSectionState.SavedPosts -> {
+            items(
+                SavedPostStatus.entries
+            ) {
+                SavedPostsListItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    status = it,
+                    onClick = {
+                        onNavigateToSavedPosts(it)
+                    }
+                )
+            }
+        }
+
+        is ConversationSectionState.Conversations<*> -> {
+            val conversations = section.conversations
+            items(
+                items = conversations.conversations,
+                key = { tagForConversation(it.id, keySuffix) }
+            ) { conversation ->
+                val itemTag = tagForConversation(conversation.id, keySuffix)
+                ConversationListItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(itemTag),
+                    itemBaseTag = itemTag,
+                    conversation = conversation,
+                    showPrefix = conversations.showPrefix,
+                    onNavigateToConversation = { onNavigateToConversation(conversation.id) },
+                    onToggleMarkAsFavourite = {
+                        onToggleMarkAsFavourite(
+                            conversation.id,
+                            !conversation.isFavorite
+                        )
+                    },
+                    onToggleHidden = { onToggleHidden(conversation.id, !conversation.isHidden) },
+                    onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SavedPostsListItem(
+    modifier: Modifier = Modifier,
+    status: SavedPostStatus,
+    onClick: () -> Unit,
+) {
+    ListItemBase(
+        modifier = modifier,
+        name = status.getUiText(),
+        unreadMessagesCount = 0,
+        grayedOut = false,
+        onClick = onClick,
+        leadingContent = {
+            Icon(
+                imageVector = status.getIcon(),
+                contentDescription = null
+            )
+        },
+        otherTrailingContent = {}
+    )
+}
+
+@Composable
+private fun ListItemBase(
+    modifier: Modifier = Modifier,
+    name: String,
+    unreadMessagesCount: Long,
+    grayedOut: Boolean,
+    onClick: () -> Unit,
+    leadingContent: @Composable () -> Unit,
+    otherTrailingContent: @Composable () -> Unit
+) {
+    val headlineColor = LocalContentColor.current.copy(alpha = if (grayedOut) 0.6f else 1f)
+
+    Box(modifier = modifier) {
+        ListItem(
             modifier = Modifier
-                .fillMaxWidth()
-                .testTag(itemTag),
-            itemBaseTag = itemTag,
-            conversation = conversation,
-            clientId = clientId,
-            showPrefix = showPrefix,
-            onNavigateToConversation = { onNavigateToConversation(conversation.id) },
-            onToggleMarkAsFavourite = {
-                onToggleMarkAsFavourite(
-                    conversation.id,
-                    !conversation.isFavorite
+                .clickable(onClick = onClick)
+                .padding(start = 24.dp)
+                .height(48.dp),
+            leadingContent = leadingContent,
+            headlineContent = {
+                Text(
+                    text = name,
+                    maxLines = 1,
+                    color = headlineColor,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
+                    )
                 )
             },
-            onToggleHidden = { onToggleHidden(conversation.id, !conversation.isHidden) },
-            onToggleMuted = { onToggleMuted(conversation.id, !conversation.isMuted) }
+            trailingContent = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                ) {
+                    UnreadMessages(unreadMessagesCount = unreadMessagesCount)
+                    otherTrailingContent()
+                }
+            }
         )
     }
 }
@@ -295,9 +441,43 @@ private fun ConversationListItem(
     modifier: Modifier = Modifier,
     itemBaseTag: String,
     conversation: Conversation,
-    clientId: Long,
     showPrefix: Boolean,
     onNavigateToConversation: () -> Unit,
+    onToggleMarkAsFavourite: () -> Unit,
+    onToggleHidden: () -> Unit,
+    onToggleMuted: () -> Unit
+) {
+    val unreadMessagesCount = conversation.unreadMessagesCount ?: 0
+    val displayName = getConversationTitle(conversation, showPrefix)
+
+    ListItemBase(
+        modifier = modifier,
+        name = displayName,
+        unreadMessagesCount = unreadMessagesCount,
+        grayedOut = conversation.isMuted,
+        onClick = onNavigateToConversation,
+        leadingContent = {
+            ConversationIcon(
+                conversation = conversation,
+                hasUnreadMessages = unreadMessagesCount > 0
+            )
+        },
+        otherTrailingContent = {
+            ConversationOptions(
+                modifier = Modifier.testTag(tagForConversationOptions(itemBaseTag)),
+                conversation = conversation,
+                onToggleMarkAsFavourite = onToggleMarkAsFavourite,
+                onToggleHidden = onToggleHidden,
+                onToggleMuted = onToggleMuted
+            )
+        }
+    )
+}
+
+@Composable
+private fun ConversationOptions(
+    modifier: Modifier,
+    conversation: Conversation,
     onToggleMarkAsFavourite: () -> Unit,
     onToggleHidden: () -> Unit,
     onToggleMuted: () -> Unit
@@ -305,12 +485,35 @@ private fun ConversationListItem(
     var isContextDialogShown by remember { mutableStateOf(false) }
     val onDismissRequest = { isContextDialogShown = false }
 
-    val unreadMessagesCount = conversation.unreadMessagesCount ?: 0
+    Box {
+        IconButton(
+            modifier = modifier,
+            onClick = { isContextDialogShown = true }
+        ) {
+            Icon(
+                imageVector = Icons.Default.MoreHoriz,
+                contentDescription = stringResource(R.string.conversation_overview_conversation_item_show_actions)
+            )
+        }
 
-    val headlineColor =
-        LocalContentColor.current.copy(alpha = if (conversation.isMuted) 0.6f else 1f)
+        ConversationListItemDropdownMenu(
+            modifier = Modifier.align(Alignment.TopEnd),
+            isContextDialogShown = isContextDialogShown,
+            onDismissRequest = onDismissRequest,
+            conversation = conversation,
+            onToggleMarkAsFavourite = onToggleMarkAsFavourite,
+            onToggleHidden = onToggleHidden,
+            onToggleMuted = onToggleMuted
+        )
+    }
+}
 
-    val displayName = when (conversation) {
+@Composable
+private fun getConversationTitle(
+    conversation: Conversation,
+    showPrefix: Boolean = true
+): String {
+    return when (conversation) {
         is ChannelChat -> {
             val channelName = if (conversation.isArchived) {
                 stringResource(
@@ -336,56 +539,6 @@ private fun ConversationListItem(
         }
 
         else -> conversation.humanReadableName
-    }
-
-    Box(modifier = modifier) {
-        ListItem(
-            modifier = Modifier
-                .clickable(onClick = onNavigateToConversation)
-                .padding(start = 8.dp)
-                .height(48.dp),
-            leadingContent = {
-                ConversationIcon(
-                    conversation = conversation,
-                    clientId = clientId,
-                    hasUnreadMessages = unreadMessagesCount > 0
-                )
-            },
-            headlineContent = {
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(
-                        text = displayName,
-                        maxLines = 1,
-                        color = headlineColor,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = if (unreadMessagesCount > 0) FontWeight.Bold else FontWeight.Normal
-                        )
-                    )
-                }
-            },
-            trailingContent = {
-                UnreadMessages(unreadMessagesCount = unreadMessagesCount)
-            }
-        )
-
-        Box(modifier = Modifier.align(Alignment.CenterEnd)) {
-            IconButton(
-                modifier = Modifier.testTag(tagForConversationOptions(itemBaseTag)),
-                onClick = { isContextDialogShown = true }
-            ) {
-                Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null)
-            }
-
-            ConversationListItemDropdownMenu(
-                modifier = Modifier.align(Alignment.TopEnd),
-                isContextDialogShown = isContextDialogShown,
-                onDismissRequest = onDismissRequest,
-                conversation = conversation,
-                onToggleMarkAsFavourite = onToggleMarkAsFavourite,
-                onToggleHidden = onToggleHidden,
-                onToggleMuted = onToggleMuted
-            )
-        }
     }
 }
 
@@ -475,7 +628,6 @@ private fun UnreadMessages(modifier: Modifier = Modifier, unreadMessagesCount: L
     if (unreadMessagesCount > 0) {
         Box(
             modifier = modifier
-                .padding(end = 32.dp)
                 .size(24.dp)
                 .aspectRatio(1f)
                 .background(

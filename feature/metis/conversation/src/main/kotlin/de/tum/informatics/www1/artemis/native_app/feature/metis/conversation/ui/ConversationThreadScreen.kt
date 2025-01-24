@@ -53,7 +53,6 @@ internal fun ConversationThreadScreen(
 
     val conversation by viewModel.conversation.collectAsState()
     val conversationName by rememberDerivedConversationName(conversation)
-    val clientId by viewModel.clientIdOrDefault.collectAsState()
 
     val dataStatus by viewModel.conversationDataStatus.collectAsState()
 
@@ -64,7 +63,6 @@ internal fun ConversationThreadScreen(
                 title = {
                     ThreadTitle(
                         conversation = conversation,
-                        clientId = clientId,
                         conversationName = conversationName
                     )
                 },
@@ -106,7 +104,6 @@ internal fun ConversationThreadScreen(
 @Composable
 private fun ThreadTitle(
     conversation: DataState<Conversation>,
-    clientId: Long,
     conversationName: String
 ) {
     Column {
@@ -123,7 +120,6 @@ private fun ThreadTitle(
                 ConversationIcon(
                     modifier = Modifier.size(16.dp),
                     conversation = (conversation as DataState.Success).data,
-                    clientId = clientId,
                 )
             }
 

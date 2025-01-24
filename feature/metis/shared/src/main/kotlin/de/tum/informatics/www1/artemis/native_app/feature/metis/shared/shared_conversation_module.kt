@@ -7,11 +7,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val sharedConversationModule = module {
-    single<ConversationService> {
-        ConversationServiceImpl(
-            get()
-        )
-    }
+    single<ConversationService> { ConversationServiceImpl(get()) }
 
     viewModel { params ->
         UserProfileDialogViewModel(params[0], params[1], get(), get(), get(), get(), get())

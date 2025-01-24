@@ -42,6 +42,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants.isImage
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.SavedPostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
@@ -59,8 +60,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.Reaction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
@@ -112,6 +115,7 @@ internal open class ConversationViewModel(
     private val websocketProvider: WebsocketProvider,
     private val metisModificationService: MetisModificationService,
     private val metisStorageService: MetisStorageService,
+    private val savedPostService: SavedPostService,
     protected val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val networkStatusProvider: NetworkStatusProvider,
@@ -130,6 +134,8 @@ internal open class ConversationViewModel(
     websocketProvider,
     coroutineContext
 ), InitialReplyTextProvider, ReplyAutoCompleteHintProvider {
+
+    private var currentlySavingPost = false
 
     private val onRequestSoftReload = onReloadRequestAndWebsocketReconnect
 
@@ -462,6 +468,34 @@ internal open class ConversationViewModel(
         }
     }
 
+    fun toggleSavePost(post: IBasePost): Deferred<MetisModificationFailure?> {
+        // TODO: this is a quick fix to prevent multiple save requests.
+        //      https://github.com/ls1intum/artemis-android/issues/307
+        if (currentlySavingPost) return CompletableDeferred(null)
+        currentlySavingPost = true
+
+        return viewModelScope.async(coroutineContext) {
+            val response = if (post.isSaved == true) {
+                savedPostService.deleteSavedPost(
+                    post = post,
+                    authToken = accountService.authToken.first(),
+                    serverUrl = serverConfigurationService.serverUrl.first()
+                )
+            } else {
+                savedPostService.savePost(
+                    post = post,
+                    authToken = accountService.authToken.first(),
+                    serverUrl = serverConfigurationService.serverUrl.first()
+                )
+            }
+
+            currentlySavingPost = false
+            response.bind { requestReload() }   // Currently changing save status does not trigger a websocket update
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
+
+        }
+    }
+
     fun deletePost(post: IBasePost): Deferred<MetisModificationFailure?> {
         isMarkedAsDeleteList.add(post)
         deleteJobs[post]?.cancel()
@@ -716,6 +750,8 @@ internal open class ConversationViewModel(
             is IAnswerPost -> MetisModificationService.AffectedPost.Answer(sPostId)
             is StandalonePost -> MetisModificationService.AffectedPost.Standalone(sPostId)
             is IStandalonePost -> MetisModificationService.AffectedPost.Standalone(sPostId)
+            is SavedPost -> null
+            is ISavedPost -> null
         }
     }
 
