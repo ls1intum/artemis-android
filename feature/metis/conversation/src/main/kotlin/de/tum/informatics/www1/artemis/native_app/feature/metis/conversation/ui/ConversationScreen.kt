@@ -80,8 +80,6 @@ fun ConversationScreen(
                 ConversationChatListScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
-                    courseId = courseId,
-                    conversationId = conversationId,
                     onNavigateBack = onCloseConversation,
                     onNavigateToSettings = onNavigateToSettings,
                     onClickViewPost = onOpenThread

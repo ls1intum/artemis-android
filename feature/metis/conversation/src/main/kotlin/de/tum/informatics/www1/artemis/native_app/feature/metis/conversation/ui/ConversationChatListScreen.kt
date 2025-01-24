@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
@@ -50,6 +49,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
@@ -68,7 +68,7 @@ import io.github.fornewid.placeholder.material3.placeholder
 internal fun ConversationChatListScreen(
     modifier: Modifier,
     viewModel: ConversationViewModel,
-    onNavigateBack: (() -> Unit)?,
+    onNavigateBack: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onClickViewPost: (StandalonePostId) -> Unit
 ) {
@@ -89,7 +89,7 @@ internal fun ConversationChatListScreen(
     courseId: Long,
     conversationId: Long,
     viewModel: ConversationViewModel,
-    onNavigateBack: (() -> Unit)?,
+    onNavigateBack: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onClickViewPost: (StandalonePostId) -> Unit
 ) {
@@ -148,7 +148,7 @@ fun ConversationChatListScreen(
     query: String,
     conversationDataStatus: DataStatus,
     conversationDataState: DataState<Conversation>,
-    onNavigateBack: (() -> Unit)?,
+    onNavigateBack: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onUpdateQuery: (String) -> Unit,
     onRequestSoftReload: () -> Unit,
@@ -195,19 +195,13 @@ fun ConversationChatListScreen(
                     }
                 },
                 navigationIcon = {
-                    onNavigateBack?.let {
-                        IconButton(
-                            onClick = {
-                                if (isSearchBarOpen) {
-                                    closeSearch()
-                                } else {
-                                    onNavigateBack()
-                                }
-                            }
-                        ) {
-                            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                    NavigationBackButton(onNavigateBack = {
+                        if (isSearchBarOpen) {
+                            closeSearch()
+                        } else {
+                            onNavigateBack()
                         }
-                    }
+                    })
                 },
                 actions = {
                     if (!isSearchBarOpen) {
