@@ -2,6 +2,10 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
@@ -17,18 +21,28 @@ import org.koin.core.parameter.parametersOf
 fun ConversationFacadeUi(
     modifier: Modifier,
     courseId: Long,
+    scaffold: @Composable (content: @Composable () -> Unit) -> Unit,
     initialConfiguration: ConversationConfiguration = NothingOpened
 ) {
-    CodeOfConductFacadeUi(
-        modifier = modifier,
-        courseId = courseId,
-        codeOfConductAcceptedContent = {
-            SinglePageConversationBody(
-                modifier = Modifier.fillMaxSize(),
-                viewModel = koinViewModel { parametersOf(courseId) },
+    var showCodeOfConduct by remember { mutableStateOf(true) }
+
+    if (showCodeOfConduct) {
+        scaffold {
+            CodeOfConductFacadeUi(
+                modifier = modifier,
                 courseId = courseId,
-                initialConfiguration = initialConfiguration
+                onCodeOfConductAccepted = {
+                    showCodeOfConduct = false
+                }
             )
         }
-    )
+    } else {
+        SinglePageConversationBody(
+            modifier = Modifier.fillMaxSize(),
+            viewModel = koinViewModel { parametersOf(courseId) },
+            courseId = courseId,
+            scaffold = scaffold,
+            initialConfiguration = initialConfiguration
+        )
+    }
 }

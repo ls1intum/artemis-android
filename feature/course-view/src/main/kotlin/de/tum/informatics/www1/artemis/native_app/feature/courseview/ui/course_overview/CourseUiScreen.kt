@@ -1,7 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -14,18 +12,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -36,7 +38,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
-import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.GroupedByWeek
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
@@ -58,23 +59,26 @@ import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-internal const val TAB_EXERCISES = 0
-internal const val TAB_LECTURES = 1
-internal const val TAB_COMMUNICATION = 2
-
-internal const val DEFAULT_CONVERSATION_ID = -1L
-internal const val DEFAULT_POST_ID = -1L
-internal const val DEFAULT_USERNAME = ""
-internal const val DEFAULT_USER_ID = -1L
 
 @Serializable
 private data class CourseUiScreen(
     val courseId: Long,
-    val conversationId: Long = DEFAULT_CONVERSATION_ID,
-    val postId: Long = DEFAULT_POST_ID,
-    val username: String = DEFAULT_USERNAME,
-    val userId: Long = DEFAULT_USER_ID
+    val conversationId: Long? = null,
+    val postId: Long? = null,
+    val username: String? = null,
+    val userId: Long? = null
 )
+
+@Serializable
+internal sealed class CourseTab {
+    @Serializable
+    data object Exercises : CourseTab()
+    @Serializable
+    data object Lectures : CourseTab()
+    @Serializable
+    data object Communication : CourseTab()
+}
+
 
 fun NavController.navigateToCourse(courseId: Long, builder: NavOptionsBuilder.() -> Unit) {
     navigate(CourseUiScreen(courseId), builder)
@@ -140,10 +144,10 @@ fun CourseUiScreen(
     modifier: Modifier,
     viewModel: CourseViewModel,
     courseId: Long,
-    conversationId: Long,
-    postId: Long,
-    username: String,
-    userId: Long,
+    conversationId: Long? = null,
+    postId: Long? = null,
+    username: String? = null,
+    userId: Long? = null,
     onNavigateToExercise: (exerciseId: Long) -> Unit,
     onNavigateToTextExerciseParticipation: (exerciseId: Long, participationId: Long) -> Unit,
     onNavigateToExerciseResultView: (exerciseId: Long) -> Unit,
@@ -189,10 +193,10 @@ fun CourseUiScreen(
 internal fun CourseUiScreen(
     modifier: Modifier,
     courseId: Long,
-    conversationId: Long,
-    postId: Long,
-    username: String,
-    userId: Long,
+    conversationId: Long? = null,
+    postId: Long? = null,
+    username: String? = null,
+    userId: Long? = null,
     courseDataState: DataState<Course>,
     weeklyExercisesDataState: DataState<List<GroupedByWeek<Exercise>>>,
     weeklyLecturesDataState: DataState<List<GroupedByWeek<Lecture>>>,
@@ -206,69 +210,96 @@ internal fun CourseUiScreen(
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit
 ) {
-    var selectedTabIndex by rememberSaveable(conversationId) {
-        val initialTab = when {
-            conversationId != DEFAULT_CONVERSATION_ID -> TAB_COMMUNICATION
-            username != DEFAULT_USERNAME -> TAB_COMMUNICATION
-            userId != DEFAULT_USER_ID -> TAB_COMMUNICATION
-            else -> TAB_EXERCISES
-        }
-
-        mutableIntStateOf(initialTab)
-    }
-
     ReportVisibleMetisContext(VisibleCourse(MetisContext.Course(courseId)))
 
-    CourseUiScreen(
-        modifier = modifier,
-        courseDataState = courseDataState,
-        selectedTabIndex = selectedTabIndex,
-        updateSelectedTabIndex = { selectedTabIndex = it },
-        exerciseTabContent = {
-            EmptyDataStateUi(dataState = weeklyExercisesDataState) { weeklyExercises ->
-                ExerciseListUi(
-                    modifier = Modifier.fillMaxSize(),
-                    weeklyExercises = weeklyExercises,
-                    onClickExercise = onNavigateToExercise,
-                    actions = BoundExerciseActions(
-                        onClickStartTextExercise = onClickStartTextExercise,
-                        onClickOpenQuiz = { exerciseId ->
-                            onParticipateInQuiz(exerciseId, false)
-                        },
-                        onClickPracticeQuiz = { exerciseId ->
-                            onParticipateInQuiz(exerciseId, true)
-                        },
-                        onClickStartQuiz = { exerciseId ->
-                            onParticipateInQuiz(exerciseId, false)
-                        },
-                        onClickOpenTextExercise = onNavigateToTextExerciseParticipation,
-                        onClickViewResult = onNavigateToExerciseResultView,
-                        onClickViewQuizResults = { exerciseId ->
-                            onClickViewQuizResults(
-                                courseId,
-                                exerciseId
-                            )
-                        }
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    val scaffold = @Composable { content: @Composable () -> Unit ->
+        CourseUiScreen(
+            modifier = modifier,
+            courseDataState = courseDataState,
+            isCourseTabSelected = { tab ->
+                val currentDestination = navBackStackEntry?.destination
+                currentDestination?.hierarchy?.any { it.hasRoute(tab::class) } == true
+            },
+            updateSelectedCourseTab = {
+                navController.navigate(it) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            onNavigateBack = onNavigateBack,
+            onReloadCourse = onReloadCourse,
+            content = content
+        )
+    }
+
+    val initialTab = when {
+        conversationId != null || postId != null -> CourseTab.Communication
+        username != null || userId != null -> CourseTab.Communication
+        else -> CourseTab.Exercises
+    }
+
+    NavHost(
+        navController = navController,
+        startDestination = initialTab::class,
+    ) {
+        composable<CourseTab.Exercises> {
+            scaffold {
+                EmptyDataStateUi(dataState = weeklyExercisesDataState) { weeklyExercises ->
+                    ExerciseListUi(
+                        modifier = Modifier.fillMaxSize(),
+                        weeklyExercises = weeklyExercises,
+                        onClickExercise = onNavigateToExercise,
+                        actions = BoundExerciseActions(
+                            onClickStartTextExercise = onClickStartTextExercise,
+                            onClickOpenQuiz = { exerciseId ->
+                                onParticipateInQuiz(exerciseId, false)
+                            },
+                            onClickPracticeQuiz = { exerciseId ->
+                                onParticipateInQuiz(exerciseId, true)
+                            },
+                            onClickStartQuiz = { exerciseId ->
+                                onParticipateInQuiz(exerciseId, false)
+                            },
+                            onClickOpenTextExercise = onNavigateToTextExerciseParticipation,
+                            onClickViewResult = onNavigateToExerciseResultView,
+                            onClickViewQuizResults = { exerciseId ->
+                                onClickViewQuizResults(
+                                    courseId,
+                                    exerciseId
+                                )
+                            }
+                        )
                     )
-                )
+                }
             }
-        },
-        lectureTabContent = {
-            EmptyDataStateUi(dataState = weeklyLecturesDataState) { weeklyLectures ->
-                LectureListUi(
-                    modifier = Modifier.fillMaxSize(),
-                    lectures = weeklyLectures,
-                    onClickLecture = { onNavigateToLecture(it.id ?: 0L) }
-                )
+        }
+
+        composable<CourseTab.Lectures> {
+            scaffold {
+                EmptyDataStateUi(dataState = weeklyLecturesDataState) { weeklyLectures ->
+                    LectureListUi(
+                        modifier = Modifier.fillMaxSize(),
+                        lectures = weeklyLectures,
+                        onClickLecture = { onNavigateToLecture(it.id ?: 0L) }
+                    )
+                }
             }
-        },
-        communicationTabContent = { course ->
+        }
+
+        composable<CourseTab.Communication> {
+
             val metisModifier = Modifier.fillMaxSize()
 
-            if (course.courseInformationSharingConfiguration.supportsMessaging) {
+            if (true) {
                 val initialConfiguration = remember(conversationId, postId) {
                     when {
-                        conversationId != DEFAULT_CONVERSATION_ID && postId != DEFAULT_POST_ID -> OpenedConversation(
+                        conversationId != null && postId != null -> OpenedConversation(
                             _prevConfiguration = IgnoreCustomBackHandling,
                             conversationId = conversationId,
                             openedThread = OpenedThread(
@@ -276,18 +307,18 @@ internal fun CourseUiScreen(
                             )
                         )
 
-                        conversationId != DEFAULT_CONVERSATION_ID -> OpenedConversation(
+                        conversationId != null -> OpenedConversation(
                             _prevConfiguration = IgnoreCustomBackHandling,
                             conversationId = conversationId,
                             openedThread = null
                         )
 
-                        username != DEFAULT_USERNAME -> NavigateToUserConversation(
+                        username != null -> NavigateToUserConversation(
                             _prevConfiguration = IgnoreCustomBackHandling,
                             userIdentifier = UserIdentifier.Username(username)
                         )
 
-                        userId != DEFAULT_USER_ID -> NavigateToUserConversation(
+                        userId != null -> NavigateToUserConversation(
                             _prevConfiguration = IgnoreCustomBackHandling,
                             userIdentifier = UserIdentifier.UserId(userId)
                         )
@@ -299,6 +330,7 @@ internal fun CourseUiScreen(
                 ConversationFacadeUi(
                     modifier = metisModifier,
                     courseId = courseId,
+                    scaffold = scaffold,
                     initialConfiguration = initialConfiguration
                 )
             } else {
@@ -313,23 +345,20 @@ internal fun CourseUiScreen(
                     )
                 }
             }
-        },
-        onNavigateBack = onNavigateBack,
-        onReloadCourse = onReloadCourse
-    )
+        }
+
+    }
 }
 
 @Composable
 internal fun CourseUiScreen(
     modifier: Modifier,
     courseDataState: DataState<Course>,
-    selectedTabIndex: Int,
-    updateSelectedTabIndex: (Int) -> Unit,
-    exerciseTabContent: @Composable () -> Unit,
-    lectureTabContent: @Composable () -> Unit,
-    communicationTabContent: @Composable (Course) -> Unit,
+    isCourseTabSelected: (CourseTab) -> Boolean,
+    updateSelectedCourseTab: (CourseTab) -> Unit,
     onNavigateBack: () -> Unit,
-    onReloadCourse: () -> Unit
+    onReloadCourse: () -> Unit,
+    content: @Composable () -> Unit
 ) {
     Scaffold(
         modifier = modifier,
@@ -341,8 +370,8 @@ internal fun CourseUiScreen(
         },
         bottomBar = {
             BottomNavigationBar(
-                selectedTabIndex = selectedTabIndex,
-                changeTab = updateSelectedTabIndex
+                isSelected = isCourseTabSelected,
+                onUpdateSelectedTab = updateSelectedCourseTab
             )
         }
     ) { padding ->
@@ -367,27 +396,7 @@ internal fun CourseUiScreen(
             // TODO: remove course top bar when in chat (similar to exercise/lecture details)
 
 
-            AnimatedContent(
-                targetState = selectedTabIndex,
-                transitionSpec = {
-                    if (targetState > initialState) {
-                        DefaultTransition.navigateForward
-                    } else {
-                        DefaultTransition.navigateBack
-                    }.using(
-                        SizeTransform(clip = false)
-                    )
-                },
-                label = "Switch Course Tab"
-            ) { tabIndex ->
-                when (tabIndex) {
-                    TAB_EXERCISES -> exerciseTabContent()
-
-                    TAB_LECTURES -> lectureTabContent()
-
-                    TAB_COMMUNICATION -> communicationTabContent(course)
-                }
-            }
+            content()
         }
     }
 }

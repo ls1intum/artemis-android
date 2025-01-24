@@ -3,8 +3,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.ListAlt
-import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Icon
@@ -25,61 +25,55 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import io.github.fornewid.placeholder.material3.placeholder
 
 
-data class BottomNavigationItem(
-    val label: String,
+internal data class BottomNavigationItem(
+    val labelStringId: Int,
     val icon: ImageVector = Icons.Filled.Home,
-//    val route: Serializable,
+    val route: CourseTab,
 ) {
     companion object {
-        @Composable
-        fun bottomNavigationItems(): List<BottomNavigationItem> {
-            return listOf(
-                BottomNavigationItem(
-                    label = stringResource(id = R.string.course_ui_tab_exercises),
-                    icon = Icons.AutoMirrored.Filled.ListAlt,
-                ),
-                BottomNavigationItem(
-                    label = stringResource(id = R.string.course_ui_tab_lectures),
-                    icon = Icons.Default.School,
-                ),
-                BottomNavigationItem(
-                    label = stringResource(id = R.string.course_ui_tab_communication),
-                    icon = Icons.Default.Chat,
-                ),
-            )
-        }
+        val topLevelRoutes: List<BottomNavigationItem> = listOf(
+            BottomNavigationItem(
+                labelStringId =R.string.course_ui_tab_exercises,
+                icon = Icons.AutoMirrored.Filled.ListAlt,
+                route = CourseTab.Exercises
+            ),
+            BottomNavigationItem(
+                labelStringId = R.string.course_ui_tab_lectures,
+                icon = Icons.Default.School,
+                route = CourseTab.Lectures
+            ),
+            BottomNavigationItem(
+                labelStringId = R.string.course_ui_tab_communication,
+                icon = Icons.AutoMirrored.Filled.Chat,
+                route = CourseTab.Communication
+            ),
+        )
     }
 }
 
 
 @Composable
-fun BottomNavigationBar(
-    selectedTabIndex: Int,
-    changeTab: (Int) -> Unit
+internal fun BottomNavigationBar(
+    isSelected: (CourseTab) -> Boolean,
+    onUpdateSelectedTab: (CourseTab) -> Unit
 ) {
     NavigationBar {
-        BottomNavigationItem.bottomNavigationItems().forEachIndexed {index,navigationItem ->
+        BottomNavigationItem.topLevelRoutes.forEach { navigationItem ->
 
+            val labelText = stringResource(id = navigationItem.labelStringId)
             NavigationBarItem(
-                selected = index == selectedTabIndex,
+                selected = isSelected(navigationItem.route),
                 label = {
-                    Text(navigationItem.label)
+                    Text(labelText)
                 },
                 icon = {
                     Icon(
                         navigationItem.icon,
-                        contentDescription = navigationItem.label
+                        contentDescription = labelText
                     )
                 },
                 onClick = {
-                    changeTab(index)
-//                    navController.navigate(navigationItem.route) {
-//                        popUpTo(navController.graph.findStartDestination().id) {
-//                            saveState = true
-//                        }
-//                        launchSingleTop = true
-//                        restoreState = true
-//                    }
+                    onUpdateSelectedTab(navigationItem.route)
                 }
             )
         }
