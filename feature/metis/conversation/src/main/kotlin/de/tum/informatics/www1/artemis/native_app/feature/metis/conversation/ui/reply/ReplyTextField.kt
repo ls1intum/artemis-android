@@ -337,40 +337,12 @@ private fun CreateReplyUi(
                         )
                     },
                     sendButton = {
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .then(
-                                    if (currentTextFieldValue.text.isBlank()) {
-                                        Modifier.background(
-                                            MaterialTheme.colorScheme.primary.copy(
-                                                alpha = 0.2f
-                                            )
-                                        )
-                                    } else {
-                                        Modifier.background(MaterialTheme.colorScheme.primary)
-                                    }
-                                )
-                        ) {
-                            IconButton(
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .align(Alignment.Center)
-                                    .testTag(TEST_TAG_REPLY_SEND_BUTTON),
-                                onClick = onReply,
-                                enabled = currentTextFieldValue.text.isNotBlank()
-                            ) {
-                                Icon(
-                                    imageVector = when (replyMode) {
-                                        is ReplyMode.EditMessage -> Icons.Default.Edit
-                                        is ReplyMode.NewMessage -> Icons.AutoMirrored.Filled.Send
-                                    },
-                                    tint = Color.White,
-                                    contentDescription = null
-                                )
-                            }
-                        }
+                        SendButton(
+                            modifier = Modifier,
+                            currentTextFieldValue = currentTextFieldValue,
+                            replyMode = replyMode,
+                            onReply = onReply
+                        )
                     },
                     topRightButton = {
                         if (replyMode is ReplyMode.EditMessage) {
@@ -437,6 +409,20 @@ private fun FormattingOptions(
     var isListDropDownExpanded by remember { mutableStateOf(false) }
     var isCodeDropdownExpanded by remember { mutableStateOf(false) }
 
+    val applyMarkdownStyleFormattingButton = @Composable { markdownStyle: MarkdownStyle, drawableId: Int ->
+        FormattingButton(
+            modifier = Modifier,
+            applyMarkdown = {
+                applyMarkdownStyle(
+                    style = markdownStyle,
+                    currentTextFieldValue = currentTextFieldValue,
+                    onTextChanged = onTextChanged
+                )
+            },
+            drawableId = drawableId
+        )
+    }
+
     Row(
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
@@ -449,57 +435,10 @@ private fun FormattingOptions(
     ) {
         Spacer(modifier = Modifier.width(8.dp))
 
-        // Bold Button
-        FormattingButton(
-            modifier = Modifier,
-            applyMarkdown = {
-                applyMarkdownStyle(
-                    style = MarkdownStyle.Bold,
-                    currentTextFieldValue = currentTextFieldValue,
-                    onTextChanged = onTextChanged
-                )
-            },
-            drawableId = R.drawable.bold
-        )
-
-        // Italic Button
-        FormattingButton(
-            modifier = Modifier,
-            applyMarkdown = {
-                applyMarkdownStyle(
-                    style = MarkdownStyle.Italic,
-                    currentTextFieldValue = currentTextFieldValue,
-                    onTextChanged = onTextChanged
-                )
-            },
-            drawableId = R.drawable.italic
-        )
-
-        // Underline Button
-        FormattingButton(
-            modifier = Modifier,
-            applyMarkdown = {
-                applyMarkdownStyle(
-                    style = MarkdownStyle.Underline,
-                    currentTextFieldValue = currentTextFieldValue,
-                    onTextChanged = onTextChanged
-                )
-            },
-            drawableId = R.drawable.underline
-        )
-
-        // Strikethrough Button
-        FormattingButton(
-            modifier = Modifier,
-            applyMarkdown = {
-                applyMarkdownStyle(
-                    style = MarkdownStyle.Strikethrough,
-                    currentTextFieldValue = currentTextFieldValue,
-                    onTextChanged = onTextChanged
-                )
-            },
-            drawableId = R.drawable.strikethrough
-        )
+        applyMarkdownStyleFormattingButton(MarkdownStyle.Bold, R.drawable.bold)
+        applyMarkdownStyleFormattingButton(MarkdownStyle.Italic, R.drawable.italic)
+        applyMarkdownStyleFormattingButton(MarkdownStyle.Underline, R.drawable.underline)
+        applyMarkdownStyleFormattingButton(MarkdownStyle.Strikethrough, R.drawable.strikethrough)
 
         // Code Button
         Box(modifier = Modifier.align(Alignment.Top)) {
@@ -511,66 +450,21 @@ private fun FormattingOptions(
                 drawableId = R.drawable.code
             )
 
-            DropdownMenu(
-                expanded = isCodeDropdownExpanded,
+            CodeFormattingDropdownMenu(
+                isCodeDropdownExpanded = isCodeDropdownExpanded,
                 onDismissRequest = { isCodeDropdownExpanded = false },
-                properties = PopupProperties(
-                    focusable = false
-                )
-            ) {
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.code),
-                            contentDescription = null
-                        )
-                    },
-                    text = { Text(text = stringResource(R.string.reply_format_inline_code)) },
-                    onClick = {
-                        isCodeDropdownExpanded = false
-                        applyMarkdownStyle(
-                            style = MarkdownStyle.InlineCode,
-                            currentTextFieldValue = currentTextFieldValue,
-                            onTextChanged = onTextChanged
-                        )
-                    }
-                )
-
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Text(
-                            modifier = Modifier.padding(start = 4.dp),
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                            text = "{ }"
-                        )
-                    },
-                    text = { Text(stringResource(R.string.reply_format_code_block)) },
-                    onClick = {
-                        isCodeDropdownExpanded = false
-                        applyMarkdownStyle(
-                            style = MarkdownStyle.CodeBlock,
-                            currentTextFieldValue = currentTextFieldValue,
-                            onTextChanged = onTextChanged
-                        )
-                    }
-                )
-            }
+                applyCodeMarkdown = { style ->
+                    applyMarkdownStyle(
+                        style = style,
+                        currentTextFieldValue = currentTextFieldValue,
+                        onTextChanged = onTextChanged
+                    )
+                }
+            )
         }
 
         // Blockquote Button
-        FormattingButton(
-            modifier = Modifier,
-            applyMarkdown = {
-                applyMarkdownStyle(
-                    style = MarkdownStyle.Blockquote,
-                    currentTextFieldValue = currentTextFieldValue,
-                    onTextChanged = onTextChanged
-                )
-            },
-            drawableId = R.drawable.quote
-        )
+        applyMarkdownStyleFormattingButton(MarkdownStyle.Blockquote, R.drawable.quote)
 
         Box(modifier = Modifier.align(Alignment.Top)) {
             FormattingButton(
@@ -581,53 +475,63 @@ private fun FormattingOptions(
                 drawableId = R.drawable.list
             )
 
-            DropdownMenu(
-                expanded = isListDropDownExpanded,
+            ListFormattingDropdownMenu(
+                isListDropDownExpanded = isListDropDownExpanded,
                 onDismissRequest = { isListDropDownExpanded = false },
-                properties = PopupProperties(
-                    focusable = false
-                )
-            ) {
-                // Unordered List item
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.list),
-                            contentDescription = null
-                        )
-                    },
-                    text = { Text(text = stringResource(R.string.reply_format_unordered)) },
-                    onClick = {
-                        isListDropDownExpanded = false
-                        applyMarkdownStyle(
-                            style = MarkdownStyle.UnorderedList,
-                            currentTextFieldValue = currentTextFieldValue,
-                            onTextChanged = onTextChanged
-                        )
-                    }
-                )
-                // Ordered List item
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.FormatListNumbered,
-                            contentDescription = null
-                        )
-                    },
-                    text = { Text(stringResource(R.string.reply_format_ordered)) },
-                    onClick = {
-                        isListDropDownExpanded = false
-                        applyMarkdownStyle(
-                            style = MarkdownStyle.OrderedList,
-                            currentTextFieldValue = currentTextFieldValue,
-                            onTextChanged = onTextChanged
-                        )
-                    }
-                )
-            }
+                applyListMarkdown = { style ->
+                    applyMarkdownStyle(
+                        style = style,
+                        currentTextFieldValue = currentTextFieldValue,
+                        onTextChanged = onTextChanged
+                    )
+                }
+            )
         }
 
         Spacer(modifier = Modifier.width(8.dp))
+    }
+}
+
+@Composable
+private fun SendButton(
+    modifier: Modifier,
+    currentTextFieldValue: TextFieldValue,
+    replyMode: ReplyMode,
+    onReply: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .size(28.dp)
+            .clip(CircleShape)
+            .then(
+                if (currentTextFieldValue.text.isBlank()) {
+                    Modifier.background(
+                        MaterialTheme.colorScheme.primary.copy(
+                            alpha = 0.2f
+                        )
+                    )
+                } else {
+                    Modifier.background(MaterialTheme.colorScheme.primary)
+                }
+            )
+    ) {
+        IconButton(
+            modifier = Modifier
+                .padding(4.dp)
+                .align(Alignment.Center)
+                .testTag(TEST_TAG_REPLY_SEND_BUTTON),
+            onClick = onReply,
+            enabled = currentTextFieldValue.text.isNotBlank()
+        ) {
+            Icon(
+                imageVector = when (replyMode) {
+                    is ReplyMode.EditMessage -> Icons.Default.Edit
+                    is ReplyMode.NewMessage -> Icons.AutoMirrored.Filled.Send
+                },
+                tint = Color.White,
+                contentDescription = null
+            )
+        }
     }
 }
 
@@ -649,6 +553,139 @@ private fun FormattingButton(
             painter = painterResource(id = drawableId),
             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             contentDescription = null,
+        )
+    }
+}
+
+@Composable
+private fun CodeFormattingDropdownMenu(
+    isCodeDropdownExpanded: Boolean,
+    onDismissRequest: () -> Unit,
+    applyCodeMarkdown: (MarkdownStyle) -> Unit,
+) {
+    DropdownMenu(
+        expanded = isCodeDropdownExpanded,
+        onDismissRequest = onDismissRequest,
+        properties = PopupProperties(
+            focusable = false
+        )
+    ) {
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.code),
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.reply_format_inline_code)) },
+            onClick = {
+                onDismissRequest()
+                applyCodeMarkdown(MarkdownStyle.InlineCode)
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Text(
+                    modifier = Modifier.padding(start = 4.dp),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    text = "{ }"
+                )
+            },
+            text = { Text(stringResource(R.string.reply_format_code_block)) },
+            onClick = {
+                onDismissRequest()
+                applyCodeMarkdown(MarkdownStyle.CodeBlock)
+            }
+        )
+    }
+}
+
+@Composable
+private fun ListFormattingDropdownMenu(
+    isListDropDownExpanded: Boolean,
+    onDismissRequest: () -> Unit,
+    applyListMarkdown: (MarkdownStyle) -> Unit,
+) {
+    DropdownMenu(
+        expanded = isListDropDownExpanded,
+        onDismissRequest = onDismissRequest,
+        properties = PopupProperties(
+            focusable = false
+        )
+    ) {
+        // Unordered List item
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.list),
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.reply_format_unordered)) },
+            onClick = {
+                onDismissRequest()
+                applyListMarkdown(MarkdownStyle.UnorderedList)
+            }
+        )
+        // Ordered List item
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.FormatListNumbered,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(R.string.reply_format_ordered)) },
+            onClick = {
+                onDismissRequest()
+                applyListMarkdown(MarkdownStyle.OrderedList)
+            }
+        )
+    }
+}
+
+@Composable
+private fun UploadDropdownMenu(
+    isFileDropdownExpanded: Boolean,
+    onDismissRequest: () -> Unit,
+    filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>
+) {
+    DropdownMenu(
+        expanded = isFileDropdownExpanded,
+        onDismissRequest = onDismissRequest,
+        properties = PopupProperties(
+            focusable = false
+        )
+    ) {
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.attachment),
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.reply_format_file_upload)) },
+            onClick = {
+                onDismissRequest()
+                filePickerLauncher.launch("*/*")
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.image),
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(R.string.reply_format_image_upload)) },
+            onClick = {
+                onDismissRequest()
+                filePickerLauncher.launch("image/*")
+            }
         )
     }
 }
@@ -772,41 +809,11 @@ private fun UnfocusedPreviewReplyTextField(
                 )
             }
 
-            DropdownMenu(
-                expanded = isFileDropdownExpanded,
+            UploadDropdownMenu(
+                isFileDropdownExpanded = isFileDropdownExpanded,
                 onDismissRequest = { isFileDropdownExpanded = false },
-                properties = PopupProperties(
-                    focusable = false
-                )
-            ) {
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.attachment),
-                            contentDescription = null
-                        )
-                    },
-                    text = { Text(text = stringResource(R.string.reply_format_file_upload)) },
-                    onClick = {
-                        isFileDropdownExpanded = false
-                        filePickerLauncher.launch("*/*")
-                    }
-                )
-
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.image),
-                            contentDescription = null
-                        )
-                    },
-                    text = { Text(stringResource(R.string.reply_format_image_upload)) },
-                    onClick = {
-                        isFileDropdownExpanded = false
-                        filePickerLauncher.launch("image/*")
-                    }
-                )
-            }
+                filePickerLauncher = filePickerLauncher
+            )
         }
     }
 }

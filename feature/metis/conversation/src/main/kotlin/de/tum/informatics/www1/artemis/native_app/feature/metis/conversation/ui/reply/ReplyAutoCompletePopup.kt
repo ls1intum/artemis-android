@@ -145,20 +145,20 @@ private fun AutoCompleteHintComposable(
         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
     ) {
         hint.icon?.let {
-            when (hint.icon) {
+            when (it) {
                 is AutoCompleteIcon.DrawableFromImageVector -> Icon(
-                    imageVector = hint.icon.imageVector,
+                    imageVector = it.imageVector,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)
                 )
                 is AutoCompleteIcon.DrawableFromId -> Icon(
-                    painter = painterResource(id = hint.icon.id ?: return@Row),
+                    painter = painterResource(id = it.id ?: return@Row),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)
                 )
                 is AutoCompleteIcon.ProfilePicture -> ProfilePicture(
                     modifier = Modifier.size(24.dp),
-                    profilePictureData = hint.icon.pictureData
+                    profilePictureData = it.pictureData
                 )
             }
         }

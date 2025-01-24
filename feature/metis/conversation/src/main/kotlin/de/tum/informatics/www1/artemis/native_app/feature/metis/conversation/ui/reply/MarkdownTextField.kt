@@ -47,6 +47,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -64,6 +66,7 @@ import kotlinx.coroutines.launch
 
 
 const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
+val textFormattingOptionsHiddenOffsetY = 200.dp
 
 /**
  * @param sendButton composable centered vertically right to the text field.
@@ -228,15 +231,9 @@ private fun TextFieldOptions(
     onOpenFilePicker: () -> Unit = {},
     onOpenImagePicker: () -> Unit = {}
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val offsetY by animateDpAsState(targetValue = if (expanded) 0.dp else 200.dp)
+    var isTextFormattingExpanded by remember { mutableStateOf(false) }
+    val textFormattingOptionsOffsetY by animateDpAsState(targetValue = if (isTextFormattingExpanded) 0.dp else textFormattingOptionsHiddenOffsetY)
     var isTaggingDropdownExpanded by remember { mutableStateOf(false) }
-
-    val iconButtonModifier = Modifier
-        .clip(CircleShape)
-        .size(32.dp)
-        .background(MaterialTheme.colorScheme.surfaceContainer)
-    val iconModifier = Modifier.padding(6.dp)
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -253,123 +250,44 @@ private fun TextFieldOptions(
                     modifier = modifier,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    IconButton(
-                        modifier = iconButtonModifier,
-                        onClick = onOpenImagePicker
+                    TextFieldOptionsIconButton(
+                        modifier = Modifier,
+                        painter = painterResource(id = R.drawable.image),
                     ) {
-                        Icon(
-                            modifier = iconModifier,
-                            painter = painterResource(id = R.drawable.image),
-                            tint = MaterialTheme.colorScheme.primary,
-                            contentDescription = null
-                        )
+                        onOpenImagePicker()
                     }
 
-                    IconButton(
-                        modifier = iconButtonModifier,
-                        onClick = onOpenFilePicker
+                    TextFieldOptionsIconButton(
+                        modifier = Modifier,
+                        painter = painterResource(id = R.drawable.attachment)
                     ) {
-                        Icon(
-                            modifier = iconModifier,
-                            painter = painterResource(id = R.drawable.attachment),
-                            tint = MaterialTheme.colorScheme.primary,
-                            contentDescription = null
-                        )
+                        onOpenFilePicker()
                     }
 
-                    IconButton(
-                        modifier = iconButtonModifier,
-                        onClick = { expanded = !expanded }
+                    TextFieldOptionsIconButton(
+                        modifier = Modifier,
+                        painter = painterResource(id = R.drawable.format_text)
                     ) {
-                        Icon(
-                            modifier = iconModifier,
-                            painter = painterResource(id = R.drawable.format_text),
-                            tint = MaterialTheme.colorScheme.primary,
-                            contentDescription = null
-                        )
+                        isTextFormattingExpanded = !isTextFormattingExpanded
                     }
 
-                    IconButton(
-                        modifier = iconButtonModifier,
-                        onClick = { isTaggingDropdownExpanded = !isTaggingDropdownExpanded }
+                    TextFieldOptionsIconButton(
+                        modifier = Modifier,
+                        painter = painterResource(id = R.drawable.tag)
                     ) {
-                        Icon(
-                            modifier = iconModifier,
-                            painter = painterResource(id = R.drawable.tag),
-                            tint = MaterialTheme.colorScheme.primary,
-                            contentDescription = null
-                        )
+                        isTaggingDropdownExpanded = !isTaggingDropdownExpanded
                     }
                 }
 
-                DropdownMenu(
-                    expanded = isTaggingDropdownExpanded,
-                    onDismissRequest = { isTaggingDropdownExpanded = false },
-                    properties = PopupProperties(
-                        focusable = false
-                    )
-                ) {
-                    DropdownMenuItem(
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.tag),
-                                contentDescription = null
-                            )
-                        },
-                        text = { Text(text = stringResource(R.string.reply_format_mention_members)) },
-                        onClick = {
-                            isTaggingDropdownExpanded = false
-                            showAutoCompletePopup?.invoke(AutocompleteType.USERS)
-                        }
-                    )
-
-                    DropdownMenuItem(
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Tag,
-                                contentDescription = null
-                            )
-                        },
-                        text = { Text(stringResource(R.string.reply_format_mention_channels)) },
-                        onClick = {
-                            isTaggingDropdownExpanded = false
-                            showAutoCompletePopup?.invoke(AutocompleteType.CHANNELS)
-                        }
-                    )
-
-                    DropdownMenuItem(
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ListAlt,
-                                contentDescription = null
-                            )
-                        },
-                        text = { Text(stringResource(R.string.reply_format_mention_exercises)) },
-                        onClick = {
-                            isTaggingDropdownExpanded = false
-                            showAutoCompletePopup?.invoke(AutocompleteType.EXERCISES)
-                        }
-                    )
-
-                    DropdownMenuItem(
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.School,
-                                contentDescription = null
-                            )
-                        },
-                        text = { Text(stringResource(R.string.reply_format_mention_lectures)) },
-                        onClick = {
-                            isTaggingDropdownExpanded = false
-                            showAutoCompletePopup?.invoke(AutocompleteType.LECTURES)
-                        }
-                    )
-
-                }
+                TaggingDropdownMenu(
+                    isTaggingDropdownExpanded = isTaggingDropdownExpanded,
+                    showAutoCompletePopup = showAutoCompletePopup,
+                    onDismissRequest = { isTaggingDropdownExpanded = false }
+                )
 
                 Box(
                     modifier = Modifier
-                        .offset(y = offsetY)
+                        .offset(y = textFormattingOptionsOffsetY)
                         .background(MaterialTheme.colorScheme.background)
                 ) {
                     Row(
@@ -378,16 +296,11 @@ private fun TextFieldOptions(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        IconButton(
-                            modifier = iconButtonModifier,
-                            onClick = { expanded = false }
+                        TextFieldOptionsIconButton(
+                            modifier = Modifier,
+                            imageVector = Icons.Default.Clear
                         ) {
-                            Icon(
-                                modifier = iconModifier,
-                                imageVector = Icons.Default.Clear,
-                                tint = MaterialTheme.colorScheme.primary,
-                                contentDescription = null
-                            )
+                            isTextFormattingExpanded = false
                         }
 
                         formattingOptionButtons()
@@ -398,28 +311,151 @@ private fun TextFieldOptions(
             Spacer(modifier = Modifier.weight(1f))
         }
 
-        Row(
-            modifier = Modifier.height(32.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            InputChip(
-                selected = selectedType == ViewType.TEXT,
-                onClick = { onChangeViewType(ViewType.TEXT) },
-                label = {
-                    Text(text = stringResource(id = R.string.markdown_textfield_tab_text))
-                }
-            )
+        PreviewEditRow(
+            modifier = Modifier,
+            selectedType = selectedType,
+            isPreviewEnabled = isPreviewEnabled,
+            onChangeViewType = onChangeViewType
+        )
+    }
+}
 
-            InputChip(
-                selected = selectedType == ViewType.PREVIEW,
-                onClick = { onChangeViewType(ViewType.PREVIEW) },
-                enabled = isPreviewEnabled,
-                label = {
-                    Text(text = stringResource(id = R.string.markdown_textfield_tab_preview))
-                }
+@Composable
+private fun TextFieldOptionsIconButton(
+    modifier: Modifier,
+    painter: Painter? = null,
+    imageVector: ImageVector? = null,
+    onClick: () -> Unit
+) {
+    require(painter != null || imageVector != null)
+
+    IconButton(
+        modifier = modifier
+            .clip(CircleShape)
+            .size(32.dp)
+            .background(MaterialTheme.colorScheme.surfaceContainer),
+        onClick = onClick
+    ) {
+        painter?.let {
+            Icon(
+                modifier = Modifier.padding(6.dp),
+                painter = painter,
+                tint = MaterialTheme.colorScheme.primary,
+                contentDescription = null
+            )
+            return@IconButton
+        }
+
+        imageVector?.let {
+            Icon(
+                modifier = Modifier.padding(6.dp),
+                imageVector = it,
+                tint = MaterialTheme.colorScheme.primary,
+                contentDescription = null
             )
         }
+    }
+}
+
+@Composable
+private fun TaggingDropdownMenu(
+    isTaggingDropdownExpanded: Boolean,
+    showAutoCompletePopup: ((AutocompleteType) -> Unit)?,
+    onDismissRequest: () -> Unit,
+) {
+    DropdownMenu(
+        expanded = isTaggingDropdownExpanded,
+        onDismissRequest = onDismissRequest,
+        properties = PopupProperties(
+            focusable = false
+        )
+    ) {
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.tag),
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.reply_format_mention_members)) },
+            onClick = {
+                onDismissRequest()
+                showAutoCompletePopup?.invoke(AutocompleteType.USERS)
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Tag,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(R.string.reply_format_mention_channels)) },
+            onClick = {
+                onDismissRequest()
+                showAutoCompletePopup?.invoke(AutocompleteType.CHANNELS)
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ListAlt,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(R.string.reply_format_mention_exercises)) },
+            onClick = {
+                onDismissRequest()
+                showAutoCompletePopup?.invoke(AutocompleteType.EXERCISES)
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.School,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(R.string.reply_format_mention_lectures)) },
+            onClick = {
+                onDismissRequest()
+                showAutoCompletePopup?.invoke(AutocompleteType.LECTURES)
+            }
+        )
+    }
+}
+
+@Composable
+private fun PreviewEditRow(
+    modifier: Modifier,
+    selectedType: ViewType,
+    isPreviewEnabled: Boolean = false,
+    onChangeViewType: (ViewType) -> Unit = {}
+) {
+    Row(
+        modifier = modifier.height(32.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        InputChip(
+            selected = selectedType == ViewType.TEXT,
+            onClick = { onChangeViewType(ViewType.TEXT) },
+            label = {
+                Text(text = stringResource(id = R.string.markdown_textfield_tab_text))
+            }
+        )
+
+        InputChip(
+            selected = selectedType == ViewType.PREVIEW,
+            onClick = { onChangeViewType(ViewType.PREVIEW) },
+            enabled = isPreviewEnabled,
+            label = {
+                Text(text = stringResource(id = R.string.markdown_textfield_tab_preview))
+            }
+        )
     }
 }
 
