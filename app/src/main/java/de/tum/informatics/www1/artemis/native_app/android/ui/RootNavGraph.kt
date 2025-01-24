@@ -19,7 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.navigateT
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.navigateToLecture
 import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
-import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
+import de.tum.informatics.www1.artemis.native_app.feature.login.loginNavGraph
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.navigateToQuizParticipation
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.quizParticipation
@@ -60,7 +60,7 @@ fun NavGraphBuilder.rootNavGraph(
     }
 
 
-    loginScreen(
+    loginNavGraph(
         onFinishedLoginFlow = { deepLink ->
             if (deepLink == null) {
                 // Navigate to the course overview and remove the login screen from the navigation stack.

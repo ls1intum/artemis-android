@@ -40,7 +40,7 @@ fun NavController.navigateToLogin(
 /**
  * Switch between actual login and notification configuration.
  */
-fun NavGraphBuilder.loginScreen(
+fun NavGraphBuilder.loginNavGraph(
     onFinishedLoginFlow: (deepLink: String?) -> Unit,
     onRequestOpenSettings: () -> Unit
 ) {
