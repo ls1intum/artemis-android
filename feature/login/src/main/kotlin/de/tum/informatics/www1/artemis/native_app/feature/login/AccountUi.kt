@@ -73,7 +73,6 @@ import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import java.io.IOException
 
-private const val ARG_REMEMBER_ME = "rememberMe"
 
 @Serializable
 private sealed interface NestedDestination {
@@ -199,8 +198,7 @@ internal fun LoginUiScreen(
             }
 
             animatedComposable<NestedDestination.Saml2Login> { backStack ->
-                val rememberMe = backStack.arguments?.getBoolean(ARG_REMEMBER_ME)
-                checkNotNull(rememberMe)
+                val rememberMe = backStack.toRoute<NestedDestination.Saml2Login>().rememberMe
 
                 val saml2LoginViewModel: Saml2LoginViewModel =
                     koinViewModel { parametersOf(rememberMe) }
