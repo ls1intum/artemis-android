@@ -1,13 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,7 +30,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
@@ -44,6 +39,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.LectureListUi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.IgnoreCustomBackHandling
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NothingOpened
@@ -215,8 +211,12 @@ internal fun CourseUiScreen(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
+    // This scaffold function is needed because of the way the navigation in the communication tab
+    // is handled and the fact that the communicationTab supports the tablet layout. In the tablet
+    // layout we want to display the scaffold always, while for the normal (phone) layout the
+    // scaffold is only shown in the ConversationOverviewScreen.
     val scaffold = @Composable { content: @Composable () -> Unit ->
-        CourseUiScreen(
+        CourseScaffold(
             modifier = modifier,
             courseDataState = courseDataState,
             isCourseTabSelected = { tab ->
@@ -293,110 +293,76 @@ internal fun CourseUiScreen(
         }
 
         composable<CourseTab.Communication> {
+            EmptyDataStateUi(dataState = courseDataState) { course ->
+                val isCommunicationEnabled = course.courseInformationSharingConfiguration.supportsMessaging
 
-            val metisModifier = Modifier.fillMaxSize()
-
-            if (true) {
-                val initialConfiguration = remember(conversationId, postId) {
-                    when {
-                        conversationId != null && postId != null -> OpenedConversation(
-                            _prevConfiguration = IgnoreCustomBackHandling,
-                            conversationId = conversationId,
-                            openedThread = OpenedThread(
-                                StandalonePostId.ServerSideId(postId)
-                            )
+                if (!isCommunicationEnabled) {
+                    CommunicationDisabledInfo()
+                } else {
+                    val initialConfiguration = remember(conversationId, postId, username, userId) {
+                        getInitialConversationConfiguration(
+                            conversationId,
+                            postId,
+                            username,
+                            userId
                         )
-
-                        conversationId != null -> OpenedConversation(
-                            _prevConfiguration = IgnoreCustomBackHandling,
-                            conversationId = conversationId,
-                            openedThread = null
-                        )
-
-                        username != null -> NavigateToUserConversation(
-                            _prevConfiguration = IgnoreCustomBackHandling,
-                            userIdentifier = UserIdentifier.Username(username)
-                        )
-
-                        userId != null -> NavigateToUserConversation(
-                            _prevConfiguration = IgnoreCustomBackHandling,
-                            userIdentifier = UserIdentifier.UserId(userId)
-                        )
-
-                        else -> NothingOpened
                     }
-                }
 
-                ConversationFacadeUi(
-                    modifier = metisModifier,
-                    courseId = courseId,
-                    scaffold = scaffold,
-                    initialConfiguration = initialConfiguration
-                )
-            } else {
-                Box(modifier = metisModifier) {
-                    Text(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .align(Alignment.Center),
-                        text = stringResource(id = R.string.course_ui_communication_disabled),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyLarge
+                    ConversationFacadeUi(
+                        modifier = Modifier.fillMaxSize(),
+                        courseId = courseId,
+                        scaffold = scaffold,
+                        initialConfiguration = initialConfiguration
                     )
                 }
             }
         }
-
     }
 }
 
 @Composable
-internal fun CourseUiScreen(
-    modifier: Modifier,
-    courseDataState: DataState<Course>,
-    isCourseTabSelected: (CourseTab) -> Boolean,
-    updateSelectedCourseTab: (CourseTab) -> Unit,
-    onNavigateBack: () -> Unit,
-    onReloadCourse: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            CourseTopAppBar(
-                courseDataState = courseDataState,
-                onNavigateBack = onNavigateBack,
-            )
-        },
-        bottomBar = {
-            BottomNavigationBar(
-                isSelected = isCourseTabSelected,
-                onUpdateSelectedTab = updateSelectedCourseTab
-            )
-        }
-    ) { padding ->
-        BasicDataStateUi(
+private fun CommunicationDisabledInfo() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Text(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    top = padding.calculateTopPadding(),
-                    bottom = padding.calculateBottomPadding()
-                )
-                .consumeWindowInsets(WindowInsets.systemBars),
-            dataState = courseDataState,
-            loadingText = stringResource(id = R.string.course_ui_loading_course_loading),
-            failureText = stringResource(id = R.string.course_ui_loading_course_failed),
-            retryButtonText = stringResource(id = R.string.course_ui_loading_course_try_again),
-            onClickRetry = onReloadCourse
-        ) { course ->
-            // TODO: use proper navigation for tabs, see:
-            //      https://medium.com/@bharadwaj.rns/bottom-navigation-in-jetpack-compose-using-material3-c153ccbf0593
-            //      https://developer.android.com/develop/ui/compose/navigation
-            // TODO: show navigation bar only in the conversation overview for compact layout (not in the chat)
-            // TODO: remove course top bar when in chat (similar to exercise/lecture details)
-
-
-            content()
-        }
+                .padding(16.dp)
+                .align(Alignment.Center),
+            text = stringResource(id = R.string.course_ui_communication_disabled),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
+}
+
+private fun getInitialConversationConfiguration(
+    conversationId: Long?,
+    postId: Long?,
+    username: String?,
+    userId: Long?
+): ConversationConfiguration = when {
+    conversationId != null && postId != null -> OpenedConversation(
+        _prevConfiguration = IgnoreCustomBackHandling,
+        conversationId = conversationId,
+        openedThread = OpenedThread(
+            StandalonePostId.ServerSideId(postId)
+        )
+    )
+
+    conversationId != null -> OpenedConversation(
+        _prevConfiguration = IgnoreCustomBackHandling,
+        conversationId = conversationId,
+        openedThread = null
+    )
+
+    username != null -> NavigateToUserConversation(
+        _prevConfiguration = IgnoreCustomBackHandling,
+        userIdentifier = UserIdentifier.Username(username)
+    )
+
+    userId != null -> NavigateToUserConversation(
+        _prevConfiguration = IgnoreCustomBackHandling,
+        userIdentifier = UserIdentifier.UserId(userId)
+    )
+
+    else -> NothingOpened
 }
