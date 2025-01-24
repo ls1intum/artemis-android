@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -84,26 +83,24 @@ private fun CourseTopAppBar(
 ) {
     val courseTitle = courseDataState.bind<String?> { it.title }.orElse(null)
 
-    Column {
-        TopAppBar(
-            title = {
-                Text(
-                    modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
-                    text = courseTitle.orEmpty(),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+    TopAppBar(
+        title = {
+            Text(
+                modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
+                text = courseTitle.orEmpty(),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onNavigateBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null
                 )
-            },
-            navigationIcon = {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null
-                    )
-                }
             }
-        )
-    }
+        }
+    )
 }
 
 

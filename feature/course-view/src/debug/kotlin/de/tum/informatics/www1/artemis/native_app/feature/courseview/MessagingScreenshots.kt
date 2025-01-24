@@ -36,8 +36,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextManager
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -191,16 +189,6 @@ fun `Metis - Conversation Channel`() {
             authorId = 0L
         ),
     ).reversed()
-
-    val visibleMetisContextManagerStub = object : VisibleMetisContextManager {
-        override fun getRegisteredMetisContexts(): List<VisibleMetisContext> = emptyList()
-
-        override fun registerMetisContext(metisContext: VisibleMetisContext) =
-            Unit
-
-        override fun unregisterMetisContext(metisContext: VisibleMetisContext) =
-            Unit
-    }
 
     // TODO: Provide artemis image provider
     ScreenshotFrame(title = "Send and receive messages directly from the app") {
