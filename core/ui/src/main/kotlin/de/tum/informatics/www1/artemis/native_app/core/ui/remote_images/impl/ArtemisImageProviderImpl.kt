@@ -33,7 +33,6 @@ class ArtemisImageProviderImpl(
             context = context,
             imageUrl = imageUrl,
             authorizationToken = authToken,
-            memoryCacheKey = imagePath
         )
 
         val loader = coil3.ImageLoader(context)
@@ -53,7 +52,6 @@ class ArtemisImageProviderImpl(
                 context = context,
                 imageUrl = imageUrl,
                 authorizationToken = authToken,
-                memoryCacheKey = imagePath
             )
         }
     }

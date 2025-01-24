@@ -13,7 +13,6 @@ class BaseImageProviderImpl : BaseImageProvider {
         context: Context,
         imageUrl: String,
         authorizationToken: String?,
-        memoryCacheKey: String?
     ): ImageRequest {
         val builder = ImageRequest.Builder(context)
             .data(imageUrl)
@@ -26,9 +25,6 @@ class BaseImageProviderImpl : BaseImageProvider {
             builder.httpHeaders(headers)
         }
 
-        memoryCacheKey?.let {
-            builder.memoryCacheKey(it)
-        }
         return builder.build()
     }
 

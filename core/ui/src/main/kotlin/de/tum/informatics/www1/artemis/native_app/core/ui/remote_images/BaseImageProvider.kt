@@ -8,7 +8,6 @@ interface BaseImageProvider {
         context: Context,
         imageUrl: String,
         authorizationToken: String?,
-        memoryCacheKey: String? = null
     ): ImageRequest
 
     // The markwon library still uses Coil 2

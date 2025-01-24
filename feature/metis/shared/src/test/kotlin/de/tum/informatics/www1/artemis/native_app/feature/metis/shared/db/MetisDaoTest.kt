@@ -45,6 +45,7 @@ class MetisDaoTest {
         updatedDate = Clock.System.now(),
         content = "post content",
         authorRole = UserRole.USER,
+        isSaved = false,
     )
     private val metisContext = MetisPostContextEntity(
         serverId = serverId,

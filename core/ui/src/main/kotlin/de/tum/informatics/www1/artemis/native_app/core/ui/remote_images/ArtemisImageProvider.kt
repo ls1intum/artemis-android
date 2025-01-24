@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.remote_images
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.platform.LocalContext
 import coil.ImageLoader
 import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
@@ -10,7 +11,7 @@ import coil3.request.ImageRequest
 import coil3.request.ImageResult
 
 
-val LocalArtemisImageProvider = compositionLocalOf<ArtemisImageProvider> { error("No ArtemisImageProvider provided") }
+val LocalArtemisImageProvider = compositionLocalOf<ArtemisImageProvider> { EmptyArtemisImageProvider() }
 
 /**
  * Provides a way to load images from the Artemis server. This interface implementation takes care
@@ -35,5 +36,19 @@ interface ArtemisImageProvider {
 
     @Composable
     fun rememberArtemisImageLoader() : ImageLoader
+}
+
+private class EmptyArtemisImageProvider : ArtemisImageProvider {
+    @Composable
+    override fun rememberArtemisImageRequest(imagePath: String): ImageRequest {
+        return ImageRequest.Builder(LocalContext.current)
+            .data(imagePath)
+            .build()
+    }
+
+    @Composable
+    override fun rememberArtemisImageLoader(): ImageLoader {
+        return ImageLoader(LocalContext.current)
+    }
 }
 

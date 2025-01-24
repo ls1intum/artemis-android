@@ -13,6 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.UserProfileDialogViewModel
@@ -56,6 +57,7 @@ internal class communication_moduleTest {
                 Application::class,
                 CurrentActivityListener::class,
                 SavedStateHandle::class,
+                SavedPostStatus::class,
             )
         )
     }

@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
@@ -31,6 +32,7 @@ internal fun PostWithBottomSheet(
     modifier: Modifier,
     post: IBasePost?,
     postItemViewType: PostItemViewType,
+    isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     postActions: PostActions,
     clientId: Long,
     displayHeader: Boolean,
@@ -42,11 +44,13 @@ internal fun PostWithBottomSheet(
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
     val isResolving = post is IAnswerPost && post.resolvesPost
     val isParentPostInThread = joinedItemType == PostItemViewJoinedType.PARENT
+    val isSaved = post?.isSaved == true
 
     val cardColor = when {
         isParentPostInThread -> MaterialTheme.colorScheme.background
         isResolving -> PostColors.StatusBackground.resolving
         isPinned -> PostColors.StatusBackground.pinned
+        isSaved -> PostColors.StatusBackground.saved
         else -> CardDefaults.cardColors().containerColor
     }
 
@@ -64,15 +68,15 @@ internal fun PostWithBottomSheet(
     }
 
     val applyPaddingToModifier: @Composable (modifier: Modifier, paddingValue: Dp) -> Modifier =
-        { modifier, paddingValue ->
+        { mod, paddingValue ->
             when (joinedItemType) {
-                PostItemViewJoinedType.HEADER -> modifier.padding(top = paddingValue, bottom = 0.dp)
-                PostItemViewJoinedType.FOOTER -> modifier.padding(top = 0.dp, bottom = paddingValue)
-                PostItemViewJoinedType.SINGLE -> modifier.padding(
+                PostItemViewJoinedType.HEADER -> mod.padding(top = paddingValue, bottom = 0.dp)
+                PostItemViewJoinedType.FOOTER -> mod.padding(top = 0.dp, bottom = paddingValue)
+                PostItemViewJoinedType.SINGLE -> mod.padding(
                     vertical = paddingValue
                 )
-                PostItemViewJoinedType.JOINED -> modifier.padding(vertical = 0.dp)
-                PostItemViewJoinedType.PARENT -> modifier.padding(0.dp)
+                PostItemViewJoinedType.JOINED -> mod.padding(vertical = 0.dp)
+                PostItemViewJoinedType.PARENT -> mod.padding(0.dp)
             }
         }
 
@@ -91,6 +95,7 @@ internal fun PostWithBottomSheet(
             clientId = clientId,
             displayHeader = displayHeader,
             postItemViewJoinedType = joinedItemType,
+            isMarkedAsDeleteList = isMarkedAsDeleteList,
             postActions = postActions,
             onClick = onClick,
             onLongClick = {

@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -103,6 +105,7 @@ internal fun MetisThreadUi(
             postActionFlags = postActionFlags,
             serverUrl = serverUrl,
             emojiService = koinInject(),
+            isMarkedAsDeleteList = viewModel.isMarkedAsDeleteList,
             clientId = clientId,
             onCreatePost = viewModel::createReply,
             onEditPost = { post, newText ->
@@ -137,7 +140,9 @@ internal fun MetisThreadUi(
                     throw NotImplementedError()
                 }
             },
+            onSavePost = viewModel::toggleSavePost,
             onDeletePost = viewModel::deletePost,
+            onUndoDeletePost = viewModel::undoDeletePost,
             onRequestReactWithEmoji = viewModel::createOrDeleteReaction,
             onRequestReload = viewModel::requestReload,
             onRequestRetrySend = viewModel::retryCreateReply,
@@ -157,13 +162,16 @@ internal fun MetisThreadUi(
     conversationDataState: DataState<Conversation>,
     postActionFlags: PostActionFlags,
     serverUrl: String,
+    isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     emojiService: EmojiService,
     initialReplyTextProvider: InitialReplyTextProvider,
     onCreatePost: () -> Deferred<MetisModificationFailure?>,
     onEditPost: (IBasePost, String) -> Deferred<MetisModificationFailure?>,
     onResolvePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
     onPinPost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
+    onSavePost: ((IBasePost) -> Deferred<MetisModificationFailure?>)?,
     onDeletePost: (IBasePost) -> Deferred<MetisModificationFailure?>,
+    onUndoDeletePost: (IBasePost) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Deferred<MetisModificationFailure?>,
     onRequestReload: () -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit,
@@ -182,14 +190,13 @@ internal fun MetisThreadUi(
             onResolvePost = onResolvePost,
             onDeletePost = onDeletePost,
             onPinPost = onPinPost,
+            onSavePost = onSavePost,
             onRequestReactWithEmoji = onRequestReactWithEmoji
-        ) { replyMode, onEditPostDelegate, onResolvePostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, onPinPostDelegate, updateFailureStateDelegate ->
+        ) { replyMode, onEditPostDelegate, onResolvePostDelegate, onRequestReactWithEmojiDelegate, onDeletePostDelegate, onPinPostDelegate, onSavePostDelegate, updateFailureStateDelegate ->
             BoxWithConstraints(modifier = modifier) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     BasicDataStateUi(
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .weight(1f),
+                        modifier = Modifier.weight(1f),
                         dataState = postDataState,
                         enablePullToRefresh = false,
                         loadingText = stringResource(id = R.string.standalone_post_loading),
@@ -214,11 +221,14 @@ internal fun MetisThreadUi(
                                 post = post,
                                 postActionFlags = postActionFlags,
                                 clientId = clientId,
+                                isMarkedAsDeleteList = isMarkedAsDeleteList,
                                 onRequestReactWithEmoji = onRequestReactWithEmojiDelegate,
                                 onRequestEdit = onEditPostDelegate,
                                 onRequestDelete = onDeletePostDelegate,
+                                onRequestUndoDelete = onUndoDeletePost,
                                 onRequestResolve = onResolvePostDelegate,
                                 onRequestPin = onPinPostDelegate,
+                                onRequestSave = onSavePostDelegate,
                                 state = listState,
                                 onRequestRetrySend = onRequestRetrySend
                             )
@@ -229,6 +239,7 @@ internal fun MetisThreadUi(
                         ReplyTextField(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .padding(horizontal = Spacings.ReplyTextFieldHorizontalSpacing)
                                 .heightIn(max = this@BoxWithConstraints.maxHeight * 0.6f),
                             replyMode = replyMode,
                             updateFailureState = updateFailureStateDelegate,
@@ -250,11 +261,14 @@ private fun PostAndRepliesList(
     state: LazyListState,
     post: IStandalonePost,
     postActionFlags: PostActionFlags,
+    isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     clientId: Long,
     onRequestEdit: (IBasePost) -> Unit,
     onRequestDelete: (IBasePost) -> Unit,
+    onRequestUndoDelete: (IBasePost) -> Unit,
     onRequestResolve: (IBasePost) -> Unit,
     onRequestPin: (IBasePost) -> Unit,
+    onRequestSave: (IBasePost) -> Unit,
     onRequestReactWithEmoji: (IBasePost, emojiId: String, create: Boolean) -> Unit,
     onRequestRetrySend: (clientSidePostId: String, content: String) -> Unit
 ) {
@@ -265,6 +279,7 @@ private fun PostAndRepliesList(
             clientId,
             onRequestEdit = { onRequestEdit(affectedPost) },
             onRequestDelete = { onRequestDelete(affectedPost) },
+            onRequestUndoDelete = { onRequestUndoDelete(affectedPost) },
             onClickReaction = { emojiId, create ->
                 onRequestReactWithEmoji(
                     affectedPost,
@@ -275,6 +290,7 @@ private fun PostAndRepliesList(
             onReplyInThread = null,
             onResolvePost = { onRequestResolve(affectedPost) },
             onPinPost = { onRequestPin(affectedPost) },
+            onSavePost = { onRequestSave(affectedPost) },
             onRequestRetrySend = {
                 onRequestRetrySend(
                     affectedPost.clientPostId ?: return@rememberPostActions,
@@ -301,6 +317,7 @@ private fun PostAndRepliesList(
                     post = post,
                     postItemViewType = PostItemViewType.ThreadContextPostItem,
                     postActions = postActions,
+                    isMarkedAsDeleteList = isMarkedAsDeleteList,
                     displayHeader = true,
                     joinedItemType = PostItemViewJoinedType.PARENT,
                     clientId = clientId,
@@ -329,6 +346,7 @@ private fun PostAndRepliesList(
                     .testTag(testTagForAnswerPost(answerPost.clientPostId)),
                 post = answerPost,
                 postActions = postActions,
+                isMarkedAsDeleteList = isMarkedAsDeleteList,
                 postItemViewType = PostItemViewType.ThreadAnswerItem,
                 clientId = clientId,
                 displayHeader = shouldDisplayHeader(

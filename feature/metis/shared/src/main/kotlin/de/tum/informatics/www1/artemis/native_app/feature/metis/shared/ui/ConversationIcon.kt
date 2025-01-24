@@ -30,7 +30,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profil
 fun ConversationIcon(
     modifier: Modifier = Modifier,
     conversation: Conversation,
-    clientId: Long,
     hasUnreadMessages: Boolean = false,
     showDialogOnOneToOneChatClick: Boolean = false
 ) {
@@ -38,7 +37,7 @@ fun ConversationIcon(
         when (conversation) {
             is ChannelChat -> ChannelChatIcon(modifier, conversation)
             is GroupChat -> GroupChatIcon(modifier)
-            is OneToOneChat -> OneToOneChatIcon(modifier, conversation, clientId, showDialogOnOneToOneChatClick)
+            is OneToOneChat -> OneToOneChatIcon(modifier, conversation, showDialogOnOneToOneChatClick)
         }
 
         if (hasUnreadMessages) {
@@ -87,10 +86,9 @@ fun GroupChatIcon(modifier: Modifier) {
 fun OneToOneChatIcon(
     modifier: Modifier,
     oneToOneChat: OneToOneChat,
-    clientId: Long,
     showDialogOnClick: Boolean = false
 ) {
-    val conversationPartner = oneToOneChat.members.first { it.id != clientId }
+    val conversationPartner = oneToOneChat.partner
     if (showDialogOnClick) {
         ProfilePictureWithDialog(
             modifier = modifier,

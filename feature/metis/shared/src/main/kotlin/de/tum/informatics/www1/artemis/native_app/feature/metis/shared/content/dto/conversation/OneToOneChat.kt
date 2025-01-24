@@ -24,6 +24,9 @@ data class OneToOneChat(
 ) : Conversation() {
     override val typeAsString: String = "oneToOneChat"
 
+    val partner: ConversationUser
+        get() = members.first { !it.isRequestingUser }
+
     override fun withUnreadMessagesCount(unreadMessagesCount: Long): Conversation =
         copy(unreadMessagesCount = unreadMessagesCount)
 
