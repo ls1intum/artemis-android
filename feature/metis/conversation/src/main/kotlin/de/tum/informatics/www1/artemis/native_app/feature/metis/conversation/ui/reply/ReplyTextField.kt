@@ -805,7 +805,7 @@ private fun UnfocusedPreviewReplyTextField(
                         .padding(4.dp),
                     imageVector = Icons.Default.Add,
                     contentDescription = null,
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.background
                 )
             }
 
