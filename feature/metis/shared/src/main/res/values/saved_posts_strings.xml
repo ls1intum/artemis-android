@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_posts_in_progress">In Progress</string>
+    <string name="saved_posts_completed">Completed</string>">
+    <string name="saved_posts_archived">Archived</string>
+</resources>

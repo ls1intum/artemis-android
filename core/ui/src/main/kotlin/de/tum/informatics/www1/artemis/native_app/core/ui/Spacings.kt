@@ -12,8 +12,7 @@ import androidx.compose.ui.unit.dp
 
 object Spacings {
     val ScreenHorizontalSpacing = 16.dp
-    val ScreenHorizontalInnerSpacing = 8.dp
-
+    val ReplyTextFieldHorizontalSpacing = ScreenHorizontalSpacing / 2
     val EndOfScrollablePageSpacing = ScreenHorizontalSpacing
 
     object Post {
@@ -28,6 +27,12 @@ object Spacings {
     @Composable
     fun calculateEndOfPagePaddingValues() = PaddingValues(
         bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + EndOfScrollablePageSpacing
+    )
+
+    val BottomSheetContentPadding = PaddingValues(
+        bottom = 40.dp,
+        start = ScreenHorizontalSpacing,
+        end = ScreenHorizontalSpacing
     )
 }
 

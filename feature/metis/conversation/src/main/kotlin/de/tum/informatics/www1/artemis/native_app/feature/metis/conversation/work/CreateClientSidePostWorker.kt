@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.wo
 
 import android.content.Context
 import android.util.Log
-import androidx.work.Data
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
@@ -53,7 +52,8 @@ class CreateClientSidePostWorker(
             name = authorAccount.name,
             id = authorAccount.id,
             firstName = authorAccount.firstName,
-            lastName = authorAccount.lastName
+            lastName = authorAccount.lastName,
+            imageUrl = authorAccount.imageUrl
         )
 
         when (postType) {

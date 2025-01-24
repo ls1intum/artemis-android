@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis
 import android.os.Parcelable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -28,6 +29,11 @@ data class OpenedConversation(
 @Parcelize
 data class OpenedThread(val postId: StandalonePostId) : Parcelable
 
+data class OpenedSavedPosts(
+    private val _prevConfiguration: ConversationConfiguration,
+    val status: SavedPostStatus
+)
+    : ConversationConfiguration(5, _prevConfiguration)
 /**
  * Special configuration in which we want to navigate to the 1-to-1 conversation with the user with the specified identifier.
  * In this configuration, we simply show a loading bar while we load the necessary data to show the chat.
@@ -37,7 +43,6 @@ data class NavigateToUserConversation(
     private val _prevConfiguration: ConversationConfiguration,
     val userIdentifier: UserIdentifier,
 ) : ConversationConfiguration(0, _prevConfiguration)
-
 
 @Parcelize
 internal data class AddChannelConfiguration(

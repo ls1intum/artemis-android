@@ -8,9 +8,17 @@
     <string name="post_does_not_resolve">Doesn\'t Resolve Post</string>
     <string name="post_pin">Pin Post</string>
     <string name="post_unpin">Unpin Post</string>
+    <string name="post_save">Save Post</string>
+    <string name="post_unsave">Remove Bookmark</string>
     <string name="post_is_resolved">Resolved</string>
     <string name="post_is_pinned">Pinned</string>
+    <string name="post_is_saved">Saved for later</string>
 
+    <string name="post_undo_delete">Undo delete</string>
+    <plurals name="post_is_being_deleted">
+        <item quantity="one">Post is being deleted in %d second.</item>
+        <item quantity="other">Post is being deleted in %d seconds.</item>
+    </plurals>
     <string name="post_edited_hint">Edited (%1$s)</string>
 
     <string name="post_replies_count">%d Replies</string>
