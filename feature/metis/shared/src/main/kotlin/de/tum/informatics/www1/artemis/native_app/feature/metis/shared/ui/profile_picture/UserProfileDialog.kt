@@ -139,6 +139,7 @@ private fun UserProfileDialogHeader(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         ProfilePicture(
             modifier = Modifier.size(80.dp),
