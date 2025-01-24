@@ -12,8 +12,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
+import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
-import de.tum.informatics.www1.artemis.native_app.core.ui.useTabletLayout
 import de.tum.informatics.www1.artemis.native_app.feature.metis.AddChannelConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.BrowseChannelConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationConfiguration
@@ -99,7 +100,7 @@ internal fun SinglePageConversationBody(
         )
     }
 
-    val doAlwaysShowScaffold = useTabletLayout()
+    val doAlwaysShowScaffold = getArtemisAppLayout() == ArtemisAppLayout.Tablet
     val scaffoldWrapper = @Composable { content: @Composable () -> Unit ->
         if (doAlwaysShowScaffold) {
             scaffold(content)

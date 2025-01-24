@@ -15,8 +15,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
+import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
-import de.tum.informatics.www1.artemis.native_app.core.ui.useTabletLayout
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -98,14 +99,14 @@ fun LayoutAwareTwoColumnLayout(
     optionalColumn: @Composable (Modifier) -> Unit,
     priorityColumn: @Composable (Modifier) -> Unit
 ) {
-    when {
-        !useTabletLayout() -> {
+    when(getArtemisAppLayout()) {
+        ArtemisAppLayout.Phone -> {
             Box(modifier = modifier) {
                 priorityColumn(Modifier.fillMaxSize())
             }
         }
 
-        else -> {
+        ArtemisAppLayout.Tablet -> {
             Row(
                 modifier = modifier,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
