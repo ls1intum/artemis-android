@@ -26,6 +26,9 @@ fun ParticipationStatusUi(
     exercise: Exercise,
     showLargeIcon: Boolean = false
 ) {
+    // The Android app used to show ungraded results, but this been changed in https://github.com/ls1intum/artemis-android/pull/295.
+    // This flag allows to show ungraded results again if needed. Make sure to also check LocalTemplateStatus.kt and occurrences of
+    // Exercise.getSpecificStudentParticipation(showUngradedResults) across the app when changing this flag.
     val showUngradedResults = false
 
     val participation = remember(exercise) { exercise.getSpecificStudentParticipation(showUngradedResults) }
