@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.exercise
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -25,18 +24,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.ProgrammingSubmission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.isResultPreliminary
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.util.ExerciseResultUtil
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import java.text.DecimalFormat
 
 private const val MIN_SCORE_GREEN = 80
 private const val MIN_SCORE_ORANGE = 40
-private const val MAX_PROGRAMMING_RESULT_INTS = 255
 
 /**
  * Display the result of an exercise. The result is displayed in a single row.
@@ -175,24 +171,14 @@ private fun StatusHasResult(
 
         val formattedPercentage = DecimalFormat.getPercentInstance().format(resultScore / 100f)
 
-        val scoreString = if (exercise is ProgrammingExercise) {
-            getProgrammingExerciseBuildMessage(
-                formattedPercentage,
-                result,
-                points,
-                context,
-                showPoints
-            )
-        } else {
-            if (showPoints) context.getString(
-                R.string.exercise_result_has_result_score,
-                formattedPercentage,
-                points
-            ) else context.getString(
-                R.string.exercise_result_has_result_score_without_points,
-                formattedPercentage
-            )
-        }
+        val scoreString = ExerciseResultUtil.resolveScoreString(
+            exercise,
+            formattedPercentage,
+            result,
+            points,
+            context,
+            showPoints
+        )
 
         context.getString(
             if (isLate) R.string.exercise_result_has_result_score_late_with_date
@@ -210,70 +196,6 @@ private fun StatusHasResult(
         textColor = textAndIconColor,
         showLargeIcon = showLargeIcon
     )
-}
-
-private fun getProgrammingExerciseBuildMessage(
-    score: String,
-    result: Result,
-    points: String,
-    context: Context,
-    showPoints: Boolean = false
-): String {
-    val submission = result.submission as? ProgrammingSubmission
-    val testCaseCount = result.testCaseCount ?: 0
-    val codeIssueCount = result.codeIssueCount ?: 0
-    val passedTestCaseCount = result.passedTestCaseCount ?: 0
-
-    var buildInformation = ""
-    submission?.let {
-        if (submission.buildFailed == true) {
-            buildInformation = context.getString(R.string.exercise_result_build_failed)
-        } else if (testCaseCount < 1) {
-            buildInformation = context.getString(R.string.exercise_result_build_successful_no_tests)
-        } else {
-            val passedTestCaseCountString =
-                if (passedTestCaseCount >= MAX_PROGRAMMING_RESULT_INTS) "$MAX_PROGRAMMING_RESULT_INTS+" else "$passedTestCaseCount"
-            val testCaseCountString =
-                if (testCaseCount >= MAX_PROGRAMMING_RESULT_INTS) "$MAX_PROGRAMMING_RESULT_INTS+" else "$testCaseCount"
-            buildInformation = context.getString(
-                R.string.exercise_result_build_successful_tests,
-                passedTestCaseCountString,
-                testCaseCountString
-            )
-        }
-    }
-
-    val resultString = if (testCaseCount > 0) {
-        buildInformation
-    } else if (codeIssueCount > 0) {
-        val codeIssueCountString =
-            if (codeIssueCount >= MAX_PROGRAMMING_RESULT_INTS) "$MAX_PROGRAMMING_RESULT_INTS+" else "$codeIssueCount"
-        if (showPoints) context.getString(
-            R.string.exercise_result_code_issues,
-            score,
-            buildInformation,
-            codeIssueCountString,
-            points
-        ) else context.getString(
-            R.string.exercise_result_code_issues_without_points,
-            score,
-            buildInformation,
-            codeIssueCountString
-        )
-    } else {
-        if (showPoints) context.getString(
-            R.string.exercise_result_no_code_issues,
-            score,
-            buildInformation,
-            points
-        ) else context.getString(
-            R.string.exercise_result_no_code_issues_without_points,
-            score,
-            buildInformation
-        )
-    }
-
-    return if (result.isResultPreliminary) resultString + " " + context.getString(R.string.exercise_result_is_preliminary) else resultString
 }
 
 @Composable

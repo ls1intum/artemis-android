@@ -74,6 +74,7 @@ internal fun ExerciseOverviewTab(
             actions = actions
         )
 
+        // The Spacers in this Column are needed as verticalArrangement.spacedBy does lead to a gap under the ArtemisWebView
         Spacer(modifier = Modifier.height(16.dp))
 
         ExerciseInformation(
