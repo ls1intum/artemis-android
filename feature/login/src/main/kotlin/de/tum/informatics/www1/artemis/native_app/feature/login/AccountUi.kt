@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.login
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -39,8 +38,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,9 +48,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -65,7 +59,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.server_config.Profi
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.linkTextColor
-import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.login.custom_instance_selection.CustomInstanceSelectionScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.instance_selection.InstanceSelectionBottomSheet
@@ -74,10 +67,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.login.LoginUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.register.RegisterUi
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.saml2_login.Saml2LoginViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.login.service.ServerNotificationStorageService
-import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsScreen
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
@@ -100,110 +89,12 @@ private sealed interface NestedDestination {
     data class Saml2Login(val rememberMe: Boolean) : NestedDestination
 }
 
-@Serializable
-data class LoginScreen(val nextDestination: String?)
-
-/**
- * @param nextDestination the deep link to a destination that should be opened after a successful login
- */
-fun NavController.navigateToLogin(
-    nextDestination: String? = null,
-    builder: NavOptionsBuilder.() -> Unit
-) {
-    val screen = if (nextDestination != null) {
-        LoginScreen(nextDestination)
-    } else {
-        LoginScreen(null)
-    }
-
-    navigate(screen, builder)
-}
-
-/**
- * Switch between actual login and notification configuration.
- */
-fun NavGraphBuilder.loginScreen(
-    onFinishedLoginFlow: (deepLink: String?) -> Unit,
-    onRequestOpenSettings: () -> Unit
-) {
-    animatedComposable<LoginScreen>(
-        enterTransition = { DefaultTransition.fadeIn },
-    ) {
-        val screen = it.toRoute<LoginScreen>()
-        val nextDestinationValue = screen.nextDestination
-
-        var nextDestination by remember(nextDestinationValue) {
-            mutableStateOf(if (nextDestinationValue == null || nextDestinationValue == "null") null else nextDestinationValue)
-        }
-
-        val scope = rememberCoroutineScope()
-        val serverNotificationStorageService: ServerNotificationStorageService = koinInject()
-        val serverConfigurationService: ServerConfigurationService = koinInject()
-
-        var currentContent by rememberSaveable { mutableStateOf(LoginScreenContent.LOGIN) }
-
-        val onFinishedLoginFlowImpl = {
-            onFinishedLoginFlow(nextDestination)
-        }
-
-        AnimatedContent(
-            targetState = currentContent,
-            transitionSpec = {
-                DefaultTransition.navigateForward
-            },
-            label = "Login <-> Notification configuration"
-        ) { content ->
-            when (content) {
-                LoginScreenContent.LOGIN -> {
-                    LoginUiScreen(
-                        modifier = Modifier.fillMaxSize(),
-                        onLoggedIn = {
-                            // Only display notification settings on the first login for the server
-                            scope.launch {
-                                val serverUrl = serverConfigurationService.serverUrl.first()
-                                if (serverNotificationStorageService.hasDisplayedForServer(serverUrl)) {
-                                    onFinishedLoginFlowImpl()
-                                } else {
-                                    currentContent = LoginScreenContent.NOTIFICATION_SETTINGS
-                                }
-                            }
-                        },
-                        onRequestOpenSettings = onRequestOpenSettings,
-                        onNavigatedToInstanceSelection = {
-                            nextDestination = null
-                        }
-                    )
-                }
-
-                LoginScreenContent.NOTIFICATION_SETTINGS -> {
-                    PushNotificationSettingsScreen(
-                        modifier = Modifier.fillMaxSize(),
-                        isInitialNotificationSettingsScreen = true,
-                        onDone = {
-                            scope.launch {
-                                serverNotificationStorageService.setHasDisplayed(
-                                    serverConfigurationService.serverUrl.first()
-                                )
-                                onFinishedLoginFlowImpl()
-                            }
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-enum class LoginScreenContent {
-    LOGIN,
-    NOTIFICATION_SETTINGS
-}
 
 /**
  * Manages UI directly responsible for logging the user in.
  */
 @Composable
-private fun LoginUiScreen(
+internal fun LoginUiScreen(
     modifier: Modifier,
     onLoggedIn: () -> Unit,
     onRequestOpenSettings: () -> Unit,
