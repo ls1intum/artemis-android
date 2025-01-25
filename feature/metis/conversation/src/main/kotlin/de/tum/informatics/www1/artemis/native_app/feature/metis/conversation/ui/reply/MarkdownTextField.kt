@@ -93,43 +93,41 @@ internal fun MarkdownTextField(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // This box is needed to ensure that the TextFieldOptions stay visible when the BasicMarkdownTextField grows
-        Box(
+        // weight(1f) is needed for the row to ensure that the TextFieldOptions stay visible when the BasicMarkdownTextField grows.
+        // fill has to be disabled for the UI tests to work properly.
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
+                .weight(1f, false)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                when (selectedType) {
-                    ViewType.TEXT -> {
-                        BasicMarkdownTextField(
-                            modifier = Modifier.weight(1f),
-                            textFieldValue = textFieldValue,
-                            onTextChanged = onTextChanged,
-                            hintText = hintText,
-                            focusRequester = focusRequester,
-                            onFocusAcquired = onFocusAcquired,
-                            onFocusLost = onFocusLost
-                        )
-                    }
-
-                    ViewType.PREVIEW -> {
-                        MarkdownText(
-                            markdown = text,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
+            when (selectedType) {
+                ViewType.TEXT -> {
+                    BasicMarkdownTextField(
+                        modifier = Modifier.weight(1f),
+                        textFieldValue = textFieldValue,
+                        onTextChanged = onTextChanged,
+                        hintText = hintText,
+                        focusRequester = focusRequester,
+                        onFocusAcquired = onFocusAcquired,
+                        onFocusLost = onFocusLost
+                    )
                 }
 
-                sendButton()
-
-                topRightButton()
+                ViewType.PREVIEW -> {
+                    MarkdownText(
+                        markdown = text,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
+
+            sendButton()
+
+            topRightButton()
         }
+
 
         TextFieldOptions(
             selectedType = selectedType,
