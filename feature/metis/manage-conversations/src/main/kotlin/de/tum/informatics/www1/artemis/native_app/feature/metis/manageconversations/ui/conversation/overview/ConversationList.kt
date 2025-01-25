@@ -114,7 +114,7 @@ internal fun ConversationList(
                 conversations = collection,
                 clientId = clientId,
                 showPrefix = collection.showPrefix,
-                isFavoritesSection = conversationCollections.favorites == collection,
+                allowFavoriteIndicator = conversationCollections.favorites == collection,
                 onNavigateToConversation = onNavigateToConversation,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
                 onToggleHidden = onToggleHidden,
@@ -259,7 +259,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
     conversations: ConversationCollections.ConversationCollection<T>,
     clientId: Long,
     showPrefix: Boolean,
-    isFavoritesSection: Boolean,
+    allowFavoriteIndicator: Boolean,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
     onToggleHidden: (conversationId: Long, hidden: Boolean) -> Unit,
@@ -279,7 +279,7 @@ private fun <T : Conversation> LazyListScope.conversationList(
             conversation = conversation,
             clientId = clientId,
             showPrefix = showPrefix,
-            isFavoritesSection = isFavoritesSection,
+            allowFavoriteIndicator = allowFavoriteIndicator,
             onNavigateToConversation = { onNavigateToConversation(conversation.id) },
             onToggleMarkAsFavourite = {
                 onToggleMarkAsFavourite(
@@ -300,7 +300,7 @@ private fun ConversationListItem(
     conversation: Conversation,
     clientId: Long,
     showPrefix: Boolean,
-    isFavoritesSection: Boolean,
+    allowFavoriteIndicator: Boolean,
     onNavigateToConversation: () -> Unit,
     onToggleMarkAsFavourite: () -> Unit,
     onToggleHidden: () -> Unit,
@@ -352,7 +352,7 @@ private fun ConversationListItem(
                 ConversationIcon(
                     conversation = conversation,
                     clientId = clientId,
-                    isFavoritesSection = isFavoritesSection,
+                    allowFavoriteIndicator = allowFavoriteIndicator,
                     hasUnreadMessages = unreadMessagesCount > 0
                 )
             },

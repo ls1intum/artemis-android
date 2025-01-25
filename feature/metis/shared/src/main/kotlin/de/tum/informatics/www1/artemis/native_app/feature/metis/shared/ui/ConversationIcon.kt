@@ -33,7 +33,7 @@ fun ConversationIcon(
     conversation: Conversation,
     clientId: Long,
     hasUnreadMessages: Boolean = false,
-    isFavoritesSection: Boolean = false,
+    allowFavoriteIndicator: Boolean = false,
     showDialogOnOneToOneChatClick: Boolean = false
 ) {
     Box {
@@ -49,7 +49,7 @@ fun ConversationIcon(
             )
         }
 
-        if (conversation.isFavorite && !isFavoritesSection) {
+        if (conversation.isFavorite && !allowFavoriteIndicator) {
             FavoriteIndicator(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -114,7 +114,7 @@ fun OneToOneChatIcon(
 }
 
 @Composable
-fun UnreadMessagesIndicator(modifier: Modifier = Modifier) {
+private fun UnreadMessagesIndicator(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .size(8.dp)
@@ -124,7 +124,7 @@ fun UnreadMessagesIndicator(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun FavoriteIndicator(modifier: Modifier = Modifier) {
+private fun FavoriteIndicator(modifier: Modifier = Modifier) {
     Icon(
         modifier = modifier
             .size(8.dp),
