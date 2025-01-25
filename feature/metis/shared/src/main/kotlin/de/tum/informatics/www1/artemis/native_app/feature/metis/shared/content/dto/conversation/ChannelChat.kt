@@ -19,7 +19,7 @@ data class ChannelChat(
     override val isCreator: Boolean = false,
     override val isMember: Boolean = false,
     override val numberOfMembers: Int = 0,
-    override val subTypeReferenceId: Long? = null,
+    val subTypeReferenceId: Long? = null,
     val name: String = "",
     val description: String? = null,
     val topic: String? = null,

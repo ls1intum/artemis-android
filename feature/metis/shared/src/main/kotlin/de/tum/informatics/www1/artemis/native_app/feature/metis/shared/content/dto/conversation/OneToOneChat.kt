@@ -20,7 +20,6 @@ data class OneToOneChat(
     override val isCreator: Boolean = false,
     override val isMember: Boolean = false,
     override val numberOfMembers: Int = 0,
-    override val subTypeReferenceId: Long? = null,
     val members: List<ConversationUser> = emptyList()
 ) : Conversation() {
     override val typeAsString: String = "oneToOneChat"
