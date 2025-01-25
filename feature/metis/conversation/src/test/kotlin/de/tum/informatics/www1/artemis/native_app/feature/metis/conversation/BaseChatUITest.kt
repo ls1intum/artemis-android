@@ -1,8 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -25,6 +27,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.AnswerPostPojo
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
@@ -35,12 +38,21 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.datetime.Clock
 
+
+private fun User.asConversationUser(isRequestingUser: Boolean = false): ConversationUser {
+    return ConversationUser(
+        id = id,
+        name = name,
+        imageUrl = null,
+        isRequestingUser = isRequestingUser
+    )
+}
+
 abstract class BaseChatUITest : BaseComposeTest() {
 
     val clientId = 20L
 
     private val course: Course = Course(id = 1)
-    val conversation = OneToOneChat(id = 2)
 
     val currentUser = User(
         id = clientId,
@@ -51,15 +63,25 @@ abstract class BaseChatUITest : BaseComposeTest() {
         name = "Other user"
     )
 
+    val conversation = OneToOneChat(
+        id = 2,
+        members = listOf(
+            currentUser.asConversationUser(isRequestingUser = true),
+            otherUser.asConversationUser()
+        )
+    )
+
     val simplePostContent = "Simple post content"
     val simpleAnswerContent = "Simple answer content"
 
     fun simplePost(
         postAuthor: User,
+        isSaved: Boolean = false
     ): StandalonePost = StandalonePost(
         id = 1,
         author = postAuthor,
         content = simplePostContent,
+        isSaved = isSaved
     )
 
     fun simpleThreadPostWithAnswer(
@@ -91,6 +113,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                 authorRole = UserRole.USER,
                 authorName = "author name",
                 authorImageUrl = null,
+                isSaved = false,
             ),
             reactions = emptyList(),
             serverPostIdCache = AnswerPostPojo.ServerPostIdCache(
@@ -116,7 +139,8 @@ abstract class BaseChatUITest : BaseComposeTest() {
             tags = emptyList(),
             answers = if (index == 0) answers else emptyList(),
             reactions = emptyList(),
-            displayPriority = DisplayPriority.NONE
+            displayPriority = DisplayPriority.NONE,
+            isSaved = false
         )
     }
 
@@ -141,13 +165,16 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     hasModerationRights = hasModerationRights,
                 ),
                 serverUrl = "",
+                isMarkedAsDeleteList = mutableStateListOf(),
                 emojiService = EmojiServiceStub,
                 initialReplyTextProvider = remember { TestInitialReplyTextProvider() },
                 onCreatePost = { CompletableDeferred() },
                 onEditPost = { _, _ -> CompletableDeferred() },
                 onResolvePost = onResolvePost,
                 onPinPost = onPinPost,
+                onSavePost = { CompletableDeferred() },
                 onDeletePost = { CompletableDeferred() },
+                onUndoDeletePost = {},
                 onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
                 onRequestReload = {},
                 onRequestRetrySend = { _, _ -> },
@@ -156,6 +183,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
         }
     }
 
+    @SuppressLint("UnrememberedMutableState")
     fun setupChatUi(
         posts: List<IStandalonePost>,
         currentUser: User = User(id = clientId),
@@ -190,16 +218,18 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     courseId = course.id!!,
                     state = rememberLazyListState(),
                     emojiService = EmojiServiceStub,
+                    isMarkedAsDeleteList = mutableStateListOf(),
                     bottomItem = null,
                     isReplyEnabled = true,
                     onCreatePost = { CompletableDeferred() },
                     onEditPost = { _, _ -> CompletableDeferred() },
                     onPinPost = onPinPost,
-                    onDeletePost = { CompletableDeferred() },
-                    onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                    onClickViewPost = {},
-                    onRequestRetrySend = { _ -> },
-                    conversationName = "Title",
+                    onSavePost = { CompletableDeferred() },
+                onDeletePost = { CompletableDeferred() },
+                onUndoDeletePost = {},onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                onClickViewPost = {},
+                onRequestRetrySend = { _ -> },
+                conversationName = "Title",
                     onFileSelected = { _ -> }
                 )
             }

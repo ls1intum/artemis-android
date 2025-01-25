@@ -7,6 +7,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.Bas
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_PIN_POST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_POST_DELETE
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_POST_EDIT
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_SAVE_POST
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -62,7 +63,7 @@ class PostActionBarUITest: BaseChatUITest() {
     @Test
     fun `test GIVEN a post WHEN navigating to the thread view as the post author THEN delete option is shown`() {
         setupThreadUi(
-            post = posts[0],
+            post = posts[0]
         )
 
         composeTestRule.onNodeWithTag(TEST_TAG_POST_DELETE).assertExists().assertIsDisplayed()
@@ -104,5 +105,14 @@ class PostActionBarUITest: BaseChatUITest() {
         )
 
         composeTestRule.onNodeWithTag(TEST_TAG_PIN_POST).assertDoesNotExist()
+    }
+
+    @Test
+    fun `test GIVEN a post WHEN navigating to the thread view THEN save option is shown`() {
+        setupThreadUi(
+            post = posts[0]
+        )
+
+        composeTestRule.onNodeWithTag(TEST_TAG_SAVE_POST).assertExists().assertIsDisplayed()
     }
 }

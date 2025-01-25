@@ -20,7 +20,7 @@ val GroupChat.humanReadableTitle: String
 
 val OneToOneChat.humanReadableTitle: String
     get() {
-        return members.filterNot { it.isRequestingUser }.firstOrNull()?.humanReadableName.orEmpty()
+        return partner.humanReadableName
     }
 
 val BaseAccount.humanReadableName: String

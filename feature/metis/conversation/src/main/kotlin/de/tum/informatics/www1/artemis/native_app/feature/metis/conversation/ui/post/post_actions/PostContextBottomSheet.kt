@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.AddReaction
+import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
@@ -89,8 +92,7 @@ internal fun PostContextBottomSheet(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
-                    .padding(bottom = 40.dp)
+                    .padding(Spacings.BottomSheetContentPadding)
             ) {
                 postActions.onClickReaction?.let { onClickReaction ->
                     EmojiReactionBar(
@@ -114,7 +116,7 @@ internal fun PostContextBottomSheet(
                 }
 
                 postActions.requestEditPost?.let {
-                    ActionButton(
+                    BottomSheetActionButton(
                         modifier = actionButtonModifier,
                         icon = Icons.Default.Edit,
                         text = stringResource(id = R.string.post_edit),
@@ -126,7 +128,7 @@ internal fun PostContextBottomSheet(
                 }
 
                 postActions.requestDeletePost?.let {
-                    ActionButton(
+                    BottomSheetActionButton(
                         modifier = actionButtonModifier,
                         icon = Icons.Default.Delete,
                         text = stringResource(id = R.string.post_delete),
@@ -137,7 +139,7 @@ internal fun PostContextBottomSheet(
                     )
                 }
 
-                ActionButton(
+                BottomSheetActionButton(
                     modifier = actionButtonModifier,
                     icon = Icons.Default.ContentCopy,
                     text = stringResource(id = R.string.post_copy_text),
@@ -148,7 +150,7 @@ internal fun PostContextBottomSheet(
                 )
 
                 if (postActions.onResolvePost != null && post is IAnswerPost) {
-                    ActionButton(
+                    BottomSheetActionButton(
                         modifier = actionButtonModifier,
                         icon = if (post.resolvesPost) Icons.Default.Clear else Icons.Default.Check,
                         text = if (post.resolvesPost) stringResource(id = R.string.post_does_not_resolve) else stringResource(id = R.string.post_resolves),
@@ -160,10 +162,11 @@ internal fun PostContextBottomSheet(
                 }
 
                 if (postActions.onPinPost != null && post is IStandalonePost) {
-                    ActionButton(
+                    val isPinned = post.displayPriority == DisplayPriority.PINNED
+                    BottomSheetActionButton(
                         modifier = actionButtonModifier,
-                        icon = if (post.displayPriority == DisplayPriority.PINNED) ImageVector.vectorResource(R.drawable.unpin) else ImageVector.vectorResource(R.drawable.pin),
-                        text = if (post.displayPriority == DisplayPriority.PINNED) stringResource(id = R.string.post_unpin) else stringResource(id = R.string.post_pin),
+                        icon = if (isPinned) ImageVector.vectorResource(R.drawable.unpin) else ImageVector.vectorResource(R.drawable.pin),
+                        text = if (isPinned) stringResource(id = R.string.post_unpin) else stringResource(id = R.string.post_pin),
                         onClick = {
                             onDismissRequest()
                             postActions.onPinPost.invoke()
@@ -171,8 +174,21 @@ internal fun PostContextBottomSheet(
                     )
                 }
 
+                if (postActions.onSavePost != null) {
+                    val isSaved = post.isSaved == true
+                    BottomSheetActionButton(
+                        modifier = actionButtonModifier,
+                        icon = if (isSaved) Icons.Default.BookmarkRemove else Icons.Default.BookmarkAdd,
+                        text = if (isSaved) stringResource(id = R.string.post_unsave) else stringResource(id = R.string.post_save),
+                        onClick = {
+                            onDismissRequest()
+                            postActions.onSavePost.invoke()
+                        }
+                    )
+                }
+
                 postActions.onReplyInThread?.let {
-                    ActionButton(
+                    BottomSheetActionButton(
                         modifier = actionButtonModifier,
                         icon = Icons.AutoMirrored.Filled.Reply,
                         text = stringResource(id = R.string.post_reply),
@@ -265,7 +281,7 @@ private fun EmojiButton(
 }
 
 @Composable
-private fun ActionButton(
+fun BottomSheetActionButton(
     modifier: Modifier,
     icon: ImageVector,
     text: String,
@@ -280,7 +296,7 @@ private fun ActionButton(
             contentDescription = null
         )
 
-        Box(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
         Text(
             modifier = Modifier.weight(1f),

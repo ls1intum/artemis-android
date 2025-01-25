@@ -10,6 +10,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseWideContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.Reaction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.MetisDao
@@ -75,7 +76,8 @@ internal class MetisStorageServiceImpl(
                 creationDate = creationDate,
                 content = content,
                 authorRole = authorRole?.asDb ?: UserRole.USER,
-                updatedDate = updatedDate
+                updatedDate = updatedDate,
+                isSaved = isSaved
             )
 
             val standalone = StandalonePostingEntity(
@@ -105,7 +107,8 @@ internal class MetisStorageServiceImpl(
                 creationDate = creationDate ?: Instant.fromEpochSeconds(0),
                 content = content,
                 authorRole = authorRole?.asDb ?: UserRole.USER,
-                updatedDate = updatedDate
+                updatedDate = updatedDate,
+                isSaved = isSaved
             )
 
             val answer = AnswerPostingEntity(
@@ -286,6 +289,8 @@ internal class MetisStorageServiceImpl(
                         answerPostId = null
                     )
                 }
+
+                is SavedPost -> throw IllegalArgumentException("Storing a SavedPost is not supported")
             }
         }
     }

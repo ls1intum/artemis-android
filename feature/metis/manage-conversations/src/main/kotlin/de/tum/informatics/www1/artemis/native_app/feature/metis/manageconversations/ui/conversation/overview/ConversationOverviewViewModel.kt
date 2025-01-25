@@ -194,25 +194,28 @@ class ConversationOverviewViewModel(
             }
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
+    private val isFiltering: StateFlow<Boolean> = query
+            .map { it.isNotBlank() }
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
+
     private val conversationsAsCollections: StateFlow<DataState<ConversationCollections>> =
         combine(
             updatedConversations,
             currentPreferences,
-            query
-        ) { conversationsDataState, preferences, query ->
+            isFiltering
+        ) { conversationsDataState, preferences, filterActive ->
             conversationsDataState.bind { conversations ->
-                val isFiltering = query.isNotBlank()
 
                 ConversationCollections(
                     channels = conversations.filterNotHidden<ChannelChat>()
                         .filter { !it.filterPredicate("exercise") && !it.filterPredicate("lecture") && !it.filterPredicate("exam") }
-                        .asCollection(isFiltering || preferences.generalsExpanded),
+                        .asCollection(filterActive || preferences.generalsExpanded),
 
                     groupChats = conversations.filterNotHidden<GroupChat>()
-                        .asCollection(isFiltering || preferences.groupChatsExpanded),
+                        .asCollection(filterActive || preferences.groupChatsExpanded),
 
                     directChats = conversations.filterNotHidden<OneToOneChat>()
-                        .asCollection(isFiltering || preferences.personalConversationsExpanded),
+                        .asCollection(filterActive || preferences.personalConversationsExpanded),
 
                     favorites = conversations.filter { it.isFavorite }
                         .asCollection(preferences.favouritesExpanded),
@@ -223,23 +226,30 @@ class ConversationOverviewViewModel(
                     exerciseChannels = conversations.filter {
                         it is ChannelChat && !it.isHidden && it.filterPredicate("exercise")
                     }.map { it as ChannelChat }
-                        .asCollection(isFiltering || preferences.exercisesExpanded, showPrefix = false),
+                        .asCollection(filterActive || preferences.exercisesExpanded, showPrefix = false),
 
                     lectureChannels = conversations.filter {
                         it is ChannelChat && !it.isHidden && it.filterPredicate("lecture")
                     }.map { it as ChannelChat }
-                        .asCollection(isFiltering || preferences.lecturesExpanded, showPrefix = false),
+                        .asCollection(filterActive || preferences.lecturesExpanded, showPrefix = false),
 
                     examChannels = conversations.filter {
                         it is ChannelChat && !it.isHidden && it.filterPredicate("exam")
                     }.map { it as ChannelChat }
-                        .asCollection(isFiltering || preferences.examsExpanded, showPrefix = false)
+                        .asCollection(filterActive || preferences.examsExpanded, showPrefix = false)
                 )
             }
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-
+    val isSavedPostsExpanded: StateFlow<Boolean> =
+        combine(
+            currentPreferences,
+            isFiltering
+        ) { preferences, filterActive ->
+            preferences.savedPostsExpanded && !filterActive
+        }
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
 
     /**
@@ -422,6 +432,10 @@ class ConversationOverviewViewModel(
         expandOrCollapseSection { copy(hiddenExpanded = !hiddenExpanded) }
     }
 
+    fun toggleSavedPostsExpanded() {
+        expandOrCollapseSection { copy(savedPostsExpanded = !savedPostsExpanded) }
+    }
+
     private fun expandOrCollapseSection(update: ConversationPreferenceService.Preferences.() -> ConversationPreferenceService.Preferences) {
         viewModelScope.launch(coroutineContext) {
             conversationPreferenceService.updatePreferences(
@@ -434,7 +448,7 @@ class ConversationOverviewViewModel(
 
     private inline fun <reified T : Conversation> List<*>.filterNotHidden(): List<T> {
         return filterIsInstance<T>()
-            .filter { !it.isHidden}
+            .filter { !it.isHidden }
     }
 
     private fun <T : Conversation> List<T>.asCollection(

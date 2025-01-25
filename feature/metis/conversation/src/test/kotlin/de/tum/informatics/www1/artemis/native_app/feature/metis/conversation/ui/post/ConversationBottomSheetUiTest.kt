@@ -171,6 +171,25 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
 
     // ###################################### UTIL METHODS ###########################################
 
+    @Test
+    fun `test GIVEN a post WHEN long pressing the post as non-moderator THEN save option is shown`() {
+        setupChatUi(
+            posts = listOf(simplePost(otherUser))
+        )
+
+        composeTestRule.assertPostActionVisibility(R.string.post_save, isVisible = true)
+    }
+
+    @Test
+    fun `test GIVEN a saved post WHEN long pressing the post as non-moderator THEN un-save option is shown`() {
+        setupChatUi(
+            posts = listOf(simplePost(otherUser, isSaved = true)),
+        )
+
+        composeTestRule.assertPostActionVisibility(R.string.post_unsave, isVisible = true)
+    }
+
+
     private fun ComposeTestRule.assertPostActionVisibility(
         stringResId: Int,
         isVisible: Boolean,
