@@ -93,35 +93,42 @@ internal fun MarkdownTextField(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        // This box is needed to ensure that the TextFieldOptions stay visible when the BasicMarkdownTextField grows
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
         ) {
-            when (selectedType) {
-                ViewType.TEXT -> {
-                    BasicMarkdownTextField(
-                        modifier = Modifier.weight(1f),
-                        textFieldValue = textFieldValue,
-                        onTextChanged = onTextChanged,
-                        hintText = hintText,
-                        focusRequester = focusRequester,
-                        onFocusAcquired = onFocusAcquired,
-                        onFocusLost = onFocusLost
-                    )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                when (selectedType) {
+                    ViewType.TEXT -> {
+                        BasicMarkdownTextField(
+                            modifier = Modifier.weight(1f),
+                            textFieldValue = textFieldValue,
+                            onTextChanged = onTextChanged,
+                            hintText = hintText,
+                            focusRequester = focusRequester,
+                            onFocusAcquired = onFocusAcquired,
+                            onFocusLost = onFocusLost
+                        )
+                    }
+
+                    ViewType.PREVIEW -> {
+                        MarkdownText(
+                            markdown = text,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
 
-                ViewType.PREVIEW -> {
-                    MarkdownText(
-                        markdown = text,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                sendButton()
+
+                topRightButton()
             }
-
-            sendButton()
-
-            topRightButton()
         }
 
         TextFieldOptions(
