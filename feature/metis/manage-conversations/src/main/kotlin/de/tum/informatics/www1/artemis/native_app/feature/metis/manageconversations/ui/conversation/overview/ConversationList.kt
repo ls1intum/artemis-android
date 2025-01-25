@@ -79,7 +79,7 @@ internal const val SECTION_EXAMS_KEY = "exams"
 internal const val SECTION_LECTURES_KEY = "lectures"
 internal const val SECTION_DIRECT_MESSAGES_KEY = "direct-messages"
 internal const val SECTION_SAVED_POSTS_KEY = "saved-posts"
-internal const val SECTION_RECENT_KEY = "recents"
+internal const val SECTION_RECENT_KEY = "recent"
 
 internal const val KEY_SUFFIX_FAVORITES = "_f"
 internal const val KEY_SUFFIX_CHANNELS = "_c"
@@ -127,6 +127,7 @@ internal fun ConversationList(
         togglePersonalConversationsExpanded = viewModel::togglePersonalConversationsExpanded,
         toggleHiddenExpanded = viewModel::toggleHiddenExpanded,
         toggleSavedPostsExpanded = viewModel::toggleSavedPostsExpanded,
+        toggleRecentExpanded = viewModel::toggleRecentExpanded,
         conversationCollections = conversationCollections,
         onNavigateToConversation = onNavigateToConversation,
         onNavigateToSavedPosts = onNavigateToSavedPosts,
@@ -150,6 +151,7 @@ internal fun ConversationList(
     togglePersonalConversationsExpanded: () -> Unit,
     toggleHiddenExpanded: () -> Unit,
     toggleSavedPostsExpanded: () -> Unit,
+    toggleRecentExpanded: () -> Unit,
     conversationCollections: ConversationCollections,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
@@ -195,11 +197,11 @@ internal fun ConversationList(
 
         if (conversationCollections.recentChannels.conversations.isNotEmpty()) {
             listWithHeader(
-                conversationCollections.recentChannels,
+                ConversationSectionState.Conversations(conversationCollections.recentChannels),
                 SECTION_RECENT_KEY,
                 KEY_SUFFIX_RECENT,
                 R.string.conversation_overview_section_recent,
-                viewModel::toggleRecentExpanded,
+                toggleRecentExpanded,
                 { Icon(imageVector = Icons.Default.AccessTimeFilled, contentDescription = null) }
             )
         }
