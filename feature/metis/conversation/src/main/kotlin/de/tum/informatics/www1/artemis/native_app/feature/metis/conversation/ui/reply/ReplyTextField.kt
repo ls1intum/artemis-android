@@ -110,9 +110,10 @@ internal fun ReplyTextField(
     conversationName: String
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
+    val systemBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
     Surface(
-        modifier = modifier.defaultMinSize(minHeight = 84.dp),
+        modifier = modifier.defaultMinSize(minHeight = (59.dp + systemBarHeight)),
         border = BorderStroke(
             1.dp,
             Brush.verticalGradient(
@@ -131,9 +132,7 @@ internal fun ReplyTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
-                .padding(
-                    bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
-                )
+                .padding(bottom = systemBarHeight)
                 .height(IntrinsicSize.Max)
         ) {
             AnimatedContent(
