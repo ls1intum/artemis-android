@@ -259,7 +259,7 @@ class ConversationOverviewViewModel(
                     }.map { it as ChannelChat }
                         .asCollection(isFiltering || preferences.examsExpanded, showPrefix = false),
 
-                    recentChannels = conversations.filter { isRecent(
+                    recentChannels = conversations.filter { ConversationOverviewUtils.isRecent(
                         it,
                         course.value.orNull()
                     ) }
@@ -271,37 +271,6 @@ class ConversationOverviewViewModel(
             }
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
-
-    private fun isRecent(conversation: Conversation, course: Course?): Boolean {
-        if (conversation !is ChannelChat) return false
-
-        val now = Clock.System.now()
-        val startDateRange = now.minus(10.days)
-        val endDateRange = now.plus(10.days)
-
-        val exercise = course?.exercises?.firstOrNull { it.id == conversation.subTypeReferenceId }
-        val lecture = course?.lectures?.firstOrNull { it.id == conversation.subTypeReferenceId }
-
-        val exerciseStart = exercise?.releaseDate ?: Instant.DISTANT_PAST
-        val exerciseEnd = exercise?.dueDate ?: Instant.DISTANT_FUTURE
-
-        val lectureStart = lecture?.startDate ?: Instant.DISTANT_PAST
-        val lectureEnd = lecture?.endDate ?: Instant.DISTANT_FUTURE
-
-        return when {
-            conversation.filterPredicate("exercise") ->
-                exerciseStart in startDateRange..endDateRange || exerciseEnd in startDateRange..endDateRange
-
-            conversation.filterPredicate("lecture") ->
-                lectureStart in startDateRange..endDateRange || lectureEnd in startDateRange..endDateRange
-
-            conversation.filterPredicate("exam") -> {
-                val creationDate = conversation.creationDate ?: Instant.DISTANT_PAST
-                creationDate in startDateRange..endDateRange
-            }
-            else -> false
-        }
-    }
 
 
     /**
