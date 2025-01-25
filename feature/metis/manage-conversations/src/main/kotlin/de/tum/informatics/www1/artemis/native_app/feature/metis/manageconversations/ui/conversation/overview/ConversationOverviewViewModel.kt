@@ -265,7 +265,7 @@ class ConversationOverviewViewModel(
                     ) }
                         .asCollection(
                             isFiltering || preferences.recentExpanded,
-                            showPrefix = false
+                            showPrefix = true
                         )
                 )
             }
