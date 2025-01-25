@@ -17,6 +17,7 @@ data class StandalonePost(
     override val updatedDate: Instant? = null,
     override val content: String = "",
     override val reactions: List<Reaction>? = null,
+    override val isSaved: Boolean? = null,
     override val title: String? = null,
     val visibleForStudents: Boolean = true,
     override val answers: List<AnswerPost>? = null,
@@ -42,14 +43,9 @@ data class StandalonePost(
         creationDate = post.creationDate ?: Clock.System.now(),
         title = post.title,
         resolved = post.resolved,
-        displayPriority = post.displayPriority
+        displayPriority = post.displayPriority,
+        isSaved = post.isSaved,
     )
-
-    @Transient
-    override val authorId: Long? = author?.id
-
-    @Transient
-    override val serverPostId: Long? = id
 
     @Transient
     override val key: Any = id ?: hashCode()
@@ -57,6 +53,4 @@ data class StandalonePost(
     @Transient
     override val standalonePostId = id?.let(StandalonePostId::ServerSideId)
 
-    @Transient
-    override val clientPostId: String? = null
 }

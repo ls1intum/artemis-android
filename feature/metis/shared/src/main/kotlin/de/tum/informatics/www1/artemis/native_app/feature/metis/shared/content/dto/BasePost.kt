@@ -13,6 +13,15 @@ sealed class BasePost : IBasePost {
     abstract override val updatedDate: Instant?
     abstract override val content: String?
     abstract override val reactions: List<Reaction>?
+    abstract override val isSaved: Boolean?
+
+    override val serverPostId: Long?
+        get() = id
+
+    override val clientPostId: String? = null
+
+    override val authorId: Long?
+        get() = author?.id
 
     override val authorName: String?
         get() = author?.name

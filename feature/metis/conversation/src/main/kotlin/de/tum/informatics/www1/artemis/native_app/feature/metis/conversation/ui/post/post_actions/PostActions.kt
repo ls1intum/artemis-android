@@ -10,11 +10,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 data class PostActions(
     val requestEditPost: (() -> Unit)? = null,
     val requestDeletePost: (() -> Unit)? = null,
+    val requestUndoDeletePost: (() -> Unit)? = null,
     val onClickReaction: ((emojiId: String, create: Boolean) -> Unit)? = null,
     val onCopyText: () -> Unit = {},
     val onReplyInThread: (() -> Unit)? = null,
     val onResolvePost: (() -> Unit)? = null,
     val onPinPost: (() -> Unit)? = null,
+    val onSavePost: (() -> Unit)? = null,
     val onRequestRetrySend: () -> Unit = {}
 ) {
     val canPerformAnyAction: Boolean get() = requestDeletePost != null || requestEditPost != null
@@ -27,10 +29,12 @@ fun rememberPostActions(
     clientId: Long,
     onRequestEdit: () -> Unit,
     onRequestDelete: () -> Unit,
+    onRequestUndoDelete: () -> Unit,
     onClickReaction: (emojiId: String, create: Boolean) -> Unit,
     onReplyInThread: (() -> Unit)?,
     onResolvePost: (() -> Unit)?,
     onPinPost: (() -> Unit)?,
+    onSavePost: (() -> Unit)?,
     onRequestRetrySend: () -> Unit
 ): PostActions {
     val clipboardManager = LocalClipboardManager.current
@@ -41,10 +45,12 @@ fun rememberPostActions(
         clientId,
         onRequestEdit,
         onRequestDelete,
+        onRequestUndoDelete,
         onClickReaction,
         onReplyInThread,
         onResolvePost,
         onPinPost,
+        onSavePost,
         onRequestRetrySend,
         clipboardManager
     ) {
@@ -58,10 +64,12 @@ fun rememberPostActions(
         val hasResolvePostRights =
             postActionFlags.isAtLeastTutorInCourse || isParentPostAuthor
         val hasPinPostRights = postActionFlags.isAbleToPin
+        val hasDeletePostRights = isPostAuthor || postActionFlags.hasModerationRights
 
         PostActions(
             requestEditPost = if (doesPostExistOnServer && isPostAuthor) onRequestEdit else null,
-            requestDeletePost = if (isPostAuthor || postActionFlags.hasModerationRights) onRequestDelete else null,
+            requestDeletePost = if (hasDeletePostRights) onRequestDelete else null,
+            requestUndoDeletePost = if (hasDeletePostRights) onRequestUndoDelete else null,
             onClickReaction = if (doesPostExistOnServer) onClickReaction else null,
             onCopyText = {
                 clipboardManager.setText(AnnotatedString(post.content.orEmpty()))
@@ -69,6 +77,7 @@ fun rememberPostActions(
             onReplyInThread = if (doesPostExistOnServer) onReplyInThread else null,
             onResolvePost = if (hasResolvePostRights) onResolvePost else null,
             onPinPost = if (hasPinPostRights) onPinPost else null,
+            onSavePost = if (doesPostExistOnServer) onSavePost else null,
             onRequestRetrySend = onRequestRetrySend,
         )
     }

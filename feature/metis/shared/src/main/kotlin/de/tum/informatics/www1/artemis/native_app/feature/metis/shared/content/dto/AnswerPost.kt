@@ -18,20 +18,12 @@ data class AnswerPost(
     override val reactions: List<Reaction>? = null,
     @SerialName("resolvesPost")
     override val resolvesPost: Boolean = false,
+    override val isSaved: Boolean = false,
     val post: StandalonePost? = null
 ) : BasePost(), IAnswerPost {
 
     @Transient
-    override val authorId: Long? = author?.id
-
-    @Transient
     override val parentAuthorId: Long? = post?.authorId
-
-    @Transient
-    override val serverPostId: Long? = id
-
-    @Transient
-    override val clientPostId: String? = null
 
     constructor(answerPostDb: AnswerPostPojo, post: StandalonePost) : this(
         id = answerPostDb.serverPostId,
