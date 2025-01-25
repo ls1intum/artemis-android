@@ -168,7 +168,7 @@ internal fun ConversationList(
             conversationList(
                 keySuffix = suffix,
                 section = items,
-                allowFavoriteIndicator = conversationCollections.favorites == items,
+                allowFavoriteIndicator = key == SECTION_FAVORITES_KEY,
                 onNavigateToConversation = onNavigateToConversation,
                 onNavigateToSavedPosts = onNavigateToSavedPosts,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
@@ -463,7 +463,8 @@ private fun ConversationListItem(
         leadingContent = {
             ConversationIcon(
                 conversation = conversation,
-                hasUnreadMessages = unreadMessagesCount > 0
+                hasUnreadMessages = unreadMessagesCount > 0,
+                allowFavoriteIndicator = allowFavoriteIndicator
             )
         },
         otherTrailingContent = {
