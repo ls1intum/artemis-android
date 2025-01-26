@@ -15,20 +15,20 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
-import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2DisplayName
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.CreatePersonalConversationScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.CreatePersonalConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelectionBaseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -74,7 +74,7 @@ class CreateConversationE2eTest : ConversationBaseTest() {
     @Test(timeout = DefaultTestTimeoutMillis)
     fun `can create personal conversation`() {
         val createdConversation = createConversationTestImpl(
-            listOf(User(username = user2Username))
+            listOf(CourseUser(username = user2Username))
         )
 
         assertIs<OneToOneChat>(createdConversation, "Created conversation is not a OneToOneChat")
@@ -84,15 +84,15 @@ class CreateConversationE2eTest : ConversationBaseTest() {
     fun `can create group conversation`() {
         val createdConversation = createConversationTestImpl(
             listOf(
-                User(username = user2Username),
-                User(username = user3Username)
+                CourseUser(username = user2Username),
+                CourseUser(username = user3Username)
             )
         )
 
         assertIs<GroupChat>(createdConversation, "Created conversation is not a group conversation")
     }
 
-    private fun createConversationTestImpl(recipients: List<User>): Conversation {
+    private fun createConversationTestImpl(recipients: List<CourseUser>): Conversation {
         var createdConversationId: Long? = null
 
         val viewModel = setupUiAndViewModel(
