@@ -297,24 +297,27 @@ internal fun CourseUiScreen(
                 val isCommunicationEnabled = course.courseInformationSharingConfiguration.supportsMessaging
 
                 if (!isCommunicationEnabled) {
-                    CommunicationDisabledInfo()
-                } else {
-                    val initialConfiguration = remember(conversationId, postId, username, userId) {
-                        getInitialConversationConfiguration(
-                            conversationId,
-                            postId,
-                            username,
-                            userId
-                        )
+                    scaffold {
+                        CommunicationDisabledInfo()
                     }
+                    return@EmptyDataStateUi
+                }
 
-                    ConversationFacadeUi(
-                        modifier = Modifier.fillMaxSize(),
-                        courseId = courseId,
-                        scaffold = scaffold,
-                        initialConfiguration = initialConfiguration
+                val initialConfiguration = remember(conversationId, postId, username, userId) {
+                    getInitialConversationConfiguration(
+                        conversationId,
+                        postId,
+                        username,
+                        userId
                     )
                 }
+
+                ConversationFacadeUi(
+                    modifier = Modifier.fillMaxSize(),
+                    courseId = courseId,
+                    scaffold = scaffold,
+                    initialConfiguration = initialConfiguration
+                )
             }
         }
     }
