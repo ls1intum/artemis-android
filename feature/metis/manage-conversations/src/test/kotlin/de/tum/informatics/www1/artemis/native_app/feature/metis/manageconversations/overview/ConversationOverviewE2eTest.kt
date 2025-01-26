@@ -43,6 +43,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metistest.Conversation
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -222,6 +223,24 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
         )
     }
 
+    @Test(timeout = DefaultTestTimeoutMillis)
+    fun `can mark all channels as read`() = runBlocking {
+        var chat = createPersonalConversation()
+
+        chat = chat.withUnreadMessagesCount(3) as OneToOneChat
+
+        assertEquals(3L, chat.unreadMessagesCount)
+
+        conversationService.markAllConversationsAsRead(
+            courseId = course.id!!,
+            authToken = accessToken,
+            serverUrl = testServerUrl
+        )
+
+        chat = chat.withUnreadMessagesCount(0) as OneToOneChat
+        assertEquals(0L, chat.unreadMessagesCount)
+    }
+
     /**
      * Checks that updates to conversations are automatically received over the websocket connection.
      */
@@ -391,7 +410,6 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
                 onRequestCreatePersonalConversation = { },
                 onRequestAddChannel = {},
                 onRequestBrowseChannel = {},
-                onMarkAllConversationsAsRead = {},
                 canCreateChannel = false
             )
         }
