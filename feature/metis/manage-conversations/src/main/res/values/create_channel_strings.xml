@@ -25,4 +25,6 @@
     <string name="create_channel_failed_title">Could not create channel.</string>
     <string name="create_channel_failed_message">Something went wrong while creating your channel. Please try again.</string>
     <string name="create_channel_failed_positive">@android:string/ok</string>
+
+    <string name="mark_all_messages_as_read">Mark all as read</string>
 </resources>

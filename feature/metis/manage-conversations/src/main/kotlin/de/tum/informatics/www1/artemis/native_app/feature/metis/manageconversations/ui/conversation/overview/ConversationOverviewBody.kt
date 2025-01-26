@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Tag
@@ -71,6 +72,7 @@ fun ConversationOverviewBody(
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit,
     onRequestBrowseChannel: () -> Unit,
+    onMarkAllConversationsAsRead: () -> Unit,
     canCreateChannel: Boolean
 ) {
     ConversationOverviewBody(
@@ -81,6 +83,7 @@ fun ConversationOverviewBody(
         onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
         onRequestAddChannel = onRequestAddChannel,
         onRequestBrowseChannel = onRequestBrowseChannel,
+        onMarkAllConversationsAsRead = onMarkAllConversationsAsRead,
         canCreateChannel = canCreateChannel
     )
 }
@@ -94,6 +97,7 @@ fun ConversationOverviewBody(
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit,
     onRequestBrowseChannel: () -> Unit,
+    onMarkAllConversationsAsRead: () -> Unit,
     canCreateChannel: Boolean
 ) {
     var showCodeOfConduct by rememberSaveable { mutableStateOf(false) }
@@ -188,7 +192,8 @@ fun ConversationOverviewBody(
             canCreateChannel = canCreateChannel,
             onCreateChat = onRequestCreatePersonalConversation,
             onBrowseChannels = onRequestBrowseChannel,
-            onCreateChannel = onRequestAddChannel
+            onCreateChannel = onRequestAddChannel,
+            onMarkAllAsRead = onMarkAllConversationsAsRead
         )
     }
 
@@ -216,7 +221,8 @@ fun ConversationFabWithDropdownMenu(
     canCreateChannel: Boolean,
     onCreateChat: () -> Unit,
     onBrowseChannels: () -> Unit,
-    onCreateChannel: () -> Unit
+    onCreateChannel: () -> Unit,
+    onMarkAllAsRead: () -> Unit
 ) {
     var showDropdownMenu by remember { mutableStateOf(false) }
 
@@ -278,6 +284,16 @@ fun ConversationFabWithDropdownMenu(
                         }
                     )
                 }
+                DropdownMenuItem(
+                    onClick = {
+                        showDropdownMenu = false
+                        onMarkAllAsRead()
+                    },
+                    text = { Text(stringResource(id = R.string.mark_all_messages_as_read)) },
+                    leadingIcon = {
+                        Icon(imageVector = Icons.Default.Checklist, contentDescription = null)
+                    }
+                )
             }
         }
     }

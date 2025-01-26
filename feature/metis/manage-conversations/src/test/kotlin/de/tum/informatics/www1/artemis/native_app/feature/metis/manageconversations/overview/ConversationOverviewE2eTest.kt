@@ -391,6 +391,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
                 onRequestCreatePersonalConversation = { },
                 onRequestAddChannel = {},
                 onRequestBrowseChannel = {},
+                onMarkAllConversationsAsRead = {},
                 canCreateChannel = false
             )
         }

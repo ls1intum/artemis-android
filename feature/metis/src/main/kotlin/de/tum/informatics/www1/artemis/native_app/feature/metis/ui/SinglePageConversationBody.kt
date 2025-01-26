@@ -93,6 +93,7 @@ internal fun SinglePageConversationBody(
             onRequestBrowseChannel = {
                 configuration = BrowseChannelConfiguration(configuration)
             },
+            onMarkAllConversationsAsRead = {},
             canCreateChannel = canCreateChannel
         )
     }
