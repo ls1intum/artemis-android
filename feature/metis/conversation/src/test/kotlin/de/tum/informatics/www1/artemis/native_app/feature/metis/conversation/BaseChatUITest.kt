@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -211,25 +212,23 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     postActionFlags = PostActionFlags(
                         isAbleToPin = isAbleToPin,
                         isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-                        hasModerationRights = hasModerationRights,
-                    ),
+                        hasModerationRights = hasModerationRights,),
+
 
                     serverUrl = "",
                     courseId = course.id!!,
                     state = rememberLazyListState(),
-                    emojiService = EmojiServiceStub,
-                    isMarkedAsDeleteList = mutableStateListOf(),
+                    emojiService = EmojiServiceStub,isMarkedAsDeleteList = mutableStateListOf(),
                     bottomItem = null,
                     isReplyEnabled = true,
                     onCreatePost = { CompletableDeferred() },
                     onEditPost = { _, _ -> CompletableDeferred() },
                     onPinPost = onPinPost,
-                    onSavePost = { CompletableDeferred() },
-                onDeletePost = { CompletableDeferred() },
-                onUndoDeletePost = {},onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                onClickViewPost = {},
-                onRequestRetrySend = { _ -> },
-                conversationName = "Title",
+                    onSavePost = { CompletableDeferred() },onDeletePost = { CompletableDeferred() },onUndoDeletePost = {},
+                    onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                    onClickViewPost = {},
+                    onRequestRetrySend = { _ -> },
+                    conversationName = "Title",
                     onFileSelected = { _ -> }
                 )
             }

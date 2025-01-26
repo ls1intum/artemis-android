@@ -168,6 +168,7 @@ internal fun ConversationList(
             conversationList(
                 keySuffix = suffix,
                 section = items,
+                allowFavoriteIndicator = key == SECTION_FAVORITES_KEY,
                 onNavigateToConversation = onNavigateToConversation,
                 onNavigateToSavedPosts = onNavigateToSavedPosts,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
@@ -319,6 +320,7 @@ private fun LazyListScope.conversationSectionHeader(
 private fun LazyListScope.conversationList(
     keySuffix: String,
     section: ConversationSectionState,
+    allowFavoriteIndicator: Boolean,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
@@ -357,6 +359,7 @@ private fun LazyListScope.conversationList(
                     itemBaseTag = itemTag,
                     conversation = conversation,
                     showPrefix = conversations.showPrefix,
+                    allowFavoriteIndicator = allowFavoriteIndicator,
                     onNavigateToConversation = { onNavigateToConversation(conversation.id) },
                     onToggleMarkAsFavourite = {
                         onToggleMarkAsFavourite(
@@ -442,6 +445,7 @@ private fun ConversationListItem(
     itemBaseTag: String,
     conversation: Conversation,
     showPrefix: Boolean,
+    allowFavoriteIndicator: Boolean,
     onNavigateToConversation: () -> Unit,
     onToggleMarkAsFavourite: () -> Unit,
     onToggleHidden: () -> Unit,
@@ -459,7 +463,8 @@ private fun ConversationListItem(
         leadingContent = {
             ConversationIcon(
                 conversation = conversation,
-                hasUnreadMessages = unreadMessagesCount > 0
+                hasUnreadMessages = unreadMessagesCount > 0,
+                allowFavoriteIndicator = allowFavoriteIndicator
             )
         },
         otherTrailingContent = {

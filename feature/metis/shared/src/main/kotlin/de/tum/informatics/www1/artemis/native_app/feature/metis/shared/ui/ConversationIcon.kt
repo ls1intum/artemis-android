@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Groups2
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Numbers
@@ -31,6 +32,7 @@ fun ConversationIcon(
     modifier: Modifier = Modifier,
     conversation: Conversation,
     hasUnreadMessages: Boolean = false,
+    allowFavoriteIndicator: Boolean = false,
     showDialogOnOneToOneChatClick: Boolean = false
 ) {
     Box {
@@ -43,6 +45,13 @@ fun ConversationIcon(
         if (hasUnreadMessages) {
             UnreadMessagesIndicator(
                 modifier = Modifier.align(Alignment.TopEnd)
+            )
+        }
+
+        if (conversation.isFavorite && !allowFavoriteIndicator) {
+            FavoriteIndicator(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
             )
         }
     }
@@ -92,7 +101,7 @@ fun OneToOneChatIcon(
     if (showDialogOnClick) {
         ProfilePictureWithDialog(
             modifier = modifier,
-            conversationUser = conversationPartner
+            courseUser = conversationPartner
         )
     } else {
         ProfilePicture(
@@ -103,11 +112,22 @@ fun OneToOneChatIcon(
 }
 
 @Composable
-fun UnreadMessagesIndicator(modifier: Modifier = Modifier) {
+private fun UnreadMessagesIndicator(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .size(8.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primaryContainer)
+    )
+}
+
+@Composable
+private fun FavoriteIndicator(modifier: Modifier = Modifier) {
+    Icon(
+        modifier = modifier
+            .size(8.dp),
+        imageVector = Icons.Default.Favorite,
+        contentDescription = "Favorite",
+        tint = MaterialTheme.colorScheme.error
     )
 }

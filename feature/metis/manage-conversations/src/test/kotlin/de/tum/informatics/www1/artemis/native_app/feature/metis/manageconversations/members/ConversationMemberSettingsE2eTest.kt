@@ -17,8 +17,11 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1DisplayName
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2DisplayName
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
+import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3DisplayName
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user3Username
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.ConversationMembersBody
@@ -41,6 +44,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.R as R_sh
 class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
 
     private lateinit var channel: ChannelChat
+
+    private val isModeratorCheck = hasContentDescription(
+        context.getString(R_shared.string.user_role_moderator)
+    )
 
     override fun setup() {
         super.setup()
@@ -76,24 +83,21 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
         composeTestRule
             .onNodeWithTag(testTagForMember(user1Username))
             .performScrollTo()
-            .assert(hasText(user1Username))
-            .assert(hasContentDescription(context.getString(R_shared.string.user_role_icon_content_description_moderator))
-        )
+            .assert(hasText(user1DisplayName))
+            .assert(isModeratorCheck)
 
         composeTestRule
             .onNodeWithTag(testTagForMember(user2Username))
             .performScrollTo()
             .assert(
-                hasText(user2Username) and !
-                    hasContentDescription(context.getString(R_shared.string.user_role_icon_content_description_moderator))
+                hasText(user2DisplayName) and !isModeratorCheck
             )
 
         composeTestRule
-            .onNodeWithTag(testTagForMember(user2Username))
+            .onNodeWithTag(testTagForMember(user3Username))
             .performScrollTo()
             .assert(
-                hasText(user2Username) and !
-                    hasContentDescription(context.getString(R_shared.string.user_role_icon_content_description_moderator))
+                hasText(user3DisplayName) and !isModeratorCheck
             )
     }
 
@@ -172,10 +176,6 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
                 )
             )
             .performClick()
-
-        val isModeratorCheck = hasContentDescription(
-            context.getString(R_shared.string.user_role_icon_content_description_moderator)
-        )
 
         composeTestRule.waitUntilExactlyOneExists(
             hasTestTag(testTagForMember(user2Username)) and if (makeModerator) isModeratorCheck else !isModeratorCheck,

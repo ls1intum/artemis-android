@@ -1,11 +1,11 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation
+package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto
 
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.ICourseUser
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ConversationUser(
+data class CourseUser(
     override val activated: Boolean = false,
     override val authorities: List<String> = emptyList(),
     @SerialName("login")
@@ -18,8 +18,6 @@ data class ConversationUser(
     override val langKey: String = "en",
     override val imageUrl: String? = null,
     override val id: Long = 0L,
-    val isChannelModerator: Boolean = false,
-    val isRequestingUser: Boolean = false,
     override val isInstructor: Boolean = false,
     override val isEditor: Boolean = false,
     override val isTeachingAssistant: Boolean = false,
