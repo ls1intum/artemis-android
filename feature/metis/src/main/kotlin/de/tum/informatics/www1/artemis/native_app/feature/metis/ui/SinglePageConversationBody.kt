@@ -141,11 +141,7 @@ internal fun SinglePageConversationBody(
 
                 is OpenedConversation -> {
                     ConversationScreen(
-                        modifier = modifier.apply {
-                            if (doAlwaysShowScaffold) {
-                                padding(bottom = 2.dp)
-                            }
-                        },
+                        modifier = modifier,
                         conversationId = config.conversationId,
                         threadPostId = config.openedThread?.postId,
                         courseId = courseId,

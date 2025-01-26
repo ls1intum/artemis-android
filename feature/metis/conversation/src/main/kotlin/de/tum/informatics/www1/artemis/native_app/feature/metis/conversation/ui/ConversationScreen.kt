@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -123,6 +124,7 @@ fun LayoutAwareTwoColumnLayout(
 
                 Box(
                     modifier = Modifier
+                        .padding(bottom = 4.dp)
                         .weight(priorityColumnWeight)
                         .fillMaxHeight()
                 ) {
