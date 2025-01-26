@@ -229,14 +229,14 @@ class ConversationOverviewViewModel(
             conversationsDataState.bind { conversations ->
 
                 ConversationCollections(
-                    channels = conversations.filterNotHiddenNorFavourite<ChannelChat>()
+                    channels = conversations.filterNotHidden<ChannelChat>()
                         .filter { !it.filterPredicate("exercise") && !it.filterPredicate("lecture") && !it.filterPredicate("exam") }
                         .asCollection(filterActive || preferences.generalsExpanded),
 
-                    groupChats = conversations.filterNotHiddenNorFavourite<GroupChat>()
+                    groupChats = conversations.filterNotHidden<GroupChat>()
                         .asCollection(filterActive || preferences.groupChatsExpanded),
 
-                    directChats = conversations.filterNotHiddenNorFavourite<OneToOneChat>()
+                    directChats = conversations.filterNotHidden<OneToOneChat>()
                         .asCollection(filterActive || preferences.personalConversationsExpanded),
 
                     favorites = conversations.filter { it.isFavorite }
@@ -246,17 +246,17 @@ class ConversationOverviewViewModel(
                         .asCollection(preferences.hiddenExpanded),
 
                     exerciseChannels = conversations.filter {
-                        it is ChannelChat && !it.isFavorite && !it.isHidden && it.filterPredicate("exercise")
+                        it is ChannelChat && !it.isHidden && it.filterPredicate("exercise")
                     }.map { it as ChannelChat }
                         .asCollection(filterActive || preferences.exercisesExpanded, showPrefix = false),
 
                     lectureChannels = conversations.filter {
-                        it is ChannelChat && !it.isFavorite && !it.isHidden && it.filterPredicate("lecture")
+                        it is ChannelChat && !it.isHidden && it.filterPredicate("lecture")
                     }.map { it as ChannelChat }
                         .asCollection(filterActive || preferences.lecturesExpanded, showPrefix = false),
 
                     examChannels = conversations.filter {
-                        it is ChannelChat && !it.isFavorite && !it.isHidden && it.filterPredicate("exam")
+                        it is ChannelChat && !it.isHidden && it.filterPredicate("exam")
                     }.map { it as ChannelChat }
                         .asCollection(filterActive || preferences.examsExpanded, showPrefix = false),
 
@@ -481,9 +481,9 @@ class ConversationOverviewViewModel(
         }
     }
 
-    private inline fun <reified T : Conversation> List<*>.filterNotHiddenNorFavourite(): List<T> {
+    private inline fun <reified T : Conversation> List<*>.filterNotHidden(): List<T> {
         return filterIsInstance<T>()
-            .filter { !it.isHidden && !it.isFavorite }
+            .filter { !it.isHidden }
     }
 
     private fun <T : Conversation> List<T>.asCollection(

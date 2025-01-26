@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImagePainter
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.nonScaledSp
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.ICourseUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 
 const val TEST_TAG_PROFILE_PICTURE_IMAGE = "TEST_TAG_PROFILE_PICTURE_IMAGE"
@@ -49,13 +49,13 @@ private const val BoxSizeToFontSizeMultiplier = 0.16f
 @Composable
 fun ProfilePictureWithDialog(
     modifier: Modifier = Modifier,
-    conversationUser: ConversationUser,
+    courseUser: ICourseUser,
 ) = ProfilePictureWithDialog(
     modifier = modifier,
-    userId = conversationUser.id,
-    userName = conversationUser.humanReadableName,
-    userRole = conversationUser.getUserRole(),
-    imageUrl = conversationUser.imageUrl
+    userId = courseUser.id,
+    userName = courseUser.humanReadableName,
+    userRole = courseUser.getUserRole(),
+    imageUrl = courseUser.imageUrl
 )
 
 
