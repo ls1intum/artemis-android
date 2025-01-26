@@ -394,6 +394,10 @@ class ConversationOverviewViewModel(
         }
     }
 
+    fun markAllConversationsAsRead() {
+
+    }
+
     fun setConversationMessagesRead(conversationId: Long) {
         viewModelScope.launch(coroutineContext) {
             manualConversationUpdates.emit(MarkMessagesRead(conversationId))

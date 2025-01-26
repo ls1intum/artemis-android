@@ -72,7 +72,6 @@ fun ConversationOverviewBody(
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit,
     onRequestBrowseChannel: () -> Unit,
-    onMarkAllConversationsAsRead: () -> Unit,
     canCreateChannel: Boolean
 ) {
     ConversationOverviewBody(
@@ -83,7 +82,6 @@ fun ConversationOverviewBody(
         onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
         onRequestAddChannel = onRequestAddChannel,
         onRequestBrowseChannel = onRequestBrowseChannel,
-        onMarkAllConversationsAsRead = onMarkAllConversationsAsRead,
         canCreateChannel = canCreateChannel
     )
 }
@@ -97,7 +95,6 @@ fun ConversationOverviewBody(
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit,
     onRequestBrowseChannel: () -> Unit,
-    onMarkAllConversationsAsRead: () -> Unit,
     canCreateChannel: Boolean
 ) {
     var showCodeOfConduct by rememberSaveable { mutableStateOf(false) }
@@ -193,7 +190,7 @@ fun ConversationOverviewBody(
             onCreateChat = onRequestCreatePersonalConversation,
             onBrowseChannels = onRequestBrowseChannel,
             onCreateChannel = onRequestAddChannel,
-            onMarkAllAsRead = onMarkAllConversationsAsRead
+            onMarkAllAsRead = viewModel::markAllConversationsAsRead
         )
     }
 
