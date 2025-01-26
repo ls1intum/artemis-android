@@ -394,9 +394,22 @@ class ConversationOverviewViewModel(
         }
     }
 
-    fun markAllConversationsAsRead() {
-
+    fun markAllConversationsAsRead(): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
+            conversationService.markAllConversationsAsRead(
+                courseId = courseId,
+                authToken = accountService.authToken.first(),
+                serverUrl = serverConfigurationService.serverUrl.first()
+            )
+                .onSuccess { isSuccessful ->
+                    if (isSuccessful) {
+                        onRequestReload.tryEmit(Unit)
+                    }
+                }
+                .or(false)
+        }
     }
+
 
     fun setConversationMessagesRead(conversationId: Long) {
         viewModelScope.launch(coroutineContext) {
