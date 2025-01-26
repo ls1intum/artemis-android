@@ -35,4 +35,9 @@
     <string name="conversation_overview_not_connected_banner">Not connected to server</string>
 
     <string name="conversation_overview_button_show_code_of_conduct">Code of Conduct</string>
+
+    <string name="mark_all_messages_as_read">Mark all as read</string>
+    <string name="mark_all_messages_as_read_failed_title">Could not mark as read</string>
+    <string name="mark_all_messages_as_read_failed_message">Something went wrong while marking your messages as read. Please try again.</string>
+    <string name="mark_all_messages_as_read_failed_positive">@android:string/ok</string>
 </resources>
