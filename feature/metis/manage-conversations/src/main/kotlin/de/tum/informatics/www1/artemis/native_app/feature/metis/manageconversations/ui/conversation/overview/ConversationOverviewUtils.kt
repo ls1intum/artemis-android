@@ -11,7 +11,6 @@ object ConversationOverviewUtils {
 
     private const val FILTER_EXERCISE = "exercise"
     private const val FILTER_LECTURE = "lecture"
-    private const val FILTER_EXAM = "exam"
 
     fun isRecent(conversation: Conversation, course: Course?): Boolean {
         if (conversation !is ChannelChat) return false
@@ -35,11 +34,6 @@ object ConversationOverviewUtils {
 
             conversation.filterPredicate(FILTER_LECTURE) ->
                 lectureStart in startDateRange..endDateRange || lectureEnd in startDateRange..endDateRange
-
-            conversation.filterPredicate(FILTER_EXAM) -> {
-                val creationDate = conversation.creationDate ?: Instant.DISTANT_PAST
-                creationDate in startDateRange..endDateRange
-            }
 
             else -> false
         }
