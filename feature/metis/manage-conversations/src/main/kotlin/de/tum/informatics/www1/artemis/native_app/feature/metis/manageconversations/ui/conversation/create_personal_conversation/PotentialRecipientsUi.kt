@@ -14,33 +14,29 @@ import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.common.CourseUserListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelectionBaseViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
 
 internal fun testTagForPotentialRecipient(username: String) = "potentialRecipient$username"
 
 @Composable
 internal fun PotentialRecipientsUi(
     modifier: Modifier,
-    potentialRecipientsDataState: DataState<List<User>>,
+    potentialRecipientsDataState: DataState<List<CourseUser>>,
     isQueryTooShort: Boolean,
     inclusionList: InclusionList,
-    addRecipient: (User) -> Unit,
+    addRecipient: (CourseUser) -> Unit,
     updateInclusionList: (InclusionList) -> Unit,
     retryLoadPotentialRecipients: () -> Unit
 ) {
@@ -107,8 +103,8 @@ private fun InclusionListUi(
 @Composable
 private fun PotentialRecipientsList(
     modifier: Modifier,
-    recipients: List<User>,
-    addRecipient: (User) -> Unit,
+    recipients: List<CourseUser>,
+    addRecipient: (CourseUser) -> Unit,
     isQueryTooShort: Boolean
 ) {
     if (recipients.isNotEmpty()) {
@@ -116,21 +112,11 @@ private fun PotentialRecipientsList(
             modifier = modifier
         ) {
             items(recipients) { user ->
-                ListItem(
+                CourseUserListItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag(testTagForPotentialRecipient(user.username.orEmpty())),
-                    leadingContent = {
-                        ProfilePicture(
-                            profilePictureData = ProfilePictureData.fromAccount(user)
-                        )
-                    },
-                    headlineContent = {
-                        val username = remember(user) { user.humanReadableName }
-
-                        Text(username)
-                    },
-                    supportingContent = user.username?.let { username -> { Text(username) } },
+                    user = user,
                     trailingContent = {
                         IconButton(onClick = { addRecipient(user) }) {
                             Icon(

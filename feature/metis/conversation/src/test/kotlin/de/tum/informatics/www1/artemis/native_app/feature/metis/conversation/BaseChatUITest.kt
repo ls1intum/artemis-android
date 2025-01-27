@@ -211,25 +211,23 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     postActionFlags = PostActionFlags(
                         isAbleToPin = isAbleToPin,
                         isAtLeastTutorInCourse = isAtLeastTutorInCourse,
-                        hasModerationRights = hasModerationRights,
-                    ),
+                        hasModerationRights = hasModerationRights,),
+
 
                     serverUrl = "",
                     courseId = course.id!!,
                     state = rememberLazyListState(),
-                    emojiService = EmojiServiceStub,
-                    isMarkedAsDeleteList = mutableStateListOf(),
+                    emojiService = EmojiServiceStub,isMarkedAsDeleteList = mutableStateListOf(),
                     bottomItem = null,
                     isReplyEnabled = true,
                     onCreatePost = { CompletableDeferred() },
                     onEditPost = { _, _ -> CompletableDeferred() },
                     onPinPost = onPinPost,
-                    onSavePost = { CompletableDeferred() },
-                onDeletePost = { CompletableDeferred() },
-                onUndoDeletePost = {},onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                onClickViewPost = {},
-                onRequestRetrySend = { _ -> },
-                conversationName = "Title",
+                    onSavePost = { CompletableDeferred() },onDeletePost = { CompletableDeferred() },onUndoDeletePost = {},
+                    onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                    onClickViewPost = {},
+                    onRequestRetrySend = { _ -> },
+                    conversationName = "Title",
                     onFileSelected = { _ -> }
                 )
             }

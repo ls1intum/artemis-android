@@ -9,6 +9,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
+import de.tum.informatics.www1.artemis.native_app.core.data.CourseServiceFake
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.test.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountServiceStub
@@ -113,8 +114,9 @@ fun `Metis - Conversation Overview`() {
                     examsExpanded = true,
                     exercisesExpanded = true,
                     lecturesExpanded = true,
-                    savedPostsExpanded = false
-                )
+                    savedPostsExpanded = false,
+                    recentExpanded = true
+                ),
             )
 
             override suspend fun updatePreferences(
@@ -125,7 +127,8 @@ fun `Metis - Conversation Overview`() {
         },
         websocketProvider = WebsocketProviderStub(),
         networkStatusProvider = NetworkStatusProviderStub(),
-        accountDataService = AccountDataServiceStub()
+        accountDataService = AccountDataServiceStub(),
+        courseService = CourseServiceFake(ScreenshotCourse)
     )
 
     val course = DataState.Success(ScreenshotCourse)
@@ -196,13 +199,9 @@ fun `Metis - Conversation Channel`() {
     ).reversed()
 
     val visibleMetisContextManagerStub = object : VisibleMetisContextManager {
+        override fun registerMetisContext(metisContext: VisibleMetisContext) = Unit
+        override fun unregisterMetisContext(metisContext: VisibleMetisContext) = Unit
         override fun getRegisteredMetisContexts(): List<VisibleMetisContext> = emptyList()
-
-        override fun registerMetisContext(metisContext: VisibleMetisContext) =
-            Unit
-
-        override fun unregisterMetisContext(metisContext: VisibleMetisContext) =
-            Unit
     }
 
     // TODO: Provide artemis image provider

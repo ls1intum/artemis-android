@@ -33,6 +33,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Programmin
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIconId
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -49,6 +50,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteCategory
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteHint
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ConversationThreadUseCase
@@ -76,6 +78,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToConversationUpdates
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getChannelIconImageVector
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -659,7 +662,8 @@ internal open class ConversationViewModel(
                             AutoCompleteHint(
                                 hint = exerciseTitle,
                                 replacementText = "[$exerciseTag]${exercise.title}(/courses/${metisContext.courseId}/exercises/${exercise.id})[/$exerciseTag]",
-                                id = "Exercise:${exercise.id ?: return@mapNotNull null}"
+                                id = "Exercise:${exercise.id ?: return@mapNotNull null}",
+                                icon = AutoCompleteIcon.DrawableFromId(getExerciseTypeIconId(exercise))
                             )
                         }
 
@@ -698,7 +702,8 @@ internal open class ConversationViewModel(
                         AutoCompleteHint(
                             hint = channel.name,
                             replacementText = "[channel]${channel.name}(${channel.id})[/channel]",
-                            id = "Channel:${channel.id}"
+                            id = "Channel:${channel.id}",
+                            icon = AutoCompleteIcon.DrawableFromImageVector(getChannelIconImageVector(channel))
                         )
                     }
 

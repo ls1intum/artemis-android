@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation
 
-import de.tum.informatics.www1.artemis.native_app.core.model.account.BaseAccount
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.ICourseUser
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -21,17 +20,8 @@ data class ConversationUser(
     override val id: Long = 0L,
     val isChannelModerator: Boolean = false,
     val isRequestingUser: Boolean = false,
-    val isInstructor: Boolean = false,
-    val isEditor: Boolean = false,
-    val isTeachingAssistant: Boolean = false,
-    val isStudent: Boolean = false
-) : BaseAccount {
-
-    fun getUserRole(): UserRole {
-        return when {
-            isInstructor -> UserRole.INSTRUCTOR
-            isTeachingAssistant || isEditor -> UserRole.TUTOR
-            else -> UserRole.USER
-        }
-    }
-}
+    override val isInstructor: Boolean = false,
+    override val isEditor: Boolean = false,
+    override val isTeachingAssistant: Boolean = false,
+    override val isStudent: Boolean = false
+) : ICourseUser
