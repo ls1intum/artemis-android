@@ -38,7 +38,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profil
 const val TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST = "TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST"
 
 private val HintHorizontalPadding = 16.dp
-private val PopupVerticalPadding = 8.dp
+private val PopupContentVerticalPadding = 8.dp
 private val AutoCompletionDialogMaxHeight = 270.dp
 
 @Composable
@@ -58,8 +58,8 @@ internal fun ReplyAutoCompletePopup(
         val maxHeight = min(maxHeightFromScreen, AutoCompletionDialogMaxHeight)
         ReplyAutoCompletePopupBody(
             modifier = Modifier
-                .padding(vertical = PopupVerticalPadding)
-                .heightIn(max = maxHeight - PopupVerticalPadding * 2)
+                .padding(vertical = PopupContentVerticalPadding)
+                .heightIn(max = maxHeight - PopupContentVerticalPadding * 2)
                 .width(targetWidth),
             autoCompleteCategories = autoCompleteCategories,
             performAutoComplete = performAutoComplete
