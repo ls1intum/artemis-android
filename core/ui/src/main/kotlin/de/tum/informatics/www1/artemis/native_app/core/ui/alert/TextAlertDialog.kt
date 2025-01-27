@@ -7,7 +7,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors.TextAlertDialog.destructiveButtonFont
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 
 @Composable
 fun TextAlertDialog(
@@ -63,7 +63,7 @@ fun DestructiveTextAlertDialog(
         dismissButtonText = dismissButtonText,
         onPressPositiveButton = onPressPositiveButton,
         onDismissRequest = onDismissRequest,
-        confirmButtonFontColor = destructiveButtonFont
+        confirmButtonFontColor = ComponentColors.TextAlertDialog.destructiveButtonFont
     )
 }
 
@@ -83,7 +83,7 @@ fun DestructiveMarkdownTextAlertDialog(
         dismissButtonText = dismissButtonText,
         onPressPositiveButton = onPressPositiveButton,
         onDismissRequest = onDismissRequest,
-        confirmButtonFontColor = destructiveButtonFont
+        confirmButtonFontColor = ComponentColors.TextAlertDialog.destructiveButtonFont
     )
 }
 
