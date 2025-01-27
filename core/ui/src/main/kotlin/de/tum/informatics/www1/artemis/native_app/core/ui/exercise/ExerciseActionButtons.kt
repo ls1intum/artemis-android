@@ -34,37 +34,119 @@ fun ExerciseActionButtons(
     val isStartExerciseAvailable = exercise.isStartExerciseAvailable.collectAsState(initial = false).value
 
     if (exercise is TextExercise) {
-        if (latestParticipation == null && isStartExerciseAvailable) {
-            Button(
-                modifier = modifier,
-                onClick = actions.onClickStartTextExercise,
-                enabled = !exercise.teamMode
-            ) {
-                Text(
-                    text = stringResource(id = R.string.exercise_actions_start_exercise_button)
-                )
-            }
-        }
+        TextExerciseButtons(
+            modifier = modifier,
+            exercise = exercise,
+            latestParticipation = latestParticipation,
+            isStartExerciseAvailable = isStartExerciseAvailable,
+            showResult = showResult,
+            templateStatus = templateStatus,
+            actions = actions
+        )
     }
 
     if (exercise is QuizExercise) {
-        if (isStartPracticeAvailable(exercise = exercise)) {
+        QuizExerciseButtons(
+            modifier = modifier,
+            exercise = exercise,
+            latestParticipation = latestParticipation,
+            actions = actions
+        )
+    }
+
+    if (templateStatus != null) {
+        if (templateStatus is ResultTemplateStatus.WithResult) {
             Button(
                 modifier = modifier,
-                onClick = actions.onClickPracticeQuiz
+                onClick = if (exercise is QuizExercise) actions.onClickViewQuizResults else actions.onClickViewResult
             ) {
-                Text(
-                    text = stringResource(id = R.string.exercise_actions_practice_quiz_button)
-                )
+                Text(text = stringResource(id = R.string.exercise_actions_view_result_button))
             }
         }
+    }
+}
 
-        val openQuizAvailable =
-            exercise.notStartedC || latestParticipation?.initializationState == Participation.InitializationState.INITIALIZED
-        val startQuizAvailable = exercise.isUninitializedC
+@Composable
+private fun TextExerciseButtons(
+    modifier: Modifier,
+    exercise: TextExercise,
+    latestParticipation: Participation?,
+    isStartExerciseAvailable: Boolean,
+    templateStatus: ResultTemplateStatus?,
+    showResult: Boolean,
+    actions: ExerciseActions
+){
+    if (latestParticipation == null && isStartExerciseAvailable) {
+        Button(
+            modifier = modifier,
+            onClick = actions.onClickStartTextExercise,
+            enabled = !exercise.teamMode
+        ) {
+            Text(
+                text = stringResource(id = R.string.exercise_actions_start_exercise_button)
+            )
+        }
+    }
 
-        if (openQuizAvailable || startQuizAvailable) {
-            // TODO: Quiz participation temporarily disabled. See https://github.com/ls1intum/artemis-android/issues/107
+    if (templateStatus != null) {
+        when (latestParticipation?.initializationState) {
+            Participation.InitializationState.INITIALIZED -> {
+                Button(
+                    modifier = modifier,
+                    onClick = {
+                        actions.onClickOpenTextExercise(
+                            latestParticipation.id ?: return@Button
+                        )
+                    }
+                ) {
+                    Text(text = stringResource(id = R.string.exercise_actions_open_exercise_button))
+                }
+            }
+
+            Participation.InitializationState.FINISHED -> {
+                if (latestParticipation.results.isNullOrEmpty() || !showResult) {
+                    Button(
+                        modifier = modifier,
+                        onClick = {
+                            actions.onClickOpenTextExercise(
+                                latestParticipation.id ?: return@Button
+                            )
+                        }
+                    ) {
+                        Text(text = stringResource(id = R.string.exercise_actions_view_submission_button))
+                    }
+                }
+            }
+
+            else -> {}
+        }
+    }
+}
+
+@Composable
+private fun QuizExerciseButtons(
+    modifier: Modifier,
+    exercise: QuizExercise,
+    latestParticipation: Participation?,
+    actions: ExerciseActions
+) {
+    if (isStartPracticeAvailable(exercise = exercise)) {
+        Button(
+            modifier = modifier,
+            onClick = actions.onClickPracticeQuiz
+        ) {
+            Text(
+                text = stringResource(id = R.string.exercise_actions_practice_quiz_button)
+            )
+        }
+    }
+
+    val openQuizAvailable =
+        exercise.notStartedC || latestParticipation?.initializationState == Participation.InitializationState.INITIALIZED
+    val startQuizAvailable = exercise.isUninitializedC
+
+    if (openQuizAvailable || startQuizAvailable) {
+        // TODO: Quiz participation temporarily disabled. See https://github.com/ls1intum/artemis-android/issues/107
 //            Button(
 //                modifier = modifier,
 //                onClick = {
@@ -79,54 +161,6 @@ fun ExerciseActionButtons(
 //                    )
 //                )
 //            }
-        }
-    }
-
-    if (templateStatus != null) {
-        if (exercise is TextExercise) {
-            if (latestParticipation?.initializationState == Participation.InitializationState.INITIALIZED) {
-                Button(
-                    modifier = modifier,
-                    onClick = {
-                        actions.onClickOpenTextExercise(
-                            latestParticipation.id ?: return@Button
-                        )
-                    },
-                    enabled = !exercise.teamMode
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.exercise_actions_open_exercise_button)
-                    )
-                }
-            }
-
-            if (latestParticipation?.initializationState == Participation.InitializationState.FINISHED &&
-                (latestParticipation.results.isNullOrEmpty() || !showResult)
-            ) {
-                Button(
-                    modifier = modifier,
-                    onClick = {
-                        actions.onClickOpenTextExercise(
-                            latestParticipation.id ?: return@Button
-                        )
-                    },
-                    enabled = !exercise.teamMode
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.exercise_actions_view_submission_button)
-                    )
-                }
-            }
-        }
-
-        if (templateStatus is ResultTemplateStatus.WithResult) {
-            Button(
-                modifier = modifier,
-                onClick = if (exercise is QuizExercise) actions.onClickViewQuizResults else actions.onClickViewResult
-            ) {
-                Text(text = stringResource(id = R.string.exercise_actions_view_result_button))
-            }
-        }
     }
 }
 
