@@ -13,15 +13,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -106,9 +108,10 @@ internal fun ReplyTextField(
     conversationName: String
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
+    val systemBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
     Surface(
-        modifier = modifier,
+        modifier = modifier.defaultMinSize(minHeight = (59.dp + systemBarHeight)),
         border = BorderStroke(
             1.dp,
             Brush.verticalGradient(
@@ -127,7 +130,8 @@ internal fun ReplyTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
-                .navigationBarsPadding()
+                .padding(bottom = systemBarHeight)
+                .height(IntrinsicSize.Max)
         ) {
             AnimatedContent(
                 modifier = Modifier
@@ -260,123 +264,121 @@ private fun CreateReplyUi(
         }
     }
 
-    Column(modifier = modifier) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            if (displayTextField || currentTextFieldValue.text.isNotBlank()) {
-                val tagChars = LocalReplyAutoCompleteHintProvider.current.legalTagChars
-                val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue, requestedAutocompleteType)
+    LaunchedEffect(requestFocus) {
+        if (requestFocus) {
+            focusRequester.requestFocus()
+            requestFocus = false
+        }
+    }
 
-                var textFieldWidth by remember { mutableIntStateOf(0) }
-                var popupMaxHeight by remember { mutableIntStateOf(0) }
-
-                val showAutoCompletePopup = mayShowAutoCompletePopup
-                        && autoCompleteHints.orEmpty().flatMap { it.items }.isNotEmpty()
-
-                if (showAutoCompletePopup) {
-                    ReplyAutoCompletePopup(
-                        autoCompleteCategories = autoCompleteHints.orEmpty(),
-                        targetWidth = with(LocalDensity.current) { textFieldWidth.toDp() },
-                        maxHeightFromScreen = with(LocalDensity.current) { popupMaxHeight.toDp() },
-                        popupPositionProvider = ReplyAutoCompletePopupPositionProvider,
-                        performAutoComplete = { replacement ->
-                            replyMode.onUpdate(
-                                performAutoComplete(
-                                    currentTextFieldValue,
-                                    tagChars,
-                                    replacement
-                                )
-                            )
-                        },
-                        onDismissRequest = {
-                            requestDismissAutoCompletePopup = true
-                        }
-                    )
+    Box(modifier = modifier.fillMaxWidth()) {
+        val showUnfocusedReplyField = !displayTextField && currentTextFieldValue.text.isBlank()
+        if (showUnfocusedReplyField) {
+            UnfocusedPreviewReplyTextField(
+                modifier = Modifier.fillMaxWidth(),
+                hintText = hintText,
+                filePickerLauncher = filePickerLauncher,
+                onRequestShowTextField = {
+                    displayTextField = true
+                    requestFocus = true
                 }
-
-                MarkdownTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .onSizeChanged { textFieldWidth = it.width }
-                        .onGloballyPositioned { coordinates ->
-                            val textFieldRootTopLeft = coordinates.localToRoot(Offset.Zero)
-                            popupMaxHeight = textFieldRootTopLeft.y.toInt()
-                        }
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .testTag(TEST_TAG_REPLY_TEXT_FIELD),
-                    textFieldValue = currentTextFieldValue,
-                    hintText = hintText,
-                    filePickerLauncher = filePickerLauncher,
-                    onTextChanged = { newValue ->
-                        val finalValue = continueListIfApplicable(prevReplyContent, newValue)
-                        replyMode.onUpdate(finalValue)
-                    },
-                    focusRequester = focusRequester,
-                    onFocusLost = {
-                        if (displayTextField && currentTextFieldValue.text.isEmpty()) {
-                            displayTextField = false
-                        }
-                    },
-                    showAutoCompletePopup = {
-                        requestedAutocompleteType = it
-                        applyMarkdownStyle(
-                            style = when (it) {
-                                AutocompleteType.USERS -> MarkdownStyle.UserMention
-                                AutocompleteType.CHANNELS -> MarkdownStyle.ChannelMention
-                                AutocompleteType.LECTURES -> MarkdownStyle.LectureMention
-                                AutocompleteType.EXERCISES -> MarkdownStyle.ExerciseMention
-                            },
-                            currentTextFieldValue = currentTextFieldValue,
-                            onTextChanged = replyMode::onUpdate
-                        )
-                    },
-                    sendButton = {
-                        SendButton(
-                            modifier = Modifier,
-                            currentTextFieldValue = currentTextFieldValue,
-                            replyMode = replyMode,
-                            onReply = onReply
-                        )
-                    },
-                    topRightButton = {
-                        if (replyMode is ReplyMode.EditMessage) {
-                            IconButton(onClick = replyMode.onCancelEditMessage) {
-                                Icon(
-                                    imageVector = Icons.Default.Cancel,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                )
-                            }
-                        }
-                    },
-                    formattingOptionButtons = {
-                        FormattingOptions(
-                            currentTextFieldValue = currentTextFieldValue,
-                            onTextChanged = replyMode::onUpdate
-                        )
-                    },
-                )
-
-                LaunchedEffect(requestFocus) {
-                    if (requestFocus) {
-                        focusRequester.requestFocus()
-                        requestFocus = false
-                    }
-                }
-            } else {
-                UnfocusedPreviewReplyTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    hintText = hintText,
-                    filePickerLauncher = filePickerLauncher,
-                    onRequestShowTextField = {
-                        displayTextField = true
-                        requestFocus = true
-                    }
-                )
-            }
+            )
+            return
         }
 
+        // TODO: move autoreply dialog out if this composable
+        val tagChars = LocalReplyAutoCompleteHintProvider.current.legalTagChars
+        val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue, requestedAutocompleteType)
+
+        var textFieldWidth by remember { mutableIntStateOf(0) }
+        var popupMaxHeight by remember { mutableIntStateOf(0) }
+
+        val showAutoCompletePopup = mayShowAutoCompletePopup
+                && autoCompleteHints.orEmpty().flatMap { it.items }.isNotEmpty()
+
+        if (showAutoCompletePopup) {
+            ReplyAutoCompletePopup(
+                autoCompleteCategories = autoCompleteHints.orEmpty(),
+                targetWidth = with(LocalDensity.current) { textFieldWidth.toDp() },
+                maxHeightFromScreen = with(LocalDensity.current) { popupMaxHeight.toDp() },
+                popupPositionProvider = ReplyAutoCompletePopupPositionProvider,
+                performAutoComplete = { replacement ->
+                    replyMode.onUpdate(
+                        performAutoComplete(
+                            currentTextFieldValue,
+                            tagChars,
+                            replacement
+                        )
+                    )
+                },
+                onDismissRequest = {
+                    requestDismissAutoCompletePopup = true
+                }
+            )
+        }
+
+        MarkdownTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .onSizeChanged { textFieldWidth = it.width }
+                .onGloballyPositioned { coordinates ->
+                    val textFieldRootTopLeft = coordinates.localToRoot(Offset.Zero)
+                    popupMaxHeight = textFieldRootTopLeft.y.toInt()
+                }
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .testTag(TEST_TAG_REPLY_TEXT_FIELD),
+            textFieldValue = currentTextFieldValue,
+            hintText = hintText,
+            filePickerLauncher = filePickerLauncher,
+            onTextChanged = { newValue ->
+                val finalValue = continueListIfApplicable(prevReplyContent, newValue)
+                replyMode.onUpdate(finalValue)
+            },
+            focusRequester = focusRequester,
+            onFocusLost = {
+                if (displayTextField && currentTextFieldValue.text.isEmpty()) {
+                    displayTextField = false
+                }
+            },
+            showAutoCompletePopup = {
+                requestedAutocompleteType = it
+                applyMarkdownStyle(
+                    style = when (it) {
+                        AutocompleteType.USERS -> MarkdownStyle.UserMention
+                        AutocompleteType.CHANNELS -> MarkdownStyle.ChannelMention
+                        AutocompleteType.LECTURES -> MarkdownStyle.LectureMention
+                        AutocompleteType.EXERCISES -> MarkdownStyle.ExerciseMention
+                    },
+                    currentTextFieldValue = currentTextFieldValue,
+                    onTextChanged = replyMode::onUpdate
+                )
+            },
+            sendButton = {
+                SendButton(
+                    modifier = Modifier,
+                    currentTextFieldValue = currentTextFieldValue,
+                    replyMode = replyMode,
+                    onReply = onReply
+                )
+            },
+            topRightButton = {
+                if (replyMode is ReplyMode.EditMessage) {
+                    IconButton(onClick = replyMode.onCancelEditMessage) {
+                        Icon(
+                            imageVector = Icons.Default.Cancel,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            },
+            formattingOptionButtons = {
+                FormattingOptions(
+                    currentTextFieldValue = currentTextFieldValue,
+                    onTextChanged = replyMode::onUpdate
+                )
+            },
+        )
     }
 }
 
@@ -770,6 +772,7 @@ private fun UnfocusedPreviewReplyTextField(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = 16.dp)
             .clickable(onClick = onRequestShowTextField)
             .testTag(TEST_TAG_UNFOCUSED_TEXT_FIELD),
         verticalAlignment = Alignment.CenterVertically
