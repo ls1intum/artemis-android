@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.alert
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
@@ -8,9 +7,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
-
-private val destructiveButtonFontColor: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(0xFFFF4F4F) else Color(0xFF800000)
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors.TextAlertDialog.destructiveButtonFont
 
 @Composable
 fun TextAlertDialog(
@@ -66,7 +63,7 @@ fun DestructiveTextAlertDialog(
         dismissButtonText = dismissButtonText,
         onPressPositiveButton = onPressPositiveButton,
         onDismissRequest = onDismissRequest,
-        confirmButtonFontColor = destructiveButtonFontColor
+        confirmButtonFontColor = destructiveButtonFont
     )
 }
 
@@ -86,7 +83,7 @@ fun DestructiveMarkdownTextAlertDialog(
         dismissButtonText = dismissButtonText,
         onPressPositiveButton = onPressPositiveButton,
         onDismissRequest = onDismissRequest,
-        confirmButtonFontColor = destructiveButtonFontColor
+        confirmButtonFontColor = destructiveButtonFont
     )
 }
 
