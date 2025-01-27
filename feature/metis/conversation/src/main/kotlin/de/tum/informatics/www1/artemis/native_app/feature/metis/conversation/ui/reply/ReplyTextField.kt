@@ -291,82 +291,85 @@ private fun CreateReplyUi(
         }
     }
 
+    Box(modifier.fillMaxWidth()) {
+        val showUnfocusedReplyField = !displayTextField && currentTextFieldValue.text.isBlank()
+        if (showUnfocusedReplyField) {
+            UnfocusedPreviewReplyTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(TEST_TAG_UNFOCUSED_TEXT_FIELD),
+                hintText = hintText,
+                filePickerLauncher = filePickerLauncher,
+                onRequestShowTextField = {
+                    displayTextField = true
+                    requestFocus = true
+                }
+            )
+            return
+        }
 
-    val showUnfocusedReplyField = !displayTextField && currentTextFieldValue.text.isBlank()
-    if (showUnfocusedReplyField) {
-        UnfocusedPreviewReplyTextField(
-            modifier = modifier.fillMaxWidth(),
+        MarkdownTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(TEST_TAG_REPLY_TEXT_FIELD),
+            textFieldValue = currentTextFieldValue,
             hintText = hintText,
             filePickerLauncher = filePickerLauncher,
-            onRequestShowTextField = {
-                displayTextField = true
-                requestFocus = true
-            }
+            onTextChanged = { newValue ->
+                val finalValue = continueListIfApplicable(prevReplyContent, newValue)
+                replyMode.onUpdate(finalValue)
+            },
+            focusRequester = focusRequester,
+            onFocusLost = {
+                if (displayTextField && currentTextFieldValue.text.isEmpty()) {
+                    displayTextField = false
+                }
+            },
+            showAutoCompletePopup = {
+                onRequestAutocompleteType(it)
+                val newTextFieldValue = MarkdownStyleUtil.apply(
+                    style = when (it) {
+                        AutoCompleteType.USERS -> MarkdownStyle.UserMention
+                        AutoCompleteType.CHANNELS -> MarkdownStyle.ChannelMention
+                        AutoCompleteType.LECTURES -> MarkdownStyle.LectureMention
+                        AutoCompleteType.EXERCISES -> MarkdownStyle.ExerciseMention
+                    },
+                    currentTextFieldValue = currentTextFieldValue,
+                )
+                replyMode.onUpdate(newTextFieldValue)
+            },
+            sendButton = {
+                SendButton(
+                    modifier = Modifier,
+                    currentTextFieldValue = currentTextFieldValue,
+                    replyMode = replyMode,
+                    onReply = onReply
+                )
+            },
+            topRightButton = {
+                if (replyMode is ReplyMode.EditMessage) {
+                    IconButton(onClick = replyMode.onCancelEditMessage) {
+                        Icon(
+                            imageVector = Icons.Default.Cancel,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            },
+            formattingOptionButtons = {
+                FormattingOptions(
+                    applyMarkdownStyle = {
+                        val newTextFieldValue = MarkdownStyleUtil.apply(
+                            style = it,
+                            currentTextFieldValue = currentTextFieldValue,
+                        )
+                        replyMode.onUpdate(newTextFieldValue)
+                    }
+                )
+            },
         )
-        return
     }
-
-    MarkdownTextField(
-        modifier = modifier
-            .fillMaxWidth()
-            .testTag(TEST_TAG_REPLY_TEXT_FIELD),
-        textFieldValue = currentTextFieldValue,
-        hintText = hintText,
-        filePickerLauncher = filePickerLauncher,
-        onTextChanged = { newValue ->
-            val finalValue = continueListIfApplicable(prevReplyContent, newValue)
-            replyMode.onUpdate(finalValue)
-        },
-        focusRequester = focusRequester,
-        onFocusLost = {
-            if (displayTextField && currentTextFieldValue.text.isEmpty()) {
-                displayTextField = false
-            }
-        },
-        showAutoCompletePopup = {
-            onRequestAutocompleteType(it)
-            val newTextFieldValue = MarkdownStyleUtil.apply(
-                style = when (it) {
-                    AutoCompleteType.USERS -> MarkdownStyle.UserMention
-                    AutoCompleteType.CHANNELS -> MarkdownStyle.ChannelMention
-                    AutoCompleteType.LECTURES -> MarkdownStyle.LectureMention
-                    AutoCompleteType.EXERCISES -> MarkdownStyle.ExerciseMention
-                },
-                currentTextFieldValue = currentTextFieldValue,
-            )
-            replyMode.onUpdate(newTextFieldValue)
-        },
-        sendButton = {
-            SendButton(
-                modifier = Modifier,
-                currentTextFieldValue = currentTextFieldValue,
-                replyMode = replyMode,
-                onReply = onReply
-            )
-        },
-        topRightButton = {
-            if (replyMode is ReplyMode.EditMessage) {
-                IconButton(onClick = replyMode.onCancelEditMessage) {
-                    Icon(
-                        imageVector = Icons.Default.Cancel,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                }
-            }
-        },
-        formattingOptionButtons = {
-            FormattingOptions(
-                applyMarkdownStyle = {
-                    val newTextFieldValue = MarkdownStyleUtil.apply(
-                        style = it,
-                        currentTextFieldValue = currentTextFieldValue,
-                    )
-                    replyMode.onUpdate(newTextFieldValue)
-                }
-            )
-        },
-    )
 }
 
 @Composable
