@@ -28,14 +28,19 @@ object WebsocketCompressionUtil {
         jsonConfig: Json,
         deserializer: DeserializationStrategy<T>
     ): T {
-        val bodyJson: String = if (message.headers[COMPRESSION_HEADER] == "true") {
-            val frameBody = message.body as? FrameBody.Text ?: error("Expected text body")
-            val compressedInBase64 = frameBody.text
-            val compressed = Base64.Default.decode(compressedInBase64)
-            ungzip(compressed)
-        } else message.bodyAsText
-
+        val bodyJson = extractPotentiallyCompressedBody(message)
         return jsonConfig.decodeFromString(deserializer, bodyJson)
+    }
+
+    internal fun extractPotentiallyCompressedBody(message: StompFrame.Message): String {
+        if (message.headers[COMPRESSION_HEADER] != "true") {
+            return message.bodyAsText
+        }
+
+        val frameBody = message.body as? FrameBody.Text ?: error("Expected text body")
+        val compressedInBase64 = frameBody.text
+        val compressed = Base64.Default.decode(compressedInBase64)
+        return ungzip(compressed)
     }
 
     private fun ungzip(compressed: ByteArray): String {
