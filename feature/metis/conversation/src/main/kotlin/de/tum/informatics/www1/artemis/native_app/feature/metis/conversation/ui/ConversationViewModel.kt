@@ -32,8 +32,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Programmin
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
-import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseViewDeeplinks
-import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureViewDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
@@ -658,7 +658,7 @@ internal open class ConversationViewModel(
 
                             val exerciseTitle = exercise.title ?: return@mapNotNull null
                             val exerciseId = exercise.id ?: return@mapNotNull null
-                            val link = ExerciseViewDeeplinks.ToExercise.markdownLink(courseId, exerciseId)
+                            val link = ExerciseDeeplinks.ToExercise.markdownLink(courseId, exerciseId)
 
                             AutoCompleteHint(
                                 hint = exerciseTitle,
@@ -673,7 +673,7 @@ internal open class ConversationViewModel(
                         .filter { query in it.title }
                         .mapNotNull { lecture ->
                             val lectureId = lecture.id ?: return@mapNotNull null
-                            val link = LectureViewDeeplinks.ToLecture.markdownLink(courseId, lectureId)
+                            val link = LectureDeeplinks.ToLecture.markdownLink(courseId, lectureId)
 
                             AutoCompleteHint(
                                 hint = lecture.title,

@@ -1,6 +1,11 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks
 
-object ExerciseViewDeeplinks {
+object ExerciseDeeplinks {
+
+    object ToExerciseOverview : ArtemisDeeplink() {
+        override val path = "courses/{courseId}/exercises"
+        override val type = Type.IN_APP_AND_WEB
+    }
 
     object ToExercise : ArtemisDeeplink() {
         override val path = "courses/{courseId}/exercises/{exerciseId}"

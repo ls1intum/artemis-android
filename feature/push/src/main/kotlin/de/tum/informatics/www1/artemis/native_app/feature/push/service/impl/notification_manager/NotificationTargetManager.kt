@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
@@ -68,7 +69,11 @@ internal object NotificationTargetManager {
             }
 
             is CommunicationPostTarget -> {
-                "artemis://courses/${notificationTarget.courseId}/${notificationTarget.conversationId}/${notificationTarget.postId}"
+                CommunicationDeeplinks.ToPostById.inAppLink(
+                    notificationTarget.courseId,
+                    notificationTarget.conversationId,
+                    notificationTarget.postId
+                )
             }
         }
     }

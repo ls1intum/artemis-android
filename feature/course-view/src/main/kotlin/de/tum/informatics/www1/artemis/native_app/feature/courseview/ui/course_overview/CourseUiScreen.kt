@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
@@ -36,7 +35,9 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.generateLinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CourseDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
@@ -91,16 +92,12 @@ fun NavGraphBuilder.course(
     onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    val deepLinks = listOf(
-        navDeepLink {
-            uriPattern = "artemis://courses/{courseId}/{conversationId}/{postId}"
-        }
-    ) +
-            generateLinks("courses/{courseId}") +
-            generateLinks("courses/{courseId}/exercises") +
-            generateLinks("courses/{courseId}/messages?conversationId={conversationId}") +
-            generateLinks("courses/{courseId}/messages?username={username}") +
-            generateLinks("courses/{courseId}/messages?userId={userId}")
+    val deepLinks = CourseDeeplinks.ToCourse.generateLinks() +
+            ExerciseDeeplinks.ToExerciseOverview.generateLinks() +
+            CommunicationDeeplinks.ToConversation.generateLinks() +
+            CommunicationDeeplinks.ToOneToOneChatByUsername.generateLinks() +
+            CommunicationDeeplinks.ToOneToOneChatByUserId.generateLinks() +
+            CommunicationDeeplinks.ToPostById.generateLinks()
     animatedComposable<CourseUiScreen>(
         deepLinks = deepLinks
     ) { backStackEntry ->
