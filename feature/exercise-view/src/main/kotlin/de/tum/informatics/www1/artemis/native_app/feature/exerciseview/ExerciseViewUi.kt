@@ -15,14 +15,12 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.KSerializableNavType
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.ExerciseScreen
@@ -89,11 +87,8 @@ fun NavGraphBuilder.exercise(
                 ExerciseViewMode.Overview.serializer()
             )
         ),
-        deepLinks = listOf(
-            navDeepLink {
-                uriPattern = "artemis://exercises/{exerciseId}"
-            }
-        ) + generateLinks("courses/{courseId}/exercises/{exerciseId}")
+        deepLinks = ExerciseViewDeeplinks.ToExercise.generateLinks() +
+                ExerciseViewDeeplinks.ToExerciseCourseAgnostic.generateLinks(),
     ) { backStackEntry ->
         val route: ExerciseViewUi = backStackEntry.toRoute()
 

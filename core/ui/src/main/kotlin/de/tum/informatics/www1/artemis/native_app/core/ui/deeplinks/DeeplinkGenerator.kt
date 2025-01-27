@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.ui
+package de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks
 
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavDeepLinkDslBuilder

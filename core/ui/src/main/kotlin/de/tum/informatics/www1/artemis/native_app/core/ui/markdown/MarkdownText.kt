@@ -36,7 +36,6 @@ import coil.request.ImageRequest
 import coil.size.Scale
 import de.tum.informatics.www1.artemis.native_app.core.common.R
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.TYPE_ICON_RESOURCE_PATH
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.LinkResolver
 import io.noties.markwon.Markwon
