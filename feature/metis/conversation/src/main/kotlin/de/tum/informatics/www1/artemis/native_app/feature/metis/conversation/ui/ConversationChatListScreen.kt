@@ -19,8 +19,11 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,12 +44,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
@@ -57,6 +62,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.ConversationDataStatusButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ConversationIcon
@@ -155,6 +161,7 @@ fun ConversationChatListScreen(
     content: @Composable (PaddingValues) -> Unit
 ) {
     var isSearchBarOpen by rememberSaveable(courseId, conversationId) { mutableStateOf(false) }
+    var isInfoDropdownExpanded by remember { mutableStateOf(false) }
 
     val searchBarFocusRequester = remember { FocusRequester() }
 
@@ -222,8 +229,22 @@ fun ConversationChatListScreen(
                             Icon(imageVector = Icons.Default.Search, contentDescription = null)
                         }
 
-                        IconButton(onClick = onNavigateToSettings) {
+                        IconButton(
+                            onClick = {
+                                if (conversationDataState.orNull() is ChannelChat) {
+                                    isInfoDropdownExpanded = true
+                                } else {
+                                    onNavigateToSettings()
+                                }
+                            }
+                        ) {
                             Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
+
+                            InfoDropdownMenu(
+                                isInfoDropdownExpanded = isInfoDropdownExpanded,
+                                onDismissRequest = { isInfoDropdownExpanded = false },
+                                onNavigateToSettings = onNavigateToSettings
+                            )
                         }
                     }
                 }
@@ -271,5 +292,44 @@ private fun ConversationTitle(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun InfoDropdownMenu(
+    isInfoDropdownExpanded: Boolean,
+    onDismissRequest: () -> Unit,
+    onNavigateToSettings: () -> Unit
+) {
+    DropdownMenu(
+        expanded = isInfoDropdownExpanded,
+        onDismissRequest = onDismissRequest
+    ) {
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.conversation_details_title)) },
+            onClick = {
+                onDismissRequest()
+                onNavigateToSettings()
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.ArrowOutward,
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.conversation_go_to_lecture)) },
+            onClick = {
+                onDismissRequest()
+            }
+        )
     }
 }

@@ -12,6 +12,9 @@
         <item quantity="one">1 Member</item>
         <item quantity="other">%1$d Members</item>
     </plurals>
+    <string name="conversation_details_title">Details</string>
+    <string name="conversation_go_to_exercise">Go to exercise</string>
+    <string name="conversation_go_to_lecture">Go to lecture</string>
 
     <string name="course_wide_context_organization">Organization</string>
     <string name="course_wide_context_tech_support">Tech Support</string>
