@@ -3,14 +3,12 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,13 +19,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,9 +48,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
@@ -63,15 +56,12 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.getTextBeforeSelection
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.ContextCompat.getString
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
@@ -82,19 +72,15 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.ReplyAutoCompletePopupPositionProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownListContinuationUtil.continueListIfApplicable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownStyleUtil
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ReplyState
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlin.time.Duration.Companion.seconds
 
 internal const val TEST_TAG_CAN_CREATE_REPLY = "TEST_TAG_CAN_CREATE_REPLY"
 internal const val TEST_TAG_REPLY_TEXT_FIELD = "TEST_TAG_REPLY_TEXT_FIELD"
 internal const val TEST_TAG_REPLY_SEND_BUTTON = "TEST_TAG_REPLY_SEND_BUTTON"
 internal const val TEST_TAG_UNFOCUSED_TEXT_FIELD = "TEST_TAG_UNFOCUSED_TEXT_FIELD"
 
-private const val DisabledContentAlpha = 0.75f
 
 @Composable
 internal fun ReplyTextField(
@@ -449,103 +435,6 @@ private fun SendButton(
     }
 }
 
-@Composable
-private fun UnfocusedPreviewReplyTextField(
-    modifier: Modifier = Modifier,
-    onRequestShowTextField: () -> Unit,
-    filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>,
-    hintText: AnnotatedString
-) {
-    var isFileDropdownExpanded by remember { mutableStateOf(false) }
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onRequestShowTextField)
-            .testTag(TEST_TAG_UNFOCUSED_TEXT_FIELD),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            modifier = Modifier
-                .weight(1f),
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = DisabledContentAlpha),
-            text = hintText,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Box(modifier = Modifier.align(Alignment.Top)) {
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .clickable {
-                        isFileDropdownExpanded = !isFileDropdownExpanded
-                    }
-                    .background(MaterialTheme.colorScheme.primary),
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(4.dp),
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.background
-                )
-            }
-
-            UploadDropdownMenu(
-                isFileDropdownExpanded = isFileDropdownExpanded,
-                onDismissRequest = { isFileDropdownExpanded = false },
-                filePickerLauncher = filePickerLauncher
-            )
-        }
-    }
-}
-
-@Composable
-private fun UploadDropdownMenu(
-    isFileDropdownExpanded: Boolean,
-    onDismissRequest: () -> Unit,
-    filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>
-) {
-    DropdownMenu(
-        expanded = isFileDropdownExpanded,
-        onDismissRequest = onDismissRequest,
-        properties = PopupProperties(
-            focusable = false
-        )
-    ) {
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.attachment),
-                    contentDescription = null
-                )
-            },
-            text = { Text(text = stringResource(R.string.reply_format_file_upload)) },
-            onClick = {
-                onDismissRequest()
-                filePickerLauncher.launch("*/*")
-            }
-        )
-
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.image),
-                    contentDescription = null
-                )
-            },
-            text = { Text(stringResource(R.string.reply_format_image_upload)) },
-            onClick = {
-                onDismissRequest()
-                filePickerLauncher.launch("image/*")
-            }
-        )
-    }
-}
-
 private fun performAutoComplete(
     textFieldValue: TextFieldValue,
     tagChars: List<Char>,
@@ -568,57 +457,6 @@ private fun performAutoComplete(
         // Put cursor after replacement.
         selection = TextRange(replacementStart + replacement.length)
     )
-}
-
-/**
- * Cycles through the reply state. When create reply is clicked, switches to sending reply.
- * If sending the reply was successful, shows has sent reply shortly.
- */
-@Composable
-private fun rememberReplyState(
-    replyMode: ReplyMode,
-    updateFailureState: (MetisModificationFailure?) -> Unit
-): ReplyState {
-    var isCreatingReplyJob: Deferred<MetisModificationFailure?>? by remember { mutableStateOf(null) }
-    var displaySendSuccess by remember { mutableStateOf(false) }
-
-    AwaitDeferredCompletion(job = isCreatingReplyJob) { failure ->
-        if (failure == null) {
-            replyMode.onUpdate(TextFieldValue(text = ""))
-
-            // Only show for edit.
-            displaySendSuccess = replyMode is ReplyMode.EditMessage
-        } else {
-            updateFailureState(failure)
-        }
-
-        isCreatingReplyJob = null
-    }
-
-    LaunchedEffect(key1 = displaySendSuccess) {
-        if (displaySendSuccess) {
-            delay(1.seconds)
-
-            displaySendSuccess = false
-        }
-    }
-
-    return remember(isCreatingReplyJob, displaySendSuccess, replyMode) {
-        when {
-            isCreatingReplyJob != null -> ReplyState.IsSendingReply {
-                isCreatingReplyJob?.cancel()
-                isCreatingReplyJob = null
-            }
-
-            displaySendSuccess -> ReplyState.HasSentReply
-            else -> ReplyState.CanCreate {
-                isCreatingReplyJob = when (replyMode) {
-                    is ReplyMode.EditMessage -> replyMode.onEditMessage()
-                    is ReplyMode.NewMessage -> replyMode.onCreateNewMessage()
-                }
-            }
-        }
-    }
 }
 
 /**
