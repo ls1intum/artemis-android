@@ -11,19 +11,13 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -31,7 +25,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -67,7 +60,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.getTextBeforeSelection
 import androidx.compose.ui.text.style.TextAlign
@@ -382,8 +374,13 @@ private fun CreateReplyUi(
         },
         formattingOptionButtons = {
             FormattingOptions(
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = replyMode::onUpdate
+                applyMarkdownStyle = {
+                    applyMarkdownStyle(
+                        style = it,
+                        currentTextFieldValue = currentTextFieldValue,
+                        onTextChanged = replyMode::onUpdate
+                    )
+                }
             )
         },
     )
@@ -405,97 +402,6 @@ private fun rememberFilePickerLauncher(
             getString(context, R.string.markdown_textfield_unsupported_warning),
             Toast.LENGTH_SHORT
         ).show()
-    }
-}
-
-@Composable
-private fun FormattingOptions(
-    currentTextFieldValue: TextFieldValue,
-    onTextChanged: (TextFieldValue) -> Unit
-) {
-    var isListDropDownExpanded by remember { mutableStateOf(false) }
-    var isCodeDropdownExpanded by remember { mutableStateOf(false) }
-
-    val applyMarkdownStyleFormattingButton = @Composable { markdownStyle: MarkdownStyle, drawableId: Int ->
-        FormattingButton(
-            modifier = Modifier,
-            applyMarkdown = {
-                applyMarkdownStyle(
-                    style = markdownStyle,
-                    currentTextFieldValue = currentTextFieldValue,
-                    onTextChanged = onTextChanged
-                )
-            },
-            drawableId = drawableId
-        )
-    }
-
-    Row(
-        modifier = Modifier
-            .clip(MaterialTheme.shapes.medium)
-            .fillMaxWidth()
-            .height(32.dp)
-            .horizontalScroll(rememberScrollState())
-            .background(MaterialTheme.colorScheme.surfaceContainer),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Spacer(modifier = Modifier.width(8.dp))
-
-        applyMarkdownStyleFormattingButton(MarkdownStyle.Bold, R.drawable.bold)
-        applyMarkdownStyleFormattingButton(MarkdownStyle.Italic, R.drawable.italic)
-        applyMarkdownStyleFormattingButton(MarkdownStyle.Underline, R.drawable.underline)
-        applyMarkdownStyleFormattingButton(MarkdownStyle.Strikethrough, R.drawable.strikethrough)
-
-        // Code Button
-        Box(modifier = Modifier.align(Alignment.Top)) {
-            FormattingButton(
-                modifier = Modifier,
-                applyMarkdown = {
-                    isCodeDropdownExpanded = !isCodeDropdownExpanded
-                },
-                drawableId = R.drawable.code
-            )
-
-            CodeFormattingDropdownMenu(
-                isCodeDropdownExpanded = isCodeDropdownExpanded,
-                onDismissRequest = { isCodeDropdownExpanded = false },
-                applyCodeMarkdown = { style ->
-                    applyMarkdownStyle(
-                        style = style,
-                        currentTextFieldValue = currentTextFieldValue,
-                        onTextChanged = onTextChanged
-                    )
-                }
-            )
-        }
-
-        // Blockquote Button
-        applyMarkdownStyleFormattingButton(MarkdownStyle.Blockquote, R.drawable.quote)
-
-        Box(modifier = Modifier.align(Alignment.Top)) {
-            FormattingButton(
-                modifier = Modifier,
-                applyMarkdown = {
-                    isListDropDownExpanded = !isListDropDownExpanded
-                },
-                drawableId = R.drawable.list
-            )
-
-            ListFormattingDropdownMenu(
-                isListDropDownExpanded = isListDropDownExpanded,
-                onDismissRequest = { isListDropDownExpanded = false },
-                applyListMarkdown = { style ->
-                    applyMarkdownStyle(
-                        style = style,
-                        currentTextFieldValue = currentTextFieldValue,
-                        onTextChanged = onTextChanged
-                    )
-                }
-            )
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
     }
 }
 
@@ -542,160 +448,6 @@ private fun SendButton(
     }
 }
 
-@Composable
-private fun FormattingButton(
-    modifier: Modifier,
-    applyMarkdown: () -> Unit,
-    drawableId: Int,
-) {
-    Box(
-        modifier = modifier
-            .clip(CircleShape)
-            .clickable {
-                applyMarkdown()
-            }
-            .padding(8.dp)
-    ){
-        Icon(
-            painter = painterResource(id = drawableId),
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-            contentDescription = null,
-        )
-    }
-}
-
-@Composable
-private fun CodeFormattingDropdownMenu(
-    isCodeDropdownExpanded: Boolean,
-    onDismissRequest: () -> Unit,
-    applyCodeMarkdown: (MarkdownStyle) -> Unit,
-) {
-    DropdownMenu(
-        expanded = isCodeDropdownExpanded,
-        onDismissRequest = onDismissRequest,
-        properties = PopupProperties(
-            focusable = false
-        )
-    ) {
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.code),
-                    contentDescription = null
-                )
-            },
-            text = { Text(text = stringResource(R.string.reply_format_inline_code)) },
-            onClick = {
-                onDismissRequest()
-                applyCodeMarkdown(MarkdownStyle.InlineCode)
-            }
-        )
-
-        DropdownMenuItem(
-            leadingIcon = {
-                Text(
-                    modifier = Modifier.padding(start = 4.dp),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    text = "{ }"
-                )
-            },
-            text = { Text(stringResource(R.string.reply_format_code_block)) },
-            onClick = {
-                onDismissRequest()
-                applyCodeMarkdown(MarkdownStyle.CodeBlock)
-            }
-        )
-    }
-}
-
-@Composable
-private fun ListFormattingDropdownMenu(
-    isListDropDownExpanded: Boolean,
-    onDismissRequest: () -> Unit,
-    applyListMarkdown: (MarkdownStyle) -> Unit,
-) {
-    DropdownMenu(
-        expanded = isListDropDownExpanded,
-        onDismissRequest = onDismissRequest,
-        properties = PopupProperties(
-            focusable = false
-        )
-    ) {
-        // Unordered List item
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.list),
-                    contentDescription = null
-                )
-            },
-            text = { Text(text = stringResource(R.string.reply_format_unordered)) },
-            onClick = {
-                onDismissRequest()
-                applyListMarkdown(MarkdownStyle.UnorderedList)
-            }
-        )
-        // Ordered List item
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.FormatListNumbered,
-                    contentDescription = null
-                )
-            },
-            text = { Text(stringResource(R.string.reply_format_ordered)) },
-            onClick = {
-                onDismissRequest()
-                applyListMarkdown(MarkdownStyle.OrderedList)
-            }
-        )
-    }
-}
-
-@Composable
-private fun UploadDropdownMenu(
-    isFileDropdownExpanded: Boolean,
-    onDismissRequest: () -> Unit,
-    filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>
-) {
-    DropdownMenu(
-        expanded = isFileDropdownExpanded,
-        onDismissRequest = onDismissRequest,
-        properties = PopupProperties(
-            focusable = false
-        )
-    ) {
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.attachment),
-                    contentDescription = null
-                )
-            },
-            text = { Text(text = stringResource(R.string.reply_format_file_upload)) },
-            onClick = {
-                onDismissRequest()
-                filePickerLauncher.launch("*/*")
-            }
-        )
-
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.image),
-                    contentDescription = null
-                )
-            },
-            text = { Text(stringResource(R.string.reply_format_image_upload)) },
-            onClick = {
-                onDismissRequest()
-                filePickerLauncher.launch("image/*")
-            }
-        )
-    }
-}
 
 private fun applyMarkdownStyle(
     style: MarkdownStyle,
@@ -769,7 +521,6 @@ private fun applyMarkdownStyle(
     }
 }
 
-
 @Composable
 private fun UnfocusedPreviewReplyTextField(
     modifier: Modifier = Modifier,
@@ -821,6 +572,49 @@ private fun UnfocusedPreviewReplyTextField(
                 filePickerLauncher = filePickerLauncher
             )
         }
+    }
+}
+
+@Composable
+private fun UploadDropdownMenu(
+    isFileDropdownExpanded: Boolean,
+    onDismissRequest: () -> Unit,
+    filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>
+) {
+    DropdownMenu(
+        expanded = isFileDropdownExpanded,
+        onDismissRequest = onDismissRequest,
+        properties = PopupProperties(
+            focusable = false
+        )
+    ) {
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.attachment),
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.reply_format_file_upload)) },
+            onClick = {
+                onDismissRequest()
+                filePickerLauncher.launch("*/*")
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.image),
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(R.string.reply_format_image_upload)) },
+            onClick = {
+                onDismissRequest()
+                filePickerLauncher.launch("image/*")
+            }
+        )
     }
 }
 
