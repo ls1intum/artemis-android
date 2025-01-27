@@ -26,13 +26,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.DestructiveMarkdownTextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadingAnimation
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.KSerializableNavType
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
@@ -40,7 +40,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.ViewQuizResultScreen
 import kotlinx.coroutines.Deferred
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -75,11 +74,7 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
                 QuizType.WorkableQuizType.serializer()
             )
         ),
-        deepLinks = listOf(
-            navDeepLink {
-                uriPattern = "artemis://quiz_participation/{courseId}/{exerciseId}"
-            }
-        )
+        deepLinks = ExerciseDeeplinks.ToQuizParticipation.generateLinks()
     ) { backStackEntry ->
         val screen = backStackEntry.toRoute<QuizParticipationScreen>()
         val courseId = screen.courseId

@@ -20,4 +20,13 @@ object ExerciseDeeplinks {
         override val path = "exercises/{exerciseId}"
         override val type = Type.ONLY_IN_APP
     }
+
+    object ToQuizParticipation : ArtemisDeeplink() {
+        override val path = "quiz_participation/{courseId}/{exerciseId}"
+        override val type = Type.ONLY_IN_APP
+
+        fun inAppLink(courseId: Long, exerciseId: Long): String {
+            return "$IN_APP_HOST/quiz_participation/$courseId/$exerciseId"
+        }
+    }
 }
