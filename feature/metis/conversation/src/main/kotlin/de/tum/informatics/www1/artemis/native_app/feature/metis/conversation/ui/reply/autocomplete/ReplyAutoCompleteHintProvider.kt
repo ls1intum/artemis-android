@@ -13,7 +13,7 @@ internal val LocalReplyAutoCompleteHintProvider: ProvidableCompositionLocal<Repl
         override fun produceAutoCompleteHints(
             tagChar: Char,
             query: String
-        ): Flow<DataState<List<AutoCompleteCategory>>> = flowOf(DataState.Success(emptyList()))
+        ): Flow<DataState<List<AutoCompleteHintCollection>>> = flowOf(DataState.Success(emptyList()))
     }
 }
 
@@ -24,5 +24,5 @@ internal interface ReplyAutoCompleteHintProvider {
     fun produceAutoCompleteHints(
         tagChar: Char,
         query: String
-    ): Flow<DataState<List<AutoCompleteCategory>>>
+    ): Flow<DataState<List<AutoCompleteHintCollection>>>
 }

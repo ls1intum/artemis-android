@@ -32,7 +32,6 @@ import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 
 const val TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST = "TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST"
@@ -46,7 +45,7 @@ internal fun ReplyAutoCompletePopup(
     popupPositionProvider: PopupPositionProvider,
     targetWidth: Dp,
     maxHeightFromScreen: Dp,
-    autoCompleteCategories: List<AutoCompleteCategory>,
+    autoCompleteCategories: List<AutoCompleteHintCollection>,
     performAutoComplete: (replacement: String) -> Unit,
     onDismissRequest: () -> Unit
 ) {
@@ -70,7 +69,7 @@ internal fun ReplyAutoCompletePopup(
 @Composable
 private fun ReplyAutoCompletePopupBody(
     modifier: Modifier,
-    autoCompleteCategories: List<AutoCompleteCategory>,
+    autoCompleteCategories: List<AutoCompleteHintCollection>,
     performAutoComplete: (replacement: String) -> Unit
 ) {
     LazyColumn(
@@ -85,12 +84,12 @@ private fun ReplyAutoCompletePopupBody(
             stickyHeader {
                 AutoCompleteCategoryComposable(
                     modifier = Modifier.fillMaxWidth(),
-                    name = stringResource(id = category.name)
+                    name = stringResource(id = category.type.title)
                 )
             }
 
             category.items.fastForEachIndexed { i, hint ->
-                item(key = "${category.name}_${hint.id}") {
+                item(key = "${category.type}_${hint.id}") {
                     AutoCompleteHintComposable(
                         modifier = Modifier.fillMaxWidth(),
                         hint = hint,
@@ -178,8 +177,8 @@ private fun ReplyAutoCompletePopupBodyPreview() {
     ReplyAutoCompletePopupBody(
         modifier = Modifier.fillMaxSize(),
         autoCompleteCategories = listOf(
-            AutoCompleteCategory(
-                name = R.string.markdown_textfield_autocomplete_category_users,
+            AutoCompleteHintCollection(
+                type = AutoCompleteType.USERS,
                 items = (0 until 1).map {
                     AutoCompleteHint(
                         hint = "Hint $it",
@@ -188,8 +187,8 @@ private fun ReplyAutoCompletePopupBodyPreview() {
                     )
                 }
             ),
-            AutoCompleteCategory(
-                name = R.string.markdown_textfield_autocomplete_category_users,
+            AutoCompleteHintCollection(
+                type = AutoCompleteType.USERS,
                 items = (0 until 1).map {
                     AutoCompleteHint(
                         hint = "Hint $it",
@@ -198,8 +197,8 @@ private fun ReplyAutoCompletePopupBodyPreview() {
                     )
                 }
             ),
-            AutoCompleteCategory(
-                name = R.string.markdown_textfield_autocomplete_category_users,
+            AutoCompleteHintCollection(
+                type = AutoCompleteType.USERS,
                 items = (0 until 1).map {
                     AutoCompleteHint(
                         hint = "Hint $it",

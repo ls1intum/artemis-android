@@ -17,9 +17,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.input.TextFieldValue
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteCategory
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHint
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHintCollection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.ReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST
@@ -41,17 +41,19 @@ class ReplyTextFieldUiTest {
     val composeTestRule = createComposeRule()
 
     private val autoCompleteHints = listOf(
-        AutoCompleteCategory(
-            R.string.markdown_textfield_autocomplete_category_users, listOf(
-            AutoCompleteHint("User1", "<User1>", "1"),
-            AutoCompleteHint("User2", "<User2>", "2"),
-            AutoCompleteHint("User3", "<User3>", "3"),
-        ))
+        AutoCompleteHintCollection(
+            type = AutoCompleteType.USERS,
+            items = listOf(
+                AutoCompleteHint("User1", "<User1>", "1"),
+                AutoCompleteHint("User2", "<User2>", "2"),
+                AutoCompleteHint("User3", "<User3>", "3"),
+            )
+        )
     )
 
     private val hintProviderStub = object : ReplyAutoCompleteHintProvider {
         override val legalTagChars: List<Char> = listOf('@')
-        override fun produceAutoCompleteHints(tagChar: Char, query: String): Flow<DataState<List<AutoCompleteCategory>>> {
+        override fun produceAutoCompleteHints(tagChar: Char, query: String): Flow<DataState<List<AutoCompleteHintCollection>>> {
             return flowOf(DataState.Success(autoCompleteHints))
         }
     }
