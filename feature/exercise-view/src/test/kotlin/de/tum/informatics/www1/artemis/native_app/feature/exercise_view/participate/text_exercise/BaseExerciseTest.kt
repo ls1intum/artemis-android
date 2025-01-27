@@ -14,6 +14,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
+import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
 import org.junit.Before
 import org.junit.Rule
 import org.koin.android.ext.koin.androidContext
@@ -27,7 +28,7 @@ abstract class BaseExerciseTest : BaseComposeTest() {
         androidContext(InstrumentationRegistry.getInstrumentation().context)
 
         modules(coreTestModules)
-        modules(loginModule, exerciseModule, testLoginModule, testWebsocketModule)
+        modules(loginModule, exerciseModule, communicationModule, testLoginModule, testWebsocketModule)
     }
 
     protected lateinit var accessToken: String

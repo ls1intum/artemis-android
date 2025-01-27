@@ -24,9 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultBad
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultMedium
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultSuccess
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.ExplanationText
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.HelpText
@@ -101,7 +99,7 @@ internal fun ChoiceItem(
 
                     Text(
                         text = correctStatusText,
-                        color = if (type.isCorrectChoice) resultSuccess else resultBad,
+                        color = if (type.isCorrectChoice) ExerciseColors.Result.success else ExerciseColors.Result.bad,
                         style = MaterialTheme.typography.bodyMedium
                     )
 
@@ -113,7 +111,7 @@ internal fun ChoiceItem(
                             modifier = iconModifier,
                             imageVector = Icons.Default.Warning,
                             contentDescription = null,
-                            tint = resultMedium
+                            tint = ExerciseColors.Result.medium
                         )
                     } else {
                         Box(modifier = iconModifier)

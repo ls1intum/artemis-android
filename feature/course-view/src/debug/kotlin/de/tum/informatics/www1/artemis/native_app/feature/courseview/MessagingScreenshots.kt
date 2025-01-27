@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
+import de.tum.informatics.www1.artemis.native_app.core.data.CourseServiceFake
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.test.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountServiceStub
@@ -109,8 +110,9 @@ fun `Metis - Conversation Overview`() {
                     examsExpanded = true,
                     exercisesExpanded = true,
                     lecturesExpanded = true,
-                    savedPostsExpanded = false
-                )
+                    savedPostsExpanded = false,
+                    recentExpanded = true
+                ),
             )
 
             override suspend fun updatePreferences(
@@ -121,7 +123,8 @@ fun `Metis - Conversation Overview`() {
         },
         websocketProvider = WebsocketProviderStub(),
         networkStatusProvider = NetworkStatusProviderStub(),
-        accountDataService = AccountDataServiceStub()
+        accountDataService = AccountDataServiceStub(),
+        courseService = CourseServiceFake(ScreenshotCourse)
     )
 
     val course = DataState.Success(ScreenshotCourse)
@@ -136,7 +139,7 @@ fun `Metis - Conversation Overview`() {
             updateSelectedCourseTab = {},
             onNavigateBack = {},
             onReloadCourse = {}
-        ) { 
+        ) {
             ConversationOverviewBody(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,

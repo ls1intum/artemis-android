@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,7 +30,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.DifficultyColors
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 
 /**
  * Display a single exercise.
@@ -65,14 +66,17 @@ fun ExerciseListItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     //Displays the icon of the exercise
-                    Icon(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .padding(end = 8.dp)
-                            .fillMaxSize(),
-                        painter = getExerciseTypeIconPainter(exercise),
-                        contentDescription = null
-                    )
+                    val painter = getExerciseTypeIconPainter(exercise)
+                    painter?.let {
+                        Icon(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .padding(end = 8.dp)
+                                .fillMaxSize(),
+                            painter = it,
+                            contentDescription = null
+                        )
+                    }
 
                     //Displays the title of the exercise
                     Text(
@@ -111,13 +115,13 @@ private fun DifficultyRectangle(modifier: Modifier, difficulty: Exercise.Difficu
         .background(
             color = when (difficulty) {
                 Exercise.Difficulty.EASY ->
-                    DifficultyColors.easy
+                    ExerciseColors.Difficulty.easy
 
                 Exercise.Difficulty.MEDIUM ->
-                    DifficultyColors.medium
+                    ExerciseColors.Difficulty.medium
 
                 Exercise.Difficulty.HARD ->
-                    DifficultyColors.hard
+                    ExerciseColors.Difficulty.hard
             }
         )
     )
@@ -136,39 +140,39 @@ private fun ExerciseDataText(
     // Format a relative time if the distant is
     val dueDate = exercise.dueDate
     val formattedDueDate = if (dueDate != null) {
-        stringResource(
-            id = R.string.exercise_item_due_date_set,
-            getRelativeTime(to = dueDate)
-        )
+        getRelativeTime(to = dueDate).toString()
     } else stringResource(id = R.string.exercise_item_due_date_not_set)
 
-    Column(modifier = modifier) {
-        Text(
-            text = formattedDueDate,
-            style = MaterialTheme.typography.bodyMedium
-        )
-
-        ProvideDefaultExerciseTemplateStatus(exercise) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                ParticipationStatusUi(
-                    modifier = Modifier,
-                    exercise = exercise
+    ProvideDefaultExerciseTemplateStatus(exercise) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Column(modifier = modifier) {
+                Text(
+                    text = formattedDueDate,
+                    style = MaterialTheme.typography.bodyMedium
                 )
 
-                if (displayActionButtons) {
-                    ExerciseActionButtons(
-                        modifier = Modifier,
-                        exercise = exercise,
-                        showResult = true,
-                        actions = exerciseActions
-                    )
-                }
+                ParticipationStatusUi(
+                    modifier = Modifier,
+                    exercise = exercise,
+                    showLargeIcon = true
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            if (displayActionButtons) {
+                ExerciseActionButtons(
+                    modifier = Modifier,
+                    exercise = exercise,
+                    showResult = true,
+                    actions = exerciseActions
+                )
             }
         }
     }

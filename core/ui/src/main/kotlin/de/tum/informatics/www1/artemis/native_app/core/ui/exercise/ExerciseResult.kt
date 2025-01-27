@@ -27,19 +27,12 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.util.ExerciseResultUtil
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import java.text.DecimalFormat
 
 private const val MIN_SCORE_GREEN = 80
 private const val MIN_SCORE_ORANGE = 40
-
-val resultSuccess: Color
-    get() = Color(0xFF4CAF50)
-val resultMedium: Color
-    get() = Color(0xFFB18502)
-val resultBad: Color
-    get() = Color.Red
-
-
 
 /**
  * Display the result of an exercise. The result is displayed in a single row.
@@ -48,59 +41,77 @@ val resultBad: Color
 @Composable
 fun ExerciseResult(
     modifier: Modifier,
-    showUngradedResults: Boolean = true,
+    showUngradedResults: Boolean = false,
     templateStatus: ResultTemplateStatus? = LocalTemplateStatusProvider.current(),
-    exercise: Exercise
+    exercise: Exercise,
+    showLargeIcon: Boolean = false,
+    showPoints: Boolean = false
 ) {
     when (templateStatus) {
         ResultTemplateStatus.IsBuilding -> {
             StatusIsBuilding(modifier = modifier.height(IntrinsicSize.Min))
         }
+
         is ResultTemplateStatus.HasResult -> {
             StatusHasResult(
                 modifier = modifier.height(IntrinsicSize.Min),
                 result = templateStatus.result,
                 isLate = false,
-                maxPoints = exercise.maxPoints
+                maxPoints = exercise.maxPoints,
+                exercise = exercise,
+                showLargeIcon = showLargeIcon,
+                showPoints = showPoints
             )
         }
+
         ResultTemplateStatus.NoResult -> {
             StatusNoResult(modifier = modifier, showUngradedResults = showUngradedResults)
         }
+
         ResultTemplateStatus.Submitted -> {
             TextStatus(
                 modifier = modifier,
                 text = stringResource(id = R.string.exercise_result_submitted)
             )
         }
+
         ResultTemplateStatus.SubmittedWaitingForGrading -> {
             TextStatus(
                 modifier = modifier,
                 text = stringResource(id = R.string.exercise_result_submitted_waiting_for_grading)
             )
         }
+
         ResultTemplateStatus.LateNoFeedback -> {
             TextStatus(
                 modifier = modifier,
                 text = stringResource(id = R.string.exercise_result_late_submission)
             )
         }
+
         is ResultTemplateStatus.Late -> {
             StatusHasResult(
                 modifier = modifier,
                 result = templateStatus.result,
                 isLate = true,
-                maxPoints = exercise.maxPoints
+                maxPoints = exercise.maxPoints,
+                exercise = exercise,
+                showLargeIcon = showLargeIcon,
+                showPoints = showPoints
             )
         }
+
         ResultTemplateStatus.Missing, null -> {
-            // TODO
+            TextStatus(
+                modifier = modifier,
+                text = stringResource(id = R.string.exercise_result_missing)
+            )
         }
     }
 }
 
 private val statusTextStyle: TextStyle
-    @Composable get() = MaterialTheme.typography.labelMedium
+    @Composable get() = MaterialTheme.typography.bodyMedium
 
 
 @Composable
@@ -127,9 +138,13 @@ private fun StatusHasResult(
     modifier: Modifier,
     result: Result,
     isLate: Boolean,
-    maxPoints: Float?
+    maxPoints: Float?,
+    exercise: Exercise,
+    showLargeIcon: Boolean = false,
+    showPoints: Boolean = false
 ) {
     val resultScore = result.score ?: 0f
+    val points = DecimalFormat.getInstance().format(resultScore / 100f * (exercise.maxPoints ?: 0f))
 
     val icon = if (resultScore < MIN_SCORE_GREEN) {
         Icons.Default.Cancel
@@ -138,9 +153,9 @@ private fun StatusHasResult(
     }
 
     val textAndIconColor = when {
-        resultScore >= MIN_SCORE_GREEN -> resultSuccess
-        resultScore >= MIN_SCORE_ORANGE -> resultMedium
-        else -> resultBad
+        resultScore >= MIN_SCORE_GREEN -> ExerciseColors.Result.success
+        resultScore >= MIN_SCORE_ORANGE -> ExerciseColors.Result.medium
+        else -> ExerciseColors.Result.bad
     }
 
     val context = LocalContext.current
@@ -154,12 +169,21 @@ private fun StatusHasResult(
         if (maxPoints == null || relativeTime == null)
             return@remember context.getString(R.string.exercise_result_has_result_score_unknown)
 
-        val formattedPercentage = DecimalFormat.getPercentInstance().format(resultScore / 100f)
+        val formattedPercentage = DecimalFormat("0.#%").format(resultScore / 100f)
+
+        val scoreString = ExerciseResultUtil.resolveScoreString(
+            exercise,
+            formattedPercentage,
+            result,
+            points,
+            context,
+            showPoints
+        )
 
         context.getString(
-            if (isLate) R.string.exercise_result_has_result_score_late
-            else R.string.exercise_result_has_result_score,
-            formattedPercentage,
+            if (isLate) R.string.exercise_result_has_result_score_late_with_date
+            else R.string.exercise_result_has_result_score_with_date,
+            scoreString,
             relativeTime
         )
     }
@@ -169,7 +193,8 @@ private fun StatusHasResult(
         icon = icon,
         text = text,
         iconColor = textAndIconColor,
-        textColor = textAndIconColor
+        textColor = textAndIconColor,
+        showLargeIcon = showLargeIcon
     )
 }
 
@@ -209,23 +234,31 @@ private fun IconTextStatus(
     text: String,
     iconColor: Color = Color.Unspecified,
     textColor: Color = Color.Unspecified,
-    textStyle: TextStyle = statusTextStyle
+    textStyle: TextStyle = statusTextStyle,
+    showLargeIcon: Boolean = false
 ) {
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            tint = iconColor,
+            modifier = Modifier.apply {
+                if (showLargeIcon)
+                    fillMaxHeight()
+                        .aspectRatio(1f, matchHeightConstraintsFirst = true)
+                else height(16.dp)
+            },
+            contentDescription = null
+        )
+
         Text(
             text = text,
             color = textColor,
             style = textStyle,
             modifier = Modifier.align(Alignment.CenterVertically)
-        )
-
-        Icon(
-            imageVector = icon,
-            tint = iconColor,
-            modifier = Modifier
-                .fillMaxHeight()
-                .aspectRatio(1f, matchHeightConstraintsFirst = true),
-            contentDescription = null
         )
     }
 }

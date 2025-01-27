@@ -11,15 +11,27 @@
     <string name="exercise_view_overview_title">Exercise Details</string>
 
     <string name="exercise_view_overview_points_max">Points: %1$s</string>
-    <string name="exercise_view_overview_points_reached">Points: %1$s / %2$s</string>
+    <string name="exercise_view_overview_points_reached">Points: %1$s of %2$s</string>
     <string name="exercise_view_overview_points_none">No points</string>
     <string name="exercise_view_overview_hint_submission_due_date">Submission due:</string>
+    <string name="exercise_view_overview_no_submission_due_date">No due date</string>
     <string name="exercise_view_overview_hint_assessment_due_date">Assessment due:</string>
-    <string name="exercise_view_overview_hint_assessment_complaint_possible">Complaint possible: %1$s</string>
+    <string name="exercise_view_overview_hint_assessment_complaint_possible">Complaint possible:</string>
     <string name="exercise_view_overview_hint_assessment_release_date">Release date:</string>
+    <string name="exercise_view_overview_hint_difficulty">Difficulty:</string>
+    <string name="exercise_view_overview_hint_exercise_type">Exercise type:</string>
+    <string name="exercise_view_overview_hint_exercise_categories">Categories:</string>
+    <string name="exercise_view_overview_hint_exercise_communication">Communication:</string>
 
     <string name="exercise_view_overview_hint_assessment_complaint_possible_yes">Yes</string>
     <string name="exercise_view_overview_hint_assessment_complaint_possible_no">No</string>
+
+    <string name="exercise_view_overview_hint_difficulty_easy">Easy</string>
+    <string name="exercise_view_overview_hint_difficulty_medium">Medium</string>
+    <string name="exercise_view_overview_hint_difficulty_hard">Hard</string>
+
+    <string name="exercise_view_overview_hint_exercise_type_optional">Optional</string>">
+    <string name="exercise_view_overview_hint_exercise_type_bonus">Bonus</string>">
 
     <string name="exercise_participation_status_title">Your exercise status:</string>
 

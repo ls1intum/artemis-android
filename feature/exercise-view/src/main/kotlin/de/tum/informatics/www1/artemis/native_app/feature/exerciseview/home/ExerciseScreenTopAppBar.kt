@@ -4,12 +4,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -28,6 +25,7 @@ import com.google.accompanist.placeholder.material.placeholder
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIconPainter
 
 
@@ -35,34 +33,16 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTy
 internal fun ExerciseScreenTopAppBar(
     modifier: Modifier,
     exerciseDataState: DataState<Exercise>,
-    onNavigateBack: () -> Unit,
-    onRequestReloadExercise: () -> Unit
+    onNavigateBack: () -> Unit
 ) {
     Column(modifier = modifier) {
         TopAppBar(
             modifier = Modifier.fillMaxWidth(),
             title = { TitleText(modifier = modifier, maxLines = 1, exerciseDataState = exerciseDataState) },
             navigationIcon = {
-                TopAppBarNavigationIcon(onNavigateBack = onNavigateBack)
-            },
-            actions = {
-                TopAppBarActions(onRequestRefresh = onRequestReloadExercise)
+                NavigationBackButton(onNavigateBack = onNavigateBack)
             }
         )
-    }
-}
-
-@Composable
-private fun TopAppBarNavigationIcon(onNavigateBack: () -> Unit) {
-    IconButton(onClick = onNavigateBack) {
-        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-    }
-}
-
-@Composable
-private fun TopAppBarActions(onRequestRefresh: () -> Unit) {
-    IconButton(onClick = onRequestRefresh) {
-        Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
     }
 }
 
@@ -81,7 +61,10 @@ private fun TitleText(
         text = titleText,
         inlineContent = inlineContent,
         modifier = modifier
-            .placeholder(exerciseDataState !is DataState.Success)
+            .placeholder(
+                visible = exerciseDataState !is DataState.Success,
+                color = MaterialTheme.colorScheme.surface
+            )
             .semantics {
                 set(
                     SemanticsProperties.Text,
@@ -110,8 +93,7 @@ private fun rememberTitleTextWithInlineContent(
         appendInlineContent("icon")
         append(" ")
         append(
-            exerciseDataState.bind { it.title }.orNull()
-                ?: "Exercise name placeholder"
+            exerciseDataState.bind { it.title }.orNull().orEmpty()
         )
     }
 
@@ -123,10 +105,13 @@ private fun rememberTitleTextWithInlineContent(
                 PlaceholderVerticalAlign.TextCenter
             )
         ) {
-            Icon(
-                painter = getExerciseTypeIconPainter(exerciseDataState.orNull()),
-                contentDescription = null
-            )
+            val painter = getExerciseTypeIconPainter(exerciseDataState.orNull())
+            painter?.let {
+                Icon(
+                    painter = painter,
+                    contentDescription = null
+                )
+            }
         }
     )
 

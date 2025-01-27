@@ -13,7 +13,8 @@ data class ConversationCollections(
     val hidden: ConversationCollection<Conversation>,
     val exerciseChannels: ConversationCollection<ChannelChat>,
     val lectureChannels: ConversationCollection<ChannelChat>,
-    val examChannels: ConversationCollection<ChannelChat>
+    val examChannels: ConversationCollection<ChannelChat>,
+    val recentChannels: ConversationCollection<Conversation>
 ) {
     val conversations: List<Conversation>
         get() = favorites.conversations +
@@ -23,7 +24,8 @@ data class ConversationCollections(
                 hidden.conversations +
                 exerciseChannels.conversations +
                 lectureChannels.conversations +
-                examChannels.conversations
+                examChannels.conversations +
+                recentChannels.conversations
 
     fun filtered(query: String): ConversationCollections {
         return ConversationCollections(
@@ -34,7 +36,8 @@ data class ConversationCollections(
             hidden = hidden.filter { it.filterPredicate(query) },
             exerciseChannels = exerciseChannels.filter { it.filterPredicate(query) },
             lectureChannels = lectureChannels.filter { it.filterPredicate(query) },
-            examChannels = examChannels.filter { it.filterPredicate(query) }
+            examChannels = examChannels.filter { it.filterPredicate(query) },
+            recentChannels = recentChannels.filter { it.filterPredicate(query) }
         )
     }
 

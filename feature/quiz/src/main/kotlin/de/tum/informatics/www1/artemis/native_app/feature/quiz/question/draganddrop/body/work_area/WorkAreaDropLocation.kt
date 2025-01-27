@@ -18,8 +18,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultMedium
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultSuccess
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.DragTargetInfo
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.LocalDragTargetInfo
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.DragItemDraggableContainer
@@ -85,8 +84,8 @@ internal fun WorkAreaDropLocation(
             if (type.isDisplayingSampleSolution) {
                 dragItemOutlineColor
             } else {
-                if (type.isCorrect) resultSuccess
-                else resultMedium
+                if (type.isCorrect) ExerciseColors.Result.success
+                else ExerciseColors.Result.medium
             }
         }
     }
@@ -101,8 +100,8 @@ internal fun WorkAreaDropLocation(
             if (type.isDisplayingSampleSolution) {
                 dropTargetColorNotDragging
             } else {
-                if (type.isCorrect) resultSuccess.copy(alpha = 0.2f)
-                else resultMedium.copy(alpha = 0.2f)
+                if (type.isCorrect) ExerciseColors.Result.success.copy(alpha = 0.2f)
+                else ExerciseColors.Result.medium.copy(alpha = 0.2f)
             }
         }
     }

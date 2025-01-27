@@ -7,15 +7,15 @@ import kotlinx.coroutines.flow.first
 import org.koin.test.KoinTest
 import org.koin.test.get
 
-val user1Username: String
-    get() = System.getenv("USER_1_USERNAME") ?: "aa01aaa"
-
-val user1Password: String
-    get() = System.getenv("USER_1_PASSWORD") ?: "test_user_1_password"
+val user1Username: String get() = System.getenv("USER_1_USERNAME") ?: "aa01aaa"
+val user1Password: String get() = System.getenv("USER_1_PASSWORD") ?: "test_user_1_password"
+val user1DisplayName: String get() = System.getenv("USER_1_DISPLAY_NAME") ?: "Test User1"
 
 val user2Username: String get() = System.getenv("USER_2_USERNAME") ?: "aa02aaa"
-val user3Username: String get() = System.getenv("USER_3_USERNAME") ?: "aa03aaa"
 val user2DisplayName: String get() = System.getenv("USER_2_DISPLAY_NAME") ?: "Test User2"
+
+val user3Username: String get() = System.getenv("USER_3_USERNAME") ?: "aa03aaa"
+val user3DisplayName: String get() = System.getenv("USER_3_DISPLAY_NAME") ?: "Test User3"
 
 suspend fun KoinTest.performTestLogin(): String {
     val loginService: LoginService = get()
