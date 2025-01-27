@@ -22,6 +22,7 @@ internal class ConversationPreferenceStorageServiceImpl(private val context: Con
         private const val KEY_EXERCISES_EXPANDED = "exercises"
         private const val KEY_LECTURES_EXPANDED = "lectures"
         private const val KEY_SAVED_POSTS_EXPANDED = "saved_posts"
+        private const val KEY_RECENT_EXPANDED = "recent"
     }
 
     private val Context.dataStore by preferencesDataStore("conversation_preferences")
@@ -39,7 +40,8 @@ internal class ConversationPreferenceStorageServiceImpl(private val context: Con
             examsExpanded = data[getKey(serverUrl, courseId, KEY_EXAMS_EXPANDED)] ?: true,
             exercisesExpanded = data[getKey(serverUrl, courseId, KEY_EXERCISES_EXPANDED)] ?: true,
             lecturesExpanded = data[getKey(serverUrl, courseId, KEY_LECTURES_EXPANDED)] ?: true,
-            savedPostsExpanded = data[getKey(serverUrl, courseId, KEY_SAVED_POSTS_EXPANDED)] ?: false
+            savedPostsExpanded = data[getKey(serverUrl, courseId, KEY_SAVED_POSTS_EXPANDED)] ?: false,
+            recentExpanded =  data[getKey(serverUrl, courseId, KEY_RECENT_EXPANDED)] ?: true,
         )
     }
 
@@ -54,6 +56,7 @@ internal class ConversationPreferenceStorageServiceImpl(private val context: Con
             data[getKey(serverUrl, courseId, KEY_EXERCISES_EXPANDED)] = preferences.exercisesExpanded
             data[getKey(serverUrl, courseId, KEY_LECTURES_EXPANDED)] = preferences.lecturesExpanded
             data[getKey(serverUrl, courseId, KEY_SAVED_POSTS_EXPANDED)] = preferences.savedPostsExpanded
+            data[getKey(serverUrl, courseId, KEY_RECENT_EXPANDED)] = preferences.recentExpanded
         }
     }
 

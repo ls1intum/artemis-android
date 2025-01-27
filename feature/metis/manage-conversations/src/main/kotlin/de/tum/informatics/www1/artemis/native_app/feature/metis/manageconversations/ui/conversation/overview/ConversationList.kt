@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material.icons.filled.AccessTimeFilled
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ChatBubble
@@ -78,6 +79,7 @@ internal const val SECTION_EXAMS_KEY = "exams"
 internal const val SECTION_LECTURES_KEY = "lectures"
 internal const val SECTION_DIRECT_MESSAGES_KEY = "direct-messages"
 internal const val SECTION_SAVED_POSTS_KEY = "saved-posts"
+internal const val SECTION_RECENT_KEY = "recent"
 
 internal const val KEY_SUFFIX_FAVORITES = "_f"
 internal const val KEY_SUFFIX_CHANNELS = "_c"
@@ -88,6 +90,7 @@ internal const val KEY_SUFFIX_GROUPS = "_g"
 internal const val KEY_SUFFIX_PERSONAL = "_p"
 internal const val KEY_SUFFIX_HIDDEN = "_h"
 internal const val KEY_SUFFIX_SAVED_MESSAGES = "_s"
+internal const val KEY_SUFFIX_RECENT = "_r"
 
 internal fun tagForConversation(conversationId: Long, suffix: String) = "$conversationId$suffix"
 internal fun tagForConversationOptions(tagForConversation: String) = "${tagForConversation}_options"
@@ -124,6 +127,7 @@ internal fun ConversationList(
         togglePersonalConversationsExpanded = viewModel::togglePersonalConversationsExpanded,
         toggleHiddenExpanded = viewModel::toggleHiddenExpanded,
         toggleSavedPostsExpanded = viewModel::toggleSavedPostsExpanded,
+        toggleRecentExpanded = viewModel::toggleRecentExpanded,
         conversationCollections = conversationCollections,
         onNavigateToConversation = onNavigateToConversation,
         onNavigateToSavedPosts = onNavigateToSavedPosts,
@@ -147,6 +151,7 @@ internal fun ConversationList(
     togglePersonalConversationsExpanded: () -> Unit,
     toggleHiddenExpanded: () -> Unit,
     toggleSavedPostsExpanded: () -> Unit,
+    toggleRecentExpanded: () -> Unit,
     conversationCollections: ConversationCollections,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
@@ -188,6 +193,17 @@ internal fun ConversationList(
                 R.string.conversation_overview_section_favorites,
                 toggleFavoritesExpanded,
                 { Icon(imageVector = Icons.Default.Favorite, contentDescription = null) }
+            )
+        }
+
+        if (conversationCollections.recentChannels.conversations.isNotEmpty()) {
+            listWithHeader(
+                ConversationSectionState.Conversations(conversationCollections.recentChannels),
+                SECTION_RECENT_KEY,
+                KEY_SUFFIX_RECENT,
+                R.string.conversation_overview_section_recent,
+                toggleRecentExpanded,
+                { Icon(imageVector = Icons.Default.AccessTimeFilled, contentDescription = null) }
             )
         }
 
