@@ -169,7 +169,7 @@ private fun StatusHasResult(
         if (maxPoints == null || relativeTime == null)
             return@remember context.getString(R.string.exercise_result_has_result_score_unknown)
 
-        val formattedPercentage = DecimalFormat.getPercentInstance().format(resultScore / 100f)
+        val formattedPercentage = DecimalFormat("0.#%").format(resultScore / 100f)
 
         val scoreString = ExerciseResultUtil.resolveScoreString(
             exercise,

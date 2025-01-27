@@ -8,6 +8,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.isResultPreliminary
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 
+// This has been inspired by the Artemis iOS app result string resolving
+// https://github.com/ls1intum/artemis-ios/blob/21e152e6d79affd160203e75eb12d050c44090f3/ArtemisKit/Sources/CourseView/ExerciseTab/SubmissionResultView.swift
 object ExerciseResultUtil {
 
     fun resolveScoreString(
@@ -46,6 +48,9 @@ object ExerciseResultUtil {
 
         private const val MAX_PROGRAMMING_RESULT_INTS = 255
 
+        // To enable longer messages including details such as number of passed test cases, etc. set this to true
+        private const val SHORT: Boolean = true
+
         fun resolveProgrammingExerciseMessage(
             score: String,
             result: Result,
@@ -61,7 +66,12 @@ object ExerciseResultUtil {
             val buildInformation = resolveBuildInformation(context, submission, testCaseCount, passedTestCaseCount)
 
             val resultString = when {
-                testCaseCount > 0 -> buildInformation
+                SHORT -> context.getString(
+                    if (testCaseCount > 0) R.string.exercise_result_has_result_score_without_points
+                    else R.string.exercise_result_programming_short_with_build_information,
+                    score,
+                    buildInformation.takeIf { testCaseCount == 0 }
+                )
                 codeIssueCount > 0 -> resolveCodeIssuesString(
                     score, buildInformation, codeIssueCount, points, context, showPoints
                 )
