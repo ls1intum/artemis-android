@@ -82,7 +82,7 @@ internal class NavigateToUserConversationViewModel(
                     } else {
                         val existingId = existingConversations
                             .filterIsInstance<OneToOneChat>()
-                            .firstOrNull { conv -> conv.members.any { userIdentifier.matches(accountData) } }
+                            .firstOrNull { conv -> userIdentifier.matches(conv.partner) }
                             ?.id
 
                         if (existingId != null) {

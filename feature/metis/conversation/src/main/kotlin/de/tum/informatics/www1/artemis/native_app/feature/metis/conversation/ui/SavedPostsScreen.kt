@@ -142,7 +142,8 @@ internal fun SavedPostsScreen (
                 loadingText = stringResource(R.string.saved_posts_loading_posts_loading),
                 failureText = stringResource(R.string.saved_posts_loading_posts_failed),
                 retryButtonText = stringResource(R.string.saved_posts_loading_posts_try_again),
-                onClickRetry = onRequestReload
+                onClickRetry = onRequestReload,
+                enablePullToRefresh = false
             ) { savedPosts ->
 
                 ProvideMarkwon {

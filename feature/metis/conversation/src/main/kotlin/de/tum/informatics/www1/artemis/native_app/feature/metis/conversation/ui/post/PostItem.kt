@@ -79,6 +79,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.UserRoleBadge
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureWithDialog
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.delay
@@ -481,7 +482,16 @@ private fun AuthorRoleAndTimeRow(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            HeadlineAuthorRoleBadge(authorRole, isGrayscale)
+
+            /*
+            * remember is needed here to prevent the value from being reset after an update
+            * (the author role is not sent when updating a post)
+            */
+            val initialAuthorRole by remember { mutableStateOf(authorRole) }
+            UserRoleBadge(
+                modifier = Modifier.applyGrayscale(isGrayscale),
+                userRole = initialAuthorRole
+            )
             Spacer(modifier = Modifier.weight(1f))
             creationDateContent()
         }
@@ -513,38 +523,6 @@ private fun HeadlineProfilePicture(
             userName = userName,
             userRole = userRole,
             imageUrl = imageUrl,
-        )
-    }
-}
-
-@Composable
-private fun HeadlineAuthorRoleBadge(
-    authorRole: UserRole?,
-    isGrayscale: Boolean
-) {
-    /*
-    * remember is needed here to prevent the value from being reset after an update
-    * (the author role is not sent when updating a post)
-    */
-    val initialAuthorRole = remember { mutableStateOf(authorRole) }
-    val (text, color) = when (initialAuthorRole.value) {
-        UserRole.INSTRUCTOR -> R.string.post_instructor to PostColors.Roles.instructor
-        UserRole.TUTOR -> R.string.post_tutor to PostColors.Roles.tutor
-        UserRole.USER -> R.string.post_student to PostColors.Roles.student
-        null -> R.string.post_student to PostColors.Roles.student
-    }
-
-    Box(
-        modifier = Modifier
-            .background(color, MaterialTheme.shapes.extraSmall)
-            .applyGrayscale(isGrayscale)
-    ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 1.dp),
-            text = stringResource(id = text),
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.White,
-            fontWeight = FontWeight.Medium
         )
     }
 }

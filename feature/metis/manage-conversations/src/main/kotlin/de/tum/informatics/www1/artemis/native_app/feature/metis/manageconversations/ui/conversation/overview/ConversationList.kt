@@ -110,12 +110,10 @@ internal fun ConversationList(
     onToggleMuted: (conversationId: Long, muted: Boolean) -> Unit,
     trailingContent: LazyListScope.() -> Unit
 ) {
-    val clientId by viewModel.clientIdOrDefault.collectAsState()
     val isSavedPostsExpanded by viewModel.isSavedPostsExpanded.collectAsState()
 
     ConversationList(
         modifier = modifier,
-        clientId = clientId,
         isSavedPostsSectionExpanded = isSavedPostsExpanded,
         toggleFavoritesExpanded = viewModel::toggleFavoritesExpanded,
         toggleGeneralsExpanded = viewModel::toggleGeneralsExpanded,
@@ -139,7 +137,6 @@ internal fun ConversationList(
 @Composable
 internal fun ConversationList(
     modifier: Modifier,
-    clientId: Long,
     isSavedPostsSectionExpanded: Boolean,
     toggleFavoritesExpanded: () -> Unit,
     toggleGeneralsExpanded: () -> Unit,
@@ -171,7 +168,7 @@ internal fun ConversationList(
             conversationList(
                 keySuffix = suffix,
                 section = items,
-                clientId = clientId,
+                allowFavoriteIndicator = key == SECTION_FAVORITES_KEY,
                 onNavigateToConversation = onNavigateToConversation,
                 onNavigateToSavedPosts = onNavigateToSavedPosts,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
@@ -323,7 +320,7 @@ private fun LazyListScope.conversationSectionHeader(
 private fun LazyListScope.conversationList(
     keySuffix: String,
     section: ConversationSectionState,
-    clientId: Long,
+    allowFavoriteIndicator: Boolean,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (status: SavedPostStatus) -> Unit,
     onToggleMarkAsFavourite: (conversationId: Long, favorite: Boolean) -> Unit,
@@ -361,8 +358,8 @@ private fun LazyListScope.conversationList(
                         .testTag(itemTag),
                     itemBaseTag = itemTag,
                     conversation = conversation,
-                    clientId = clientId,
                     showPrefix = conversations.showPrefix,
+                    allowFavoriteIndicator = allowFavoriteIndicator,
                     onNavigateToConversation = { onNavigateToConversation(conversation.id) },
                     onToggleMarkAsFavourite = {
                         onToggleMarkAsFavourite(
@@ -447,8 +444,8 @@ private fun ConversationListItem(
     modifier: Modifier = Modifier,
     itemBaseTag: String,
     conversation: Conversation,
-    clientId: Long,
     showPrefix: Boolean,
+    allowFavoriteIndicator: Boolean,
     onNavigateToConversation: () -> Unit,
     onToggleMarkAsFavourite: () -> Unit,
     onToggleHidden: () -> Unit,
@@ -466,8 +463,8 @@ private fun ConversationListItem(
         leadingContent = {
             ConversationIcon(
                 conversation = conversation,
-                clientId = clientId,
-                hasUnreadMessages = unreadMessagesCount > 0
+                hasUnreadMessages = unreadMessagesCount > 0,
+                allowFavoriteIndicator = allowFavoriteIndicator
             )
         },
         otherTrailingContent = {

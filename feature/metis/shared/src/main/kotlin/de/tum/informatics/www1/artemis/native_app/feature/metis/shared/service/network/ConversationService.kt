@@ -1,8 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
@@ -25,14 +25,14 @@ interface ConversationService {
         includeInstructors: Boolean,
         authToken: String,
         serverUrl: String
-    ): NetworkResponse<List<User>>
+    ): NetworkResponse<List<CourseUser>>
 
     suspend fun searchForCourseMembers(
         courseId: Long,
         query: String,
         authToken: String,
         serverUrl: String
-    ): NetworkResponse<List<User>>
+    ): NetworkResponse<List<ConversationUser>>
 
     suspend fun createOneToOneConversation(
         courseId: Long,
