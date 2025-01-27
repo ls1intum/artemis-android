@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
+import android.content.Context
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -41,6 +42,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -57,7 +59,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -73,11 +74,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.ContextCompat.getString
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
@@ -92,7 +95,7 @@ import kotlin.time.Duration.Companion.seconds
 internal const val TEST_TAG_CAN_CREATE_REPLY = "TEST_TAG_CAN_CREATE_REPLY"
 internal const val TEST_TAG_REPLY_TEXT_FIELD = "TEST_TAG_REPLY_TEXT_FIELD"
 internal const val TEST_TAG_REPLY_SEND_BUTTON = "TEST_TAG_REPLY_SEND_BUTTON"
-internal const val TEST_TAG_UNFOCUSED_TEXT_FIELD = "TEST_TAG_UNFOCUSED_TEXT_FIED"
+internal const val TEST_TAG_UNFOCUSED_TEXT_FIELD = "TEST_TAG_UNFOCUSED_TEXT_FIELD"
 
 private const val DisabledContentAlpha = 0.75f
 
@@ -105,6 +108,9 @@ internal fun ReplyTextField(
     conversationName: String
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
+    val requestedAutoCompleteType = remember { mutableStateOf<AutocompleteType?>(null) }
+    var boxWidth by remember { mutableIntStateOf(0) }
+    var popupMaxHeight by remember { mutableIntStateOf(0) }
 
     Surface(
         modifier = modifier,
@@ -126,11 +132,24 @@ internal fun ReplyTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
+                .onSizeChanged { boxWidth = it.width }
+                .onGloballyPositioned { coordinates ->
+                    val textFieldRootTopLeft = coordinates.localToRoot(Offset.Zero)
+                    popupMaxHeight = textFieldRootTopLeft.y.toInt()
+                }
                 .navigationBarsPadding()
         ) {
+            AutoCompletionDialog(
+                replyMode = replyMode,
+                requestedAutoCompleteType = requestedAutoCompleteType,
+                targetWidth = boxWidth.dp,
+                maxHeightFromScreen = popupMaxHeight.dp,
+            )
+
             AnimatedContent(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = Spacings.ScreenHorizontalSpacing, vertical = 8.dp)
                     .align(Alignment.Center),
                 targetState = replyState,
                 label = "CanCreate -> HasSentReply -> IsSendingReply"
@@ -144,7 +163,8 @@ internal fun ReplyTextField(
                             replyMode = replyMode,
                             onReply = { targetReplyState.onCreateReply() },
                             conversationName = conversationName,
-                            onFileSelected = { uri -> onFileSelected(uri) }
+                            onFileSelected = { uri -> onFileSelected(uri) },
+                            onRequestAutocompleteType = { requestedAutoCompleteType.value = it }
                         )
                     }
 
@@ -161,8 +181,7 @@ internal fun ReplyTextField(
                     is ReplyState.IsSendingReply -> {
                         SendingReplyUi(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 8.dp),
+                                .fillMaxWidth(),
                             onCancel = targetReplyState.onCancelSendReply,
                             title = stringResource(R.string.create_reply_sending_reply)
                         )
@@ -171,6 +190,61 @@ internal fun ReplyTextField(
             }
         }
     }
+}
+
+@Composable
+private fun AutoCompletionDialog(
+    replyMode: ReplyMode,
+    requestedAutoCompleteType: MutableState<AutocompleteType?>,
+    targetWidth: Dp,
+    maxHeightFromScreen: Dp,
+) {
+    val currentTextFieldValue by replyMode.currentText
+
+    var mayShowAutoCompletePopup by remember { mutableStateOf(true) }
+    var requestDismissAutoCompletePopup by remember { mutableStateOf(false) }
+
+    val tagChars = LocalReplyAutoCompleteHintProvider.current.legalTagChars
+    val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue, requestedAutoCompleteType.value)
+
+    LaunchedEffect( currentTextFieldValue) {
+        mayShowAutoCompletePopup = true
+        requestDismissAutoCompletePopup = false
+    }
+
+    LaunchedEffect(requestDismissAutoCompletePopup) {
+        if (requestDismissAutoCompletePopup) {
+            delay(100)
+            mayShowAutoCompletePopup = false
+            requestedAutoCompleteType.value = null
+        }
+    }
+
+    val showAutoCompletePopup = mayShowAutoCompletePopup
+            && autoCompleteHints.orEmpty().flatMap { it.items }.isNotEmpty()
+
+    if (!showAutoCompletePopup) {
+        return
+    }
+
+    ReplyAutoCompletePopup(
+        autoCompleteCategories = autoCompleteHints.orEmpty(),
+        targetWidth = targetWidth,
+        maxHeightFromScreen = maxHeightFromScreen,
+        popupPositionProvider = ReplyAutoCompletePopupPositionProvider,
+        performAutoComplete = { replacement ->
+            val newTextFieldValue = performAutoComplete(
+                currentTextFieldValue,
+                tagChars,
+                replacement
+            )
+
+            replyMode.onUpdate(newTextFieldValue)
+        },
+        onDismissRequest = {
+            requestDismissAutoCompletePopup = true
+        }
+    )
 }
 
 @Composable
@@ -203,19 +277,14 @@ private fun CreateReplyUi(
     conversationName: String,
     focusRequester: FocusRequester = remember { FocusRequester() },
     onReply: () -> Unit,
-    onFileSelected: (Uri) -> Unit
+    onFileSelected: (Uri) -> Unit,
+    onRequestAutocompleteType: (AutocompleteType) -> Unit
 ) {
-    val context = LocalContext.current
-
     var prevReplyContent by remember { mutableStateOf("") }
     var displayTextField: Boolean by remember { mutableStateOf(false) }
     var requestFocus: Boolean by remember { mutableStateOf(false) }
 
     val currentTextFieldValue by replyMode.currentText
-    var requestedAutocompleteType by remember { mutableStateOf<AutocompleteType?>(null) }
-
-    var mayShowAutoCompletePopup by remember { mutableStateOf(true) }
-    var requestDismissAutoCompletePopup by remember { mutableStateOf(false) }
 
     val hintText = buildAnnotatedString {
         append(stringResource(R.string.create_reply_click_to_write_prefix) + " '")
@@ -225,21 +294,8 @@ private fun CreateReplyUi(
         append("'")
     }
 
-    val filePickerLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            if (uri == null) return@rememberLauncherForActivityResult
-
-            val mimeType = context.contentResolver.getType(uri)
-            if (mimeType in FileValidationConstants.ALLOWED_MIME_TYPES) {
-                onFileSelected(uri)
-            } else {
-                Toast.makeText(
-                    context,
-                    getString(context, R.string.markdown_textfield_unsupported_warning),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
+    val context = LocalContext.current
+    val filePickerLauncher = rememberFilePickerLauncher(context, onFileSelected)
 
     LaunchedEffect(displayTextField, currentTextFieldValue) {
         if (!displayTextField && currentTextFieldValue.text.isNotBlank() && prevReplyContent.isBlank()) {
@@ -247,16 +303,6 @@ private fun CreateReplyUi(
         }
 
         prevReplyContent = currentTextFieldValue.text
-        mayShowAutoCompletePopup = true
-        requestDismissAutoCompletePopup = false
-    }
-
-    LaunchedEffect(requestDismissAutoCompletePopup) {
-        if (requestDismissAutoCompletePopup) {
-            delay(100)
-            mayShowAutoCompletePopup = false
-            requestedAutocompleteType = null
-        }
     }
 
     LaunchedEffect(requestFocus) {
@@ -266,114 +312,95 @@ private fun CreateReplyUi(
         }
     }
 
-    Box(modifier = modifier.fillMaxWidth()) {
-        val showUnfocusedReplyField = !displayTextField && currentTextFieldValue.text.isBlank()
-        if (showUnfocusedReplyField) {
-            UnfocusedPreviewReplyTextField(
-                modifier = Modifier.fillMaxWidth(),
-                hintText = hintText,
-                filePickerLauncher = filePickerLauncher,
-                onRequestShowTextField = {
-                    displayTextField = true
-                    requestFocus = true
-                }
-            )
-            return
-        }
 
-        // TODO: move autoreply dialog out if this composable
-        val tagChars = LocalReplyAutoCompleteHintProvider.current.legalTagChars
-        val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue, requestedAutocompleteType)
-
-        var textFieldWidth by remember { mutableIntStateOf(0) }
-        var popupMaxHeight by remember { mutableIntStateOf(0) }
-
-        val showAutoCompletePopup = mayShowAutoCompletePopup
-                && autoCompleteHints.orEmpty().flatMap { it.items }.isNotEmpty()
-
-        if (showAutoCompletePopup) {
-            ReplyAutoCompletePopup(
-                autoCompleteCategories = autoCompleteHints.orEmpty(),
-                targetWidth = with(LocalDensity.current) { textFieldWidth.toDp() },
-                maxHeightFromScreen = with(LocalDensity.current) { popupMaxHeight.toDp() },
-                popupPositionProvider = ReplyAutoCompletePopupPositionProvider,
-                performAutoComplete = { replacement ->
-                    replyMode.onUpdate(
-                        performAutoComplete(
-                            currentTextFieldValue,
-                            tagChars,
-                            replacement
-                        )
-                    )
-                },
-                onDismissRequest = {
-                    requestDismissAutoCompletePopup = true
-                }
-            )
-        }
-
-        MarkdownTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .onSizeChanged { textFieldWidth = it.width }
-                .onGloballyPositioned { coordinates ->
-                    val textFieldRootTopLeft = coordinates.localToRoot(Offset.Zero)
-                    popupMaxHeight = textFieldRootTopLeft.y.toInt()
-                }
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .testTag(TEST_TAG_REPLY_TEXT_FIELD),
-            textFieldValue = currentTextFieldValue,
+    val showUnfocusedReplyField = !displayTextField && currentTextFieldValue.text.isBlank()
+    if (showUnfocusedReplyField) {
+        UnfocusedPreviewReplyTextField(
+            modifier = modifier.fillMaxWidth(),
             hintText = hintText,
             filePickerLauncher = filePickerLauncher,
-            onTextChanged = { newValue ->
-                val finalValue = continueListIfApplicable(prevReplyContent, newValue)
-                replyMode.onUpdate(finalValue)
-            },
-            focusRequester = focusRequester,
-            onFocusLost = {
-                if (displayTextField && currentTextFieldValue.text.isEmpty()) {
-                    displayTextField = false
-                }
-            },
-            showAutoCompletePopup = {
-                requestedAutocompleteType = it
-                applyMarkdownStyle(
-                    style = when (it) {
-                        AutocompleteType.USERS -> MarkdownStyle.UserMention
-                        AutocompleteType.CHANNELS -> MarkdownStyle.ChannelMention
-                        AutocompleteType.LECTURES -> MarkdownStyle.LectureMention
-                        AutocompleteType.EXERCISES -> MarkdownStyle.ExerciseMention
-                    },
-                    currentTextFieldValue = currentTextFieldValue,
-                    onTextChanged = replyMode::onUpdate
-                )
-            },
-            sendButton = {
-                SendButton(
-                    modifier = Modifier,
-                    currentTextFieldValue = currentTextFieldValue,
-                    replyMode = replyMode,
-                    onReply = onReply
-                )
-            },
-            topRightButton = {
-                if (replyMode is ReplyMode.EditMessage) {
-                    IconButton(onClick = replyMode.onCancelEditMessage) {
-                        Icon(
-                            imageVector = Icons.Default.Cancel,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
-                    }
-                }
-            },
-            formattingOptionButtons = {
-                FormattingOptions(
-                    currentTextFieldValue = currentTextFieldValue,
-                    onTextChanged = replyMode::onUpdate
-                )
-            },
+            onRequestShowTextField = {
+                displayTextField = true
+                requestFocus = true
+            }
         )
+        return
+    }
+
+    MarkdownTextField(
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag(TEST_TAG_REPLY_TEXT_FIELD),
+        textFieldValue = currentTextFieldValue,
+        hintText = hintText,
+        filePickerLauncher = filePickerLauncher,
+        onTextChanged = { newValue ->
+            val finalValue = continueListIfApplicable(prevReplyContent, newValue)
+            replyMode.onUpdate(finalValue)
+        },
+        focusRequester = focusRequester,
+        onFocusLost = {
+            if (displayTextField && currentTextFieldValue.text.isEmpty()) {
+                displayTextField = false
+            }
+        },
+        showAutoCompletePopup = {
+            onRequestAutocompleteType(it)
+            applyMarkdownStyle(
+                style = when (it) {
+                    AutocompleteType.USERS -> MarkdownStyle.UserMention
+                    AutocompleteType.CHANNELS -> MarkdownStyle.ChannelMention
+                    AutocompleteType.LECTURES -> MarkdownStyle.LectureMention
+                    AutocompleteType.EXERCISES -> MarkdownStyle.ExerciseMention
+                },
+                currentTextFieldValue = currentTextFieldValue,
+                onTextChanged = replyMode::onUpdate
+            )
+        },
+        sendButton = {
+            SendButton(
+                modifier = Modifier,
+                currentTextFieldValue = currentTextFieldValue,
+                replyMode = replyMode,
+                onReply = onReply
+            )
+        },
+        topRightButton = {
+            if (replyMode is ReplyMode.EditMessage) {
+                IconButton(onClick = replyMode.onCancelEditMessage) {
+                    Icon(
+                        imageVector = Icons.Default.Cancel,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        },
+        formattingOptionButtons = {
+            FormattingOptions(
+                currentTextFieldValue = currentTextFieldValue,
+                onTextChanged = replyMode::onUpdate
+            )
+        },
+    )
+}
+
+@Composable
+private fun rememberFilePickerLauncher(
+    context: Context,
+    onFileSelected: (Uri) -> Unit
+) = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    if (uri == null) return@rememberLauncherForActivityResult
+
+    val mimeType = context.contentResolver.getType(uri)
+    if (mimeType in FileValidationConstants.ALLOWED_MIME_TYPES) {
+        onFileSelected(uri)
+    } else {
+        Toast.makeText(
+            context,
+            getString(context, R.string.markdown_textfield_unsupported_warning),
+            Toast.LENGTH_SHORT
+        ).show()
     }
 }
 
@@ -767,7 +794,6 @@ private fun UnfocusedPreviewReplyTextField(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
             .clickable(onClick = onRequestShowTextField)
             .testTag(TEST_TAG_UNFOCUSED_TEXT_FIELD),
         verticalAlignment = Alignment.CenterVertically
