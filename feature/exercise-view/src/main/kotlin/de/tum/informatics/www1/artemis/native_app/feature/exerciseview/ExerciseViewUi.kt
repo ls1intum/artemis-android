@@ -34,8 +34,6 @@ import org.koin.core.parameter.parametersOf
 import kotlin.reflect.typeOf
 
 object ExerciseViewDestination {
-    const val EXERCISE_VIEW_ROUTE = "exercise/{exerciseId}/{viewMode}"
-
     /**
      * Set this to true to on the backStackEntry and the exercise will be reloaded
      */
