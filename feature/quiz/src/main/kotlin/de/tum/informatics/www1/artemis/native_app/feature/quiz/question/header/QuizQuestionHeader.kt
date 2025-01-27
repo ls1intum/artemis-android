@@ -27,8 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePointsDecimalFormat
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultMedium
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultSuccess
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.HelpText
@@ -141,7 +140,7 @@ private fun ScoreInfo(
                 id = R.string.quiz_result_question_header_points,
                 achievedPointsFormatted,
                 maxPointsFormatted
-            ) to if (isCorrect) resultSuccess else resultMedium
+            ) to if (isCorrect) ExerciseColors.Result.success else ExerciseColors.Result.medium
         }
     }
 

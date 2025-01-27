@@ -11,6 +11,13 @@ interface ChannelService {
         authToken: String
     ): NetworkResponse<List<ChannelChat>>
 
+    suspend fun getExerciseChannel(
+        exerciseId: Long,
+        courseId: Long,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<ChannelChat>
+
     suspend fun registerInChannel(
         courseId: Long,
         conversationId: Long,
