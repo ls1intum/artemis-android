@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Clock
@@ -40,12 +41,12 @@ class UpdateReplyNotificationWorker(
 
         return when (accountData) {
             is NetworkResponse.Response -> {
-                val authorName =
-                    "${accountData.data.firstName} ${accountData.data.lastName}"
+                val account = accountData.data
 
                 communicationNotificationManager.addSelfMessage(
                     parentId = conversationId,
-                    authorName = authorName,
+                    authorName = account.humanReadableName,
+                    authorImageUrl = account.imageUrl,
                     body = content,
                     date = Clock.System.now()
                 )

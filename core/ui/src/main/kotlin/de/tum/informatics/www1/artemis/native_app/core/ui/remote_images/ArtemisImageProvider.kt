@@ -1,12 +1,15 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.remote_images
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import coil.ImageLoader
 import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ErrorResult
 import coil3.request.ImageRequest
+import coil3.request.ImageResult
 
 
 val LocalArtemisImageProvider = compositionLocalOf<ArtemisImageProvider> { EmptyArtemisImageProvider() }
@@ -16,6 +19,11 @@ val LocalArtemisImageProvider = compositionLocalOf<ArtemisImageProvider> { Empty
  * of authentication and the applicable Artemis server URL.
  */
 interface ArtemisImageProvider {
+
+    suspend fun loadArtemisImage(
+        context: Context,
+        imagePath: String,
+    ): ImageResult
 
     @Composable
     fun rememberArtemisImageRequest(
@@ -32,11 +40,18 @@ interface ArtemisImageProvider {
 }
 
 private class EmptyArtemisImageProvider : ArtemisImageProvider {
+
+    override suspend fun loadArtemisImage(context: Context, imagePath: String): ImageResult {
+        return ErrorResult(
+            image = null,
+            request = ImageRequest.Builder(context).data(imagePath).build(),
+            throwable = IllegalStateException("No ArtemisImageProvider provided."),
+        )
+    }
+
     @Composable
     override fun rememberArtemisImageRequest(imagePath: String): ImageRequest {
-        return ImageRequest.Builder(LocalContext.current)
-            .data(imagePath)
-            .build()
+        return ImageRequest.Builder(LocalContext.current).build()
     }
 
     @Composable

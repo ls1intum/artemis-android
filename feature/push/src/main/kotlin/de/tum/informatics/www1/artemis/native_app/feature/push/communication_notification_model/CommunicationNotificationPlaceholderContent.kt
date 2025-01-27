@@ -17,27 +17,16 @@ private const val TAG = "CommunicationNotificationPlaceholderContent"
  * This class is used to parse the relevant information of this list into a structured object.
  */
 data class CommunicationNotificationPlaceholderContent(
-    val authorName: String,
-    val channelName: String,
     val courseName: String,
-    val userId: String,
+    val channelName: String,
+    val authorId: String,
+    val authorName: String,
+    val authorImageUrl: String?,
     val messageId: String,
-    val profilePicUrl: String?,
     val messageContent: String,
-    val type: ConversationType?,
+    val conversationType: CommunicationNotificationConversationType?,
     val isReply: Boolean
 ) {
-    enum class ConversationType(val rawValue: String) {
-        CHANNEL("channel"),
-        ONE_TO_ONE_CHAT("oneToOneChat"),
-        GROUP_CHAT("groupChat");
-
-        companion object {
-            fun fromString(rawValue: String): ConversationType =
-                entries.first { it.rawValue == rawValue }
-        }
-    }
-
     companion object {
 
         fun fromNotificationsPlaceholders(
@@ -56,11 +45,11 @@ data class CommunicationNotificationPlaceholderContent(
                         authorName = notificationPlaceholders[4],
                         channelName = "New Announcement Post",
                         courseName = notificationPlaceholders[0],
-                        userId = notificationPlaceholders[6],
+                        authorId = notificationPlaceholders[6],
                         messageId = notificationPlaceholders[7],
-                        profilePicUrl = profilePic,
+                        authorImageUrl = profilePic,
                         messageContent = "${notificationPlaceholders[1]}\n${notificationPlaceholders[2]}",
-                        type = null,
+                        conversationType = null,
                         isReply = false
                     )
                 }
@@ -74,11 +63,11 @@ data class CommunicationNotificationPlaceholderContent(
                         authorName = notificationPlaceholders[4],
                         channelName = notificationPlaceholders[3],
                         courseName = notificationPlaceholders[0],
-                        userId = notificationPlaceholders[7],
+                        authorId = notificationPlaceholders[7],
                         messageId = notificationPlaceholders[8],
-                        profilePicUrl = profilePic,
+                        authorImageUrl = profilePic,
                         messageContent = notificationPlaceholders[1],
-                        type = ConversationType.fromString(notificationPlaceholders[5]),
+                        conversationType = CommunicationNotificationConversationType.fromRawValue(notificationPlaceholders[5]),
                         isReply = false
                     )
                 }
@@ -89,14 +78,14 @@ data class CommunicationNotificationPlaceholderContent(
                     val profilePic = notificationPlaceholders[8].takeIf { it.isNotEmpty() }
 
                     CommunicationNotificationPlaceholderContent(
-                        authorName = "Replied to ${notificationPlaceholders[6]} by ${notificationPlaceholders[3]}",
+                        authorName = notificationPlaceholders[6],
                         channelName = notificationPlaceholders[7],
                         courseName = notificationPlaceholders[0],
-                        userId = notificationPlaceholders[9],
+                        authorId = notificationPlaceholders[9],
                         messageId = notificationPlaceholders[11],
-                        profilePicUrl = profilePic,
+                        authorImageUrl = profilePic,
                         messageContent = notificationPlaceholders[4],
-                        type = null,
+                        conversationType = null,
                         isReply = true
                     )
                 }
