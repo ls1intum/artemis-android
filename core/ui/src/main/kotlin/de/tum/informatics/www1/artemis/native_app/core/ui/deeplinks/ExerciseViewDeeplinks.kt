@@ -1,12 +1,14 @@
-package de.tum.informatics.www1.artemis.native_app.feature.exerciseview
-
-import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ArtemisDeeplink
+package de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks
 
 object ExerciseViewDeeplinks {
 
     object ToExercise : ArtemisDeeplink() {
         override val path = "courses/{courseId}/exercises/{exerciseId}"
         override val type = Type.IN_APP_AND_WEB
+
+        fun markdownLink(courseId: Long, exerciseId: Long): String {
+            return "/courses/$courseId/exercises/$exerciseId"
+        }
     }
 
     object ToExerciseCourseAgnostic : ArtemisDeeplink() {

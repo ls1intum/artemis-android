@@ -32,6 +32,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Programmin
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseViewDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureViewDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
@@ -655,11 +657,13 @@ internal open class ConversationViewModel(
                             }
 
                             val exerciseTitle = exercise.title ?: return@mapNotNull null
+                            val exerciseId = exercise.id ?: return@mapNotNull null
+                            val link = ExerciseViewDeeplinks.ToExercise.markdownLink(courseId, exerciseId)
 
                             AutoCompleteHint(
                                 hint = exerciseTitle,
-                                replacementText = "[$exerciseTag]${exercise.title}(/courses/${metisContext.courseId}/exercises/${exercise.id})[/$exerciseTag]",
-                                id = "Exercise:${exercise.id ?: return@mapNotNull null}"
+                                replacementText = "[$exerciseTag]${exercise.title}($link)[/$exerciseTag]",
+                                id = "Exercise:$exerciseId"
                             )
                         }
 
@@ -668,10 +672,13 @@ internal open class ConversationViewModel(
                         .lectures
                         .filter { query in it.title }
                         .mapNotNull { lecture ->
+                            val lectureId = lecture.id ?: return@mapNotNull null
+                            val link = LectureViewDeeplinks.ToLecture.markdownLink(courseId, lectureId)
+
                             AutoCompleteHint(
                                 hint = lecture.title,
-                                replacementText = "[lecture]${lecture.title}(/courses/${metisContext.courseId}/lectures/${lecture.id})[/lecture]",
-                                id = "Lecture:${lecture.id ?: return@mapNotNull null}"
+                                replacementText = "[lecture]${lecture.title}($link)[/lecture]",
+                                id = "Lecture:$lectureId"
                             )
                         }
 

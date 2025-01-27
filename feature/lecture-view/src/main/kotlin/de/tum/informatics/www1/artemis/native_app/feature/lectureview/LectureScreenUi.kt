@@ -36,12 +36,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
-import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.generateLinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureViewDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
@@ -75,11 +74,8 @@ fun NavGraphBuilder.lecture(
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
 ) {
     animatedComposable<LectureScreenUi>(
-        deepLinks = listOf(
-            navDeepLink {
-                uriPattern = "artemis://lectures/{lectureId}"
-            }
-        ) + generateLinks("courses/{courseId}/lectures/{lectureId}")
+        deepLinks = LectureViewDeeplinks.ToLecture.generateLinks() +
+                LectureViewDeeplinks.ToLectureCourseAgnostic.generateLinks()
     ) { backStackEntry ->
         val route: LectureScreenUi = backStackEntry.toRoute()
 
