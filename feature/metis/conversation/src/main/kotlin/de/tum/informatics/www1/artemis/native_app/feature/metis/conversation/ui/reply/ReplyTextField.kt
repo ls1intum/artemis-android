@@ -76,11 +76,12 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MarkdownListContinuationUtil.continueListIfApplicable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteCategory
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.ReplyAutoCompletePopup
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.ReplyAutoCompletePopupPositionProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownListContinuationUtil.continueListIfApplicable
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util.MarkdownStyleUtil
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ReplyState
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -342,7 +343,7 @@ private fun CreateReplyUi(
         },
         showAutoCompletePopup = {
             onRequestAutocompleteType(it)
-            applyMarkdownStyle(
+            val newTextFieldValue = MarkdownStyleUtil.apply(
                 style = when (it) {
                     AutocompleteType.USERS -> MarkdownStyle.UserMention
                     AutocompleteType.CHANNELS -> MarkdownStyle.ChannelMention
@@ -350,8 +351,8 @@ private fun CreateReplyUi(
                     AutocompleteType.EXERCISES -> MarkdownStyle.ExerciseMention
                 },
                 currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = replyMode::onUpdate
             )
+            replyMode.onUpdate(newTextFieldValue)
         },
         sendButton = {
             SendButton(
@@ -375,11 +376,11 @@ private fun CreateReplyUi(
         formattingOptionButtons = {
             FormattingOptions(
                 applyMarkdownStyle = {
-                    applyMarkdownStyle(
+                    val newTextFieldValue = MarkdownStyleUtil.apply(
                         style = it,
                         currentTextFieldValue = currentTextFieldValue,
-                        onTextChanged = replyMode::onUpdate
                     )
+                    replyMode.onUpdate(newTextFieldValue)
                 }
             )
         },
@@ -443,79 +444,6 @@ private fun SendButton(
                 },
                 tint = Color.White,
                 contentDescription = null
-            )
-        }
-    }
-}
-
-
-private fun applyMarkdownStyle(
-    style: MarkdownStyle,
-    currentTextFieldValue: TextFieldValue,
-    onTextChanged: (TextFieldValue) -> Unit
-) {
-    val selection = currentTextFieldValue.selection
-    val text = currentTextFieldValue.text
-
-    val startTag = style.startTag
-    val endTag = style.endTag
-
-    if (selection.collapsed) {
-        // No text selected
-        if (style == MarkdownStyle.CodeBlock) {
-            // Insert code block with newlines
-            val newText = text.substring(0, selection.start) +
-                    "$startTag\n\n$endTag" +
-                    text.substring(selection.end)
-            val newCursorPosition = selection.start + startTag.length + 1
-            onTextChanged(
-                TextFieldValue(
-                    text = newText,
-                    selection = TextRange(newCursorPosition, newCursorPosition)
-                )
-            )
-        } else {
-            // Other styles
-            val newText = text.substring(
-                0,
-                selection.start
-            ) + startTag + endTag + text.substring(selection.end)
-            val newCursorPosition = selection.start + startTag.length
-            onTextChanged(
-                TextFieldValue(
-                    text = newText,
-                    selection = TextRange(newCursorPosition, newCursorPosition)
-                )
-            )
-        }
-    } else {
-        val selectedText = text.substring(selection.start, selection.end)
-        if (style == MarkdownStyle.CodeBlock) {
-            val newText = text.substring(0, selection.start) +
-                    "$startTag\n$selectedText\n$endTag" +
-                    text.substring(selection.end)
-            val newSelection = TextRange(
-                selection.start + startTag.length + 1,
-                selection.end + startTag.length + 1
-            )
-            onTextChanged(
-                TextFieldValue(
-                    text = newText,
-                    selection = newSelection
-                )
-            )
-        } else {
-            val newText = text.substring(0, selection.start) +
-                    startTag +
-                    selectedText +
-                    endTag +
-                    text.substring(selection.end)
-            val newSelection = TextRange(selection.end + startTag.length + endTag.length)
-            onTextChanged(
-                TextFieldValue(
-                    text = newText,
-                    selection = newSelection
-                )
             )
         }
     }
