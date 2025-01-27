@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -217,8 +218,7 @@ fun MetisChatList(
             if (isReplyEnabled) {
                 ReplyTextField(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Spacings.ReplyTextFieldHorizontalSpacing),
+                        .fillMaxWidth(),
                     replyMode = replyMode,
                     updateFailureState = updateFailureStateDelegate,
                     conversationName = conversationName,
@@ -235,8 +235,8 @@ private fun ChatList(
     state: LazyListState,
     posts: PostsDataState.Loaded,
     postActionFlags: PostActionFlags,
-    clientId: Long,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
+    clientId: Long,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
     onRequestDelete: (IStandalonePost) -> Unit,
@@ -249,6 +249,7 @@ private fun ChatList(
     LazyColumn(
         modifier = modifier,
         state = state,
+        contentPadding = PaddingValues(bottom = 4.dp),
         reverseLayout = true
     ) {
         items(
