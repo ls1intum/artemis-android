@@ -85,6 +85,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MarkdownListContinuationUtil.continueListIfApplicable
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteCategory
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.ReplyAutoCompletePopup
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.ReplyAutoCompletePopupPositionProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ReplyState
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -402,22 +406,6 @@ private fun rememberFilePickerLauncher(
             Toast.LENGTH_SHORT
         ).show()
     }
-}
-
-enum class MarkdownStyle(val startTag: String, val endTag: String) {
-    Bold("**", "**"),
-    Italic("*", "*"),
-    Underline("<ins>", "</ins>"),
-    Strikethrough("~~", "~~"),
-    InlineCode("`", "`"),
-    CodeBlock("```", "```"),
-    Blockquote("> ", ""),
-    OrderedList("1. ", ""),
-    UnorderedList("- ", ""),
-    UserMention("@", ""),
-    ChannelMention("#", ""),
-    LectureMention("#", ""),
-    ExerciseMention("#", "")
 }
 
 @Composable
