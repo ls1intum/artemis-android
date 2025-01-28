@@ -39,7 +39,7 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         return when (type) {
             "attachment" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$newUrl)"
             "lecture-unit" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$newUrl)"
-            "slide" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$newUrl)" // TODO: fix authentication or redirect to lecture unit (https://github.com/ls1intum/artemis-android/issues/245)
+            "slide" -> "![$fileName]($serverUrl/api/files/attachments/$newUrl)"
             else -> fileName
         }
     }
