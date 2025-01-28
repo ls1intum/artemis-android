@@ -33,6 +33,9 @@ configurations.all {
 
     // Not used and created a security issue: https://github.com/ls1intum/artemis-android/issues/339
     exclude(group = "com.google.firebase", module = "firebase-measurement-connector")
+    // Not used and created a security issues: https://www.mend.io/vulnerability-database/CVE-2022-2390
+    exclude(group = "com.google.firebase", module = "firebase-installations-interop")
+
 
 
 }
