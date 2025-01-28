@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,12 +14,14 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenu
@@ -203,7 +206,10 @@ fun ConversationChatListScreen(
                                 Text("placeholder", Modifier.placeholder(true))
                             }
                         ) {
-                            ConversationTitle(conversation = it)
+                            ConversationTitle(
+                                conversation = it,
+                                onclick = onNavigateToSettings
+                            )
                         }
                     }
                 },
@@ -271,6 +277,7 @@ fun ConversationChatListScreen(
 private fun ConversationTitle(
     modifier: Modifier = Modifier,
     conversation: Conversation,
+    onclick: () -> Unit
 ) {
     Row(
         modifier = modifier,
@@ -283,13 +290,25 @@ private fun ConversationTitle(
 
         Spacer(Modifier.width(8.dp))
 
-        Column {
-            Text(
-                text = conversation.humanReadableName,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium
-            )
+        Column(
+            modifier = Modifier.clickable { onclick() }
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = conversation.humanReadableName,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Icon(
+                    modifier = Modifier.size(20.dp),
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null,
+                )
+            }
 
             if (conversation !is OneToOneChat) {
                 Text(
