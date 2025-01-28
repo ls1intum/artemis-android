@@ -48,7 +48,7 @@ fun ConversationIcon(
             )
         }
 
-        if (conversation.isFavorite && !allowFavoriteIndicator) {
+        if (conversation.isFavorite && allowFavoriteIndicator) {
             FavoriteIndicator(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)

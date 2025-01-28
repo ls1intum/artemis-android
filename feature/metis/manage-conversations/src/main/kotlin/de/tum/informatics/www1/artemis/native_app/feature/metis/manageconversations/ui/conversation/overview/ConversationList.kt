@@ -173,7 +173,7 @@ internal fun ConversationList(
             conversationList(
                 keySuffix = suffix,
                 section = items,
-                allowFavoriteIndicator = key == SECTION_FAVORITES_KEY,
+                allowFavoriteIndicator = key != SECTION_FAVORITES_KEY,
                 onNavigateToConversation = onNavigateToConversation,
                 onNavigateToSavedPosts = onNavigateToSavedPosts,
                 onToggleMarkAsFavourite = onToggleMarkAsFavourite,
