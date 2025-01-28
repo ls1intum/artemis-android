@@ -35,10 +35,11 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         url: String
     ): String {
         val fileIconImage = createFileTypeIconMarkdown(R.drawable.file_link_icon)
+        val newUrl = url.replace(" ", "%20")
         return when (type) {
-            "attachment" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$url)"
-            "lecture-unit" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$url)"
-            "slide" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$url)" // TODO: fix authentication or redirect to lecture unit (https://github.com/ls1intum/artemis-android/issues/117)
+            "attachment" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$newUrl)"
+            "lecture-unit" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$newUrl)"
+            "slide" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$newUrl)" // TODO: fix authentication or redirect to lecture unit (https://github.com/ls1intum/artemis-android/issues/245)
             else -> fileName
         }
     }
@@ -48,7 +49,6 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         fileName: String,
         filePath: String
     ): String {
-        // TODO: fix authentication or redirect for all non-image uploads (https://github.com/ls1intum/artemis-android/issues/117)
         return if (isImage) "![$fileName]($serverUrl$filePath)" else "[$fileName]($serverUrl$filePath)"
     }
 }
