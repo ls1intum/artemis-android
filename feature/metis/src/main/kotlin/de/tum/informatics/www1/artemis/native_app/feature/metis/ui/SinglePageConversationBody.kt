@@ -3,10 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -144,7 +141,7 @@ internal fun SinglePageConversationBody(
 
                 is OpenedConversation -> {
                     ConversationScreen(
-                        modifier = modifier.consumeWindowInsets(WindowInsets.systemBars),
+                        modifier = modifier,
                         conversationId = config.conversationId,
                         threadPostId = config.openedThread?.postId,
                         courseId = courseId,
