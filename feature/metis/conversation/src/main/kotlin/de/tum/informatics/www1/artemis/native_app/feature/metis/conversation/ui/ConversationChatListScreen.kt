@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenu
@@ -43,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,6 +53,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -69,6 +70,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.Conver
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import io.github.fornewid.placeholder.material3.placeholder
 
+private const val FILTER_EXERCISE = "exercise"
+private const val FILTER_LECTURE = "lecture"
 
 @Composable
 internal fun ConversationChatListScreen(
@@ -164,6 +167,9 @@ fun ConversationChatListScreen(
     var isInfoDropdownExpanded by remember { mutableStateOf(false) }
 
     val searchBarFocusRequester = remember { FocusRequester() }
+    val conversation = conversationDataState.orNull()
+    val hasExercise = conversation?.filterPredicate(FILTER_EXERCISE) == true
+    val hasLecture = conversation?.filterPredicate(FILTER_LECTURE) == true
 
     val closeSearch = {
         isSearchBarOpen = false
@@ -212,13 +218,16 @@ fun ConversationChatListScreen(
                                 }
                             }
                         ) {
-                            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = null
+                            )
                         }
                     }
                 },
                 actions = {
                     if (!isSearchBarOpen) {
-                        if (BuildConfig.DEBUG){
+                        if (BuildConfig.DEBUG) {
                             ConversationDataStatusButton(
                                 dataStatus = conversationDataStatus,
                                 onRequestSoftReload = onRequestSoftReload
@@ -231,9 +240,8 @@ fun ConversationChatListScreen(
 
                         IconButton(
                             onClick = {
-                                if (conversationDataState.orNull() is ChannelChat) {
-                                    isInfoDropdownExpanded = true
-                                } else {
+                                isInfoDropdownExpanded = hasExercise || hasLecture
+                                if (!isInfoDropdownExpanded) {
                                     onNavigateToSettings()
                                 }
                             }
@@ -242,6 +250,10 @@ fun ConversationChatListScreen(
 
                             InfoDropdownMenu(
                                 isInfoDropdownExpanded = isInfoDropdownExpanded,
+                                hasExercise = hasExercise,
+                                hasLecture = hasLecture,
+                                courseId = courseId,
+                                conversation = if (conversation is ChannelChat) conversation else return@IconButton,
                                 onDismissRequest = { isInfoDropdownExpanded = false },
                                 onNavigateToSettings = onNavigateToSettings
                             )
@@ -298,9 +310,23 @@ private fun ConversationTitle(
 @Composable
 private fun InfoDropdownMenu(
     isInfoDropdownExpanded: Boolean,
+    hasExercise: Boolean,
+    hasLecture: Boolean,
+    courseId: Long,
+    conversation: ChannelChat,
     onDismissRequest: () -> Unit,
     onNavigateToSettings: () -> Unit
 ) {
+    val isParameterCombinationIllegal = hasExercise && hasLecture
+    require(!isParameterCombinationIllegal)
+
+    val localLinkOpener = LocalLinkOpener.current
+    val (stringResource, referenceType) = when {
+        hasExercise -> stringResource(R.string.conversation_go_to_exercise) to "exercises"
+        hasLecture -> stringResource(R.string.conversation_go_to_lecture) to "lectures"
+        else -> "" to null
+    }
+
     DropdownMenu(
         expanded = isInfoDropdownExpanded,
         onDismissRequest = onDismissRequest
@@ -319,17 +345,19 @@ private fun InfoDropdownMenu(
             }
         )
 
-        DropdownMenuItem(
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.ArrowOutward,
-                    contentDescription = null
-                )
-            },
-            text = { Text(text = stringResource(R.string.conversation_go_to_lecture)) },
-            onClick = {
-                onDismissRequest()
-            }
-        )
+        referenceType?.let { referenceType ->
+            DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.open),
+                        contentDescription = null
+                    )
+                },
+                text = { Text(text = stringResource) },
+                onClick = {
+                    localLinkOpener.openLink("artemis://courses/${courseId}/${referenceType}/${conversation.subTypeReferenceId}")
+                }
+            )
+        }
     }
 }
