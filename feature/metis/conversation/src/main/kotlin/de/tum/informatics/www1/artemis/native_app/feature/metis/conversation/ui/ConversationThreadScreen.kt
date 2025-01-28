@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -82,8 +81,7 @@ internal fun ConversationThreadScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .imePadding()
-                .navigationBarsPadding(),
+                .imePadding(),
         ) {
             CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides viewModel) {
                 MetisThreadUi(
