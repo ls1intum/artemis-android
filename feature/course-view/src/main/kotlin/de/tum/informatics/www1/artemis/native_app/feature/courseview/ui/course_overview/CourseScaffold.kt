@@ -1,10 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview
 
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.ListAlt
@@ -58,11 +57,9 @@ internal fun CourseScaffold(
         BasicDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(
-                    top = padding.calculateTopPadding(),
-                    bottom = padding.calculateBottomPadding()
-                )
-                .consumeWindowInsets(WindowInsets.systemBars),
+                .padding(padding)
+                .consumeWindowInsets(padding)
+                .systemBarsPadding(),           // This line is needed due to https://stackoverflow.com/a/74545344/13366254
             dataState = courseDataState,
             loadingText = stringResource(id = R.string.course_ui_loading_course_loading),
             failureText = stringResource(id = R.string.course_ui_loading_course_failed),
