@@ -81,7 +81,7 @@
     <string name="conversation_title_exercise_post">%1$s/%2$s: %3$s</string>
     <string name="conversation_title_lecture_post">%1$s/%2$s: %3$s</string>
     <string name="conversation_title_conversation">%1$s/%2$s</string>
-    <string name="conversation_title_conversation_thread">%1$s/%2$s: %3$s</string>
+    <string name="conversation_title_conversation_thread">Re: %1$s/%2$s</string>
 
     <string name="push_notification_unknown_title">Your application may be outdated.</string>
     <string name="push_notification_unknown_body">You have received a notification which could not be processed. Try to update your application.</string>

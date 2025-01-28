@@ -12,20 +12,23 @@ class BaseImageProviderImpl : BaseImageProvider {
     override fun createImageRequest(
         context: Context,
         imageUrl: String,
-        authorizationToken: String,
+        authorizationToken: String?,
     ): ImageRequest {
-        val headers = NetworkHeaders.Builder()
-            .set(HttpHeaders.Cookie, "jwt=$authorizationToken")
-            .build()
-
         val builder = ImageRequest.Builder(context)
-            .httpHeaders(headers)
             .data(imageUrl)
+
+        authorizationToken?.let {
+            val headers = NetworkHeaders.Builder()
+                .set(HttpHeaders.Cookie, "jwt=$authorizationToken")
+                .build()
+
+            builder.httpHeaders(headers)
+        }
 
         return builder.build()
     }
 
-    override fun createImageLoader(
+    override fun createCoil2ImageLoader(
         context: Context,
         authorizationToken: String
     ): ImageLoader {

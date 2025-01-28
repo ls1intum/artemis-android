@@ -15,6 +15,7 @@ interface CommunicationNotificationManager {
     suspend fun addSelfMessage(
         parentId: Long,
         authorName: String,
+        authorImageUrl: String?,
         body: String,
         date: Instant
     )
