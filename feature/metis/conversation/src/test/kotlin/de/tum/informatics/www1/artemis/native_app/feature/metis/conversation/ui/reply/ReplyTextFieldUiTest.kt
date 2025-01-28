@@ -1,6 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,18 +66,22 @@ class ReplyTextFieldUiTest {
             CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides hintProviderStub) {
                 val text = remember { mutableStateOf(TextFieldValue()) }
 
-                ReplyTextField(
-                    modifier = Modifier.fillMaxSize(),
-                    replyMode = ReplyMode.NewMessage(
-                        text,
-                        onUpdateTextUpstream = { text.value = it }
-                    ) {
-                        CompletableDeferred()
-                    },
-                    updateFailureState = {},
-                    conversationName = "TestChat",
-                    onFileSelected = { _ -> }
-                )
+                Column {
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    ReplyTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        replyMode = ReplyMode.NewMessage(
+                            text,
+                            onUpdateTextUpstream = { text.value = it }
+                        ) {
+                            CompletableDeferred()
+                        },
+                        updateFailureState = {},
+                        conversationName = "TestChat",
+                        onFileSelected = { _ -> }
+                    )
+                }
             }
         }
 
