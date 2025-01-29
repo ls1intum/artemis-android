@@ -108,6 +108,10 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 add(configuration.name, "com.google.android.gms:play-services-basement:18.0.2") {
                     because("Created a security issues: https://www.mend.io/vulnerability-database/CVE-2022-2390")
                 }
+
+                add(configuration.name, "com.google.guava:guava:32.0.1-jre") {
+                    because("Created several security issues: https://www.mend.io/vulnerability-database/CVE-2023-2976")
+                }
             }
         }
     }
