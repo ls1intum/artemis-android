@@ -13,9 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,11 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.PotentialRecipientsUi
 
@@ -62,8 +59,6 @@ internal fun MemberSelection(
             onUpdateQuery = viewModel::updateQuery,
             onRemoveRecipient = viewModel::removeRecipient
         )
-
-        HorizontalDivider()
 
         PotentialRecipientsUi(
             modifier = Modifier
@@ -125,26 +120,15 @@ private fun RecipientsTextField(
             }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(text = stringResource(id = R.string.conversation_member_selection_search_label))
-
-            val textStyle = LocalTextStyle.current
-
-            BasicHintTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester)
-                    .testTag(TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD),
-                value = query,
-                onValueChange = onUpdateQuery,
-                hint = stringResource(id = R.string.conversation_member_selection_address_hint),
-                maxLines = 1,
-                hintStyle = remember(textStyle) { textStyle.copy(textStyle.color.copy(alpha = 0.8f)) }
-            )
-        }
+        BasicSearchTextField (
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD),
+            query = query,
+            updateQuery = onUpdateQuery,
+            hint = stringResource(id = R.string.conversation_member_selection_address_hint),
+            focusRequester = focusRequester
+        )
     }
 }
 

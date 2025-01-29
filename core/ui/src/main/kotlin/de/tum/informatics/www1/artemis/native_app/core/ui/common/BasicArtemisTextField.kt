@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,58 +36,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-
-@Composable
-fun BasicHintTextField(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    hint: String,
-    maxLines: Int,
-    hideHintOnFocus: Boolean = true,
-    hintStyle: TextStyle = LocalTextStyle.current
-) {
-    var hasFocus by remember { mutableStateOf(false) }
-    val keyboardController = LocalSoftwareKeyboardController.current
-
-    val isValueDisplayed = value.isNotBlank() || (hasFocus && hideHintOnFocus)
-    val currentValue = if (isValueDisplayed) value else hint
-
-    BasicTextField(
-        modifier = modifier
-            .onFocusChanged { focusState ->
-                hasFocus = focusState.hasFocus
-            },
-        value = currentValue,
-        onValueChange = onValueChange,
-        maxLines = maxLines,
-        textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
-        cursorBrush = SolidColor(LocalContentColor.current),
-        visualTransformation = { text ->
-            if (isValueDisplayed) TransformedText(text, OffsetMapping.Identity)
-            else TransformedText(
-                AnnotatedString(text = currentValue, spanStyle = hintStyle.toSpanStyle()),
-                OffsetMapping.Identity
-            )
-        },
-        keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                keyboardController?.hide()
-            }
-        )
-    )
-}
 
 @Composable
 fun BasicArtemisTextField(
@@ -100,13 +52,12 @@ fun BasicArtemisTextField(
     focusRequester: FocusRequester? = null,
     hideHintOnFocus: Boolean = false,
     backgroundColor: Color,
+    textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     onFocusChanged: ((Boolean) -> Unit),
     onValueChange: (TextFieldValue) -> Unit,
 ) {
-    val localTextStyle = LocalTextStyle.current
-
     BasicTextField(
         modifier = modifier
             .onFocusChanged { focusState ->
@@ -141,7 +92,7 @@ fun BasicArtemisTextField(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = localTextStyle,
+                            style = textStyle,
                         )
                     }
                 }
@@ -150,7 +101,7 @@ fun BasicArtemisTextField(
         },
         maxLines = maxLines,
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-        textStyle = localTextStyle.copy(color = MaterialTheme.colorScheme.onSurface),
+        textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions
     )
@@ -159,8 +110,10 @@ fun BasicArtemisTextField(
 @Composable
 fun BasicSearchTextField(
     modifier: Modifier,
+    focusRequester: FocusRequester? = null,
     hint: String,
     query: String,
+    textStyle: TextStyle = LocalTextStyle.current,
     updateQuery: (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -181,17 +134,19 @@ fun BasicSearchTextField(
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             BasicArtemisTextField(
-                modifier = Modifier
+                modifier = modifier
                     .weight(1f),
                 backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
                 hint = hint,
                 leadingHintIcon = Icons.Default.Search,
                 value = textFieldValue,
+                focusRequester = focusRequester,
                 onValueChange = { newValue ->
                     textFieldValue = newValue
                     updateQuery(newValue.text)
                 },
                 maxLines = 1,
+                textStyle = textStyle,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done
                 ),

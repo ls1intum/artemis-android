@@ -22,6 +22,7 @@
     <string name="metis_post_list_loading">Loading posts…</string>
     <string name="metis_post_list_error">Something went wrong while loading your posts.</string>
     <string name="metis_post_list_error_try_again">Try again</string>
+    <string name="metis_post_search_hint">Search for a post</string>
 
     <!-- Strings related to failures when interacting and modifying metis -->
     <string name="metis_modification_failure_dialog_title">Failure</string>

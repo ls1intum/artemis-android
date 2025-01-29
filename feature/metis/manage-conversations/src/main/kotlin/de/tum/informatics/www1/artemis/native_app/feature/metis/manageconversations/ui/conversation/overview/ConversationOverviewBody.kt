@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.material.icons.filled.ChatBubble
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.WifiOff
@@ -29,7 +27,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -50,7 +47,6 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.endOfPagePadding
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
@@ -142,11 +138,6 @@ fun ConversationOverviewBody(
                     }
                 }
 
-//                ConversationSearch(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    query = query,
-//                    updateQuery = viewModel::onUpdateQuery
-//                )
                 BasicSearchTextField(
                     modifier = Modifier.fillMaxWidth(),
                     hint = stringResource(id = R.string.conversation_overview_search_hint),
@@ -289,49 +280,3 @@ fun ConversationFabWithDropdownMenu(
         }
     }
 }
-
-
-
-@Composable
-private fun ConversationSearch(
-    modifier: Modifier,
-    query: String,
-    updateQuery: (String) -> Unit
-) {
-    Box(
-        modifier = modifier.border(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.primaryContainer,
-            shape = MaterialTheme.shapes.small
-        )
-    ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            BasicHintTextField(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(8.dp),
-                hint = stringResource(id = R.string.conversation_overview_search_hint),
-                value = query,
-                onValueChange = updateQuery,
-                maxLines = 1
-            )
-
-            if (query.isNotEmpty()) {
-                IconButton(
-                    onClick = { updateQuery("") },
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .size(24.dp)
-                        .padding(end = 5.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
