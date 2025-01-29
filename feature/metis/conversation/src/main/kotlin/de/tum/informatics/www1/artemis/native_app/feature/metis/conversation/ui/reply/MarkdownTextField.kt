@@ -183,6 +183,7 @@ fun BasicMarkdownTextField(
         BasicArtemisTextField(
             modifier = modifier
                 .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
+            backgroundColor = MaterialTheme.colorScheme.background,
             value = textFieldValue,
             onValueChange = onTextChanged,
             focusRequester = focusRequester,

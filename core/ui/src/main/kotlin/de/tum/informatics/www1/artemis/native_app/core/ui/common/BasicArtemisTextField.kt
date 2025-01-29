@@ -1,18 +1,20 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.common
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -31,7 +33,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -91,9 +95,11 @@ fun BasicArtemisTextField(
     modifier: Modifier,
     value: TextFieldValue,
     hint: String,
+    leadingHintIcon: ImageVector? = null,
     maxLines: Int = Int.MAX_VALUE,
     focusRequester: FocusRequester? = null,
     hideHintOnFocus: Boolean = false,
+    backgroundColor: Color,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     onFocusChanged: ((Boolean) -> Unit),
@@ -112,17 +118,32 @@ fun BasicArtemisTextField(
         decorationBox = { innerTextField ->
             Box(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(backgroundColor)
             ) {
                 if (value.text.isEmpty() && !hideHintOnFocus) {
-                    Text(
+                    Row(
                         modifier = Modifier.align(Alignment.CenterStart),
-                        text = hint,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = localTextStyle,
-                    )
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        leadingHintIcon?.let {
+                            Icon(
+                                imageVector = it,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(4.dp))
+                        }
+
+                        Text(
+                            text = hint,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = localTextStyle,
+                        )
+                    }
                 }
                 innerTextField()
             }
@@ -154,18 +175,17 @@ fun BasicSearchTextField(
 
     Box(
         modifier = modifier
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = MaterialTheme.shapes.small
-            )
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             BasicArtemisTextField(
                 modifier = Modifier
                     .weight(1f),
+                backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
                 hint = hint,
+                leadingHintIcon = Icons.Default.Search,
                 value = textFieldValue,
                 onValueChange = { newValue ->
                     textFieldValue = newValue
@@ -188,7 +208,7 @@ fun BasicSearchTextField(
                     onClick = { updateQuery("") },
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                        .background(MaterialTheme.colorScheme.background)
                         .align(Alignment.CenterVertically)
                         .size(24.dp)
                 ) {
