@@ -23,10 +23,6 @@ android {
 
     val versionName = "1.1.1"
     val versionCode = 618
-    // While we do not have a building pipeline set up, we default back to using manual version
-    // codes, because otherwise we always have to re-install the app when checking out a branch with
-    // less commits.
-//    val versionCode = deriveVersionCodeFromGit()
 
     setProperty("archivesBaseName", "artemis-android-$versionName-$versionCode")
 
@@ -161,13 +157,4 @@ dependencies {
 
 sentry {
     autoInstallation.enabled.set(false)
-}
-
-/**
- * The version code is the number of commits in the current branch.
- */
-fun deriveVersionCodeFromGit(): Int {
-    return providers.exec {
-        commandLine("git", "rev-list", "--count", "HEAD")
-    }.standardOutput.asText.get().trim().toInt()
 }
