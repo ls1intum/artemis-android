@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
@@ -44,9 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
@@ -55,11 +51,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicArtemisTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import kotlinx.coroutines.launch
@@ -184,42 +180,23 @@ fun BasicMarkdownTextField(
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scrollState)
     ) {
-        BasicTextField(
+        BasicArtemisTextField(
             modifier = modifier
-                .focusRequester(focusRequester)
-                .onFocusChanged { focusState ->
-                    if (focusState.hasFocus) {
-                        hadFocus = true
-                        onFocusAcquired()
-                    }
-                    if (!focusState.hasFocus && hadFocus) {
-                        onFocusLost()
-                        hadFocus = false
-                    }
-                }
                 .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
             value = textFieldValue,
             onValueChange = onTextChanged,
-            decorationBox = { innerTextField ->
-                Box(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
-                    if (textFieldValue.text.isEmpty()) {
-                        Text(
-                            modifier = Modifier.align(Alignment.CenterStart),
-                            text = hintText,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = localTextStyle,
-                        )
-                    }
-                    innerTextField()
+            focusRequester = focusRequester,
+            onFocusChanged = { hasFocus ->
+                if (hasFocus) {
+                    hadFocus = true
+                    onFocusAcquired()
+                }
+                if (!hasFocus && hadFocus) {
+                    onFocusLost()
+                    hadFocus = false
                 }
             },
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            textStyle = localTextStyle.copy(color = MaterialTheme.colorScheme.onSurface)
+            hint = hintText.text
         )
     }
 }
