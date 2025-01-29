@@ -26,6 +26,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.PotentialRecipientsUi
@@ -39,7 +40,8 @@ internal fun testTagForSelectedRecipient(username: String) = "selectedRecipient$
 @Composable
 internal fun MemberSelection(
     modifier: Modifier,
-    viewModel: MemberSelectionBaseViewModel
+    viewModel: MemberSelectionBaseViewModel,
+    onUpdateSelectedUserCount: (Int) -> Unit
 ) {
     val recipients by viewModel.recipients.collectAsState()
     val query by viewModel.query.collectAsState()
@@ -47,12 +49,17 @@ internal fun MemberSelection(
     val potentialRecipientsDataState by viewModel.potentialRecipients.collectAsState()
     val inclusionList by viewModel.inclusionList.collectAsState()
 
+    LaunchedEffect(recipients) {
+        onUpdateSelectedUserCount(recipients.size)
+    }
+
     Column(
         modifier = modifier,
     ) {
         RecipientsTextField(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                 .padding(bottom = 4.dp),
             recipients = recipients,
             query = query,

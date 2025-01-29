@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -9,7 +10,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -17,13 +18,16 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFloatingActionButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -59,6 +63,7 @@ internal fun CreatePersonalConversationScreen(
     val canCreateConversation by viewModel.canCreateConversation.collectAsState()
 
     var displayCreateConversationFailedDialog: Boolean by remember { mutableStateOf(false) }
+    var numberOfSelectedUsers by remember { mutableIntStateOf(0) }
 
     Scaffold(
         modifier = modifier,
@@ -85,7 +90,18 @@ internal fun CreatePersonalConversationScreen(
                     }
                 }
             ) {
-                Icon(imageVector = Icons.Default.Done, contentDescription = null)
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = pluralStringResource(
+                            id = R.plurals.create_personal_conversation_members,
+                            count = numberOfSelectedUsers
+                        )
+                    )
+                    Icon(Icons.Default.ChevronRight, contentDescription = null)
+                }
             }
         }
     ) { padding ->
@@ -94,9 +110,9 @@ internal fun CreatePersonalConversationScreen(
                 .fillMaxSize()
                 .imePadding()
                 .padding(top = padding.calculateTopPadding())
-                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
-                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
-            viewModel = viewModel
+                .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
+            viewModel = viewModel,
+            onUpdateSelectedUserCount = { numberOfSelectedUsers = it }
         )
     }
 
