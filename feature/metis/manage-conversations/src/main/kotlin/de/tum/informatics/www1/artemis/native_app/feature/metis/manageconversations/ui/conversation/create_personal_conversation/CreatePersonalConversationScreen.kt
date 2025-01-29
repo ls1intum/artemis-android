@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -72,7 +72,9 @@ internal fun CreatePersonalConversationScreen(
         },
         floatingActionButton = {
             JobAnimatedFloatingActionButton(
-                modifier = Modifier.testTag(TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON),
+                modifier = Modifier
+                    .imePadding()
+                    .testTag(TEST_TAG_CREATE_PERSONAL_CONVERSATION_BUTTON),
                 enabled = canCreateConversation,
                 startJob = viewModel::createConversation,
                 onJobCompleted = { conversation ->
@@ -83,7 +85,7 @@ internal fun CreatePersonalConversationScreen(
                     }
                 }
             ) {
-                Icon(imageVector = Icons.Default.Create, contentDescription = null)
+                Icon(imageVector = Icons.Default.Done, contentDescription = null)
             }
         }
     ) { padding ->
