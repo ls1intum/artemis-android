@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.settings
+package de.tum.informatics.www1.artemis.native_app.feature.settings.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,13 +16,11 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -40,9 +38,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptionsBuilder
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
@@ -53,16 +48,15 @@ import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvi
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
-import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
-import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureData
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationJobService
-import de.tum.informatics.www1.artemis.native_app.feature.push.ui.PushNotificationSettingsScreen
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
+import de.tum.informatics.www1.artemis.native_app.feature.settings.BuildConfig
+import de.tum.informatics.www1.artemis.native_app.feature.settings.R
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import kotlinx.coroutines.flow.SharingStarted
@@ -70,70 +64,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 
-@Serializable
-private data object SettingsScreen
-
-@Serializable
-private data object PushNotificationSettingsScreen
-
-fun NavController.navigateToSettings(builder: NavOptionsBuilder.() -> Unit) {
-    navigate(SettingsScreen, builder)
-}
-
-/**
- * version information has to be supplied externally, as they come from the app module
- */
-fun NavGraphBuilder.settingsScreen(
-    navController: NavController,
-    versionCode: Int,
-    versionName: String,
-    onNavigateUp: () -> Unit,
-    onLoggedOut: () -> Unit,
-    onDisplayThirdPartyLicenses: () -> Unit
-) {
-    animatedComposable<SettingsScreen>(
-        exitTransition = {
-            val toLoginScreen = targetState.destination.route?.startsWith(LoginScreen::class.qualifiedName!!) ?: false
-            if (toLoginScreen) {
-                return@animatedComposable DefaultTransition.fadeOut
-            }
-            DefaultTransition.exit
-        }
-    ) {
-        SettingsScreen(
-            modifier = Modifier.fillMaxSize(),
-            versionCode = versionCode,
-            versionName = versionName,
-            onNavigateUp = onNavigateUp,
-            onLoggedOut = onLoggedOut,
-            onDisplayThirdPartyLicenses = onDisplayThirdPartyLicenses
-        ) {
-            navController.navigate(PushNotificationSettingsScreen)
-        }
-    }
-
-    animatedComposable<PushNotificationSettingsScreen> {
-        PushNotificationSettingsScreen(
-            modifier = Modifier.fillMaxSize(),
-            onDone = onNavigateUp
-        )
-    }
-}
 
 /**
  * Display the settings screen.
  * Contains account settings, push settings and general info such as imprint and privacy policy.
  */
 @Composable
-private fun SettingsScreen(
+internal fun SettingsScreen(
     modifier: Modifier,
     versionCode: Int,
     versionName: String,
     onNavigateUp: () -> Unit,
-    onLoggedOut: () -> Unit,
     onDisplayThirdPartyLicenses: () -> Unit,
     onRequestOpenNotificationSettings: () -> Unit
 ) {
@@ -177,11 +120,7 @@ private fun SettingsScreen(
                 title = {
                     Text(text = stringResource(id = R.string.settings_screen_title))
                 },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateUp) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    }
-                }
+                navigationIcon = { NavigationBackButton(onNavigateUp) }
             )
         }
     ) { padding ->
@@ -209,8 +148,6 @@ private fun SettingsScreen(
                             )
 
                             accountService.logout()
-
-                            onLoggedOut()
                         }
                     }
                 )
