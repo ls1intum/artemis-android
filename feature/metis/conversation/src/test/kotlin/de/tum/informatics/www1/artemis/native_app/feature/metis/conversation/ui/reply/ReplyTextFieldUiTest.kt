@@ -67,6 +67,8 @@ class ReplyTextFieldUiTest {
                 val text = remember { mutableStateOf(TextFieldValue()) }
 
                 Column {
+                    // This Spacer is required to allocate some space where the autocompletion dialog can be 
+                    // displayed above the TextField.
                     Spacer(modifier = Modifier.weight(1f))
 
                     ReplyTextField(
