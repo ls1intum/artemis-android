@@ -68,9 +68,7 @@ import kotlinx.coroutines.launch
 const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
 val textFormattingOptionsHiddenOffsetY = 200.dp
 
-/**
- * @param sendButton composable centered vertically right to the text field.
- */
+
 @Composable
 internal fun MarkdownTextField(
     modifier: Modifier,
