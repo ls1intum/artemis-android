@@ -9,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -18,7 +17,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.rememberPostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
@@ -85,33 +86,28 @@ internal fun <T : Any> MetisPostListHandler(
         }
     }
 
-    // use scaffold as a way to conveniently place the fab.
-    Scaffold(
-        modifier = modifier,
-        floatingActionButton = {
-            if (hasNewUnseenPost) {
-                FloatingActionButton(
-                    onClick = { scope.launch { state.scrollToItem(bottomItemIndex) } }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowDownward,
-                        contentDescription = null
-                    )
-                }
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+        val markdownTransformer = rememberPostArtemisMarkdownTransformer(serverUrl, courseId)
+
+        ProvideEmojis(emojiService) {
+            CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
+                content()
             }
         }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            val markdownTransformer = rememberPostArtemisMarkdownTransformer(serverUrl, courseId)
 
-            ProvideEmojis(emojiService) {
-                CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
-                    content()
-                }
+        if (hasNewUnseenPost) {
+            FloatingActionButton(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(Spacings.FabPaddingValues),
+                onClick = { scope.launch { state.scrollToItem(bottomItemIndex) } }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowDownward,
+                    contentDescription = null
+                )
             }
         }
     }
