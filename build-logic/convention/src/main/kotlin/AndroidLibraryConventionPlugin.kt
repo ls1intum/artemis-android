@@ -88,14 +88,8 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
         configuration: Configuration,
         project: Project
     ) {
-        // Not used in project and created several security issues related to protobuf: https://github.com/advisories/GHSA-735f-pc8j-v9w8
-        // As far as I understand, the affected dependency com.google.protobuf is added via https://android.googlesource.com/platform/frameworks/support/+/androidx-main/datastore/datastore-preferences-external-protobuf/build.gradle
-        configuration.exclude(
-            group = "androidx.datastore",
-            module = "datastore-preferences-external-protobuf"
-        )
-
-        // Not used and created a security issue: https://github.com/ls1intum/artemis-android/issues/339
+        // Not used and only added due to firebase-bom dependency
+        // and created a security issue: https://github.com/ls1intum/artemis-android/issues/339
         configuration.exclude(
             group = "com.google.firebase",
             module = "firebase-measurement-connector"
@@ -107,6 +101,10 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 
         project.dependencies {
             constraints {
+                add(configuration.name, "com.google.protobuf:protobuf-java:3.25") {
+                    because("Created several security issues related to protobuf: https://github.com/advisories/GHSA-735f-pc8j-v9w8")
+                }
+
                 add(configuration.name, "com.google.android.gms:play-services-basement:18.0.2") {
                     because("Created a security issues: https://www.mend.io/vulnerability-database/CVE-2022-2390")
                 }
