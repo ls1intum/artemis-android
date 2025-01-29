@@ -181,11 +181,9 @@ fun BasicMarkdownTextField(
     Box(
         modifier = modifier
             .heightIn(max = (localTextStyle.fontSize.value * maxVisibleLines).dp)
-            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scrollState)
     ) {
         BasicTextField(
-            modifier = modifier
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester)
@@ -203,10 +201,7 @@ fun BasicMarkdownTextField(
             value = textFieldValue,
             onValueChange = onTextChanged,
             decorationBox = { innerTextField ->
-                Box(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
+                Box {
                     if (textFieldValue.text.isEmpty()) {
                         Text(
                             modifier = Modifier.align(Alignment.CenterStart),
