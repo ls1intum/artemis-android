@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,7 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardAlt
 import androidx.compose.material.icons.filled.PersonOff
+import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +29,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
@@ -51,7 +51,6 @@ internal fun PotentialRecipientsUi(
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         InclusionListUi(
             modifier = Modifier
-                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                 .fillMaxWidth(),
             inclusionList = inclusionList,
             updateInclusionList = updateInclusionList
@@ -118,35 +117,39 @@ private fun PotentialRecipientsList(
     isQueryTooShort: Boolean
 ) {
     if (recipients.isNotEmpty()) {
-        LazyColumn(
-            modifier = modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(bottom = 90.dp),
-        ) {
-            items(recipients) { user ->
-                CourseUserListItem(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(testTagForPotentialRecipient(user.username.orEmpty())),
-                    user = user,
-                    trailingContent = {
-                        IconButton(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .size(32.dp)
-                                .background(MaterialTheme.colorScheme.surfaceContainer),
-                            onClick = { addRecipient(user) }
-                        ) {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                imageVector = Icons.Default.Add,
-                                tint = MaterialTheme.colorScheme.primary,
-                                contentDescription = stringResource(
-                                    id = R.string.conversation_member_selection_content_description_add_recipient
+        Card {
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(bottom = 90.dp),
+            ) {
+                items(recipients) { user ->
+                    CourseUserListItem(
+                        modifier = Modifier
+                            .testTag(testTagForPotentialRecipient(user.username.orEmpty())),
+                        user = user,
+                        trailingContent = {
+                            IconButton(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .size(32.dp)
+                                    .background(MaterialTheme.colorScheme.surfaceContainer),
+                                onClick = { addRecipient(user) }
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    imageVector = Icons.Default.Add,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    contentDescription = stringResource(
+                                        id = R.string.conversation_member_selection_content_description_add_recipient
+                                    )
                                 )
-                            )
+                            }
                         }
-                    }
-                )
+                    )
+
+                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                }
             }
         }
     } else {

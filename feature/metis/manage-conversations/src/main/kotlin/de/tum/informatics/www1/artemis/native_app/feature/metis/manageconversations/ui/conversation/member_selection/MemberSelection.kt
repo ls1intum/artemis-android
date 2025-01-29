@@ -26,7 +26,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.PotentialRecipientsUi
@@ -59,7 +58,6 @@ internal fun MemberSelection(
         RecipientsTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                 .padding(bottom = 4.dp),
             recipients = recipients,
             query = query,
@@ -165,7 +163,11 @@ private fun RecipientChip(
                 )
             )
 
-            Text(modifier = Modifier.padding(start = 8.dp), text = recipient.humanReadableName)
+            Text(
+                modifier = Modifier.padding(start = 8.dp),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                text = recipient.humanReadableName
+            )
         }
     }
 }

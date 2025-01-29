@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
@@ -128,6 +129,8 @@ internal fun ConversationAddMembersScreen(
                 .fillMaxSize()
                 .imePadding()
                 .padding(top = paddingValues.calculateTopPadding())
+                .padding(bottom = paddingValues.calculateBottomPadding())
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                 .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
             viewModel = viewModel,
             onUpdateSelectedUserCount = {}

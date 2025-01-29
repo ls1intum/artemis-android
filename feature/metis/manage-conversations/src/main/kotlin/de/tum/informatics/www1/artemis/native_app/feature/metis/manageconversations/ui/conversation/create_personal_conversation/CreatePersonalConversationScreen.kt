@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFloatingActionButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -110,6 +111,8 @@ internal fun CreatePersonalConversationScreen(
                 .fillMaxSize()
                 .imePadding()
                 .padding(top = padding.calculateTopPadding())
+                .padding(bottom = padding.calculateBottomPadding())
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                 .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
             viewModel = viewModel,
             onUpdateSelectedUserCount = { numberOfSelectedUsers = it }
