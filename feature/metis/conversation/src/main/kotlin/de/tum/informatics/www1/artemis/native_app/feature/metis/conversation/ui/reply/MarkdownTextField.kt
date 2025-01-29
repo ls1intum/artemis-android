@@ -78,8 +78,7 @@ internal fun MarkdownTextField(
     hintText: AnnotatedString,
     filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>,
     focusRequester: FocusRequester = remember { FocusRequester() },
-    sendButton: @Composable () -> Unit = {},
-    topRightButton: @Composable RowScope.() -> Unit = {},
+    textFieldTrailingContent: @Composable RowScope.() -> Unit = {},
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
@@ -123,9 +122,7 @@ internal fun MarkdownTextField(
                 }
             }
 
-            sendButton()
-
-            topRightButton()
+            textFieldTrailingContent()
         }
 
 
