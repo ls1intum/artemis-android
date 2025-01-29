@@ -186,6 +186,8 @@ fun BasicMarkdownTextField(
     ) {
         BasicTextField(
             modifier = modifier
+            modifier = Modifier
+                .fillMaxWidth()
                 .focusRequester(focusRequester)
                 .onFocusChanged { focusState ->
                     if (focusState.hasFocus) {
