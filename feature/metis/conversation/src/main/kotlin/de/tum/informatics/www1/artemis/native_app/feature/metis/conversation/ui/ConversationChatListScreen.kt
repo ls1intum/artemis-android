@@ -173,6 +173,7 @@ fun ConversationChatListScreen(
     val conversation = conversationDataState.orNull()
     val hasExercise = conversation?.filterPredicate(FILTER_EXERCISE) == true
     val hasLecture = conversation?.filterPredicate(FILTER_LECTURE) == true
+    val hasInfoDropdown = hasExercise || hasLecture
 
     val closeSearch = {
         isSearchBarOpen = false
@@ -208,7 +209,7 @@ fun ConversationChatListScreen(
                         ) {
                             ConversationTitle(
                                 conversation = it,
-                                onclick = onNavigateToSettings
+                                onClick = onNavigateToSettings
                             )
                         }
                     }
@@ -246,8 +247,8 @@ fun ConversationChatListScreen(
 
                         IconButton(
                             onClick = {
-                                isInfoDropdownExpanded = hasExercise || hasLecture
-                                if (!isInfoDropdownExpanded) {
+                                isInfoDropdownExpanded = hasInfoDropdown
+                                if (!hasInfoDropdown) {
                                     onNavigateToSettings()
                                 }
                             }
@@ -277,10 +278,10 @@ fun ConversationChatListScreen(
 private fun ConversationTitle(
     modifier: Modifier = Modifier,
     conversation: Conversation,
-    onclick: () -> Unit
+    onClick: () -> Unit
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier.clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ConversationIcon(
@@ -290,9 +291,7 @@ private fun ConversationTitle(
 
         Spacer(Modifier.width(8.dp))
 
-        Column(
-            modifier = Modifier.clickable { onclick() }
-        ) {
+        Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
