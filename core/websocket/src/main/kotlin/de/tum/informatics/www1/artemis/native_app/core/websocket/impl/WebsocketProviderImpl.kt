@@ -9,11 +9,13 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.device.awaitInternetConnection
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
+import de.tum.informatics.www1.artemis.native_app.core.websocket.util.WebsocketCompressionUtil
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -41,11 +43,12 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import org.hildan.krossbow.stomp.StompClient
 import org.hildan.krossbow.stomp.StompReceipt
+import org.hildan.krossbow.stomp.StompSession
 import org.hildan.krossbow.stomp.config.HeartBeat
 import org.hildan.krossbow.stomp.conversions.kxserialization.StompSessionWithKxSerialization
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.stomp.headers.StompSendHeaders
-import org.hildan.krossbow.stomp.headers.StompSubscribeHeaders
+import org.hildan.krossbow.stomp.subscribe
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
@@ -149,7 +152,7 @@ class WebsocketProviderImpl(
                                 withTimeoutOrNull(1.seconds * attempt.toInt()) {
                                     networkStatusProvider.awaitInternetConnection()
                                 }
-                                kotlinx.coroutines.delay(1.seconds * attempt.toInt())
+                                delay(1.seconds * attempt.toInt())
                                 true
                             } else false
                         }
@@ -164,7 +167,7 @@ class WebsocketProviderImpl(
             )
 
     override val connectionState: Flow<WebsocketProvider.WebsocketConnectionState> =
-        session.transformLatest<StompSessionWithKxSerialization, WebsocketProvider.WebsocketConnectionState> { _ ->
+        session.transformLatest<StompSession, WebsocketProvider.WebsocketConnectionState> { _ ->
             emit(WebsocketProvider.WebsocketConnectionState.WithSession(true))
 
             // Wait for error or reconnect
@@ -206,10 +209,7 @@ class WebsocketProviderImpl(
             .transformLatest { currentSession ->
                 val flow: Flow<WebsocketProvider.WebsocketData<T>> = flow {
                     emitAll(
-                        currentSession.subscribe(
-                            StompSubscribeHeaders(destination = topic),
-                            deserializer
-                        )
+                        currentSession.subscribe(topic)
                     )
                 }
                     .onStart {
@@ -223,7 +223,12 @@ class WebsocketProviderImpl(
                         Log.e(TAG, "Subscription $topic reported error: ${e.localizedMessage}")
                     }
                     .map {
-                        WebsocketProvider.WebsocketData.Message(it)
+                        val deserialized = WebsocketCompressionUtil.deserializeMessage(
+                            message = it,
+                            jsonConfig = jsonProvider.applicationJsonConfiguration,
+                            deserializer = deserializer
+                        )
+                        return@map WebsocketProvider.WebsocketData.Message(deserialized)
                     }
 
                 emitAll(
