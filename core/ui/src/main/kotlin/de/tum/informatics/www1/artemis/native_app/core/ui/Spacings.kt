@@ -12,8 +12,13 @@ import androidx.compose.ui.unit.dp
 
 object Spacings {
     val ScreenHorizontalSpacing = 16.dp
-    val ReplyTextFieldHorizontalSpacing = ScreenHorizontalSpacing / 2
     val EndOfScrollablePageSpacing = ScreenHorizontalSpacing
+
+    /**
+     * The spacing between the FAB and the end of the screen, according to the M3 guidelines:
+     * https://m3.material.io/components/floating-action-button/specs#09dc2aff-7688-4d3b-9547-bd3ab606bd8b
+     */
+    val FabPaddingValues = PaddingValues(bottom = 16.dp, end = 16.dp)
 
     object Post {
         val innerSpacing = 8.dp
