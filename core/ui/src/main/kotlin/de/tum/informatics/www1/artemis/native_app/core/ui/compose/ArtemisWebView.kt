@@ -11,15 +11,22 @@ import android.webkit.WebView
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
+import kotlin.math.roundToInt
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -29,6 +36,7 @@ fun ArtemisWebView(
     webView: WebView?,
     serverUrl: String,
     authToken: String,
+    adjustHeightForContent: Boolean = false,
     setWebView: (WebView) -> Unit
 ) {
     LaunchedEffect(serverUrl, authToken) {
@@ -37,30 +45,44 @@ fun ArtemisWebView(
 
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val value = if (isSystemInDarkTheme) "DARK" else "LIGHT"
+    var webViewHeight by remember { mutableIntStateOf(0) }
+
+    WebView(
+        modifier = if (adjustHeightForContent) {
+            Modifier
+                .fillMaxWidth()
+                .height(webViewHeight.dp)
+        } else {
+            Modifier.fillMaxSize()
+        },
+        client = remember(value, adjustHeightForContent) {
+            ThemeClient(
+                value,
+                adjustHeightForContent
+            ) { height ->
+                webViewHeight = height
+            }
+        },
+        state = webViewState,
+        onCreated = {
+            it.settings.javaScriptEnabled = true
+            it.settings.domStorageEnabled = true
+            it.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+            it.setBackgroundColor(Color.TRANSPARENT)
+        },
+        factory = { context ->
+            if (webView != null) {
+                (webView.parent as? ViewGroup)?.removeView(webView)
+                webView
+            } else {
+                val newWebView = ArtemisWebViewImpl(context)
+                setWebView(newWebView)
+                newWebView
+            }
+        }
+    )
 
     Box(modifier = modifier) {
-        WebView(
-            modifier = Modifier.fillMaxSize(),
-            client = remember(value) { ThemeClient(value) },
-            state = webViewState,
-            onCreated = {
-                it.settings.javaScriptEnabled = true
-                it.settings.domStorageEnabled = true
-                it.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
-                it.setBackgroundColor(Color.TRANSPARENT)
-            },
-            factory = { context ->
-                if (webView != null) {
-                    (webView.parent as? ViewGroup)?.removeView(webView)
-                    webView
-                } else {
-                    val newWebView = ArtemisWebViewImpl(context)
-                    setWebView(newWebView)
-                    newWebView
-                }
-            }
-        )
-
         if (webViewState.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
@@ -80,7 +102,9 @@ private class ArtemisWebViewImpl(context: Context) : WebView(context) {
 }
 
 private class ThemeClient(
-    private val themeValue: String
+    private val themeValue: String,
+    private val adjustHeightForContent: Boolean,
+    private val onHeightChanged: (Int) -> Unit
 ) : AccompanistWebViewClient() {
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         if (view != null) {
@@ -89,7 +113,6 @@ private class ThemeClient(
 
         super.onPageStarted(view, url, favicon)
     }
-
 
     private fun setLocalStorage(view: WebView) {
         view.evaluateJavascript(
@@ -102,6 +125,29 @@ private class ThemeClient(
     override fun onPageFinished(view: WebView?, url: String?) {
         if (view != null) {
             setLocalStorage(view)
+
+            // The following code is inspired by: https://github.com/ls1intum/artemis-ios/blob/71596a9949bacd29c142cbdfe3a9825d6921628f/ArtemisKit/Sources/CourseView/ExerciseTab/ExerciseDetailViewModel.swift
+            // The code can be found in the artemis-ios repository: https://github.com/ls1intum/artemis-ios
+            if (adjustHeightForContent) {
+                val delay = 750L
+
+                view.postDelayed({
+                    view.evaluateJavascript(
+                        """
+                        if (document.querySelector("#problem-statement") != null) {
+                            document.querySelector("#problem-statement").scrollHeight;
+                        } else if (document.querySelector(".instructions__content") != null) {
+                            document.querySelector(".instructions__content").scrollHeight;
+                        } else {
+                            document.body.scrollHeight;
+                        }
+                    """.trimIndent(),
+                    ) { heightString ->
+                        val contentHeight = heightString?.toFloatOrNull()?.roundToInt() ?: 0
+                        onHeightChanged(contentHeight)
+                    }
+                }, delay)
+            }
         }
 
         super.onPageFinished(view, url)

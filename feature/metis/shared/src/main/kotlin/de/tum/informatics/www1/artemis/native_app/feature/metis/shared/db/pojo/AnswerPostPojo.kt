@@ -22,7 +22,7 @@ data class AnswerPostPojo(
         entity = BasePostingEntity::class,
         entityColumn = "id",
         parentColumn = "post_id",
-        projection = ["author_id", "creation_date", "updated_date", "content", "author_role"]
+        projection = ["author_id", "creation_date", "updated_date", "content", "author_role", "is_saved"]
     )
     private val basePostingCache: BasePostingCache,
     @Relation(
@@ -69,6 +69,9 @@ data class AnswerPostPojo(
     override val authorImageUrl: String? = basePostingCache.authorImageUrl
 
     @Ignore
+    override val isSaved: Boolean = basePostingCache.isSaved
+
+    @Ignore
     override val serverPostId: Long? = serverPostIdCache.serverPostId
 
     @Ignore
@@ -103,7 +106,9 @@ data class AnswerPostPojo(
             parentColumn = "author_id",
             projection = ["image_url"]
         )
-        val authorImageUrl: String?
+        val authorImageUrl: String?,
+        @ColumnInfo(name = "is_saved")
+        val isSaved: Boolean,
     )
 
     // The ids have primitive types (Long), that's why we need to add the wrapper cache class around them.

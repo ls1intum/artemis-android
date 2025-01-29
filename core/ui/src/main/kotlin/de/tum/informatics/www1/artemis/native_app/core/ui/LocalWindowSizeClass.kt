@@ -19,6 +19,7 @@ val LocalWindowSizeClassProvider = compositionLocalOf<WindowSizeClassProvider> {
 @Composable
 fun getWindowSizeClass(): WindowSizeClass = LocalWindowSizeClassProvider.current.provideWindowSizeClass()
 
+
 interface WindowSizeClassProvider {
     @Composable
     fun provideWindowSizeClass(): WindowSizeClass

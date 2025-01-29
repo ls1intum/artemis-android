@@ -10,13 +10,16 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState.Success
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.keepSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection
@@ -73,6 +76,7 @@ class ConversationOverviewViewModel(
     websocketProvider: WebsocketProvider,
     networkStatusProvider: NetworkStatusProvider,
     accountDataService: AccountDataService,
+    private val courseService: CourseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
     serverConfigurationService,
@@ -93,6 +97,7 @@ class ConversationOverviewViewModel(
         websocketProvider: WebsocketProvider,
         networkStatusProvider: NetworkStatusProvider,
         accountDataService: AccountDataService,
+        courseService: CourseService,
         coroutineContext: CoroutineContext = EmptyCoroutineContext
     ) : this(
         application as? CurrentActivityListener,
@@ -104,6 +109,7 @@ class ConversationOverviewViewModel(
         websocketProvider,
         networkStatusProvider,
         accountDataService,
+        courseService,
         coroutineContext
     )
 
@@ -194,25 +200,44 @@ class ConversationOverviewViewModel(
             }
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
+    private val isFiltering: StateFlow<Boolean> = query
+            .map { it.isNotBlank() }
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
+
+    private val course: StateFlow<DataState<Course>> = flatMapLatest(
+        serverConfigurationService.serverUrl,
+        accountService.authToken,
+        onRequestReload.onStart { emit(Unit) }
+    ) { serverUrl, authToken, _ ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            courseService.getCourse(
+                courseId,
+                serverUrl,
+                authToken
+            ).bind { it.course }
+        }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+
     private val conversationsAsCollections: StateFlow<DataState<ConversationCollections>> =
         combine(
             updatedConversations,
             currentPreferences,
-            query
-        ) { conversationsDataState, preferences, query ->
+            isFiltering
+        ) { conversationsDataState, preferences, filterActive ->
             conversationsDataState.bind { conversations ->
-                val isFiltering = query.isNotBlank()
 
                 ConversationCollections(
-                    channels = conversations.filterNotHiddenNorFavourite<ChannelChat>()
+                    channels = conversations.filterNotHidden<ChannelChat>()
                         .filter { !it.filterPredicate("exercise") && !it.filterPredicate("lecture") && !it.filterPredicate("exam") }
-                        .asCollection(isFiltering || preferences.generalsExpanded),
+                        .asCollection(filterActive || preferences.generalsExpanded),
 
-                    groupChats = conversations.filterNotHiddenNorFavourite<GroupChat>()
-                        .asCollection(isFiltering || preferences.groupChatsExpanded),
+                    groupChats = conversations.filterNotHidden<GroupChat>()
+                        .asCollection(filterActive || preferences.groupChatsExpanded),
 
-                    directChats = conversations.filterNotHiddenNorFavourite<OneToOneChat>()
-                        .asCollection(isFiltering || preferences.personalConversationsExpanded),
+                    directChats = conversations.filterNotHidden<OneToOneChat>()
+                        .asCollection(filterActive || preferences.personalConversationsExpanded),
 
                     favorites = conversations.filter { it.isFavorite }
                         .asCollection(preferences.favouritesExpanded),
@@ -221,25 +246,41 @@ class ConversationOverviewViewModel(
                         .asCollection(preferences.hiddenExpanded),
 
                     exerciseChannels = conversations.filter {
-                        it is ChannelChat && !it.isFavorite && !it.isHidden && it.filterPredicate("exercise")
+                        it is ChannelChat && !it.isHidden && it.filterPredicate("exercise")
                     }.map { it as ChannelChat }
-                        .asCollection(isFiltering || preferences.exercisesExpanded, showPrefix = false),
+                        .asCollection(filterActive || preferences.exercisesExpanded, showPrefix = false),
 
                     lectureChannels = conversations.filter {
-                        it is ChannelChat && !it.isFavorite && !it.isHidden && it.filterPredicate("lecture")
+                        it is ChannelChat && !it.isHidden && it.filterPredicate("lecture")
                     }.map { it as ChannelChat }
-                        .asCollection(isFiltering || preferences.lecturesExpanded, showPrefix = false),
+                        .asCollection(filterActive || preferences.lecturesExpanded, showPrefix = false),
 
                     examChannels = conversations.filter {
-                        it is ChannelChat && !it.isFavorite && !it.isHidden && it.filterPredicate("exam")
+                        it is ChannelChat && !it.isHidden && it.filterPredicate("exam")
                     }.map { it as ChannelChat }
-                        .asCollection(isFiltering || preferences.examsExpanded, showPrefix = false)
+                        .asCollection(filterActive || preferences.examsExpanded, showPrefix = false),
+
+                    recentChannels = conversations.filter { ConversationOverviewUtils.isRecent(
+                        it,
+                        course.value.orNull()
+                    ) }
+                        .asCollection(
+                            filterActive || preferences.recentExpanded,
+                            showPrefix = true
+                        )
                 )
             }
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-
+    val isSavedPostsExpanded: StateFlow<Boolean> =
+        combine(
+            currentPreferences,
+            isFiltering
+        ) { preferences, filterActive ->
+            preferences.savedPostsExpanded && !filterActive
+        }
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
 
     /**
@@ -422,6 +463,14 @@ class ConversationOverviewViewModel(
         expandOrCollapseSection { copy(hiddenExpanded = !hiddenExpanded) }
     }
 
+    fun toggleSavedPostsExpanded() {
+        expandOrCollapseSection { copy(savedPostsExpanded = !savedPostsExpanded) }
+    }
+
+    fun toggleRecentExpanded() {
+        expandOrCollapseSection { copy(recentExpanded = !recentExpanded) }
+    }
+
     private fun expandOrCollapseSection(update: ConversationPreferenceService.Preferences.() -> ConversationPreferenceService.Preferences) {
         viewModelScope.launch(coroutineContext) {
             conversationPreferenceService.updatePreferences(
@@ -432,9 +481,9 @@ class ConversationOverviewViewModel(
         }
     }
 
-    private inline fun <reified T : Conversation> List<*>.filterNotHiddenNorFavourite(): List<T> {
+    private inline fun <reified T : Conversation> List<*>.filterNotHidden(): List<T> {
         return filterIsInstance<T>()
-            .filter { !it.isHidden && !it.isFavorite }
+            .filter { !it.isHidden }
     }
 
     private fun <T : Conversation> List<T>.asCollection(

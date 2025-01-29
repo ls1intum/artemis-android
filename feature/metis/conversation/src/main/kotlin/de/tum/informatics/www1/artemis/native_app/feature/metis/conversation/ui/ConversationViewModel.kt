@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.widget.Toast
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
@@ -32,6 +33,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Programmin
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIconId
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
@@ -41,12 +43,14 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants.isImage
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisModificationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.SavedPostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteCategory
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteHint
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ConversationThreadUseCase
@@ -58,8 +62,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.ISavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.Reaction
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
@@ -72,10 +78,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.n
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.getConversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.subscribeToConversationUpdates
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getChannelIconImageVector
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -96,6 +105,12 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
+// A buffer is added to the delay to account for additional delays
+// NOTE: This is only for the viewModel. Check PostItem.kt for the visible delay in the UI.
+private const val undoDeleteDelayFromUi = 6000L
+private const val bufferDelay = 1000L
+private const val undoDeleteDelay = undoDeleteDelayFromUi + bufferDelay
+
 internal open class ConversationViewModel(
     val courseId: Long,
     val conversationId: Long,
@@ -103,6 +118,7 @@ internal open class ConversationViewModel(
     private val websocketProvider: WebsocketProvider,
     private val metisModificationService: MetisModificationService,
     private val metisStorageService: MetisStorageService,
+    private val savedPostService: SavedPostService,
     protected val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
     private val networkStatusProvider: NetworkStatusProvider,
@@ -122,12 +138,17 @@ internal open class ConversationViewModel(
     coroutineContext
 ), InitialReplyTextProvider, ReplyAutoCompleteHintProvider {
 
+    private var currentlySavingPost = false
+
     private val onRequestSoftReload = onReloadRequestAndWebsocketReconnect
 
     val metisContext = MetisContext.Conversation(courseId, conversationId)
 
     private val _postId: MutableStateFlow<StandalonePostId?> = MutableStateFlow(initialPostId)
     val postId: StateFlow<StandalonePostId?> = _postId
+
+    private val deleteJobs = mutableMapOf<IBasePost, Job>()
+    val isMarkedAsDeleteList = mutableStateListOf<IBasePost>()
 
     val chatListUseCase = ConversationChatListUseCase(
         viewModelScope = viewModelScope,
@@ -450,18 +471,69 @@ internal open class ConversationViewModel(
         }
     }
 
-    fun deletePost(post: IBasePost): Deferred<MetisModificationFailure?> {
+    fun toggleSavePost(post: IBasePost): Deferred<MetisModificationFailure?> {
+        // TODO: this is a quick fix to prevent multiple save requests.
+        //      https://github.com/ls1intum/artemis-android/issues/307
+        if (currentlySavingPost) return CompletableDeferred(null)
+        currentlySavingPost = true
+
         return viewModelScope.async(coroutineContext) {
-            metisModificationService.deletePost(
-                metisContext,
-                post.getAsAffectedPost() ?: return@async MetisModificationFailure.DELETE_POST,
-                serverConfigurationService.serverUrl.first(),
-                accountService.authToken.first()
-            )
-                .bind { if (it) null else MetisModificationFailure.DELETE_POST }
-                .or(MetisModificationFailure.DELETE_POST)
-                .also { if (it != MetisModificationFailure.DELETE_POST && post is IStandalonePost) onCloseThread?.invoke() }
+            val response = if (post.isSaved == true) {
+                savedPostService.deleteSavedPost(
+                    post = post,
+                    authToken = accountService.authToken.first(),
+                    serverUrl = serverConfigurationService.serverUrl.first()
+                )
+            } else {
+                savedPostService.savePost(
+                    post = post,
+                    authToken = accountService.authToken.first(),
+                    serverUrl = serverConfigurationService.serverUrl.first()
+                )
+            }
+
+            currentlySavingPost = false
+            response.bind { requestReload() }   // Currently changing save status does not trigger a websocket update
+                .asMetisModificationFailure(MetisModificationFailure.UPDATE_POST)
+
         }
+    }
+
+    fun deletePost(post: IBasePost): Deferred<MetisModificationFailure?> {
+        isMarkedAsDeleteList.add(post)
+        deleteJobs[post]?.cancel()
+
+        val deleteJob = viewModelScope.async(coroutineContext) {
+            try {
+                delay(undoDeleteDelay)
+
+                if (isMarkedAsDeleteList.contains(post)) {
+                    metisModificationService.deletePost(
+                        metisContext,
+                        post.getAsAffectedPost() ?: return@async MetisModificationFailure.DELETE_POST,
+                        serverConfigurationService.serverUrl.first(),
+                        accountService.authToken.first()
+                    )
+                        .bind { if (it) null else MetisModificationFailure.DELETE_POST }
+                        .or(MetisModificationFailure.DELETE_POST)
+                        .also { if (it != MetisModificationFailure.DELETE_POST && post is IStandalonePost) onCloseThread?.invoke() }
+                } else {
+                    null
+                }
+            } finally {
+                deleteJobs.remove(post)
+                isMarkedAsDeleteList.remove(post)
+            }
+        }
+        deleteJobs[post] = deleteJob
+
+        return deleteJob
+    }
+
+    fun undoDeletePost(post: IBasePost) {
+        deleteJobs[post]?.cancel()
+        deleteJobs.remove(post)
+        isMarkedAsDeleteList.remove(post)
     }
 
     fun editPost(post: IStandalonePost, newText: String): Deferred<MetisModificationFailure?> {
@@ -590,7 +662,8 @@ internal open class ConversationViewModel(
                             AutoCompleteHint(
                                 hint = exerciseTitle,
                                 replacementText = "[$exerciseTag]${exercise.title}(/courses/${metisContext.courseId}/exercises/${exercise.id})[/$exerciseTag]",
-                                id = "Exercise:${exercise.id ?: return@mapNotNull null}"
+                                id = "Exercise:${exercise.id ?: return@mapNotNull null}",
+                                icon = AutoCompleteIcon.DrawableFromId(getExerciseTypeIconId(exercise))
                             )
                         }
 
@@ -629,7 +702,8 @@ internal open class ConversationViewModel(
                         AutoCompleteHint(
                             hint = channel.name,
                             replacementText = "[channel]${channel.name}(${channel.id})[/channel]",
-                            id = "Channel:${channel.id}"
+                            id = "Channel:${channel.id}",
+                            icon = AutoCompleteIcon.DrawableFromImageVector(getChannelIconImageVector(channel))
                         )
                     }
 
@@ -681,6 +755,8 @@ internal open class ConversationViewModel(
             is IAnswerPost -> MetisModificationService.AffectedPost.Answer(sPostId)
             is StandalonePost -> MetisModificationService.AffectedPost.Standalone(sPostId)
             is IStandalonePost -> MetisModificationService.AffectedPost.Standalone(sPostId)
+            is SavedPost -> null
+            is ISavedPost -> null
         }
     }
 

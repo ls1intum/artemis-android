@@ -1,0 +1,7 @@
+{
+  "notificationPlaceholders" : [ "Test Notifications & Announcements", "content", "2025-01-17T10:33:30.517854965Z[Etc/UTC]", "announcement", "Martin Felber", "channel", "", "130", "776" ],
+  "target" : "{\"message\":\"new-message\",\"entity\":\"message\",\"mainPage\":\"courses\",\"id\":776,\"course\":168,\"conversation\":1510}",
+  "type" : "NEW_ANNOUNCEMENT_POST",
+  "date" : "2025-01-17T10:33:30.647405681Z",
+  "version" : 1
+}

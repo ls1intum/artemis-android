@@ -18,8 +18,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultMedium
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultSuccess
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.DragTargetInfo
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.LocalDragTargetInfo
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.DragItemDraggableContainer
@@ -28,15 +27,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.dragandd
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.body.dragItemOutlineColor
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragOffset
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragPosition
-
-private val dropTargetColorNotDragging: Color
-    @Composable get() = Color.White
-
-private val dropTargetColorDragging: Color
-    @Composable get() = Color.Blue
-
-private val dropTargetColorDropTarget: Color
-    @Composable get() = Color.Green
 
 internal sealed interface WorkAreaDropLocationType {
     data class ViewOnly(val isCorrect: Boolean, val isDisplayingSampleSolution: Boolean) :
@@ -85,24 +75,24 @@ internal fun WorkAreaDropLocation(
             if (type.isDisplayingSampleSolution) {
                 dragItemOutlineColor
             } else {
-                if (type.isCorrect) resultSuccess
-                else resultMedium
+                if (type.isCorrect) ExerciseColors.Result.success
+                else ExerciseColors.Result.medium
             }
         }
     }
 
     val backgroundColor: Color = when (type) {
         is WorkAreaDropLocationType.Editable -> when {
-            isCurrentDropTarget -> dropTargetColorDropTarget
-            targetInfo is DragTargetInfo.Dragging -> dropTargetColorDragging
-            else -> dropTargetColorNotDragging
+            isCurrentDropTarget -> ExerciseColors.Quiz.dropTargetColorDropTarget
+            targetInfo is DragTargetInfo.Dragging -> ExerciseColors.Quiz.dropTargetColorDragging
+            else -> ExerciseColors.Quiz.dropTargetColorNotDragging
         }
         is WorkAreaDropLocationType.ViewOnly -> {
             if (type.isDisplayingSampleSolution) {
-                dropTargetColorNotDragging
+                ExerciseColors.Quiz.dropTargetColorNotDragging
             } else {
-                if (type.isCorrect) resultSuccess.copy(alpha = 0.2f)
-                else resultMedium.copy(alpha = 0.2f)
+                if (type.isCorrect) ExerciseColors.Result.success.copy(alpha = 0.2f)
+                else ExerciseColors.Result.medium.copy(alpha = 0.2f)
             }
         }
     }

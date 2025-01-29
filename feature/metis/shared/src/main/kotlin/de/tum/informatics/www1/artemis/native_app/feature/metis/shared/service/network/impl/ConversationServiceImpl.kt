@@ -4,7 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.account.User
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
@@ -52,7 +52,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         includeInstructors: Boolean,
         authToken: String,
         serverUrl: String
-    ): NetworkResponse<List<User>> {
+    ): NetworkResponse<List<CourseUser>> {
         val roles: List<String> =
             (if (includeStudents) listOf("students") else emptyList()) +
                     (if (includeInstructors) listOf("instructors") else emptyList()) +
@@ -77,7 +77,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         query: String,
         authToken: String,
         serverUrl: String
-    ): NetworkResponse<List<User>> {
+    ): NetworkResponse<List<ConversationUser>> {
         return performNetworkCall {
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
@@ -126,6 +126,24 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
 
                 setBody(listOf(partner))
                 contentType(ContentType.Application.Json)
+
+                accept(ContentType.Application.Json)
+                cookieAuth(authToken)
+            }.body()
+        }
+    }
+
+    override suspend fun createOneToOneConversation(
+        courseId: Long,
+        partnerId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<OneToOneChat> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments("api", "courses", courseId.toString(), "one-to-one-chats", partnerId.toString())
+                }
 
                 accept(ContentType.Application.Json)
                 cookieAuth(authToken)

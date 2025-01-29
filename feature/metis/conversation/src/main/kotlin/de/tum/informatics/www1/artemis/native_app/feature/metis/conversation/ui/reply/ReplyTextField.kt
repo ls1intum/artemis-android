@@ -1,28 +1,42 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
 import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,27 +50,39 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.getTextBeforeSelection
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
+import androidx.core.content.ContextCompat.getString
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.MetisModificationFailure
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.model.FileValidationConstants
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.MarkdownListContinuationUtil.continueListIfApplicable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ReplyState
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -77,19 +103,31 @@ internal fun ReplyTextField(
     replyMode: ReplyMode,
     onFileSelected: (Uri) -> Unit,
     updateFailureState: (MetisModificationFailure?) -> Unit,
-    title: String
+    conversationName: String
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
 
     Surface(
-        modifier = modifier.defaultMinSize(minHeight = 48.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        modifier = modifier,
+        border = BorderStroke(
+            1.dp,
+            Brush.verticalGradient(
+                listOf(
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                    MaterialTheme.colorScheme.background
+                ),
+                startY = 0f,
+                endY = 100f
+            )
+        ),
+        color = MaterialTheme.colorScheme.background,
         shape = MaterialTheme.shapes.large
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(IntrinsicSize.Max)
+                .padding(4.dp)
+                .navigationBarsPadding()
         ) {
             AnimatedContent(
                 modifier = Modifier
@@ -106,7 +144,7 @@ internal fun ReplyTextField(
                                 .testTag(TEST_TAG_CAN_CREATE_REPLY),
                             replyMode = replyMode,
                             onReply = { targetReplyState.onCreateReply() },
-                            title = stringResource(R.string.create_reply_click_to_write, title),
+                            conversationName = conversationName,
                             onFileSelected = { uri -> onFileSelected(uri) }
                         )
                     }
@@ -163,19 +201,46 @@ private fun SendingReplyUi(modifier: Modifier, onCancel: () -> Unit, title: Stri
 private fun CreateReplyUi(
     modifier: Modifier,
     replyMode: ReplyMode,
+    conversationName: String,
     focusRequester: FocusRequester = remember { FocusRequester() },
     onReply: () -> Unit,
-    onFileSelected: (Uri) -> Unit,
-    title: String?
+    onFileSelected: (Uri) -> Unit
 ) {
+    val context = LocalContext.current
+
     var prevReplyContent by remember { mutableStateOf("") }
     var displayTextField: Boolean by remember { mutableStateOf(false) }
     var requestFocus: Boolean by remember { mutableStateOf(false) }
 
     val currentTextFieldValue by replyMode.currentText
+    var requestedAutocompleteType by remember { mutableStateOf<AutocompleteType?>(null) }
 
     var mayShowAutoCompletePopup by remember { mutableStateOf(true) }
     var requestDismissAutoCompletePopup by remember { mutableStateOf(false) }
+
+    val hintText = buildAnnotatedString {
+        append(stringResource(R.string.create_reply_click_to_write_prefix) + " '")
+        withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
+            append(conversationName)
+        }
+        append("'")
+    }
+
+    val filePickerLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+
+            val mimeType = context.contentResolver.getType(uri)
+            if (mimeType in FileValidationConstants.ALLOWED_MIME_TYPES) {
+                onFileSelected(uri)
+            } else {
+                Toast.makeText(
+                    context,
+                    getString(context, R.string.markdown_textfield_unsupported_warning),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
 
     LaunchedEffect(displayTextField, currentTextFieldValue) {
         if (!displayTextField && currentTextFieldValue.text.isNotBlank() && prevReplyContent.isBlank()) {
@@ -191,6 +256,7 @@ private fun CreateReplyUi(
         if (requestDismissAutoCompletePopup) {
             delay(100)
             mayShowAutoCompletePopup = false
+            requestedAutocompleteType = null
         }
     }
 
@@ -198,7 +264,7 @@ private fun CreateReplyUi(
         Box(modifier = Modifier.fillMaxWidth()) {
             if (displayTextField || currentTextFieldValue.text.isNotBlank()) {
                 val tagChars = LocalReplyAutoCompleteHintProvider.current.legalTagChars
-                val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue)
+                val autoCompleteHints = manageAutoCompleteHints(currentTextFieldValue, requestedAutocompleteType)
 
                 var textFieldWidth by remember { mutableIntStateOf(0) }
                 var popupMaxHeight by remember { mutableIntStateOf(0) }
@@ -235,41 +301,59 @@ private fun CreateReplyUi(
                             val textFieldRootTopLeft = coordinates.localToRoot(Offset.Zero)
                             popupMaxHeight = textFieldRootTopLeft.y.toInt()
                         }
-                        .padding(8.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                         .testTag(TEST_TAG_REPLY_TEXT_FIELD),
                     textFieldValue = currentTextFieldValue,
-                    onTextChanged = replyMode::onUpdate,
+                    hintText = hintText,
+                    filePickerLauncher = filePickerLauncher,
+                    onTextChanged = { newValue ->
+                        val finalValue = continueListIfApplicable(prevReplyContent, newValue)
+                        replyMode.onUpdate(finalValue)
+                    },
                     focusRequester = focusRequester,
                     onFocusLost = {
                         if (displayTextField && currentTextFieldValue.text.isEmpty()) {
                             displayTextField = false
                         }
                     },
+                    showAutoCompletePopup = {
+                        requestedAutocompleteType = it
+                        applyMarkdownStyle(
+                            style = when (it) {
+                                AutocompleteType.USERS -> MarkdownStyle.UserMention
+                                AutocompleteType.CHANNELS -> MarkdownStyle.ChannelMention
+                                AutocompleteType.LECTURES -> MarkdownStyle.LectureMention
+                                AutocompleteType.EXERCISES -> MarkdownStyle.ExerciseMention
+                            },
+                            currentTextFieldValue = currentTextFieldValue,
+                            onTextChanged = replyMode::onUpdate
+                        )
+                    },
                     sendButton = {
-                        IconButton(
-                            modifier = Modifier.testTag(TEST_TAG_REPLY_SEND_BUTTON),
-                            onClick = onReply,
-                            enabled = currentTextFieldValue.text.isNotBlank()
-                        ) {
-                            Icon(
-                                imageVector = when (replyMode) {
-                                    is ReplyMode.EditMessage -> Icons.Default.Edit
-                                    is ReplyMode.NewMessage -> Icons.AutoMirrored.Filled.Send
-                                },
-                                contentDescription = null
-                            )
-                        }
+                        SendButton(
+                            modifier = Modifier,
+                            currentTextFieldValue = currentTextFieldValue,
+                            replyMode = replyMode,
+                            onReply = onReply
+                        )
                     },
                     topRightButton = {
                         if (replyMode is ReplyMode.EditMessage) {
                             IconButton(onClick = replyMode.onCancelEditMessage) {
-                                Icon(imageVector = Icons.Default.Cancel, contentDescription = null)
+                                Icon(
+                                    imageVector = Icons.Default.Cancel,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
                             }
                         }
                     },
-                    onFileSelected = { uri ->
-                        onFileSelected(uri)
-                    }
+                    formattingOptionButtons = {
+                        FormattingOptions(
+                            currentTextFieldValue = currentTextFieldValue,
+                            onTextChanged = replyMode::onUpdate
+                        )
+                    },
                 )
 
                 LaunchedEffect(requestFocus) {
@@ -279,19 +363,20 @@ private fun CreateReplyUi(
                     }
                 }
             } else {
-                UnfocusedPreviewReplyTextField({
-                    displayTextField = true
-                    requestFocus = true
-                }, title = title)
+                UnfocusedPreviewReplyTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    hintText = hintText,
+                    filePickerLauncher = filePickerLauncher,
+                    onRequestShowTextField = {
+                        displayTextField = true
+                        requestFocus = true
+                    }
+                )
             }
         }
 
-        if (displayTextField || currentTextFieldValue.text.isNotBlank()) {
-            FormattingOptions(
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = replyMode::onUpdate
-            )
-        }
     }
 }
 
@@ -299,9 +384,16 @@ enum class MarkdownStyle(val startTag: String, val endTag: String) {
     Bold("**", "**"),
     Italic("*", "*"),
     Underline("<ins>", "</ins>"),
+    Strikethrough("~~", "~~"),
     InlineCode("`", "`"),
     CodeBlock("```", "```"),
-    Blockquote("> ", "")
+    Blockquote("> ", ""),
+    OrderedList("1. ", ""),
+    UnorderedList("- ", ""),
+    UserMention("@", ""),
+    ChannelMention("#", ""),
+    LectureMention("#", ""),
+    ExerciseMention("#", "")
 }
 
 @Composable
@@ -309,95 +401,287 @@ private fun FormattingOptions(
     currentTextFieldValue: TextFieldValue,
     onTextChanged: (TextFieldValue) -> Unit
 ) {
+    var isListDropDownExpanded by remember { mutableStateOf(false) }
+    var isCodeDropdownExpanded by remember { mutableStateOf(false) }
+
+    val applyMarkdownStyleFormattingButton = @Composable { markdownStyle: MarkdownStyle, drawableId: Int ->
+        FormattingButton(
+            modifier = Modifier,
+            applyMarkdown = {
+                applyMarkdownStyle(
+                    style = markdownStyle,
+                    currentTextFieldValue = currentTextFieldValue,
+                    onTextChanged = onTextChanged
+                )
+            },
+            drawableId = drawableId
+        )
+    }
+
     Row(
         modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.Start
+            .height(32.dp)
+            .horizontalScroll(rememberScrollState())
+            .background(MaterialTheme.colorScheme.surfaceContainer),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // Bold Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.Bold,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
-            )
-        }) {
-            Text(
-                text = "B",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
-            )
-        }
+        Spacer(modifier = Modifier.width(8.dp))
 
-        // Italic Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.Italic,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
-            )
-        }) {
-            Text(
-                text = "I",
-                style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic)
-            )
-        }
+        applyMarkdownStyleFormattingButton(MarkdownStyle.Bold, R.drawable.bold)
+        applyMarkdownStyleFormattingButton(MarkdownStyle.Italic, R.drawable.italic)
+        applyMarkdownStyleFormattingButton(MarkdownStyle.Underline, R.drawable.underline)
+        applyMarkdownStyleFormattingButton(MarkdownStyle.Strikethrough, R.drawable.strikethrough)
 
-        // Underline Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.Underline,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
+        // Code Button
+        Box(modifier = Modifier.align(Alignment.Top)) {
+            FormattingButton(
+                modifier = Modifier,
+                applyMarkdown = {
+                    isCodeDropdownExpanded = !isCodeDropdownExpanded
+                },
+                drawableId = R.drawable.code
             )
-        }) {
-            Text(
-                text = "U",
-                style = MaterialTheme.typography.bodyMedium.copy(textDecoration = TextDecoration.Underline)
-            )
-        }
 
-        // Inline Code Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.InlineCode,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
-            )
-        }) {
-            Text(
-                text = "</>",
-                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
-            )
-        }
-
-        // Code Block Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.CodeBlock,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
-            )
-        }) {
-            Text(
-                text = "{ }",
-                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
+            CodeFormattingDropdownMenu(
+                isCodeDropdownExpanded = isCodeDropdownExpanded,
+                onDismissRequest = { isCodeDropdownExpanded = false },
+                applyCodeMarkdown = { style ->
+                    applyMarkdownStyle(
+                        style = style,
+                        currentTextFieldValue = currentTextFieldValue,
+                        onTextChanged = onTextChanged
+                    )
+                }
             )
         }
 
         // Blockquote Button
-        IconButton(onClick = {
-            applyMarkdownStyle(
-                style = MarkdownStyle.Blockquote,
-                currentTextFieldValue = currentTextFieldValue,
-                onTextChanged = onTextChanged
+        applyMarkdownStyleFormattingButton(MarkdownStyle.Blockquote, R.drawable.quote)
+
+        Box(modifier = Modifier.align(Alignment.Top)) {
+            FormattingButton(
+                modifier = Modifier,
+                applyMarkdown = {
+                    isListDropDownExpanded = !isListDropDownExpanded
+                },
+                drawableId = R.drawable.list
             )
-        }) {
-            Text(
-                text = "\"",
-                style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic)
+
+            ListFormattingDropdownMenu(
+                isListDropDownExpanded = isListDropDownExpanded,
+                onDismissRequest = { isListDropDownExpanded = false },
+                applyListMarkdown = { style ->
+                    applyMarkdownStyle(
+                        style = style,
+                        currentTextFieldValue = currentTextFieldValue,
+                        onTextChanged = onTextChanged
+                    )
+                }
             )
         }
+
+        Spacer(modifier = Modifier.width(8.dp))
+    }
+}
+
+@Composable
+private fun SendButton(
+    modifier: Modifier,
+    currentTextFieldValue: TextFieldValue,
+    replyMode: ReplyMode,
+    onReply: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .size(28.dp)
+            .clip(CircleShape)
+            .then(
+                if (currentTextFieldValue.text.isBlank()) {
+                    Modifier.background(
+                        MaterialTheme.colorScheme.primary.copy(
+                            alpha = 0.2f
+                        )
+                    )
+                } else {
+                    Modifier.background(MaterialTheme.colorScheme.primary)
+                }
+            )
+    ) {
+        IconButton(
+            modifier = Modifier
+                .padding(4.dp)
+                .align(Alignment.Center)
+                .testTag(TEST_TAG_REPLY_SEND_BUTTON),
+            onClick = onReply,
+            enabled = currentTextFieldValue.text.isNotBlank()
+        ) {
+            Icon(
+                imageVector = when (replyMode) {
+                    is ReplyMode.EditMessage -> Icons.Default.Edit
+                    is ReplyMode.NewMessage -> Icons.AutoMirrored.Filled.Send
+                },
+                tint = Color.White,
+                contentDescription = null
+            )
+        }
+    }
+}
+
+@Composable
+private fun FormattingButton(
+    modifier: Modifier,
+    applyMarkdown: () -> Unit,
+    drawableId: Int,
+) {
+    Box(
+        modifier = modifier
+            .clip(CircleShape)
+            .clickable {
+                applyMarkdown()
+            }
+            .padding(8.dp)
+    ){
+        Icon(
+            painter = painterResource(id = drawableId),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            contentDescription = null,
+        )
+    }
+}
+
+@Composable
+private fun CodeFormattingDropdownMenu(
+    isCodeDropdownExpanded: Boolean,
+    onDismissRequest: () -> Unit,
+    applyCodeMarkdown: (MarkdownStyle) -> Unit,
+) {
+    DropdownMenu(
+        expanded = isCodeDropdownExpanded,
+        onDismissRequest = onDismissRequest,
+        properties = PopupProperties(
+            focusable = false
+        )
+    ) {
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.code),
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.reply_format_inline_code)) },
+            onClick = {
+                onDismissRequest()
+                applyCodeMarkdown(MarkdownStyle.InlineCode)
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Text(
+                    modifier = Modifier.padding(start = 4.dp),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    text = "{ }"
+                )
+            },
+            text = { Text(stringResource(R.string.reply_format_code_block)) },
+            onClick = {
+                onDismissRequest()
+                applyCodeMarkdown(MarkdownStyle.CodeBlock)
+            }
+        )
+    }
+}
+
+@Composable
+private fun ListFormattingDropdownMenu(
+    isListDropDownExpanded: Boolean,
+    onDismissRequest: () -> Unit,
+    applyListMarkdown: (MarkdownStyle) -> Unit,
+) {
+    DropdownMenu(
+        expanded = isListDropDownExpanded,
+        onDismissRequest = onDismissRequest,
+        properties = PopupProperties(
+            focusable = false
+        )
+    ) {
+        // Unordered List item
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.list),
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.reply_format_unordered)) },
+            onClick = {
+                onDismissRequest()
+                applyListMarkdown(MarkdownStyle.UnorderedList)
+            }
+        )
+        // Ordered List item
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.FormatListNumbered,
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(R.string.reply_format_ordered)) },
+            onClick = {
+                onDismissRequest()
+                applyListMarkdown(MarkdownStyle.OrderedList)
+            }
+        )
+    }
+}
+
+@Composable
+private fun UploadDropdownMenu(
+    isFileDropdownExpanded: Boolean,
+    onDismissRequest: () -> Unit,
+    filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>
+) {
+    DropdownMenu(
+        expanded = isFileDropdownExpanded,
+        onDismissRequest = onDismissRequest,
+        properties = PopupProperties(
+            focusable = false
+        )
+    ) {
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.attachment),
+                    contentDescription = null
+                )
+            },
+            text = { Text(text = stringResource(R.string.reply_format_file_upload)) },
+            onClick = {
+                onDismissRequest()
+                filePickerLauncher.launch("*/*")
+            }
+        )
+
+        DropdownMenuItem(
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.image),
+                    contentDescription = null
+                )
+            },
+            text = { Text(stringResource(R.string.reply_format_image_upload)) },
+            onClick = {
+                onDismissRequest()
+                filePickerLauncher.launch("image/*")
+            }
+        )
     }
 }
 
@@ -428,7 +712,10 @@ private fun applyMarkdownStyle(
             )
         } else {
             // Other styles
-            val newText = text.substring(0, selection.start) + startTag + endTag + text.substring(selection.end)
+            val newText = text.substring(
+                0,
+                selection.start
+            ) + startTag + endTag + text.substring(selection.end)
             val newCursorPosition = selection.start + startTag.length
             onTextChanged(
                 TextFieldValue(
@@ -472,27 +759,56 @@ private fun applyMarkdownStyle(
 
 
 @Composable
-private fun UnfocusedPreviewReplyTextField(onRequestShowTextField: () -> Unit, title: String?) {
+private fun UnfocusedPreviewReplyTextField(
+    modifier: Modifier = Modifier,
+    onRequestShowTextField: () -> Unit,
+    filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>,
+    hintText: AnnotatedString
+) {
+    var isFileDropdownExpanded by remember { mutableStateOf(false) }
+
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onRequestShowTextField)
-            .padding(horizontal = 16.dp)
             .testTag(TEST_TAG_UNFOCUSED_TEXT_FIELD),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = title.toString(),
             modifier = Modifier
-                .padding(vertical = 8.dp)
-                .weight(1f)
+                .weight(1f),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = DisabledContentAlpha),
+            text = hintText,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
 
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.Send,
-            contentDescription = null,
-            tint = LocalContentColor.current.copy(alpha = DisabledContentAlpha)
-        )
+        Box(modifier = Modifier.align(Alignment.Top)) {
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        isFileDropdownExpanded = !isFileDropdownExpanded
+                    }
+                    .background(MaterialTheme.colorScheme.primary),
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(4.dp),
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.background
+                )
+            }
+
+            UploadDropdownMenu(
+                isFileDropdownExpanded = isFileDropdownExpanded,
+                onDismissRequest = { isFileDropdownExpanded = false },
+                filePickerLauncher = filePickerLauncher
+            )
+        }
     }
 }
 
@@ -575,7 +891,10 @@ private fun rememberReplyState(
  * @return a list of auto complete hints that should be displayed, or null if no auto complete hints are to be displayed.
  */
 @Composable
-private fun manageAutoCompleteHints(textFieldValue: TextFieldValue): List<AutoCompleteCategory>? {
+private fun manageAutoCompleteHints(
+    textFieldValue: TextFieldValue,
+    requestedAutocompleteType: AutocompleteType? = null
+): List<AutoCompleteCategory>? {
     val replyAutoCompleteHintProvider = LocalReplyAutoCompleteHintProvider.current
     var replyAutoCompleteHintProducer: Flow<DataState<List<AutoCompleteCategory>>>? by remember {
         mutableStateOf(
@@ -602,6 +921,12 @@ private fun manageAutoCompleteHints(textFieldValue: TextFieldValue): List<AutoCo
         ?.value
         ?.orElse(emptyList())
         .orEmpty()
+        .toMutableList()
+        .apply {
+            requestedAutocompleteType?.let { type ->
+                retainAll { it.name == type.title }
+            }
+        }
 
     var latestValidAutoCompleteHints: List<AutoCompleteCategory>? by remember {
         mutableStateOf(null)
@@ -616,6 +941,13 @@ private fun manageAutoCompleteHints(textFieldValue: TextFieldValue): List<AutoCo
     }
 
     return latestValidAutoCompleteHints
+}
+
+enum class AutocompleteType(@StringRes val title: Int) {
+    USERS(R.string.markdown_textfield_autocomplete_category_users),
+    CHANNELS(R.string.markdown_textfield_autocomplete_category_channels),
+    LECTURES(R.string.markdown_textfield_autocomplete_category_lectures),
+    EXERCISES(R.string.markdown_textfield_autocomplete_category_exercises),
 }
 
 /**
@@ -652,7 +984,7 @@ private fun ReplyTextFieldPreview() {
                 CompletableDeferred()
             },
             updateFailureState = {},
-            title = "Replying..",
+            conversationName = "PreviewChat",
             onFileSelected = { _ -> }
         )
     }

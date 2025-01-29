@@ -6,7 +6,9 @@ import androidx.compose.ui.platform.LocalContext
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.annotation.DelicateCoilApi
+import coil3.request.ErrorResult
 import coil3.request.ImageRequest
+import coil3.request.ImageResult
 import coil3.test.FakeImage
 import coil3.test.FakeImageLoaderEngine
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisImageProvider
@@ -26,6 +28,14 @@ class ArtemisImageProviderStub : ArtemisImageProvider {
                 .build()
             SingletonImageLoader.setUnsafe(imageLoader)
         }
+    }
+
+    override suspend fun loadArtemisImage(context: Context, imagePath: String): ImageResult {
+        return ErrorResult(
+            image = null,
+            request = ImageRequest.Builder(context).data(imagePath).build(),
+            throwable = Exception("Fake error"),
+        )
     }
 
     @Composable

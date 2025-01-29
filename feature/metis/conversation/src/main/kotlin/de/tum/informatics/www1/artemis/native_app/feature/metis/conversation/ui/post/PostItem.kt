@@ -2,6 +2,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -15,31 +18,42 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.InsertEmoticon
+import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -65,11 +79,15 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IReaction
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.UserRole
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.UserRoleBadge
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePictureWithDialog
 import io.github.fornewid.placeholder.material3.placeholder
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.koin.compose.koinInject
+import java.time.Duration
 
 sealed class PostItemViewType {
 
@@ -97,6 +115,7 @@ internal fun PostItem(
     clientId: Long,
     displayHeader: Boolean,
     postItemViewJoinedType: PostItemViewJoinedType,
+    isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     postActions: PostActions,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -107,8 +126,11 @@ internal fun PostItem(
         PostItemViewType.ThreadContextPostItem -> true
         else -> false
     }
+    val isDeleting by remember(post) { derivedStateOf { isMarkedAsDeleteList.contains(post) } }
+
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
+    val isSaved = post?.isSaved == true
     val hasFooter = (post is IStandalonePost && post.answers.orEmpty()
         .isNotEmpty()) || post?.reactions.orEmpty().isNotEmpty() || isExpanded
 
@@ -124,7 +146,7 @@ internal fun PostItem(
         }
     }
 
-    Column(
+    PostItemMainContent(
         modifier = modifier
             .let {
                 if (postStatus == CreatePostService.Status.FAILED) {
@@ -139,37 +161,115 @@ internal fun PostItem(
                         )
                 }
             }
-            .padding(PaddingValues(horizontal = Spacings.ScreenHorizontalInnerSpacing))
-    ) {
-        val applyDistancePaddingToModifier: @Composable (Modifier) -> Modifier = {
-            if (postItemViewJoinedType in listOf(
-                    PostItemViewJoinedType.JOINED,
-                    PostItemViewJoinedType.FOOTER
-                )
-            ) {
-                it.padding(top = Spacings.Post.innerSpacing)
-            } else {
-                it.padding(bottom = 4.dp)
+            .padding(horizontal = Spacings.Post.innerSpacing),
+        post = post,
+        isExpanded = isExpanded,
+        isPlaceholder = isPlaceholder,
+        isDeleting = isDeleting,
+        postStatus = postStatus,
+        displayHeader = displayHeader,
+        onClick = onClick,
+        onLongClick = onLongClick,
+        onUndoDelete = { postActions.requestUndoDeletePost?.invoke() },
+        leadingContent = {
+            val applyDistancePaddingToModifier: @Composable (Modifier) -> Modifier = {
+                if (postItemViewJoinedType in listOf(
+                        PostItemViewJoinedType.JOINED,
+                        PostItemViewJoinedType.FOOTER
+                    )
+                ) {
+                    it.padding(top = Spacings.Post.innerSpacing)
+                } else {
+                    it.padding(bottom = 4.dp)
+                }
             }
-        }
 
-        if (isPinned) {
-            IconLabel(
-                modifier = applyDistancePaddingToModifier(Modifier)
-                    .fillMaxWidth(),
-                resourceString = R.string.post_is_pinned,
-                icon = Icons.Outlined.PushPin
+            if (isPinned) {
+                IconLabel(
+                    modifier = applyDistancePaddingToModifier(Modifier)
+                        .fillMaxWidth(),
+                    resourceString = R.string.post_is_pinned,
+                    icon = Icons.Outlined.PushPin
+                )
+            }
+
+            if (isSaved) {
+                IconLabel(
+                    modifier = applyDistancePaddingToModifier(Modifier)
+                        .fillMaxWidth(),
+                    resourceString = R.string.post_is_saved,
+                    icon = Icons.Outlined.Bookmark
+                )
+            }
+
+            if (post is IAnswerPost && post.resolvesPost) {
+                IconLabel(
+                    modifier = applyDistancePaddingToModifier(Modifier)
+                        .fillMaxWidth(),
+                    resourceString = R.string.post_resolves,
+                    icon = Icons.Default.Check
+                )
+            }
+        },
+        trailingContent = {
+            if (post is IStandalonePost && post.resolved == true) {
+                Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
+
+                IconLabel(
+                    modifier = Modifier.fillMaxWidth(),
+                    resourceString = R.string.post_is_resolved,
+                    icon = Icons.Default.Check
+                )
+            }
+
+            if (hasFooter) {
+                Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
+            }
+
+            StandalonePostFooter(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .let {
+                        if (postItemViewJoinedType in listOf(
+                                PostItemViewJoinedType.JOINED,
+                                PostItemViewJoinedType.HEADER
+                            ) && post?.reactions
+                                .orEmpty()
+                                .isNotEmpty()
+                        ) {
+                            it.padding(bottom = Spacings.Post.innerSpacing)
+                        } else {
+                            it
+                        }
+                    },
+                clientId = clientId,
+                reactions = remember(post?.reactions) { post?.reactions.orEmpty() },
+                postItemViewType = postItemViewType,
+                postActions = postActions
             )
         }
+    )
+}
 
-        if (post is IAnswerPost && post.resolvesPost) {
-            IconLabel(
-                modifier = applyDistancePaddingToModifier(Modifier)
-                    .fillMaxWidth(),
-                resourceString = R.string.post_resolves,
-                icon = Icons.Default.Check
-            )
-        }
+@Composable
+fun PostItemMainContent(
+    modifier: Modifier = Modifier,
+    post: IBasePost?,
+    isExpanded: Boolean = true,
+    isPlaceholder: Boolean = false,
+    isDeleting: Boolean = false,
+    postStatus: CreatePostService.Status = CreatePostService.Status.FINISHED,
+    displayHeader: Boolean = true,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    onUndoDelete: () -> Unit = {},
+    leadingContent: @Composable ColumnScope.() -> Unit = {},
+    trailingContent: @Composable ColumnScope.() -> Unit = {}
+) {
+    Column(
+        modifier = modifier
+    ) {
+        leadingContent()
 
         PostHeadline(
             modifier = Modifier.fillMaxWidth(),
@@ -181,11 +281,20 @@ internal fun PostItem(
             creationDate = post?.creationDate,
             expanded = isExpanded,
             isAnswerPost = post is IAnswerPost,
-            displayHeader = displayHeader
+            displayHeader = displayHeader,
+            isDeleting = isDeleting
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
+                if (isDeleting) {
+                    UndoDeleteHeader(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = onUndoDelete
+                    )
+                    return@PostHeadline
+                }
+
                 MarkdownText(
                     markdown = remember(post?.content, isPlaceholder) {
                         if (isPlaceholder) {
@@ -203,9 +312,9 @@ internal fun PostItem(
 
                 val instant = post?.updatedDate
                 if (instant != null) {
-                    val updateTime = instant.format(DateFormats.EditTimestamp.format)
                     Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
 
+                    val updateTime = instant.format(DateFormats.EditTimestamp.format)
                     Text(
                         text = stringResource(id = R.string.post_edited_hint, updateTime),
                         style = MaterialTheme.typography.bodySmall,
@@ -213,41 +322,7 @@ internal fun PostItem(
                     )
                 }
 
-                if (post is IStandalonePost && post.resolved == true) {
-                    Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
-
-                    IconLabel(
-                        modifier = Modifier.fillMaxWidth(),
-                        resourceString = R.string.post_is_resolved,
-                        icon = Icons.Default.Check
-                    )
-                }
-
-                if (hasFooter) {
-                    Spacer(modifier = Modifier.height(Spacings.Post.innerSpacing))
-                }
-
-                StandalonePostFooter(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .let {
-                            if (postItemViewJoinedType in listOf(
-                                    PostItemViewJoinedType.JOINED,
-                                    PostItemViewJoinedType.HEADER
-                                ) && post?.reactions
-                                    .orEmpty()
-                                    .isNotEmpty()
-                            ) {
-                                it.padding(bottom = Spacings.Post.innerSpacing)
-                            } else {
-                                it
-                            }
-                        },
-                    clientId = clientId,
-                    reactions = remember(post?.reactions) { post?.reactions.orEmpty() },
-                    postItemViewType = postItemViewType,
-                    postActions = postActions
-                )
+                trailingContent()
             }
         }
     }
@@ -265,6 +340,7 @@ private fun PostHeadline(
     expanded: Boolean = false,
     isAnswerPost: Boolean,
     displayHeader: Boolean = true,
+    isDeleting: Boolean,
     content: @Composable () -> Unit
 ) {
     val doDisplayHeader = displayHeader || postStatus == CreatePostService.Status.FAILED
@@ -287,6 +363,7 @@ private fun PostHeadline(
                 userName = authorName.orEmpty(),
                 imageUrl = authorImageUrl,
                 userRole = authorRole,
+                isGrayscale = isDeleting
             )
 
             if (postStatus == CreatePostService.Status.FAILED) {
@@ -305,7 +382,8 @@ private fun PostHeadline(
                 authorRole = authorRole,
                 creationDate = creationDate,
                 expanded = expanded,
-                isAnswerPost = isAnswerPost
+                isAnswerPost = isAnswerPost,
+                isGrayscale = isDeleting
             )
         }
 
@@ -345,14 +423,16 @@ private fun HeadlineAuthorInfo(
     authorRole: UserRole?,
     creationDate: Instant?,
     expanded: Boolean,
-    isAnswerPost: Boolean
+    isAnswerPost: Boolean,
+    isGrayscale: Boolean
 ) {
     Column(modifier = modifier) {
         AuthorRoleAndTimeRow(
             expanded = expanded,
             authorRole = authorRole,
             creationDate = creationDate,
-            isAnswerPost = isAnswerPost
+            isAnswerPost = isAnswerPost,
+            isGrayscale = isGrayscale
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -372,7 +452,8 @@ private fun AuthorRoleAndTimeRow(
     expanded: Boolean,
     authorRole: UserRole?,
     creationDate: Instant?,
-    isAnswerPost: Boolean
+    isAnswerPost: Boolean,
+    isGrayscale: Boolean
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -401,7 +482,16 @@ private fun AuthorRoleAndTimeRow(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            HeadlineAuthorRoleBadge(authorRole)
+
+            /*
+            * remember is needed here to prevent the value from being reset after an update
+            * (the author role is not sent when updating a post)
+            */
+            val initialAuthorRole by remember { mutableStateOf(authorRole) }
+            UserRoleBadge(
+                modifier = Modifier.applyGrayscale(isGrayscale),
+                userRole = initialAuthorRole
+            )
             Spacer(modifier = Modifier.weight(1f))
             creationDateContent()
         }
@@ -414,10 +504,15 @@ private fun HeadlineProfilePicture(
     userName: String,
     imageUrl: String?,
     userRole: UserRole?,
-    displayImage: Boolean = true
+    displayImage: Boolean = true,
+    isGrayscale: Boolean = false
 ) {
     val size = postHeadlineHeight
-    Box(modifier = Modifier.size(size)) {
+    Box(
+        modifier = Modifier
+            .size(size)
+            .applyGrayscale(isGrayscale)
+    ) {
         if (!displayImage) {
             return
         }
@@ -428,36 +523,6 @@ private fun HeadlineProfilePicture(
             userName = userName,
             userRole = userRole,
             imageUrl = imageUrl,
-        )
-    }
-}
-
-@Composable
-private fun HeadlineAuthorRoleBadge(
-    authorRole: UserRole?,
-) {
-    /*
-    * remember is needed here to prevent the value from being reset after an update
-    * (the author role is not sent when updating a post)
-    */
-    val initialAuthorRole = remember { mutableStateOf(authorRole) }
-    val (text, color) = when (initialAuthorRole.value) {
-        UserRole.INSTRUCTOR -> R.string.post_instructor to PostColors.Roles.instructor
-        UserRole.TUTOR -> R.string.post_tutor to PostColors.Roles.tutor
-        UserRole.USER -> R.string.post_student to PostColors.Roles.student
-        null -> R.string.post_student to PostColors.Roles.student
-    }
-
-    Box(
-        modifier = Modifier
-            .background(color, MaterialTheme.shapes.extraSmall)
-    ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 1.dp),
-            text = stringResource(id = text),
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.White,
-            fontWeight = FontWeight.Medium
         )
     }
 }
@@ -481,14 +546,14 @@ private fun StandalonePostFooter(
             )
         }
     }
-    val showEmojiDialog = remember { mutableStateOf(false) }
+    var showEmojiDialog by remember { mutableStateOf(false) }
 
-    if (showEmojiDialog.value) {
+    if (showEmojiDialog) {
         EmojiDialog(
-            onDismissRequest = { showEmojiDialog.value = false },
+            onDismissRequest = { showEmojiDialog = false },
             onSelectEmoji = { emojiId ->
                 postActions.onClickReaction?.invoke(emojiId, true)
-                showEmojiDialog.value = false
+                showEmojiDialog = false
             }
         )
     }
@@ -519,7 +584,7 @@ private fun StandalonePostFooter(
                         .background(color = PostColors.EmojiChipColors.background, CircleShape)
                         .clip(CircleShape)
                         .clickable(onClick = {
-                            showEmojiDialog.value = true
+                            showEmojiDialog = true
                         })
                 ) {
                     Icon(
@@ -631,5 +696,87 @@ private fun EmojiChip(
 
             AnimatedCounter(reactionCount, selected)
         }
+    }
+}
+
+@Composable
+fun UndoDeleteHeader(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    delay: Duration = Duration.ofSeconds(6)
+) {
+    var remainingTime by remember { mutableLongStateOf(delay.seconds) }
+    val animatedProgress = remember { Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        launch {
+            animatedProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = delay.toMillis().toInt(),
+                    easing = LinearEasing
+                )
+            )
+        }
+        while (remainingTime > 0) {
+            delay(Duration.ofSeconds(1).toMillis())
+            remainingTime--
+        }
+    }
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            modifier = Modifier.weight(1f),
+            text = pluralStringResource(
+                id = R.plurals.post_is_being_deleted,
+                count = remainingTime.toInt(),
+                remainingTime.toInt()
+            ),
+            color = MaterialTheme.colorScheme.secondary,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+
+        Box(
+            modifier = Modifier
+                .width(120.dp)
+                .height(34.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+                .clickable(onClick = onClick)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(animatedProgress.value)
+                    .background(MaterialTheme.colorScheme.primary),
+            )
+
+            Text(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(4.dp),
+                text = stringResource(id = R.string.post_undo_delete),
+                color = MaterialTheme.colorScheme.onPrimary,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+    }
+}
+
+fun Modifier.applyGrayscale(isGrayscale: Boolean): Modifier {
+    return if (isGrayscale) {
+        this
+            .drawWithCache {
+                onDrawWithContent {
+                    drawContent()
+                    drawRect(Color.Black, blendMode = BlendMode.Saturation)
+                }
+            }
+    } else {
+        this
     }
 }

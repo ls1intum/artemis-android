@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="conversation_name_fallback">Conversation</string>
+
+    <plurals name="communication_standalone_post_view_replies_button">
+        <item quantity="one">1 reply</item>
+        <item quantity="other">%1$d replies</item>
+    </plurals>
+
+    <string name="thread_view_title">Thread</string>
+    <plurals name="conversation_name_member_count">
+        <item quantity="one">1 Member</item>
+        <item quantity="other">%1$d Members</item>
+    </plurals>
+
+    <string name="course_wide_context_organization">Organization</string>
+    <string name="course_wide_context_tech_support">Tech Support</string>
+    <string name="course_wide_context_random">Random</string>
+    <string name="course_wide_context_announcement">Announcement</string>
+
+    <string name="metis_post_list_empty">No posts found.</string>
+    <string name="metis_post_list_loading">Loading posts…</string>
+    <string name="metis_post_list_error">Something went wrong while loading your posts.</string>
+    <string name="metis_post_list_error_try_again">Try again</string>
+
+    <!-- Strings related to failures when interacting and modifying metis -->
+    <string name="metis_modification_failure_dialog_title">Failure</string>
+    <string name="metis_modification_failure_dialog_confirm_button">@android:string/ok</string>
+    <string name="metis_modification_failure_dialog_message_create_reaction">Could not create reaction.</string>
+    <string name="metis_modification_failure_dialog_message_delete_reaction">Could not delete reaction.</string>
+    <string name="metis_modification_failure_dialog_message_create_post">Could not create post.</string>
+    <string name="metis_modification_failure_dialog_message_delete_post">Could not delete post.</string>
+    <string name="metis_modification_failure_dialog_message_update_post">Could not update post.</string>
+    <string name="metis_modification_failure_dialog_message_change_saved_post_status">Could change the saved post\'s status.</string>
+
+    <string name="standalone_post_loading">Loading post…</string>
+    <string name="standalone_post_failure">Something went wrong while loading the post.</string>
+    <string name="standalone_post_try_again">Try again</string>
+</resources>

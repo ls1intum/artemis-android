@@ -2,6 +2,8 @@
 <resources>
     <string name="conversation_overview_search_hint">Search for conversation</string>
 
+    <string name="conversation_overview_conversation_item_show_actions">Show Actions</string>
+
     <string name="conversation_overview_conversation_item_mark_as_favorite">Favorite</string>
     <string name="conversation_overview_conversation_item_unmark_as_favorite">Unfavorite</string>
 
@@ -19,6 +21,8 @@
     <string name="conversation_overview_section_groups">Group Chats</string>
     <string name="conversation_overview_section_direct_messages">Direct Messages</string>
     <string name="conversation_overview_section_hidden">Hidden</string>
+    <string name="conversation_overview_section_saved_posts">Saved Messages</string>
+    <string name="conversation_overview_section_recent">Recent</string>
 
     <string name="conversation_overview_section_add_channel_browse">Browse channels</string>
     <string name="conversation_overview_section_add_channel_create">Create channel</string>

@@ -1,0 +1,7 @@
+{
+  "notificationPlaceholders" : [ "Practical Course: Interactive Learning WS24/25", "na du nugget", "2024-12-12T12:51:36.221Z", "Test User 1 Artemis", "answer", "2025-01-11T12:11:34.183911547Z[Etc/UTC]", "Test User 20 Artemis", "Test User 20 Artemis", "/api/files/user/profile-pictures/52/ProfilePicture_2025-01-11T12-09-05-525_4651e801.jpeg", "52", "639", "1079" ],
+  "target" : "{\"message\":\"new-reply\",\"entity\":\"message\",\"mainPage\":\"courses\",\"id\":1079,\"course\":78,\"conversation\":974}",
+  "type" : "CONVERSATION_NEW_REPLY_MESSAGE",
+  "date" : "2025-01-11T12:11:34.343340406Z",
+  "version" : 1
+}
