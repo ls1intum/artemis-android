@@ -293,7 +293,12 @@ internal fun CourseUiScreen(
         }
 
         composable<CourseTab.Communication> {
-            EmptyDataStateUi(dataState = courseDataState) { course ->
+            EmptyDataStateUi(
+                dataState = courseDataState,
+                otherwise = {
+                    scaffold {}
+                }
+            ) { course ->
                 val isCommunicationEnabled = course.courseInformationSharingConfiguration.supportsMessaging
 
                 if (!isCommunicationEnabled) {
