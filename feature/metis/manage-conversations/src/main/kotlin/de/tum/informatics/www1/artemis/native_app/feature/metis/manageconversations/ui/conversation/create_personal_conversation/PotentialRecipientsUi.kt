@@ -148,7 +148,7 @@ private fun PotentialRecipientsList(
                         }
                     )
 
-                    HorizontalDivider(color = MaterialTheme.colorScheme.background)
+                    HorizontalDivider()
                 }
             }
         }

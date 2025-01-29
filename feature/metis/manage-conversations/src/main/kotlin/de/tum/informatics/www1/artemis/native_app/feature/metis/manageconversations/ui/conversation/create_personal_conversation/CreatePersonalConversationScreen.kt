@@ -95,12 +95,7 @@ internal fun CreatePersonalConversationScreen(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = pluralStringResource(
-                            id = R.plurals.create_personal_conversation_members,
-                            count = numberOfSelectedUsers
-                        )
-                    )
+                    Text(pluralStringResource(R.plurals.create_personal_conversation_members, numberOfSelectedUsers, numberOfSelectedUsers))
                     Icon(Icons.Default.ChevronRight, contentDescription = null)
                 }
             }
