@@ -5,6 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.core.common.isInFutureFlow
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation.InitializationState
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -145,6 +146,15 @@ sealed class Exercise {
         if (dueDate == null) null else {
             participation?.individualDueDate ?: dueDate
         }
+
+    fun getSpecificStudentParticipation(testRun: Boolean): Participation? {
+        return studentParticipations.orEmpty().firstOrNull {
+            when (it) {
+                is StudentParticipation -> it.testRun == testRun
+                else -> false
+            }
+        }
+    }
 }
 
 // Extensions
@@ -170,6 +180,13 @@ val Exercise.notEndedSubmittedOrFinished: Flow<Boolean>
                 )
     }
 
+// TODO: Include QuizExercises here once this issue has been resolved: See https://github.com/ls1intum/artemis-android/issues/107
+val Exercise.isParticipationAvailable: Flow<Boolean>
+    get() {
+        return if (this is TextExercise) flowOf(true)
+        else flowOf(false)
+    }
+
 val Exercise.isStartExerciseAvailable: Flow<Boolean>
     get() {
         return if (this !is ProgrammingExercise) flowOf(true)
@@ -182,10 +199,10 @@ private val Exercise.currentUserScore: Float?
         .firstOrNull()?.results?.maxBy { it.completionDate ?: Instant.fromEpochSeconds(0L) }
         ?.score
 
-val Exercise.currentUserPoints: Float?
+val Exercise.currentUserPoints: Float
     get() {
-        val maxPoints = maxPoints ?: return null
-        val currentUserScore = currentUserScore ?: return null
+        val maxPoints = maxPoints ?: return 0f
+        val currentUserScore = currentUserScore ?: return 0f
         return maxPoints * (currentUserScore / 100f)
     }
 

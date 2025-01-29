@@ -18,13 +18,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -62,6 +58,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactC
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.ExpandedCourseItemHeader
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseColumnCount
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseItemModifier
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
@@ -131,11 +128,7 @@ internal fun RegisterForCourseScreen(
             TopAppBar(
                 title = { Text(text = stringResource(id = R.string.course_registration_title)) },
                 scrollBehavior = scrollBehavior,
-                navigationIcon = {
-                    IconButton(onClick = onNavigateUp) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    }
-                }
+                navigationIcon = { NavigationBackButton(onNavigateUp) }
             )
         }
     ) { padding ->

@@ -15,51 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptionsBuilder
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.conversationNavGraphBuilderExtension
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.add_members.navigateToAddMembersScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members.navigateToConversationMembersScreen
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.ConversationDetailsRoute
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-fun NavController.navigateToConversationSettingsScreen(
-    courseId: Long,
-    conversationId: Long,
-    builder: NavOptionsBuilder.() -> Unit
-) {
-    navigate("course/$courseId/conversations/$conversationId/settings", builder)
-}
-
-fun NavGraphBuilder.conversationSettingsScreen(
-    navController: NavController,
-    onNavigateBack: () -> Unit
-) {
-    conversationNavGraphBuilderExtension(
-        route = "course/{courseId}/conversations/{conversationId}/settings",
-        deepLink = "artemis://courses/{courseId}/conversations/{conversationId}/settings"
-    ) { courseId, conversationId ->
-        ConversationSettingsScreen(
-            modifier = Modifier.fillMaxSize(),
-            courseId = courseId,
-            conversationId = conversationId,
-            onNavigateBack = onNavigateBack,
-            onRequestAddMembers = {
-                navController.navigateToAddMembersScreen(courseId, conversationId) { }
-            },
-            onRequestViewAllMembers = {
-                navController.navigateToConversationMembersScreen(courseId, conversationId) {}
-            },
-            onConversationLeft = {
-                navController.popBackStack(ConversationDetailsRoute, true)
-            }
-        )
-    }
-}
 
 @Composable
 fun ConversationSettingsScreen(

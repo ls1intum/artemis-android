@@ -5,20 +5,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
+import de.tum.informatics.www1.artemis.native_app.core.data.CourseServiceFake
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.test.AccountDataServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationServiceStub
-import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProviderStub
 import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProviderStub
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseUiScreen
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.TAB_COMMUNICATION
+import de.tum.informatics.www1.artemis.native_app.device.test.NetworkStatusProviderStub
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseScaffold
+import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseTab
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.impl.EmojiServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ConversationChatListScreen
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
@@ -37,9 +37,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.GroupChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.OneToOneChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextManager
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -113,8 +110,9 @@ fun `Metis - Conversation Overview`() {
                     examsExpanded = true,
                     exercisesExpanded = true,
                     lecturesExpanded = true,
-                    savedPostsExpanded = false
-                )
+                    savedPostsExpanded = false,
+                    recentExpanded = true
+                ),
             )
 
             override suspend fun updatePreferences(
@@ -125,34 +123,34 @@ fun `Metis - Conversation Overview`() {
         },
         websocketProvider = WebsocketProviderStub(),
         networkStatusProvider = NetworkStatusProviderStub(),
-        accountDataService = AccountDataServiceStub()
+        accountDataService = AccountDataServiceStub(),
+        courseService = CourseServiceFake(ScreenshotCourse)
     )
 
     val course = DataState.Success(ScreenshotCourse)
 
     ScreenshotFrame(title = "Communicate with students and instructors") {
-        CourseUiScreen(
+        CourseScaffold(
             modifier = Modifier.fillMaxSize(),
             courseDataState = course,
-            selectedTabIndex = TAB_COMMUNICATION,
-            updateSelectedTabIndex = {},
-            exerciseTabContent = { },
-            lectureTabContent = { },
-            communicationTabContent = {
-                ConversationOverviewBody(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = viewModel,
-                    onNavigateToConversation = {},
-                    onNavigateToSavedPosts = {},
-                    onRequestCreatePersonalConversation = {},
-                    onRequestAddChannel = {},
-                    onRequestBrowseChannel = {},
-                    canCreateChannel = false
-                )
+            isCourseTabSelected = {
+                it == CourseTab.Communication
             },
-            onNavigateBack = { },
+            updateSelectedCourseTab = {},
+            onNavigateBack = {},
             onReloadCourse = {}
-        )
+        ) {
+            ConversationOverviewBody(
+                modifier = Modifier.fillMaxSize(),
+                viewModel = viewModel,
+                onNavigateToConversation = {},
+                onNavigateToSavedPosts = {},
+                onRequestCreatePersonalConversation = {},
+                onRequestAddChannel = {},
+                onRequestBrowseChannel = {},
+                canCreateChannel = false
+            )
+        }
     }
 }
 
@@ -195,83 +193,61 @@ fun `Metis - Conversation Channel`() {
         ),
     ).reversed()
 
-    val visibleMetisContextManagerStub = object : VisibleMetisContextManager {
-        override fun registerMetisContext(metisContext: VisibleMetisContext) = Unit
-        override fun unregisterMetisContext(metisContext: VisibleMetisContext) = Unit
-        override fun getRegisteredMetisContexts(): List<VisibleMetisContext> = emptyList()
-    }
-
     // TODO: Provide artemis image provider
     ScreenshotFrame(title = "Send and receive messages directly from the app") {
-        CourseUiScreen(
+        ConversationChatListScreen(
             modifier = Modifier.fillMaxSize(),
-            courseDataState = DataState.Success(ScreenshotCourse),
-            selectedTabIndex = TAB_COMMUNICATION,
-            updateSelectedTabIndex = {},
-            exerciseTabContent = { },
-            lectureTabContent = { },
-            communicationTabContent = {
-                CompositionLocalProvider(
-                    LocalVisibleMetisContextManager provides visibleMetisContextManagerStub,
-                ) {
-                    ConversationChatListScreen(
-                        modifier = Modifier.fillMaxSize(),
-                        courseId = ScreenshotCourse.id!!,
-                        conversationId = sharedConversation.id,
-                        conversationDataState = DataState.Success(sharedConversation),
-                        query = "",
-                        onUpdateQuery = {},
-                        onNavigateBack = {},
-                        onNavigateToSettings = {},
-                        conversationDataStatus = DataStatus.UpToDate,
-                        onRequestSoftReload = {},
-                        content = { padding ->
-                            MetisChatList(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(padding),
-                                initialReplyTextProvider = object : InitialReplyTextProvider {
-                                    override val newMessageText: Flow<TextFieldValue> = flowOf(
-                                        TextFieldValue()
-                                    )
+            courseId = ScreenshotCourse.id!!,
+            conversationId = sharedConversation.id,
+            conversationDataState = DataState.Success(sharedConversation),
+            query = "",
+            onUpdateQuery = {},
+            onNavigateBack = {},
+            onNavigateToSettings = {},
+            conversationDataStatus = DataStatus.UpToDate,
+            onRequestSoftReload = {},
+            content = { padding ->
+                MetisChatList(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    initialReplyTextProvider = object : InitialReplyTextProvider {
+                        override val newMessageText: Flow<TextFieldValue> = flowOf(
+                            TextFieldValue()
+                        )
 
-                                    override fun updateInitialReplyText(text: TextFieldValue) = Unit
-                                },
-                                posts = PostsDataState.Loaded.WithList(
-                                    posts,
-                                    PostsDataState.NotLoading
-                                ),
-                                clientId = 0L,
-                                postActionFlags = PostActionFlags(
-                                    isAbleToPin = true,
-                                    isAtLeastTutorInCourse = true,
-                                    hasModerationRights = true
-                                ),
-                                serverUrl = "",
-                                courseId = 0,
-                                state = rememberLazyListState(),
-                                isReplyEnabled = true,
-                                isMarkedAsDeleteList = mutableStateListOf(),
-                                onCreatePost = { CompletableDeferred() },
-                                onEditPost = { _, _ -> CompletableDeferred() },
-                                onDeletePost = { CompletableDeferred() },
-                                onUndoDeletePost = {},
-                                onPinPost = { CompletableDeferred() },
-                                onSavePost = { CompletableDeferred() },
-                                onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
-                                bottomItem = null,
-                                onClickViewPost = {},
-                                onRequestRetrySend = {},
-                                onFileSelected = { _ -> },
-                                conversationName = "Chat",
-                                emojiService = EmojiServiceStub,
-                            )
-                        }
-                    )
-                }
-            },
-            onNavigateBack = { },
-            onReloadCourse = {}
+                        override fun updateInitialReplyText(text: TextFieldValue) = Unit
+                    },
+                    posts = PostsDataState.Loaded.WithList(
+                        posts,
+                        PostsDataState.NotLoading
+                    ),
+                    clientId = 0L,
+                    postActionFlags = PostActionFlags(
+                        isAbleToPin = true,
+                        isAtLeastTutorInCourse = true,
+                        hasModerationRights = true
+                    ),
+                    serverUrl = "",
+                    courseId = 0,
+                    state = rememberLazyListState(),
+                    isReplyEnabled = true,
+                    isMarkedAsDeleteList = mutableStateListOf(),
+                    onCreatePost = { CompletableDeferred() },
+                    onEditPost = { _, _ -> CompletableDeferred() },
+                    onDeletePost = { CompletableDeferred() },
+                    onUndoDeletePost = {},
+                    onPinPost = { CompletableDeferred() },
+                    onSavePost = { CompletableDeferred() },
+                    onRequestReactWithEmoji = { _, _, _ -> CompletableDeferred() },
+                    bottomItem = null,
+                    onClickViewPost = {},
+                    onRequestRetrySend = {},
+                    onFileSelected = { _ -> },
+                    conversationName = "Chat",
+                    emojiService = EmojiServiceStub,
+                )
+            }
         )
     }
 }

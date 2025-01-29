@@ -401,6 +401,7 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             websocketProvider = get(),
             networkStatusProvider = get(),
             accountDataService = get(),
+            courseService = get(),
             coroutineContext = testDispatcher
         )
 

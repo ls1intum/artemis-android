@@ -10,6 +10,7 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipati
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.exerciseModule
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.participate.textexercise.TextExerciseParticipationViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -37,6 +38,7 @@ internal class exercise_moduleTest {
                 AccountService::class,
                 CoroutineContext::class,
                 ExerciseService::class,
+                ChannelService::class,
                 LiveParticipationService::class,
                 CourseExerciseService::class
             )
