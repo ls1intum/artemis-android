@@ -72,6 +72,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiDialog
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiSelection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
@@ -118,7 +119,7 @@ internal fun PostItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onRequestRetrySend: () -> Unit,
-    onShowReactionsBottomSheet: (String) -> Unit
+    onShowReactionsBottomSheet: (EmojiSelection) -> Unit
 ) {
     val isPlaceholder = post == null
     val isExpanded = when (postItemViewType) {
@@ -536,7 +537,7 @@ private fun StandalonePostFooter(
     reactions: List<IReaction>,
     postItemViewType: PostItemViewType,
     postActions: PostActions,
-    onShowReactionsBottomSheet: (String) -> Unit
+    onShowReactionsBottomSheet: (EmojiSelection) -> Unit
 ) {
     val reactionCount: Map<String, ReactionData> = remember(reactions, clientId) {
         reactions.groupBy { it.emojiId }.mapValues { groupedReactions ->
@@ -664,7 +665,7 @@ private fun EmojiChip(
     emojiId: String,
     reactionCount: Int,
     onClick: () -> Unit,
-    onLongClick: (String) -> Unit
+    onLongClick: (EmojiSelection) -> Unit
 ) {
     val shape = CircleShape
 
@@ -678,7 +679,7 @@ private fun EmojiChip(
             .heightIn(max = Spacings.Post.emojiHeight)
             .combinedClickable(
                 onClick = onClick,
-                onLongClick = { onLongClick(emojiId) }
+                onLongClick = { onLongClick(EmojiSelection.SINGLE(emojiId)) }
             )
             .let {
                 if (selected) {
