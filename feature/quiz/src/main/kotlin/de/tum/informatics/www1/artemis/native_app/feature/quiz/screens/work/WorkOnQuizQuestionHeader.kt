@@ -43,6 +43,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragA
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.MultipleChoiceQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.ShortAnswerQuizQuestion
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 
 @Composable
@@ -111,19 +112,6 @@ internal fun QuizOverviewRow(
     }
 }
 
-private val dragAndDropColor: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF296773) else Color(0xFF86ccd5)
-
-private val multipleChoiceColor: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF9d8a1e) else Color(0xFFeee066)
-
-private val shortAnswerColor: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF703e20) else Color(0xFFd8956c)
-
-private val selectedBorderColor: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color.Green else Color.Green
-
-
 @Composable
 private fun QuizQuestionRowItem(
     modifier: Modifier,
@@ -133,9 +121,9 @@ private fun QuizQuestionRowItem(
     onClick: () -> Unit
 ) {
     val backgroundColor = when (question) {
-        is DragAndDropQuizQuestion -> dragAndDropColor
-        is MultipleChoiceQuizQuestion -> multipleChoiceColor
-        is ShortAnswerQuizQuestion -> shortAnswerColor
+        is DragAndDropQuizQuestion -> ExerciseColors.Quiz.Header.dragAndDrop
+        is MultipleChoiceQuizQuestion -> ExerciseColors.Quiz.Header.multipleChoice
+        is ShortAnswerQuizQuestion -> ExerciseColors.Quiz.Header.shortAnswer
     }
 
     val shortText = when (question) {
@@ -155,7 +143,7 @@ private fun QuizQuestionRowItem(
                     if (isSelected) {
                         it.border(
                             width = 1.dp,
-                            color = selectedBorderColor,
+                            color = ExerciseColors.Quiz.Header.selectedBorder,
                             shape = CircleShape
                         )
                     } else it

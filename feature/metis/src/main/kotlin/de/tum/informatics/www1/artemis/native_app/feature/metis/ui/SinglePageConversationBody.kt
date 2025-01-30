@@ -3,10 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15,6 +12,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
+import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.feature.metis.AddChannelConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.BrowseChannelConfiguration
@@ -44,6 +43,7 @@ internal fun SinglePageConversationBody(
     modifier: Modifier,
     viewModel: SinglePageConversationBodyViewModel,
     courseId: Long,
+    scaffold: @Composable (content: @Composable () -> Unit) -> Unit,
     initialConfiguration: ConversationConfiguration = NothingOpened
 ) {
     var configuration: ConversationConfiguration by rememberSaveable(initialConfiguration) {
@@ -100,170 +100,187 @@ internal fun SinglePageConversationBody(
         )
     }
 
-    AnimatedContent(
-        targetState = configuration,
-        transitionSpec = {
-            val navigationLevelDiff = targetState.navigationLevel - initialState.navigationLevel
-            when {
-                navigationLevelDiff > 0 -> DefaultTransition.navigateForward
-                navigationLevelDiff < 0 -> DefaultTransition.navigateBack
-                else -> DefaultTransition.navigateNeutral
-            }
-            .using(
-                SizeTransform(clip = false)
-            )
-        },
-        contentKey = {
-            it.javaClass        // Eg no recomposition of the ChatList when navigating to a thread.
-        },
-        label = "SinglePageConversationBody screen transition animation"
-    ) { config ->
-        when (config) {
-            NothingOpened -> {
-                conversationOverview(modifier)
-            }
+    val doAlwaysShowScaffold = getArtemisAppLayout() == ArtemisAppLayout.Tablet
+    val scaffoldWrapper = @Composable { content: @Composable () -> Unit ->
+        if (doAlwaysShowScaffold) {
+            scaffold(content)
+        } else {
+            content()
+        }
+    }
 
-            is OpenedConversation -> {
-                ConversationScreen(
-                    modifier = modifier.consumeWindowInsets(WindowInsets.systemBars),
-                    conversationId = config.conversationId,
-                    threadPostId = config.openedThread?.postId,
-                    courseId = courseId,
-                    onOpenThread = { postId ->
-                        configuration = OpenedConversation(
-                            _prevConfiguration = config,
-                            conversationId = config.conversationId,
-                            openedThread = OpenedThread(postId)
-                        )
-                    },
-                    onCloseThread = navigateToPrevConfig,
-                    onCloseConversation = {
-                        configuration = NothingOpened
-                    },
-                    onNavigateToSettings = {
-                        configuration = ConversationSettings(
-                            conversationId = config.conversationId,
-                            _prevConfiguration = config
-                        )
-                    },
-                    conversationsOverview = { mod -> conversationOverview(mod) }
-                )
-            }
+    scaffoldWrapper {
+        AnimatedContent(
+            targetState = configuration,
+            transitionSpec = {
+                val navigationLevelDiff = targetState.navigationLevel - initialState.navigationLevel
+                when {
+                    navigationLevelDiff > 0 -> DefaultTransition.navigateForward
+                    navigationLevelDiff < 0 -> DefaultTransition.navigateBack
+                    else -> DefaultTransition.navigateNeutral
+                }
+                    .using(
+                        SizeTransform(clip = false)
+                    )
+            },
+            contentKey = {
+                it.javaClass        // Eg no recomposition of the ChatList when navigating to a thread.
+            },
+            label = "SinglePageConversationBody screen transition animation"
+        ) { config ->
+            when (config) {
+                NothingOpened -> {
+                    if (doAlwaysShowScaffold) {
+                        conversationOverview(modifier)
+                    } else {
+                        scaffold {
+                            conversationOverview(modifier)
+                        }
+                    }
+                }
 
-            is OpenedSavedPosts -> {
-                // TODO: This should potentially be moved into the ConversationScreen. That allows us to still display the ConvOverview on the left.
-                //      https://github.com/ls1intum/artemis-android/issues/288
-                SavedPostsScreen(
-                    modifier = modifier,
-                    courseId = courseId,
-                    savedPostStatus = config.status,
-                    onNavigateBack = navigateToPrevConfig,
-                    onNavigateToPost = { savedPost ->
-                        configuration = OpenedConversation(
-                            _prevConfiguration = configuration,
-                            conversationId = savedPost.conversation.id,
-                            openedThread = OpenedThread(
-                                StandalonePostId.ServerSideId(savedPost.referencePostId)
+                is OpenedConversation -> {
+                    ConversationScreen(
+                        modifier = modifier,
+                        conversationId = config.conversationId,
+                        threadPostId = config.openedThread?.postId,
+                        courseId = courseId,
+                        onOpenThread = { postId ->
+                            configuration = OpenedConversation(
+                                _prevConfiguration = config,
+                                conversationId = config.conversationId,
+                                openedThread = OpenedThread(postId)
                             )
+                        },
+                        onCloseThread = navigateToPrevConfig,
+                        onCloseConversation = {
+                            configuration = NothingOpened
+                        },
+                        onNavigateToSettings = {
+                            configuration = ConversationSettings(
+                                conversationId = config.conversationId,
+                                _prevConfiguration = config
+                            )
+                        },
+                        conversationsOverview = { mod -> conversationOverview(mod) }
+                    )
+                }
+
+                is OpenedSavedPosts -> {
+                    // TODO: This should potentially be moved into the ConversationScreen. That allows us to still display the ConvOverview on the left.
+                    //      https://github.com/ls1intum/artemis-android/issues/288
+                    SavedPostsScreen(
+                        modifier = modifier,
+                        courseId = courseId,
+                        savedPostStatus = config.status,
+                        onNavigateBack = navigateToPrevConfig,
+                        onNavigateToPost = { savedPost ->
+                            configuration = OpenedConversation(
+                                _prevConfiguration = configuration,
+                                conversationId = savedPost.conversation.id,
+                                openedThread = OpenedThread(
+                                    StandalonePostId.ServerSideId(savedPost.referencePostId)
+                                )
+                            )
+                        }
+                    )
+                }
+
+                is BrowseChannelConfiguration -> {
+                    BrowseChannelsScreen(
+                        modifier = modifier,
+                        courseId = courseId,
+                        onNavigateToConversation = openConversation,
+                        onNavigateBack = navigateToPrevConfig
+                    )
+                }
+
+                is AddChannelConfiguration -> {
+                    if (canCreateChannel) {
+                        CreateChannelScreen(
+                            modifier = modifier,
+                            courseId = courseId,
+                            onConversationCreated = openConversation,
+                            onNavigateBack = navigateToPrevConfig
                         )
                     }
-                )
-            }
+                }
 
-            is BrowseChannelConfiguration -> {
-                BrowseChannelsScreen(
-                    modifier = modifier,
-                    courseId = courseId,
-                    onNavigateToConversation = openConversation,
-                    onNavigateBack = navigateToPrevConfig
-                )
-            }
-
-            is AddChannelConfiguration -> {
-                if (canCreateChannel) {
-                    CreateChannelScreen(
+                is CreatePersonalConversation -> {
+                    CreatePersonalConversationScreen(
                         modifier = modifier,
                         courseId = courseId,
                         onConversationCreated = openConversation,
                         onNavigateBack = navigateToPrevConfig
                     )
                 }
-            }
 
-            is CreatePersonalConversation -> {
-                CreatePersonalConversationScreen(
-                    modifier = modifier,
-                    courseId = courseId,
-                    onConversationCreated = openConversation,
-                    onNavigateBack = navigateToPrevConfig
-                )
-            }
+                is ConversationSettings -> {
+                    when {
+                        config.isViewingAllMembers -> {
+                            ConversationMembersScreen(
+                                modifier = modifier,
+                                courseId = courseId,
+                                conversationId = config.conversationId,
+                                onNavigateBack = navigateToPrevConfig
+                            )
+                        }
 
-            is ConversationSettings -> {
-                when {
-                    config.isViewingAllMembers -> {
-                        ConversationMembersScreen(
-                            modifier = modifier,
-                            courseId = courseId,
-                            conversationId = config.conversationId,
-                            onNavigateBack = navigateToPrevConfig
-                        )
-                    }
+                        config.isAddingMembers -> {
+                            ConversationAddMembersScreen(
+                                modifier = modifier,
+                                courseId = courseId,
+                                conversationId = config.conversationId,
+                                onNavigateBack = navigateToPrevConfig
+                            )
+                        }
 
-                    config.isAddingMembers -> {
-                        ConversationAddMembersScreen(
-                            modifier = modifier,
-                            courseId = courseId,
-                            conversationId = config.conversationId,
-                            onNavigateBack = navigateToPrevConfig
-                        )
-                    }
-
-                    else -> {
-                        ConversationSettingsScreen(
-                            modifier = modifier,
-                            courseId = courseId,
-                            conversationId = config.conversationId,
-                            onNavigateBack = navigateToPrevConfig,
-                            onRequestAddMembers = {
-                                configuration = config.copy(
-                                    isAddingMembers = true,
-                                    _prevConfiguration = configuration
-                                )
-                            },
-                            onRequestViewAllMembers = {
-                                configuration = config.copy(
-                                    isViewingAllMembers = true,
-                                    _prevConfiguration = configuration
-                                )
-                            },
-                            onConversationLeft = {
-                                configuration = NothingOpened
-                            }
-                        )
+                        else -> {
+                            ConversationSettingsScreen(
+                                modifier = modifier,
+                                courseId = courseId,
+                                conversationId = config.conversationId,
+                                onNavigateBack = navigateToPrevConfig,
+                                onRequestAddMembers = {
+                                    configuration = config.copy(
+                                        isAddingMembers = true,
+                                        _prevConfiguration = configuration
+                                    )
+                                },
+                                onRequestViewAllMembers = {
+                                    configuration = config.copy(
+                                        isViewingAllMembers = true,
+                                        _prevConfiguration = configuration
+                                    )
+                                },
+                                onConversationLeft = {
+                                    configuration = NothingOpened
+                                }
+                            )
+                        }
                     }
                 }
-            }
 
-            is NavigateToUserConversation -> {
-                NavigateToUserConversationUi(
-                    modifier = modifier,
-                    courseId = courseId,
-                    navigation = config,
-                    onNavigateToConversation = { conversationId ->
-                        configuration = OpenedConversation(
-                            // We want to skip the NavigateToUserConversationUi when navigating back, as it is only a utility loading screen
-                            _prevConfiguration = configuration.prevConfiguration ?: NothingOpened,
-                            conversationId = conversationId,
-                            openedThread = null
-                        )
-                    },
-                    onNavigateBack = { configuration = NothingOpened }
-                )
-            }
+                is NavigateToUserConversation -> {
+                    NavigateToUserConversationUi(
+                        modifier = modifier,
+                        courseId = courseId,
+                        navigation = config,
+                        onNavigateToConversation = { conversationId ->
+                            configuration = OpenedConversation(
+                                // We want to skip the NavigateToUserConversationUi when navigating back, as it is only a utility loading screen
+                                _prevConfiguration = configuration.prevConfiguration ?: NothingOpened,
+                                conversationId = conversationId,
+                                openedThread = null
+                            )
+                        },
+                        onNavigateBack = { configuration = NothingOpened }
+                    )
+                }
 
-            is IgnoreCustomBackHandling -> {
-                throw IllegalStateException("IgnoreCustomBackHandling is only a technical configuration and should not be handled in SinglePageConversationBody")
+                is IgnoreCustomBackHandling -> {
+                    throw IllegalStateException("IgnoreCustomBackHandling is only a technical configuration and should not be handled in SinglePageConversationBody")
+                }
             }
         }
     }

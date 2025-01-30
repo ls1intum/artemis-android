@@ -28,15 +28,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.dragandd
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragOffset
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.dragPosition
 
-private val dropTargetColorNotDragging: Color
-    @Composable get() = Color.White
-
-private val dropTargetColorDragging: Color
-    @Composable get() = Color.Blue
-
-private val dropTargetColorDropTarget: Color
-    @Composable get() = Color.Green
-
 internal sealed interface WorkAreaDropLocationType {
     data class ViewOnly(val isCorrect: Boolean, val isDisplayingSampleSolution: Boolean) :
         WorkAreaDropLocationType
@@ -92,13 +83,13 @@ internal fun WorkAreaDropLocation(
 
     val backgroundColor: Color = when (type) {
         is WorkAreaDropLocationType.Editable -> when {
-            isCurrentDropTarget -> dropTargetColorDropTarget
-            targetInfo is DragTargetInfo.Dragging -> dropTargetColorDragging
-            else -> dropTargetColorNotDragging
+            isCurrentDropTarget -> ExerciseColors.Quiz.dropTargetColorDropTarget
+            targetInfo is DragTargetInfo.Dragging -> ExerciseColors.Quiz.dropTargetColorDragging
+            else -> ExerciseColors.Quiz.dropTargetColorNotDragging
         }
         is WorkAreaDropLocationType.ViewOnly -> {
             if (type.isDisplayingSampleSolution) {
-                dropTargetColorNotDragging
+                ExerciseColors.Quiz.dropTargetColorNotDragging
             } else {
                 if (type.isCorrect) ExerciseColors.Result.success.copy(alpha = 0.2f)
                 else ExerciseColors.Result.medium.copy(alpha = 0.2f)
