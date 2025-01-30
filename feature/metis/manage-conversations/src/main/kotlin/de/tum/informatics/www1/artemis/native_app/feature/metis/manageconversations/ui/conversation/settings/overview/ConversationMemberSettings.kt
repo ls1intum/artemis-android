@@ -3,8 +3,10 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.Button
@@ -72,7 +74,7 @@ internal fun ConversationMemberSettings(
             if (conversation !is OneToOneChat && conversation.hasModerationRights) {
                 Button(onClick = onRequestAddMembers) {
                     Icon(imageVector = Icons.Default.PersonAdd, contentDescription = null)
-
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(text = stringResource(id = R.string.conversation_settings_section_members_add_members))
                 }
             }
