@@ -14,7 +14,7 @@ sealed class ProfilePictureData {
         )
 
         fun create(userId: Long?, username: String?, imageUrl: String?): ProfilePictureData {
-            if (userId == null || username.isNullOrEmpty()) {
+            if (userId == null || username.isNullOrBlank()) {
                 return Unknown
             }
 
