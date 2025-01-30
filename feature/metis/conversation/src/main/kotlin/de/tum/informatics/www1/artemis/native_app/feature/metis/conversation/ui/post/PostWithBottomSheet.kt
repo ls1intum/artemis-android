@@ -19,6 +19,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostContextBottomSheet
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostReactionBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -40,6 +41,8 @@ internal fun PostWithBottomSheet(
     onClick: () -> Unit
 ) {
     var displayBottomSheet by remember(post, postItemViewType) { mutableStateOf(false) }
+    var displayReactionBottomSheet by remember(post, postItemViewType) { mutableStateOf(false) }
+    var selectedEmojiId: String by remember { mutableStateOf("") }
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
     val isResolving = post is IAnswerPost && post.resolvesPost
@@ -101,7 +104,11 @@ internal fun PostWithBottomSheet(
             onLongClick = {
                 displayBottomSheet = true
             },
-            onRequestRetrySend = postActions.onRequestRetrySend
+            onRequestRetrySend = postActions.onRequestRetrySend,
+            onShowReactionsBottomSheet = {
+                selectedEmojiId = it
+                displayReactionBottomSheet = true
+            }
         )
     }
 
@@ -112,6 +119,16 @@ internal fun PostWithBottomSheet(
             clientId = clientId,
             onDismissRequest = {
                 displayBottomSheet = false
+            }
+        )
+    }
+
+    if (displayReactionBottomSheet && post != null) {
+        PostReactionBottomSheet(
+            post = post,
+            selectedEmojiId = selectedEmojiId,
+            onDismissRequest = {
+                displayReactionBottomSheet = false
             }
         )
     }

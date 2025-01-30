@@ -101,8 +101,6 @@ sealed class PostItemViewType {
 }
 
 private const val PlaceholderContent = "WWWWWWW"
-private val postHeadlineHeight = 36.dp
-private val emojiHeight = 27.dp
 
 /**
  * Displays a post item or a placeholder for it.
@@ -119,7 +117,8 @@ internal fun PostItem(
     postActions: PostActions,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    onRequestRetrySend: () -> Unit
+    onRequestRetrySend: () -> Unit,
+    onShowReactionsBottomSheet: (String) -> Unit
 ) {
     val isPlaceholder = post == null
     val isExpanded = when (postItemViewType) {
@@ -127,7 +126,6 @@ internal fun PostItem(
         else -> false
     }
     val isDeleting by remember(post) { derivedStateOf { isMarkedAsDeleteList.contains(post) } }
-
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
     val isSaved = post?.isSaved == true
@@ -245,7 +243,8 @@ internal fun PostItem(
                 clientId = clientId,
                 reactions = remember(post?.reactions) { post?.reactions.orEmpty() },
                 postItemViewType = postItemViewType,
-                postActions = postActions
+                postActions = postActions,
+                onShowReactionsBottomSheet = onShowReactionsBottomSheet
             )
         }
     )
@@ -377,7 +376,7 @@ private fun PostHeadline(
             HeadlineAuthorInfo(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(postHeadlineHeight),
+                    .height(Spacings.Post.postHeadlineHeight),
                 authorName = authorName,
                 authorRole = authorRole,
                 creationDate = creationDate,
@@ -507,7 +506,7 @@ private fun HeadlineProfilePicture(
     displayImage: Boolean = true,
     isGrayscale: Boolean = false
 ) {
-    val size = postHeadlineHeight
+    val size = Spacings.Post.postHeadlineHeight
     Box(
         modifier = Modifier
             .size(size)
@@ -536,7 +535,8 @@ private fun StandalonePostFooter(
     clientId: Long,
     reactions: List<IReaction>,
     postItemViewType: PostItemViewType,
-    postActions: PostActions
+    postActions: PostActions,
+    onShowReactionsBottomSheet: (String) -> Unit
 ) {
     val reactionCount: Map<String, ReactionData> = remember(reactions, clientId) {
         reactions.groupBy { it.emojiId }.mapValues { groupedReactions ->
@@ -575,7 +575,8 @@ private fun StandalonePostFooter(
                     reactionCount = reactionData.reactionCount,
                     onClick = {
                         postActions.onClickReaction?.invoke(emoji, !reactionData.hasClientReacted)
-                    }
+                    },
+                    onLongClick = onShowReactionsBottomSheet
                 )
             }
             if (reactionCount.isNotEmpty() || postItemViewType is PostItemViewType.ThreadContextPostItem) {
@@ -589,7 +590,7 @@ private fun StandalonePostFooter(
                 ) {
                     Icon(
                         modifier = Modifier
-                            .size(emojiHeight)
+                            .size(Spacings.Post.emojiHeight)
                             .padding(5.dp),
                         imageVector = Icons.Default.InsertEmoticon,
                         contentDescription = null,
@@ -662,7 +663,8 @@ private fun EmojiChip(
     selected: Boolean,
     emojiId: String,
     reactionCount: Int,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onLongClick: (String) -> Unit
 ) {
     val shape = CircleShape
 
@@ -673,8 +675,11 @@ private fun EmojiChip(
         modifier = modifier
             .background(color = backgroundColor, shape)
             .clip(shape)
-            .heightIn(max = emojiHeight)
-            .clickable(onClick = onClick)
+            .heightIn(max = Spacings.Post.emojiHeight)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = { onLongClick(emojiId) }
+            )
             .let {
                 if (selected) {
                     it.border(1.dp, MaterialTheme.colorScheme.primary, shape)
