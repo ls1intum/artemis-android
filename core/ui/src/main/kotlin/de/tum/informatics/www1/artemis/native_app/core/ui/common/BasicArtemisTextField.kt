@@ -127,7 +127,7 @@ fun BasicSearchTextField(
     }
 
     Box(
-        modifier = modifier
+        modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(horizontal = 16.dp, vertical = 8.dp)
