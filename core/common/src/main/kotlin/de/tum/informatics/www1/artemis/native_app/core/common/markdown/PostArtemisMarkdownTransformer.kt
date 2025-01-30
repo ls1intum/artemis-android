@@ -4,10 +4,15 @@ import androidx.annotation.DrawableRes
 import de.tum.informatics.www1.artemis.native_app.core.common.R
 
 const val TYPE_ICON_RESOURCE_PATH = "android.resource://de.tum.cit.aet.artemis/"
+const val ATTACHMENTS_ENDPOINT = "/api/files/attachments/"
 
 class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) : ArtemisMarkdownTransformer() {
 
-    private fun createFileTypeIconMarkdown(@DrawableRes drawableId: Int) = "![]($TYPE_ICON_RESOURCE_PATH$drawableId)"
+    private fun createFileTypeIconMarkdown(@DrawableRes drawableId: Int) =
+        "![]($TYPE_ICON_RESOURCE_PATH$drawableId)"
+
+    private fun createAttachmentsLink(serverUrl: String, fileName: String, filePath: String) =
+        "[$fileName]($serverUrl$ATTACHMENTS_ENDPOINT$filePath)"
 
     override fun transformExerciseMarkdown(title: String, url: String, type: String): String {
         val typeIcon =  when (type) {
@@ -35,11 +40,12 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         url: String
     ): String {
         val fileIconImage = createFileTypeIconMarkdown(R.drawable.file_link_icon)
-        val newUrl = url.replace(" ", "%20")
+        val link = createAttachmentsLink(serverUrl, fileName, MarkdownUrlUtil.encodeUrl(url))
+
         return when (type) {
-            "attachment" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$newUrl)"
-            "lecture-unit" -> "$fileIconImage [$fileName]($serverUrl/api/files/attachments/$newUrl)"
-            "slide" -> "![$fileName]($serverUrl/api/files/attachments/$newUrl)"
+            "attachment" -> "$fileIconImage $link"
+            "lecture-unit" -> "$fileIconImage $link"
+            "slide" -> "!$link"
             else -> fileName
         }
     }

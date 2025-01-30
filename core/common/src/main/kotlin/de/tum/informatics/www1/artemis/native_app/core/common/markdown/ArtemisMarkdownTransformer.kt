@@ -38,7 +38,7 @@ abstract class ArtemisMarkdownTransformer {
     private val userMarkdownPattern = "\\[user](.*?)\\((.*?)\\)\\[/user]".toRegex()
     private val channelMarkdownPattern = "\\[channel](.*?)\\((\\d+?)\\)\\[/channel]".toRegex()
     private val lectureContentMarkdownPattern = "\\[(attachment|lecture-unit|slide)](.*?)\\(([/\\w\\d\\-_\\.\\s]+)\\)\\[/\\1]".toRegex()
-    private val fileUploadMessagePattern = "(\\!?)\\[(.*?)]\\((/api/files/[\\w\\d/\\-_.]+)\\)".toRegex()
+    private val fileUploadMessagePattern = "(\\!?)\\[(.*?)]\\((/api/files/[\\w\\d/\\-_.\\s]+)\\)".toRegex()
 
     fun transformMarkdown(markdown: String): String {
         return exerciseMarkdownPattern.replace(markdown) { matchResult ->
