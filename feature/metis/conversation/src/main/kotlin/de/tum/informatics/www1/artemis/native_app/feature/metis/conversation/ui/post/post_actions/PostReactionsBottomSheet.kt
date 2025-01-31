@@ -44,6 +44,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 
 internal const val TEST_TAG_POST_REACTIONS_BOTTOM_SHEET = "TEST_TAG_POST_REACTIONS_BOTTOM_SHEET"
+fun getTestTagForEmojiId(emojiId: String, source: String) = "emoji$emojiId$source"
+fun getTestTagForReactionAuthor(emojiId: String, reactionId: Long, username: String) =
+    "reactionAuthor$reactionId$username$emojiId"
 
 sealed class EmojiSelection {
     data object ALL : EmojiSelection()
@@ -170,11 +173,12 @@ private fun Chip(
             .clickable {
                 onClick(emojiSelection)
             }
+            .testTag(getTestTagForEmojiId(text, "REACTIONS_BOTTOM_SHEET")),
     ) {
         Text(
             color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onBackground,
             text = if (emojiSelection is EmojiSelection.SINGLE) getUnicodeForEmojiId(emojiId = text) else text,
-            fontSize = if (emojiSelection is EmojiSelection.SINGLE) 20.sp else 14.sp
+            fontSize = if (emojiSelection is EmojiSelection.SINGLE) 20.sp else 14.sp,
         )
     }
 }
@@ -187,7 +191,8 @@ private fun ReactionAuthorListItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(40.dp),
+            .height(40.dp)
+            .testTag(getTestTagForReactionAuthor(reaction.emojiId, reaction.id, reaction.username)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {

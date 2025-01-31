@@ -10,6 +10,9 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.BaseChatUITest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_POST_CONTEXT_BOTTOM_SHEET
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.TEST_TAG_POST_REACTIONS_BOTTOM_SHEET
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.getTestTagForEmojiId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.getTestTagForReactionAuthor
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -168,7 +171,6 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         )
     }
 
-
     // ###################################### UTIL METHODS ###########################################
 
     @Test
@@ -187,6 +189,57 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         )
 
         composeTestRule.assertPostActionVisibility(R.string.post_unsave, isVisible = true)
+    }
+
+    // ################################## VIEW REACTING AUTHORS ######################################
+
+    @Test
+    fun `test GIVEN a post with reactions WHEN long pressing a reaction THEN at least this reaction is shown`() {
+        setupChatUi(
+            posts = posts
+        )
+        val reactionToClick = reactions.first().emojiId
+        val expectedReaction = posts[0].reactions.first().emojiId
+
+        composeTestRule.assertPostReactionVisibility(
+            emojiId = reactionToClick,
+            testTag = getTestTagForEmojiId(expectedReaction, "REACTIONS_BOTTOM_SHEET")
+        )
+    }
+
+    @Test
+    fun `test GIVEN a post with reactions WHEN long pressing a reaction THEN the reacting user is shown correctly`() {
+       setupChatUi(
+            posts = posts
+        )
+        val reactionToView = posts[0].reactions.last().emojiId
+        val expectedReactionEmojiId = reactions.last().emojiId
+        val expectedReactionId = reactions.last().id
+        val expectedReactionUsername = reactions.last().username
+
+        composeTestRule.assertPostReactionVisibility(
+            emojiId = reactionToView,
+            assertReactionVisibility = false,
+            testTag = getTestTagForReactionAuthor(expectedReactionEmojiId, expectedReactionId, expectedReactionUsername)
+        )
+    }
+
+    @Test
+    fun `test GIVEN a post with reactions WHEN long pressing a reaction THEN users reacting with another reaction are hidden`() {
+        setupChatUi(
+            posts = posts
+        )
+        val reactionToView = posts[0].reactions.last().emojiId
+        val expectedHiddenUsername = reactions.first().username
+        val expectedHiddenReactionId = reactions.first().id
+        val expectedHiddenReactionEmojiId = reactions.first().emojiId
+
+        composeTestRule.assertPostReactionVisibility(
+            reactionToView,
+            assertReactionVisibility = false,
+            testTag = getTestTagForReactionAuthor(expectedHiddenReactionEmojiId, expectedHiddenReactionId, expectedHiddenUsername),
+            isVisible = false
+        )
     }
 
 
@@ -209,4 +262,28 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         }
     }
 
+    private fun ComposeTestRule.assertPostReactionVisibility(
+        emojiId: String,
+        assertReactionVisibility: Boolean = true,
+        isVisible: Boolean = true,
+        testTag: String = "",
+    ) {
+        onNodeWithTag(getTestTagForEmojiId(emojiId, "POST_ITEM"))
+            .performSemanticsAction(SemanticsActions.OnLongClick)
+
+        onNodeWithTag(TEST_TAG_POST_REACTIONS_BOTTOM_SHEET)
+            .assertIsDisplayed()
+
+        val visibleNode = if (assertReactionVisibility) {
+            onNodeWithTag(testTag)
+        } else {
+            onNodeWithTag(testTag)
+        }
+
+        if (isVisible) {
+            visibleNode.assertExists().assertIsDisplayed()
+        } else {
+            visibleNode.assertDoesNotExist()
+        }
+    }
 }
