@@ -108,7 +108,7 @@ fun PostReactionBottomSheet(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth(),
-                contentPadding = PaddingValues(bottom = 40.dp),
+                contentPadding = PaddingValues(bottom = Spacings.BottomSheetContentPadding.calculateBottomPadding()),
             ) {
                 items(
                     getReactingAuthorsForEmojiSelection(currentEmojiSelection, reactions),
