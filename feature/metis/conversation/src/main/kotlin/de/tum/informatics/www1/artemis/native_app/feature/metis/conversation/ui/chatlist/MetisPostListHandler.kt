@@ -48,7 +48,6 @@ internal fun <T : Any> MetisPostListHandler(
 ) {
     val scope = rememberCoroutineScope()
 
-    var isScrolledDown by remember { mutableStateOf(false) }
     var prevBottomItem: T? by remember { mutableStateOf(null) }
 
     var hasNewUnseenPost by remember { mutableStateOf(false) }
@@ -65,28 +64,36 @@ internal fun <T : Any> MetisPostListHandler(
         DisplayPostOrder.REGULAR -> state.canScrollForward
     }
 
-    LaunchedEffect(isScrolledDown, itemCount, bottomItem, canScrollDown, bottomItemIndex) {
-        if (itemCount > 0) {
-            // Check if new bottom item exists
-            if (bottomItem != prevBottomItem && isScrolledDown) {
+    LaunchedEffect(itemCount, bottomItem, canScrollDown, bottomItemIndex) {
+        if (itemCount == 0) {
+            hasNewUnseenPost = false
+            return@LaunchedEffect
+        }
+
+        val isScrolledDown = !canScrollDown
+        val doesNewPostExist = bottomItem != prevBottomItem
+
+        if (doesNewPostExist) {
+            if (isScrolledDown) {
                 // new bottom item exists and we were previously scrolled to the bottom. Scroll down!
+
+                // For the ChatList, the bottomPost and posts are not updated synchronously.
+                // Therefore, we need to wait shortly before the new post is present in the posts
+                // and we can actually scroll to it.
                 delay(100.milliseconds)
                 state.animateScrollToItem(bottomItemIndex)
-            } else if (bottomItem != prevBottomItem) {
-                //  new bottom item exists but we are not on bottom so instead show user button.
+            } else {
+                // new bottom item exists but we are not on bottom so instead show user button.
                 hasNewUnseenPost = true
             }
+        }
 
-            isScrolledDown = !canScrollDown
-            prevBottomItem = bottomItem
-
-            if (isScrolledDown) {
-                // we are scrolled down now, so we must have seen all posts.
-                hasNewUnseenPost = false
-            }
-        } else {
+        if (isScrolledDown) {
+            // we are scrolled down now, so we must have seen all posts.
             hasNewUnseenPost = false
         }
+
+        prevBottomItem = bottomItem
     }
 
     Box(
