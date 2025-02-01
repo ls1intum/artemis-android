@@ -10,20 +10,20 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 /**
- * Wrapper that either displays the code of conduct if it has not yet been accepted, or the [codeOfConductAcceptedContent] otherwise.
+ * Wrapper that either displays the code of conduct if it has not yet been accepted, or the [onCodeOfConductAccepted] otherwise.
  */
 @Composable
 fun CodeOfConductFacadeUi(
     modifier: Modifier,
     courseId: Long,
-    codeOfConductAcceptedContent: @Composable () -> Unit
+    onCodeOfConductAccepted: () -> Unit
 ) {
     val codeOfConductViewModel: CodeOfConductViewModel = koinViewModel { parametersOf(courseId) }
 
     CodeOfConductFacadeUi(
         modifier = modifier,
         codeOfConductViewModel = codeOfConductViewModel,
-        codeOfConductAcceptedContent = codeOfConductAcceptedContent
+        onCodeOfConductAccepted = onCodeOfConductAccepted
     )
 }
 
@@ -31,7 +31,7 @@ fun CodeOfConductFacadeUi(
 internal fun CodeOfConductFacadeUi(
     modifier: Modifier,
     codeOfConductViewModel: CodeOfConductViewModel,
-    codeOfConductAcceptedContent: @Composable () -> Unit
+    onCodeOfConductAccepted: () -> Unit
 ) {
     val isCodeOfConductAcceptedDataState by codeOfConductViewModel.isCodeOfConductAccepted.collectAsState()
     val codeOfConductDataState by codeOfConductViewModel.codeOfConduct.collectAsState()
@@ -43,7 +43,7 @@ internal fun CodeOfConductFacadeUi(
     ) { (isCodeOfConductAccepted, codeOfConduct) ->
         when {
             isCodeOfConductAccepted -> {
-                codeOfConductAcceptedContent()
+                onCodeOfConductAccepted()
             }
 
             else -> {
