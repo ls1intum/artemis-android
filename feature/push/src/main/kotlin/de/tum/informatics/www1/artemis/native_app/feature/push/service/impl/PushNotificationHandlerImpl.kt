@@ -37,6 +37,29 @@ class PushNotificationHandlerImpl(
         ///
         /// The version is declared in the constants of Artemis, see [source](https://github.com/ls1intum/Artemis/blob/6.6.7/src/main/java/de/tum/in/www1/artemis/config/Constants.java#L318).
         private const val PUSH_NOTIFICATION_VERSION = 1
+
+        internal fun isNotificationContextInVisibleMetisContexts(
+            notification: ArtemisNotification<out NotificationType>,
+            visibleMetisContexts: List<VisibleMetisContext>
+        ): Boolean {
+            val notificationType = notification.type
+            if (notificationType !is CommunicationNotificationType) return false
+
+            val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
+                target = notification.target
+            )
+
+            val visibleMetisContext = if (notificationType is ReplyPostCommunicationNotificationType) {
+                VisibleStandalonePostDetails(
+                    metisContext = metisTarget.metisContext,
+                    postId = metisTarget.postId
+                )
+            } else {
+                VisiblePostList(metisContext = metisTarget.metisContext)
+            }
+
+            return visibleMetisContext in visibleMetisContexts
+        }
     }
 
     override fun handleServerPushNotification(payload: String) {
@@ -104,24 +127,7 @@ class PushNotificationHandlerImpl(
         val visibleMetisContexts: List<VisibleMetisContext> =
             (currentActivity as? VisibleMetisContextReporter)?.visibleMetisContexts?.value ?: return false
 
-        val notificationType = notification.type
-        if (notificationType !is CommunicationNotificationType) return false
-
-        val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
-            target = notification.target
-        )
-
-
-        val visibleMetisContext = if (notificationType is ReplyPostCommunicationNotificationType) {
-            VisibleStandalonePostDetails(
-                metisContext = metisTarget.metisContext,
-                postId = metisTarget.postId
-            )
-        } else {
-            VisiblePostList(metisContext = metisTarget.metisContext)
-        }
-
-        return visibleMetisContext in visibleMetisContexts
+        return isNotificationContextInVisibleMetisContexts(notification, visibleMetisContexts)
     }
 
 
