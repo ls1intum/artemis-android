@@ -20,7 +20,7 @@
     <string name="conversation_overview_section_exam_channels">Exams</string>
     <string name="conversation_overview_section_groups">Group Chats</string>
     <string name="conversation_overview_section_direct_messages">Direct Messages</string>
-    <string name="conversation_overview_section_hidden">Hidden</string>
+    <string name="conversation_overview_section_hidden">Archive</string>
     <string name="conversation_overview_section_saved_posts">Saved Messages</string>
     <string name="conversation_overview_section_recent">Recent</string>
 
