@@ -1,12 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist
 
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -164,7 +166,6 @@ fun MetisChatList(
             MetisPostListHandler(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                     .weight(1f),
                 serverUrl = serverUrl,
                 courseId = courseId,
@@ -237,6 +238,7 @@ private fun ChatList(
     postActionFlags: PostActionFlags,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     clientId: Long,
+    unreadPostsCount: Int = 4,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
     onRequestDelete: (IStandalonePost) -> Unit,
@@ -256,10 +258,16 @@ private fun ChatList(
             count = posts.itemCount,
             key = posts::getItemKey
         ) { index ->
+            if (posts.itemCount > unreadPostsCount && index == unreadPostsCount) {
+                UnreadPostsIndicator()
+            }
+
             when (val chatListItem = posts[index]) {
                 is ChatListItem.DateDivider -> {
                     DateDivider(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                            .fillMaxWidth(),
                         date = chatListItem.localDate
                     )
                 }
@@ -296,6 +304,7 @@ private fun ChatList(
 
                     PostWithBottomSheet(
                         modifier = Modifier
+                            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                             .fillMaxWidth()
                             .let {
                                 if (post != null) {
@@ -399,6 +408,39 @@ private fun NoPostsFoundInformation(
             text = stringResource(id = R.string.metis_post_list_empty),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun UnreadPostsIndicator(
+    modifier: Modifier = Modifier,
+) {
+    val color = MaterialTheme.colorScheme.error
+
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(3.dp)
+                .background(color)
+        )
+
+        Text(
+            modifier = Modifier
+                .padding(end = 32.dp)
+                .align(Alignment.CenterEnd)
+                .background(
+                    color = color,
+                    shape = MaterialTheme.shapes.small
+                )
+                .padding(4.dp),
+            text = "New",
+            color = MaterialTheme.colorScheme.onError,
+            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
         )
     }
 }
