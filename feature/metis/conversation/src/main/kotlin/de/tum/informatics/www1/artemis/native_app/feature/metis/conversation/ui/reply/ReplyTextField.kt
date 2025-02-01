@@ -14,18 +14,14 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -110,10 +106,9 @@ internal fun ReplyTextField(
     conversationName: String
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
-    val systemBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
     Surface(
-        modifier = modifier.defaultMinSize(minHeight = (59.dp + systemBarHeight)),
+        modifier = modifier,
         border = BorderStroke(
             1.dp,
             Brush.verticalGradient(
@@ -132,8 +127,7 @@ internal fun ReplyTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
-                .padding(bottom = systemBarHeight)
-                .height(IntrinsicSize.Max)
+                .navigationBarsPadding()
         ) {
             AnimatedContent(
                 modifier = Modifier
@@ -335,23 +329,18 @@ private fun CreateReplyUi(
                             onTextChanged = replyMode::onUpdate
                         )
                     },
-                    sendButton = {
+                    textFieldTrailingContent = {
                         SendButton(
                             modifier = Modifier,
                             currentTextFieldValue = currentTextFieldValue,
                             replyMode = replyMode,
                             onReply = onReply
                         )
-                    },
-                    topRightButton = {
+
                         if (replyMode is ReplyMode.EditMessage) {
-                            IconButton(onClick = replyMode.onCancelEditMessage) {
-                                Icon(
-                                    imageVector = Icons.Default.Cancel,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                )
-                            }
+                            CancelButton(
+                                onClick = replyMode.onCancelEditMessage
+                            )
                         }
                     },
                     formattingOptionButtons = {
@@ -370,7 +359,9 @@ private fun CreateReplyUi(
                 }
             } else {
                 UnfocusedPreviewReplyTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                     hintText = hintText,
                     filePickerLauncher = filePickerLauncher,
                     onRequestShowTextField = {
@@ -531,6 +522,23 @@ private fun SendButton(
                 contentDescription = null
             )
         }
+    }
+}
+
+@Composable
+private fun CancelButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    IconButton(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Icon(
+            imageVector = Icons.Default.Cancel,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
     }
 }
 
@@ -774,7 +782,6 @@ private fun UnfocusedPreviewReplyTextField(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
             .clickable(onClick = onRequestShowTextField)
             .testTag(TEST_TAG_UNFOCUSED_TEXT_FIELD),
         verticalAlignment = Alignment.CenterVertically
