@@ -17,6 +17,8 @@ import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTi
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
+import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user1Username
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.user2Username
@@ -43,6 +45,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metistest.Conversation
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -220,6 +225,23 @@ class ConversationOverviewE2eTest : ConversationBaseTest() {
             textToClick = context.getString(R.string.conversation_overview_conversation_item_unmark_as_muted),
             checkExists = { conversations.none { conv -> conv.id == chat.id && conv.isMuted } }
         )
+    }
+
+    @Test(timeout = DefaultTestTimeoutMillis)
+    fun `mark all conversations as read api called successfully`() = runTest {
+        val response = conversationService.markAllConversationsAsRead(
+            courseId = course.id!!,
+            authToken = accessToken,
+            serverUrl = testServerUrl
+        )
+
+        response
+            .onSuccess {
+                assertTrue(true)
+            }
+            .onFailure {
+                fail("API call failed with exception: ${it.message}")
+            }
     }
 
     /**

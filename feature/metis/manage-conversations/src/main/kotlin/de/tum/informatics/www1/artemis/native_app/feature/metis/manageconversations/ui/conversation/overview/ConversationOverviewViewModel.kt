@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState.Success
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.keepSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
@@ -312,6 +313,9 @@ class ConversationOverviewViewModel(
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
+    private val _isDisplayingErrorDialog = MutableStateFlow(false)
+    val isDisplayingErrorDialog: StateFlow<Boolean> = _isDisplayingErrorDialog
+
     private fun getUpdateConversationsFlow(loadedConversations: List<Conversation>): Flow<Success<List<Conversation>>> =
         flow {
             val currentConversations =
@@ -424,6 +428,30 @@ class ConversationOverviewViewModel(
                 .or(false)
         }
     }
+
+    fun markAllConversationsAsRead(): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
+            conversationService.markAllConversationsAsRead(
+                courseId = courseId,
+                authToken = accountService.authToken.first(),
+                serverUrl = serverConfigurationService.serverUrl.first()
+            )
+                .onSuccess { isSuccessful ->
+                    if (isSuccessful) {
+                        onRequestReload.tryEmit(Unit)
+                    }
+                }
+                .onFailure {
+                    _isDisplayingErrorDialog.value = true
+                }
+                .or(false)
+        }
+    }
+
+    fun dismissErrorDialog() {
+        _isDisplayingErrorDialog.value = false
+    }
+
 
     fun setConversationMessagesRead(conversationId: Long) {
         viewModelScope.launch(coroutineContext) {
