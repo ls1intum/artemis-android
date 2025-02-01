@@ -162,4 +162,10 @@ open class ConversationServiceStub(
         authToken: String,
         serverUrl: String
     ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
+
+    override suspend fun markAllConversationsAsRead(
+        courseId: Long,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
 }
