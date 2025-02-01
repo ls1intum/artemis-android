@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccessTimeFilled
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ChatBubble
@@ -28,12 +29,11 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.NotInterested
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Unarchive
+import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -272,7 +272,7 @@ internal fun ConversationList(
                 KEY_SUFFIX_HIDDEN,
                 R.string.conversation_overview_section_hidden,
                 toggleHiddenExpanded
-            ) { Icon(imageVector = Icons.Default.NotInterested, contentDescription = null) }
+            ) { Icon(imageVector = Icons.Default.Archive, contentDescription = null) }
         }
 
         listWithHeader(
@@ -603,7 +603,7 @@ private fun ConversationListItemDropdownMenu(
         DropdownMenuItem(
             leadingIcon = {
                 Icon(
-                    imageVector = if (conversation.isHidden) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                    imageVector = if (conversation.isHidden) Icons.Default.Unarchive else Icons.Default.Archive,
                     contentDescription = null
                 )
             },
