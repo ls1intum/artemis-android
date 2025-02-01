@@ -2,9 +2,11 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
@@ -32,12 +35,11 @@ import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.ProfilePicture
 
 const val TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST = "TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST"
 
-private val HintHorizontalPadding = 16.dp
-private val PopupContentVerticalPadding = 8.dp
 private val AutoCompletionDialogMaxHeight = 270.dp
 
 @Composable
@@ -55,10 +57,11 @@ internal fun ReplyAutoCompletePopup(
         onDismissRequest = onDismissRequest
     ) {
         val maxHeight = min(maxHeightFromScreen, AutoCompletionDialogMaxHeight)
+        val verticalPadding = Spacings.AutoCompletePopup.ContentVerticalPadding
         ReplyAutoCompletePopupBody(
             modifier = Modifier
-                .padding(vertical = PopupContentVerticalPadding)
-                .heightIn(max = maxHeight - PopupContentVerticalPadding * 2)
+                .padding(vertical = verticalPadding)
+                .heightIn(max = maxHeight - verticalPadding * 2)
                 .width(targetWidth),
             autoCompleteCategories = autoCompleteCategories,
             performAutoComplete = performAutoComplete
@@ -107,7 +110,7 @@ private fun ReplyAutoCompletePopupBody(
                     Column {
                         HorizontalDivider()
 
-                        Box(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
             }
@@ -122,7 +125,7 @@ private fun AutoCompleteCategoryComposable(modifier: Modifier, name: String) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(color = MaterialTheme.colorScheme.surfaceContainer)
-                .padding(horizontal = HintHorizontalPadding, vertical = 4.dp),
+                .padding(horizontal = Spacings.AutoCompletePopup.HintHorizontalPadding, vertical = 4.dp),
             text = name,
             color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.labelLarge,
@@ -137,35 +140,37 @@ private fun AutoCompleteHintComposable(
     hint: AutoCompleteHint,
     onClick: () -> Unit
 ) {
+    val horizontalPadding = Spacings.AutoCompletePopup.HintHorizontalPadding
+
     Row(
         modifier = modifier
-            .padding(horizontal = HintHorizontalPadding)
+            .padding(horizontal = horizontalPadding, vertical = 8.dp)
             .clickable(onClick = onClick),
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(horizontalPadding)
     ) {
         hint.icon?.let {
+            val iconSize = 24.dp
             when (it) {
                 is AutoCompleteIcon.DrawableFromImageVector -> Icon(
                     imageVector = it.imageVector,
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(iconSize)
                 )
                 is AutoCompleteIcon.DrawableFromId -> Icon(
                     painter = painterResource(id = it.id ?: return@Row),
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(iconSize)
                 )
                 is AutoCompleteIcon.ProfilePicture -> ProfilePicture(
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(iconSize),
                     profilePictureData = it.pictureData
                 )
             }
         }
 
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = HintHorizontalPadding, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth(),
             text = hint.hint
         )
     }
