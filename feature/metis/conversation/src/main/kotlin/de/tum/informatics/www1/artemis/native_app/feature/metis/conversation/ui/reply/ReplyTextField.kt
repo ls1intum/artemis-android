@@ -10,11 +10,14 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -170,7 +173,7 @@ private fun AutoCompletionDialog(
     val currentTextFieldValue by replyMode.currentText
 
     var boxWidth by remember { mutableIntStateOf(0) }
-    var popupMaxHeight by remember { mutableIntStateOf(0) }
+    var boxYOffset by remember { mutableIntStateOf(0) }
 
     var mayShowAutoCompletePopup by remember { mutableStateOf(true) }
     var requestDismissAutoCompletePopup by remember { mutableStateOf(false) }
@@ -206,14 +209,16 @@ private fun AutoCompletionDialog(
             }
             .onGloballyPositioned { coordinates ->
                 val boxRootTopLeft = coordinates.localToRoot(Offset.Zero)
-                popupMaxHeight = boxRootTopLeft.y.toInt()
+                boxYOffset = boxRootTopLeft.y.toInt()
             }
             .fillMaxWidth()
     ) {
+        val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+
         ReplyAutoCompletePopup(
             autoCompleteCategories = autoCompleteHints.orEmpty(),
             targetWidth = with(LocalDensity.current) { boxWidth.toDp() },
-            maxHeightFromScreen = with(LocalDensity.current) { popupMaxHeight.toDp() } - 80.dp,
+            maxHeightFromScreen = with(LocalDensity.current) { boxYOffset.toDp() } - statusBarHeight,
             popupPositionProvider = ReplyAutoCompletePopupPositionProvider,
             performAutoComplete = { replacement ->
                 val newTextFieldValue = AutoCompleteUtil.perform(
