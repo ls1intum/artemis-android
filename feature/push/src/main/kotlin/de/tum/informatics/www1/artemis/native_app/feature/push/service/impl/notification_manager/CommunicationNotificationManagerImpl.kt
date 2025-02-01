@@ -56,6 +56,7 @@ internal class CommunicationNotificationManagerImpl(
     override suspend fun popNotification(
         artemisNotification: ArtemisNotification<CommunicationNotificationType>
     ) {
+        var isPostFromAppUser = false
         val (communication, messages) = dbProvider.database.withTransaction {
             dbProvider.pushCommunicationDao.insertNotification(
                 artemisNotification = artemisNotification,
@@ -63,7 +64,8 @@ internal class CommunicationNotificationManagerImpl(
                     ArtemisNotificationManager.getNextNotificationId(context)
                 },
                 isPostFromAppUser = { content ->
-                     content.authorId == getClientId().toString()
+                    isPostFromAppUser = content.authorId == getClientId().toString()
+                    isPostFromAppUser
                 }
             )
 
@@ -78,6 +80,14 @@ internal class CommunicationNotificationManagerImpl(
             communication to messages
         }
 
+        // Without this check, we would pop previous notifications in the following scenario:
+        // 1. App user creates post1.
+        // 2. Other user replies answer1 in post1's thread.
+        //      -> User gets notification for answer1 (desired).
+        // 3. App user replies answer2 in post1's thread.
+        //      -> User would get not get notification for answer2 (desired).
+        //      -> BUT: Notification for answer1 would be popped again (not desired).
+        if (isPostFromAppUser) return
 
         if (messages.isEmpty()) return
         popCommunicationNotification(communication, messages)
