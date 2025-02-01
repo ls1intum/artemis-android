@@ -9,18 +9,12 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -51,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -60,7 +55,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
@@ -94,8 +88,6 @@ internal fun ReplyTextField(
 ) {
     val replyState: ReplyState = rememberReplyState(replyMode, updateFailureState)
     val requestedAutoCompleteType = remember { mutableStateOf<AutoCompleteType?>(null) }
-    var boxWidth by remember { mutableIntStateOf(0) }
-    var popupMaxHeight by remember { mutableIntStateOf(0) }
 
     Surface(
         modifier = modifier,
@@ -117,18 +109,11 @@ internal fun ReplyTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
-                .onSizeChanged { boxWidth = it.width }
-                .onGloballyPositioned { coordinates ->
-                    val textFieldRootTopLeft = coordinates.localToRoot(Offset.Zero)
-                    popupMaxHeight = textFieldRootTopLeft.y.toInt()
-                }
                 .navigationBarsPadding()
         ) {
             AutoCompletionDialog(
                 replyMode = replyMode,
                 requestedAutoCompleteType = requestedAutoCompleteType,
-                targetWidth = boxWidth.dp,
-                maxHeightFromScreen = popupMaxHeight.dp,
             )
 
             AnimatedContent(
@@ -181,10 +166,11 @@ internal fun ReplyTextField(
 private fun AutoCompletionDialog(
     replyMode: ReplyMode,
     requestedAutoCompleteType: MutableState<AutoCompleteType?>,
-    targetWidth: Dp,
-    maxHeightFromScreen: Dp,
 ) {
     val currentTextFieldValue by replyMode.currentText
+
+    var boxWidth by remember { mutableIntStateOf(0) }
+    var popupMaxHeight by remember { mutableIntStateOf(0) }
 
     var mayShowAutoCompletePopup by remember { mutableStateOf(true) }
     var requestDismissAutoCompletePopup by remember { mutableStateOf(false) }
@@ -212,24 +198,37 @@ private fun AutoCompletionDialog(
         return
     }
 
-    ReplyAutoCompletePopup(
-        autoCompleteCategories = autoCompleteHints.orEmpty(),
-        targetWidth = targetWidth,
-        maxHeightFromScreen = maxHeightFromScreen,
-        popupPositionProvider = ReplyAutoCompletePopupPositionProvider,
-        performAutoComplete = { replacement ->
-            val newTextFieldValue = AutoCompleteUtil.perform(
-                currentTextFieldValue,
-                tagChars,
-                replacement
-            )
+    Box(
+        modifier = Modifier
+            .onSizeChanged {
+                boxWidth = it.width
+                println("boxWidth: $boxWidth")
+            }
+            .onGloballyPositioned { coordinates ->
+                val boxRootTopLeft = coordinates.localToRoot(Offset.Zero)
+                popupMaxHeight = boxRootTopLeft.y.toInt()
+            }
+            .fillMaxWidth()
+    ) {
+        ReplyAutoCompletePopup(
+            autoCompleteCategories = autoCompleteHints.orEmpty(),
+            targetWidth = with(LocalDensity.current) { boxWidth.toDp() },
+            maxHeightFromScreen = with(LocalDensity.current) { popupMaxHeight.toDp() } - 80.dp,
+            popupPositionProvider = ReplyAutoCompletePopupPositionProvider,
+            performAutoComplete = { replacement ->
+                val newTextFieldValue = AutoCompleteUtil.perform(
+                    currentTextFieldValue,
+                    tagChars,
+                    replacement
+                )
 
-            replyMode.onUpdate(newTextFieldValue)
-        },
-        onDismissRequest = {
-            requestDismissAutoCompletePopup = true
-        }
-    )
+                replyMode.onUpdate(newTextFieldValue)
+            },
+            onDismissRequest = {
+                requestDismissAutoCompletePopup = true
+            }
+        )
+    }
 }
 
 @Composable
