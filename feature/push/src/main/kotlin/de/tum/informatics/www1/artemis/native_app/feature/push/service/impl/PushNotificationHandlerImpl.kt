@@ -5,10 +5,12 @@ import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextReporter
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationHandler
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.NotificationTargetManager
@@ -42,7 +44,10 @@ class PushNotificationHandlerImpl(
 
         val notification = decodeNotification(payload) ?: return
 
-        if (isNotificationContextAlreadyObservedByUser(notification)) return
+        if (isNotificationContextAlreadyObservedByUser(notification)) {
+            Log.d(TAG, "Notification context is already observed by user -> discarding")
+            return
+        }
 
         runBlocking {
             notificationManager.popNotification(
@@ -106,10 +111,15 @@ class PushNotificationHandlerImpl(
             target = notification.target
         )
 
-        val visibleMetisContext = VisibleStandalonePostDetails(
-            metisContext = metisTarget.metisContext,
-            postId = metisTarget.postId
-        )
+
+        val visibleMetisContext = if (notificationType is ReplyPostCommunicationNotificationType) {
+            VisibleStandalonePostDetails(
+                metisContext = metisTarget.metisContext,
+                postId = metisTarget.postId
+            )
+        } else {
+            VisiblePostList(metisContext = metisTarget.metisContext)
+        }
 
         return visibleMetisContext in visibleMetisContexts
     }
