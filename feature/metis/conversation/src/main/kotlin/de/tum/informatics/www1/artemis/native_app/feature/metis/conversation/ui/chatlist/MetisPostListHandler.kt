@@ -25,7 +25,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.rememberPostA
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.EmojiService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.ProvideEmojis
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.DisplayPostOrder
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Handles scrolling down to new items if the list was scrolled down before the new items came in.
@@ -68,6 +70,7 @@ internal fun <T : Any> MetisPostListHandler(
             // Check if new bottom item exists
             if (bottomItem != prevBottomItem && isScrolledDown) {
                 // new bottom item exists and we were previously scrolled to the bottom. Scroll down!
+                delay(100.milliseconds)
                 state.animateScrollToItem(bottomItemIndex)
             } else if (bottomItem != prevBottomItem) {
                 //  new bottom item exists but we are not on bottom so instead show user button.
