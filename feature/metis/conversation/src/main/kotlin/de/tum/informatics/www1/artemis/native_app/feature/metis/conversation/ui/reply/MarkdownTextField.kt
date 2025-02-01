@@ -68,9 +68,7 @@ import kotlinx.coroutines.launch
 const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
 val textFormattingOptionsHiddenOffsetY = 200.dp
 
-/**
- * @param sendButton composable centered vertically right to the text field.
- */
+
 @Composable
 internal fun MarkdownTextField(
     modifier: Modifier,
@@ -78,8 +76,7 @@ internal fun MarkdownTextField(
     hintText: AnnotatedString,
     filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>,
     focusRequester: FocusRequester = remember { FocusRequester() },
-    sendButton: @Composable () -> Unit = {},
-    topRightButton: @Composable RowScope.() -> Unit = {},
+    textFieldTrailingContent: @Composable RowScope.() -> Unit = {},
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
@@ -123,9 +120,7 @@ internal fun MarkdownTextField(
                 }
             }
 
-            sendButton()
-
-            topRightButton()
+            textFieldTrailingContent()
         }
 
 
@@ -181,11 +176,11 @@ fun BasicMarkdownTextField(
     Box(
         modifier = modifier
             .heightIn(max = (localTextStyle.fontSize.value * maxVisibleLines).dp)
-            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scrollState)
     ) {
         BasicTextField(
-            modifier = modifier
+            modifier = Modifier
+                .fillMaxWidth()
                 .focusRequester(focusRequester)
                 .onFocusChanged { focusState ->
                     if (focusState.hasFocus) {
@@ -201,10 +196,7 @@ fun BasicMarkdownTextField(
             value = textFieldValue,
             onValueChange = onTextChanged,
             decorationBox = { innerTextField ->
-                Box(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
+                Box {
                     if (textFieldValue.text.isEmpty()) {
                         Text(
                             modifier = Modifier.align(Alignment.CenterStart),
