@@ -9,14 +9,18 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState.Success
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.keepSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection
@@ -73,6 +77,7 @@ class ConversationOverviewViewModel(
     websocketProvider: WebsocketProvider,
     networkStatusProvider: NetworkStatusProvider,
     accountDataService: AccountDataService,
+    private val courseService: CourseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
     serverConfigurationService,
@@ -93,6 +98,7 @@ class ConversationOverviewViewModel(
         websocketProvider: WebsocketProvider,
         networkStatusProvider: NetworkStatusProvider,
         accountDataService: AccountDataService,
+        courseService: CourseService,
         coroutineContext: CoroutineContext = EmptyCoroutineContext
     ) : this(
         application as? CurrentActivityListener,
@@ -104,6 +110,7 @@ class ConversationOverviewViewModel(
         websocketProvider,
         networkStatusProvider,
         accountDataService,
+        courseService,
         coroutineContext
     )
 
@@ -198,6 +205,22 @@ class ConversationOverviewViewModel(
             .map { it.isNotBlank() }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
+    private val course: StateFlow<DataState<Course>> = flatMapLatest(
+        serverConfigurationService.serverUrl,
+        accountService.authToken,
+        onRequestReload.onStart { emit(Unit) }
+    ) { serverUrl, authToken, _ ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            courseService.getCourse(
+                courseId,
+                serverUrl,
+                authToken
+            ).bind { it.course }
+        }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+
     private val conversationsAsCollections: StateFlow<DataState<ConversationCollections>> =
         combine(
             updatedConversations,
@@ -236,7 +259,16 @@ class ConversationOverviewViewModel(
                     examChannels = conversations.filter {
                         it is ChannelChat && !it.isHidden && it.filterPredicate("exam")
                     }.map { it as ChannelChat }
-                        .asCollection(filterActive || preferences.examsExpanded, showPrefix = false)
+                        .asCollection(filterActive || preferences.examsExpanded, showPrefix = false),
+
+                    recentChannels = conversations.filter { ConversationOverviewUtils.isRecent(
+                        it,
+                        course.value.orNull()
+                    ) }
+                        .asCollection(
+                            filterActive || preferences.recentExpanded,
+                            showPrefix = true
+                        )
                 )
             }
         }
@@ -280,6 +312,9 @@ class ConversationOverviewViewModel(
             }
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+    private val _isDisplayingErrorDialog = MutableStateFlow(false)
+    val isDisplayingErrorDialog: StateFlow<Boolean> = _isDisplayingErrorDialog
 
     private fun getUpdateConversationsFlow(loadedConversations: List<Conversation>): Flow<Success<List<Conversation>>> =
         flow {
@@ -394,6 +429,30 @@ class ConversationOverviewViewModel(
         }
     }
 
+    fun markAllConversationsAsRead(): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
+            conversationService.markAllConversationsAsRead(
+                courseId = courseId,
+                authToken = accountService.authToken.first(),
+                serverUrl = serverConfigurationService.serverUrl.first()
+            )
+                .onSuccess { isSuccessful ->
+                    if (isSuccessful) {
+                        onRequestReload.tryEmit(Unit)
+                    }
+                }
+                .onFailure {
+                    _isDisplayingErrorDialog.value = true
+                }
+                .or(false)
+        }
+    }
+
+    fun dismissErrorDialog() {
+        _isDisplayingErrorDialog.value = false
+    }
+
+
     fun setConversationMessagesRead(conversationId: Long) {
         viewModelScope.launch(coroutineContext) {
             manualConversationUpdates.emit(MarkMessagesRead(conversationId))
@@ -434,6 +493,10 @@ class ConversationOverviewViewModel(
 
     fun toggleSavedPostsExpanded() {
         expandOrCollapseSection { copy(savedPostsExpanded = !savedPostsExpanded) }
+    }
+
+    fun toggleRecentExpanded() {
+        expandOrCollapseSection { copy(recentExpanded = !recentExpanded) }
     }
 
     private fun expandOrCollapseSection(update: ConversationPreferenceService.Preferences.() -> ConversationPreferenceService.Preferences) {

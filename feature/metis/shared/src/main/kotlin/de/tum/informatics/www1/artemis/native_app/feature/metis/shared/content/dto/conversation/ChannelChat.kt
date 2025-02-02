@@ -19,6 +19,7 @@ data class ChannelChat(
     override val isCreator: Boolean = false,
     override val isMember: Boolean = false,
     override val numberOfMembers: Int = 0,
+    val subTypeReferenceId: Long? = null, // Id of the corresponding lecture, exercise, exam etc that is related to the channel.
     val name: String = "",
     val description: String? = null,
     val topic: String? = null,

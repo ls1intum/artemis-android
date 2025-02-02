@@ -35,6 +35,7 @@ val manageConversationsModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }

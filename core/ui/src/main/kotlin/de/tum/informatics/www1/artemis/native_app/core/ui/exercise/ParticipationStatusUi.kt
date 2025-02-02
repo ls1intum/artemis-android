@@ -10,7 +10,6 @@ import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.isUninitialized
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.notStarted
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation.InitializationState
@@ -24,26 +23,39 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.date.hasPassed
 @Composable
 fun ParticipationStatusUi(
     modifier: Modifier,
-    exercise: Exercise
+    exercise: Exercise,
+    showLargeIcon: Boolean = false
 ) {
-    val participation = remember(exercise) { exercise.latestParticipation }
+    // The Android app used to show ungraded results, but this been changed in https://github.com/ls1intum/artemis-android/pull/295.
+    // This flag allows to show ungraded results again if needed. Make sure to also check LocalTemplateStatus.kt and occurrences of
+    // Exercise.getSpecificStudentParticipation(showUngradedResults) across the app when changing this flag.
+    val showUngradedResults = false
 
-    if (participation != null && participation.results.orEmpty().isNotEmpty()) {
+    val participation = remember(exercise) { exercise.getSpecificStudentParticipation(showUngradedResults) }
+    val result = if (showUngradedResults) participation?.results.orEmpty().first() else participation?.results?.firstOrNull { it.rated == true }
+
+    if (participation != null && result != null) {
         // Display dynamic updates component
         ExerciseResult(
             modifier = modifier,
-            showUngradedResults = true,
-            exercise = exercise
+            showUngradedResults = showUngradedResults,
+            exercise = exercise,
+            showLargeIcon = showLargeIcon,
         )
     } else {
         // Simply display text
+        val text = getSubmissionResultStatusText(
+            participation = participation,
+            exercise = exercise
+        )
+
+        if (text == null) return
+
         Text(
             modifier = modifier,
-            text = getSubmissionResultStatusText(
-                participation = participation,
-                exercise = exercise
-            ),
-            style = MaterialTheme.typography.labelLarge
+            text = text,
+            color = MaterialTheme.colorScheme.secondary,
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
@@ -54,9 +66,9 @@ fun ParticipationStatusUi(
 private fun getSubmissionResultStatusText(
     participation: Participation?,
     exercise: Exercise
-): String {
+): String? {
     val isAfterDueDate = exercise.dueDate?.hasPassed() ?: false
-    val exerciseMissedDeadline = isAfterDueDate && exercise.latestParticipation == null
+    val exerciseMissedDeadline = isAfterDueDate && participation == null
 
     val uninitialized =
         if (exercise is QuizExercise) exercise.isUninitializedC else !isAfterDueDate && participation == null
@@ -77,7 +89,7 @@ private fun getSubmissionResultStatusText(
         participation?.initializationState == InitializationState.FINISHED -> R.string.exercise_user_submitted
         participation?.initializationState == InitializationState.INITIALIZED && exercise is QuizExercise -> R.string.exercise_user_participating
         exercise is QuizExercise && exercise.notStartedC -> R.string.exercise_quiz_not_started
-        else -> R.string.exercise_user_unknown
+        else -> return null
     }
 
     return stringResource(id = id)

@@ -25,8 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.QuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExercisePointsDecimalFormat
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultMedium
-import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.resultSuccess
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizQuestionData
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.screens.QuizQuestionBody
@@ -96,7 +95,7 @@ internal fun QuizResultUi(
                             .fillMaxWidth()
                             .border(
                                 width = 1.dp,
-                                color = if (isCorrect) resultSuccess else resultMedium
+                                color = if (isCorrect) ExerciseColors.Result.success else ExerciseColors.Result.medium
                             )
                             .padding(8.dp)
                     ) {

@@ -32,8 +32,12 @@ data class CommunicationMessageEntity(
     val communicationParentId: Long,
     @ColumnInfo(name = "text")
     val text: String,
+    @ColumnInfo(name = "author_id")
+    val authorId: String,
     @ColumnInfo(name = "author_name")
     val authorName: String,
+    @ColumnInfo(name = "author_image_url")
+    val authorImageUrl: String?,
     @ColumnInfo(name = "date")
     val date: Instant
 )

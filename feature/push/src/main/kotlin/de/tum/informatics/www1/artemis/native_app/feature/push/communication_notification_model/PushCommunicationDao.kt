@@ -55,9 +55,11 @@ interface PushCommunicationDao {
                 val pushCommunicationEntity = PushCommunicationEntity(
                     parentId = parentId,
                     notificationId = generateNotificationId(),
+                    notificationTypeString = artemisNotification.type.toString(),
                     courseTitle = content.courseName,
                     containerTitle = content.channelName,
-                    target = artemisNotification.target
+                    target = artemisNotification.target,
+                    conversationTypeString = content.conversationType?.rawValue
                 )
 
                 insertPushCommunication(pushCommunicationEntity)
@@ -66,7 +68,9 @@ interface PushCommunicationDao {
             CommunicationMessageEntity(
                 communicationParentId = parentId,
                 text = content.messageContent,
+                authorId = content.authorId,
                 authorName = content.authorName,
+                authorImageUrl = content.authorImageUrl,
                 date = artemisNotification.date
             )
         } catch (e: Exception) {
@@ -81,6 +85,7 @@ interface PushCommunicationDao {
     suspend fun insertSelfMessage(
         parentId: Long,
         authorName: String,
+        authorImageUrl: String?,
         body: String,
         date: Instant
     ) {
@@ -89,7 +94,9 @@ interface PushCommunicationDao {
                 CommunicationMessageEntity(
                     communicationParentId = parentId,
                     text = body,
+                    authorId = "self",      // TODO
                     authorName = authorName,
+                    authorImageUrl = authorImageUrl,
                     date = date
                 )
             )

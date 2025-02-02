@@ -48,7 +48,7 @@ fun ConversationIcon(
             )
         }
 
-        if (conversation.isFavorite && !allowFavoriteIndicator) {
+        if (conversation.isFavorite && allowFavoriteIndicator) {
             FavoriteIndicator(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -69,7 +69,7 @@ fun ChannelChatIcon(
     )
 }
 
-private fun getChannelIconImageVector(channelChat: ChannelChat): ImageVector {
+fun getChannelIconImageVector(channelChat: ChannelChat): ImageVector {
     if (channelChat.isArchived) {
         return Icons.Default.Archive
     }
