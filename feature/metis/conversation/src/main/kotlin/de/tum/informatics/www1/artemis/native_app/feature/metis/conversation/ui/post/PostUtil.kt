@@ -25,7 +25,7 @@ internal fun <T : IBasePost> shouldDisplayHeader(
     index: Int,
     post: T?,
     postCount: Int,
-    unreadPostsCount: Int? = null,
+    unreadPostsCount: Int? = null,  // TODO: index can just be 0
     order: DisplayPostOrder,
     getPost: (index: Int) -> T?
 ): Boolean {
@@ -40,6 +40,7 @@ internal fun <T : IBasePost> shouldDisplayHeader(
             DisplayPostOrder.REGULAR -> if (index - 1 >= 0) getPost(prevPostIndex) else null
         }
 
+        // TODO: refactor into two functions: isFirstUnreadPost() || isByDifferentAuthor() || isDeltaTimeBetweenPostsTooLarge()
         val firstUnreadPostIndex = when {
             unreadPostsCount == null -> null
             order == DisplayPostOrder.REVERSED -> unreadPostsCount - 1
