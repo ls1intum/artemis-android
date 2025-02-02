@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 import androidx.annotation.DrawableRes
 import de.tum.informatics.www1.artemis.native_app.core.common.R
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.MarkdownUrlUtil
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ArtemisDeeplink
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 
