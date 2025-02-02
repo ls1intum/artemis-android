@@ -10,7 +10,7 @@ sealed class ChatListItem {
         is PostChatListItem -> post.key
     }
 
-    data class PostChatListItem(val post: IStandalonePost) : ChatListItem()
+    data class PostChatListItem(val post: IStandalonePost, val index: Int = -1) : ChatListItem()
 
     data class DateDivider(val localDate: LocalDate) : ChatListItem()
 }

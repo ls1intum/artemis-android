@@ -260,6 +260,7 @@ private fun ChatList(
         ) { index ->
             if (posts.itemCount > unreadPostsCount && index == unreadPostsCount) {
                 UnreadPostsIndicator()
+                // TODO: How to deal with date dividers in the unread posts? They also increase the index
             }
 
             when (val chatListItem = posts[index]) {
@@ -273,6 +274,7 @@ private fun ChatList(
                 }
 
                 is ChatListItem.PostChatListItem? -> {
+                    Text(chatListItem?.index.toString())
                     val post = chatListItem?.post
 
                     val postActions = rememberPostActions(
@@ -322,6 +324,7 @@ private fun ChatList(
                             index = index,
                             post = post,
                             postCount = posts.itemCount,
+                            unreadPostsCount = unreadPostsCount,
                             order = DisplayPostOrder.REVERSED,
                             getPost = { getPostIndex ->
                                 when (val entry = posts.peek(getPostIndex)) {
@@ -334,6 +337,7 @@ private fun ChatList(
                                 index = index,
                                 post = post,
                                 postCount = posts.itemCount,
+                                unreadPostsCount = unreadPostsCount,
                                 order = DisplayPostOrder.REVERSED,
                                 getPost = { getPostIndex ->
                                     when (val entry = posts.peek(getPostIndex)) {
