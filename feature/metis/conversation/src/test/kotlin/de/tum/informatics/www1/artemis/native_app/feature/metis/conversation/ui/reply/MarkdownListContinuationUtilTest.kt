@@ -143,6 +143,109 @@ class MarkdownListContinuationUtilTest {
         assertEquals(14, finalValue.selection.end)
     }
 
+    @Test
+    fun `test WHEN revisiting an empty unordered list item THEN no repeated prefix is inserted`() {
+        // Initial text with an empty list item
+        val oldText = "- Test\n- \nNew text"
+
+        // Simulate the user placing the cursor in the empty list item and typing 'Text'
+        val newText = "- Test\n- Text\nNew text"
+        val cursor = newText.length  // Cursor should be after 'Text'
+
+        val newValue = TextFieldValue(
+            text = newText,
+            selection = TextRange(cursor, cursor)
+        )
+
+        val result = continueListIfApplicable(oldText, newValue)
+
+        // Expect the text to remain as is without inserting additional dashes
+        val expectedText = "- Test\n- Text\nNew text"
+
+        // Check text and cursor position
+        assertEquals(expectedText, result.text)
+        assertEquals(22, result.selection.start)  // Cursor at the end of 'Text'
+        assertEquals(22, result.selection.end)
+    }
+
+    @Test
+    fun `test WHEN revisiting an empty unordered list item after multiple newlines THEN no repeated prefix is inserted`() {
+        // Initial text: user created an empty list item and hit Enter twice to create extra newlines
+        val oldText = "- Test\n- \n\n"
+
+        // Simulate the user moving back to the empty list item and typing 'Hello'
+        val newText = "- Test\n- Hello\n\n"
+        val cursor = newText.length  // Cursor at the end of 'Hello'
+
+        val newValue = TextFieldValue(
+            text = newText,
+            selection = TextRange(cursor, cursor)
+        )
+
+        // Run the utility function
+        val result = continueListIfApplicable(oldText, newValue)
+
+        // Expect the text to remain as is without inserting repeated dashes
+        val expectedText = "- Test\n- Hello\n\n"
+
+        // Check text and cursor position
+        assertEquals(expectedText, result.text)
+        assertEquals(16, result.selection.start)  // Cursor at the end of 'Hello'
+        assertEquals(16, result.selection.end)
+    }
+
+    @Test
+    fun `test WHEN revisiting an empty ordered list item THEN no repeated prefix is inserted`() {
+        // Initial text with an empty ordered list item
+        val oldText = "1. Test\n2. \nMore text"
+
+        // Simulate the user placing the cursor in the empty list item and typing 'Text'
+        val newText = "1. Test\n2. Text\nMore text"
+        val cursor = newText.length  // Cursor should be after 'Text'
+
+        val newValue = TextFieldValue(
+            text = newText,
+            selection = TextRange(cursor, cursor)
+        )
+
+        // Run the utility function
+        val result = continueListIfApplicable(oldText, newValue)
+
+        // Expect the text to remain as is without inserting repeated prefixes
+        val expectedText = "1. Test\n2. Text\nMore text"
+
+        // Check text and cursor position
+        assertEquals(expectedText, result.text)
+        assertEquals(expectedText.length, result.selection.start)  // Cursor at the end of 'Text'
+        assertEquals(expectedText.length, result.selection.end)
+    }
+
+    @Test
+    fun `test WHEN revisiting an empty ordered list item after multiple newlines THEN no repeated prefix is inserted`() {
+        // Initial text with an empty ordered list item and extra newlines
+        val oldText = "1. Test\n2. \n\n"
+
+        // Simulate the user moving back to the empty list item and typing 'Hello'
+        val newText = "1. Test\n2. Hello\n\n"
+        val cursor = newText.length  // Cursor at the end of 'Hello'
+
+        val newValue = TextFieldValue(
+            text = newText,
+            selection = TextRange(cursor, cursor)
+        )
+
+        // Run the utility function
+        val result = continueListIfApplicable(oldText, newValue)
+
+        // Expect the text to remain as is without inserting repeated prefixes
+        val expectedText = "1. Test\n2. Hello\n\n"
+
+        // Check text and cursor position
+        assertEquals(expectedText, result.text)
+        assertEquals(expectedText.length, result.selection.start)  // Cursor at the end of 'Hello'
+        assertEquals(expectedText.length, result.selection.end)
+    }
+
 }
 
 
