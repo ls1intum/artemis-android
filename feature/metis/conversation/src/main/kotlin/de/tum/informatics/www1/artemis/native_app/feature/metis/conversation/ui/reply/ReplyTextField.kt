@@ -329,23 +329,18 @@ private fun CreateReplyUi(
                             onTextChanged = replyMode::onUpdate
                         )
                     },
-                    sendButton = {
+                    textFieldTrailingContent = {
                         SendButton(
                             modifier = Modifier,
                             currentTextFieldValue = currentTextFieldValue,
                             replyMode = replyMode,
                             onReply = onReply
                         )
-                    },
-                    topRightButton = {
+
                         if (replyMode is ReplyMode.EditMessage) {
-                            IconButton(onClick = replyMode.onCancelEditMessage) {
-                                Icon(
-                                    imageVector = Icons.Default.Cancel,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                )
-                            }
+                            CancelButton(
+                                onClick = replyMode.onCancelEditMessage
+                            )
                         }
                     },
                     formattingOptionButtons = {
@@ -527,6 +522,23 @@ private fun SendButton(
                 contentDescription = null
             )
         }
+    }
+}
+
+@Composable
+private fun CancelButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    IconButton(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Icon(
+            imageVector = Icons.Default.Cancel,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
     }
 }
 

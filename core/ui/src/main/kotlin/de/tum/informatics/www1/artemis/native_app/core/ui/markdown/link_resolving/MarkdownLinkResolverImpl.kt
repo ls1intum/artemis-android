@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.MarkdownUrlUtil
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -34,7 +35,10 @@ class MarkdownLinkResolverImpl(
         val (bottomSheetState, setBottomSheetState) = remember { mutableStateOf(LinkBottomSheetState.WEBVIEWSTATE) }
 
         if (bottomSheetLink != null) {
-            val filename = if (bottomSheetState == LinkBottomSheetState.PDFVIEWSTATE) bottomSheetLink.substringAfterLast("/") else null
+            val filename =
+                if (bottomSheetState == LinkBottomSheetState.PDFVIEWSTATE) MarkdownUrlUtil.decodeUrl(
+                    bottomSheetLink.substringAfterLast("/")
+                ) else null
             LinkBottomSheet(
                 modifier = Modifier.fillMaxSize(),
                 serverUrl = serverUrl,
