@@ -40,6 +40,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
+import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
+import de.tum.informatics.www1.artemis.native_app.core.model.upcomingExercises
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
@@ -74,6 +77,13 @@ fun CourseItem(
 
     val progressPercentFormatted = remember(progress) {
         DecimalFormat("0.##%").format(progress)
+    }
+
+    val nextExercise = courseWithScore.upcomingExercises().firstOrNull { exercise ->
+        val participation = exercise.latestParticipation
+        val submission = participation?.submissions?.firstOrNull() ?: return@firstOrNull true
+        val result = submission.results?.firstOrNull() ?: return@firstOrNull true
+        result.successful == false
     }
 
     //if (isCompact) {
@@ -120,8 +130,7 @@ fun CourseItem(
         ) {
             CourseItemHeader(
                 modifier = modifier,
-                course = courseWithScore.course,
-                compactCourseHeaderViewMode = CompactCourseHeaderViewMode.EXERCISE_AND_LECTURE_COUNT
+                course = courseWithScore.course
             )
 
             Row(
@@ -134,7 +143,8 @@ fun CourseItem(
                 CourseItemContent(
                     modifier = Modifier.weight(1f),
                     currentPointsFormatted = currentPointsFormatted,
-                    maxPointsFormatted = maxPointsFormatted
+                    maxPointsFormatted = maxPointsFormatted,
+                    nextExercise = nextExercise
                 )
 
                 if (currentPoints > 0f) {
@@ -196,8 +206,7 @@ fun CourseItem(
 @Composable
 private fun CourseItemHeader(
     modifier: Modifier,
-    course: Course,
-    compactCourseHeaderViewMode: CompactCourseHeaderViewMode
+    course: Course
 ) {
     val painter = getCourseIconPainter(course)
 
@@ -254,6 +263,7 @@ private fun CourseItemContent(
     modifier: Modifier,
     currentPointsFormatted: String,
     maxPointsFormatted: String,
+    nextExercise: Exercise?
 ) {
     Column(
         modifier = modifier,
@@ -285,12 +295,9 @@ private fun CourseItemContent(
             )
 
             Text(
-                text = stringResource(
-                    id = R.string.course_overview_course_progress_pts,
-                    currentPointsFormatted,
-                    maxPointsFormatted
-                ),
+                text = nextExercise?.title ?: stringResource(R.string.course_overview_course_no_exercise_planned),
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -347,25 +354,6 @@ private fun CircularCourseProgress(
             fontWeight = FontWeight.Normal
         )
     }
-}
-
-@Composable
-private fun CourseProgressText(
-    modifier: Modifier,
-    currentPointsFormatted: String,
-    maxPointsFormatted: String,
-    progressPercentFormatted: String
-) {
-    Text(
-        modifier = modifier,
-        text = stringResource(
-            id = R.string.course_overview_course_progress,
-            currentPointsFormatted,
-            maxPointsFormatted,
-            progressPercentFormatted
-        ),
-        fontSize = 14.sp
-    )
 }
 
 @Composable

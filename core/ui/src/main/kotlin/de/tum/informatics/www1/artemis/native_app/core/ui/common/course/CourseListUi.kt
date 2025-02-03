@@ -261,7 +261,7 @@ fun CourseExerciseAndLectureCount(
 }
 
 fun computeCourseColumnCount(windowSizeClass: WindowSizeClass): Int = when {
-    windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Expanded -> 3
+    windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Expanded -> 2
     windowSizeClass.widthSizeClass >= WindowWidthSizeClass.Medium -> 2
     else -> 1
 }
