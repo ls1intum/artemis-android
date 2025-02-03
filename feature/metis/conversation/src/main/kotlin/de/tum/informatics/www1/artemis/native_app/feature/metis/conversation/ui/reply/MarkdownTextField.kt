@@ -64,9 +64,7 @@ import kotlinx.coroutines.launch
 const val TEST_TAG_MARKDOWN_TEXTFIELD = "TEST_TAG_MARKDOWN_TEXTFIELD"
 val textFormattingOptionsHiddenOffsetY = 200.dp
 
-/**
- * @param sendButton composable centered vertically right to the text field.
- */
+
 @Composable
 internal fun MarkdownTextField(
     modifier: Modifier,
@@ -74,8 +72,7 @@ internal fun MarkdownTextField(
     hintText: AnnotatedString,
     filePickerLauncher: ManagedActivityResultLauncher<String, Uri?>,
     focusRequester: FocusRequester = remember { FocusRequester() },
-    sendButton: @Composable () -> Unit = {},
-    topRightButton: @Composable RowScope.() -> Unit = {},
+    textFieldTrailingContent: @Composable RowScope.() -> Unit = {},
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
@@ -119,9 +116,7 @@ internal fun MarkdownTextField(
                 }
             }
 
-            sendButton()
-
-            topRightButton()
+            textFieldTrailingContent()
         }
 
 
@@ -177,11 +172,11 @@ fun BasicMarkdownTextField(
     Box(
         modifier = modifier
             .heightIn(max = (localTextStyle.fontSize.value * maxVisibleLines).dp)
-            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scrollState)
     ) {
         BasicArtemisTextField(
             modifier = modifier
+                .fillMaxWidth()
                 .testTag(TEST_TAG_MARKDOWN_TEXTFIELD),
             backgroundColor = MaterialTheme.colorScheme.background,
             value = textFieldValue,

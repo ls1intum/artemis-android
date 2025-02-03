@@ -92,7 +92,7 @@ internal fun CreatePersonalConversationScreen(
                 }
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 8.dp),
+                    modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(pluralStringResource(R.plurals.create_personal_conversation_members, numberOfSelectedUsers, numberOfSelectedUsers))

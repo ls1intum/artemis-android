@@ -1,17 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.printToString
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
 import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
@@ -19,8 +14,8 @@ import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.CodeOfConductService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.service.impl.CodeOfConductServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductFacadeUi
-import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metistest.ConversationBaseTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -102,15 +97,13 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
                 coroutineContext = testDispatcher
             )
 
-        val testTagAccepted = "accepted"
+        var accepted = false
 
         composeTestRule.setContent {
             CodeOfConductFacadeUi(
                 modifier = Modifier.fillMaxSize(),
                 codeOfConductViewModel = viewModel,
-                codeOfConductAcceptedContent = {
-                    Box(modifier = Modifier.testTag(testTagAccepted))
-                }
+                onCodeOfConductAccepted = { accepted = true }
             )
         }
 
@@ -125,7 +118,8 @@ class CodeOfConductE2eTest : ConversationBaseTest() {
             .performScrollTo()
             .performClick()
 
-        composeTestRule
-            .waitUntilExactlyOneExists(hasTestTag(testTagAccepted), DefaultTimeoutMillis)
+        composeTestRule.waitForIdle()
+
+        assertTrue(accepted, "Code of conduct was not accepted.")
     }
 }

@@ -1,13 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.common
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -34,7 +33,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -47,7 +45,6 @@ fun BasicArtemisTextField(
     modifier: Modifier,
     value: TextFieldValue,
     hint: String,
-    leadingHintIcon: ImageVector? = null,
     maxLines: Int = Int.MAX_VALUE,
     focusRequester: FocusRequester? = null,
     hideHintOnFocus: Boolean = false,
@@ -72,29 +69,13 @@ fun BasicArtemisTextField(
                     .background(backgroundColor)
             ) {
                 if (value.text.isEmpty() && !hideHintOnFocus) {
-                    Row(
-                        modifier = Modifier.align(Alignment.CenterStart),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        leadingHintIcon?.let {
-                            Icon(
-                                imageVector = it,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
-                            )
-
-                            Spacer(modifier = Modifier.width(4.dp))
-                        }
-
-                        Text(
-                            text = hint,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = textStyle,
-                        )
-                    }
+                    Text(
+                        text = hint,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = textStyle,
+                    )
                 }
                 innerTextField()
             }
@@ -132,13 +113,23 @@ fun BasicSearchTextField(
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
+
             BasicArtemisTextField(
                 modifier = modifier
                     .weight(1f),
                 backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
                 hint = hint,
-                leadingHintIcon = Icons.Default.Search,
                 value = textFieldValue,
                 focusRequester = focusRequester,
                 onValueChange = { newValue ->
@@ -163,14 +154,14 @@ fun BasicSearchTextField(
                     onClick = { updateQuery("") },
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.background)
+                        .background(MaterialTheme.colorScheme.primary)
                         .align(Alignment.CenterVertically)
-                        .size(24.dp)
+                        .size(20.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.surfaceContainer,
                         modifier = Modifier.size(18.dp)
                     )
                 }

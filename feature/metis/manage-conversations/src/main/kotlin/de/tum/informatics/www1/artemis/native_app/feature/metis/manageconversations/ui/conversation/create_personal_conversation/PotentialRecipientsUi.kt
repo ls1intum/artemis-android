@@ -126,6 +126,7 @@ private fun PotentialRecipientsList(
                 items(recipients) { user ->
                     CourseUserListItem(
                         modifier = Modifier
+                            .animateItem()
                             .testTag(testTagForPotentialRecipient(user.username.orEmpty())),
                         user = user,
                         trailingContent = {

@@ -29,46 +29,18 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptionsBuilder
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.JobAnimatedFloatingActionButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.conversationNavGraphBuilderExtension
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.member_selection.MemberSelection
 import kotlinx.coroutines.Deferred
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 internal const val TEST_TAG_ADD_MEMBERS_BUTTON = "add members to conversation button"
-
-fun NavController.navigateToAddMembersScreen(
-    courseId: Long,
-    conversationId: Long,
-    builder: NavOptionsBuilder.() -> Unit
-) {
-    navigate("course/$courseId/conversations/$conversationId/settings/add_members", builder)
-}
-
-fun NavGraphBuilder.conversationAddMembersScreen(
-    onNavigateBack: () -> Unit
-) {
-    conversationNavGraphBuilderExtension(
-        route = "course/{courseId}/conversations/{conversationId}/settings/add_members",
-        deepLink = "artemis://courses/{courseId}/conversations/{conversationId}/settings/add_members"
-    ) { courseId, conversationId ->
-        ConversationAddMembersScreen(
-            modifier = Modifier.fillMaxSize(),
-            courseId = courseId,
-            conversationId = conversationId,
-            onNavigateBack = onNavigateBack
-        )
-    }
-}
 
 @Composable
 fun ConversationAddMembersScreen(
@@ -135,7 +107,7 @@ internal fun ConversationAddMembersScreen(
                 }
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 8.dp),
+                    modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
