@@ -86,6 +86,78 @@ fun Modifier.computeCourseItemModifier(isCompact: Boolean): Modifier {
     }
 }
 
+/**
+ * Displays the cource icon on left, with the title and the description in a column on the right to it.
+ */
+//@Composable
+//fun CompactCourseItemHeader(
+//    modifier: Modifier,
+//    course: Course,
+//    compactCourseHeaderViewMode: CompactCourseHeaderViewMode,
+//    onClick: () -> Unit = {},
+//    content: @Composable ColumnScope.() -> Unit
+//) {
+//    val painter = getCourseIconPainter(course)
+//
+//    val courseColor: Color? = remember {
+//        try {
+//            course.color?.toColorInt()?.let { Color(it) }
+//        } catch (e: IllegalArgumentException) {
+//            null
+//        }
+//    }
+//
+//    Card(
+//        modifier = modifier,
+//        onClick = onClick
+//    ) {
+//        Column(
+//            modifier = Modifier.fillMaxWidth()
+//        ) {
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .let {
+//                        if (courseColor != null) {
+//                            it.background(courseColor)
+//                        } else it
+//                    },
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Image(
+//                    modifier = Modifier
+//                        .size(headerHeight)
+//                        .clip(CircleShape),
+//                    painter = painter,
+//                    contentDescription = null
+//                )
+//
+//                AutoResizeText(
+//                    text = course.title,
+//                    modifier = Modifier
+//                        .fillMaxWidth(),
+//                    fontSizeRange = FontSizeRange(min = 14.sp, max = 22.sp),
+//                    fontWeight = FontWeight.Bold,
+//                    maxLines = 2
+//                )
+//            }
+//
+//            content()
+//        }
+//    }
+//}
+
+//@Composable
+//private fun getCourseIconPainter(
+//    course: Course,
+//): Painter {
+//    return if (course.courseIconPath != null) {
+//        LocalArtemisImageProvider.current.rememberArtemisAsyncImagePainter(
+//            imagePath = course.courseIconPath.orEmpty()
+//        )
+//    } else rememberVectorPainter(image = Icons.Default.QuestionMark)
+//}
+
 @Composable
 fun ExpandedCourseItemHeader(
     modifier: Modifier,
