@@ -25,7 +25,7 @@ object Spacings {
     }
 
     object CourseItem {
-        val height = 236.dp
+        val height = 250.dp
         val headerHeight = 70.dp
     }
 

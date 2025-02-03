@@ -128,13 +128,14 @@ fun CourseItem(
             modifier = Modifier.fillMaxWidth()
         ) {
             CourseItemHeader(
-                modifier = modifier,
+                modifier = Modifier,
                 course = courseWithScore.course
             )
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .weight(1f)
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -209,44 +210,56 @@ private fun CourseItemHeader(
 ) {
     val painter = getCourseIconPainter(course)
 
-    val courseColor: Color? = remember {
+    val courseColor: Color = remember {
         try {
-            course.color?.toColorInt()?.let { Color(it) }
+            Color(course.color?.toColorInt() ?: throw IllegalArgumentException())
         } catch (e: IllegalArgumentException) {
-            null
+            CourseColors.artemisDefaultColor
         }
     }
 
-    val itemModifier = Modifier
+    val courseImageModifier = Modifier
+        .padding(start = 16.dp)
         .padding(vertical = 8.dp)
+        .clip(CircleShape)
+        .size(Spacings.CourseItem.headerHeight)
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .heightIn(min = Spacings.CourseItem.headerHeight)
-            .let {
-                if (courseColor != null) {
-                    it.background(courseColor)
-                } else it
-            },
+            .background(courseColor),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        painter?.let {
+        if (painter != null) {
             Image(
-                modifier = itemModifier
-                    .padding(start = 16.dp)
-                    .clip(CircleShape)
-                    .size(Spacings.CourseItem.headerHeight),
+                modifier = courseImageModifier,
                 painter = painter,
                 contentScale = ContentScale.FillBounds,
                 contentDescription = null
             )
+        } else {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .padding(start = 16.dp)
+                    .size(Spacings.CourseItem.headerHeight)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Text(
+                    modifier = Modifier.align(Alignment.Center),
+                    text = course.title.first().toString(),
+                    fontSize = 24.sp,
+                )
+            }
         }
 
         AutoResizeText(
-            modifier = itemModifier
+            modifier = Modifier
                 .fillMaxWidth()
+                .padding(vertical = 8.dp)
                 .padding(end = 16.dp),
             text = course.title,
             color = Color.White,
@@ -323,7 +336,7 @@ private fun CircularCourseProgress(
                 startAngle = -90f + 360f * progress,
                 sweepAngle = 360f * (1f - progress),
                 useCenter = false,
-                style = Stroke(width = progressBarWidth,)
+                style = Stroke(width = progressBarWidth)
             )
 
             drawArc(
@@ -331,7 +344,7 @@ private fun CircularCourseProgress(
                 startAngle = -90f,
                 sweepAngle = 360f * progress,
                 useCenter = false,
-                style = Stroke(width = progressBarWidth,)
+                style = Stroke(width = progressBarWidth)
             )
         }
 

@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -24,8 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProvideTextStyle
-import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -35,15 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
-import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
@@ -137,17 +131,6 @@ fun CourseItemGrid(
 //    }
 //}
 
-//@Composable
-//private fun getCourseIconPainter(
-//    course: Course,
-//): Painter {
-//    return if (course.courseIconPath != null) {
-//        LocalArtemisImageProvider.current.rememberArtemisAsyncImagePainter(
-//            imagePath = course.courseIconPath.orEmpty()
-//        )
-//    } else rememberVectorPainter(image = Icons.Default.QuestionMark)
-//}
-
 @Composable
 fun ExpandedCourseItemHeader(
     modifier: Modifier,
@@ -213,40 +196,6 @@ fun ExpandedCourseItemHeader(
         }
 
         content()
-    }
-}
-
-/**
- * Text about the amount of exercises and lectures the course has.
- */
-@Composable
-fun CourseExerciseAndLectureCount(
-    modifier: Modifier,
-    textStyle: TextStyle,
-    exerciseCount: Int,
-    lectureCount: Int,
-    alignment: Alignment.Horizontal = Alignment.Start
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(0.dp),
-        horizontalAlignment = alignment
-    ) {
-        ProvideTextStyle(value = textStyle) {
-            Text(
-                text = stringResource(
-                    id = R.string.course_header_exercise_count,
-                    exerciseCount
-                )
-            )
-
-            Text(
-                text = stringResource(
-                    id = R.string.course_header_lecture_count,
-                    lectureCount
-                )
-            )
-        }
     }
 }
 

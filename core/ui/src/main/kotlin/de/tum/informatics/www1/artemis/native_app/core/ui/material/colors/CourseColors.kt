@@ -4,6 +4,9 @@ import androidx.compose.ui.graphics.Color
 
 object CourseColors {
 
+    val artemisDefaultColor: Color
+        get() = Color(0xFF3E8ACC)
+
     object CircularCourseProgress {
         val circle: Color
             get() = Color(0xffdc3545)
