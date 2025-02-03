@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.WifiOff
@@ -46,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.endOfPagePadding
@@ -95,6 +97,7 @@ fun ConversationOverviewBody(
 ) {
     var showCodeOfConduct by rememberSaveable { mutableStateOf(false) }
     val conversationCollectionsDataState: DataState<ConversationCollections> by viewModel.conversations.collectAsState()
+    val isDisplayingErrorDialog by viewModel.isDisplayingErrorDialog.collectAsState()
 
     val isConnected by viewModel.isConnected.collectAsState()
 
@@ -186,7 +189,8 @@ fun ConversationOverviewBody(
             canCreateChannel = canCreateChannel,
             onCreateChat = onRequestCreatePersonalConversation,
             onBrowseChannels = onRequestBrowseChannel,
-            onCreateChannel = onRequestAddChannel
+            onCreateChannel = onRequestAddChannel,
+            onMarkAllAsRead = viewModel::markAllConversationsAsRead
         )
     }
 
@@ -206,6 +210,17 @@ fun ConversationOverviewBody(
             )
         }
     }
+
+    if (isDisplayingErrorDialog) {
+        TextAlertDialog(
+            title = stringResource(id = R.string.mark_all_messages_as_read_failed_title),
+            text = stringResource(id = R.string.mark_all_messages_as_read_failed_message),
+            confirmButtonText = stringResource(id = R.string.mark_all_messages_as_read_failed_positive),
+            dismissButtonText = null,
+            onPressPositiveButton = { viewModel.dismissErrorDialog() },
+            onDismissRequest = { viewModel.dismissErrorDialog() }
+        )
+    }
 }
 
 @Composable
@@ -214,7 +229,8 @@ fun ConversationFabWithDropdownMenu(
     canCreateChannel: Boolean,
     onCreateChat: () -> Unit,
     onBrowseChannels: () -> Unit,
-    onCreateChannel: () -> Unit
+    onCreateChannel: () -> Unit,
+    onMarkAllAsRead: () -> Unit
 ) {
     var showDropdownMenu by remember { mutableStateOf(false) }
 
@@ -276,6 +292,16 @@ fun ConversationFabWithDropdownMenu(
                         }
                     )
                 }
+                DropdownMenuItem(
+                    onClick = {
+                        showDropdownMenu = false
+                        onMarkAllAsRead()
+                    },
+                    text = { Text(stringResource(id = R.string.mark_all_messages_as_read)) },
+                    leadingIcon = {
+                        Icon(imageVector = Icons.Default.Checklist, contentDescription = null)
+                    }
+                )
             }
         }
     }
