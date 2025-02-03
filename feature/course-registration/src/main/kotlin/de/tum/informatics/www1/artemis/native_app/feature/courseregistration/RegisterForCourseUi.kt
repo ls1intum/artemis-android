@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -55,7 +56,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.ExpandedCourseItemHeader
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseColumnCount
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseItemModifier
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
@@ -205,7 +205,9 @@ private fun RegisterForCourseContent(
         val columnCount = computeCourseColumnCount(windowSizeClass)
         val isCompact = windowSizeClass.widthSizeClass <= WindowWidthSizeClass.Compact
         val courseItemModifier = Modifier
-            .computeCourseItemModifier(isCompact = isCompact)
+            .fillMaxWidth()
+            .height(Spacings.CourseItem.height)
+            //.computeCourseItemModifier(isCompact = isCompact)
 
         if(data.isEmpty()) {
             Column(

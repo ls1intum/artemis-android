@@ -24,6 +24,10 @@ object Spacings {
         val innerSpacing = 8.dp
     }
 
+    object CourseItem {
+        val height = 236.dp
+        val headerHeight = 70.dp
+    }
 
     /**
      * Calculate the padding for the bottom of the screen, considering the navigation bar height.

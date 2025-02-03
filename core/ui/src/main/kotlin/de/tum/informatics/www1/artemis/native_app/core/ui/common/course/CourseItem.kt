@@ -44,14 +44,13 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.upcomingExercises
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.CoursePointsDecimalFormat
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.CourseColors
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import java.text.DecimalFormat
-
-private val headerHeight = 70.dp
 
 /**
  * Displays course icon, title and description in a Material Design Card.
@@ -150,7 +149,7 @@ fun CourseItem(
                 if (currentPoints > 0f) {
                     Box(
                         modifier = Modifier
-                            .weight(0.6f)
+                            .weight(0.5f)
                             .aspectRatio(1f)
                     ) {
                         CircularCourseProgress(
@@ -224,7 +223,7 @@ private fun CourseItemHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = headerHeight)
+            .heightIn(min = Spacings.CourseItem.headerHeight)
             .let {
                 if (courseColor != null) {
                     it.background(courseColor)
@@ -238,7 +237,7 @@ private fun CourseItemHeader(
                 modifier = itemModifier
                     .padding(start = 16.dp)
                     .clip(CircleShape)
-                    .size(headerHeight),
+                    .size(Spacings.CourseItem.headerHeight),
                 painter = painter,
                 contentScale = ContentScale.FillBounds,
                 contentDescription = null
@@ -297,7 +296,7 @@ private fun CourseItemContent(
             Text(
                 text = nextExercise?.title ?: stringResource(R.string.course_overview_course_no_exercise_planned),
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary,
+                color = if (nextExercise == null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
         }

@@ -49,8 +49,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 
-private val headerHeight = 80.dp
-
 @Composable
 fun CourseItemGrid(
     modifier: Modifier,
@@ -61,7 +59,9 @@ fun CourseItemGrid(
     val columnCount = computeCourseColumnCount(windowSizeClass)
 
     val isCompact = windowSizeClass.widthSizeClass <= WindowWidthSizeClass.Compact
-    val courseItemModifier = Modifier.computeCourseItemModifier(isCompact)
+    val courseItemModifier = Modifier
+        .height(Spacings.CourseItem.height)
+        .fillMaxWidth()
 
     LazyVerticalGrid(
         modifier = modifier.consumeWindowInsets(WindowInsets.navigationBars),
@@ -73,16 +73,6 @@ fun CourseItemGrid(
         items(courses, key = { it.course.id ?: 0L }) { course ->
             courseItem(course, courseItemModifier, isCompact)
         }
-    }
-
-}
-
-fun Modifier.computeCourseItemModifier(isCompact: Boolean): Modifier {
-    return if (isCompact) {
-        fillMaxWidth()
-    } else {
-        fillMaxWidth()
-            .aspectRatio(1f)
     }
 }
 
