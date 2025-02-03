@@ -215,7 +215,7 @@ private fun TextView.applyStyleAndColor(
     )
 
     setTextColor(textColor.toArgb())
-    setTextSize(TypedValue.COMPLEX_UNIT_DIP, mergedStyle.fontSize.value)
+    setTextSize(TypedValue.COMPLEX_UNIT_SP, mergedStyle.fontSize.value)
 
     textAlign?.let { align ->
         textAlignment = when (align) {

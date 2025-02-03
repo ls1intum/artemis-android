@@ -28,7 +28,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -56,6 +58,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -377,7 +380,7 @@ private fun PostHeadline(
             HeadlineAuthorInfo(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(postHeadlineHeight),
+                    .wrapContentHeight(),
                 authorName = authorName,
                 authorRole = authorRole,
                 creationDate = creationDate,
@@ -507,10 +510,12 @@ private fun HeadlineProfilePicture(
     displayImage: Boolean = true,
     isGrayscale: Boolean = false
 ) {
-    val size = postHeadlineHeight
+    val fontScale = LocalDensity.current.fontScale
+    val scaledSizeDp = postHeadlineHeight * fontScale
+
     Box(
         modifier = Modifier
-            .size(size)
+            .sizeIn(minWidth = scaledSizeDp, minHeight = scaledSizeDp)
             .applyGrayscale(isGrayscale)
     ) {
         if (!displayImage) {
@@ -518,7 +523,7 @@ private fun HeadlineProfilePicture(
         }
 
         ProfilePictureWithDialog(
-            modifier = Modifier.size(size),
+            modifier = Modifier.sizeIn(minWidth = scaledSizeDp, minHeight = scaledSizeDp),
             userId = userId,
             userName = userName,
             userRole = userRole,
