@@ -219,7 +219,6 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
 
         composeTestRule.assertPostReactionVisibility(
             emojiId = reactionToView,
-            assertReactionVisibility = false,
             testTag = getTestTagForReactionAuthor(expectedReactionEmojiId, expectedReactionId, expectedReactionUsername)
         )
     }
@@ -235,8 +234,7 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         val expectedHiddenReactionEmojiId = reactions.first().emojiId
 
         composeTestRule.assertPostReactionVisibility(
-            reactionToView,
-            assertReactionVisibility = false,
+            emojiId = reactionToView,
             testTag = getTestTagForReactionAuthor(expectedHiddenReactionEmojiId, expectedHiddenReactionId, expectedHiddenUsername),
             isVisible = false
         )
@@ -264,7 +262,6 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
 
     private fun ComposeTestRule.assertPostReactionVisibility(
         emojiId: String,
-        assertReactionVisibility: Boolean = true,
         isVisible: Boolean = true,
         testTag: String = "",
     ) {
@@ -274,11 +271,7 @@ class ConversationBottomSheetUiTest : BaseChatUITest() {
         onNodeWithTag(TEST_TAG_POST_REACTIONS_BOTTOM_SHEET)
             .assertIsDisplayed()
 
-        val visibleNode = if (assertReactionVisibility) {
-            onNodeWithTag(testTag)
-        } else {
-            onNodeWithTag(testTag)
-        }
+        val visibleNode = onNodeWithTag(testTag)
 
         if (isVisible) {
             visibleNode.assertExists().assertIsDisplayed()

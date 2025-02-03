@@ -53,7 +53,7 @@ sealed class EmojiSelection {
     data class SINGLE(val emojiId: String) : EmojiSelection()
 }
 
-data class ReactionAuthor(
+private data class ReactionAuthor(
     val id: Long,
     val username: String,
     val emojiId: String
@@ -167,7 +167,7 @@ private fun Chip(
 
     Box(
         modifier = modifier
-            .clip(CircleShape)
+            .clip(shape)
             .background(color = backgroundColor, shape)
             .padding(horizontal = 8.dp, vertical = 5.dp)
             .clickable {
