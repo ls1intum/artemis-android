@@ -11,12 +11,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -36,13 +34,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -53,7 +48,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 
 private val headerHeight = 80.dp
 
@@ -72,8 +66,8 @@ fun CourseItemGrid(
     LazyVerticalGrid(
         modifier = modifier.consumeWindowInsets(WindowInsets.navigationBars),
         columns = GridCells.Fixed(columnCount),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = Spacings.calculateEndOfPagePaddingValues()
     ) {
         items(courses, key = { it.course.id ?: 0L }) { course ->
@@ -90,92 +84,6 @@ fun Modifier.computeCourseItemModifier(isCompact: Boolean): Modifier {
         fillMaxWidth()
             .aspectRatio(1f)
     }
-}
-
-/**
- * Displays the cource icon on left, with the title and the description in a column on the right to it.
- */
-@Composable
-fun CompactCourseItemHeader(
-    modifier: Modifier,
-    course: Course,
-    compactCourseHeaderViewMode: CompactCourseHeaderViewMode,
-    onClick: () -> Unit = {},
-    content: @Composable ColumnScope.() -> Unit
-) {
-    val painter = getCourseIconPainter(course)
-
-    Card(modifier = modifier, onClick = onClick) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Image(
-                    modifier = Modifier
-                        .size(headerHeight),
-                    painter = painter,
-                    contentDescription = null
-                )
-
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .padding(horizontal = 8.dp)
-                ) {
-                    AutoResizeText(
-                        text = course.title,
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        fontSizeRange = FontSizeRange(min = 14.sp, max = 22.sp),
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 2
-                    )
-
-                    when (compactCourseHeaderViewMode) {
-                        CompactCourseHeaderViewMode.DESCRIPTION -> {
-                            Text(
-                                text = course.description,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f),
-                                color = MaterialTheme.colorScheme.secondary,
-                                fontSize = 12.sp,
-                                overflow = TextOverflow.Ellipsis,
-                                lineHeight = 14.sp,
-                                maxLines = 3
-                            )
-                        }
-
-                        CompactCourseHeaderViewMode.EXERCISE_AND_LECTURE_COUNT -> {
-                            CourseExerciseAndLectureCount(
-                                modifier = Modifier.fillMaxWidth(),
-                                exerciseCount = course.exercises.size,
-                                lectureCount = course.lectures.size,
-                                textStyle = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-                }
-            }
-
-            content()
-        }
-    }
-}
-
-@Composable
-private fun getCourseIconPainter(
-    course: Course,
-): Painter {
-    return if (course.courseIconPath != null) {
-        LocalArtemisImageProvider.current.rememberArtemisAsyncImagePainter(
-            imagePath = course.courseIconPath.orEmpty()
-        )
-    } else rememberVectorPainter(image = Icons.Default.QuestionMark)
 }
 
 @Composable
@@ -219,7 +127,7 @@ fun ExpandedCourseItemHeader(
                         modifier = Modifier
                             .aspectRatio(1f)
                             .clip(CircleShape),
-                        painter = courseIconPainter,
+                        painter = courseIconPainter ?: rememberVectorPainter(image = Icons.Default.QuestionMark),
                         contentDescription = null
                     )
                 }

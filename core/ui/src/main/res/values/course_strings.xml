@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--  The placeholders are digits, but are supplied as strings, as the number formatting is handled in code.  -->
+    <string name="course_overview_course_progress">%1$sP/%2$sP (%3$s)</string>
+    <string name="course_overview_course_progress_pts">%1$s / %2$s Points</string>
+    <string name="course_overview_course_progress_percentage">%1$s</string>
+    <string name="course_overview_course_no_score_available">No statistics available</string>
+    <string name="course_overview_course_score">Score</string>
+    <string name="course_overview_course_next_exercise">Next Exercise</string>
+    <string name="course_overview_course_no_exercise_planned">No exercise planned</string>
+
     <string name="course_header_exercise_count">Exercises: %1$d</string>
     <string name="course_header_lecture_count">Lectures: %1$d</string>
 </resources>

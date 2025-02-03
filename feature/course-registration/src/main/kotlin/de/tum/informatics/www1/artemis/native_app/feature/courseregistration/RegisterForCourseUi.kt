@@ -53,8 +53,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseHeaderViewMode
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseItemHeader
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.ExpandedCourseItemHeader
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseColumnCount
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseItemModifier
@@ -279,12 +277,12 @@ private fun RegistrableCourse(
     }
 
     if (isCompact) {
-        CompactCourseItemHeader(
-            modifier = modifier,
-            course = course,
-            content = content,
-            compactCourseHeaderViewMode = CompactCourseHeaderViewMode.DESCRIPTION
-        )
+//        CompactCourseItemHeader(
+//            modifier = modifier,
+//            course = course,
+//            content = content,
+//            compactCourseHeaderViewMode = CompactCourseHeaderViewMode.DESCRIPTION
+//        )
     } else {
         ExpandedCourseItemHeader(
             modifier = modifier,
