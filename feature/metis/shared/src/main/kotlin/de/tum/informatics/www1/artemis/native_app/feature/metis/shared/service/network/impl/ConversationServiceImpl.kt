@@ -513,6 +513,28 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         }
     }
 
+    override suspend fun markAllConversationsAsRead(
+        courseId: Long,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<Boolean> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments(
+                        "api",
+                        "courses",
+                        courseId.toString(),
+                        "channels",
+                        "mark-as-read"
+                    )
+                }
+                cookieAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }.status.isSuccess()
+        }
+    }
+
     private fun URLBuilder.appendConversationTypeWithId(
         conversation: Conversation,
         conversationId: Long
