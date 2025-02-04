@@ -594,7 +594,7 @@ private fun StandalonePostFooter(
                 ) {
                     Icon(
                         modifier = Modifier
-                            .size(emojiHeight)
+                            .sizeIn(minHeight = emojiHeight)
                             .padding(5.dp),
                         imageVector = Icons.Default.InsertEmoticon,
                         contentDescription = null,
@@ -678,7 +678,7 @@ private fun EmojiChip(
         modifier = modifier
             .background(color = backgroundColor, shape)
             .clip(shape)
-            .heightIn(max = emojiHeight)
+            .heightIn(min = emojiHeight)
             .clickable(onClick = onClick)
             .let {
                 if (selected) {
