@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -28,12 +30,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
@@ -43,22 +46,22 @@ import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.upcomingExercises
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.R
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.util.CourseUtil
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.CoursePointsDecimalFormat
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.CourseColors
-import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import java.text.DecimalFormat
 
 /**
- * Displays course icon, title and description in a Material Design Card.
+ * Displays course card with score and exercise information for the dashboard.
  */
 @Composable
 fun CourseItem(
     modifier: Modifier,
-    isCompact: Boolean,
     courseWithScore: CourseWithScore,
     onClick: () -> Unit
 ) {
@@ -73,7 +76,6 @@ fun CourseItem(
     }
 
     val progress = if (maxPoints == 0f) 0f else currentPoints / maxPoints
-
     val progressPercentFormatted = remember(progress) {
         DecimalFormat("0.##%").format(progress)
     }
@@ -84,39 +86,6 @@ fun CourseItem(
         val result = submission.results?.firstOrNull() ?: return@firstOrNull true
         result.successful == false
     }
-
-    //if (isCompact) {
-//        CompactCourseItemHeader(
-//            modifier = modifier,
-//            course = courseWithScore.course,
-//            onClick = onClick,
-//            compactCourseHeaderViewMode = CompactCourseHeaderViewMode.EXERCISE_AND_LECTURE_COUNT,
-//            content = {
-
-//                when (compactCourseHeaderViewMode) {
-//                    CompactCourseHeaderViewMode.DESCRIPTION -> {
-//                        Text(
-//                            text = course.description,
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .weight(1f),
-//                            color = MaterialTheme.colorScheme.secondary,
-//                            fontSize = 12.sp,
-//                            overflow = TextOverflow.Ellipsis,
-//                            lineHeight = 14.sp,
-//                            maxLines = 3
-//                        )
-//                    }
-//
-//                    CompactCourseHeaderViewMode.EXERCISE_AND_LECTURE_COUNT -> {
-//                        CourseExerciseAndLectureCount(
-//                            modifier = Modifier.fillMaxWidth(),
-//                            exerciseCount = course.exercises.size,
-//                            lectureCount = course.lectures.size,
-//                            textStyle = MaterialTheme.typography.bodyMedium
-//                        )
-//                    }
-//                }
 
     Card(
         modifier = modifier
@@ -144,7 +113,8 @@ fun CourseItem(
                     modifier = Modifier.weight(1f),
                     currentPointsFormatted = currentPointsFormatted,
                     maxPointsFormatted = maxPointsFormatted,
-                    nextExercise = nextExercise
+                    nextExercise = nextExercise,
+                    courseId = courseWithScore.course.id ?: 0L
                 )
 
                 if (currentPoints > 0f) {
@@ -165,50 +135,61 @@ fun CourseItem(
         }
     }
 }
-       // )
-//    } else {
-//        ExpandedCourseItemHeader(
-//            modifier = modifier,
-//            course = courseWithScore.course,
-//            onClick = onClick,
-//            content = {
-//                Box(
-//                    modifier = Modifier
-//                        .weight(1f)
-//                        .aspectRatio(1f)
-//                        .align(Alignment.CenterHorizontally)
-//                ) {
-//                    CircularCourseProgress(
-//                        modifier = Modifier
-//                            .fillMaxSize(0.8f)
-//                            .align(Alignment.Center),
-//                        progress = progress,
-//                        currentPointsFormatted = currentPointsFormatted,
-//                        maxPointsFormatted = maxPointsFormatted,
-//                        progressPercentFormatted = progressPercentFormatted
-//                    )
-//                }
-//
-//                CourseExerciseAndLectureCount(
-//                    modifier = Modifier
-//                        .align(Alignment.CenterHorizontally)
-//                        .padding(vertical = 8.dp),
-//                    exerciseCount = courseWithScore.course.exercises.size,
-//                    lectureCount = courseWithScore.course.lectures.size,
-//                    textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center),
-//                    alignment = Alignment.CenterHorizontally
-//                )
-//            },
-//            rightHeaderContent = { }
-//        )
-    //}
+
+/**
+ * Displays the course preview card for the registration screen.
+ */
+@Composable
+fun CourseItemPreview(
+    modifier: Modifier,
+    course: Course,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            CourseItemHeader(
+                modifier = Modifier,
+                course = course,
+                height = Spacings.CourseItem.previewHeaderHeight
+            )
+
+            if (course.description.isNotBlank()) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(vertical = 8.dp),
+                    text = course.description,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Button(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottom = 8.dp),
+                onClick = onClick
+            ) {
+                Text(text = stringResource(id = R.string.course_registration_sign_up))
+            }
+        }
+    }
+}
 
 @Composable
 private fun CourseItemHeader(
     modifier: Modifier,
-    course: Course
+    course: Course,
+    height: Dp = Spacings.CourseItem.headerHeight
 ) {
-    val painter = getCourseIconPainter(course)
+    val painter = CourseUtil.getCourseIconPainter(course)
 
     val courseColor: Color = remember {
         try {
@@ -222,12 +203,12 @@ private fun CourseItemHeader(
         .padding(start = 16.dp)
         .padding(vertical = 8.dp)
         .clip(CircleShape)
-        .size(Spacings.CourseItem.headerHeight)
+        .size(height)
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = Spacings.CourseItem.headerHeight)
+            .heightIn(min = height)
             .background(courseColor),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -244,7 +225,7 @@ private fun CourseItemHeader(
                 modifier = Modifier
                     .padding(vertical = 8.dp)
                     .padding(start = 16.dp)
-                    .size(Spacings.CourseItem.headerHeight)
+                    .size(height)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
@@ -275,8 +256,11 @@ private fun CourseItemContent(
     modifier: Modifier,
     currentPointsFormatted: String,
     maxPointsFormatted: String,
-    nextExercise: Exercise?
+    nextExercise: Exercise?,
+    courseId: Long
 ) {
+    val localLinkOpener = LocalLinkOpener.current
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -307,6 +291,13 @@ private fun CourseItemContent(
             )
 
             Text(
+                modifier = Modifier.let {
+                    if (nextExercise != null) it.clickable {
+                        val url = "artemis://courses/${courseId}/exercises/${nextExercise.id}"
+                        localLinkOpener.openLink(url)
+                    }
+                    else it
+                },
                 text = nextExercise?.title ?: stringResource(R.string.course_overview_course_no_exercise_planned),
                 style = MaterialTheme.typography.bodyLarge,
                 color = if (nextExercise == null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary,
@@ -366,15 +357,4 @@ private fun CircularCourseProgress(
             fontWeight = FontWeight.Normal
         )
     }
-}
-
-@Composable
-fun getCourseIconPainter(
-    course: Course,
-): Painter? {
-    return if (course.courseIconPath != null) {
-        LocalArtemisImageProvider.current.rememberArtemisAsyncImagePainter(
-            imagePath = course.courseIconPath.orEmpty()
-        )
-    } else null
 }

@@ -1,12 +1,24 @@
 package de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseItem
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseItemGrid
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.util.CourseUtil
+import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 
 /**
  * Displays a lazy list of all the courses supplied.
@@ -17,15 +29,26 @@ fun CourseList(
     courses: List<CourseWithScore>,
     onClickOnCourse: (Course) -> Unit
 ) {
-    CourseItemGrid(
-        modifier = modifier,
-        courses = courses,
-    ) { dashboardCourse, courseItemModifier, isCompact ->
-        CourseItem(
-            modifier = courseItemModifier.testTag(testTagForCourse(dashboardCourse.course.id!!)),
-            courseWithScore = dashboardCourse,
-            onClick = { onClickOnCourse(dashboardCourse.course) },
-            isCompact = isCompact
-        )
+    val windowSizeClass = getWindowSizeClass()
+    val columnCount = CourseUtil.computeCourseColumnCount(windowSizeClass)
+
+    val courseItemModifier = Modifier
+        .height(Spacings.CourseItem.height)
+        .fillMaxWidth()
+
+    LazyVerticalGrid(
+        modifier = modifier.consumeWindowInsets(WindowInsets.navigationBars),
+        columns = GridCells.Fixed(columnCount),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = Spacings.calculateEndOfPagePaddingValues()
+    ) {
+        items(courses, key = { it.course.id ?: 0L }) { course ->
+            CourseItem(
+                modifier = courseItemModifier.testTag(testTagForCourse(course.course.id!!)),
+                courseWithScore = course,
+                onClick = { onClickOnCourse(course.course) }
+            )
+        }
     }
 }

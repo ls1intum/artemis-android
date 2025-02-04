@@ -27,6 +27,7 @@ object Spacings {
     object CourseItem {
         val height = 250.dp
         val headerHeight = 70.dp
+        val previewHeaderHeight = 40.dp
     }
 
     /**

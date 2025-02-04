@@ -11,4 +11,6 @@
 
     <string name="course_header_exercise_count">Exercises: %1$d</string>
     <string name="course_header_lecture_count">Lectures: %1$d</string>
+
+    <string name="course_registration_sign_up">Enroll</string>
 </resources>
