@@ -106,7 +106,9 @@ class ConversationAddMemberSettingsE2eTest : ConversationBaseTest() {
         }
 
         newUsers.forEach { username ->
-            composeTestRule.onNodeWithTag(testTagForSelectedRecipient(username)).assertExists()
+            composeTestRule.onNodeWithTag(testTagForSelectedRecipient(username))
+                .performScrollTo()
+                .assertExists()
         }
 
         // Click on add button to add users.
