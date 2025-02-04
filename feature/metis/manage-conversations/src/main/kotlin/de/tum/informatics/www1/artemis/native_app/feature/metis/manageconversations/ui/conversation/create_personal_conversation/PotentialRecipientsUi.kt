@@ -7,12 +7,15 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardAlt
 import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material3.Card
@@ -67,7 +70,9 @@ internal fun PotentialRecipientsUi(
             onClickRetry = retryLoadPotentialRecipients
         ) { potentialRecipients ->
             PotentialRecipientsList(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding(),
                 recipients = potentialRecipients,
                 addRecipient = addRecipient,
                 isQueryTooShort = isQueryTooShort
@@ -82,30 +87,36 @@ private fun InclusionListUi(
     inclusionList: InclusionList,
     updateInclusionList: (InclusionList) -> Unit
 ) {
+    val chip: @Composable (Boolean, Int, () -> Unit) -> Unit = { selected, labelResId, onClick ->
+        FilterChip(
+            selected = selected,
+            onClick = onClick,
+            leadingIcon = {
+                if (selected) Icon(
+                    modifier = Modifier.size(18.dp),
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null
+                )
+            },
+            label = { Text(text = stringResource(id = labelResId)) }
+        )
+    }
+
     FlowRow(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        FilterChip(
-            selected = inclusionList.students,
-            onClick = {
-                updateInclusionList(inclusionList.copy(students = !inclusionList.students))
-            },
-            label = { Text(text = stringResource(id = R.string.conversation_member_selection_include_students)) }
-        )
+        chip(inclusionList.students, R.string.conversation_member_selection_include_students) {
+            updateInclusionList(inclusionList.copy(students = !inclusionList.students))
+        }
 
-        FilterChip(
-            selected = inclusionList.tutors,
-            onClick = {
-                updateInclusionList(inclusionList.copy(tutors = !inclusionList.tutors))
-            },
-            label = { Text(text = stringResource(id = R.string.conversation_member_selection_include_tutors)) }
-        )
+        chip(inclusionList.tutors, R.string.conversation_member_selection_include_tutors) {
+            updateInclusionList(inclusionList.copy(tutors = !inclusionList.tutors))
+        }
 
-        FilterChip(
-            selected = inclusionList.instructors,
-            onClick = {
-                updateInclusionList(inclusionList.copy(instructors = !inclusionList.instructors))
-            },
-            label = { Text(text = stringResource(id = R.string.conversation_member_selection_include_instructors)) }
-        )
+        chip(
+            inclusionList.instructors,
+            R.string.conversation_member_selection_include_instructors
+        ) {
+            updateInclusionList(inclusionList.copy(instructors = !inclusionList.instructors))
+        }
     }
 }
 
@@ -117,7 +128,14 @@ private fun PotentialRecipientsList(
     isQueryTooShort: Boolean
 ) {
     if (recipients.isNotEmpty()) {
-        Card {
+        Card(
+            shape = RoundedCornerShape(
+                topStart = 16.dp,
+                topEnd = 16.dp,
+                bottomStart = 0.dp,
+                bottomEnd = 0.dp
+            ),
+        ) {
             LazyColumn(
                 modifier = modifier
                     .fillMaxWidth(),

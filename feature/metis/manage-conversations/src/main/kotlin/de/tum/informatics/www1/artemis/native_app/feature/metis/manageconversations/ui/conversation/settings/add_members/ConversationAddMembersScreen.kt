@@ -131,9 +131,7 @@ internal fun ConversationAddMembersScreen(
         MemberSelection(
             modifier = Modifier
                 .fillMaxSize()
-                .imePadding()
                 .padding(top = paddingValues.calculateTopPadding())
-                .padding(bottom = paddingValues.calculateBottomPadding())
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                 .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
             viewModel = viewModel,

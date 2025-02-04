@@ -104,9 +104,7 @@ internal fun CreatePersonalConversationScreen(
         MemberSelection(
             modifier = Modifier
                 .fillMaxSize()
-                .imePadding()
                 .padding(top = padding.calculateTopPadding())
-                .padding(bottom = padding.calculateBottomPadding())
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                 .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
             viewModel = viewModel,
