@@ -47,7 +47,7 @@ fun `Dashboard - Exercise List`() {
                 serverUrl: String
             ): NetworkResponse<Dashboard> = NetworkResponse.Response(
                 Dashboard(
-                    courses = listOf(
+                    courses = mutableListOf(
                         CourseWithScore(
                             course = Course(
                                 id = 1,

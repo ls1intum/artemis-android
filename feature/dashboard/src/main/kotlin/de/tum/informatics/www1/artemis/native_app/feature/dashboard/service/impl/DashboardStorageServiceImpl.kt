@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardStorageService
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 
@@ -32,8 +32,8 @@ class DashboardStorageServiceImpl(private val context: Context) : DashboardStora
             val lastAccessedCourses =
                 data[getDashboardKey(serverHost, KEY_LAST_ACCESSED_COURSES)]
 
-            val decodedLastAccessedCourses =
-                Json.decodeFromString<MutableMap<Long, Long>>(lastAccessedCourses ?: "{}")
+            val decodedLastAccessedCourses: MutableMap<Long, Long> =
+                Json.decodeFromString(lastAccessedCourses ?: "{}")
             decodedLastAccessedCourses[courseId] = Clock.System.now().toEpochMilliseconds()
 
             if (decodedLastAccessedCourses.size > MAX_DISPLAYED_RECENTLY_ACCESSED_COURSES) {
@@ -44,17 +44,18 @@ class DashboardStorageServiceImpl(private val context: Context) : DashboardStora
             data[getDashboardKey(serverHost, KEY_LAST_ACCESSED_COURSES)] =
                 Json.encodeToString(decodedLastAccessedCourses)
         }
-
     }
 
     override suspend fun getLastAccesssedCourses(
         serverHost: String,
     ): Flow<Map<Long, Long>> {
-        val storedJson = context.dataStore.data.first()[getDashboardKey(
-            serverHost,
-            KEY_LAST_ACCESSED_COURSES
-        )] ?: "{}"
-        return Json.decodeFromString(storedJson)
+        return context.dataStore.data.map { preferences ->
+            val storedJson = preferences[getDashboardKey(
+                serverHost,
+                KEY_LAST_ACCESSED_COURSES
+            )] ?: "{}"
+            Json.decodeFromString(storedJson)
+        }
     }
 
     private fun getDashboardKey(serverHost: String, key: String): Preferences.Key<String> =

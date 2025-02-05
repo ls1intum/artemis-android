@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.Dash
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.plus
@@ -28,7 +29,7 @@ internal class CourseOverviewViewModel(
     private val dashboardService: DashboardService,
     private val dashboardStorageService: DashboardStorageService,
     accountService: AccountService,
-    serverConfigurationService: ServerConfigurationService,
+    private val serverConfigurationService: ServerConfigurationService,
     networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
@@ -53,18 +54,51 @@ internal class CourseOverviewViewModel(
                     authToken,
                     serverUrl
                 ).bind { dashboard ->
-                    dashboard.copy(courses = dashboard.courses.sortedBy { it.course.title })
+                    val sortedDashboard = dashboard.copy(courses = dashboard.courses.sortedBy { it.course.title }.toMutableList())
+                    sortCoursesInSections(serverUrl, sortedDashboard)
                 }
             }
         }
             //Store the loaded dashboard, so it is not loaded again when somebody collects this flow.
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
-
     /**
      * Request a reload of the dashboard.
      */
     fun requestReloadDashboard() {
         reloadDashboard.tryEmit(Unit)
+    }
+
+    suspend fun onCourseAccessed(courseId: Long) {
+        val serverUrl = serverConfigurationService.serverUrl.first()
+        dashboardStorageService.onCourseAccessed(
+            courseId = courseId,
+            serverHost = serverUrl
+        )
+    }
+
+    /**
+     * Checks for recently accessed courses and adds them to the recent courses section.
+     */
+    private suspend fun sortCoursesInSections(serverUrl: String, currentDashboard: Dashboard): Dashboard {
+        if (currentDashboard.courses.size <= 5) {
+            return currentDashboard
+        }
+
+        val recentlyAccessedCourseMap = dashboardStorageService.getLastAccesssedCourses(serverUrl).first()
+        val coursesToMove = currentDashboard.courses.filter { course ->
+            recentlyAccessedCourseMap.containsKey(course.course.id)
+        }.sortedBy { it.course.title }.toSet()
+
+        if (coursesToMove.isEmpty()) {
+            return currentDashboard
+        }
+
+        val updatedCourses = currentDashboard.courses - coursesToMove
+        val updatedRecentCourses = currentDashboard.recentCourses + coursesToMove
+        return currentDashboard.copy(
+            courses = updatedCourses.toMutableList(),
+            recentCourses = updatedRecentCourses.toMutableList()
+        )
     }
 }

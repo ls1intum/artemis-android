@@ -96,6 +96,7 @@ internal fun CoursesOverview(
     surveyHintService: SurveyHintService = koinInject()
 ) {
     val coursesDataState by viewModel.dashboard.collectAsState()
+    val scope = rememberCoroutineScope()
 
     val shouldDisplayBetaDialog by betaHintService.shouldShowBetaHint.collectAsState(initial = false)
     var displayBetaDialog by rememberSaveable { mutableStateOf(false) }
@@ -187,7 +188,13 @@ internal fun CoursesOverview(
                             .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                             .testTag(TEST_TAG_COURSE_LIST),
                         courses = dashboard.courses,
-                        onClickOnCourse = { course -> onViewCourse(course.id ?: 0L) }
+                        recentCourses = dashboard.recentCourses,
+                        onClickOnCourse = { course ->
+                            scope.launch{
+                                viewModel.onCourseAccessed(course.id ?: 0L)
+                            }
+                            onViewCourse(course.id ?: 0L)
+                        }
                     )
                 }
             }
@@ -195,8 +202,6 @@ internal fun CoursesOverview(
     }
 
     if (displayBetaDialog) {
-        val scope = rememberCoroutineScope()
-
         BetaHintDialog { dismissPermanently ->
             if (dismissPermanently) {
                 scope.launch {
