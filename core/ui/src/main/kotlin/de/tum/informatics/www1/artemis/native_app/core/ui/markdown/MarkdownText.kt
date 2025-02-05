@@ -36,7 +36,6 @@ import coil.request.ImageRequest
 import coil.size.Scale
 import de.tum.informatics.www1.artemis.native_app.core.common.R
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.TYPE_ICON_RESOURCE_PATH
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.LinkResolver
 import io.noties.markwon.Markwon
@@ -217,13 +216,11 @@ private fun TextView.applyStyleAndColor(
     setTextColor(textColor.toArgb())
     setTextSize(TypedValue.COMPLEX_UNIT_DIP, mergedStyle.fontSize.value)
 
-    textAlign?.let { align ->
-        textAlignment = when (align) {
-            TextAlign.Left, TextAlign.Start -> View.TEXT_ALIGNMENT_TEXT_START
-            TextAlign.Right, TextAlign.End -> View.TEXT_ALIGNMENT_TEXT_END
-            TextAlign.Center -> View.TEXT_ALIGNMENT_CENTER
-            else -> View.TEXT_ALIGNMENT_TEXT_START
-        }
+    textAlignment = when (textAlign) {
+        TextAlign.Left, TextAlign.Start -> View.TEXT_ALIGNMENT_TEXT_START
+        TextAlign.Right, TextAlign.End -> View.TEXT_ALIGNMENT_TEXT_END
+        TextAlign.Center -> View.TEXT_ALIGNMENT_CENTER
+        else -> View.TEXT_ALIGNMENT_TEXT_START
     }
 }
 
