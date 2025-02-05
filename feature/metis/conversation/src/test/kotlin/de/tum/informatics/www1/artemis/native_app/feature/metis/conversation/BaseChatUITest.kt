@@ -71,6 +71,23 @@ abstract class BaseChatUITest : BaseComposeTest() {
         )
     )
 
+    val reactions = listOf(
+        PostPojo.Reaction(
+            emojiId = "rocket",
+            authorId = currentUser.id,
+            username = currentUser.username ?: "author name",
+            id = 1,
+            creationDate = Clock.System.now()
+        ),
+        PostPojo.Reaction(
+            emojiId = "tada",
+            authorId = otherUser.id,
+            username = otherUser.username ?: "other author name",
+            id = 2,
+            creationDate = Clock.System.now()
+        )
+    )
+
     val simplePostContent = "Simple post content"
     val simpleAnswerContent = "Simple answer content"
 
@@ -138,7 +155,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
             courseWideContext = null,
             tags = emptyList(),
             answers = if (index == 0) answers else emptyList(),
-            reactions = emptyList(),
+            reactions = if (index == 0) reactions else emptyList(),
             displayPriority = DisplayPriority.NONE,
             isSaved = false
         )
@@ -212,8 +229,6 @@ abstract class BaseChatUITest : BaseComposeTest() {
                         isAbleToPin = isAbleToPin,
                         isAtLeastTutorInCourse = isAtLeastTutorInCourse,
                         hasModerationRights = hasModerationRights,),
-
-
                     serverUrl = "",
                     courseId = course.id!!,
                     state = rememberLazyListState(),
