@@ -595,9 +595,6 @@ private fun ConversationListItemDropdownMenu(
             },
             onClick = {
                 onToggleMarkAsFavourite()
-                if (conversation.isHidden) {
-                    onToggleHidden()
-                }
                 onDismissRequest()
             }
         )
@@ -619,9 +616,6 @@ private fun ConversationListItemDropdownMenu(
             },
             onClick = {
                 onToggleHidden()
-                if (conversation.isFavorite) {
-                    onToggleMarkAsFavourite()
-                }
                 onDismissRequest()
             }
         )
