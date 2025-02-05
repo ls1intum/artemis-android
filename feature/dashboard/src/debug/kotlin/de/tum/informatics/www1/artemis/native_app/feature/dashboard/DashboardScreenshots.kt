@@ -26,8 +26,12 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.test.ArtemisImageProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardService
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CourseOverviewViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CoursesOverview
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.datetime.Clock
 
 private const val IMAGE_MARS = "mars"
 private const val IMAGE_SATURN_5 = "saturn5"
@@ -85,6 +89,18 @@ fun `Dashboard - Exercise List`() {
                     )
                 )
             )
+        },
+        dashboardStorageService = object : DashboardStorageService{
+            override suspend fun onCourseAccessed(serverHost: String, courseId: Long) {}
+
+            override suspend fun getLastAccesssedCourses(serverHost: String): Flow<Map<Long, Long>> {
+                // return one course to show in the screenshot
+                return object : Flow<Map<Long, Long>> {
+                    override suspend fun collect(collector: FlowCollector<Map<Long, Long>>) {
+                        collector.emit(mapOf(2L to Clock.System.now().toEpochMilliseconds()))
+                    }
+                }
+            }
         },
         accountService = AccountServiceStub(),
         serverConfigurationService = ServerConfigurationServiceStub(),

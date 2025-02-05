@@ -11,6 +11,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardService
+import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardStorageService
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +26,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  */
 internal class CourseOverviewViewModel(
     private val dashboardService: DashboardService,
+    private val dashboardStorageService: DashboardStorageService,
     accountService: AccountService,
     serverConfigurationService: ServerConfigurationService,
     networkStatusProvider: NetworkStatusProvider,
