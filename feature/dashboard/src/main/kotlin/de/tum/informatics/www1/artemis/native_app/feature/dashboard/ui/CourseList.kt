@@ -64,7 +64,7 @@ fun CourseList(
             )
         }
 
-        if (courses.isNotEmpty()) {
+        if (courses.isNotEmpty() && recentCourses.isNotEmpty()) {
             item(span = { GridItemSpan(columnCount) }) {
                 SectionHeader(stringResource(R.string.course_overview_all_courses_section))
             }

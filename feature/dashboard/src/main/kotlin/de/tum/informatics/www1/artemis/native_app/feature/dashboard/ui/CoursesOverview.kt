@@ -106,6 +106,10 @@ internal fun CoursesOverview(
         if (shouldDisplayBetaDialog) displayBetaDialog = true
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.reorderCourses()
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {

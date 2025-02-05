@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
@@ -13,12 +12,10 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardService
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardStorageService
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.plus
+import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -28,9 +25,9 @@ import kotlin.coroutines.EmptyCoroutineContext
 internal class CourseOverviewViewModel(
     private val dashboardService: DashboardService,
     private val dashboardStorageService: DashboardStorageService,
-    accountService: AccountService,
+    private val accountService: AccountService,
     private val serverConfigurationService: ServerConfigurationService,
-    networkStatusProvider: NetworkStatusProvider,
+    private val networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 
@@ -39,28 +36,56 @@ internal class CourseOverviewViewModel(
      */
     private val reloadDashboard = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
+    private val _dashboardState = MutableStateFlow<DataState<Dashboard>>(DataState.Loading())
+    val dashboard: StateFlow<DataState<Dashboard>> get() = _dashboardState
+
+    // Load the dashboard on init and whenever the reloadDashboard flow emits a value.
+    init {
+        viewModelScope.launch {
+            reloadDashboard.collect {
+                loadDashboard()
+            }
+        }
+        loadDashboard()
+    }
+
     /**
      * Always emits the latest dashboard. Automatically updated when [requestReloadDashboard] is requested,
      * the login status changes or the server is updated.
      */
-    val dashboard: StateFlow<DataState<Dashboard>> =
-        flatMapLatest(
-            accountService.authToken,
-            serverConfigurationService.serverUrl,
-            reloadDashboard.onStart { emit(Unit) }
-        ) { authToken, serverUrl, _ ->
+    private fun loadDashboard() {
+        viewModelScope.launch {
+            val authToken = accountService.authToken.first()
+            val serverUrl = serverConfigurationService.serverUrl.first()
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                dashboardService.loadDashboard(
-                    authToken,
-                    serverUrl
-                ).bind { dashboard ->
-                    val sortedDashboard = dashboard.copy(courses = dashboard.courses.sortedBy { it.course.title }.toMutableList())
-                    sortCoursesInSections(serverUrl, sortedDashboard)
+                dashboardService.loadDashboard(authToken, serverUrl).bind { dashboard ->
+                    val sortedDashboard = dashboard.copy(
+                        courses = dashboard.courses.sortedBy { it.course.title }.toMutableList()
+                    )
+                    val finalDashboard = sortCoursesInSections(serverUrl, sortedDashboard)
+                    finalDashboard
                 }
+            }.collect {
+                _dashboardState.value = it
             }
         }
-            //Store the loaded dashboard, so it is not loaded again when somebody collects this flow.
-            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
+    }
+
+    fun reorderCourses() {
+        val currentState = _dashboardState.value
+
+        if (currentState is DataState.Success) {
+            val currentDashboard = currentState.data
+
+            viewModelScope.launch {
+                val finalDashboard = sortCoursesInSections(
+                    serverConfigurationService.serverUrl.first(),
+                    currentDashboard
+                )
+                _dashboardState.value = DataState.Success(finalDashboard)
+            }
+        }
+    }
 
     /**
      * Request a reload of the dashboard.
@@ -80,25 +105,34 @@ internal class CourseOverviewViewModel(
     /**
      * Checks for recently accessed courses and adds them to the recent courses section.
      */
-    private suspend fun sortCoursesInSections(serverUrl: String, currentDashboard: Dashboard): Dashboard {
+    private suspend fun sortCoursesInSections(
+        serverUrl: String,
+        currentDashboard: Dashboard
+    ): Dashboard {
         if (currentDashboard.courses.size <= 5) {
             return currentDashboard
         }
 
-        val recentlyAccessedCourseMap = dashboardStorageService.getLastAccesssedCourses(serverUrl).first()
+        val recentlyAccessedCourseMap =
+            dashboardStorageService.getLastAccesssedCourses(serverUrl).first()
+
         val coursesToMove = currentDashboard.courses.filter { course ->
             recentlyAccessedCourseMap.containsKey(course.course.id)
-        }.sortedBy { it.course.title }.toSet()
+        }.toSet()
+        val coursesToRemove = currentDashboard.recentCourses.filter { course ->
+            !recentlyAccessedCourseMap.containsKey(course.course.id)
+        }.toSet()
 
-        if (coursesToMove.isEmpty()) {
+        if (coursesToMove.isEmpty() && coursesToRemove.isEmpty()) {
             return currentDashboard
         }
 
-        val updatedCourses = currentDashboard.courses - coursesToMove
-        val updatedRecentCourses = currentDashboard.recentCourses + coursesToMove
+        val updatedCourses = currentDashboard.courses - coursesToMove + coursesToRemove
+        val updatedRecentCourses = currentDashboard.recentCourses - coursesToRemove + coursesToMove
         return currentDashboard.copy(
-            courses = updatedCourses.toMutableList(),
-            recentCourses = updatedRecentCourses.toMutableList()
+            courses = updatedCourses.sortedBy { it.course.title }.toSet().toMutableList(),
+            recentCourses = updatedRecentCourses.sortedBy { it.course.title }.toSet()
+                .toMutableList()
         )
     }
 }
