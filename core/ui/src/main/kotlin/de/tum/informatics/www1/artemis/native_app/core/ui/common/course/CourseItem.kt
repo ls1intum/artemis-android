@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -59,6 +60,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.util.Cou
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.CoursePointsDecimalFormat
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.CourseColors
 import java.text.DecimalFormat
+
+const val TEST_TAG_ENROLL_BUTTON = "TEST_TAG_ENROLL_BUTTON"
 
 /**
  * Displays course card with score and exercise information for the dashboard.
@@ -178,7 +181,8 @@ fun CourseItemPreview(
             Button(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(bottom = 8.dp),
+                    .padding(bottom = 8.dp)
+                    .testTag(TEST_TAG_ENROLL_BUTTON),
                 onClick = onClick
             ) {
                 Row(
