@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
 
 @Composable
 fun rememberPostArtemisMarkdownTransformer(

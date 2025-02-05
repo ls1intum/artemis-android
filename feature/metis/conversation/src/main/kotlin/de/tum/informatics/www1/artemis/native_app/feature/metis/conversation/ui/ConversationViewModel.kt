@@ -10,7 +10,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
@@ -33,6 +32,9 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Programmin
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.TextExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.UnknownExercise
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.PostArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.getExerciseTypeIconId
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
@@ -48,11 +50,12 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.ReplyTextStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ConversationChatListUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActionFlags
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteCategory
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteHint
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.AutoCompleteIcon
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.InitialReplyTextProvider
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.ReplyAutoCompleteHintProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHint
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHintCollection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteIcon
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.ReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.ConversationThreadUseCase
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisCrudAction
@@ -586,7 +589,7 @@ internal open class ConversationViewModel(
     override fun produceAutoCompleteHints(
         tagChar: Char,
         query: String
-    ): Flow<DataState<List<AutoCompleteCategory>>> = when (tagChar) {
+    ): Flow<DataState<List<AutoCompleteHintCollection>>> = when (tagChar) {
         '@' -> {
             produceUserMentionAutoCompleteHints(query)
         }
@@ -611,7 +614,7 @@ internal open class ConversationViewModel(
             }
         }
 
-    private fun produceUserMentionAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteCategory>>> =
+    private fun produceUserMentionAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> =
         flatMapLatest(
             accountService.authToken,
             serverConfigurationService.serverUrl
@@ -625,8 +628,8 @@ internal open class ConversationViewModel(
                         serverUrl = serverUrl
                     )
                     .bind { users ->
-                        AutoCompleteCategory(
-                            name = R.string.markdown_textfield_autocomplete_category_users,
+                        AutoCompleteHintCollection(
+                            type = AutoCompleteType.USERS,
                             items = users.map {
                                 AutoCompleteHint(
                                     it.name.orEmpty(),
@@ -640,7 +643,7 @@ internal open class ConversationViewModel(
             }
         }
 
-    private fun produceExerciseAndLectureAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteCategory>>> =
+    private fun produceExerciseAndLectureAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> =
         course.map { courseDataState ->
             courseDataState.bind { course ->
                 val exerciseAutoCompleteItems =
@@ -658,11 +661,13 @@ internal open class ConversationViewModel(
                             }
 
                             val exerciseTitle = exercise.title ?: return@mapNotNull null
+                            val exerciseId = exercise.id ?: return@mapNotNull null
+                            val link = ExerciseDeeplinks.ToExercise.markdownLink(courseId, exerciseId)
 
                             AutoCompleteHint(
                                 hint = exerciseTitle,
-                                replacementText = "[$exerciseTag]${exercise.title}(/courses/${metisContext.courseId}/exercises/${exercise.id})[/$exerciseTag]",
-                                id = "Exercise:${exercise.id ?: return@mapNotNull null}",
+                                replacementText = "[$exerciseTag]${exercise.title}($link)[/$exerciseTag]",
+                                id = "Exercise:$exerciseId",
                                 icon = AutoCompleteIcon.DrawableFromId(getExerciseTypeIconId(exercise))
                             )
                         }
@@ -672,27 +677,30 @@ internal open class ConversationViewModel(
                         .lectures
                         .filter { query in it.title }
                         .mapNotNull { lecture ->
+                            val lectureId = lecture.id ?: return@mapNotNull null
+                            val link = LectureDeeplinks.ToLecture.markdownLink(courseId, lectureId)
+
                             AutoCompleteHint(
                                 hint = lecture.title,
-                                replacementText = "[lecture]${lecture.title}(/courses/${metisContext.courseId}/lectures/${lecture.id})[/lecture]",
-                                id = "Lecture:${lecture.id ?: return@mapNotNull null}"
+                                replacementText = "[lecture]${lecture.title}($link)[/lecture]",
+                                id = "Lecture:$lectureId"
                             )
                         }
 
                 listOf(
-                    AutoCompleteCategory(
-                        name = R.string.markdown_textfield_autocomplete_category_exercises,
+                    AutoCompleteHintCollection(
+                        type = AutoCompleteType.EXERCISES,
                         items = exerciseAutoCompleteItems
                     ),
-                    AutoCompleteCategory(
-                        name = R.string.markdown_textfield_autocomplete_category_lectures,
+                    AutoCompleteHintCollection(
+                        type = AutoCompleteType.LECTURES,
                         items = lectureAutoCompleteItems
                     )
                 )
             }
         }
 
-    private fun produceConversationAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteCategory>>> =
+    private fun produceConversationAutoCompleteHints(query: String): Flow<DataState<List<AutoCompleteHintCollection>>> =
         conversations.map { conversationsDataState ->
             conversationsDataState.bind { conversations ->
                 val conversationAutoCompleteItems = conversations
@@ -708,8 +716,8 @@ internal open class ConversationViewModel(
                     }
 
                 listOf(
-                    AutoCompleteCategory(
-                        name = R.string.markdown_textfield_autocomplete_category_channels,
+                    AutoCompleteHintCollection(
+                        type = AutoCompleteType.CHANNELS,
                         items = conversationAutoCompleteItems
                     )
                 )
