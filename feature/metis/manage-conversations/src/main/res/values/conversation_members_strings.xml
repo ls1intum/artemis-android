@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="conversation_members_title">Members</string>
-    <string name="conversation_members_query_placeholder">Find members</string>
+    <string name="conversation_members_query_placeholder">Search users</string>
 
     <string name="conversation_members_loading">Loading conversation members…</string>
     <string name="conversation_members_failure">Something went wrong while loading conversation members.</string>
