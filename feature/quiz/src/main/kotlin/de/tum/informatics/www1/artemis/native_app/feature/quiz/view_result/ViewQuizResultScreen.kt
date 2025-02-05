@@ -7,14 +7,18 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.toRoute
@@ -73,25 +77,32 @@ internal fun ViewQuizResultScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(id = R.string.quiz_results_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateUp) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = null
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = viewModel::retryLoadExercise) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = null
-                        )
-                    }
-                }
-            )
+            Surface(
+                shadowElevation = 8.dp
+            ){
+                TopAppBar(
+                    title = { Text(text = stringResource(id = R.string.quiz_results_title)) },
+                    navigationIcon = {
+                        IconButton(onClick = onNavigateUp) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = null
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = viewModel::retryLoadExercise) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = null
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    )
+                )
+            }
         }
     ) { padding ->
         BasicDataStateUi(

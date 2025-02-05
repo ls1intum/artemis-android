@@ -15,9 +15,12 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -117,10 +120,17 @@ internal fun SavedPostsScreen (
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { TopBarTitle(status = status) },
-                navigationIcon = { NavigationBackButton(onNavigateBack) }
-            )
+            Surface(
+                shadowElevation = Spacings.AppBarElevation
+            ){
+                TopAppBar(
+                    title = { TopBarTitle(status = status) },
+                    navigationIcon = { NavigationBackButton(onNavigateBack) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
+                )
+            }
         }
     ) { paddingValues ->
         Column(
@@ -131,7 +141,9 @@ internal fun SavedPostsScreen (
         ) {
             if (status == SavedPostStatus.ARCHIVED || status == SavedPostStatus.COMPLETED) {
                 InfoMessageCard(
-                    modifier = Modifier.padding(bottom = 8.dp),
+                    modifier = Modifier
+                        .padding(top = Spacings.ScreenTopBarSpacing)
+                        .padding(bottom = 8.dp),
                     infoText = stringResource(R.string.saved_posts_removal_notice)
                 )
             }
@@ -189,7 +201,7 @@ private fun SavedPostsList(
         LazyColumn(
             modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = Spacings.calculateEndOfPagePaddingValues()
+            contentPadding = Spacings.calculateContentPaddingValues()
         ) {
             items(
                 items = savedPosts,

@@ -11,9 +11,12 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,12 +66,19 @@ internal fun CreatePersonalConversationScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(id = R.string.create_personal_conversation_title)) },
-                navigationIcon = {
-                    NavigationBackButton(onNavigateBack)
-                }
-            )
+            Surface(
+                shadowElevation = Spacings.AppBarElevation
+            ){
+                TopAppBar(
+                    title = { Text(text = stringResource(id = R.string.create_personal_conversation_title)) },
+                    navigationIcon = {
+                        NavigationBackButton(onNavigateBack)
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    )
+                )
+            }
         },
         floatingActionButton = {
             JobAnimatedFloatingActionButton(
@@ -91,7 +101,7 @@ internal fun CreatePersonalConversationScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .imePadding()
-                .padding(top = padding.calculateTopPadding())
+                .padding(top = padding.calculateTopPadding() + Spacings.ScreenTopBarSpacing)
                 .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             viewModel = viewModel

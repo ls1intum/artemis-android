@@ -28,8 +28,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -55,6 +57,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -183,80 +186,87 @@ fun ConversationChatListScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = {
-                    if (isSearchBarOpen) {
-                        LaunchedEffect(Unit) {
-                            searchBarFocusRequester.requestFocus()
-                        }
-
-                        BasicHintTextField(
-                            modifier = Modifier.focusRequester(searchBarFocusRequester),
-                            value = query,
-                            onValueChange = onUpdateQuery,
-                            hint = "",
-                            maxLines = 1,
-                            hintStyle = MaterialTheme.typography.bodyMedium
-                        )
-                    } else {
-                        EmptyDataStateUi(
-                            dataState = conversationDataState,
-                            otherwise = {
-                                Text("placeholder", Modifier.placeholder(true))
-                            }
-                        ) {
-                            ConversationTitle(
-                                conversation = it,
-                                onClick = onNavigateToSettings
-                            )
-                        }
-                    }
-                },
-                navigationIcon = {
-                    NavigationBackButton(onNavigateBack = {
+            Surface(
+                shadowElevation = Spacings.AppBarElevation
+            ){
+                TopAppBar(
+                    title = {
                         if (isSearchBarOpen) {
-                            closeSearch()
-                        } else {
-                            onNavigateBack()
-                        }
-                    })
-                },
-                actions = {
-                    if (!isSearchBarOpen) {
-                        if (BuildConfig.DEBUG) {
-                            ConversationDataStatusButton(
-                                dataStatus = conversationDataStatus,
-                                onRequestSoftReload = onRequestSoftReload
-                            )
-                        }
-
-                        IconButton(onClick = { isSearchBarOpen = true }) {
-                            Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                        }
-
-                        IconButton(
-                            onClick = {
-                                isInfoDropdownExpanded = hasInfoDropdown
-                                if (!hasInfoDropdown) {
-                                    onNavigateToSettings()
-                                }
+                            LaunchedEffect(Unit) {
+                                searchBarFocusRequester.requestFocus()
                             }
-                        ) {
-                            Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
 
-                            InfoDropdownMenu(
-                                isInfoDropdownExpanded = isInfoDropdownExpanded,
-                                hasExercise = hasExercise,
-                                hasLecture = hasLecture,
-                                courseId = courseId,
-                                conversation = if (conversation is ChannelChat) conversation else return@IconButton,
-                                onDismissRequest = { isInfoDropdownExpanded = false },
-                                onNavigateToSettings = onNavigateToSettings
+                            BasicHintTextField(
+                                modifier = Modifier.focusRequester(searchBarFocusRequester),
+                                value = query,
+                                onValueChange = onUpdateQuery,
+                                hint = "",
+                                maxLines = 1,
+                                hintStyle = MaterialTheme.typography.bodyMedium
                             )
+                        } else {
+                            EmptyDataStateUi(
+                                dataState = conversationDataState,
+                                otherwise = {
+                                    Text("placeholder", Modifier.placeholder(true))
+                                }
+                            ) {
+                                ConversationTitle(
+                                    conversation = it,
+                                    onClick = onNavigateToSettings
+                                )
+                            }
                         }
-                    }
-                }
-            )
+                    },
+                    navigationIcon = {
+                        NavigationBackButton(onNavigateBack = {
+                            if (isSearchBarOpen) {
+                                closeSearch()
+                            } else {
+                                onNavigateBack()
+                            }
+                        })
+                    },
+                    actions = {
+                        if (!isSearchBarOpen) {
+                            if (BuildConfig.DEBUG) {
+                                ConversationDataStatusButton(
+                                    dataStatus = conversationDataStatus,
+                                    onRequestSoftReload = onRequestSoftReload
+                                )
+                            }
+
+                            IconButton(onClick = { isSearchBarOpen = true }) {
+                                Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    isInfoDropdownExpanded = hasInfoDropdown
+                                    if (!hasInfoDropdown) {
+                                        onNavigateToSettings()
+                                    }
+                                }
+                            ) {
+                                Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
+
+                                InfoDropdownMenu(
+                                    isInfoDropdownExpanded = isInfoDropdownExpanded,
+                                    hasExercise = hasExercise,
+                                    hasLecture = hasLecture,
+                                    courseId = courseId,
+                                    conversation = if (conversation is ChannelChat) conversation else return@IconButton,
+                                    onDismissRequest = { isInfoDropdownExpanded = false },
+                                    onNavigateToSettings = onNavigateToSettings
+                                )
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    )
+                )
+            }
         },
         content = content
     )

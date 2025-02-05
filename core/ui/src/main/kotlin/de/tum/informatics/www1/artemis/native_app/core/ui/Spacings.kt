@@ -12,7 +12,9 @@ import androidx.compose.ui.unit.dp
 
 object Spacings {
     val ScreenHorizontalSpacing = 16.dp
+    val ScreenTopBarSpacing = ScreenHorizontalSpacing
     val EndOfScrollablePageSpacing = ScreenHorizontalSpacing
+    val AppBarElevation = 8.dp
 
     /**
      * The spacing between the FAB and the end of the screen, according to the M3 guidelines:
@@ -32,6 +34,16 @@ object Spacings {
     @Composable
     fun calculateEndOfPagePaddingValues() = PaddingValues(
         bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + EndOfScrollablePageSpacing
+    )
+
+    /**
+     * Calculates the bottom padding according to calculateEndOfPagePaddingValues.
+     * Adds the default ScreenTopBarSpacing to the top padding to add space between the top of the screen and the content.
+     */
+    @Composable
+    fun calculateContentPaddingValues() = PaddingValues(
+        top = ScreenTopBarSpacing,
+        bottom = calculateEndOfPagePaddingValues().calculateBottomPadding()
     )
 
     val BottomSheetContentPadding = PaddingValues(

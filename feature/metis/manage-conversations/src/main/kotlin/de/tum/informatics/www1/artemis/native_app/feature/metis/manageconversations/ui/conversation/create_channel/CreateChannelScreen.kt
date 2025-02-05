@@ -17,9 +17,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
@@ -82,14 +85,21 @@ internal fun CreateChannelScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = stringResource(id = R.string.create_channel_title))
-                },
-                navigationIcon = {
-                    NavigationBackButton(onNavigateBack)
-                }
-            )
+            Surface(
+                shadowElevation = Spacings.AppBarElevation
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(text = stringResource(id = R.string.create_channel_title))
+                    },
+                    navigationIcon = {
+                        NavigationBackButton(onNavigateBack)
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
+                )
+            }
         },
 
     ) { paddingValues ->

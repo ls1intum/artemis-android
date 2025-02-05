@@ -10,10 +10,13 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -71,29 +74,36 @@ internal fun ConversationAddMembersScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(id = R.string.conversation_add_members_title)) },
-                navigationIcon = {
-                    NavigationBackButton(
-                        imageVector = Icons.Default.Close,
-                        onNavigateBack = onNavigateBack
-                    )
-                },
-                actions = {
-                    if (addDeferred == null) {
-                        TextButton(
-                            onClick = {
-                                addDeferred = viewModel.addMembers()
-                            },
-                            enabled = canAdd
-                        ) {
-                            Text(text = stringResource(id = R.string.conversation_add_members_button_add_members))
+            Surface(
+                shadowElevation = Spacings.AppBarElevation
+            ){
+                TopAppBar(
+                    title = { Text(text = stringResource(id = R.string.conversation_add_members_title)) },
+                    navigationIcon = {
+                        NavigationBackButton(
+                            imageVector = Icons.Default.Close,
+                            onNavigateBack = onNavigateBack
+                        )
+                    },
+                    actions = {
+                        if (addDeferred == null) {
+                            TextButton(
+                                onClick = {
+                                    addDeferred = viewModel.addMembers()
+                                },
+                                enabled = canAdd
+                            ) {
+                                Text(text = stringResource(id = R.string.conversation_add_members_button_add_members))
+                            }
+                        } else {
+                            CircularProgressIndicator()
                         }
-                    } else {
-                        CircularProgressIndicator()
-                    }
-                }
-            )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    )
+                )
+            }
         }
     ) { paddingValues ->
         MemberSelection(

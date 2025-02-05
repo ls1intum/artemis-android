@@ -9,9 +9,12 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,6 +31,7 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.DestructiveMarkdownTextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadingAnimation
@@ -163,29 +167,38 @@ internal fun QuizParticipationScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text(text = exerciseDataState.bind { it.title.orEmpty() }.orElse("")) },
-                navigationIcon = {
-                    IconButton(onClick = onRequestLeave) {
-                        Icon(Icons.Default.Close, contentDescription = null)
-                    }
-                },
-                actions = {
-                    if (!isWaitingForQuizStart && !hasQuizEnded) {
-                        ButtonWithLoadingAnimation(
-                            modifier = Modifier,
-                            isLoading = submissionDeferred != null,
-                            onClick = { displaySubmitDialog = true },
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = ExerciseColors.Quiz.submitButton,
-                                contentColor = ExerciseColors.Quiz.submitButtonText
-                            )
-                        ) {
-                            Text(text = stringResource(id = R.string.quiz_participation_submit_button))
+            Surface(
+                shadowElevation = Spacings.AppBarElevation
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(text = exerciseDataState.bind { it.title.orEmpty() }.orElse(""))
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onRequestLeave) {
+                            Icon(Icons.Default.Close, contentDescription = null)
                         }
-                    }
-                }
-            )
+                    },
+                    actions = {
+                        if (!isWaitingForQuizStart && !hasQuizEnded) {
+                            ButtonWithLoadingAnimation(
+                                modifier = Modifier,
+                                isLoading = submissionDeferred != null,
+                                onClick = { displaySubmitDialog = true },
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = ExerciseColors.Quiz.submitButton,
+                                    contentColor = ExerciseColors.Quiz.submitButtonText
+                                )
+                            ) {
+                                Text(text = stringResource(id = R.string.quiz_participation_submit_button))
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
+                )
+            }
         }
     ) { padding ->
         QuizParticipationUi(

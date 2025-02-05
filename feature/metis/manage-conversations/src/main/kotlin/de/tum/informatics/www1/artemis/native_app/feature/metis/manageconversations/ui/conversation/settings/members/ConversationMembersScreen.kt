@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -27,18 +30,25 @@ fun ConversationMembersScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                navigationIcon = { NavigationBackButton(onNavigateBack) },
-                title = {
-                    Text(text = stringResource(id = R.string.conversation_members_title))
-                }
-            )
+            Surface(
+                shadowElevation = Spacings.AppBarElevation,
+            ){
+                TopAppBar(
+                    navigationIcon = { NavigationBackButton(onNavigateBack) },
+                    title = {
+                        Text(text = stringResource(id = R.string.conversation_members_title))
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
+                )
+            }
         }
     ) { padding ->
         ConversationMembersBody(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
+                .padding(top = padding.calculateTopPadding() + Spacings.ScreenTopBarSpacing)
                 .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             courseId = courseId,

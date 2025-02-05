@@ -16,8 +16,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -94,10 +96,17 @@ internal fun BrowseChannelsScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(id = R.string.browse_channels_title)) },
-                navigationIcon = { NavigationBackButton(onNavigateBack) }
-            )
+            Surface(
+                shadowElevation = Spacings.AppBarElevation
+            ){
+                TopAppBar(
+                    title = { Text(text = stringResource(id = R.string.browse_channels_title)) },
+                    navigationIcon = { NavigationBackButton(onNavigateBack) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
+                )
+            }
         },
 
     ) { padding ->
@@ -116,7 +125,7 @@ internal fun BrowseChannelsScreen(
             if (channels.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = Spacings.calculateEndOfPagePaddingValues()
+                    contentPadding = Spacings.calculateContentPaddingValues()
                 ) {
                     items(channels) { channelChat ->
                         ChannelChatItem(
