@@ -36,7 +36,8 @@ interface PushCommunicationDao {
     @Transaction
     suspend fun insertNotification(
         artemisNotification: ArtemisNotification<CommunicationNotificationType>,
-        generateNotificationId: suspend () -> Int
+        generateNotificationId: suspend () -> Int,
+        isPostFromAppUser: suspend (CommunicationNotificationPlaceholderContent) -> Boolean
     ) {
         val parentId = artemisNotification.parentId
 
@@ -45,6 +46,12 @@ interface PushCommunicationDao {
                 type = artemisNotification.type,
                 notificationPlaceholders = artemisNotification.notificationPlaceholders
             ) ?: return
+
+            if (isPostFromAppUser(content)) {
+                // As a temporary fix for receiving notifications for own posts.
+                // See: https://github.com/ls1intum/artemis-android/issues/326
+                return
+            }
 
             if (hasPushCommunication(parentId)) {
                 updatePushCommunication(
