@@ -231,7 +231,11 @@ fun ConversationChatListScreen(
                         }
 
                         IconButton(onClick = { isSearchBarOpen = true }) {
-                            Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                tint = MaterialTheme.colorScheme.primary,
+                                contentDescription = null
+                            )
                         }
 
                         IconButton(
@@ -242,7 +246,11 @@ fun ConversationChatListScreen(
                                 }
                             }
                         ) {
-                            Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
+                            Icon(
+                                imageVector = Icons.Outlined.Info,
+                                tint = MaterialTheme.colorScheme.primary,
+                                contentDescription = null
+                            )
 
                             InfoDropdownMenu(
                                 isInfoDropdownExpanded = isInfoDropdownExpanded,

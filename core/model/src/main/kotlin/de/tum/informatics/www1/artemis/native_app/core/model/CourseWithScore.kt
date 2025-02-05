@@ -25,6 +25,8 @@ data class CourseWithScore(
     }
 }
 
+// Inspired by the Artemis iOS app
+// https://github.com/ls1intum/artemis-ios/blob/c6c3aaea962539ef213ea86669ba3cb1a8bbf91f/ArtemisKit/Sources/Dashboard/CourseGridCell.swift
 fun CourseWithScore.upcomingExercises(): List<Exercise> {
     return course.exercises
         .filter { exercise ->
