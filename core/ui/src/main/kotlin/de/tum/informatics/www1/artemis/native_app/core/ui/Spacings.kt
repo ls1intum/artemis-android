@@ -24,6 +24,11 @@ object Spacings {
         val innerSpacing = 8.dp
     }
 
+    object AutoCompletePopup {
+        val HintHorizontalPadding = 16.dp
+        val ContentVerticalPadding = 8.dp
+    }
+
 
     /**
      * Calculate the padding for the bottom of the screen, considering the navigation bar height.
