@@ -40,6 +40,7 @@ import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.LinkResolver
 import io.noties.markwon.Markwon
 import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.MarkwonVisitor
 import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tables.TablePlugin
@@ -47,6 +48,7 @@ import io.noties.markwon.html.HtmlPlugin
 import io.noties.markwon.image.AsyncDrawable
 import io.noties.markwon.image.coil.CoilImagesPlugin
 import io.noties.markwon.linkify.LinkifyPlugin
+import org.commonmark.node.SoftLineBreak
 
 // Copy from: https://github.com/jeziellago/compose-markdown
 /*
@@ -263,6 +265,14 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, linkResolv
                     .linkColor(context.getColor(R.color.link_color))
                     .isLinkUnderlined(false)
             }
+        })
+        .usePlugin(object : AbstractMarkwonPlugin() {
+            override fun configureVisitor(builder: MarkwonVisitor.Builder) {
+                builder.on(SoftLineBreak::class.java) { visitor, _ ->
+                    visitor.forceNewLine()
+                }
+            }
+
         })
         .apply {
             if (imagePlugin != null) {
