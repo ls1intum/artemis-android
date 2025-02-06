@@ -238,7 +238,6 @@ private fun ChatList(
     postActionFlags: PostActionFlags,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     clientId: Long,
-    unreadPostsCount: Int = 4,
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
     onRequestDelete: (IStandalonePost) -> Unit,
@@ -322,7 +321,6 @@ private fun ChatList(
                             index = index,
                             post = post,
                             postCount = posts.itemCount,
-                            unreadPostsCount = unreadPostsCount,
                             order = DisplayPostOrder.REVERSED,
                             getPost = { getPostIndex ->
                                 when (val entry = posts.peek(getPostIndex)) {
@@ -335,7 +333,6 @@ private fun ChatList(
                                 index = index,
                                 post = post,
                                 postCount = posts.itemCount,
-                                unreadPostsCount = unreadPostsCount,
                                 order = DisplayPostOrder.REVERSED,
                                 getPost = { getPostIndex ->
                                     when (val entry = posts.peek(getPostIndex)) {

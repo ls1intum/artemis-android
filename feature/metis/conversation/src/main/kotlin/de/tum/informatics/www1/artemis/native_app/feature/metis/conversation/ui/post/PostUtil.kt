@@ -25,37 +25,23 @@ internal fun <T : IBasePost> shouldDisplayHeader(
     index: Int,
     post: T?,
     postCount: Int,
-    unreadPostsCount: Int? = null,  // TODO: index can just be 0
     order: DisplayPostOrder,
     getPost: (index: Int) -> T?
 ): Boolean {
-    return remember(index, post, getPost, postCount, unreadPostsCount) {
+    return remember(index, post, getPost, postCount) {
         val prevPostIndex = when (order) {
             DisplayPostOrder.REVERSED -> index + 1
             DisplayPostOrder.REGULAR -> index - 1
         }
 
-        val prefPost = when (order) {
+        val prevPost = when (order) {
             DisplayPostOrder.REVERSED -> if (index + 1 < postCount) getPost(prevPostIndex) else null
             DisplayPostOrder.REGULAR -> if (index - 1 >= 0) getPost(prevPostIndex) else null
         }
 
-        // TODO: refactor into two functions: isFirstUnreadPost() || isByDifferentAuthor() || isDeltaTimeBetweenPostsTooLarge()
-        val firstUnreadPostIndex = when {
-            unreadPostsCount == null -> null
-            order == DisplayPostOrder.REVERSED -> unreadPostsCount - 1
-            order == DisplayPostOrder.REGULAR -> postCount - unreadPostsCount
-            else -> null // never reached
-        }
-
-        val isFirstUnreadPost = firstUnreadPostIndex != null && index == firstUnreadPostIndex
-        if (isFirstUnreadPost) {
-            return@remember true
-        }
-
-        val prefPostCreationDate = prefPost?.creationDate
+        val prefPostCreationDate = prevPost?.creationDate
         val postCreationDate = post?.creationDate
-        if (prefPost != null && post != null && prefPost.authorId == post.authorId && prefPostCreationDate != null && postCreationDate != null) {
+        if (prevPost != null && post != null && prevPost.authorId == post.authorId && prefPostCreationDate != null && postCreationDate != null) {
             postCreationDate - prefPostCreationDate > MaxDurationJoinMessages
         } else true
     }
@@ -66,11 +52,10 @@ internal fun <T : IBasePost> determinePostItemViewJoinedType(
     index: Int,
     post: T?,
     postCount: Int,
-    unreadPostsCount: Int? = null,
     order: DisplayPostOrder,
     getPost: (index: Int) -> T?
 ): PostItemViewJoinedType {
-    val isHeader = shouldDisplayHeader(index, post, postCount, unreadPostsCount, order, getPost)
+    val isHeader = shouldDisplayHeader(index, post, postCount, order, getPost)
 
     val nextPostIndex = when (order) {
         DisplayPostOrder.REVERSED -> index - 1
@@ -79,7 +64,7 @@ internal fun <T : IBasePost> determinePostItemViewJoinedType(
 
     val nextPost = if (nextPostIndex in 0 until postCount) getPost(nextPostIndex) else null
     val isNextHeader = nextPost?.let {
-        shouldDisplayHeader(nextPostIndex, it, postCount, unreadPostsCount, order, getPost)
+        shouldDisplayHeader(nextPostIndex, it, postCount, order, getPost)
     } ?: true
 
     return remember(isHeader, postCount, nextPost, isNextHeader) {
