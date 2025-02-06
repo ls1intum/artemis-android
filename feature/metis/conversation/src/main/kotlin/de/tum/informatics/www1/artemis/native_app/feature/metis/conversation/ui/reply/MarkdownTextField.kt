@@ -58,6 +58,7 @@ import androidx.compose.ui.window.PopupProperties
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicArtemisTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
 import kotlinx.coroutines.launch
 
 
@@ -76,7 +77,7 @@ internal fun MarkdownTextField(
     onFocusAcquired: () -> Unit = {},
     onFocusLost: () -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit,
-    showAutoCompletePopup: ((AutocompleteType) -> Unit)? = null,
+    showAutoCompletePopup: ((AutoCompleteType) -> Unit)? = null,
     formattingOptionButtons: @Composable () -> Unit = {},
 ) {
     val text = textFieldValue.text
@@ -204,7 +205,7 @@ private fun TextFieldOptions(
     isPreviewEnabled: Boolean,
     showFormattingOptions: Boolean,
     onChangeViewType: (ViewType) -> Unit,
-    showAutoCompletePopup: ((AutocompleteType) -> Unit)? = null,
+    showAutoCompletePopup: ((AutoCompleteType) -> Unit)? = null,
     formattingOptionButtons: @Composable () -> Unit = {},
     onOpenFilePicker: () -> Unit = {},
     onOpenImagePicker: () -> Unit = {}
@@ -338,7 +339,7 @@ private fun TextFieldOptionsIconButton(
 @Composable
 private fun TaggingDropdownMenu(
     isTaggingDropdownExpanded: Boolean,
-    showAutoCompletePopup: ((AutocompleteType) -> Unit)?,
+    showAutoCompletePopup: ((AutoCompleteType) -> Unit)?,
     onDismissRequest: () -> Unit,
 ) {
     DropdownMenu(
@@ -358,7 +359,7 @@ private fun TaggingDropdownMenu(
             text = { Text(text = stringResource(R.string.reply_format_mention_members)) },
             onClick = {
                 onDismissRequest()
-                showAutoCompletePopup?.invoke(AutocompleteType.USERS)
+                showAutoCompletePopup?.invoke(AutoCompleteType.USERS)
             }
         )
 
@@ -372,7 +373,7 @@ private fun TaggingDropdownMenu(
             text = { Text(stringResource(R.string.reply_format_mention_channels)) },
             onClick = {
                 onDismissRequest()
-                showAutoCompletePopup?.invoke(AutocompleteType.CHANNELS)
+                showAutoCompletePopup?.invoke(AutoCompleteType.CHANNELS)
             }
         )
 
@@ -386,7 +387,7 @@ private fun TaggingDropdownMenu(
             text = { Text(stringResource(R.string.reply_format_mention_exercises)) },
             onClick = {
                 onDismissRequest()
-                showAutoCompletePopup?.invoke(AutocompleteType.EXERCISES)
+                showAutoCompletePopup?.invoke(AutoCompleteType.EXERCISES)
             }
         )
 
@@ -400,7 +401,7 @@ private fun TaggingDropdownMenu(
             text = { Text(stringResource(R.string.reply_format_mention_lectures)) },
             onClick = {
                 onDismissRequest()
-                showAutoCompletePopup?.invoke(AutocompleteType.LECTURES)
+                showAutoCompletePopup?.invoke(AutoCompleteType.LECTURES)
             }
         )
     }

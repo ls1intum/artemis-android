@@ -1,7 +1,11 @@
-package de.tum.informatics.www1.artemis.native_app.core.common.markdown
+package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import androidx.annotation.DrawableRes
 import de.tum.informatics.www1.artemis.native_app.core.common.R
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.MarkdownUrlUtil
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ArtemisDeeplink
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 
 const val TYPE_ICON_RESOURCE_PATH = "android.resource://de.tum.cit.aet.artemis/"
 const val ATTACHMENTS_ENDPOINT = "/api/files/attachments/"
@@ -15,6 +19,7 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
         "[$fileName]($serverUrl$ATTACHMENTS_ENDPOINT$filePath)"
 
     override fun transformExerciseMarkdown(title: String, url: String, type: String): String {
+        val namedLink = "[$title](${ArtemisDeeplink.IN_APP_HOST}$url)"
         val typeIcon =  when (type) {
             "text" -> R.drawable.font_link_icon
             "quiz" -> R.drawable.check_double_link_icon
@@ -22,17 +27,23 @@ class PostArtemisMarkdownTransformer(val serverUrl: String, val courseId: Long) 
             "modeling" -> R.drawable.diagram_project_link_icon
             "file-upload" -> R.drawable.file_arrow_up_link_icon
             "programming" -> R.drawable.keyboard_link_icon
-            else -> return "[$title](artemis:/$url)"
+            else -> return namedLink
         }
-        return "${createFileTypeIconMarkdown(typeIcon)}  [$title](artemis:/$url)"
+        return "${createFileTypeIconMarkdown(typeIcon)}  $namedLink"
     }
 
-    override fun transformUserMentionMarkdown(text: String, fullName: String, userName: String): String = "[@$fullName](artemis://courses/$courseId/messages?username=$userName)"
+    override fun transformUserMentionMarkdown(text: String, fullName: String, userName: String): String {
+        val link = CommunicationDeeplinks.ToOneToOneChatByUsername.inAppLink(courseId, userName)
+        return "[@$fullName]($link)"
+    }
 
     override fun transformChannelMentionMarkdown(
         channelName: String,
         conversationId: Long
-    ): String = "${createFileTypeIconMarkdown(R.drawable.message_link_icon)}  [#$channelName](artemis://courses/$courseId/messages?conversationId=$conversationId)"
+    ): String {
+        val link = CommunicationDeeplinks.ToConversation.inAppLink(courseId, conversationId)
+        return "${createFileTypeIconMarkdown(R.drawable.message_link_icon)}  [#$channelName]($link)"
+    }
 
     override fun transformLectureContentMarkdown(
         type: String,

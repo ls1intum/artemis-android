@@ -4,14 +4,13 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.MiscNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CommunicationPostTarget
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.CoursePostTarget
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.ExercisePostTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.ExerciseTarget
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.LecturePostTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.MetisTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.NotificationTarget
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.target.UnknownNotificationTarget
@@ -38,7 +37,10 @@ internal object NotificationTargetManager {
 
                     is ExerciseTarget -> {
                         if (type == MiscNotificationType.QUIZ_EXERCISE_STARTED) {
-                            "artemis://quiz_participation/${notificationTarget.courseId}/${notificationTarget.exerciseId}"
+                            ExerciseDeeplinks.ToQuizParticipation.inAppLink(
+                                notificationTarget.courseId,
+                                notificationTarget.exerciseId
+                            )
                         } else null
                     }
 
@@ -55,20 +57,12 @@ internal object NotificationTargetManager {
 
     private fun getMetisDeeplink(notificationTarget: MetisTarget): String {
         return when (notificationTarget) {
-            is CoursePostTarget -> {
-                "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/null/null/null"
-            }
-
-            is LecturePostTarget -> {
-                "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/null/${notificationTarget.lectureId}/null"
-            }
-
-            is ExercisePostTarget -> {
-                "artemis://metis_standalone_post/${notificationTarget.postId}/${notificationTarget.courseId}/${notificationTarget.exerciseId}/null/null"
-            }
-
             is CommunicationPostTarget -> {
-                "artemis://courses/${notificationTarget.courseId}/${notificationTarget.conversationId}/${notificationTarget.postId}"
+                CommunicationDeeplinks.ToPostById.inAppLink(
+                    notificationTarget.courseId,
+                    notificationTarget.conversationId,
+                    notificationTarget.postId
+                )
             }
         }
     }

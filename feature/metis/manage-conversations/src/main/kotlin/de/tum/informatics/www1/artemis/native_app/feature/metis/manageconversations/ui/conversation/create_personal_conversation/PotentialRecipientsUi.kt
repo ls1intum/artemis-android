@@ -128,6 +128,7 @@ private fun PotentialRecipientsList(
 ) {
     if (recipients.isNotEmpty()) {
         Card {
+            // We need to add a bottom contentPadding of 90.dp here to prevent the last item from being hidden behind the FAB
             LazyColumn(
                 modifier = modifier
                     .fillMaxWidth(),
