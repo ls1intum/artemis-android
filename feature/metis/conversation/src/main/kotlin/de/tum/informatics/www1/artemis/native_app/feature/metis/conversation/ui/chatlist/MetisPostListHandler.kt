@@ -12,6 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,17 +49,62 @@ internal fun <T : Any> MetisPostListHandler(
 ) {
     val scope = rememberCoroutineScope()
 
-    var prevBottomItem: T? by remember { mutableStateOf(null) }
-    var requestScrollToBottom by remember { mutableStateOf(false) }
-
-    var hasNewUnseenPost by remember { mutableStateOf(false) }
-
+    val hasNewUnseenPostState = remember { mutableStateOf(false) }
     val bottomItemIndex = remember(order, itemCount) {
         when (order) {
             DisplayPostOrder.REVERSED -> 0
             DisplayPostOrder.REGULAR -> itemCount - 1
         }
     }
+
+    manageScrollToNewPost(
+        state = state,
+        itemCount = itemCount,
+        bottomItem = bottomItem,
+        order = order,
+        bottomItemIndex = bottomItemIndex,
+        hasNewUnseenPostState = hasNewUnseenPostState
+    )
+
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+        val markdownTransformer = rememberPostArtemisMarkdownTransformer(serverUrl, courseId)
+
+        ProvideEmojis(emojiService) {
+            CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
+                content()
+            }
+        }
+
+        if (hasNewUnseenPostState.value) {
+            FloatingActionButton(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(Spacings.FabPaddingValues),
+                onClick = { scope.launch { state.scrollToItem(bottomItemIndex) } }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowDownward,
+                    contentDescription = null
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun <T: Any>manageScrollToNewPost(
+    state: LazyListState,
+    itemCount: Int,
+    bottomItem: T?,
+    order: DisplayPostOrder,
+    bottomItemIndex: Int,
+    hasNewUnseenPostState: MutableState<Boolean>
+) {
+    var prevBottomItem: T? by remember { mutableStateOf(null) }
+    var requestScrollToBottom by remember { mutableStateOf(false) }
+    var hasNewUnseenPost by hasNewUnseenPostState
 
     val canScrollDown = when (order) {
         DisplayPostOrder.REVERSED -> state.canScrollBackward
@@ -100,32 +146,6 @@ internal fun <T : Any> MetisPostListHandler(
             delay(100.milliseconds)
             state.animateScrollToItem(bottomItemIndex)
             requestScrollToBottom = false
-        }
-    }
-
-    Box(
-        modifier = modifier.fillMaxSize()
-    ) {
-        val markdownTransformer = rememberPostArtemisMarkdownTransformer(serverUrl, courseId)
-
-        ProvideEmojis(emojiService) {
-            CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
-                content()
-            }
-        }
-
-        if (hasNewUnseenPost) {
-            FloatingActionButton(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(Spacings.FabPaddingValues),
-                onClick = { scope.launch { state.scrollToItem(bottomItemIndex) } }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowDownward,
-                    contentDescription = null
-                )
-            }
         }
     }
 }
