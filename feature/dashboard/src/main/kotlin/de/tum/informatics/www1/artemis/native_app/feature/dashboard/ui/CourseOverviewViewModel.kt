@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardService
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardStorageService
@@ -41,15 +42,12 @@ internal class CourseOverviewViewModel(
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query
+    val sorting = MutableStateFlow(CourseSorting.ALPHABETICAL_ASCENDING)
 
     private val _dashboardState = MutableStateFlow<DataState<Dashboard>>(DataState.Loading())
-    val dashboard: StateFlow<DataState<Dashboard>> = combine(_dashboardState, query) { dashboardState, query ->
+    val dashboard: StateFlow<DataState<Dashboard>> = combine(_dashboardState, query, sorting) { dashboardState, query, sorting ->
         if (dashboardState is DataState.Success) {
             val originalDashboard = dashboardState.data
-
-            if (query.isBlank()) {
-                return@combine dashboardState
-            }
 
             val filteredCourses = originalDashboard.courses.filter {
                 it.course.title.contains(query, ignoreCase = true)
@@ -58,7 +56,10 @@ internal class CourseOverviewViewModel(
                 it.course.title.contains(query, ignoreCase = true)
             }.toMutableList()
 
-            DataState.Success(originalDashboard.copy(courses = filteredCourses, recentCourses = filteredRecentCourses))
+            val sortedCourses = sortCourses(filteredCourses, sorting)
+            val sortedRecentCourses = sortCourses(filteredRecentCourses, sorting)
+
+            DataState.Success(Dashboard(courses = sortedCourses, recentCourses = sortedRecentCourses))
         } else {
             dashboardState
         }
@@ -84,7 +85,7 @@ internal class CourseOverviewViewModel(
             val serverUrl = serverConfigurationService.serverUrl.first()
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                 dashboardService.loadDashboard(authToken, serverUrl).bind { dashboard ->
-                    sortCoursesInSections(serverUrl, dashboard)
+                    extractCoursesInSections(serverUrl, dashboard)
                 }
             }.collect {
                 _dashboardState.value = it
@@ -99,7 +100,7 @@ internal class CourseOverviewViewModel(
             val currentDashboard = currentState.data
 
             viewModelScope.launch {
-                val finalDashboard = sortCoursesInSections(
+                val finalDashboard = extractCoursesInSections(
                     serverConfigurationService.serverUrl.first(),
                     currentDashboard
                 )
@@ -119,27 +120,8 @@ internal class CourseOverviewViewModel(
         _query.value = newQuery
     }
 
-    private fun filterCourses() {
-        val currentState = _dashboardState.value
-        if (currentState is DataState.Success) {
-            val currentDashboard = currentState.data
-
-            if (query.value.isNotBlank()) {
-                val filteredCourses = currentDashboard.courses.filter {
-                    it.course.title.contains(_query.value, ignoreCase = true)
-                }.toMutableList()
-                val filteredRecentCourses = currentDashboard.recentCourses.filter {
-                    it.course.title.contains(_query.value, ignoreCase = true)
-                }.toMutableList()
-
-                _dashboardState.value = DataState.Success(
-                    currentDashboard.copy(
-                        courses = filteredCourses,
-                        recentCourses = filteredRecentCourses
-                    )
-                )
-            }
-        }
+    fun onUpdateSorting(newSorting: CourseSorting) {
+        sorting.value = newSorting
     }
 
     suspend fun onCourseAccessed(courseId: Long) {
@@ -153,9 +135,10 @@ internal class CourseOverviewViewModel(
     /**
      * Checks for recently accessed courses and adds them to the recent courses section.
      */
-    private suspend fun sortCoursesInSections(
+    private suspend fun extractCoursesInSections(
         serverUrl: String,
-        currentDashboard: Dashboard
+        currentDashboard: Dashboard,
+        sorting: CourseSorting = CourseSorting.ALPHABETICAL_ASCENDING
     ): Dashboard {
         if (currentDashboard.courses.size <= 5) {
             return currentDashboard
@@ -177,10 +160,26 @@ internal class CourseOverviewViewModel(
 
         val updatedCourses = currentDashboard.courses - coursesToMove + coursesToRemove
         val updatedRecentCourses = currentDashboard.recentCourses - coursesToRemove + coursesToMove
-        return currentDashboard.copy(
-            courses = updatedCourses.sortedBy { it.course.title }.toSet().toMutableList(),
-            recentCourses = updatedRecentCourses.sortedBy { it.course.title }.toSet()
-                .toMutableList()
+
+       return Dashboard(
+            courses = sortCourses(updatedCourses, sorting),
+            recentCourses = sortCourses(updatedRecentCourses, sorting)
         )
     }
+
+    private fun sortCourses(
+        courses: List<CourseWithScore>,
+        sorting: CourseSorting
+    ): MutableList<CourseWithScore> {
+        return if (sorting == CourseSorting.ALPHABETICAL_ASCENDING) {
+            courses.sortedBy { it.course.title }.toMutableList()
+        } else {
+            courses.sortedByDescending { it.course.title }.toMutableList()
+        }
+    }
+}
+
+enum class CourseSorting {
+    ALPHABETICAL_ASCENDING,
+    ALPHABETICAL_DESCENDING,
 }

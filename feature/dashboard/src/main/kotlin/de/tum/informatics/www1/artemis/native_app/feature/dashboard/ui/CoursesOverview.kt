@@ -106,6 +106,7 @@ internal fun CoursesOverview(
     var displayBetaDialog by rememberSaveable { mutableStateOf(false) }
 
     val query by viewModel.query.collectAsState()
+    val sorting by viewModel.sorting.collectAsState()
 
     // Trigger the dialog if service sets value to true
     LaunchedEffect(shouldDisplayBetaDialog) {
@@ -185,12 +186,34 @@ internal fun CoursesOverview(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                BasicSearchTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    hint = stringResource(id = R.string.course_overview_search_courses_hint),
-                    query = query,
-                    updateQuery = viewModel::onUpdateQuery,
-                )
+                Box(modifier = Modifier.weight(1f)) {
+                    BasicSearchTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        hint = stringResource(id = R.string.course_overview_search_courses_hint),
+                        query = query,
+                        updateQuery = viewModel::onUpdateQuery,
+                    )
+                }
+
+                IconButton(
+                    modifier = Modifier
+                        .size(24.dp),
+                    onClick = {
+                        val newSorting = if (sorting == CourseSorting.ALPHABETICAL_ASCENDING) {
+                            CourseSorting.ALPHABETICAL_DESCENDING
+                        } else {
+                            CourseSorting.ALPHABETICAL_ASCENDING
+                        }
+                        viewModel.onUpdateSorting(newSorting)
+                    }
+                ) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = if (sorting == CourseSorting.ALPHABETICAL_ASCENDING) painterResource(id = R.drawable.alphabetical_sorting_descending) else painterResource(id = R.drawable.alphabetical_sorting_ascending),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
 
             BasicDataStateUi(
@@ -201,12 +224,12 @@ internal fun CoursesOverview(
                 retryButtonText = stringResource(id = R.string.courses_loading_try_again),
                 onClickRetry = viewModel::requestReloadDashboard
             ) { dashboard: Dashboard ->
-                if (dashboard.courses.isEmpty() && query.isNotBlank()) {
+                if (dashboard.courses.isEmpty() && dashboard.recentCourses.isEmpty() && query.isNotBlank()) {
                     NoSearchResults(
                         modifier = Modifier.fillMaxSize(),
                         query = query
                     )
-                } else if (dashboard.courses.isEmpty()) {
+                } else if (dashboard.courses.isEmpty() && dashboard.recentCourses.isEmpty()) {
                     DashboardEmpty(
                         modifier = Modifier.fillMaxSize(),
                         onClickSignup = onClickRegisterForCourse
