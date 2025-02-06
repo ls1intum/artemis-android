@@ -57,11 +57,13 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.util.CourseUtil
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.CoursePointsDecimalFormat
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.CourseColors
 import java.text.DecimalFormat
 
 const val TEST_TAG_ENROLL_BUTTON = "TEST_TAG_ENROLL_BUTTON"
+private const val progressFontSizeMultiplier = 0.25f
 
 /**
  * Displays course card with score and exercise information for the dashboard.
@@ -82,7 +84,7 @@ fun CourseItem(
         CoursePointsDecimalFormat.format(maxPoints)
     }
 
-    val progress = if (maxPoints == 0f) 0f else currentPoints / maxPoints
+    val progress = if (maxPoints == 0f) 0f else (currentPoints / maxPoints).coerceIn(0f, 1f)
     val progressPercentFormatted = remember(progress) {
         DecimalFormat("0.##%").format(progress)
     }
@@ -313,7 +315,7 @@ private fun CourseItemContent(
             Text(
                 modifier = Modifier.let {
                     if (nextExercise != null) it.clickable {
-                        val url = "artemis://courses/${courseId}/exercises/${nextExercise.id}"
+                        val url = ExerciseDeeplinks.ToExercise.inAppLink(courseId, nextExercise.id ?: 0L)
                         localLinkOpener.openLink(url)
                     }
                     else it
@@ -361,7 +363,7 @@ private fun CircularCourseProgress(
 
         val percentFontSize = with(LocalDensity.current) {
             val availableSpace = maxHeight - progressBarWidthDp * 2
-            (availableSpace * 0.25f).toSp()
+            (availableSpace * progressFontSizeMultiplier).toSp()
         }
 
         Text(

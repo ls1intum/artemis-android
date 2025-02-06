@@ -22,12 +22,21 @@ object Spacings {
 
     object Post {
         val innerSpacing = 8.dp
+
+        val postHeadlineHeight = 36.dp
+        val emojiHeight = 27.dp
+    }
+
+    object AutoCompletePopup {
+        val HintHorizontalPadding = 16.dp
+        val ContentVerticalPadding = 8.dp
     }
 
     object CourseItem {
         val height = 250.dp
         val headerHeight = 70.dp
         val previewHeaderHeight = 40.dp
+        val gridSpacing = 16.dp
     }
 
     /**

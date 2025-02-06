@@ -46,8 +46,8 @@ fun CourseList(
     LazyVerticalGrid(
         modifier = modifier.consumeWindowInsets(WindowInsets.navigationBars),
         columns = GridCells.Fixed(columnCount),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(Spacings.CourseItem.gridSpacing),
+        horizontalArrangement = Arrangement.spacedBy(Spacings.CourseItem.gridSpacing),
         contentPadding = Spacings.calculateEndOfPagePaddingValues()
     ) {
         if (recentCourses.isNotEmpty()) {
