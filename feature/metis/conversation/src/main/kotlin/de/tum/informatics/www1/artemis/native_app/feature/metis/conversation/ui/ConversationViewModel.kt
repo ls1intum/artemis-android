@@ -150,6 +150,22 @@ internal open class ConversationViewModel(
     private val deleteJobs = mutableMapOf<IBasePost, Job>()
     val isMarkedAsDeleteList = mutableStateListOf<IBasePost>()
 
+    val conversation: StateFlow<DataState<Conversation>> = flatMapLatest(
+        serverConfigurationService.serverUrl,
+        accountService.authToken,
+        onReloadRequestAndWebsocketReconnect.onStart { emit(Unit) }
+    ) { serverUrl, authToken, _ ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            conversationService.getConversation(
+                courseId = metisContext.courseId,
+                conversationId = metisContext.conversationId,
+                authToken = authToken,
+                serverUrl = serverUrl
+            )
+        }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
     val chatListUseCase = ConversationChatListUseCase(
         viewModelScope = viewModelScope,
         metisService = metisService,
@@ -157,7 +173,8 @@ internal open class ConversationViewModel(
         metisContext = metisContext,
         onRequestSoftReload = onRequestSoftReload,
         serverConfigurationService = serverConfigurationService,
-        accountService = accountService
+        accountService = accountService,
+        conversation = conversation,
     )
 
     val threadUseCase = ConversationThreadUseCase(
@@ -246,21 +263,6 @@ internal open class ConversationViewModel(
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DataStatus.Outdated)
 
-    val conversation: StateFlow<DataState<Conversation>> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
-        onReloadRequestAndWebsocketReconnect.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            conversationService.getConversation(
-                courseId = metisContext.courseId,
-                conversationId = metisContext.conversationId,
-                authToken = authToken,
-                serverUrl = serverUrl
-            )
-        }
-    }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val latestUpdatedConversation: StateFlow<DataState<Conversation>> = flatMapLatest(
         conversation.holdLatestLoaded(),

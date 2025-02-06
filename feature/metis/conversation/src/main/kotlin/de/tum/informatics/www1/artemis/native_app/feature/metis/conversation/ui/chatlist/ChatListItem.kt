@@ -8,9 +8,12 @@ sealed class ChatListItem {
     fun getItemKey(): Any = when (this) {
         is DateDivider -> localDate.toEpochDays()
         is PostChatListItem -> post.key
+        is UnreadIndicator -> "unread"
     }
 
-    data class PostChatListItem(val post: IStandalonePost, val index: Int = -1) : ChatListItem()
+    data class PostChatListItem(val post: IStandalonePost, val index: Long = -1L) : ChatListItem()
 
     data class DateDivider(val localDate: LocalDate) : ChatListItem()
+
+    data object UnreadIndicator : ChatListItem()
 }

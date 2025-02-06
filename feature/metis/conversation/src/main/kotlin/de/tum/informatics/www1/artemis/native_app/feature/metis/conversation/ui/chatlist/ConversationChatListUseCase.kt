@@ -8,7 +8,10 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -20,6 +23,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.M
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -53,10 +57,11 @@ class ConversationChatListUseCase(
     private val viewModelScope: CoroutineScope,
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,
-    private val metisContext: MetisContext,
+    private val metisContext: MetisContext.Conversation,
     onRequestSoftReload: Flow<Unit>,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
+    conversation: StateFlow<DataState<Conversation>>,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) {
     companion object {
@@ -106,6 +111,13 @@ class ConversationChatListUseCase(
     )
 
     private val highestVisiblePostIndex = MutableStateFlow(0)
+
+    private val unreadMessagesCountDataStateFlow: Flow<DataState<Long>> = conversation.map {
+        it.bind { conversation ->
+            conversation.unreadMessagesCount ?: 0L
+        }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     @OptIn(ExperimentalPagingApi::class)
     val postPagingData: Flow<PagingData<ChatListItem>> =
@@ -164,7 +176,9 @@ class ConversationChatListUseCase(
                     .cachedIn(viewModelScope + coroutineContext)
             }
 
-            pagerFlow.map(::insertDateSeparators)
+            pagerFlow
+                .map(::insertDateSeparators)
+                .map(::insertUnreadSeparator)
         }
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Lazily, replay = 1)
 
@@ -172,7 +186,7 @@ class ConversationChatListUseCase(
     private fun  Flow<PagingData<out IStandalonePost>>.mapIndexedPosts(): Flow<PagingData<ChatListItem.PostChatListItem>> {
         // TODO: this indexing seems to work, BUT if a chat has between 40 and 60 posts, the pager messes something up
         return this.map { pagingData ->
-            var indexCounter = 0
+            var indexCounter = 0L
             pagingData.map { post ->
                 ChatListItem.PostChatListItem(post, indexCounter++)
             }
@@ -295,6 +309,26 @@ class ConversationChatListUseCase(
 
                 else -> null
             }
+        }
+
+    private fun insertUnreadSeparator(pagingList: PagingData<ChatListItem>) =
+        pagingList.insertSeparators { before: ChatListItem?, after: ChatListItem? ->
+            val unreadMessagesCountDataState = unreadMessagesCountDataStateFlow.first()
+            if (!unreadMessagesCountDataState.isSuccess) {
+                Log.d(TAG, "Failed to load unread messages count. Not inserting separator. $unreadMessagesCountDataState")
+                return@insertSeparators null
+            }
+
+            val unreadMessagesCount = (unreadMessagesCountDataState as DataState.Success).data
+            if (unreadMessagesCount == 0L) {
+                return@insertSeparators null
+            }
+
+            if (after != null && after is ChatListItem.PostChatListItem && after.index == unreadMessagesCount) {
+                return@insertSeparators ChatListItem.UnreadIndicator
+            }
+
+            return@insertSeparators null
         }
 
     /**

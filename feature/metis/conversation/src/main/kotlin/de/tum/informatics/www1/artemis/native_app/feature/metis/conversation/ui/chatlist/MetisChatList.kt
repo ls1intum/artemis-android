@@ -258,12 +258,11 @@ private fun ChatList(
             count = posts.itemCount,
             key = posts::getItemKey
         ) { index ->
-            if (posts.itemCount > unreadPostsCount && index == unreadPostsCount) {
-                UnreadPostsIndicator()
-                // TODO: How to deal with date dividers in the unread posts? They also increase the index
-            }
-
             when (val chatListItem = posts[index]) {
+                is ChatListItem.UnreadIndicator -> {
+                    UnreadPostsIndicator()
+                }
+
                 is ChatListItem.DateDivider -> {
                     DateDivider(
                         modifier = Modifier
