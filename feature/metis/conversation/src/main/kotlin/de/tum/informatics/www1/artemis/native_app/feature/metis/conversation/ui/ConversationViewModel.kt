@@ -213,22 +213,9 @@ internal open class ConversationViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
-    private val hasModerationRights: StateFlow<Boolean> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
-        onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            conversationService
-                .getConversation(
-                    courseId = metisContext.courseId,
-                    conversationId = metisContext.conversationId,
-                    authToken = authToken,
-                    serverUrl = serverUrl
-                )
-                .bind { it.hasModerationRights }
-        }
-            .map { it.orElse(false) }
+    private val hasModerationRights: StateFlow<Boolean> = conversation.map {
+        it.bind { conversation -> conversation.hasModerationRights }
+            .orElse(false)
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
