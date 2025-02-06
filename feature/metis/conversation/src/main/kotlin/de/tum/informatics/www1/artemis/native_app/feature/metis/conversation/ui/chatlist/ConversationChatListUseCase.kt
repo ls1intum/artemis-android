@@ -127,7 +127,8 @@ class ConversationChatListUseCase(
                 enablePlaceholders = true
             )
 
-            val pagerFlow = if (pagingDataInput.standalonePostsContext.query.isNullOrBlank()) {
+            val isSearchActive = !pagingDataInput.standalonePostsContext.query.isNullOrBlank()
+            val pagerFlow = if (!isSearchActive) {
                 Pager(
                     config = config,
                     remoteMediator = MetisRemoteMediator(
@@ -178,7 +179,13 @@ class ConversationChatListUseCase(
 
             pagerFlow
                 .map(::insertDateSeparators)
-                .map(::insertUnreadSeparator)
+                .map {
+                    if (!isSearchActive) {
+                        insertUnreadSeparator(it)
+                    } else {
+                        it
+                    }
+                }
         }
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Lazily, replay = 1)
 
