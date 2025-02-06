@@ -5,7 +5,7 @@
     <string name="course_overview_recently_accessed_section">Recently accessed</string>
     <string name="course_overview_all_courses_section">Other</string>
 
-    <string name="course_overview_search_courses_hint">Search courses</string>
+    <string name="course_overview_search_courses_hint">Search for a course</string>
     <string name="course_overview_no_search_results">No courses found</string>
     <string name="course_overview_no_search_results_details">%s did not match any courses.</string>
 
