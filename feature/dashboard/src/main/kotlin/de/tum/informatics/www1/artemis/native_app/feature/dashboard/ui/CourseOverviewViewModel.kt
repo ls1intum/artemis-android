@@ -13,8 +13,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.Dash
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.service.DashboardStorageService
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -36,8 +39,30 @@ internal class CourseOverviewViewModel(
      */
     private val reloadDashboard = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
+    private val _query = MutableStateFlow("")
+    val query: StateFlow<String> = _query
+
     private val _dashboardState = MutableStateFlow<DataState<Dashboard>>(DataState.Loading())
-    val dashboard: StateFlow<DataState<Dashboard>> get() = _dashboardState
+    val dashboard: StateFlow<DataState<Dashboard>> = combine(_dashboardState, query) { dashboardState, query ->
+        if (dashboardState is DataState.Success) {
+            val originalDashboard = dashboardState.data
+
+            if (query.isBlank()) {
+                return@combine dashboardState
+            }
+
+            val filteredCourses = originalDashboard.courses.filter {
+                it.course.title.contains(query, ignoreCase = true)
+            }.toMutableList()
+            val filteredRecentCourses = originalDashboard.recentCourses.filter {
+                it.course.title.contains(query, ignoreCase = true)
+            }.toMutableList()
+
+            DataState.Success(originalDashboard.copy(courses = filteredCourses, recentCourses = filteredRecentCourses))
+        } else {
+            dashboardState
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
     // Load the dashboard on init and whenever the reloadDashboard flow emits a value.
     init {
@@ -59,11 +84,7 @@ internal class CourseOverviewViewModel(
             val serverUrl = serverConfigurationService.serverUrl.first()
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                 dashboardService.loadDashboard(authToken, serverUrl).bind { dashboard ->
-                    val sortedDashboard = dashboard.copy(
-                        courses = dashboard.courses.sortedBy { it.course.title }.toMutableList()
-                    )
-                    val finalDashboard = sortCoursesInSections(serverUrl, sortedDashboard)
-                    finalDashboard
+                    sortCoursesInSections(serverUrl, dashboard)
                 }
             }.collect {
                 _dashboardState.value = it
@@ -92,6 +113,33 @@ internal class CourseOverviewViewModel(
      */
     fun requestReloadDashboard() {
         reloadDashboard.tryEmit(Unit)
+    }
+
+    fun onUpdateQuery(newQuery: String) {
+        _query.value = newQuery
+    }
+
+    private fun filterCourses() {
+        val currentState = _dashboardState.value
+        if (currentState is DataState.Success) {
+            val currentDashboard = currentState.data
+
+            if (query.value.isNotBlank()) {
+                val filteredCourses = currentDashboard.courses.filter {
+                    it.course.title.contains(_query.value, ignoreCase = true)
+                }.toMutableList()
+                val filteredRecentCourses = currentDashboard.recentCourses.filter {
+                    it.course.title.contains(_query.value, ignoreCase = true)
+                }.toMutableList()
+
+                _dashboardState.value = DataState.Success(
+                    currentDashboard.copy(
+                        courses = filteredCourses,
+                        recentCourses = filteredRecentCourses
+                    )
+                )
+            }
+        }
     }
 
     suspend fun onCourseAccessed(courseId: Long) {
