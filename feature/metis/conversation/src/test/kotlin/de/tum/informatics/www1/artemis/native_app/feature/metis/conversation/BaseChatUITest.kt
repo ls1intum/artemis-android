@@ -202,7 +202,7 @@ abstract class BaseChatUITest : BaseComposeTest() {
                     )))
                 }
             ) {
-                val list = posts.map { post -> ChatListItem.PostChatListItem(post) }.toMutableList()
+                val list = posts.map { post -> ChatListItem.IndexedPost(post) }.toMutableList()
                 MetisChatList(
                     modifier = Modifier.fillMaxSize(),
                     initialReplyTextProvider = remember { TestInitialReplyTextProvider() },

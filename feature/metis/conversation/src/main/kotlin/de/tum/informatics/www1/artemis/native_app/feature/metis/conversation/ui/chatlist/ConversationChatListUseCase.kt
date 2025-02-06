@@ -183,12 +183,13 @@ class ConversationChatListUseCase(
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Lazily, replay = 1)
 
 
-    private fun  Flow<PagingData<out IStandalonePost>>.mapIndexedPosts(): Flow<PagingData<ChatListItem.PostChatListItem>> {
+    private fun  Flow<PagingData<out IStandalonePost>>.mapIndexedPosts(): Flow<PagingData<ChatListItem.IndexedPost>> {
         // TODO: this indexing seems to work, BUT if a chat has between 40 and 60 posts, the pager messes something up
+        //  https://github.com/ls1intum/artemis-android/issues/392
         return this.map { pagingData ->
             var indexCounter = 0L
             pagingData.map { post ->
-                ChatListItem.PostChatListItem(post, indexCounter++)
+                ChatListItem.IndexedPost(post, indexCounter++)
             }
         }
     }
@@ -290,8 +291,8 @@ class ConversationChatListUseCase(
         _query.value = new.ifEmpty { null }
     }
 
-    private fun insertDateSeparators(pagingList: PagingData<ChatListItem.PostChatListItem>) =
-        pagingList.insertSeparators { before: ChatListItem.PostChatListItem?, after: ChatListItem.PostChatListItem? ->
+    private fun insertDateSeparators(pagingList: PagingData<ChatListItem.IndexedPost>) =
+        pagingList.insertSeparators { before: ChatListItem.IndexedPost?, after: ChatListItem.IndexedPost? ->
             when {
                 before == null && after == null -> null
                 before != null && after == null -> {
@@ -312,7 +313,7 @@ class ConversationChatListUseCase(
         }
 
     private fun insertUnreadSeparator(pagingList: PagingData<ChatListItem>) =
-        pagingList.insertSeparators { before: ChatListItem?, after: ChatListItem? ->
+        pagingList.insertSeparators { _, after: ChatListItem? ->
             val unreadMessagesCountDataState = unreadMessagesCountDataStateFlow.first()
             if (!unreadMessagesCountDataState.isSuccess) {
                 Log.d(TAG, "Failed to load unread messages count. Not inserting separator. $unreadMessagesCountDataState")
@@ -324,7 +325,7 @@ class ConversationChatListUseCase(
                 return@insertSeparators null
             }
 
-            if (after != null && after is ChatListItem.PostChatListItem && after.index == unreadMessagesCount) {
+            if (after != null && after is ChatListItem.IndexedPost && after.index == unreadMessagesCount) {
                 return@insertSeparators ChatListItem.UnreadIndicator
             }
 

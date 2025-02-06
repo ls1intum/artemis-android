@@ -272,8 +272,7 @@ private fun ChatList(
                     )
                 }
 
-                is ChatListItem.PostChatListItem? -> {
-                    Text(chatListItem?.index.toString())
+                is ChatListItem.IndexedPost? -> {
                     val post = chatListItem?.post
 
                     val postActions = rememberPostActions(
@@ -327,7 +326,7 @@ private fun ChatList(
                             order = DisplayPostOrder.REVERSED,
                             getPost = { getPostIndex ->
                                 when (val entry = posts.peek(getPostIndex)) {
-                                    is ChatListItem.PostChatListItem -> entry.post
+                                    is ChatListItem.IndexedPost -> entry.post
                                     else -> null
                                 }
                             }
@@ -340,7 +339,7 @@ private fun ChatList(
                                 order = DisplayPostOrder.REVERSED,
                                 getPost = { getPostIndex ->
                                     when (val entry = posts.peek(getPostIndex)) {
-                                        is ChatListItem.PostChatListItem -> entry.post
+                                        is ChatListItem.IndexedPost -> entry.post
                                         else -> null
                                     }
                                 }
