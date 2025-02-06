@@ -204,8 +204,8 @@ private fun RegisterForCourseContent(
                 .testTag(TEST_TAG_REGISTRABLE_COURSE_LIST),
             columns = GridCells.Fixed(columnCount),
             contentPadding = Spacings.calculateEndOfPagePaddingValues(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(Spacings.CourseItem.gridSpacing),
+            horizontalArrangement = Arrangement.spacedBy(Spacings.CourseItem.gridSpacing),
         ) {
             data.forEach { semesterCourses ->
                 item(span = { GridItemSpan(columnCount) }) {
