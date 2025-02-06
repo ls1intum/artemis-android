@@ -49,6 +49,7 @@ internal fun <T : Any> MetisPostListHandler(
     val scope = rememberCoroutineScope()
 
     var prevBottomItem: T? by remember { mutableStateOf(null) }
+    var requestScrollToBottom by remember { mutableStateOf(false) }
 
     var hasNewUnseenPost by remember { mutableStateOf(false) }
 
@@ -76,12 +77,7 @@ internal fun <T : Any> MetisPostListHandler(
         if (doesNewPostExist) {
             if (isScrolledDown) {
                 // new bottom item exists and we were previously scrolled to the bottom. Scroll down!
-
-                // For the ChatList, the bottomPost and posts are not updated synchronously.
-                // Therefore, we need to wait shortly before the new post is present in the posts
-                // and we can actually scroll to it.
-                delay(100.milliseconds)
-                state.animateScrollToItem(bottomItemIndex)
+                requestScrollToBottom = true
             } else {
                 // new bottom item exists but we are not on bottom so instead show user button.
                 hasNewUnseenPost = true
@@ -94,6 +90,17 @@ internal fun <T : Any> MetisPostListHandler(
         }
 
         prevBottomItem = bottomItem
+    }
+
+    LaunchedEffect(requestScrollToBottom) {
+        if (requestScrollToBottom) {
+            // For the ChatList, the bottomPost and posts are not updated synchronously.
+            // Therefore, we need to wait shortly before the new post is present in the posts
+            // and we can actually scroll to it.
+            delay(100.milliseconds)
+            state.animateScrollToItem(bottomItemIndex)
+            requestScrollToBottom = false
+        }
     }
 
     Box(
