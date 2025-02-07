@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Groups2
@@ -70,9 +69,6 @@ fun ChannelChatIcon(
 }
 
 fun getChannelIconImageVector(channelChat: ChannelChat): ImageVector {
-    if (channelChat.isArchived) {
-        return Icons.Default.Archive
-    }
     if (channelChat.isAnnouncementChannel) {
         return Icons.Default.Campaign
     }
