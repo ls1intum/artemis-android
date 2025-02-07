@@ -117,6 +117,9 @@ class ConversationChatListUseCase(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, 0L)
 
+    // We store this in addition to the unreadPostCount, because as new posts come in, the unreadPostCount will become outdated.
+    private var lastAlreadyReadPostId: Long? = null
+
     @OptIn(ExperimentalPagingApi::class)
     val postPagingData: Flow<PagingData<ChatListItem>> =
         pagingDataInput.flatMapLatest { pagingDataInput ->
@@ -319,6 +322,17 @@ class ConversationChatListUseCase(
 
     private fun insertUnreadSeparator(pagingList: PagingData<ChatListItem>) =
         pagingList.insertSeparators { _, after: ChatListItem? ->
+            // If we already know the id, great
+            if (lastAlreadyReadPostId != null) {
+                if (after != null && after is ChatListItem.IndexedPost && after.post.serverPostId == lastAlreadyReadPostId) {
+                    return@insertSeparators ChatListItem.UnreadIndicator
+                } else {
+                    return@insertSeparators null
+                }
+            }
+
+            // Otherwise we first need to figure out the id of the last already read post
+
             val unreadMessagesCount = unreadMessagesCountFlow.first()
 
             if (unreadMessagesCount == 0L) {
@@ -326,6 +340,7 @@ class ConversationChatListUseCase(
             }
 
             if (after != null && after is ChatListItem.IndexedPost && after.index == unreadMessagesCount) {
+                lastAlreadyReadPostId = after.post.serverPostId
                 return@insertSeparators ChatListItem.UnreadIndicator
             }
 
