@@ -7,8 +7,8 @@
     <string name="conversation_overview_conversation_item_mark_as_favorite">Favorite</string>
     <string name="conversation_overview_conversation_item_unmark_as_favorite">Unfavorite</string>
 
-    <string name="conversation_overview_conversation_item_mark_as_hidden">Hide</string>
-    <string name="conversation_overview_conversation_item_unmark_as_hidden">Unhide</string>
+    <string name="conversation_overview_conversation_item_mark_as_hidden">Archive</string>
+    <string name="conversation_overview_conversation_item_unmark_as_hidden">Unarchive</string>
 
     <string name="conversation_overview_conversation_item_mark_as_muted">Mute</string>
     <string name="conversation_overview_conversation_item_unmark_as_muted">Unmute</string>
@@ -20,7 +20,7 @@
     <string name="conversation_overview_section_exam_channels">Exams</string>
     <string name="conversation_overview_section_groups">Group Chats</string>
     <string name="conversation_overview_section_direct_messages">Direct Messages</string>
-    <string name="conversation_overview_section_hidden">Hidden</string>
+    <string name="conversation_overview_section_hidden">Archive</string>
     <string name="conversation_overview_section_saved_posts">Saved Messages</string>
     <string name="conversation_overview_section_recent">Recent</string>
 
