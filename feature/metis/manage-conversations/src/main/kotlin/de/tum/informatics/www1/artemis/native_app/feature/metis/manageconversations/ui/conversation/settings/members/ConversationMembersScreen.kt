@@ -7,16 +7,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 
@@ -30,19 +27,12 @@ fun ConversationMembersScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            Surface(
-                shadowElevation = Spacings.AppBarElevation,
-            ){
-                TopAppBar(
-                    navigationIcon = { NavigationBackButton(onNavigateBack) },
-                    title = {
-                        Text(text = stringResource(id = R.string.conversation_members_title))
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
-                    )
-                )
-            }
+            ArtemisTopAppBar(
+                navigationIcon = { NavigationBackButton(onNavigateBack) },
+                title = {
+                    Text(text = stringResource(id = R.string.conversation_members_title))
+                }
+            )
         }
     ) { padding ->
         ConversationMembersBody(

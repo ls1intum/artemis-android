@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -34,7 +33,6 @@ import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
-import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewModel
@@ -146,15 +144,11 @@ internal fun ExerciseScreen(
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 topBar = {
-                    Surface(
-                        shadowElevation = Spacings.AppBarElevation
-                    ) {
-                        ExerciseScreenTopAppBar(
-                            modifier = Modifier.fillMaxWidth(),
-                            onNavigateBack = onNavigateBack,
-                            exerciseDataState = exerciseDataState
-                        )
-                    }
+                    ExerciseScreenTopAppBar(
+                        modifier = Modifier.fillMaxWidth(),
+                        onNavigateBack = onNavigateBack,
+                        exerciseDataState = exerciseDataState
+                    )
                 },
                 floatingActionButton = floatingActionButton
             ) { padding ->

@@ -10,14 +10,11 @@ import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -27,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
@@ -83,24 +81,17 @@ private fun CourseTopAppBar(
 ) {
     val courseTitle = courseDataState.bind<String?> { it.title }.orElse(null)
 
-    Surface(
-        shadowElevation = Spacings.AppBarElevation
-    ) {
-        TopAppBar(
-            title = {
-                Text(
-                    modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
-                    text = courseTitle.orEmpty(),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-            ),
-            navigationIcon = { NavigationBackButton(onNavigateBack) }
-        )
-    }
+    ArtemisTopAppBar(
+        title = {
+            Text(
+                modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
+                text = courseTitle.orEmpty(),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        navigationIcon = { NavigationBackButton(onNavigateBack) }
+    )
 }
 
 
