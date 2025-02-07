@@ -120,6 +120,10 @@ class ConversationChatListUseCase(
     // We store this in addition to the unreadPostCount, because as new posts come in, the unreadPostCount will become outdated.
     private var lastAlreadyReadPostId: Long? = null
 
+    fun resetLastAlreadyReadPostId() {
+        lastAlreadyReadPostId = null
+    }
+
     @OptIn(ExperimentalPagingApi::class)
     val postPagingData: Flow<PagingData<ChatListItem>> =
         pagingDataInput.flatMapLatest { pagingDataInput ->
