@@ -201,6 +201,7 @@ fun ConversationChatListScreen(
                                 query = query,
                                 updateQuery = onUpdateQuery,
                                 hint = stringResource(id = R.string.metis_post_search_hint),
+                                backgroundColor = MaterialTheme.colorScheme.background,
                                 textStyle = MaterialTheme.typography.bodyMedium,
                                 focusRequester = searchBarFocusRequester
                             )
