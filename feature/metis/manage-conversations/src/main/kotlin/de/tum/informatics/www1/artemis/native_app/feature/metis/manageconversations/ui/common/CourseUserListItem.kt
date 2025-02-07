@@ -2,10 +2,12 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.ICourseUser
@@ -45,5 +47,8 @@ fun CourseUserListItem(
             }
         },
         trailingContent = trailingContent,
+        colors = ListItemDefaults.colors(
+            containerColor = Color.Transparent
+        )
     )
 }

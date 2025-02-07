@@ -8,6 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.network.Acco
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -45,7 +46,7 @@ class UserProfileDialogViewModel(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     fun navigateToOneToOneChat(context: Context) {
-        val chatLink = "artemis://courses/$courseId/messages?userId=$userId"
+        val chatLink = CommunicationDeeplinks.ToOneToOneChatByUserId.inAppLink(courseId, userId)
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(chatLink))
         context.startActivity(intent)
     }

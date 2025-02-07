@@ -8,4 +8,5 @@
     <string name="artemis_instance_tum_test_server_0">TUM test-server 0 </string>
     <string name="artemis_instance_tum_test_server_1">TUM test-server 1</string>
     <string name="artemis_instance_tum_test_server_2">TUM test-server 2</string>
+    <string name="artemis_instance_tum_legacy">TUM Artemis (Legacy)</string>
 </resources>

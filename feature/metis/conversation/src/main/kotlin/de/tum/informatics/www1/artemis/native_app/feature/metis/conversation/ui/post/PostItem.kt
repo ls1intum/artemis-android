@@ -58,6 +58,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -75,7 +76,9 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.CreatePostService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.getUnicodeForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiDialog
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiSelection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.getTestTagForEmojiId
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -104,8 +107,6 @@ sealed class PostItemViewType {
 }
 
 private const val PlaceholderContent = "WWWWWWW"
-private val postHeadlineHeight = 36.dp
-private val emojiHeight = 27.dp
 
 /**
  * Displays a post item or a placeholder for it.
@@ -122,7 +123,8 @@ internal fun PostItem(
     postActions: PostActions,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    onRequestRetrySend: () -> Unit
+    onRequestRetrySend: () -> Unit,
+    onShowReactionsBottomSheet: (EmojiSelection) -> Unit
 ) {
     val isPlaceholder = post == null
     val isExpanded = when (postItemViewType) {
@@ -130,7 +132,6 @@ internal fun PostItem(
         else -> false
     }
     val isDeleting by remember(post) { derivedStateOf { isMarkedAsDeleteList.contains(post) } }
-
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
     val isSaved = post?.isSaved == true
@@ -248,7 +249,8 @@ internal fun PostItem(
                 clientId = clientId,
                 reactions = remember(post?.reactions) { post?.reactions.orEmpty() },
                 postItemViewType = postItemViewType,
-                postActions = postActions
+                postActions = postActions,
+                onShowReactionsBottomSheet = onShowReactionsBottomSheet
             )
         }
     )
@@ -511,7 +513,7 @@ private fun HeadlineProfilePicture(
     isGrayscale: Boolean = false
 ) {
     val fontScale = LocalDensity.current.fontScale
-    val scaledSizeDp = postHeadlineHeight * fontScale
+    val scaledSizeDp = Spacings.Post.postHeadlineHeight * fontScale
 
     Box(
         modifier = Modifier
@@ -541,7 +543,8 @@ private fun StandalonePostFooter(
     clientId: Long,
     reactions: List<IReaction>,
     postItemViewType: PostItemViewType,
-    postActions: PostActions
+    postActions: PostActions,
+    onShowReactionsBottomSheet: (EmojiSelection) -> Unit
 ) {
     val reactionCount: Map<String, ReactionData> = remember(reactions, clientId) {
         reactions.groupBy { it.emojiId }.mapValues { groupedReactions ->
@@ -580,7 +583,8 @@ private fun StandalonePostFooter(
                     reactionCount = reactionData.reactionCount,
                     onClick = {
                         postActions.onClickReaction?.invoke(emoji, !reactionData.hasClientReacted)
-                    }
+                    },
+                    onLongClick = onShowReactionsBottomSheet
                 )
             }
             if (reactionCount.isNotEmpty() || postItemViewType is PostItemViewType.ThreadContextPostItem) {
@@ -594,7 +598,7 @@ private fun StandalonePostFooter(
                 ) {
                     Icon(
                         modifier = Modifier
-                            .sizeIn(minHeight = emojiHeight)
+                            .sizeIn(minHeight = Spacings.Post.emojiHeight)
                             .padding(5.dp),
                         imageVector = Icons.Default.InsertEmoticon,
                         contentDescription = null,
@@ -667,7 +671,8 @@ private fun EmojiChip(
     selected: Boolean,
     emojiId: String,
     reactionCount: Int,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onLongClick: (EmojiSelection) -> Unit
 ) {
     val shape = CircleShape
 
@@ -678,8 +683,11 @@ private fun EmojiChip(
         modifier = modifier
             .background(color = backgroundColor, shape)
             .clip(shape)
-            .heightIn(min = emojiHeight)
-            .clickable(onClick = onClick)
+            .heightIn(min = Spacings.Post.emojiHeight)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = { onLongClick(EmojiSelection.SINGLE(emojiId)) }
+            )
             .let {
                 if (selected) {
                     it.border(1.dp, MaterialTheme.colorScheme.primary, shape)
@@ -687,6 +695,7 @@ private fun EmojiChip(
                     it
                 }
             }
+            .testTag(getTestTagForEmojiId(emojiId, "POST_ITEM"))
     ) {
         Row(
             modifier = Modifier

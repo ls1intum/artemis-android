@@ -1,22 +1,32 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardAlt
 import androidx.compose.material.icons.filled.PersonOff
+import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -42,7 +52,8 @@ internal fun PotentialRecipientsUi(
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         InclusionListUi(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(),
             inclusionList = inclusionList,
             updateInclusionList = updateInclusionList
         )
@@ -58,7 +69,9 @@ internal fun PotentialRecipientsUi(
             onClickRetry = retryLoadPotentialRecipients
         ) { potentialRecipients ->
             PotentialRecipientsList(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding(),
                 recipients = potentialRecipients,
                 addRecipient = addRecipient,
                 isQueryTooShort = isQueryTooShort
@@ -73,30 +86,36 @@ private fun InclusionListUi(
     inclusionList: InclusionList,
     updateInclusionList: (InclusionList) -> Unit
 ) {
+    val chip: @Composable (Boolean, Int, () -> Unit) -> Unit = { selected, labelResId, onClick ->
+        FilterChip(
+            selected = selected,
+            onClick = onClick,
+            leadingIcon = {
+                if (selected) Icon(
+                    modifier = Modifier.size(18.dp),
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null
+                )
+            },
+            label = { Text(text = stringResource(id = labelResId)) }
+        )
+    }
+
     FlowRow(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        FilterChip(
-            selected = inclusionList.students,
-            onClick = {
-                updateInclusionList(inclusionList.copy(students = !inclusionList.students))
-            },
-            label = { Text(text = stringResource(id = R.string.conversation_member_selection_include_students)) }
-        )
+        chip(inclusionList.students, R.string.conversation_member_selection_include_students) {
+            updateInclusionList(inclusionList.copy(students = !inclusionList.students))
+        }
 
-        FilterChip(
-            selected = inclusionList.tutors,
-            onClick = {
-                updateInclusionList(inclusionList.copy(tutors = !inclusionList.tutors))
-            },
-            label = { Text(text = stringResource(id = R.string.conversation_member_selection_include_tutors)) }
-        )
+        chip(inclusionList.tutors, R.string.conversation_member_selection_include_tutors) {
+            updateInclusionList(inclusionList.copy(tutors = !inclusionList.tutors))
+        }
 
-        FilterChip(
-            selected = inclusionList.instructors,
-            onClick = {
-                updateInclusionList(inclusionList.copy(instructors = !inclusionList.instructors))
-            },
-            label = { Text(text = stringResource(id = R.string.conversation_member_selection_include_instructors)) }
-        )
+        chip(
+            inclusionList.instructors,
+            R.string.conversation_member_selection_include_instructors
+        ) {
+            updateInclusionList(inclusionList.copy(instructors = !inclusionList.instructors))
+        }
     }
 }
 
@@ -108,26 +127,41 @@ private fun PotentialRecipientsList(
     isQueryTooShort: Boolean
 ) {
     if (recipients.isNotEmpty()) {
-        LazyColumn(
-            modifier = modifier
-        ) {
-            items(recipients) { user ->
-                CourseUserListItem(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(testTagForPotentialRecipient(user.username.orEmpty())),
-                    user = user,
-                    trailingContent = {
-                        IconButton(onClick = { addRecipient(user) }) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = stringResource(
-                                    id = R.string.conversation_member_selection_content_description_add_recipient
+        Card {
+            // We need to add a bottom contentPadding of 90.dp here to prevent the last item from being hidden behind the FAB
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(bottom = 90.dp),
+            ) {
+                items(recipients) { user ->
+                    CourseUserListItem(
+                        modifier = Modifier
+                            .animateItem()
+                            .testTag(testTagForPotentialRecipient(user.username.orEmpty())),
+                        user = user,
+                        trailingContent = {
+                            IconButton(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .size(32.dp)
+                                    .background(MaterialTheme.colorScheme.surfaceContainer),
+                                onClick = { addRecipient(user) }
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    imageVector = Icons.Default.Add,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    contentDescription = stringResource(
+                                        id = R.string.conversation_member_selection_content_description_add_recipient
+                                    )
                                 )
-                            )
+                            }
                         }
-                    }
-                )
+                    )
+
+                    HorizontalDivider()
+                }
             }
         }
     } else {
