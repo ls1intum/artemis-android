@@ -10,8 +10,6 @@ import androidx.paging.insertSeparators
 import androidx.paging.map
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
@@ -112,12 +110,12 @@ class ConversationChatListUseCase(
 
     private val highestVisiblePostIndex = MutableStateFlow(0)
 
-    private val unreadMessagesCountDataStateFlow: Flow<DataState<Long>> = conversation.map {
+    private val unreadMessagesCountFlow: Flow<Long> = conversation.map {
         it.bind { conversation ->
             conversation.unreadMessagesCount ?: 0L
-        }
+        }.orElse(0L)
     }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, 0L)
 
     @OptIn(ExperimentalPagingApi::class)
     val postPagingData: Flow<PagingData<ChatListItem>> =
@@ -321,13 +319,8 @@ class ConversationChatListUseCase(
 
     private fun insertUnreadSeparator(pagingList: PagingData<ChatListItem>) =
         pagingList.insertSeparators { _, after: ChatListItem? ->
-            val unreadMessagesCountDataState = unreadMessagesCountDataStateFlow.first()
-            if (!unreadMessagesCountDataState.isSuccess) {
-                Log.d(TAG, "Failed to load unread messages count. Not inserting separator. $unreadMessagesCountDataState")
-                return@insertSeparators null
-            }
+            val unreadMessagesCount = unreadMessagesCountFlow.first()
 
-            val unreadMessagesCount = (unreadMessagesCountDataState as DataState.Success).data
             if (unreadMessagesCount == 0L) {
                 return@insertSeparators null
             }
