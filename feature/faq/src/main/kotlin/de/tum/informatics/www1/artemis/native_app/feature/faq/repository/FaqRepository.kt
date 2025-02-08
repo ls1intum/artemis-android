@@ -11,4 +11,11 @@ interface FaqRepository {
         authToken: String,
         serverUrl: String,
     ): Flow<DataState<List<Faq>>>
+
+    suspend fun getFaq(
+        courseId: Long,
+        faqId: Long,
+        authToken: String,
+        serverUrl: String,
+    ): Flow<DataState<Faq>>
 }

@@ -40,7 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.LectureListUi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
-import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.FaqOverviewUi
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview.FaqOverviewUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.IgnoreCustomBackHandling
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversation
@@ -91,6 +91,7 @@ fun NavGraphBuilder.course(
     onParticipateInQuiz: (courseId: Long, exerciseId: Long, isPractice: Boolean) -> Unit,
     onViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onNavigateToLecture: (courseId: Long, lectureId: Long) -> Unit,
+    onNavigateToFaq: (courseId: Long, faqId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val deepLinks = CourseDeeplinks.ToCourse.generateLinks() +
@@ -130,6 +131,7 @@ fun NavGraphBuilder.course(
             },
             onClickViewQuizResults = onViewQuizResults,
             onNavigateToLecture = { lectureId -> onNavigateToLecture(courseId, lectureId) },
+            onNavigateToFaq = { faqId -> onNavigateToFaq(courseId, faqId) },
             onNavigateBack = onNavigateBack
         )
     }
@@ -150,6 +152,7 @@ fun CourseUiScreen(
     onParticipateInQuiz: (exerciseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onNavigateToLecture: (lectureId: Long) -> Unit,
+    onNavigateToFaq: (faqId: Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val courseDataState by viewModel.course.collectAsState()
@@ -172,6 +175,7 @@ fun CourseUiScreen(
         courseId = courseId,
         weeklyLecturesDataState = weeklyLecturesDataState,
         onNavigateToLecture = onNavigateToLecture,
+        onNavigateToFaq = onNavigateToFaq,
         postId = postId,
         onReloadCourse = viewModel::reloadCourse,
         onClickStartTextExercise = { exerciseId: Long ->
@@ -203,6 +207,7 @@ internal fun CourseUiScreen(
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
     onNavigateToLecture: (lectureId: Long) -> Unit,
     onClickStartTextExercise: (exerciseId: Long) -> Unit,
+    onNavigateToFaq: (faqId: Long) -> Unit,
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit
 ) {
@@ -331,9 +336,7 @@ internal fun CourseUiScreen(
                 FaqOverviewUi(
                     modifier = Modifier.fillMaxSize(),
                     courseId = courseId,
-                    onNavigateToFaq = { faqId ->
-                        // TODO
-                    }
+                    onNavigateToFaq = onNavigateToFaq
                 )
             }
         }

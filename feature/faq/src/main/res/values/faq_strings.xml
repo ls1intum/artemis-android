@@ -4,5 +4,9 @@
     <string name="faq_loading_faqs_failed">Something went wrong while loading your FAQs.</string>
     <string name="faq_loading_faqs_try_again">Try again</string>
 
+    <string name="faq_loading_faq_loading">Fetching FAQ from the server …</string>
+    <string name="faq_loading_faq_failed">Something went wrong while loading your FAQ.</string>
+    <string name="faq_loading_faq_try_again">Try again</string>
+
     <string name="faq_overview_read_more">Read more</string>
 </resources>

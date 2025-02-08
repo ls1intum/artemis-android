@@ -4,7 +4,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.FaqRepo
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.FaqRepositoryImpl
 import de.tum.informatics.www1.artemis.native_app.feature.faq.service.remote.FaqRemoteService
 import de.tum.informatics.www1.artemis.native_app.feature.faq.service.remote.FaqRemoteServiceImpl
-import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.FaqOverviewViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.detail.FaqDetailViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview.FaqOverviewViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -15,6 +16,16 @@ val faqModule = module {
     viewModel { params ->
         FaqOverviewViewModel(
             params[0],
+            get(),
+            get(),
+            get(),
+        )
+    }
+
+    viewModel { params ->
+        FaqDetailViewModel(
+            params[0],
+            params[1],
             get(),
             get(),
             get(),

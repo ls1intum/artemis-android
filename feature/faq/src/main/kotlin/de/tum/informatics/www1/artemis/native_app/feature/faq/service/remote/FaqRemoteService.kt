@@ -9,4 +9,11 @@ interface FaqRemoteService {
         authToken: String,
         serverUrl: String,
     ): NetworkResponse<List<FaqDto>>
+
+    suspend fun getFaq(
+        courseId: Long,
+        faqId: Long,
+        authToken: String,
+        serverUrl: String,
+    ): NetworkResponse<FaqDto>
 }

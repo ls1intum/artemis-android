@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.faq.ui
+package de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +24,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.faq.R
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.FaqState
@@ -68,11 +70,13 @@ fun FaqOverviewUi(
         // TODO: empty state
         // TODO: search bar
 
-        FaqList(
-            modifier = Modifier.padding(16.dp),
-            faqs = faqs,
-            onNavigateToFaq = onNavigateToFaq
-        )
+        ProvideMarkwon {
+            FaqList(
+                modifier = Modifier.padding(16.dp),
+                faqs = faqs,
+                onNavigateToFaq = onNavigateToFaq
+            )
+        }
     }
 }
 
@@ -121,11 +125,11 @@ private fun FaqPreviewItem(
                 overflow = TextOverflow.Ellipsis
             )
 
-            Text(
-                text = faq.questionAnswer,
+            // TODO: Images are not displayed. I am not sure why
+            MarkdownText(
+                markdown = faq.questionAnswer,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 8,
-                overflow = TextOverflow.Ellipsis
             )
 
             TextButton(

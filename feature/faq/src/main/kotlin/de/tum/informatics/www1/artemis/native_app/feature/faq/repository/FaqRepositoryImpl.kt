@@ -28,4 +28,22 @@ class FaqRepositoryImpl(
             }
         }
     }
+
+    override suspend fun getFaq(
+        courseId: Long,
+        faqId: Long,
+        authToken: String,
+        serverUrl: String,
+    ): Flow<DataState<Faq>> {
+        return retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            remoteService.getFaq(
+                courseId = courseId,
+                faqId = faqId,
+                authToken = authToken,
+                serverUrl = serverUrl,
+            ).bind {
+                it.toFaq()
+            }
+        }
+    }
 }

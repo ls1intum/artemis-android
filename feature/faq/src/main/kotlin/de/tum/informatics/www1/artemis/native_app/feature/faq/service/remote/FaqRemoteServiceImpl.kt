@@ -32,4 +32,27 @@ class FaqRemoteServiceImpl(
             }.body()
         }
     }
+
+    override suspend fun getFaq(
+        courseId: Long,
+        faqId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<FaqDto> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.get(serverUrl) {
+                url {
+                    appendPathSegments(
+                        "api",
+                        "courses",
+                        courseId.toString(),
+                        "faqs",
+                        faqId.toString()
+                    )
+                }
+
+                cookieAuth(authToken)
+            }.body()
+        }
+    }
 }
