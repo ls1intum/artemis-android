@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
@@ -51,7 +52,6 @@ fun FaqOverviewUi(
 }
 
 
-
 @Composable
 fun FaqOverviewUi(
     modifier: Modifier = Modifier,
@@ -60,7 +60,9 @@ fun FaqOverviewUi(
     onNavigateToFaq: (faqId: Long) -> Unit
 ) {
     BasicDataStateUi(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = Spacings.ScreenHorizontalSpacing),
         dataState = faqsDataState,
         loadingText = stringResource(id = R.string.faq_loading_faqs_loading),
         failureText = stringResource(id = R.string.faq_loading_faqs_failed),
@@ -72,7 +74,7 @@ fun FaqOverviewUi(
 
         ProvideMarkwon {
             FaqList(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.fillMaxSize(),
                 faqs = faqs,
                 onNavigateToFaq = onNavigateToFaq
             )
@@ -89,6 +91,7 @@ private fun FaqList(
 ) {
     LazyColumn(
         modifier = modifier,
+        contentPadding = Spacings.calculateEndOfPagePaddingValues(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(faqs) { faq ->
@@ -130,6 +133,7 @@ private fun FaqPreviewItem(
                 markdown = faq.questionAnswer,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 8,
+                onClick = onClick
             )
 
             TextButton(
