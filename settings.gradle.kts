@@ -40,6 +40,7 @@ include(":feature:lecture-view")
 include(":feature:quiz")
 include(":feature:settings")
 include(":feature:push")
+include(":feature:faq")
 
 include(":feature:metis")
 include(":feature:metis:shared")
