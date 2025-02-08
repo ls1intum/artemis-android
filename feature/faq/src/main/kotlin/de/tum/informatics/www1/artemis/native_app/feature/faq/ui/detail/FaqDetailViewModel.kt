@@ -28,7 +28,6 @@ class FaqDetailViewModel(
 
     private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-
     val faq: StateFlow<DataState<Faq>> = flatMapLatest(
         serverConfigurationService.serverUrl,
         accountService.authToken,
@@ -42,7 +41,6 @@ class FaqDetailViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    // TODO: create reloadableCourseBasedViewModel
     fun requestReload() {
         onRequestReload.tryEmit(Unit)
     }

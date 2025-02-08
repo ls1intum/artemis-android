@@ -9,6 +9,6 @@ internal fun FaqDto.toFaq() = Faq(
     id = id,
     questionTitle = questionTitle,
     questionAnswer = questionAnswer,
-    categories = listOf(),  // TODO: Ignored for now
+    categories = listOf(),  // TODO: Ignored for now and will be tackled in a follow-up PR
     faqState = FaqState.valueOf(faqState)
 )
