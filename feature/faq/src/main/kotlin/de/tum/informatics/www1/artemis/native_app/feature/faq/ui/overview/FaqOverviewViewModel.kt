@@ -11,8 +11,10 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.FaqRepository
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
@@ -28,7 +30,7 @@ class FaqOverviewViewModel(
 
     private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    val faqs: StateFlow<DataState<List<Faq>>> = flatMapLatest(
+    private val allFaqs: StateFlow<DataState<List<Faq>>> = flatMapLatest(
         serverConfigurationService.serverUrl,
         accountService.authToken,
         onRequestReload.onStart { emit(Unit) },
@@ -41,8 +43,32 @@ class FaqOverviewViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
+    val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
+
+    val displayedFaqs: StateFlow<DataState<List<Faq>>> = combine(
+        allFaqs,
+        searchQuery
+    ) { faqsDataState, query ->
+        if (query.isBlank()) {
+            return@combine faqsDataState
+        }
+
+        faqsDataState.bind { faqs ->
+            faqs.filter {
+                it.questionTitle.contains(query, ignoreCase = true) ||
+                it.questionAnswer.contains(query, ignoreCase = true)
+            }
+        }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
 
     fun requestReload() {
         onRequestReload.tryEmit(Unit)
+    }
+
+    fun updateQuery(newQuery: String) {
+        _searchQuery.value = newQuery
     }
 }

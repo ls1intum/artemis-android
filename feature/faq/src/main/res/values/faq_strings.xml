@@ -9,4 +9,10 @@
     <string name="faq_loading_faq_try_again">Try again</string>
 
     <string name="faq_overview_read_more">Read more</string>
+
+    <string name="faq_overview_no_faqs">No FAQs found</string>
+    <string name="faq_overview_no_faqs_search">No FAQs matching your query found</string>
+    <string name="faq_search_hint">Search</string>
+
+
 </resources>

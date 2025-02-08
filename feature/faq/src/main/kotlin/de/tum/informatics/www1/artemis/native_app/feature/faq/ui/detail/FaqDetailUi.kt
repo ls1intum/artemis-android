@@ -133,7 +133,7 @@ private fun FaqDetail(
 
         MarkdownText(
             markdown = faq.questionAnswer,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
         )
     }
 }

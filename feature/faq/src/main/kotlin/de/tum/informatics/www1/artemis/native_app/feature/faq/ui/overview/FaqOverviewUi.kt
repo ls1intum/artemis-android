@@ -3,11 +3,16 @@ package de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.feature.faq.R
@@ -41,11 +48,14 @@ fun FaqOverviewUi(
 ) {
     val viewModel = koinViewModel<FaqOverviewViewModel> { parametersOf(courseId) }
 
-    val faqs by viewModel.faqs.collectAsState()
+    val faqs by viewModel.displayedFaqs.collectAsState()
+    val query by viewModel.searchQuery.collectAsState()
 
     FaqOverviewUi(
         modifier = modifier,
         faqsDataState = faqs,
+        query = query,
+        onUpdateQuery = viewModel::updateQuery,
         onReloadRequest = viewModel::requestReload,
         onNavigateToFaq = onNavigateToFaq
     )
@@ -56,6 +66,8 @@ fun FaqOverviewUi(
 fun FaqOverviewUi(
     modifier: Modifier = Modifier,
     faqsDataState: DataState<List<Faq>>,
+    query: String,
+    onUpdateQuery: (String) -> Unit,
     onReloadRequest: () -> Unit,
     onNavigateToFaq: (faqId: Long) -> Unit
 ) {
@@ -69,10 +81,54 @@ fun FaqOverviewUi(
         retryButtonText = stringResource(id = R.string.faq_loading_faqs_try_again),
         onClickRetry = onReloadRequest
     ) { faqs ->
-        // TODO: empty state
-        // TODO: search bar
-
         ProvideMarkwon {
+            FaqOverviewBody(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding(),
+                faqs = faqs,
+                query = query,
+                onUpdateQuery = onUpdateQuery,
+                onNavigateToFaq = onNavigateToFaq
+            )
+        }
+    }
+}
+
+@Composable
+private fun FaqOverviewBody(
+    modifier: Modifier = Modifier,
+    faqs: List<Faq>,
+    query: String,
+    onUpdateQuery: (String) -> Unit,
+    onNavigateToFaq: (Long) -> Unit
+) {
+    val isSearching = query.isNotBlank()
+
+    Column(
+        modifier = modifier,
+    ) {
+        BasicSearchTextField(
+            modifier = Modifier.fillMaxWidth(),
+            query = query,
+            updateQuery = onUpdateQuery,
+            hint = stringResource(R.string.faq_search_hint),
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (faqs.isEmpty()) {
+            val emptyStringResId = if (isSearching) {
+                R.string.faq_overview_no_faqs_search
+            } else {
+                R.string.faq_overview_no_faqs
+            }
+            EmptyListHint(
+                modifier = Modifier.fillMaxSize(),
+                hint = stringResource(emptyStringResId),
+                icon = Icons.AutoMirrored.Filled.Help
+            )
+        } else {
             FaqList(
                 modifier = Modifier.fillMaxSize(),
                 faqs = faqs,
@@ -96,7 +152,9 @@ private fun FaqList(
     ) {
         items(faqs) { faq ->
             FaqPreviewItem(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateItem(),
                 faq = faq,
                 onClick = { onNavigateToFaq(faq.id) }
             )
@@ -131,7 +189,7 @@ private fun FaqPreviewItem(
             // TODO: Images are not displayed. I am not sure why
             MarkdownText(
                 markdown = faq.questionAnswer,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 maxLines = 8,
                 onClick = onClick
             )
@@ -144,7 +202,6 @@ private fun FaqPreviewItem(
             }
         }
     }
-
 }
 
 
