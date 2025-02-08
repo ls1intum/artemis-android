@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "de.tum.informatics.www1.artemis.native_app.feature.login"
+    namespace = "de.tum.informatics.www1.artemis.native_app.feature.faq"
 }
 
 dependencies {

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -143,6 +144,12 @@ private data class BottomNavigationItem(
                 labelStringId = R.string.course_ui_tab_communication,
                 icon = Icons.AutoMirrored.Filled.Chat,
                 route = CourseTab.Communication
+            ),
+            // TODO: Only include the FAQ tab if the course has faq enabled
+            BottomNavigationItem(
+                labelStringId = R.string.course_ui_tab_faq,
+                icon = Icons.Default.QuestionMark,
+                route = CourseTab.Faq
             ),
         )
     }

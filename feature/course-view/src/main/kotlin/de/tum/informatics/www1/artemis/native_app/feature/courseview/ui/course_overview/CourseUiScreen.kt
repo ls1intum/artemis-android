@@ -40,6 +40,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.LectureListUi
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.exercise_list.ExerciseListUi
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.FaqOverviewUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ConversationConfiguration
 import de.tum.informatics.www1.artemis.native_app.feature.metis.IgnoreCustomBackHandling
 import de.tum.informatics.www1.artemis.native_app.feature.metis.NavigateToUserConversation
@@ -74,6 +75,8 @@ internal sealed class CourseTab {
     data object Lectures : CourseTab()
     @Serializable
     data object Communication : CourseTab()
+    @Serializable
+    data object Faq : CourseTab()
 }
 
 
@@ -319,6 +322,18 @@ internal fun CourseUiScreen(
                     courseId = courseId,
                     scaffold = scaffold,
                     initialConfiguration = initialConfiguration
+                )
+            }
+        }
+
+        composable<CourseTab.Faq> {
+            scaffold {
+                FaqOverviewUi(
+                    modifier = Modifier.fillMaxSize(),
+                    courseId = courseId,
+                    onNavigateToFaq = { faqId ->
+                        // TODO
+                    }
                 )
             }
         }

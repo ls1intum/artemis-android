@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="faq_loading_faqs_loading">Fetching FAQs from the server …</string>
+    <string name="faq_loading_faqs_failed">Something went wrong while loading your FAQs.</string>
+    <string name="faq_loading_faqs_try_again">Try again</string>
+
+    <string name="faq_overview_read_more">Read more</string>
+</resources>

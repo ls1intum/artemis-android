@@ -17,12 +17,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.feature.faq.R
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.FaqState
 import org.koin.androidx.compose.koinViewModel
@@ -58,9 +60,9 @@ fun FaqOverviewUi(
     BasicDataStateUi(
         modifier = modifier.fillMaxWidth(),
         dataState = faqsDataState,
-        loadingText = "Loading Faqs",
-        failureText = "Failed to load Faqs",    // TODO: string resources
-        retryButtonText = "Try again",
+        loadingText = stringResource(id = R.string.faq_loading_faqs_loading),
+        failureText = stringResource(id = R.string.faq_loading_faqs_failed),
+        retryButtonText = stringResource(id = R.string.faq_loading_faqs_try_again),
         onClickRetry = onReloadRequest
     ) { faqs ->
         // TODO: empty state
@@ -130,7 +132,7 @@ private fun FaqPreviewItem(
                 onClick = onClick,
                 modifier = Modifier.align(Alignment.End)
             ) {
-                Text("Read more")
+                Text(stringResource(R.string.faq_overview_read_more))
             }
         }
     }

@@ -120,6 +120,7 @@ dependencies {
     implementation(project(":feature:quiz"))
     implementation(project(":feature:push"))
     implementation(project(":feature:metis"))
+    implementation(project(":feature:faq"))
 
     kover(project(":core:common"))
     kover(project(":core:data"))
