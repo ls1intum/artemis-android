@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -134,6 +135,11 @@ private fun FaqDetail(
         MarkdownText(
             markdown = faq.questionAnswer,
             style = MaterialTheme.typography.bodyLarge,
+        )
+
+        Spacer(modifier = Modifier
+            .height(Spacings.EndOfScrollablePageSpacing)
+            .navigationBarsPadding()
         )
     }
 }

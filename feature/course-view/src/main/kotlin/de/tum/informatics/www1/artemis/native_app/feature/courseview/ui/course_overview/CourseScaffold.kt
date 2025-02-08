@@ -50,6 +50,7 @@ internal fun CourseScaffold(
         },
         bottomBar = {
             BottomNavigationBar(
+                courseDataState = courseDataState,
                 isSelected = isCourseTabSelected,
                 onUpdateSelectedTab = updateSelectedCourseTab
             )
@@ -96,12 +97,20 @@ private fun CourseTopAppBar(
 
 @Composable
 private fun BottomNavigationBar(
+    courseDataState: DataState<Course>,
     isSelected: (CourseTab) -> Boolean,
     onUpdateSelectedTab: (CourseTab) -> Unit
 ) {
-    NavigationBar {
-        BottomNavigationItem.topLevelRoutes.forEach { navigationItem ->
+    val navItems = BottomNavigationItem.defaults.toMutableList()
+    if (courseDataState.isSuccess) {
+        val course = (courseDataState as DataState.Success).data
+        if (course.faqEnabled) {
+            navItems += BottomNavigationItem.faq
+        }
+    }
 
+    NavigationBar {
+        navItems.forEach { navigationItem ->
             val labelText = stringResource(id = navigationItem.labelStringId)
             NavigationBarItem(
                 selected = isSelected(navigationItem.route),
@@ -129,29 +138,31 @@ private data class BottomNavigationItem(
     val route: CourseTab,
 ) {
     companion object {
-        val topLevelRoutes: List<BottomNavigationItem> = listOf(
-            BottomNavigationItem(
-                labelStringId =R.string.course_ui_tab_exercises,
-                icon = Icons.AutoMirrored.Filled.ListAlt,
-                route = CourseTab.Exercises
-            ),
-            BottomNavigationItem(
-                labelStringId = R.string.course_ui_tab_lectures,
-                icon = Icons.Default.School,
-                route = CourseTab.Lectures
-            ),
-            BottomNavigationItem(
-                labelStringId = R.string.course_ui_tab_communication,
-                icon = Icons.AutoMirrored.Filled.Chat,
-                route = CourseTab.Communication
-            ),
-            // TODO: Only include the FAQ tab if the course has faq enabled
-            BottomNavigationItem(
-                labelStringId = R.string.course_ui_tab_faq,
-                icon = Icons.Default.QuestionMark,
-                route = CourseTab.Faq
-            ),
+        val exercise = BottomNavigationItem(
+            labelStringId =R.string.course_ui_tab_exercises,
+            icon = Icons.AutoMirrored.Filled.ListAlt,
+            route = CourseTab.Exercises
         )
+
+        val lecture = BottomNavigationItem(
+            labelStringId = R.string.course_ui_tab_lectures,
+            icon = Icons.Default.School,
+            route = CourseTab.Lectures
+        )
+
+        val communication = BottomNavigationItem(
+            labelStringId = R.string.course_ui_tab_communication,
+            icon = Icons.AutoMirrored.Filled.Chat,
+            route = CourseTab.Communication
+        )
+
+        val faq = BottomNavigationItem(
+            labelStringId = R.string.course_ui_tab_faq,
+            icon = Icons.Default.QuestionMark,
+            route = CourseTab.Faq
+        )
+
+        val defaults = listOf(exercise, lecture, communication)
     }
 }
 
