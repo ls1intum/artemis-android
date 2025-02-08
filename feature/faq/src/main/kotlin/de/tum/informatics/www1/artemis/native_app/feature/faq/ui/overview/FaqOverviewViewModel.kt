@@ -24,8 +24,8 @@ class FaqOverviewViewModel(
     courseId: Long,
     private val faqRepository: FaqRepository,
     serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
-    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
+    accountService: AccountService,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 
     private val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
