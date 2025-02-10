@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.work.BaseCreatePostWorker
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
@@ -14,8 +12,6 @@ import kotlinx.datetime.Clock
 class UpdateReplyNotificationWorker(
     appContext: Context,
     params: WorkerParameters,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
     private val accountDataService: AccountDataService,
     private val communicationNotificationManager: CommunicationNotificationManager,
 ) : BaseCreatePostWorker(appContext, params) {

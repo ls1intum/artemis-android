@@ -133,8 +133,6 @@ internal open class ConversationViewModel(
     metisService: MetisService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
-    serverConfigurationService,
-    accountService,
     accountDataService,
     networkStatusProvider,
     websocketProvider,

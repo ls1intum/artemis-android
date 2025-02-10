@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
@@ -22,7 +21,6 @@ import kotlinx.datetime.Clock
 class CreateClientSidePostWorker(
     appContext: Context,
     params: WorkerParameters,
-    private val accountService: AccountService,
     private val accountDataService: AccountDataService,
     private val metisStorageService: MetisStorageService,
     private val serverConfigurationService: ServerConfigurationService,

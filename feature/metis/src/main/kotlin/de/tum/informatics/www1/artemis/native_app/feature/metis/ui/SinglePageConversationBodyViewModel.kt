@@ -26,7 +26,7 @@ internal class SinglePageConversationBodyViewModel(
     courseService: CourseService,
     accountDataService: AccountDataService,
     networkStatusProvider: NetworkStatusProvider,
-    private val coroutineContext: CoroutineContext = EmptyCoroutineContext
+    coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 
     val canCreateChannel: StateFlow<Boolean> = flatMapLatest(

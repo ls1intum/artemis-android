@@ -80,8 +80,6 @@ class ConversationOverviewViewModel(
     private val courseService: CourseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
-    serverConfigurationService,
-    accountService,
     accountDataService,
     networkStatusProvider,
     websocketProvider,

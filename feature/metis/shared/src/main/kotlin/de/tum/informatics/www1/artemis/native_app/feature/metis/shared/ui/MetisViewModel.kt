@@ -7,8 +7,6 @@ import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndefinetly
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,12 +25,10 @@ import kotlin.coroutines.CoroutineContext
  * Base view model which handles logic such as creating posts and reactions.
  */
 abstract class MetisViewModel(
-    serverConfigurationService: ServerConfigurationService,
-    accountService: AccountService,
     private val accountDataService: AccountDataService,
     private val networkStatusProvider: NetworkStatusProvider,
     websocketProvider: WebsocketProvider,
-    private val coroutineContext: CoroutineContext
+    coroutineContext: CoroutineContext
 ) : ViewModel() {
 
     protected val onRequestReload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
