@@ -120,10 +120,6 @@ internal fun CoursesOverview(
         if (shouldDisplayBetaDialog) displayBetaDialog = true
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.reorderCourses()
-    }
-
     LaunchedEffect(sorting, query) {
         courseListState.scrollToItem(lastIndex, lastOffset)
     }
@@ -271,17 +267,17 @@ private fun SearchAndOrderRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(modifier = Modifier.weight(1f)) {
-            BasicSearchTextField(
-                modifier = Modifier.fillMaxWidth(),
-                hint = stringResource(id = R.string.course_overview_search_courses_hint),
-                query = query,
-                updateQuery = {
-                    if (query.isBlank()) captureListPosition()
-                    onUpdateQuery(it)
-                },
-            )
-        }
+        BasicSearchTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            hint = stringResource(id = R.string.course_overview_search_courses_hint),
+            query = query,
+            updateQuery = {
+                if (query.isBlank()) captureListPosition()
+                onUpdateQuery(it)
+            },
+        )
 
         IconButton(
             modifier = Modifier

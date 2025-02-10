@@ -40,6 +40,7 @@ internal class CourseOverviewViewModel(
      * Emit a unit to this flow, to reload the dashboard.
      */
     private val reloadDashboard = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private val courseAccess = MutableSharedFlow<Long>(extraBufferCapacity = 1)
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query
@@ -66,13 +67,32 @@ internal class CourseOverviewViewModel(
         }
     }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
-    // Load the dashboard on init and whenever the reloadDashboard flow emits a value.
+    /**
+     * Load the dashboard on init and whenever the reloadDashboard flow emits a value.
+     * Trigger a reordering of the courses when a course is accessed.
+     */
     init {
+        viewModelScope.launch(coroutineContext) {
+            courseAccess.collect {
+                val currentState = _dashboardState.value
+
+                if (currentState is DataState.Success) {
+                    val currentDashboard = currentState.data
+                    val finalDashboard = extractCoursesInSections(
+                        serverConfigurationService.serverUrl.first(),
+                        currentDashboard
+                    )
+                    _dashboardState.value = DataState.Success(finalDashboard)
+                }
+            }
+        }
+
         viewModelScope.launch(coroutineContext) {
             reloadDashboard.collect {
                 loadDashboard(coroutineContext)
             }
         }
+
         loadDashboard(coroutineContext)
     }
 
@@ -90,22 +110,6 @@ internal class CourseOverviewViewModel(
                 }
             }.collect {
                 _dashboardState.value = it
-            }
-        }
-    }
-
-    fun reorderCourses() {
-        val currentState = _dashboardState.value
-
-        if (currentState is DataState.Success) {
-            val currentDashboard = currentState.data
-
-            viewModelScope.launch {
-                val finalDashboard = extractCoursesInSections(
-                    serverConfigurationService.serverUrl.first(),
-                    currentDashboard
-                )
-                _dashboardState.value = DataState.Success(finalDashboard)
             }
         }
     }
@@ -131,6 +135,7 @@ internal class CourseOverviewViewModel(
             courseId = courseId,
             serverHost = serverUrl
         )
+        courseAccess.tryEmit(courseId)
     }
 
     /**
