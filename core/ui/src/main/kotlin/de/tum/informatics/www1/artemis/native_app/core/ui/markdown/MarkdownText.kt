@@ -77,7 +77,7 @@ import org.commonmark.node.SoftLineBreak
  */
 
 val LocalMarkdownTransformer =
-    compositionLocalOf<ArtemisMarkdownTransformer> { ArtemisMarkdownTransformer }
+    compositionLocalOf<ArtemisMarkdownTransformer> { ArtemisMarkdownTransformer.Default }
 
 private const val DEFAULT_IMAGE_HEIGHT = 800
 private const val LINK_TYPE_HINT_ICON_HEIGHT = 52

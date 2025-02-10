@@ -24,6 +24,7 @@ val faqModule = module {
         FaqDetailViewModel(
             params[0],
             params[1],
+            get(),
             get()
         )
     }

@@ -208,7 +208,6 @@ private fun FaqPreviewItem(
                 overflow = TextOverflow.Ellipsis
             )
 
-            // TODO: Images are not displayed. I am not sure why. @Julian, do you have an idea?
             MarkdownText(
                 markdown = faq.questionAnswer,
                 style = MaterialTheme.typography.bodyLarge,

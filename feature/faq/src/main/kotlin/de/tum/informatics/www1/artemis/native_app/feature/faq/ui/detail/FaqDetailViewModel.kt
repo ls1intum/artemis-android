@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.FaqRepository
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -19,6 +21,7 @@ class FaqDetailViewModel(
     courseId: Long,
     faqId: Long,
     private val faqRepository: FaqRepository,
+    serverConfigurationService: ServerConfigurationService,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 
@@ -31,6 +34,9 @@ class FaqDetailViewModel(
         )
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+    val serverUrl: StateFlow<String> = serverConfigurationService.serverUrl
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, "")
 
     fun requestReload() {
         onRequestReload.tryEmit(Unit)

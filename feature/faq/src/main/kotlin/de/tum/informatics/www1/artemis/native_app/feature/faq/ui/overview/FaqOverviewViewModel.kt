@@ -52,7 +52,6 @@ class FaqOverviewViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-
     fun requestReload() {
         onRequestReload.tryEmit(Unit)
     }

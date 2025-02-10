@@ -18,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -32,11 +33,13 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
+import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.LocalMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwon
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.faq.R
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.rememberFaqArtemisMarkdownTransformer
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -67,12 +70,17 @@ fun NavGraphBuilder.faqDetail(
         val viewModel = koinViewModel<FaqDetailViewModel> { parametersOf(courseId, faqId) }
         val faq by viewModel.faq.collectAsState()
 
-        FaqDetailUi(
-            modifier = Modifier.fillMaxSize(),
-            faqDataState = faq,
-            onReloadRequest = viewModel::requestReload,
-            onNavigateBack = onNavigateBack
-        )
+        val serverUrl by viewModel.serverUrl.collectAsState()
+        val markdownTransformer = rememberFaqArtemisMarkdownTransformer(serverUrl)
+
+        CompositionLocalProvider(LocalMarkdownTransformer provides markdownTransformer) {
+            FaqDetailUi(
+                modifier = Modifier.fillMaxSize(),
+                faqDataState = faq,
+                onReloadRequest = viewModel::requestReload,
+                onNavigateBack = onNavigateBack
+            )
+        }
     }
 }
 
