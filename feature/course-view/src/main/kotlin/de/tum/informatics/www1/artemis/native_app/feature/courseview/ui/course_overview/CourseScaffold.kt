@@ -118,6 +118,8 @@ private fun BottomNavigationBar(
                     Text(
                         text = labelText,
                         maxLines = 1,
+                        // On small devices the "Communication Label would overflow onto two lines
+                        // when FAQ is enabled. Therefore trim the label to one line.
                         overflow = TextOverflow.Ellipsis
                     )
                 },
