@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -63,24 +64,24 @@ internal class CourseOverviewViewModel(
         } else {
             dashboardState
         }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+    }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     // Load the dashboard on init and whenever the reloadDashboard flow emits a value.
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(coroutineContext) {
             reloadDashboard.collect {
-                loadDashboard()
+                loadDashboard(coroutineContext)
             }
         }
-        loadDashboard()
+        loadDashboard(coroutineContext)
     }
 
     /**
      * Always emits the latest dashboard. Automatically updated when [requestReloadDashboard] is requested,
      * the login status changes or the server is updated.
      */
-    private fun loadDashboard() {
-        viewModelScope.launch {
+    private fun loadDashboard(context: CoroutineContext) {
+        viewModelScope.launch(context) {
             val authToken = accountService.authToken.first()
             val serverUrl = serverConfigurationService.serverUrl.first()
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
@@ -147,19 +148,19 @@ internal class CourseOverviewViewModel(
         val recentlyAccessedCourseMap =
             dashboardStorageService.getLastAccesssedCourses(serverUrl).first()
 
-        val coursesToMove = currentDashboard.courses.filter { course ->
+        val newlyRecentCourses = currentDashboard.courses.filter { course ->
             recentlyAccessedCourseMap.containsKey(course.course.id)
         }.toSet()
-        val coursesToRemove = currentDashboard.recentCourses.filter { course ->
+        val noLongerRecentCourses = currentDashboard.recentCourses.filter { course ->
             !recentlyAccessedCourseMap.containsKey(course.course.id)
         }.toSet()
 
-        if (coursesToMove.isEmpty() && coursesToRemove.isEmpty()) {
+        if (newlyRecentCourses.isEmpty() && noLongerRecentCourses.isEmpty()) {
             return currentDashboard
         }
 
-        val updatedCourses = currentDashboard.courses - coursesToMove + coursesToRemove
-        val updatedRecentCourses = currentDashboard.recentCourses - coursesToRemove + coursesToMove
+        val updatedCourses = currentDashboard.courses - newlyRecentCourses + noLongerRecentCourses
+        val updatedRecentCourses = currentDashboard.recentCourses - noLongerRecentCourses + newlyRecentCourses
 
        return Dashboard(
             courses = sortCourses(updatedCourses, sorting),

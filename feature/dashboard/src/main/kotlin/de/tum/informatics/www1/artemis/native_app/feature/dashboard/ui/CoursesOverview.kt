@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SearchOff
@@ -29,7 +30,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -108,6 +111,10 @@ internal fun CoursesOverview(
     val query by viewModel.query.collectAsState()
     val sorting by viewModel.sorting.collectAsState()
 
+    val courseListState = rememberLazyGridState()
+    var lastIndex by remember { mutableIntStateOf(0) }
+    var lastOffset by remember { mutableIntStateOf(0) }
+
     // Trigger the dialog if service sets value to true
     LaunchedEffect(shouldDisplayBetaDialog) {
         if (shouldDisplayBetaDialog) displayBetaDialog = true
@@ -115,6 +122,10 @@ internal fun CoursesOverview(
 
     LaunchedEffect(Unit) {
         viewModel.reorderCourses()
+    }
+
+    LaunchedEffect(sorting, query) {
+        courseListState.scrollToItem(lastIndex, lastOffset)
     }
 
     Scaffold(
@@ -179,42 +190,17 @@ internal fun CoursesOverview(
                 surveyHintService = surveyHintService
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    BasicSearchTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        hint = stringResource(id = R.string.course_overview_search_courses_hint),
-                        query = query,
-                        updateQuery = viewModel::onUpdateQuery,
-                    )
+            SearchAndOrderRow(
+                modifier = Modifier.fillMaxWidth(),
+                query = query,
+                sorting = sorting,
+                onUpdateQuery = viewModel::onUpdateQuery,
+                onUpdateSorting = viewModel::onUpdateSorting,
+                captureListPosition = {
+                    lastIndex = courseListState.firstVisibleItemIndex
+                    lastOffset = courseListState.firstVisibleItemScrollOffset
                 }
-
-                IconButton(
-                    modifier = Modifier
-                        .size(24.dp),
-                    onClick = {
-                        val newSorting = if (sorting == CourseSorting.ALPHABETICAL_ASCENDING) {
-                            CourseSorting.ALPHABETICAL_DESCENDING
-                        } else {
-                            CourseSorting.ALPHABETICAL_ASCENDING
-                        }
-                        viewModel.onUpdateSorting(newSorting)
-                    }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        painter = if (sorting == CourseSorting.ALPHABETICAL_ASCENDING) painterResource(id = R.drawable.alphabetical_sorting_descending) else painterResource(id = R.drawable.alphabetical_sorting_ascending),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
-            }
+            )
 
             BasicDataStateUi(
                 modifier = Modifier.fillMaxSize(),
@@ -240,6 +226,7 @@ internal fun CoursesOverview(
                             .fillMaxSize()
                             .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                             .testTag(TEST_TAG_COURSE_LIST),
+                        courseListState = courseListState,
                         courses = dashboard.courses,
                         recentCourses = dashboard.recentCourses,
                         onClickOnCourse = { course ->
@@ -265,6 +252,56 @@ internal fun CoursesOverview(
             } else {
                 displayBetaDialog = false
             }
+        }
+    }
+}
+
+@Composable
+private fun SearchAndOrderRow(
+    modifier: Modifier,
+    query: String,
+    sorting: CourseSorting,
+    onUpdateQuery: (String) -> Unit,
+    onUpdateSorting: (CourseSorting) -> Unit,
+    captureListPosition: () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(modifier = Modifier.weight(1f)) {
+            BasicSearchTextField(
+                modifier = Modifier.fillMaxWidth(),
+                hint = stringResource(id = R.string.course_overview_search_courses_hint),
+                query = query,
+                updateQuery = {
+                    if (query.isBlank()) captureListPosition()
+                    onUpdateQuery(it)
+                },
+            )
+        }
+
+        IconButton(
+            modifier = Modifier
+                .size(24.dp),
+            onClick = {
+                val newSorting = if (sorting == CourseSorting.ALPHABETICAL_ASCENDING) {
+                    CourseSorting.ALPHABETICAL_DESCENDING
+                } else {
+                    CourseSorting.ALPHABETICAL_ASCENDING
+                }
+                captureListPosition()
+                onUpdateSorting(newSorting)
+            }
+        ) {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                painter = if (sorting == CourseSorting.ALPHABETICAL_ASCENDING) painterResource(id = R.drawable.alphabetical_sorting_descending) else painterResource(id = R.drawable.alphabetical_sorting_ascending),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }

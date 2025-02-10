@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +35,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.R
 fun CourseList(
     modifier: Modifier,
     courses: List<CourseWithScore>,
+    courseListState: LazyGridState,
     recentCourses: List<CourseWithScore>,
     onClickOnCourse: (Course) -> Unit
 ) {
@@ -47,6 +49,7 @@ fun CourseList(
     LazyVerticalGrid(
         modifier = modifier.consumeWindowInsets(WindowInsets.navigationBars),
         columns = GridCells.Fixed(columnCount),
+        state = courseListState,
         verticalArrangement = Arrangement.spacedBy(Spacings.CourseItem.gridSpacing),
         horizontalArrangement = Arrangement.spacedBy(Spacings.CourseItem.gridSpacing),
         contentPadding = Spacings.calculateEndOfPagePaddingValues()
@@ -59,7 +62,9 @@ fun CourseList(
 
         items(recentCourses, key = { it.course.id ?: 0L }) { course ->
             CourseItem(
-                modifier = courseItemModifier.testTag(testTagForCourse(course.course.id!!)),
+                modifier = courseItemModifier
+                    .animateItem()
+                    .testTag(testTagForCourse(course.course.id!!)),
                 courseWithScore = course,
                 onClick = { onClickOnCourse(course.course) }
             )
@@ -73,7 +78,9 @@ fun CourseList(
 
         items(courses, key = { it.course.id ?: 0L }) { course ->
             CourseItem(
-                modifier = courseItemModifier.testTag(testTagForCourse(course.course.id!!)),
+                modifier = courseItemModifier
+                    .animateItem()
+                    .testTag(testTagForCourse(course.course.id!!)),
                 courseWithScore = course,
                 onClick = { onClickOnCourse(course.course) }
             )
