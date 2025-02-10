@@ -5,10 +5,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.network.Acco
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 
 class AccountDataServiceStub(private val account: Account = Account()) : AccountDataService {
-    override suspend fun getAccountData(
-        serverUrl: String,
-        bearerToken: String
-    ): NetworkResponse<Account> = NetworkResponse.Response(account)
+    override suspend fun getAccountData(): NetworkResponse<Account> = NetworkResponse.Response(account)
 
-    override suspend fun getCachedAccountData(serverUrl: String, bearerToken: String): Account = account
+    override suspend fun getCachedAccountData(): Account = account
 }

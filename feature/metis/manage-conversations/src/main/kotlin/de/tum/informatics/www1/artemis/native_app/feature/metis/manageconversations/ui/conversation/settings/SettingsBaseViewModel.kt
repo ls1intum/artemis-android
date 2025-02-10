@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.plus
@@ -57,13 +58,9 @@ abstract class SettingsBaseViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    val clientUsername: StateFlow<DataState<String>> = flatMapLatest(
-        accountService.authToken,
-        serverConfigurationService.serverUrl,
-        onRequestReload.onStart { emit(Unit) }
-    ) { authToken, serverUrl, _ ->
+    val clientUsername: StateFlow<DataState<String>> = onRequestReload.onStart { emit(Unit) }.flatMapLatest {
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            accountDataService.getAccountData(serverUrl, authToken)
+            accountDataService.getAccountData()
         }
             .map { accountDataState -> accountDataState.bind { it.username.orEmpty() } }
     }

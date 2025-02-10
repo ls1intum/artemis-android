@@ -219,16 +219,11 @@ internal open class ConversationViewModel(
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     private val isAtLeastTutorInCourse: StateFlow<Boolean> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
         course,
         onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, course, _ ->
+    ) { course, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            accountDataService.getAccountData(
-                serverUrl = serverUrl,
-                bearerToken = authToken
-            )
+            accountDataService.getAccountData()
                 .bind { it.isAtLeastTutorInCourse(course = course.orThrow()) }
         }
             .map { it.orElse(false) }
