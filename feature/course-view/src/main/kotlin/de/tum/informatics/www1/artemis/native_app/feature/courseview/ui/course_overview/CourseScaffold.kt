@@ -115,7 +115,11 @@ private fun BottomNavigationBar(
             NavigationBarItem(
                 selected = isSelected(navigationItem.route),
                 label = {
-                    Text(labelText)
+                    Text(
+                        text = labelText,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 },
                 icon = {
                     Icon(
