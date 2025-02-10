@@ -41,6 +41,7 @@ include(":feature:quiz")
 include(":feature:settings")
 include(":feature:push")
 include(":feature:faq")
+include(":feature:faq-test")
 
 include(":feature:metis")
 include(":feature:metis:shared")

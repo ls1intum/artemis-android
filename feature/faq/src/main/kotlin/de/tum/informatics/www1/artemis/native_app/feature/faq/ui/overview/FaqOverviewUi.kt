@@ -22,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,6 +41,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Fa
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+
+internal const val TEST_TAG_FAQ_OVERVIEW_SEARCH = "TEST_TAG_FAQ_OVERVIEW_SEARCH"
+internal fun testTagForFaq(faq: Faq) = "TEST_TAG_FAQ_${faq.id}"
+
+
 @Composable
 fun FaqOverviewUi(
     modifier: Modifier = Modifier,
@@ -48,6 +54,19 @@ fun FaqOverviewUi(
 ) {
     val viewModel = koinViewModel<FaqOverviewViewModel> { parametersOf(courseId) }
 
+    FaqOverviewUi(
+        modifier = modifier,
+        viewModel = viewModel,
+        onNavigateToFaq = onNavigateToFaq
+    )
+}
+
+@Composable
+fun FaqOverviewUi(
+    modifier: Modifier = Modifier,
+    viewModel: FaqOverviewViewModel,
+    onNavigateToFaq: (faqId: Long) -> Unit
+) {
     val faqs by viewModel.displayedFaqs.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
 
@@ -109,7 +128,9 @@ private fun FaqOverviewBody(
         modifier = modifier,
     ) {
         BasicSearchTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(TEST_TAG_FAQ_OVERVIEW_SEARCH),
             query = query,
             updateQuery = onUpdateQuery,
             hint = stringResource(R.string.faq_search_hint),
@@ -154,7 +175,8 @@ private fun FaqList(
             FaqPreviewItem(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .animateItem(),
+                    .animateItem()
+                    .testTag(testTagForFaq(faq)),
                 faq = faq,
                 onClick = { onNavigateToFaq(faq.id) }
             )
