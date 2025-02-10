@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.faq
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
@@ -45,25 +44,25 @@ class FaqOverviewUiTest : BaseComposeTest() {
     fun `test GIVEN faqs WHEN displaying the overview THEN the title and description should be visible`() {
         setupUiAndViewModel(listOf(faq1))
 
-        composeTestRule.assertFaqVisibility(faq1, isVisible = true)
+        faq1.assertIsVisible()
     }
 
     @Test
     fun `test GIVEN faqs WHEN searching THEN only faqs matching the search should be visible`() {
         setupUiAndViewModel(listOf(faq1, faq2))
 
-        composeTestRule.assertFaqVisibility(faq1, isVisible = true)
-        composeTestRule.assertFaqVisibility(faq2, isVisible = true)
+        faq1.assertIsVisible()
+        faq2.assertIsVisible()
 
-        search(faq1.questionTitle)
+        searchFor(faq1.questionTitle)
 
-        composeTestRule.assertFaqVisibility(faq1, isVisible = true)
-        composeTestRule.assertFaqVisibility(faq2, isVisible = false)
+        faq1.assertIsVisible()
+        faq2.assertIsHidden()
 
-        search(faq2.questionAnswer)
+        searchFor(faq2.questionAnswer)
 
-        composeTestRule.assertFaqVisibility(faq1, isVisible = false)
-        composeTestRule.assertFaqVisibility(faq2, isVisible = true)
+        faq1.assertIsHidden()
+        faq2.assertIsVisible()
     }
 
 
@@ -85,18 +84,18 @@ class FaqOverviewUiTest : BaseComposeTest() {
         }
     }
 
-    private fun ComposeTestRule.assertFaqVisibility(faq: Faq, isVisible: Boolean) {
-        if (isVisible) {
-            onNodeWithTag(testTagForFaq(faq)).assertIsDisplayed()
-        } else {
-            onNodeWithTag(testTagForFaq(faq)).assertDoesNotExist()
-        }
+    private fun Faq.assertIsVisible() {
+        composeTestRule.onNodeWithTag(testTagForFaq(this)).assertIsDisplayed()
     }
 
-    private fun search(query: String) {
+    private fun Faq.assertIsHidden() {
+        composeTestRule.onNodeWithTag(testTagForFaq(this)).assertDoesNotExist()
+    }
+
+    private fun searchFor(query: String) {
         val searchInput = composeTestRule.onNodeWithTag(TEST_TAG_FAQ_OVERVIEW_SEARCH)
         searchInput.performTextClearance()
         searchInput.performTextInput(query)
-        composeTestRule.waitForIdle()
+        composeTestRule.waitForIdle()       // Wait until LazyColumn animateItem() animation is done
     }
 }
