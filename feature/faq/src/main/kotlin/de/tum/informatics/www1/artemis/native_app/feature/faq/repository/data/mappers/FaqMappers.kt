@@ -9,6 +9,6 @@ internal fun FaqDto.toFaq() = Faq(
     id = id,
     questionTitle = questionTitle,
     questionAnswer = questionAnswer,
-    categories = listOf(),  // TODO: Ignored for now and will be tackled in a follow-up PR
+    categories = listOf(),  // TODO: Ignored for now and will be tackled in a follow-up PR: https://github.com/ls1intum/artemis-android/issues/399
     faqState = FaqState.valueOf(faqState)
 )

@@ -10,6 +10,5 @@ android {
 }
 
 dependencies {
-
     implementation(project(":core:device"))
 }
