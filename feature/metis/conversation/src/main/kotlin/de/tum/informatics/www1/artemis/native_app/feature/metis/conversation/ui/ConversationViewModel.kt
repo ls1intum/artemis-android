@@ -220,8 +220,9 @@ internal open class ConversationViewModel(
 
     private val isAtLeastTutorInCourse: StateFlow<Boolean> = flatMapLatest(
         course,
-        onRequestReload.onStart { emit(Unit) }
-    ) { course, _ ->
+        onRequestReload.onStart { emit(Unit) },
+        accountDataService.onReloadRequired,
+    ) { course, _, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             accountDataService.getAccountData()
                 .bind { it.isAtLeastTutorInCourse(course = course.orThrow()) }

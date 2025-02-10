@@ -6,7 +6,6 @@ import androidx.work.WorkerParameters
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
@@ -41,10 +40,7 @@ class CreateClientSidePostWorker(
         postType: PostType,
         parentPostId: Long?
     ): Result {
-        val serverUrl = serverConfigurationService.serverUrl.first()
-        val authToken = accountService.authToken.first()
-
-        val authorAccount = accountDataService.getCachedAccountData(serverUrl, authToken)
+        val authorAccount = accountDataService.getCachedAccountData()
             ?: Account() // Super edge case, just use nothing here.
 
         val author = User(

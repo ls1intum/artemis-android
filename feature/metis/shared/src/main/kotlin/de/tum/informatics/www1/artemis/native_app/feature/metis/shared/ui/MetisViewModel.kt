@@ -9,10 +9,8 @@ import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndef
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +20,6 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 
@@ -55,14 +52,13 @@ abstract class MetisViewModel(
         .onStart { emit(Unit) }
 
     val clientId: StateFlow<DataState<Long>> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
+        accountDataService.onReloadRequired,
         onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
+    ) { _, _ ->
         retryOnInternetIndefinetly(
             networkStatusProvider.currentNetworkStatus
         ) {
-            accountDataService.getAccountData(serverUrl, authToken).bind { it.id }
+            accountDataService.getAccountData().bind { it.id }
         }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily, DataState.Loading())

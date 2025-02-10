@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -36,9 +37,9 @@ internal class SinglePageConversationBodyViewModel(
             courseService.getCourse(courseId, serverUrl, authToken)
                 .then { courseWithScore ->
                     accountDataService
-                        .getAccountData(serverUrl, authToken)
+                        .getAccountData()
                         .bind { it.isAtLeastTutorInCourse(courseWithScore.course) }
                 }
         }.map { it.orElse(false) }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    }.stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 }

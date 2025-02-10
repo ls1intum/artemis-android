@@ -19,7 +19,7 @@ abstract class ArtemisContextBasedServiceImpl(
     private val artemisContextProvider: ArtemisContextProvider,
 ) : ArtemisContextBasedService {
 
-    val reloadRequired: Flow<Unit> = artemisContextProvider.current.map { Unit }
+    override val onReloadRequired: Flow<Unit> = artemisContextProvider.current.map { Unit }
 
     suspend fun artemisContext(): ArtemisContext = artemisContextProvider.current.first()
     suspend fun serverUrl(): String = artemisContext().serverUrl

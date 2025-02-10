@@ -17,10 +17,7 @@ import coil3.toBitmap
 import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PushNotificationArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ArtemisNotificationManager
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
@@ -33,7 +30,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.notification_mode
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
@@ -48,8 +44,6 @@ internal class CommunicationNotificationManagerImpl(
     private val context: Context,
     private val dbProvider: PushCommunicationDatabaseProvider,
     private val artemisImageProvider: ArtemisImageProvider,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
     private val accountDataService: AccountDataService,
 ) : CommunicationNotificationManager, BaseNotificationManager {
 
@@ -94,14 +88,7 @@ internal class CommunicationNotificationManagerImpl(
     }
 
     private suspend fun getClientId(): Long? {
-        val serverUrl = serverConfigurationService.serverUrl.first()
-        val authToken = accountService.authToken.first()
-
-        val accountData = accountDataService.getCachedAccountData(
-            serverUrl = serverUrl,
-            bearerToken = authToken
-        )
-
+        val accountData = accountDataService.getCachedAccountData()
         return accountData?.id
     }
 
