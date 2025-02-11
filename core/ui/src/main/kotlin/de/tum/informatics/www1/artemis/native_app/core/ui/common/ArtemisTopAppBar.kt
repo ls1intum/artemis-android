@@ -79,6 +79,7 @@ fun ArtemisSearchTopAppBar(
     title: @Composable () -> Unit,
     searchBarHint: String,
     query: String,
+    lineCount: Int = 1,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
@@ -160,7 +161,9 @@ fun ArtemisSearchTopAppBar(
             ) {
                 FakeBasicSearchTextField(
                     modifier = Modifier
-                        .padding(16.dp)
+                        .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                        .padding(bottom = 16.dp)
+                        .then(if (lineCount != 1) Modifier.padding(top = 16.dp) else Modifier)
                         .innerShadow(
                             offset = 2.dp,
                             color = ComponentColors.ArtemisTopAppBar.searchBarShadow

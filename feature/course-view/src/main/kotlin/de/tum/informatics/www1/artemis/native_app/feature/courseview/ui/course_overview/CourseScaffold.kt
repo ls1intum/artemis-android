@@ -22,6 +22,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -66,10 +69,10 @@ internal fun CourseScaffold(
             )
         }
     ) { padding ->
+        // Animate the padding to provide smooth search transitions
         val animatedPadding by animateDpAsState(
             targetValue = padding.calculateTopPadding(),
-            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
-            label = "Padding Animation"
+            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
         )
 
         BasicDataStateUi(
@@ -102,12 +105,14 @@ private fun CourseTopAppBar(
     onNavigateBack: () -> Unit
 ) {
     val courseTitle = courseDataState.bind<String?> { it.title }.orElse(null)
+    var lineCount by remember { mutableIntStateOf(1) }
     val title = @Composable {
         Text(
             modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
             text = courseTitle.orEmpty(),
             maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { lineCount = it.lineCount }
         )
     }
 
@@ -116,6 +121,7 @@ private fun CourseTopAppBar(
             title = title,
             searchBarHint = searchConfiguration.hint,
             query = searchConfiguration.query,
+            lineCount = lineCount,
             updateQuery = searchConfiguration.onUpdateQuery,
             navigationIcon = { NavigationBackButton(onNavigateBack) }
         )
