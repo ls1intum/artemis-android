@@ -272,6 +272,7 @@ internal fun CourseUiScreen(
                     ExerciseListUi(
                         modifier = Modifier.fillMaxSize(),
                         weeklyExercises = weeklyExercises,
+                        query = if (exerciseSearchConfiguration is CourseSearchConfiguration.Search) exerciseSearchConfiguration.query else "",
                         onClickExercise = onNavigateToExercise,
                         actions = BoundExerciseActions(
                             onClickStartTextExercise = onClickStartTextExercise,
@@ -304,6 +305,7 @@ internal fun CourseUiScreen(
                     LectureListUi(
                         modifier = Modifier.fillMaxSize(),
                         lectures = weeklyLectures,
+                        query = if (lectureSearchConfiguration is CourseSearchConfiguration.Search) lectureSearchConfiguration.query else "",
                         onClickLecture = { onNavigateToLecture(it.id ?: 0L) }
                     )
                 }
