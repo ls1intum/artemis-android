@@ -1,5 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,20 +21,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSearchTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import io.github.fornewid.placeholder.material3.placeholder
-
 
 @Composable
 internal fun CourseScaffold(
@@ -56,10 +62,21 @@ internal fun CourseScaffold(
             )
         }
     ) { padding ->
+        val animatedPadding by animateDpAsState(
+            targetValue = padding.calculateTopPadding(),
+            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+            label = "Padding Animation"
+        )
+
         BasicDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(
+                    start = padding.calculateStartPadding(LocalLayoutDirection.current),
+                    end = padding.calculateEndPadding(LocalLayoutDirection.current),
+                    bottom = padding.calculateBottomPadding(),
+                    top = animatedPadding
+                )
                 .consumeWindowInsets(padding)
                 .systemBarsPadding(),           // This line is needed due to https://stackoverflow.com/a/74545344/13366254
             dataState = courseDataState,
@@ -81,7 +98,7 @@ private fun CourseTopAppBar(
 ) {
     val courseTitle = courseDataState.bind<String?> { it.title }.orElse(null)
 
-    ArtemisTopAppBar(
+    ArtemisSearchTopAppBar(
         title = {
             Text(
                 modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
@@ -90,6 +107,7 @@ private fun CourseTopAppBar(
                 overflow = TextOverflow.Ellipsis
             )
         },
+        searchBarHint = stringResource(id = R.string.course_ui_tab_lectures),
         navigationIcon = { NavigationBackButton(onNavigateBack) }
     )
 }

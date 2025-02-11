@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.common
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -48,6 +49,7 @@ fun BasicArtemisTextField(
     maxLines: Int = Int.MAX_VALUE,
     focusRequester: FocusRequester? = null,
     hideHintOnFocus: Boolean = false,
+    enabled: Boolean = true,
     backgroundColor: Color,
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -84,7 +86,8 @@ fun BasicArtemisTextField(
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
         keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions
+        keyboardActions = keyboardActions,
+        enabled = enabled
     )
 }
 
@@ -96,6 +99,7 @@ fun BasicSearchTextField(
     query: String,
     backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     textStyle: TextStyle = LocalTextStyle.current,
+    isSearchEnabled: Boolean = true,
     updateQuery: (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -109,7 +113,7 @@ fun BasicSearchTextField(
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .clip(MaterialTheme.shapes.medium)
             .background(backgroundColor)
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -127,7 +131,7 @@ fun BasicSearchTextField(
             )
 
             BasicArtemisTextField(
-                modifier = modifier
+                modifier = Modifier
                     .weight(1f),
                 backgroundColor = backgroundColor,
                 hint = hint,
@@ -139,6 +143,7 @@ fun BasicSearchTextField(
                 },
                 maxLines = 1,
                 textStyle = textStyle,
+                enabled = isSearchEnabled,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done
                 ),
@@ -168,5 +173,27 @@ fun BasicSearchTextField(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun FakeBasicSearchTextField(
+    modifier: Modifier,
+    backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    hint: String,
+    onClick: (Boolean) -> Unit
+) {
+    Box(
+        modifier = modifier
+            .clickable { onClick(true) }
+    ) {
+        BasicSearchTextField(
+            modifier = Modifier,
+            hint = hint,
+            query = "",
+            updateQuery = {},
+            isSearchEnabled = false,
+            backgroundColor = backgroundColor
+        )
     }
 }
