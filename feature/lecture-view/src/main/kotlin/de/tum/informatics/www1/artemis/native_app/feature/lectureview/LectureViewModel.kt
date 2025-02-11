@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -21,7 +22,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BaseExerciseListViewModel
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.service.LectureService
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
@@ -59,7 +58,7 @@ internal class LectureViewModel(
     serverTimeService: ServerTimeService,
     courseExerciseService: CourseExerciseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : BaseExerciseListViewModel(serverConfigurationService, accountService, courseExerciseService) {
+) : BaseExerciseListViewModel(courseExerciseService) {
 
     companion object {
         private const val LECTURE_UNIT_COMPLETED_MAP_TAG = "LECTURE_UNIT_COMPLETED_MAP_TAG"

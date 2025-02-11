@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
@@ -45,8 +44,8 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 internal class ExerciseViewModel(
     private val exerciseId: Long,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
+    serverConfigurationService: ServerConfigurationService,
+    accountService: AccountService,
     private val exerciseService: ExerciseService,
     private val liveParticipationService: LiveParticipationService,
     private val courseExerciseService: CourseExerciseService,
@@ -169,14 +168,7 @@ internal class ExerciseViewModel(
      */
     fun startExercise(): Deferred<Long?> {
         return viewModelScope.async(coroutineContext) {
-            val serverUrl = serverConfigurationService.serverUrl.first()
-            val authToken = accountService.authToken.first()
-
-            val response = courseExerciseService.startExercise(
-                exerciseId,
-                serverUrl,
-                authToken
-            )
+            val response = courseExerciseService.startExercise(exerciseId)
 
             response
                 .onSuccess {

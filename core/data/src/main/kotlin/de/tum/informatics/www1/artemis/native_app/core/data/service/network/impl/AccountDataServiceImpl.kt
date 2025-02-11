@@ -12,9 +12,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.Artemis
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
-import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
-import io.ktor.http.contentType
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.SerializationException
 
@@ -32,12 +30,10 @@ internal class AccountDataServiceImpl(
     private val Context.accountDataCache by preferencesDataStore(ACCOUNT_DATA_CACHE_NAME)
 
     override suspend fun getAccountData(): NetworkResponse<Account> {
-        return get<Account> {
+        return getRequest<Account> {
             url {
                 appendPathSegments("api", "public", "account")
             }
-
-            contentType(ContentType.Application.Json)
         }.onSuccess { account ->
             context.accountDataCache.edit { data ->
                 data[getAccountDataCacheKey(authToken())] = jsonProvider.applicationJsonConfiguration.encodeToString(account)

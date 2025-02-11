@@ -48,7 +48,7 @@ class CourseViewModel(
     courseExerciseService: CourseExerciseService,
     networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : BaseExerciseListViewModel(serverConfigurationService, accountService, courseExerciseService) {
+) : BaseExerciseListViewModel(courseExerciseService) {
 
     private val requestReloadCourse = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
