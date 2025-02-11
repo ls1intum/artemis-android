@@ -108,6 +108,10 @@ fun ArtemisSearchTopAppBar(
                     }
                 ) { searchActive ->
                     if (searchActive) {
+                        LaunchedEffect(Unit) {
+                            focusRequester.requestFocus()
+                        }
+
                         BasicSearchTextField(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -123,11 +127,6 @@ fun ArtemisSearchTopAppBar(
                             updateQuery = updateQuery,
                             focusRequester = focusRequester
                         )
-
-                        LaunchedEffect(Unit) {
-                            if (isSearchActive) focusRequester.requestFocus()
-                        }
-
                     } else {
                         title()
                     }

@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -193,24 +192,21 @@ fun ConversationChatListScreen(
                             searchBarFocusRequester.requestFocus()
                         }
 
-                        Box(
+                        BasicSearchTextField(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(end = 8.dp)
-                        ){
-                            BasicSearchTextField(
-                                modifier = Modifier.innerShadow(
+                                .innerShadow(
                                     offset = 2.dp,
                                     color = ComponentColors.ArtemisTopAppBar.searchBarShadow
                                 ),
-                                query = query,
-                                updateQuery = onUpdateQuery,
-                                hint = stringResource(id = R.string.metis_post_search_hint),
-                                backgroundColor = MaterialTheme.colorScheme.background,
-                                textStyle = MaterialTheme.typography.bodyMedium,
-                                focusRequester = searchBarFocusRequester
-                            )
-                        }
+                            query = query,
+                            updateQuery = onUpdateQuery,
+                            hint = stringResource(id = R.string.metis_post_search_hint),
+                            backgroundColor = MaterialTheme.colorScheme.background,
+                            textStyle = MaterialTheme.typography.bodyMedium,
+                            focusRequester = searchBarFocusRequester
+                        )
                     } else {
                         EmptyDataStateUi(
                             dataState = conversationDataState,

@@ -254,7 +254,7 @@ internal fun CourseUiScreen(
             scaffold(
                 CourseSearchConfiguration.Search(
                     query = "",
-                    hint = stringResource(id = R.string.course_ui_tab_exercises),
+                    hint = stringResource(id = R.string.course_ui_exercises_search_hint),
                     onUpdateQuery = onUpdateExerciseQuery
                 )
             ) {
@@ -292,7 +292,7 @@ internal fun CourseUiScreen(
             scaffold(
                 CourseSearchConfiguration.Search(
                     query = "",
-                    hint = stringResource(id = R.string.course_ui_tab_lectures),
+                    hint = stringResource(id = R.string.course_ui_lectures_search_hint),
                     onUpdateQuery = onUpdateLectureQuery
                 )
             ) {
