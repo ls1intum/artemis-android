@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
@@ -136,8 +135,8 @@ internal class LectureViewModel(
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    private val serverClock: Flow<Clock> = flatMapLatest(serverUrl, authToken) { serverUrl, authToken ->
-        serverTimeService.getServerClock(authToken, serverUrl)
+    private val serverClock: Flow<Clock> = serverTimeService.onReloadRequired.flatMapLatest {
+        serverTimeService.getServerClock()
     }
         .shareIn(viewModelScope + coroutineContext, SharingStarted.WhileSubscribed(1.seconds), replay = 1)
 

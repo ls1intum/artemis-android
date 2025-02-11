@@ -1,20 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl
 
 import de.tum.informatics.www1.artemis.native_app.core.common.ClockWithOffset
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.offsetBy
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
-import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
-import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.retryNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
-import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
-import io.ktor.http.contentType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -31,17 +25,15 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Implements the time sync logic using the stackoverflow answer given here: https://gamedev.stackexchange.com/a/93662
  */
-internal class ServerTimeServiceImpl(private val ktorProvider: KtorProvider) : ServerTimeService {
+internal class ServerTimeServiceImpl(
+    ktorProvider: KtorProvider,
+    artemisContextProvider: ArtemisContextProvider,
+) : ArtemisContextBasedServiceImpl(ktorProvider, artemisContextProvider),  ServerTimeService {
 
-    override fun getServerClock(authToken: String, serverUrl: String): Flow<ClockWithOffset> = flow {
+    override fun getServerClock(): Flow<ClockWithOffset> = flow {
         // Logic of implementation taken from: https://gamedev.stackexchange.com/a/93662
 
-        val firstResponse = performClockSync(
-            clock = Clock.System,
-            serverUrl = serverUrl,
-            authToken = authToken
-        )
-            ?: throw TimeSyncFailedException()
+        val firstResponse = performClockSync(clock = Clock.System) ?: throw TimeSyncFailedException()
 
         val initiallyAdjustedClock =
             Clock.System.offsetBy(firstResponse.improvedDelta.milliseconds)
@@ -52,12 +44,7 @@ internal class ServerTimeServiceImpl(private val ktorProvider: KtorProvider) : S
         // Sync clock up to 5 times, emitting a new value every time.
         for (i in 0 until 5) {
             delay(1.seconds)
-            results += performClockSync(
-                clock = initiallyAdjustedClock,
-                serverUrl = serverUrl,
-                authToken = authToken
-            )
-                ?: throw TimeSyncFailedException()
+            results += performClockSync(clock = initiallyAdjustedClock) ?: throw TimeSyncFailedException()
 
             val sortedResults = results.sortedBy { it.latencyInMs }
 
@@ -89,16 +76,8 @@ internal class ServerTimeServiceImpl(private val ktorProvider: KtorProvider) : S
             } else false
         }
 
-    private suspend fun performClockSync(
-        clock: Clock,
-        serverUrl: String,
-        authToken: String
-    ): SyncResult? {
-        return when (val serverTimeResponse = requestServerTime(
-            clock = clock,
-            serverUrl = serverUrl,
-            authToken = authToken
-        )) {
+    private suspend fun performClockSync(clock: Clock, ): SyncResult? {
+        return when (val serverTimeResponse = requestServerTime(clock = clock)) {
             is NetworkResponse.Response -> {
                 val sentTime = serverTimeResponse.data.sentTime
                 val serverTime = serverTimeResponse.data.serverTime
@@ -116,22 +95,13 @@ internal class ServerTimeServiceImpl(private val ktorProvider: KtorProvider) : S
         }
     }
 
-    private suspend fun requestServerTime(
-        clock: Clock,
-        serverUrl: String,
-        authToken: String
-    ): NetworkResponse<ServerTimeRequestResponse> {
+    private suspend fun requestServerTime(clock: Clock): NetworkResponse<ServerTimeRequestResponse> {
         return retryNetworkCall(maxRetries = 3, delayBetweenRetries = 1.seconds) {
             val sentTime = clock.now().toEpochMilliseconds()
-            performNetworkCall {
-                ktorProvider.ktorClient.get(serverUrl) {
-                    url {
-                        appendPathSegments("api", "public", "time")
-                    }
-
-                    contentType(ContentType.Application.Json)
-                    cookieAuth(authToken)
-                }.body<Instant>()
+            getRequest<Instant> {
+                url {
+                    appendPathSegments("api", "public", "time")
+                }
             }
                 .bind { serverTime ->
                     ServerTimeRequestResponse(sentTime, serverTime.toEpochMilliseconds())
