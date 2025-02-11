@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material3.Button
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -29,13 +31,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSearchTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
@@ -74,6 +77,7 @@ internal fun BrowseChannelsScreen(
     }
 
     val channelsDataState by viewModel.channels.collectAsState()
+    val query by viewModel.query.collectAsState()
 
     var registerInChannelJob: Deferred<Long?>? by remember { mutableStateOf(null) }
     var displayRegistrationFailedDialog by remember { mutableStateOf(false) }
@@ -94,9 +98,12 @@ internal fun BrowseChannelsScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            ArtemisTopAppBar(
+            ArtemisSearchTopAppBar(
                 title = { Text(text = stringResource(id = R.string.browse_channels_title)) },
-                navigationIcon = { NavigationBackButton(onNavigateBack) }
+                navigationIcon = { NavigationBackButton(onNavigateBack) },
+                searchBarHint = stringResource(id = R.string.browse_channels_search_hint),
+                query = query,
+                updateQuery = viewModel::updateQuery
             )
         }
     ) { padding ->
@@ -129,11 +136,17 @@ internal fun BrowseChannelsScreen(
                         )
                     }
                 }
+            } else if (query.isNotBlank()) {
+                NoSearchResults(
+                    modifier = Modifier.fillMaxSize(),
+                    title = stringResource(id = R.string.browse_channel_list_no_search_results_title),
+                    details = stringResource(id = R.string.browse_channel_list_no_search_results_body, query)
+                )
             } else {
-                Text(
+                EmptyListHint(
                     modifier = Modifier.align(Alignment.Center),
-                    text = stringResource(id = R.string.browse_channel_list_empty),
-                    textAlign = TextAlign.Center
+                    hint = stringResource(id = R.string.browse_channel_list_empty),
+                    icon = Icons.Default.Tag
                 )
             }
         }
