@@ -23,7 +23,7 @@ val dataModule = module {
     singleOf(::JsonProvider)
     single<KtorProvider> { KtorProviderImpl(get()) }
 
-    single<CourseService> { CourseServiceImpl(get()) }
+    single<CourseService> { CourseServiceImpl(get(), get()) }
     single<ExerciseService> { ExerciseServiceImpl(get(), get()) }
     single<AccountDataService> { AccountDataServiceImpl(androidContext(), get(), get(), get()) }
     single<CourseExerciseService> { CourseExerciseServiceImpl(get(), get()) }

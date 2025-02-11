@@ -7,8 +7,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import de.tum.informatics.www1.artemis.native_app.core.data.CourseServiceFake
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountServiceStub
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProviderStub
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
@@ -38,8 +36,6 @@ fun `Course View - Exercise List`() {
         courseId = 0L,
         courseService = CourseServiceFake(ScreenshotCourse),
         liveParticipationService = LiveParticipationServiceStub(),
-        serverConfigurationService = ServerConfigurationServiceStub(),
-        accountService = AccountServiceStub(),
         courseExerciseService = object : CourseExerciseService {
             override val onReloadRequired: Flow<Unit> = emptyFlow()
             override suspend fun startExercise(exerciseId: Long): NetworkResponse<Participation> =

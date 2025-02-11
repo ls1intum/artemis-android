@@ -204,15 +204,12 @@ class ConversationOverviewViewModel(
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     private val course: StateFlow<DataState<Course>> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
+        courseService.onReloadRequired,
         onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
+    ) { _, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             courseService.getCourse(
                 courseId,
-                serverUrl,
-                authToken
             ).bind { it.course }
         }
     }

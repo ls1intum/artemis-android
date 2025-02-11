@@ -6,9 +6,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
@@ -43,8 +40,6 @@ class CourseViewModel(
     private val courseId: Long,
     private val courseService: CourseService,
     private val liveParticipationService: LiveParticipationService,
-    serverConfigurationService: ServerConfigurationService,
-    accountService: AccountService,
     courseExerciseService: CourseExerciseService,
     networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
@@ -54,13 +49,12 @@ class CourseViewModel(
 
     val course: StateFlow<DataState<Course>> =
         flatMapLatest(
-            serverConfigurationService.serverUrl,
-            accountService.authToken,
+            courseService.onReloadRequired,
             requestReloadCourse.onStart { emit(Unit) }
-        ) { serverUrl, authToken, _ ->
+        ) { _, _ ->
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                 courseService
-                    .getCourse(courseId, serverUrl, authToken)
+                    .getCourse(courseId)
                     .bind { it.course }
             }
         }
