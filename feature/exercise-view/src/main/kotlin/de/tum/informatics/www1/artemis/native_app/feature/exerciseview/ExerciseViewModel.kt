@@ -71,14 +71,10 @@ internal class ExerciseViewModel(
             .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
 
     private val fetchedExercise: Flow<DataState<Exercise>> =
-        baseConfigurationFlow
-            .flatMapLatest { (serverUrl, authToken) ->
+        exerciseService.onReloadRequired
+            .flatMapLatest {
                 retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                    exerciseService.getExerciseDetails(
-                        exerciseId,
-                        serverUrl,
-                        authToken
-                    )
+                    exerciseService.getExerciseDetails(exerciseId)
                 }
             }
             .flowOn(coroutineContext)
