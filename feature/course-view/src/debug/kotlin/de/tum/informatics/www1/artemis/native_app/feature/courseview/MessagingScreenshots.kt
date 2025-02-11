@@ -15,6 +15,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountServiceS
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProviderStub
 import de.tum.informatics.www1.artemis.native_app.device.test.NetworkStatusProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseScaffold
@@ -133,6 +134,11 @@ fun `Metis - Conversation Overview`() {
         CourseScaffold(
             modifier = Modifier.fillMaxSize(),
             courseDataState = course,
+            searchConfiguration = CourseSearchConfiguration.Search(
+                query = "",
+                hint = "Search for a conversation",
+                onUpdateQuery = {}
+            ),
             isCourseTabSelected = {
                 it == CourseTab.Communication
             },

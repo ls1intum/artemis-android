@@ -168,4 +168,12 @@ class CourseViewModel(
     fun reloadCourse() {
         requestReloadCourse.tryEmit(Unit)
     }
+
+    fun onUpdateExerciseQuery(query: String) {
+        println("Exercise query: $query")
+    }
+
+    fun onUpdateLectureQuery(query: String) {
+        println("Lecture query: $query")
+    }
 }

@@ -32,7 +32,9 @@ import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSearchTopAppBar
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import io.github.fornewid.placeholder.material3.placeholder
@@ -42,6 +44,7 @@ internal fun CourseScaffold(
     modifier: Modifier = Modifier,
     courseDataState: DataState<Course>,
     isCourseTabSelected: (CourseTab) -> Boolean,
+    searchConfiguration: CourseSearchConfiguration,
     updateSelectedCourseTab: (CourseTab) -> Unit,
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit,
@@ -52,6 +55,7 @@ internal fun CourseScaffold(
         topBar = {
             CourseTopAppBar(
                 courseDataState = courseDataState,
+                searchConfiguration = searchConfiguration,
                 onNavigateBack = onNavigateBack,
             )
         },
@@ -94,22 +98,39 @@ internal fun CourseScaffold(
 @Composable
 private fun CourseTopAppBar(
     courseDataState: DataState<Course>,
+    searchConfiguration: CourseSearchConfiguration,
     onNavigateBack: () -> Unit
 ) {
     val courseTitle = courseDataState.bind<String?> { it.title }.orElse(null)
 
-    ArtemisSearchTopAppBar(
-        title = {
-            Text(
-                modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
-                text = courseTitle.orEmpty(),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        searchBarHint = stringResource(id = R.string.course_ui_tab_lectures),
-        navigationIcon = { NavigationBackButton(onNavigateBack) }
-    )
+    if (searchConfiguration is CourseSearchConfiguration.Search) {
+        ArtemisSearchTopAppBar(
+            title = {
+                Text(
+                    modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
+                    text = courseTitle.orEmpty(),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            searchBarHint = searchConfiguration.hint,
+            query = searchConfiguration.query,
+            updateQuery = searchConfiguration.onUpdateQuery,
+            navigationIcon = { NavigationBackButton(onNavigateBack) }
+        )
+    } else {
+        ArtemisTopAppBar(
+            title = {
+                Text(
+                    modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
+                    text = courseTitle.orEmpty(),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            navigationIcon = { NavigationBackButton(onNavigateBack) }
+        )
+    }
 }
 
 

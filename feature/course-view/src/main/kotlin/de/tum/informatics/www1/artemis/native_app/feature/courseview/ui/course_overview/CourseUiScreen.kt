@@ -30,6 +30,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CourseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
@@ -75,7 +76,6 @@ internal sealed class CourseTab {
     @Serializable
     data object Communication : CourseTab()
 }
-
 
 fun NavController.navigateToCourse(courseId: Long, builder: NavOptionsBuilder.() -> Unit) {
     navigate(CourseUiScreen(courseId), builder)
@@ -171,6 +171,8 @@ fun CourseUiScreen(
         onNavigateToLecture = onNavigateToLecture,
         postId = postId,
         onReloadCourse = viewModel::reloadCourse,
+        onUpdateExerciseQuery = viewModel::onUpdateExerciseQuery,
+        onUpdateLectureQuery = viewModel::onUpdateLectureQuery,
         onClickStartTextExercise = { exerciseId: Long ->
             viewModel.startExercise(exerciseId) { participationId ->
                 onNavigateToTextExerciseParticipation(
@@ -201,7 +203,9 @@ internal fun CourseUiScreen(
     onNavigateToLecture: (lectureId: Long) -> Unit,
     onClickStartTextExercise: (exerciseId: Long) -> Unit,
     onNavigateBack: () -> Unit,
-    onReloadCourse: () -> Unit
+    onReloadCourse: () -> Unit,
+    onUpdateExerciseQuery: (String) -> Unit,
+    onUpdateLectureQuery: (String) -> Unit
 ) {
     ReportVisibleMetisContext(VisibleCourse(MetisContext.Course(courseId)))
 
@@ -212,7 +216,7 @@ internal fun CourseUiScreen(
     // is handled and the fact that the communicationTab supports the tablet layout. In the tablet
     // layout we want to display the scaffold always, while for the normal (phone) layout the
     // scaffold is only shown in the ConversationOverviewScreen.
-    val scaffold = @Composable { content: @Composable () -> Unit ->
+    val scaffold = @Composable { searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit ->
         CourseScaffold(
             modifier = modifier,
             courseDataState = courseDataState,
@@ -231,6 +235,7 @@ internal fun CourseUiScreen(
             },
             onNavigateBack = onNavigateBack,
             onReloadCourse = onReloadCourse,
+            searchConfiguration = searchConfiguration,
             content = content
         )
     }
@@ -246,7 +251,13 @@ internal fun CourseUiScreen(
         startDestination = initialTab::class,
     ) {
         composable<CourseTab.Exercises> {
-            scaffold {
+            scaffold(
+                CourseSearchConfiguration.Search(
+                    query = "",
+                    hint = stringResource(id = R.string.course_ui_tab_exercises),
+                    onUpdateQuery = onUpdateExerciseQuery
+                )
+            ) {
                 EmptyDataStateUi(dataState = weeklyExercisesDataState) { weeklyExercises ->
                     ExerciseListUi(
                         modifier = Modifier.fillMaxSize(),
@@ -278,7 +289,13 @@ internal fun CourseUiScreen(
         }
 
         composable<CourseTab.Lectures> {
-            scaffold {
+            scaffold(
+                CourseSearchConfiguration.Search(
+                    query = "",
+                    hint = stringResource(id = R.string.course_ui_tab_lectures),
+                    onUpdateQuery = onUpdateLectureQuery
+                )
+            ) {
                 EmptyDataStateUi(dataState = weeklyLecturesDataState) { weeklyLectures ->
                     LectureListUi(
                         modifier = Modifier.fillMaxSize(),
@@ -293,13 +310,13 @@ internal fun CourseUiScreen(
             EmptyDataStateUi(
                 dataState = courseDataState,
                 otherwise = {
-                    scaffold {}
+                    scaffold(CourseSearchConfiguration.DisabledSearch) {}
                 }
             ) { course ->
                 val isCommunicationEnabled = course.courseInformationSharingConfiguration.supportsMessaging
 
                 if (!isCommunicationEnabled) {
-                    scaffold {
+                    scaffold(CourseSearchConfiguration.DisabledSearch) {
                         CommunicationDisabledInfo()
                     }
                     return@EmptyDataStateUi

@@ -49,7 +49,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.endOfPagePadding
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductUi
@@ -140,13 +139,6 @@ fun ConversationOverviewBody(
                         }
                     }
                 }
-
-                BasicSearchTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    hint = stringResource(id = R.string.conversation_overview_search_hint),
-                    query = query,
-                    updateQuery = viewModel::onUpdateQuery
-                )
 
                 ConversationList(
                     modifier = Modifier.fillMaxSize(),

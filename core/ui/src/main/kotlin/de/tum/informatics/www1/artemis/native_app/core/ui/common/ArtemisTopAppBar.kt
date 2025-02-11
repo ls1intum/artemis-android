@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 
 @Composable
 fun ArtemisTopAppBar(
@@ -54,7 +55,7 @@ fun ArtemisTopAppBar(
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        containerColor = ComponentColors.ArtemisTopAppBar.background,
     )
 ) {
     Surface(
@@ -77,13 +78,15 @@ fun ArtemisSearchTopAppBar(
     modifier: Modifier = Modifier,
     title: @Composable () -> Unit,
     searchBarHint: String,
+    query: String,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-    )
+        containerColor = ComponentColors.ArtemisTopAppBar.background,
+    ),
+    updateQuery: (String) -> Unit
 ) {
     var isSearchActive by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
@@ -111,13 +114,13 @@ fun ArtemisSearchTopAppBar(
                                 .padding(end = 8.dp)
                                 .innerShadow(
                                     offset = 2.dp,
-                                    color = Color.Black.copy(0.35f)
+                                    color = ComponentColors.ArtemisTopAppBar.searchBarShadow
                                 ),
                             backgroundColor = MaterialTheme.colorScheme.background,
                             textStyle = MaterialTheme.typography.bodyLarge,
                             hint = searchBarHint,
-                            query = "",
-                            updateQuery = {},
+                            query = query,
+                            updateQuery = updateQuery,
                             focusRequester = focusRequester
                         )
 
@@ -156,7 +159,7 @@ fun ArtemisSearchTopAppBar(
                         .padding(16.dp)
                         .innerShadow(
                             offset = 2.dp,
-                            color = Color.Black.copy(0.35f)
+                            color = ComponentColors.ArtemisTopAppBar.searchBarShadow
                         ),
                     hint = searchBarHint,
                     backgroundColor = MaterialTheme.colorScheme.background,
