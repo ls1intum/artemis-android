@@ -27,7 +27,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import de.tum.informatics.www1.artemis.native_app.core.data.join
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.ConversationMemberListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.PerformActionOnUserData
@@ -59,8 +58,6 @@ internal fun ConversationMembersBody(
         viewModel.updateConversation(courseId, conversationId)
     }
 
-    val query by viewModel.query.collectAsState()
-
     val members = viewModel.membersPagingData.collectAsLazyPagingItems()
 
     val clientUsername by viewModel.clientUsername.collectAsState()
@@ -80,12 +77,6 @@ internal fun ConversationMembersBody(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            BasicSearchTextField(
-                modifier = Modifier.fillMaxWidth(),
-                query = query,
-                updateQuery = viewModel::updateQuery,
-                hint = stringResource(id = R.string.conversation_members_query_placeholder)
-            )
 
             ConversationMembersList(
                 modifier = Modifier.fillMaxSize(),

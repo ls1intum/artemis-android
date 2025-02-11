@@ -163,7 +163,7 @@ fun ArtemisSearchTopAppBar(
                     modifier = Modifier
                         .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                         .padding(bottom = 16.dp)
-                        .then(if (lineCount != 1) Modifier.padding(top = 16.dp) else Modifier)
+                        .then(if (lineCount > 1) Modifier.padding(top = 16.dp) else Modifier)
                         .innerShadow(
                             offset = 2.dp,
                             color = ComponentColors.ArtemisTopAppBar.searchBarShadow
