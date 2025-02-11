@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.core.ui.common
 import android.graphics.BlurMaskFilter
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -92,6 +93,13 @@ fun ArtemisSearchTopAppBar(
     var isSearchActive by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
 
+    val closeSearch = {
+        isSearchActive = false
+        updateQuery("")
+    }
+
+    BackHandler(isSearchActive, closeSearch)
+
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -135,12 +143,7 @@ fun ArtemisSearchTopAppBar(
             },
             modifier = modifier,
             navigationIcon = if (isSearchActive) {
-                {
-                    NavigationBackButton({
-                        isSearchActive = false
-                        updateQuery("")
-                    })
-                }
+                { NavigationBackButton(closeSearch) }
             } else navigationIcon,
             actions = actions,
             windowInsets = windowInsets,
