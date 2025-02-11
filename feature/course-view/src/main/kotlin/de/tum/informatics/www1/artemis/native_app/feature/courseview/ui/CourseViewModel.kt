@@ -18,8 +18,10 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipati
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.GroupedByWeek
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -51,6 +53,12 @@ class CourseViewModel(
 ) : BaseExerciseListViewModel(serverConfigurationService, accountService, courseExerciseService) {
 
     private val requestReloadCourse = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    private val _exerciseQuery = MutableStateFlow("")
+    val exerciseQuery: StateFlow<String> = _exerciseQuery
+
+    private val _lectureQuery = MutableStateFlow("")
+    val lectureQuery: StateFlow<String> = _lectureQuery
 
     val course: StateFlow<DataState<Course>> =
         flatMapLatest(
@@ -114,10 +122,11 @@ class CourseViewModel(
             }
 
     internal val exercisesGroupedByWeek: StateFlow<DataState<List<GroupedByWeek<Exercise>>>> =
-        exerciseWithParticipationStatusFlow.map { exercisesDataState ->
+        combine(exerciseWithParticipationStatusFlow, exerciseQuery) { exercisesDataState, query ->
             exercisesDataState.bind { exercisesWithParticipationState ->
                 exercisesWithParticipationState
                     .filter { it.visibleToStudents != false }
+                    .filter { exercise -> query.isBlank() || exercise.title?.contains(query, ignoreCase = true) ?: false }
                     .groupByWeek(compareBy(Exercise::dueDate)) { dueDate }
             }
         }
@@ -125,10 +134,11 @@ class CourseViewModel(
             .stateIn(viewModelScope, SharingStarted.Lazily, DataState.Loading())
 
     internal val lecturesGroupedByWeek: StateFlow<DataState<List<GroupedByWeek<Lecture>>>> =
-        course.map { courseDataState ->
+        combine(course, _lectureQuery) { courseDataState, query ->
             courseDataState.bind { course ->
                 course
                     .lectures
+                    .filter { lecture -> query.isBlank() || lecture.title.contains(query, ignoreCase = true) }
                     .groupByWeek(compareBy(Lecture::title)) { startDate }
             }
         }
@@ -170,10 +180,10 @@ class CourseViewModel(
     }
 
     fun onUpdateExerciseQuery(query: String) {
-        println("Exercise query: $query")
+        _exerciseQuery.value = query
     }
 
     fun onUpdateLectureQuery(query: String) {
-        println("Lecture query: $query")
+        _lectureQuery.value = query
     }
 }

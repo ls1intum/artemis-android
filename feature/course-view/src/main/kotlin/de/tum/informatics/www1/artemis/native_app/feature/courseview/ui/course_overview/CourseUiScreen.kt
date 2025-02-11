@@ -153,15 +153,17 @@ fun CourseUiScreen(
     val weeklyExercisesDataState by viewModel.exercisesGroupedByWeek.collectAsState()
     val weeklyLecturesDataState by viewModel.lecturesGroupedByWeek.collectAsState()
 
+    val exerciseQuery by viewModel.exerciseQuery.collectAsState()
+    val lectureQuery by viewModel.lectureQuery.collectAsState()
 
     val lectureSearchConfiguration = CourseSearchConfiguration.Search(
-        query = "",
+        query = lectureQuery,
         hint = stringResource(id = R.string.course_ui_lectures_search_hint),
         onUpdateQuery = viewModel::onUpdateLectureQuery
     )
 
     val exerciseSearchConfiguration = CourseSearchConfiguration.Search(
-        query = "",
+        query = exerciseQuery,
         hint = stringResource(id = R.string.course_ui_exercises_search_hint),
         onUpdateQuery = viewModel::onUpdateExerciseQuery
     )
