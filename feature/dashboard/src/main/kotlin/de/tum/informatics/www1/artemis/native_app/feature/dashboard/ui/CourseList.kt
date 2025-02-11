@@ -56,7 +56,10 @@ fun CourseList(
     ) {
         if (recentCourses.isNotEmpty()) {
             item(span = { GridItemSpan(columnCount) }) {
-                SectionHeader(stringResource(R.string.course_overview_recently_accessed_section))
+                SectionHeader(
+                    modifier = Modifier.animateItem(),
+                    text = stringResource(R.string.course_overview_recently_accessed_section)
+                )
             }
         }
 
@@ -72,7 +75,10 @@ fun CourseList(
 
         if (courses.isNotEmpty() && recentCourses.isNotEmpty()) {
             item(span = { GridItemSpan(columnCount) }) {
-                SectionHeader(stringResource(R.string.course_overview_all_courses_section))
+                SectionHeader(
+                    modifier = Modifier.animateItem(),
+                    text = stringResource(R.string.course_overview_all_courses_section)
+                )
             }
         }
 
@@ -89,13 +95,16 @@ fun CourseList(
 }
 
 @Composable
-private fun SectionHeader(text: String) {
+private fun SectionHeader(
+    modifier: Modifier,
+    text: String
+) {
     Text(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
         text = text,
         color = MaterialTheme.colorScheme.primary,
-        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp)
+        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
     )
 }

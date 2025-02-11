@@ -128,7 +128,7 @@ fun BasicSearchTextField(
             )
 
             BasicArtemisTextField(
-                modifier = modifier
+                modifier = Modifier
                     .weight(1f)
                     .then(testTag?.let { Modifier.testTag(it) } ?: Modifier),
                 backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
