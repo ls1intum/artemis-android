@@ -45,6 +45,7 @@ import org.hildan.krossbow.stomp.StompClient
 import org.hildan.krossbow.stomp.StompReceipt
 import org.hildan.krossbow.stomp.StompSession
 import org.hildan.krossbow.stomp.config.HeartBeat
+import org.hildan.krossbow.stomp.config.HeartBeatTolerance
 import org.hildan.krossbow.stomp.conversions.kxserialization.StompSessionWithKxSerialization
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.stomp.headers.StompSendHeaders
@@ -88,6 +89,12 @@ class WebsocketProviderImpl(
     private val client =
         StompClient(webSocketClient) {
             heartBeat = HeartBeat(60.seconds, 60.seconds)
+            // Especially with the test servers, we often missed heartbeats and all websocket
+            // subscriptions were closed. To prevent this, we increase the tolerance.
+            heartBeatTolerance = HeartBeatTolerance(
+                outgoingMargin = 5.seconds,
+                incomingMargin = 5.seconds
+            )
             gracefulDisconnect = false
             connectionTimeout = 20.minutes
         }
@@ -228,6 +235,7 @@ class WebsocketProviderImpl(
                             jsonConfig = jsonProvider.applicationJsonConfiguration,
                             deserializer = deserializer
                         )
+                        Log.d(TAG, "Received message: $deserialized")
                         return@map WebsocketProvider.WebsocketData.Message(deserialized)
                     }
 
