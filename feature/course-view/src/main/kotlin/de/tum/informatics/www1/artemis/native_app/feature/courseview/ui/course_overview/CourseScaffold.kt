@@ -102,17 +102,18 @@ private fun CourseTopAppBar(
     onNavigateBack: () -> Unit
 ) {
     val courseTitle = courseDataState.bind<String?> { it.title }.orElse(null)
+    val title = @Composable {
+        Text(
+            modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
+            text = courseTitle.orEmpty(),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
 
     if (searchConfiguration is CourseSearchConfiguration.Search) {
         ArtemisSearchTopAppBar(
-            title = {
-                Text(
-                    modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
-                    text = courseTitle.orEmpty(),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            },
+            title = title,
             searchBarHint = searchConfiguration.hint,
             query = searchConfiguration.query,
             updateQuery = searchConfiguration.onUpdateQuery,
@@ -120,14 +121,7 @@ private fun CourseTopAppBar(
         )
     } else {
         ArtemisTopAppBar(
-            title = {
-                Text(
-                    modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
-                    text = courseTitle.orEmpty(),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            },
+            title = title,
             navigationIcon = { NavigationBackButton(onNavigateBack) }
         )
     }

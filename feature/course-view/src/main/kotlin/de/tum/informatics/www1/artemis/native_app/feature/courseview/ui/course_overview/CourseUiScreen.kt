@@ -153,12 +153,27 @@ fun CourseUiScreen(
     val weeklyExercisesDataState by viewModel.exercisesGroupedByWeek.collectAsState()
     val weeklyLecturesDataState by viewModel.lecturesGroupedByWeek.collectAsState()
 
+
+    val lectureSearchConfiguration = CourseSearchConfiguration.Search(
+        query = "",
+        hint = stringResource(id = R.string.course_ui_lectures_search_hint),
+        onUpdateQuery = viewModel::onUpdateLectureQuery
+    )
+
+    val exerciseSearchConfiguration = CourseSearchConfiguration.Search(
+        query = "",
+        hint = stringResource(id = R.string.course_ui_exercises_search_hint),
+        onUpdateQuery = viewModel::onUpdateExerciseQuery
+    )
+
     CourseUiScreen(
         modifier = modifier,
         conversationId = conversationId,
         courseDataState = courseDataState,
         username = username,
         userId = userId,
+        lectureSearchConfiguration = lectureSearchConfiguration,
+        exerciseSearchConfiguration = exerciseSearchConfiguration,
         onNavigateBack = onNavigateBack,
         weeklyExercisesDataState = weeklyExercisesDataState,
         onNavigateToExercise = onNavigateToExercise,
@@ -171,8 +186,6 @@ fun CourseUiScreen(
         onNavigateToLecture = onNavigateToLecture,
         postId = postId,
         onReloadCourse = viewModel::reloadCourse,
-        onUpdateExerciseQuery = viewModel::onUpdateExerciseQuery,
-        onUpdateLectureQuery = viewModel::onUpdateLectureQuery,
         onClickStartTextExercise = { exerciseId: Long ->
             viewModel.startExercise(exerciseId) { participationId ->
                 onNavigateToTextExerciseParticipation(
@@ -192,6 +205,8 @@ internal fun CourseUiScreen(
     postId: Long? = null,
     username: String? = null,
     userId: Long? = null,
+    lectureSearchConfiguration: CourseSearchConfiguration,
+    exerciseSearchConfiguration: CourseSearchConfiguration,
     courseDataState: DataState<Course>,
     weeklyExercisesDataState: DataState<List<GroupedByWeek<Exercise>>>,
     weeklyLecturesDataState: DataState<List<GroupedByWeek<Lecture>>>,
@@ -204,13 +219,12 @@ internal fun CourseUiScreen(
     onClickStartTextExercise: (exerciseId: Long) -> Unit,
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit,
-    onUpdateExerciseQuery: (String) -> Unit,
-    onUpdateLectureQuery: (String) -> Unit
 ) {
     ReportVisibleMetisContext(VisibleCourse(MetisContext.Course(courseId)))
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+
 
     // This scaffold function is needed because of the way the navigation in the communication tab
     // is handled and the fact that the communicationTab supports the tablet layout. In the tablet
@@ -251,13 +265,7 @@ internal fun CourseUiScreen(
         startDestination = initialTab::class,
     ) {
         composable<CourseTab.Exercises> {
-            scaffold(
-                CourseSearchConfiguration.Search(
-                    query = "",
-                    hint = stringResource(id = R.string.course_ui_exercises_search_hint),
-                    onUpdateQuery = onUpdateExerciseQuery
-                )
-            ) {
+            scaffold(exerciseSearchConfiguration) {
                 EmptyDataStateUi(dataState = weeklyExercisesDataState) { weeklyExercises ->
                     ExerciseListUi(
                         modifier = Modifier.fillMaxSize(),
@@ -289,13 +297,7 @@ internal fun CourseUiScreen(
         }
 
         composable<CourseTab.Lectures> {
-            scaffold(
-                CourseSearchConfiguration.Search(
-                    query = "",
-                    hint = stringResource(id = R.string.course_ui_lectures_search_hint),
-                    onUpdateQuery = onUpdateLectureQuery
-                )
-            ) {
+            scaffold(lectureSearchConfiguration) {
                 EmptyDataStateUi(dataState = weeklyLecturesDataState) { weeklyLectures ->
                     LectureListUi(
                         modifier = Modifier.fillMaxSize(),
