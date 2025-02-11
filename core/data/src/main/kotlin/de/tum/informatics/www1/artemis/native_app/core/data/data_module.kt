@@ -27,6 +27,6 @@ val dataModule = module {
     single<ExerciseService> { ExerciseServiceImpl(get(), get()) }
     single<AccountDataService> { AccountDataServiceImpl(androidContext(), get(), get(), get()) }
     single<CourseExerciseService> { CourseExerciseServiceImpl(get(), get()) }
-    single<ParticipationService> { ParticipationServiceImpl(get()) }
+    single<ParticipationService> { ParticipationServiceImpl(get(), get()) }
     single<ServerTimeService> { ServerTimeServiceImpl(get()) }
 }

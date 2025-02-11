@@ -61,16 +61,11 @@ internal abstract class BaseQuizViewModel<
         when (quizType) {
             QuizType.Live, QuizType.ViewResults ->
                 flatMapLatest(
-                    serverConfigurationService.serverUrl,
-                    accountService.authToken,
+                    participationService.onReloadRequired,
                     retryLoadExercise.onStart { emit(Unit) }
-                ) { serverUrl, authToken, _ ->
+                ) { _, _ ->
                     retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                        participationService.findParticipation(
-                            exerciseId,
-                            serverUrl,
-                            authToken
-                        )
+                        participationService.findParticipation(exerciseId)
                     }
                 }
 
