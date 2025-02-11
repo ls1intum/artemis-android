@@ -24,6 +24,6 @@ object ComponentColors {
         val background: Color
             @Composable get() = MaterialTheme.colorScheme.surfaceContainer
         val searchBarShadow: Color
-            @Composable get() = if(isSystemInDarkTheme()) Color.Black else Color.Black.copy(alpha = 0.35f)
+            @Composable get() = if(isSystemInDarkTheme()) Color.Black.copy(alpha = 0.6f) else Color.Black.copy(alpha = 0.35f)
     }
 }
