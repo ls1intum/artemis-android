@@ -100,8 +100,6 @@ fun ConversationOverviewBody(
 
     val isConnected by viewModel.isConnected.collectAsState()
 
-    val query by viewModel.query.collectAsState()
-
     LaunchedEffect(Unit) {
         viewModel.requestReload()
     }

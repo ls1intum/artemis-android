@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -12,7 +11,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
 import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
@@ -85,7 +83,7 @@ internal fun SinglePageConversationBody(
 
     val conversationOverview: @Composable (Modifier) -> Unit = { m ->
         ConversationOverviewBody(
-            modifier = m.padding(top = 16.dp),
+            modifier = m,
             courseId = courseId,
             onNavigateToConversation = openConversation,
             onNavigateToSavedPosts = {

@@ -135,7 +135,12 @@ fun ArtemisSearchTopAppBar(
             },
             modifier = modifier,
             navigationIcon = if (isSearchActive) {
-                { NavigationBackButton({ isSearchActive = false }) }
+                {
+                    NavigationBackButton({
+                        isSearchActive = false
+                        updateQuery("")
+                    })
+                }
             } else navigationIcon,
             actions = actions,
             windowInsets = windowInsets,
@@ -198,7 +203,7 @@ private fun Modifier.dropShadowBelow(
 
 // Inspired by the following Medium article:
 // https://medium.com/@kappdev/inner-shadow-in-jetpack-compose-d80dcd56f6cf
-private fun Modifier.innerShadow(
+fun Modifier.innerShadow(
     offset: Dp = 2.dp,
     color: Color = Color.Black.copy(0.5f)
 ) = this.drawWithContent {
