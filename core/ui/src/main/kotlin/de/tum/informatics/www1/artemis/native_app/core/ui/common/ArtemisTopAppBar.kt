@@ -47,6 +47,11 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 
+
+/**
+ * A top app bar only featuring a title and a navigation icon using the style of the bottom app bar to
+ * maintain a consistent look and feel.
+ */
 @Composable
 fun ArtemisTopAppBar(
     modifier: Modifier = Modifier,
@@ -74,6 +79,9 @@ fun ArtemisTopAppBar(
     }
 }
 
+/**
+ * An extension of the [ArtemisTopAppBar] that includes a search bar and provides a smooth search transitions.
+ */
 @Composable
 fun ArtemisSearchTopAppBar(
     modifier: Modifier = Modifier,
