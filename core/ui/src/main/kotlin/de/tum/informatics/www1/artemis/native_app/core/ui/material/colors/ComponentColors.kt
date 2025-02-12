@@ -18,4 +18,11 @@ object ComponentColors {
         val text: Color
             @Composable get() = if(isSystemInDarkTheme()) Color(0xFF36CEE6) else Color(0xFF09414A)
     }
+
+    object BrowseChannelCard {
+        val joinedBackground: Color
+            @Composable get() = Color(0xff28a745)
+        val actionText: Color
+            @Composable get() = Color.White
+    }
 }
