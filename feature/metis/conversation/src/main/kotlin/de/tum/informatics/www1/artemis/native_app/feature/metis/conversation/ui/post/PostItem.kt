@@ -58,14 +58,13 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.DateFormats
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.format
@@ -592,14 +591,17 @@ private fun StandalonePostFooter(
                     modifier = modifier
                         .background(color = PostColors.EmojiChipColors.background, CircleShape)
                         .clip(CircleShape)
+                        .then(Modifier.align(Alignment.CenterVertically))
+                        .sizeIn(minHeight = Spacings.Post.emojiHeight, minWidth = Spacings.Post.emojiHeight)
+                        .padding(5.dp)
                         .clickable(onClick = {
                             showEmojiDialog = true
                         })
                 ) {
                     Icon(
                         modifier = Modifier
-                            .sizeIn(minHeight = Spacings.Post.emojiHeight)
-                            .padding(5.dp),
+                            .align(Alignment.Center)
+                            .size(with(LocalDensity.current) { Spacings.Post.addEmojiIconSize.toDp() } ),
                         imageVector = Icons.Default.InsertEmoticon,
                         contentDescription = null,
                     )
@@ -659,7 +661,7 @@ private fun AnimatedCounter(currentCount: Int, selected: Boolean) {
     ) { targetCount ->
         Text(
             text = "$targetCount",
-            fontSize = 12.sp,
+            fontSize = Spacings.Post.emojiTextSize,
             color = if (selected) MaterialTheme.colorScheme.primary else Color.Unspecified
         )
     }
@@ -699,13 +701,12 @@ private fun EmojiChip(
     ) {
         Row(
             modifier = Modifier
-                .padding(2.dp)
-                .padding(horizontal = 4.dp),
+                .padding(horizontal = 6.dp, vertical = 1.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
                 text = getUnicodeForEmojiId(emojiId = emojiId),
-                fontSize = 12.sp
+                fontSize = Spacings.Post.emojiTextSize
             )
 
             AnimatedCounter(reactionCount, selected)
