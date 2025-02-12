@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
@@ -70,15 +71,16 @@ internal class ExerciseViewModel(
             .flowOn(coroutineContext)
             .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
 
-    private val fetchedExercise: Flow<DataState<Exercise>> =
-        exerciseService.onReloadRequired
-            .flatMapLatest {
-                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                    exerciseService.getExerciseDetails(exerciseId)
-                }
+    private val fetchedExercise: Flow<DataState<Exercise>> = flatMapLatest(
+            exerciseService.onReloadRequired,
+            requestReloadExercise.onStart { emit(Unit) }
+        ) { _, _ ->
+            retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                exerciseService.getExerciseDetails(exerciseId)
             }
-            .flowOn(coroutineContext)
-            .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+        }
+        .flowOn(coroutineContext)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
 
     /**
      * Emitted to when startExercise is successful
