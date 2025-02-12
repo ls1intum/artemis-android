@@ -32,6 +32,12 @@ object Spacings {
         val ContentVerticalPadding = 8.dp
     }
 
+    object CourseItem {
+        val height = 250.dp
+        val headerHeight = 70.dp
+        val previewHeaderHeight = 40.dp
+        val gridSpacing = 16.dp
+    }
 
     /**
      * Calculate the padding for the bottom of the screen, considering the navigation bar height.

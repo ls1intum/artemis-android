@@ -67,6 +67,7 @@ class DashboardE2eTest : BaseComposeTest() {
 
         val viewModel = CourseOverviewViewModel(
             dashboardService = get(),
+            dashboardStorageService = get(),
             accountService = get(),
             serverConfigurationService = get(),
             networkStatusProvider = get(),
