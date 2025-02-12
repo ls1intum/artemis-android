@@ -43,6 +43,7 @@ internal const val TEST_TAG_CREATE_CHANNEL_BUTTON = "create channel button"
 
 internal const val TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH = "TEST_TAG_SET_PRIVATE_PUBLIC_SWITCH"
 internal const val TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH = "TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH"
+internal const val TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH = "TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH"
 
 @Composable
 fun CreateChannelScreen(
@@ -76,6 +77,7 @@ internal fun CreateChannelScreen(
 
     val isPrivate by viewModel.isPrivate.collectAsState()
     val isAnnouncement by viewModel.isAnnouncement.collectAsState()
+    val isCourseWide by viewModel.isCourseWide.collectAsState()
 
     val canCreate by viewModel.canCreate.collectAsState()
 
@@ -154,6 +156,15 @@ internal fun CreateChannelScreen(
                 isChecked = isAnnouncement,
                 onCheckedChange = { viewModel.updateAnnouncement(it) },
                 switchTestTag = TEST_TAG_SET_ANNOUNCEMENT_UNRESTRICTED_SWITCH,
+            )
+
+            BinarySelection(
+                modifier = Modifier.fillMaxWidth(),
+                title = stringResource(id = R.string.create_channel_channel_course_wide_type),
+                description = stringResource(id = R.string.create_channel_channel_course_wide_type_hint),
+                isChecked = isCourseWide,
+                onCheckedChange = { viewModel.updateCourseWide(it) },
+                switchTestTag = TEST_TAG_SET_COURSE_WIDE_SELECTIVE_SWITCH,
             )
 
             Button(

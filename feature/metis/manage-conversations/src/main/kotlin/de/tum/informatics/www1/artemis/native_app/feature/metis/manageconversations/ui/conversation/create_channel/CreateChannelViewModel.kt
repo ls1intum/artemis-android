@@ -33,6 +33,7 @@ internal class CreateChannelViewModel(
         private const val KEY_DESCRIPTION = "description"
         private const val KEY_IS_PRIVATE = "is_private"
         private const val KEY_IS_ANNOUNCEMENT = "announcement"
+        private const val KEY_IS_COURSE_WIDE = "course_wide"
     }
 
     val name: StateFlow<String> = savedStateHandle.getStateFlow(KEY_NAME, "")
@@ -41,6 +42,8 @@ internal class CreateChannelViewModel(
     val isPrivate: StateFlow<Boolean> = savedStateHandle.getStateFlow(KEY_IS_PRIVATE, false)
     val isAnnouncement: StateFlow<Boolean> =
         savedStateHandle.getStateFlow(KEY_IS_ANNOUNCEMENT, false)
+    val isCourseWide: StateFlow<Boolean> =
+        savedStateHandle.getStateFlow(KEY_IS_COURSE_WIDE, false)
 
     val isNameIllegal: StateFlow<Boolean> = name
         .mapIsChannelNameIllegal()
@@ -67,6 +70,7 @@ internal class CreateChannelViewModel(
                 description = description.value,
                 isPublic = !isPrivate.value,
                 isAnnouncement = isAnnouncement.value,
+                isCourseWide = isCourseWide.value,
                 authToken = authToken,
                 serverUrl = serverUrl
             ).orNull()
@@ -89,5 +93,9 @@ internal class CreateChannelViewModel(
 
     fun updateAnnouncement(isAnnouncement: Boolean) {
         savedStateHandle[KEY_IS_ANNOUNCEMENT] = isAnnouncement
+    }
+
+    fun updateCourseWide(isCourseWide: Boolean) {
+        savedStateHandle[KEY_IS_COURSE_WIDE] = isCourseWide
     }
 }
