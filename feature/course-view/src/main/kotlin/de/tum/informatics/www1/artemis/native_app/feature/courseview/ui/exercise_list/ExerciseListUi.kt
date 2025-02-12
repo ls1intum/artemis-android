@@ -50,9 +50,9 @@ internal fun ExerciseListUi(
             modifier = modifier.testTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN),
             weeklyItemGroups = weeklyExercises,
             getItemId = { id ?: 0 }
-        ) { exercise ->
+        ) { m, exercise ->
             ExerciseListItem(
-                modifier = Modifier
+                modifier = m
                     .fillMaxWidth()
                     .padding(horizontal = Spacings.ScreenHorizontalSpacing),
                 exercise = exercise,

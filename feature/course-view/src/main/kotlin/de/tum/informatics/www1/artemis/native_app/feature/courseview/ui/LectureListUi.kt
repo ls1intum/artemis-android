@@ -53,9 +53,9 @@ internal fun LectureListUi(
             modifier = modifier.testTag(TEST_TAG_LECTURE_LIST),
             weeklyItemGroups = lectures,
             getItemId = { id ?: 0L }
-        ) { lecture ->
+        ) { m, lecture ->
             LectureListItem(
-                modifier = Modifier
+                modifier = m
                     .fillMaxWidth()
                     .padding(horizontal = Spacings.ScreenHorizontalSpacing),
                 lecture = lecture,
