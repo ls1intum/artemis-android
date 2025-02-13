@@ -34,6 +34,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -96,6 +97,7 @@ fun BasicSearchTextField(
     query: String,
     backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     textStyle: TextStyle = LocalTextStyle.current,
+    testTag: String? = null,
     updateQuery: (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -109,7 +111,7 @@ fun BasicSearchTextField(
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .clip(MaterialTheme.shapes.medium)
             .background(backgroundColor)
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -127,8 +129,9 @@ fun BasicSearchTextField(
             )
 
             BasicArtemisTextField(
-                modifier = modifier
-                    .weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .then(testTag?.let { Modifier.testTag(it) } ?: Modifier),
                 backgroundColor = backgroundColor,
                 hint = hint,
                 value = textFieldValue,
