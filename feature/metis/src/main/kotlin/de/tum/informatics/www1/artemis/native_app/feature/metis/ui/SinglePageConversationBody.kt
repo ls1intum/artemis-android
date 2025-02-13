@@ -116,8 +116,6 @@ internal fun SinglePageConversationBody(
     )
 
     val doAlwaysShowScaffold = getArtemisAppLayout() == ArtemisAppLayout.Tablet
-    collapsingContentState.isInitiallyForcedCollapsed = doAlwaysShowScaffold
-    collapsingContentState.isCollapsed = doAlwaysShowScaffold
     val scaffoldWrapper = @Composable { content: @Composable () -> Unit ->
         if (doAlwaysShowScaffold) {
             scaffold(searchConfiguration, content)
@@ -145,6 +143,14 @@ internal fun SinglePageConversationBody(
             },
             label = "SinglePageConversationBody screen transition animation"
         ) { config ->
+            // This handles the state of the search bar in tablet mode depending on the view
+            // We only want to show it in the conversation overview
+            if (config !is NothingOpened && doAlwaysShowScaffold) {
+                collapsingContentState.isCollapsed = true
+            } else if (doAlwaysShowScaffold) {
+                collapsingContentState.isCollapsed = false
+            }
+
             when (config) {
                 NothingOpened -> {
                     if (doAlwaysShowScaffold) {
@@ -157,6 +163,9 @@ internal fun SinglePageConversationBody(
                 }
 
                 is OpenedConversation -> {
+                    // Since we have the conversation list opened while being in a channel in tablet
+                    // mode we want to be able to use the conversation list search bar
+                    collapsingContentState.isSearchIconShown = doAlwaysShowScaffold
                     ConversationScreen(
                         modifier = modifier,
                         conversationId = config.conversationId,

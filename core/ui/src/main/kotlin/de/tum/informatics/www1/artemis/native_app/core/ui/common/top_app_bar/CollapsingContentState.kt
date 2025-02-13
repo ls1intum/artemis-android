@@ -11,12 +11,12 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 class CollapsingContentState(
     initialCollapsingHeight: Float,
     initialOffset: Float,
-    var isInitiallyForcedCollapsed: Boolean = false,
     val isCollapsingEnabled: Boolean = true
 ) {
+    var isSearchIconShown by mutableStateOf(false)
     var collapsingHeight by mutableFloatStateOf(initialCollapsingHeight)
     var offset by mutableFloatStateOf(initialOffset)
-    var isCollapsed by mutableStateOf(isInitiallyForcedCollapsed)
+    var isCollapsed by mutableStateOf(false)
 
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {

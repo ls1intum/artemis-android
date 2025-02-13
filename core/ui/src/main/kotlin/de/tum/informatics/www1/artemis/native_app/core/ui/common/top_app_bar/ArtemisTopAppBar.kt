@@ -168,7 +168,7 @@ fun ArtemisSearchTopAppBar(
             actions = {
                 actions()
 
-                if (collapsingContentState.isInitiallyForcedCollapsed) {
+                if (collapsingContentState.isSearchIconShown) {
                     // Since the search bar is collapsed by default on tablets to
                     // make the screen less cluttered in the twoColumnLayout, we trigger the search bar by clicking the search icon
                     if (getArtemisAppLayout() == ArtemisAppLayout.Tablet) {
@@ -182,7 +182,6 @@ fun ArtemisSearchTopAppBar(
                             )
                         }
                     }
-                    collapsingContentState.isInitiallyForcedCollapsed = false
                 }
             },
             windowInsets = windowInsets,
