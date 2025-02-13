@@ -117,7 +117,7 @@ internal fun SinglePageConversationBody(
 
     val doAlwaysShowScaffold = getArtemisAppLayout() == ArtemisAppLayout.Tablet
     collapsingContentState.isInitiallyForcedCollapsed = doAlwaysShowScaffold
-    collapsingContentState.isCollapsed = true
+    collapsingContentState.isCollapsed = doAlwaysShowScaffold
     val scaffoldWrapper = @Composable { content: @Composable () -> Unit ->
         if (doAlwaysShowScaffold) {
             scaffold(searchConfiguration, content)
