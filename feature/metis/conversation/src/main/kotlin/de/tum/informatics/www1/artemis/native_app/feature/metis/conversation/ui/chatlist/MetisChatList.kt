@@ -437,7 +437,7 @@ private fun UnreadPostsIndicator(
                     shape = MaterialTheme.shapes.small
                 )
                 .padding(4.dp),
-            text = "New",
+            text = stringResource(R.string.unread_post_indicator_text),
             color = MaterialTheme.colorScheme.onError,
             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
         )
