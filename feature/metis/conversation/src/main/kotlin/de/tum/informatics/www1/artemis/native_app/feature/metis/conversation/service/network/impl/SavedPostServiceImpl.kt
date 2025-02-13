@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.impl
 
+import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
@@ -61,7 +62,7 @@ class SavedPostServiceImpl(
 
                 cookieAuth(authToken)
             }.also {
-                println("### STATUS: ${it.status} ${it.bodyAsText()}")
+                Log.d("### STATUS", "${it.status} ${it.bodyAsText()}")
             }.body()
         }
     }
