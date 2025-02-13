@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -42,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -55,13 +55,13 @@ import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.ChatListItem
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist.MetisChatList
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.ConversationDataStatusButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.isReplyEnabled
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
@@ -190,13 +190,15 @@ fun ConversationChatListScreen(
                             searchBarFocusRequester.requestFocus()
                         }
 
-                        BasicHintTextField(
-                            modifier = Modifier.focusRequester(searchBarFocusRequester),
-                            value = query,
-                            onValueChange = onUpdateQuery,
-                            hint = "",
-                            maxLines = 1,
-                            hintStyle = MaterialTheme.typography.bodyMedium
+                        BasicSearchTextField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(end = 8.dp),
+                            query = query,
+                            updateQuery = onUpdateQuery,
+                            hint = stringResource(id = R.string.metis_post_search_hint),
+                            textStyle = MaterialTheme.typography.bodyMedium,
+                            focusRequester = searchBarFocusRequester
                         )
                     } else {
                         EmptyDataStateUi(
@@ -231,7 +233,11 @@ fun ConversationChatListScreen(
                         }
 
                         IconButton(onClick = { isSearchBarOpen = true }) {
-                            Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                tint = MaterialTheme.colorScheme.primary,
+                                contentDescription = null
+                            )
                         }
 
                         IconButton(
@@ -242,7 +248,11 @@ fun ConversationChatListScreen(
                                 }
                             }
                         ) {
-                            Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
+                            Icon(
+                                imageVector = Icons.Outlined.Info,
+                                tint = MaterialTheme.colorScheme.primary,
+                                contentDescription = null
+                            )
 
                             InfoDropdownMenu(
                                 isInfoDropdownExpanded = isInfoDropdownExpanded,

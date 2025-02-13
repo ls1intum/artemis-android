@@ -6,6 +6,12 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.R
 
 object ArtemisInstances {
 
+    val LegacyTumArtemis = ArtemisInstance(
+        host = "artemis.ase.in.tum.de",
+        name = R.string.artemis_instance_tum_legacy,
+        type = ArtemisInstance.Type.LEGACY
+    )
+
     val TumArtemis = ArtemisInstance(
         host = "artemis.cit.tum.de",
         name = R.string.artemis_instance_tum_production,
@@ -51,7 +57,8 @@ object ArtemisInstances {
         enum class Type {
             PRODUCTION,
             TEST,
-            CUSTOM
+            CUSTOM,
+            LEGACY
         }
 
         val serverUrl = "https://$host/"
