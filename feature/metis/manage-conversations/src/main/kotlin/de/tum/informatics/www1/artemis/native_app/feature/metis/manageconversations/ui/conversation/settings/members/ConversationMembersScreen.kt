@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisSearchTopAppBar
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
 import org.koin.androidx.compose.koinViewModel
@@ -51,6 +52,10 @@ fun ConversationMembersScreen(
                 query = query,
                 searchBarHint = stringResource(id = R.string.conversation_members_query_placeholder),
                 updateQuery = viewModel::updateQuery,
+                collapsingContentState = CollapsingContentState(
+                    initialCollapsingHeight = 0f,
+                    initialOffset = 0f
+                )
             )
         }
     ) { padding ->

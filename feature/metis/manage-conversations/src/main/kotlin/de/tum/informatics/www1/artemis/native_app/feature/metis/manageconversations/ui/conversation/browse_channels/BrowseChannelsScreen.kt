@@ -44,6 +44,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateU
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisSearchTopAppBar
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
@@ -109,7 +110,11 @@ internal fun BrowseChannelsScreen(
                 navigationIcon = { NavigationBackButton(onNavigateBack) },
                 searchBarHint = stringResource(id = R.string.browse_channels_search_hint),
                 query = query,
-                updateQuery = viewModel::updateQuery
+                updateQuery = viewModel::updateQuery,
+                collapsingContentState = CollapsingContentState(
+                    initialCollapsingHeight = 0f,
+                    initialOffset = 0f,
+                )
             )
         }
     ) { padding ->
