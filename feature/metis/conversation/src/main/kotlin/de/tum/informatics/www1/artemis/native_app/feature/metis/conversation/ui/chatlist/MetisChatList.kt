@@ -238,6 +238,7 @@ private fun ChatList(
     postActionFlags: PostActionFlags,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     clientId: Long,
+    displayUnreadIndicator: Boolean = false,        // See https://github.com/ls1intum/artemis-android/pull/375#issuecomment-2656030353
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
     onRequestDelete: (IStandalonePost) -> Unit,
@@ -259,7 +260,9 @@ private fun ChatList(
         ) { index ->
             when (val chatListItem = posts[index]) {
                 is ChatListItem.UnreadIndicator -> {
-                    UnreadPostsIndicator()
+                    if (displayUnreadIndicator) {
+                        UnreadPostsIndicator()
+                    }
                 }
 
                 is ChatListItem.DateDivider -> {
