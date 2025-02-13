@@ -22,9 +22,8 @@ fun ProvideMarkwon(
     val linkResolver = LocalMarkdownLinkResolver.current.rememberMarkdownLinkResolver()
     val context = LocalContext.current
 
-    val imageWidth = context.resources.displayMetrics.widthPixels
     val markdownRender: Markwon = remember(imageLoader, linkResolver, useOriginalImageSize) {
-        createMarkdownRender(context, imageLoader, linkResolver, imageWidth, useOriginalImageSize)
+        MarkdownRenderFactory.create(context, imageLoader, linkResolver, useOriginalImageSize)
     }
 
     CompositionLocalProvider(LocalMarkwon provides markdownRender) {
