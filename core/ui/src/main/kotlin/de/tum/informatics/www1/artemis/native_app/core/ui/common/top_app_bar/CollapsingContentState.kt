@@ -20,7 +20,9 @@ class CollapsingContentState(
 
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-            isCollapsed = available.y < 0
+            if (offset > -collapsingHeight) {
+                isCollapsed = available.y < 0
+            }
             return calculateOffset(available.y)
         }
 
