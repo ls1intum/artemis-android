@@ -35,6 +35,7 @@ import androidx.core.content.res.ResourcesCompat
 import coil.ImageLoader
 import coil.request.Disposable
 import coil.request.ImageRequest
+import coil.size.Scale
 import de.tum.informatics.www1.artemis.native_app.core.common.R
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
 import io.noties.markwon.AbstractMarkwonPlugin
@@ -228,7 +229,13 @@ private fun TextView.applyStyleAndColor(
     }
 }
 
-fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, linkResolver: LinkResolver?, imageWidth: Int): Markwon {
+fun createMarkdownRender(
+    context: Context,
+    imageLoader: ImageLoader?,
+    linkResolver: LinkResolver?,
+    imageWidth: Int,
+    useOriginalImageSize: Boolean = false
+): Markwon {
     val imagePlugin: CoilImagesPlugin? =
         if (imageLoader != null) {
             CoilImagesPlugin.create(
@@ -243,8 +250,12 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, linkResolv
                             .defaults(imageLoader.defaults)
                             .data(drawable.destination)
                             .crossfade(true)
-//                            .size(imageWidth, height) // We set a fixed height and set the width of the image to the screen width.
-//                            .scale(Scale.FIT)
+                            .apply {
+                                if (!useOriginalImageSize) {
+                                    size(imageWidth, height) // We set a fixed height and set the width of the image to the screen width.
+                                    scale(Scale.FIT)
+                                }
+                            }
                             .build()
                     }
 

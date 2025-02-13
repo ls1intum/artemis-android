@@ -112,7 +112,9 @@ fun FaqDetailUi(
             retryButtonText = stringResource(id = R.string.faq_loading_faq_try_again),
             onClickRetry = onReloadRequest
         ) { faq ->
-            ProvideMarkwon {
+            ProvideMarkwon(
+                useOriginalImageSize = true
+            ) {
                 FaqDetail(
                     modifier = Modifier
                         .fillMaxSize()
