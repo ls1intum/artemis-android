@@ -24,9 +24,6 @@ class FaqArtemisMarkdownTransformer(
         filePath: String
     ): String {
         val link = "[$fileName]($serverUrl$filePath)"
-        val res = if (isImage) "!$link" else link
-        // TODO: this still does not work
-        println("Transformed link: $res")
-        return res
+        return if (isImage) "!$link" else link
     }
 }
