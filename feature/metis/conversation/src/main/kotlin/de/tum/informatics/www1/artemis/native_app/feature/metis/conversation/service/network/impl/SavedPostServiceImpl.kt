@@ -13,6 +13,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.appendPathSegments
 
 class SavedPostServiceImpl(
@@ -59,6 +60,8 @@ class SavedPostServiceImpl(
                 }
 
                 cookieAuth(authToken)
+            }.also {
+                println("### STATUS: ${it.status} ${it.bodyAsText()}")
             }.body()
         }
     }
