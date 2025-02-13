@@ -116,7 +116,8 @@ fun FaqDetailUi(
                 FaqDetail(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
+                        .verticalScroll(rememberScrollState())
+                        .navigationBarsPadding(),
                     faq = faq
                 )
             }
@@ -147,7 +148,6 @@ private fun FaqDetail(
 
         Spacer(modifier = Modifier
             .height(Spacings.EndOfScrollablePageSpacing)
-            .navigationBarsPadding()
         )
     }
 }

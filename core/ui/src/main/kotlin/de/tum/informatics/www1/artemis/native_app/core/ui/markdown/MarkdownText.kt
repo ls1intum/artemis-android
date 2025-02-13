@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.markdown
 
 import android.content.Context
+import android.text.Spanned
 import android.text.method.LinkMovementMethod
 import android.util.TypedValue
 import android.view.View
@@ -15,6 +16,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
@@ -33,7 +35,6 @@ import androidx.core.content.res.ResourcesCompat
 import coil.ImageLoader
 import coil.request.Disposable
 import coil.request.ImageRequest
-import coil.size.Scale
 import de.tum.informatics.www1.artemis.native_app.core.common.R
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
 import io.noties.markwon.AbstractMarkwonPlugin
@@ -109,13 +110,14 @@ fun MarkdownText(
 
     val markdownTransformer = LocalMarkdownTransformer.current
 
-    val transformedMarkdown by remember(markdown, markdownTransformer) {
+    val parsedMarkdown by remember(markdown, markdownTransformer, markdownRender) {
         derivedStateOf {
-            markdownTransformer.transformMarkdown(markdown)
+            val transformedMarkdown = markdownTransformer.transformMarkdown(markdown)
+            markdownRender.toMarkdown(transformedMarkdown)
         }
     }
 
-    val previousTransformedMarkdown = remember { mutableStateOf<String?>(null) }
+    var previousParsedMarkdown by remember { mutableStateOf<Spanned?>(null) }
 
     AndroidView(
         // Added semantics for ui testing.
@@ -141,10 +143,10 @@ fun MarkdownText(
             )
         },
         update = { textView ->
-            // Only update if the transformed markdown has changed
-            if (transformedMarkdown != previousTransformedMarkdown.value) {
-                markdownRender.setMarkdown(textView, transformedMarkdown)
-                previousTransformedMarkdown.value = transformedMarkdown
+            // Only update if the parsed markdown has changed
+            if (parsedMarkdown != previousParsedMarkdown) {
+                markdownRender.setParsedMarkdown(textView, parsedMarkdown)
+                previousParsedMarkdown = parsedMarkdown
             }
 
             textView.movementMethod = LinkMovementMethod.getInstance()
@@ -241,8 +243,8 @@ fun createMarkdownRender(context: Context, imageLoader: ImageLoader?, linkResolv
                             .defaults(imageLoader.defaults)
                             .data(drawable.destination)
                             .crossfade(true)
-                            .size(imageWidth, height) // We set a fixed height and set the width of the image to the screen width.
-                            .scale(Scale.FIT)
+//                            .size(imageWidth, height) // We set a fixed height and set the width of the image to the screen width.
+//                            .scale(Scale.FIT)
                             .build()
                     }
 
