@@ -75,7 +75,7 @@ internal fun <T> WeeklyItemsLazyColumn(
     LazyColumn(
         modifier = modifier,
         verticalArrangement = verticalArrangement,
-        contentPadding = Spacings.calculateEndOfPagePaddingValues()
+        contentPadding = Spacings.calculateContentPaddingValues()
     ) {
         weeklyItemGroups.forEachIndexed { index, weeklyItems ->
             item {

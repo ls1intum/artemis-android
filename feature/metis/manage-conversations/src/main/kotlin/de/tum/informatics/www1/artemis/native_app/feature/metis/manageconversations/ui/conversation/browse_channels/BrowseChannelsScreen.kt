@@ -19,7 +19,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
@@ -97,12 +97,11 @@ internal fun BrowseChannelsScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
+            ArtemisTopAppBar(
                 title = { Text(text = stringResource(id = R.string.browse_channels_title)) },
                 navigationIcon = { NavigationBackButton(onNavigateBack) }
             )
-        },
-
+        }
     ) { padding ->
         BasicDataStateUi(
             modifier = Modifier
@@ -119,7 +118,7 @@ internal fun BrowseChannelsScreen(
             if (channels.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = Spacings.calculateEndOfPagePaddingValues(),
+                    contentPadding = Spacings.calculateContentPaddingValues(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(channels) { channelChat ->

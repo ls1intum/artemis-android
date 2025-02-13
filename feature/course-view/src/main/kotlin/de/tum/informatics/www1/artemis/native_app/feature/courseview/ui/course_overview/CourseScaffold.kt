@@ -13,8 +13,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -23,6 +23,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
@@ -79,7 +81,7 @@ private fun CourseTopAppBar(
 ) {
     val courseTitle = courseDataState.bind<String?> { it.title }.orElse(null)
 
-    TopAppBar(
+    ArtemisTopAppBar(
         title = {
             Text(
                 modifier = Modifier.placeholder(visible = !courseDataState.isSuccess),
@@ -98,25 +100,29 @@ private fun BottomNavigationBar(
     isSelected: (CourseTab) -> Boolean,
     onUpdateSelectedTab: (CourseTab) -> Unit
 ) {
-    NavigationBar {
-        BottomNavigationItem.topLevelRoutes.forEach { navigationItem ->
+    Surface(
+        shadowElevation = Spacings.AppBarElevation
+    ){
+        NavigationBar {
+            BottomNavigationItem.topLevelRoutes.forEach { navigationItem ->
 
-            val labelText = stringResource(id = navigationItem.labelStringId)
-            NavigationBarItem(
-                selected = isSelected(navigationItem.route),
-                label = {
-                    Text(labelText)
-                },
-                icon = {
-                    Icon(
-                        navigationItem.icon,
-                        contentDescription = labelText
-                    )
-                },
-                onClick = {
-                    onUpdateSelectedTab(navigationItem.route)
-                }
-            )
+                val labelText = stringResource(id = navigationItem.labelStringId)
+                NavigationBarItem(
+                    selected = isSelected(navigationItem.route),
+                    label = {
+                        Text(labelText)
+                    },
+                    icon = {
+                        Icon(
+                            navigationItem.icon,
+                            contentDescription = labelText
+                        )
+                    },
+                    onClick = {
+                        onUpdateSelectedTab(navigationItem.route)
+                    }
+                )
+            }
         }
     }
 }
