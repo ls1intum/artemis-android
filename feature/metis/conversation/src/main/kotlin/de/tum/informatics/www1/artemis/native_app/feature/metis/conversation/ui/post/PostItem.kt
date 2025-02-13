@@ -701,6 +701,7 @@ private fun EmojiChip(
     ) {
         Row(
             modifier = Modifier
+                .align(Alignment.Center)
                 .padding(horizontal = 6.dp, vertical = 1.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
