@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 
 import android.app.Activity
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
@@ -66,6 +67,9 @@ import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration.Companion.seconds
+
+
+private const val TAG = "ConversationOverviewViewModel"
 
 class ConversationOverviewViewModel(
     currentActivityListener: CurrentActivityListener?,
@@ -354,9 +358,21 @@ class ConversationOverviewViewModel(
                             val postUpdate = update.update
                             if (postUpdate.action != MetisCrudAction.CREATE) return@collect
 
+                            Log.d(TAG, "Received post creation update: $postUpdate")
+
                             val conversationId = postUpdate.post.conversation?.id ?: return@collect
                             val isConversationVisible = visibleMetisContexts.value.any { it.isInConversation(conversationId) }
-                            if (isConversationVisible) return@collect       // The user is currently looking at the conversation in the UI
+                            // The user is currently looking at the conversation in the UI
+                            if (isConversationVisible) {
+                                Log.d(TAG, "Conversation is visible, not increasing unread messages count")
+                                conversationService.markConversationAsRead(
+                                    courseId,
+                                    conversationId,
+                                    accountService.authToken.first(),
+                                    serverConfigurationService.serverUrl.first()
+                                )
+                                return@collect
+                            }
 
                             val existingConversation = currentConversations[conversationId] ?: return@collect
 
