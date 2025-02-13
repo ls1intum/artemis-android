@@ -14,7 +14,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,7 +23,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
-import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -111,34 +109,30 @@ private fun BottomNavigationBar(
         }
     }
 
-    Surface(
-        shadowElevation = Spacings.AppBarElevation
-    ) {
-        NavigationBar {
-            navItems.forEach { navigationItem ->
-                val labelText = stringResource(id = navigationItem.labelStringId)
-                NavigationBarItem(
-                    selected = isSelected(navigationItem.route),
-                    label = {
-                        Text(
-                            text = labelText,
-                            maxLines = 1,
-                            // On small devices the "Communication Label would overflow onto two lines
-                            // when FAQ is enabled. Therefore trim the label to one line.
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    icon = {
-                        Icon(
-                            navigationItem.icon,
-                            contentDescription = labelText
-                        )
-                    },
-                    onClick = {
-                        onUpdateSelectedTab(navigationItem.route)
-                    }
-                )
-            }
+    NavigationBar {
+        navItems.forEach { navigationItem ->
+            val labelText = stringResource(id = navigationItem.labelStringId)
+            NavigationBarItem(
+                selected = isSelected(navigationItem.route),
+                label = {
+                    Text(
+                        text = labelText,
+                        maxLines = 1,
+                        // On small devices the "Communication Label would overflow onto two lines
+                        // when FAQ is enabled. Therefore trim the label to one line.
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                icon = {
+                    Icon(
+                        navigationItem.icon,
+                        contentDescription = labelText
+                    )
+                },
+                onClick = {
+                    onUpdateSelectedTab(navigationItem.route)
+                }
+            )
         }
     }
 }
