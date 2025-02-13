@@ -12,21 +12,21 @@ androidxAppCompat = "1.7.0"
 androidxComposeBom = "2025.01.01"
 androidxDataStore = "1.1.2"
 androidxLifecycle = "2.8.7"
-androidxNavigation = "2.8.6"
-androidxPaging = "3.3.5"
+androidxNavigation = "2.8.7"
+androidxPaging = "3.3.6"
 androidxPagingCompose = "3.3.5"
 coil = "3.1.0"
 coil2 = "2.7.0"     # The markwon library still depends on coil2: https://github.com/ls1intum/artemis-android/issues/171
 emoji2 = "1.5.0"
 kotlin = "2.1.10"
 kotlinxCoroutines = "1.10.1"
-kotlinxDatetime = "0.6.1"
+kotlinxDatetime = "0.6.2"
 kotlinxSerializationJson = "1.8.0"
 koin = "4.0.2"
 koinAndroidxCompose = "4.0.0"
 kover = "0.9.1"
 krossbow = "9.0.0"
-ktor = "3.0.3"
+ktor = "3.1.0"
 markwon = "4.6.2"
 mockk = "1.13.16"
 ossLicensesPlugin = "0.10.6"
@@ -136,7 +136,7 @@ kotlin-kover = { group = "org.jetbrains.kotlinx", name = "kover-gradle-plugin", 
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.1.0" }
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.1.1" }
 google-ksp = { id = "com.google.devtools.ksp", version = "2.1.10-1.0.29" }
 google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

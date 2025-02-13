@@ -6,4 +6,7 @@ import kotlinx.serialization.Serializable
  * A dashboard is a collection of courses.
  */
 @Serializable
-data class Dashboard(val courses: List<CourseWithScore> = emptyList())
+data class Dashboard(
+    val recentCourses: MutableList<CourseWithScore> = mutableListOf(),
+    val courses: MutableList<CourseWithScore> = mutableListOf()
+)

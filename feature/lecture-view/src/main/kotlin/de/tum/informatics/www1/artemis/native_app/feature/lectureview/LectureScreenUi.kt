@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -36,6 +35,7 @@ import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
@@ -170,7 +170,7 @@ internal fun LectureScreen(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                TopAppBar(
+                ArtemisTopAppBar(
                     title = {
                         Text(
                             text = lectureTitle.orEmpty(),

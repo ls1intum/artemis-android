@@ -216,7 +216,7 @@ private fun TextView.applyStyleAndColor(
     )
 
     setTextColor(textColor.toArgb())
-    setTextSize(TypedValue.COMPLEX_UNIT_DIP, mergedStyle.fontSize.value)
+    setTextSize(TypedValue.COMPLEX_UNIT_SP, mergedStyle.fontSize.value)
 
     textAlignment = when (textAlign) {
         TextAlign.Left, TextAlign.Start -> View.TEXT_ALIGNMENT_TEXT_START

@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.SyncProblem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
 
@@ -21,6 +22,7 @@ internal fun ConversationDataStatusButton(
                 DataStatus.Outdated -> Icons.Default.SyncProblem
                 DataStatus.UpToDate -> Icons.Default.CloudDone
             },
+            tint = MaterialTheme.colorScheme.primary,
             contentDescription = null
         )
     }

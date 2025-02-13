@@ -127,11 +127,11 @@ private fun RecipientsTextField(
 
         BasicSearchTextField (
             modifier = Modifier
-                .fillMaxWidth()
-                .testTag(TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD),
+                .fillMaxWidth(),
             query = query,
             updateQuery = onUpdateQuery,
             hint = stringResource(id = R.string.conversation_member_selection_address_hint),
+            testTag = TEST_TAG_MEMBER_SELECTION_SEARCH_FIELD,
             focusRequester = focusRequester
         )
     }
