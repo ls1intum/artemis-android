@@ -31,71 +31,92 @@ object MarkdownRenderFactory {
         linkResolver: LinkResolver?,
         useOriginalImageSize: Boolean = false,
     ): Markwon {
-        val displayWidth = context.resources.displayMetrics.widthPixels
-
-        val imagePlugin: CoilImagesPlugin? =
-            if (imageLoader != null) {
-                CoilImagesPlugin.create(
-                    object : CoilImagesPlugin.CoilStore {
-                        override fun load(drawable: AsyncDrawable): ImageRequest {
-                            var height = DEFAULT_IMAGE_HEIGHT
-                            if (drawable.destination.contains(TYPE_ICON_RESOURCE_PATH)) {
-                                height = LINK_TYPE_HINT_ICON_HEIGHT
-                            }
-
-                            return ImageRequest.Builder(context)
-                                .defaults(imageLoader.defaults)
-                                .data(drawable.destination)
-                                .crossfade(true)
-                                .apply {
-                                    if (!useOriginalImageSize) {
-                                        size(displayWidth, height) // We set a fixed height and set the width of the image to the screen width.
-                                        scale(Scale.FIT)
-                                    }
-                                }
-                                .build()
-                        }
-
-                        override fun cancel(disposable: Disposable) {
-                            disposable.dispose()
-                        }
-                    },
-                    imageLoader
-                )
-            } else null
+        val imagePlugin: CoilImagesPlugin? = createImagePlugin(imageLoader, context, useOriginalImageSize)
+        val linkHighlightPlugin = createLinkHighlightPlugin(context)
+        val softLineBreakPlugin = createSoftLineBreakPlugin()
+        val linkResolverPlugin: AbstractMarkwonPlugin? = createLinkResolverPlugin(linkResolver)
 
         return Markwon.builder(context)
             .usePlugin(HtmlPlugin.create())
             .usePlugin(StrikethroughPlugin.create())
             .usePlugin(TablePlugin.create(context))
             .usePlugin(LinkifyPlugin.create())
-            .usePlugin(object : AbstractMarkwonPlugin() {
-                override fun configureTheme(builder: MarkwonTheme.Builder) {
-                    builder
-                        .linkColor(context.getColor(R.color.link_color))
-                        .isLinkUnderlined(false)
-                }
-            })
-            .usePlugin(object : AbstractMarkwonPlugin() {
-                override fun configureVisitor(builder: MarkwonVisitor.Builder) {
-                    builder.on(SoftLineBreak::class.java) { visitor, _ ->
-                        visitor.forceNewLine()
-                    }
-                }
-
-            })
+            .usePlugin(linkHighlightPlugin)
+            .usePlugin(softLineBreakPlugin)
             .apply {
                 if (imagePlugin != null) {
                     usePlugin(imagePlugin)
                 }
-                if (linkResolver != null) {
-                    usePlugin(object : AbstractMarkwonPlugin() {
-                        override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
-                            builder.linkResolver(linkResolver)
-                        }
-                    })
+                if (linkResolverPlugin != null) {
+                    usePlugin(linkResolverPlugin)
                 }
             }
             .build()
+    }
+
+
+    private fun createImagePlugin(
+        imageLoader: ImageLoader?,
+        context: Context,
+        useOriginalImageSize: Boolean,
+    ): CoilImagesPlugin? {
+        if (imageLoader == null) return null
+        
+        val displayWidth = context.resources.displayMetrics.widthPixels
+        val coilStore = object : CoilImagesPlugin.CoilStore {
+            override fun load(drawable: AsyncDrawable): ImageRequest {
+                var height = DEFAULT_IMAGE_HEIGHT
+                if (drawable.destination.contains(TYPE_ICON_RESOURCE_PATH)) {
+                    height = LINK_TYPE_HINT_ICON_HEIGHT
+                }
+
+                val builder = ImageRequest.Builder(context)
+                    .defaults(imageLoader.defaults)
+                    .data(drawable.destination)
+                    .crossfade(true)
+
+                if (!useOriginalImageSize) {
+                    builder.apply {
+                        size(displayWidth, height) // We set a fixed height and set the width of the image to the screen width.
+                        scale(Scale.FIT)
+                    }
+                }
+                    
+                return builder.build()
+            }
+
+            override fun cancel(disposable: Disposable) {
+                disposable.dispose()
+            }
+        }
+
+        return CoilImagesPlugin.create(coilStore, imageLoader)
+    }
+
+    private fun createSoftLineBreakPlugin() = object : AbstractMarkwonPlugin() {
+        override fun configureVisitor(builder: MarkwonVisitor.Builder) {
+            builder.on(SoftLineBreak::class.java) { visitor, _ ->
+                visitor.forceNewLine()
+            }
+        }
+    }
+
+    private fun createLinkHighlightPlugin(context: Context) =
+        object : AbstractMarkwonPlugin() {
+            override fun configureTheme(builder: MarkwonTheme.Builder) {
+                builder
+                    .linkColor(context.getColor(R.color.link_color))
+                    .isLinkUnderlined(false)
+            }
+        }
+
+    private fun createLinkResolverPlugin(linkResolver: LinkResolver?): AbstractMarkwonPlugin? {
+        if (linkResolver == null) return null
+
+        return object : AbstractMarkwonPlugin() {
+            override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
+                builder.linkResolver(linkResolver)
+            }
+        }
     }
 }
