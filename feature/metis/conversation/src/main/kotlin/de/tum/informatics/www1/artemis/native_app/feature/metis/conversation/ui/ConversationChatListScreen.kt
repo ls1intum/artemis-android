@@ -30,7 +30,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -55,6 +54,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -183,7 +183,7 @@ fun ConversationChatListScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
+            ArtemisTopAppBar(
                 title = {
                     if (isSearchBarOpen) {
                         LaunchedEffect(Unit) {
@@ -197,9 +197,11 @@ fun ConversationChatListScreen(
                             query = query,
                             updateQuery = onUpdateQuery,
                             hint = stringResource(id = R.string.metis_post_search_hint),
-                            textStyle = MaterialTheme.typography.bodyMedium,
-                            focusRequester = searchBarFocusRequester
-                        )
+                            backgroundColor = MaterialTheme.colorScheme.background,
+                                textStyle = MaterialTheme.typography.bodyMedium,
+                                focusRequester = searchBarFocusRequester
+                            )
+
                     } else {
                         EmptyDataStateUi(
                             dataState = conversationDataState,
