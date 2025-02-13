@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.feature.metis.AddChannelConfiguration
@@ -48,6 +49,7 @@ internal fun SinglePageConversationBody(
     viewModel: SinglePageConversationBodyViewModel,
     courseId: Long,
     scaffold: @Composable (searchConfiguration: CourseSearchConfiguration, content: @Composable () -> Unit) -> Unit,
+    collapsingContentState: CollapsingContentState,
     initialConfiguration: ConversationConfiguration = NothingOpened
 ) {
     var configuration: ConversationConfiguration by rememberSaveable(initialConfiguration) {
@@ -85,6 +87,7 @@ internal fun SinglePageConversationBody(
         ConversationOverviewBody(
             modifier = m,
             courseId = courseId,
+            collapsingContentState = collapsingContentState,
             onNavigateToConversation = openConversation,
             onNavigateToSavedPosts = {
                 configuration = OpenedSavedPosts(configuration, it)
@@ -113,6 +116,7 @@ internal fun SinglePageConversationBody(
     )
 
     val doAlwaysShowScaffold = getArtemisAppLayout() == ArtemisAppLayout.Tablet
+    collapsingContentState.isCollapsed = doAlwaysShowScaffold
     val scaffoldWrapper = @Composable { content: @Composable () -> Unit ->
         if (doAlwaysShowScaffold) {
             scaffold(searchConfiguration, content)

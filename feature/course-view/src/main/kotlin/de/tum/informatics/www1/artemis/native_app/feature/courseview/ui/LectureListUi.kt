@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -23,6 +24,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyListHint
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.NoSearchResults
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.getRelativeTime
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.GroupedByWeek
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
@@ -33,6 +35,7 @@ internal const val TEST_TAG_LECTURE_LIST = "lecture list"
 internal fun LectureListUi(
     modifier: Modifier,
     lectures: List<GroupedByWeek<Lecture>>,
+    collapsingContentState: CollapsingContentState,
     query: String,
     onClickLecture: (Lecture) -> Unit
 ) {
@@ -50,7 +53,9 @@ internal fun LectureListUi(
         )
     } else {
         WeeklyItemsLazyColumn(
-            modifier = modifier.testTag(TEST_TAG_LECTURE_LIST),
+            modifier = modifier
+                .nestedScroll(collapsingContentState.nestedScrollConnection)
+                .testTag(TEST_TAG_LECTURE_LIST),
             weeklyItemGroups = lectures,
             getItemId = { id ?: 0L }
         ) { m, lecture ->

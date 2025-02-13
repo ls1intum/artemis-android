@@ -16,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProviderStub
 import de.tum.informatics.www1.artemis.native_app.device.test.NetworkStatusProviderStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseScaffold
@@ -144,7 +145,10 @@ fun `Metis - Conversation Overview`() {
             },
             updateSelectedCourseTab = {},
             onNavigateBack = {},
-            onReloadCourse = {}
+            onReloadCourse = {},
+            collapsingContentState = CollapsingContentState(
+                0f, 0f, true
+            )
         ) {
             ConversationOverviewBody(
                 modifier = Modifier.fillMaxSize(),
@@ -154,6 +158,9 @@ fun `Metis - Conversation Overview`() {
                 onRequestCreatePersonalConversation = {},
                 onRequestAddChannel = {},
                 onRequestBrowseChannel = {},
+                collapsingContentState = CollapsingContentState(
+                    0f, 0f, true
+                ),
                 canCreateChannel = false
             )
         }

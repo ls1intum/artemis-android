@@ -34,10 +34,11 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisSearchTopAppBar
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisSearchTopAppBar
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.ArtemisTopAppBar
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.R
 import io.github.fornewid.placeholder.material3.placeholder
@@ -48,6 +49,7 @@ internal fun CourseScaffold(
     courseDataState: DataState<Course>,
     isCourseTabSelected: (CourseTab) -> Boolean,
     searchConfiguration: CourseSearchConfiguration,
+    collapsingContentState: CollapsingContentState,
     updateSelectedCourseTab: (CourseTab) -> Unit,
     onNavigateBack: () -> Unit,
     onReloadCourse: () -> Unit,
@@ -59,6 +61,7 @@ internal fun CourseScaffold(
             CourseTopAppBar(
                 courseDataState = courseDataState,
                 searchConfiguration = searchConfiguration,
+                collapsingContentState = collapsingContentState,
                 onNavigateBack = onNavigateBack,
             )
         },
@@ -102,6 +105,7 @@ internal fun CourseScaffold(
 private fun CourseTopAppBar(
     courseDataState: DataState<Course>,
     searchConfiguration: CourseSearchConfiguration,
+    collapsingContentState: CollapsingContentState,
     onNavigateBack: () -> Unit
 ) {
     val courseTitle = courseDataState.bind<String?> { it.title }.orElse(null)
@@ -121,6 +125,7 @@ private fun CourseTopAppBar(
             title = title,
             searchBarHint = searchConfiguration.hint,
             query = searchConfiguration.query,
+            collapsingContentState = collapsingContentState,
             lineCount = lineCount,
             updateQuery = searchConfiguration.onUpdateQuery,
             navigationIcon = { NavigationBackButton(onNavigateBack) }
@@ -192,4 +197,3 @@ private data class BottomNavigationItem(
         )
     }
 }
-

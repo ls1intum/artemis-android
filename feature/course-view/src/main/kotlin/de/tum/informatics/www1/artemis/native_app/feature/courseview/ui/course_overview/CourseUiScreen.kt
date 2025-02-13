@@ -31,6 +31,7 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseSearchConfiguration
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CourseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
@@ -153,6 +154,11 @@ fun CourseUiScreen(
     val weeklyExercisesDataState by viewModel.exercisesGroupedByWeek.collectAsState()
     val weeklyLecturesDataState by viewModel.lecturesGroupedByWeek.collectAsState()
 
+    val collapsingContentState = remember { CollapsingContentState(
+        initialCollapsingHeight = 0f,
+        initialOffset = 0f,
+    ) }
+
     val exerciseQuery by viewModel.exerciseQuery.collectAsState()
     val lectureQuery by viewModel.lectureQuery.collectAsState()
 
@@ -176,6 +182,7 @@ fun CourseUiScreen(
         userId = userId,
         lectureSearchConfiguration = lectureSearchConfiguration,
         exerciseSearchConfiguration = exerciseSearchConfiguration,
+        collapsingContentState = collapsingContentState,
         onNavigateBack = onNavigateBack,
         weeklyExercisesDataState = weeklyExercisesDataState,
         onNavigateToExercise = onNavigateToExercise,
@@ -208,6 +215,7 @@ internal fun CourseUiScreen(
     username: String? = null,
     userId: Long? = null,
     lectureSearchConfiguration: CourseSearchConfiguration,
+    collapsingContentState: CollapsingContentState,
     exerciseSearchConfiguration: CourseSearchConfiguration,
     courseDataState: DataState<Course>,
     weeklyExercisesDataState: DataState<List<GroupedByWeek<Exercise>>>,
@@ -252,6 +260,7 @@ internal fun CourseUiScreen(
             onNavigateBack = onNavigateBack,
             onReloadCourse = onReloadCourse,
             searchConfiguration = searchConfiguration,
+            collapsingContentState = collapsingContentState,
             content = content
         )
     }
@@ -273,6 +282,7 @@ internal fun CourseUiScreen(
                         modifier = Modifier.fillMaxSize(),
                         weeklyExercises = weeklyExercises,
                         query = if (exerciseSearchConfiguration is CourseSearchConfiguration.Search) exerciseSearchConfiguration.query else "",
+                        collapsingContentState = collapsingContentState,
                         onClickExercise = onNavigateToExercise,
                         actions = BoundExerciseActions(
                             onClickStartTextExercise = onClickStartTextExercise,
@@ -305,6 +315,7 @@ internal fun CourseUiScreen(
                     LectureListUi(
                         modifier = Modifier.fillMaxSize(),
                         lectures = weeklyLectures,
+                        collapsingContentState = collapsingContentState,
                         query = if (lectureSearchConfiguration is CourseSearchConfiguration.Search) lectureSearchConfiguration.query else "",
                         onClickLecture = { onNavigateToLecture(it.id ?: 0L) }
                     )
@@ -341,6 +352,7 @@ internal fun CourseUiScreen(
                     modifier = Modifier.fillMaxSize(),
                     courseId = courseId,
                     scaffold = scaffold,
+                    collapsingContentState = collapsingContentState,
                     initialConfiguration = initialConfiguration
                 )
             }

@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.core.ui.common
+package de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar
 
 import android.graphics.BlurMaskFilter
 import android.graphics.PorterDuff
@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -41,9 +42,13 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.FakeBasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 
@@ -89,6 +94,7 @@ fun ArtemisSearchTopAppBar(
     searchBarHint: String,
     query: String,
     lineCount: Int = 1,
+    collapsingContentState: CollapsingContentState? = null,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
@@ -159,33 +165,57 @@ fun ArtemisSearchTopAppBar(
             scrollBehavior = scrollBehavior
         )
 
-        AnimatedVisibility(
-            visible = !isSearchActive,
-            enter = fadeIn(tween(300)),
-            exit = fadeOut(tween(300))
+        CollapsingSurface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .dropShadowBelow(),
+            lineCount = lineCount,
+            searchBarHint = searchBarHint,
+            isSearchActive = isSearchActive,
+            collapsingContentState = collapsingContentState ?: CollapsingContentState(0f, 0f, true),
+            onClick = { isSearchActive = it }
+        )
+    }
+}
+
+@Composable
+private fun CollapsingSurface(
+    modifier: Modifier,
+    lineCount: Int,
+    searchBarHint: String,
+    isSearchActive: Boolean,
+    collapsingContentState: CollapsingContentState,
+    onClick: (Boolean) -> Unit,
+) {
+    val visibilityCondition =
+        if (collapsingContentState.isCollapsingEnabled) !isSearchActive && !collapsingContentState.isCollapsed else !isSearchActive
+
+    AnimatedVisibility(
+        visible = visibilityCondition,
+        enter = fadeIn(tween(300)),
+        exit = fadeOut(tween(300))
+    ) {
+        Surface(
+            modifier = modifier
+                .onSizeChanged {
+                    collapsingContentState.collapsingHeight = it.height.toFloat()
+                }
+                .offset { IntOffset(0, collapsingContentState.offset.toInt()) },
+            color = MaterialTheme.colorScheme.surfaceContainer,
         ) {
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceContainer,
+            FakeBasicSearchTextField(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .dropShadowBelow()
-            ) {
-                FakeBasicSearchTextField(
-                    modifier = Modifier
-                        .padding(horizontal = Spacings.ScreenHorizontalSpacing)
-                        .padding(bottom = 16.dp)
-                        .then(if (lineCount > 1) Modifier.padding(top = 16.dp) else Modifier)
-                        .innerShadow(
-                            offset = 2.dp,
-                            color = ComponentColors.ArtemisTopAppBar.searchBarShadow
-                        ),
-                    hint = searchBarHint,
-                    backgroundColor = MaterialTheme.colorScheme.background,
-                    onClick = {
-                        isSearchActive = true
-                    }
-                )
-            }
+                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                    .padding(bottom = 16.dp)
+                    .then(if (lineCount > 1) Modifier.padding(top = 16.dp) else Modifier)
+                    .innerShadow(
+                        offset = 2.dp,
+                        color = ComponentColors.ArtemisTopAppBar.searchBarShadow
+                    ),
+                hint = searchBarHint,
+                backgroundColor = MaterialTheme.colorScheme.background,
+                onClick = onClick
+            )
         }
     }
 }

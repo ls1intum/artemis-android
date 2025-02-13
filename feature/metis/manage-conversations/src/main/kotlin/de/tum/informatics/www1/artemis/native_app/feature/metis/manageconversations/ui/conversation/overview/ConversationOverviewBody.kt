@@ -49,6 +49,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.top_app_bar.CollapsingContentState
 import de.tum.informatics.www1.artemis.native_app.core.ui.endOfPagePadding
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductUi
@@ -64,6 +65,7 @@ private const val KEY_BUTTON_SHOW_COC = "KEY_BUTTON_SHOW_COC"
 fun ConversationOverviewBody(
     modifier: Modifier,
     courseId: Long,
+    collapsingContentState: CollapsingContentState,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (SavedPostStatus) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
@@ -74,6 +76,7 @@ fun ConversationOverviewBody(
     ConversationOverviewBody(
         modifier = modifier,
         viewModel = koinViewModel { parametersOf(courseId) },
+        collapsingContentState = collapsingContentState,
         onNavigateToConversation = onNavigateToConversation,
         onNavigateToSavedPosts = onNavigateToSavedPosts,
         onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
@@ -87,6 +90,7 @@ fun ConversationOverviewBody(
 fun ConversationOverviewBody(
     modifier: Modifier,
     viewModel: ConversationOverviewViewModel,
+    collapsingContentState: CollapsingContentState,
     onNavigateToConversation: (conversationId: Long) -> Unit,
     onNavigateToSavedPosts: (SavedPostStatus) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
@@ -141,6 +145,7 @@ fun ConversationOverviewBody(
                 ConversationList(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
+                    collapsingContentState = collapsingContentState,
                     conversationCollections = conversationCollection,
                     onNavigateToConversation = { conversationId ->
                         viewModel.setConversationMessagesRead(conversationId)
