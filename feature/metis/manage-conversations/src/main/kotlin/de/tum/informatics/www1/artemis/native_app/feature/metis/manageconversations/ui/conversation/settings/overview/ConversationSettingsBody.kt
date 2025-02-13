@@ -132,6 +132,7 @@ internal fun ConversationSettingsBody(
     ) { (conversation, members, clientUsername) ->
         val conversationSectionModifier = Modifier
             .fillMaxWidth()
+            .padding(top = Spacings.ScreenTopBarSpacing)
             .padding(horizontal = Spacings.ScreenHorizontalSpacing)
 
         Column(

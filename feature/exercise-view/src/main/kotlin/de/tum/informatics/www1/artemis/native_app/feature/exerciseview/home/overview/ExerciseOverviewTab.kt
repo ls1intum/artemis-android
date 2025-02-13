@@ -48,7 +48,8 @@ internal fun ExerciseOverviewTab(
         ParticipationStatusUi(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(top = Spacings.ScreenTopBarSpacing)
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             exercise = exercise,
             actions = actions
         )

@@ -258,8 +258,8 @@ private fun generateMessage(
     time: Instant,
     id: String,
     authorId: Long
-): ChatListItem.PostChatListItem {
-    return ChatListItem.PostChatListItem(
+): ChatListItem.IndexedPost {
+    return ChatListItem.IndexedPost(
         PostPojo(
             clientPostId = id,
             serverPostId = 0L,

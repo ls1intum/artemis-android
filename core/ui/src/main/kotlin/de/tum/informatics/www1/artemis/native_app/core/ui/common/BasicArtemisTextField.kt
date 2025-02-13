@@ -95,6 +95,7 @@ fun BasicSearchTextField(
     focusRequester: FocusRequester? = null,
     hint: String,
     query: String,
+    backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     textStyle: TextStyle = LocalTextStyle.current,
     testTag: String? = null,
     updateQuery: (String) -> Unit
@@ -112,7 +113,7 @@ fun BasicSearchTextField(
     Box(
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .background(backgroundColor)
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Row(
@@ -131,7 +132,7 @@ fun BasicSearchTextField(
                 modifier = Modifier
                     .weight(1f)
                     .then(testTag?.let { Modifier.testTag(it) } ?: Modifier),
-                backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
+                backgroundColor = backgroundColor,
                 hint = hint,
                 value = textFieldValue,
                 focusRequester = focusRequester,
