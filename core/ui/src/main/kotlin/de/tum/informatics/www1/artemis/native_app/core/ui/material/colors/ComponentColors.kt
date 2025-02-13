@@ -26,4 +26,11 @@ object ComponentColors {
         val searchBarShadow: Color
             @Composable get() = if(isSystemInDarkTheme()) Color.Black.copy(alpha = 0.6f) else Color.Black.copy(alpha = 0.35f)
     }
+
+    object BrowseChannelCard {
+        val joinedBackground: Color
+            @Composable get() = Color(0xff28a745)
+        val actionText: Color
+            @Composable get() = Color.White
+    }
 }

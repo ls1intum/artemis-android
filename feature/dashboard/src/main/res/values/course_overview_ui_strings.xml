@@ -2,19 +2,21 @@
 <resources>
     <string name="course_overview_title">Courses</string>
 
-    <!--  The placeholders are digits, but are supplied as strings, as the number formatting is handled in code.  -->
-    <string name="course_overview_course_progress">%1$sP/%2$sP (%3$s)</string>
-    <string name="course_overview_course_progress_pts">%1$s /%2$s pts</string>
-    <string name="course_overview_course_progress_percentage">%1$s</string>
+    <string name="course_overview_recently_accessed_section">Recently accessed</string>
+    <string name="course_overview_all_courses_section">Other</string>
 
-    <string name="course_overview_action_register">Register for course</string>
+    <string name="course_overview_search_courses_hint">Search for a course</string>
+    <string name="course_overview_no_search_results">No courses found</string>
+    <string name="course_overview_no_search_results_details">%s did not match any courses.</string>
+
+    <string name="course_overview_action_register">Enroll</string>
     <string name="courses_loading_loading">Loading dashboard…</string>
     <string name="courses_loading_suspended">Your internet connection may be unstable. Could not load dashboard.</string>
     <string name="courses_loading_failure">Something went wrong while loading your dashboard.</string>
     <string name="courses_loading_try_again">Try again</string>
 
-    <string name="courses_empty_text">You are not registered to a course yet. Do you want to sign up for one now?</string>
-    <string name="courses_empty_register_now_button">Sign up now</string>
+    <string name="courses_empty_text">You are not registered to a course yet. Do you want to enroll into one now?</string>
+    <string name="courses_empty_register_now_button">Enroll</string>
 
     <string name="dashboard_title_beta">Beta</string>
     <string name="dashboard_dialog_beta_title">Beta Version</string>
