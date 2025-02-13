@@ -8,18 +8,20 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
-import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.network.MetisService.StandalonePostsContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.service.storage.MetisStorageService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.DataStatus
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisFilter
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IStandalonePost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.StandalonePost
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.pojo.PostPojo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -44,7 +46,6 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import java.lang.RuntimeException
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.math.max
@@ -54,10 +55,11 @@ class ConversationChatListUseCase(
     private val viewModelScope: CoroutineScope,
     private val metisService: MetisService,
     private val metisStorageService: MetisStorageService,
-    private val metisContext: MetisContext,
+    private val metisContext: MetisContext.Conversation,
     onRequestSoftReload: Flow<Unit>,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
+    conversation: StateFlow<DataState<Conversation>>,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) {
     companion object {
@@ -108,6 +110,20 @@ class ConversationChatListUseCase(
 
     private val highestVisiblePostIndex = MutableStateFlow(0)
 
+    private val unreadMessagesCountFlow: Flow<Long> = conversation.map {
+        it.bind { conversation ->
+            conversation.unreadMessagesCount ?: 0L
+        }.orElse(0L)
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, 0L)
+
+    // We store this in addition to the unreadPostCount, because as new posts come in, the unreadPostCount will become outdated.
+    private var lastAlreadyReadPostId: Long? = null
+
+    fun resetLastAlreadyReadPostId() {
+        lastAlreadyReadPostId = null
+    }
+
     @OptIn(ExperimentalPagingApi::class)
     val postPagingData: Flow<PagingData<ChatListItem>> =
         pagingDataInput.flatMapLatest { pagingDataInput ->
@@ -116,7 +132,8 @@ class ConversationChatListUseCase(
                 enablePlaceholders = true
             )
 
-            if (pagingDataInput.standalonePostsContext.query.isNullOrBlank()) {
+            val isSearchActive = !pagingDataInput.standalonePostsContext.query.isNullOrBlank()
+            val pagerFlow = if (!isSearchActive) {
                 Pager(
                     config = config,
                     remoteMediator = MetisRemoteMediator(
@@ -144,6 +161,7 @@ class ConversationChatListUseCase(
                     }
                 )
                     .flow
+                    .mapIndexedPosts()
                     .cachedIn(viewModelScope + coroutineContext)
             } else {
                 Pager(
@@ -160,12 +178,33 @@ class ConversationChatListUseCase(
                     }
                 )
                     .flow
+                    .mapIndexedPosts()
                     .cachedIn(viewModelScope + coroutineContext)
             }
-                .map { pagingList -> pagingList.map(ChatListItem::PostChatListItem) }
+
+            pagerFlow
                 .map(::insertDateSeparators)
+                .map {
+                    if (!isSearchActive) {
+                        insertUnreadSeparator(it)
+                    } else {
+                        it
+                    }
+                }
         }
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Lazily, replay = 1)
+
+
+    private fun  Flow<PagingData<out IStandalonePost>>.mapIndexedPosts(): Flow<PagingData<ChatListItem.IndexedPost>> {
+        // TODO: this indexing seems to work, BUT if a chat has between 40 and 60 posts, the pager messes something up
+        //  https://github.com/ls1intum/artemis-android/issues/392
+        return this.map { pagingData ->
+            var indexCounter = 0L
+            pagingData.map { post ->
+                ChatListItem.IndexedPost(post, indexCounter++)
+            }
+        }
+    }
 
     /**
      * This flow handles reloading the visible posts from the server.
@@ -174,7 +213,7 @@ class ConversationChatListUseCase(
      * It loads the necessary data from the server and updates the db.
      *
      * Instead of directly emitting a DataState, it instead emits a wrapper that also contains which
-     * highestvisiblepostindex was used. This is then used in [softReloadOnScrollDataStatus].
+     * highestVisiblePostIndex was used. This is then used in [softReloadOnScrollDataStatus].
      */
     private val softReloadOnRequestDataStatus: Flow<SoftReloadOnRequestResult> = onRequestSoftReload
         .transformLatest {
@@ -264,8 +303,8 @@ class ConversationChatListUseCase(
         _query.value = new.ifEmpty { null }
     }
 
-    private fun insertDateSeparators(pagingList: PagingData<ChatListItem.PostChatListItem>) =
-        pagingList.insertSeparators { before: ChatListItem.PostChatListItem?, after: ChatListItem.PostChatListItem? ->
+    private fun insertDateSeparators(pagingList: PagingData<ChatListItem.IndexedPost>) =
+        pagingList.insertSeparators { before: ChatListItem.IndexedPost?, after: ChatListItem.IndexedPost? ->
             when {
                 before == null && after == null -> null
                 before != null && after == null -> {
@@ -283,6 +322,33 @@ class ConversationChatListUseCase(
 
                 else -> null
             }
+        }
+
+    private fun insertUnreadSeparator(pagingList: PagingData<ChatListItem>) =
+        pagingList.insertSeparators { _, after: ChatListItem? ->
+            // If we already know the id, great
+            if (lastAlreadyReadPostId != null) {
+                if (after != null && after is ChatListItem.IndexedPost && after.post.serverPostId == lastAlreadyReadPostId) {
+                    return@insertSeparators ChatListItem.UnreadIndicator
+                } else {
+                    return@insertSeparators null
+                }
+            }
+
+            // Otherwise we first need to figure out the id of the last already read post
+
+            val unreadMessagesCount = unreadMessagesCountFlow.first()
+
+            if (unreadMessagesCount == 0L) {
+                return@insertSeparators null
+            }
+
+            if (after != null && after is ChatListItem.IndexedPost && after.index == unreadMessagesCount) {
+                lastAlreadyReadPostId = after.post.serverPostId
+                return@insertSeparators ChatListItem.UnreadIndicator
+            }
+
+            return@insertSeparators null
         }
 
     /**

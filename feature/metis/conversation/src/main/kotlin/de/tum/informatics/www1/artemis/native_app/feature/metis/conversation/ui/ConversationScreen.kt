@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +49,10 @@ fun ConversationScreen(
 
     LaunchedEffect(threadPostId, viewModel) {
         viewModel.updateOpenedThread(threadPostId)
+    }
+
+    DisposableEffect(viewModel) {
+        onDispose { viewModel.chatListUseCase.resetLastAlreadyReadPostId() }
     }
 
     val showThread by remember(threadPostId) {
