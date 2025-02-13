@@ -182,6 +182,7 @@ fun ArtemisSearchTopAppBar(
                             )
                         }
                     }
+                    collapsingContentState.isInitiallyForcedCollapsed = false
                 }
             },
             windowInsets = windowInsets,
