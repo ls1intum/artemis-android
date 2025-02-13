@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -86,6 +87,11 @@ internal fun BrowseChannelsScreen(
     val channelsDataState by viewModel.channels.collectAsState()
     val query by viewModel.query.collectAsState()
 
+    val collapsingContentState = CollapsingContentState(
+        initialCollapsingHeight = 0f,
+        initialOffset = 0f,
+    )
+
     var registerInChannelJob: Deferred<Long?>? by remember { mutableStateOf(null) }
     var displayRegistrationFailedDialog by remember { mutableStateOf(false) }
 
@@ -111,10 +117,7 @@ internal fun BrowseChannelsScreen(
                 searchBarHint = stringResource(id = R.string.browse_channels_search_hint),
                 query = query,
                 updateQuery = viewModel::updateQuery,
-                collapsingContentState = CollapsingContentState(
-                    initialCollapsingHeight = 0f,
-                    initialOffset = 0f,
-                )
+                collapsingContentState = collapsingContentState
             )
         }
     ) { padding ->
@@ -138,7 +141,9 @@ internal fun BrowseChannelsScreen(
         ) { channels ->
             if (channels.isNotEmpty()) {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .nestedScroll(collapsingContentState.nestedScrollConnection)
+                        .fillMaxSize(),
                     contentPadding = Spacings.calculateContentPaddingValues(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {

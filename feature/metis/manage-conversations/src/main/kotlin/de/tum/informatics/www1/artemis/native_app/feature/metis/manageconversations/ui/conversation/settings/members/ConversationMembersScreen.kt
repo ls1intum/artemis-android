@@ -41,6 +41,11 @@ fun ConversationMembersScreen(
 
     val query by viewModel.query.collectAsState()
 
+    val collapsingContentState = CollapsingContentState(
+        initialCollapsingHeight = 0f,
+        initialOffset = 0f
+    )
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -52,10 +57,7 @@ fun ConversationMembersScreen(
                 query = query,
                 searchBarHint = stringResource(id = R.string.conversation_members_query_placeholder),
                 updateQuery = viewModel::updateQuery,
-                collapsingContentState = CollapsingContentState(
-                    initialCollapsingHeight = 0f,
-                    initialOffset = 0f
-                )
+                collapsingContentState = collapsingContentState
             )
         }
     ) { padding ->
@@ -72,6 +74,7 @@ fun ConversationMembersScreen(
                 .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             courseId = courseId,
+            collapsingContentState = collapsingContentState,
             conversationId = conversationId
         )
     }
