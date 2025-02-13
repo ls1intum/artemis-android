@@ -113,7 +113,7 @@ private fun BottomNavigationBar(
 
     Surface(
         shadowElevation = Spacings.AppBarElevation
-    ){
+    ) {
         NavigationBar {
             navItems.forEach { navigationItem ->
                 val labelText = stringResource(id = navigationItem.labelStringId)

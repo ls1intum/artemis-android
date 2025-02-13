@@ -130,13 +130,12 @@ private fun FaqOverviewBody(
         BasicSearchTextField(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(vertical = 8.dp)
                 .testTag(TEST_TAG_FAQ_OVERVIEW_SEARCH),
             query = query,
             updateQuery = onUpdateQuery,
             hint = stringResource(R.string.faq_search_hint),
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         if (faqs.isEmpty()) {
             val emptyStringResId = if (isSearching) {
