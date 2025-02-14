@@ -14,14 +14,16 @@ val LocalMarkwon: ProvidableCompositionLocal<Markwon?> =
     compositionLocalOf { null }
 
 @Composable
-fun ProvideMarkwon(content: @Composable () -> Unit) {
+fun ProvideMarkwon(
+    useOriginalImageSize: Boolean = false,
+    content: @Composable () -> Unit
+) {
     val imageLoader = LocalArtemisImageProvider.current.rememberArtemisImageLoader()
     val linkResolver = LocalMarkdownLinkResolver.current.rememberMarkdownLinkResolver()
     val context = LocalContext.current
 
-    val imageWidth = context.resources.displayMetrics.widthPixels
-    val markdownRender: Markwon = remember(imageLoader, linkResolver) {
-        createMarkdownRender(context, imageLoader, linkResolver, imageWidth)
+    val markdownRender: Markwon = remember(imageLoader, linkResolver, useOriginalImageSize) {
+        MarkdownRenderFactory.create(context, imageLoader, linkResolver, useOriginalImageSize)
     }
 
     CompositionLocalProvider(LocalMarkwon provides markdownRender) {
