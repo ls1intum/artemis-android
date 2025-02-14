@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpCenter
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.HelpCenter
 import androidx.compose.material.icons.filled.ViewHeadline
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
@@ -174,7 +174,7 @@ private fun BodyWithTabs(
 
             DefaultTab(
                 1,
-                Icons.Default.HelpCenter,
+                Icons.AutoMirrored.Filled.HelpCenter,
                 R.string.exercise_view_tab_qna,
                 selectedTabIndex,
                 onUpdateSelectedTabIndex

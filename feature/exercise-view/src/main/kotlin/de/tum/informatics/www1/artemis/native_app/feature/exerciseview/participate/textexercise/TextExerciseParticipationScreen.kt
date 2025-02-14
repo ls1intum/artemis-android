@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material3.AlertDialog
@@ -198,7 +199,7 @@ private fun TabView(
 
     Column(modifier = modifier) {
         TabRow(selectedTabIndex = selectedTab.index) {
-            Tab.values().forEach { tab ->
+            Tab.entries.forEach { tab ->
                 Tab(
                     text = { Text(text = stringResource(id = tab.title)) },
                     icon = { Icon(imageVector = tab.icon, contentDescription = null) },
@@ -217,7 +218,8 @@ private fun TabView(
 
 private enum class Tab(@StringRes val title: Int, val icon: ImageVector, val index: Int) {
     SUBMISSION(R.string.participate_text_exercise_tab_submission, Icons.Default.EditNote, 0),
-    PROBLEM_STATEMENT(R.string.participate_text_exercise_tab_problem_statement, Icons.Default.ListAlt, 1)
+    PROBLEM_STATEMENT(R.string.participate_text_exercise_tab_problem_statement,
+        Icons.AutoMirrored.Filled.ListAlt, 1)
 }
 
 private fun isAlwaysActive(
