@@ -1,56 +1,32 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseregistration.service.impl
 
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
-import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.service.CourseRegistrationService
-import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.appendPathSegments
-import io.ktor.http.contentType
 
 internal class CourseRegistrationServiceImpl(
-    private val ktorProvider: KtorProvider
-) : CourseRegistrationService {
+    ktorProvider: KtorProvider,
+    artemisContextProvider: ArtemisContextProvider,
+) : ArtemisContextBasedServiceImpl(ktorProvider, artemisContextProvider), CourseRegistrationService {
 
-    override suspend fun fetchRegistrableCourses(
-        serverUrl: String,
-        authToken: String
-    ): NetworkResponse<List<Course>> {
-        return performNetworkCall {
-            ktorProvider.ktorClient
-                .get(serverUrl) {
-                    url {
-                        appendPathSegments("api", "courses", "for-enrollment")
-                    }
-
-                    cookieAuth(authToken)
-                    contentType(ContentType.Application.Json)
-                }
-                .body()
+    override suspend fun fetchRegistrableCourses(): NetworkResponse<List<Course>> {
+        return getRequest {
+            url {
+                appendPathSegments("api", "courses", "for-enrollment")
+            }
         }
     }
 
-    override suspend fun registerInCourse(
-        serverUrl: String,
-        authToken: String,
-        courseId: Long
-    ): NetworkResponse<HttpStatusCode> {
-        return performNetworkCall {
-            ktorProvider.ktorClient
-                .post(serverUrl) {
-                    url {
-                        appendPathSegments("api", "courses", courseId.toString(), "enroll")
-                    }
-
-                    cookieAuth(authToken)
-                }.status
-            // TODO: sync groups
+    override suspend fun registerInCourse(courseId: Long): NetworkResponse<HttpStatusCode> {
+        return postRequest {
+            url {
+                appendPathSegments("api", "courses", courseId.toString(), "enroll")
+            }
         }
     }
 }
