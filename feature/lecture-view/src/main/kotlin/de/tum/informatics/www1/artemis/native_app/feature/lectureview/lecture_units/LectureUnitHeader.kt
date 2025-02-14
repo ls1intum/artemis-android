@@ -10,7 +10,6 @@ import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.QuestionMark
-import androidx.compose.material.icons.filled.Task
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
@@ -19,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -31,6 +31,8 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_uni
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitUnknown
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
+import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseListItem
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.R
 
 internal const val TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED = "Checkbox Lecture Unit Completed"
@@ -42,13 +44,26 @@ internal const val TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED = "Checkbox Lecture 
 internal fun LectureUnitHeader(
     modifier: Modifier,
     lectureUnit: LectureUnit,
+    onClickExercise: (exerciseId: Long) -> Unit,
+    exerciseActions: BoundExerciseActions,
     isUploadingMarkedAsCompleted: Boolean,
     onMarkAsCompleted: (isCompleted: Boolean) -> Unit,
     onHeaderClick: () -> Unit
 ) {
     val (icon, text) = when (lectureUnit) {
         is LectureUnitAttachment -> Icons.Default.Description to R.string.lecture_view_lecture_unit_type_attachment
-        is LectureUnitExercise -> Icons.Default.Task to R.string.lecture_view_lecture_unit_type_exercise
+        is LectureUnitExercise -> {
+            val exercise = lectureUnit.exercise ?: return
+            ExerciseListItem(
+                modifier = modifier,
+                exercise = exercise,
+                onClickExercise = { onClickExercise(exercise.id ?: 0L) },
+                exerciseActions = remember(exerciseActions, exercise) {
+                    exerciseActions.getUnbound(exerciseId = exercise.id ?: 0L)
+                }
+            )
+            return
+        }
         is LectureUnitOnline -> Icons.Default.Link to R.string.lecture_view_lecture_unit_type_online
         is LectureUnitText -> Icons.AutoMirrored.Default.Assignment to R.string.lecture_view_lecture_unit_type_text
         is LectureUnitUnknown -> Icons.Default.QuestionMark to R.string.lecture_view_lecture_unit_type_unknown
@@ -79,22 +94,20 @@ internal fun LectureUnitHeader(
                 modifier = Modifier.weight(1f)
             )
 
-            if (lectureUnit !is LectureUnitExercise) {
-                Crossfade(
-                    targetState = isUploadingMarkedAsCompleted,
-                    label = "IsCompletedCheckbox <-> Updating"
-                ) { isUploadingState ->
-                    if (isUploadingState) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(48.dp)
-                        )
-                    } else {
-                        Checkbox(
-                            modifier = Modifier.testTag(TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED),
-                            checked = lectureUnit.completed,
-                            onCheckedChange = onMarkAsCompleted
-                        )
-                    }
+            Crossfade(
+                targetState = isUploadingMarkedAsCompleted,
+                label = "IsCompletedCheckbox <-> Updating"
+            ) { isUploadingState ->
+                if (isUploadingState) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(48.dp)
+                    )
+                } else {
+                    Checkbox(
+                        modifier = Modifier.testTag(TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED),
+                        checked = lectureUnit.completed,
+                        onCheckedChange = onMarkAsCompleted
+                    )
                 }
             }
         }

@@ -56,7 +56,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.Communicatio
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitAttachmentUi
-import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitExerciseUi
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitHeader
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitOnlineUi
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitTextUi
@@ -104,10 +103,8 @@ internal fun LectureOverviewTab(
             LectureUnitBottomSheetContent(
                 modifier = modifier,
                 lectureUnit = selectedLectureUnit!!,
-                onViewExercise = onViewExercise,
                 onRequestViewLink = onRequestViewLink,
-                onRequestOpenAttachment = onRequestOpenAttachment,
-                exerciseActions = exerciseActions
+                onRequestOpenAttachment = onRequestOpenAttachment
             )
         }
     }
@@ -138,6 +135,8 @@ internal fun LectureOverviewTab(
             lectureUnitSection(
                 modifier = Modifier.fillMaxWidth(),
                 lectureUnits = lectureUnits,
+                onViewExercise = onViewExercise,
+                exerciseActions = exerciseActions,
                 onMarkAsCompleted = onMarkAsCompleted,
                 onHeaderClick = { lectureUnit ->
                     selectedLectureUnit = lectureUnit
@@ -292,6 +291,8 @@ private fun LazyListScope.channelSection(
 private fun LazyListScope.lectureUnitSection(
     modifier: Modifier,
     lectureUnits: List<LectureUnitData>,
+    onViewExercise: (exerciseId: Long) -> Unit,
+    exerciseActions: BoundExerciseActions,
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onHeaderClick: (LectureUnit) -> Unit
 ) {
@@ -313,6 +314,8 @@ private fun LazyListScope.lectureUnitSection(
                     .testTag(getLectureUnitTestTag(lectureUnitWithData.lectureUnit.id))
                     .animateItem(),
                 lectureUnit = lectureUnitWithData.lectureUnit,
+                onClickExercise = onViewExercise,
+                exerciseActions = exerciseActions,
                 onMarkAsCompleted = { isCompleted ->
                     onMarkAsCompleted(lectureUnitWithData.lectureUnit.id, isCompleted)
                 },
@@ -331,10 +334,8 @@ private fun LazyListScope.lectureUnitSection(
 private fun LectureUnitBottomSheetContent(
     modifier: Modifier,
     lectureUnit: LectureUnit,
-    onViewExercise: (exerciseId: Long) -> Unit,
     onRequestViewLink: (String) -> Unit,
-    onRequestOpenAttachment: (Attachment) -> Unit,
-    exerciseActions: BoundExerciseActions
+    onRequestOpenAttachment: (Attachment) -> Unit
 ) {
     val childModifier = Modifier.fillMaxWidth()
     Column(
@@ -355,14 +356,7 @@ private fun LectureUnitBottomSheetContent(
                 )
             }
 
-            is LectureUnitExercise -> {
-                LectureUnitExerciseUi(
-                    modifier = childModifier,
-                    lectureUnit = lectureUnit,
-                    onClickExercise = onViewExercise,
-                    exerciseActions = exerciseActions
-                )
-            }
+            is LectureUnitExercise -> {}
 
             is LectureUnitOnline -> {
                 LectureUnitOnlineUi(

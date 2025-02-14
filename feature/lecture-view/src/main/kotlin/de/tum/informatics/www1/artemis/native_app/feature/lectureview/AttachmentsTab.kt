@@ -77,7 +77,7 @@ private fun AttachmentItem(modifier: Modifier, attachment: Attachment, onClick: 
 
     val version = attachment.version
     val uploadDate = attachment.uploadDate
-    val formattedUploadDate = uploadDate?.let { getRelativeTime(to = it) }
+    val formattedUploadDate = uploadDate?.let { getRelativeTime(to = it, showDateAndTime = true) }
 
     val supportingContent = when {
         version != null && formattedUploadDate != null ->
