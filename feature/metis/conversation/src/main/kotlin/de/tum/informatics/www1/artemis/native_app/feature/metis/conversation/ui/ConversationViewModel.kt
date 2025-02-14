@@ -129,7 +129,7 @@ internal open class ConversationViewModel(
     private val networkStatusProvider: NetworkStatusProvider,
     private val conversationService: ConversationService,
     private val replyTextStorageService: ReplyTextStorageService,
-    private val courseService: CourseService,
+    courseService: CourseService,
     private val createPostService: CreatePostService,
     accountDataService: AccountDataService,
     metisService: MetisService,

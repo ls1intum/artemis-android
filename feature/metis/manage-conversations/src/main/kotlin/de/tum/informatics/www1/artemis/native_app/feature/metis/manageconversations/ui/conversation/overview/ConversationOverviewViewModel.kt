@@ -82,7 +82,7 @@ class ConversationOverviewViewModel(
     websocketProvider: WebsocketProvider,
     networkStatusProvider: NetworkStatusProvider,
     accountDataService: AccountDataService,
-    private val courseService: CourseService,
+    courseService: CourseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
     accountDataService,

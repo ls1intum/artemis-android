@@ -47,8 +47,8 @@ internal class TextExerciseParticipationViewModel(
     private val participationId: Long,
     private val textSubmissionService: TextSubmissionService,
     val artemisContextProvider: ArtemisContextProvider,
-    private val textEditorService: TextEditorService,
-    private val networkStatusProvider: NetworkStatusProvider,
+    textEditorService: TextEditorService,
+    networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 

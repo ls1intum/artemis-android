@@ -48,7 +48,7 @@ internal abstract class BaseQuizViewModel<
     private val networkStatusProvider: NetworkStatusProvider,
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
-    private val participationService: ParticipationService,
+    participationService: ParticipationService,
     private val coroutineContext: CoroutineContext
 ) : ViewModel() {
 

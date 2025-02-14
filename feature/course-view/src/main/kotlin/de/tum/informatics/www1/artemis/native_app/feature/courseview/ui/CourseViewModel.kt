@@ -36,7 +36,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 class CourseViewModel(
     private val courseId: Long,
-    private val courseService: CourseService,
+    courseService: CourseService,
     private val liveParticipationService: LiveParticipationService,
     courseExerciseService: CourseExerciseService,
     networkStatusProvider: NetworkStatusProvider,

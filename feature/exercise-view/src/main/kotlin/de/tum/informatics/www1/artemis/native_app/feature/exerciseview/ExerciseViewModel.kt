@@ -38,7 +38,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 internal class ExerciseViewModel(
     private val exerciseId: Long,
     val artemisContextProvider: ArtemisContextProvider,
-    private val exerciseService: ExerciseService,
+    exerciseService: ExerciseService,
     private val liveParticipationService: LiveParticipationService,
     private val courseExerciseService: CourseExerciseService,
     private val channelService: ChannelService,
