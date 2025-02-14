@@ -15,7 +15,7 @@ import coil3.request.ErrorResult
 import coil3.request.SuccessResult
 import coil3.toBitmap
 import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PushNotificationArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ArtemisNotificationManager
@@ -213,7 +213,7 @@ internal class CommunicationNotificationManagerImpl(
 
             style.addMessage(
                 NotificationCompat.MessagingStyle.Message(
-                    PushNotificationArtemisMarkdownTransformer.transformMarkdown(message.text),
+                    ArtemisMarkdownTransformer.Default.transformMarkdown(message.text),
                     message.date.toEpochMilliseconds(),
                     Person.Builder()
                         .setIcon(icon)

@@ -59,6 +59,7 @@ fun `Course View - Exercise List`() {
             onParticipateInQuiz = { _, _ -> },
             onClickViewQuizResults = { _, _ -> },
             onNavigateToLecture = {},
+            onNavigateToFaq = {},
             onNavigateBack = {}
         )
     }
