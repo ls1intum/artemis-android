@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
@@ -29,7 +28,6 @@ import kotlin.coroutines.EmptyCoroutineContext
 internal class CourseOverviewViewModel(
     private val dashboardService: DashboardService,
     private val dashboardStorageService: DashboardStorageService,
-    private val accountService: AccountService,
     private val serverConfigurationService: ServerConfigurationService,
     private val networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext

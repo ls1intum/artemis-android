@@ -1,6 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.core.ui.markdown.link_resolving
 
-import android.content.Context
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -49,15 +48,13 @@ class MarkdownLinkResolverImpl(
         }
 
         return remember(context, localLinkOpener, authToken, serverUrl) {
-            BaseMarkdownLinkResolver(context, localLinkOpener, serverUrl, setLinkToShow, setBottomSheetState)
+            BaseMarkdownLinkResolver(localLinkOpener, setLinkToShow, setBottomSheetState)
         }
     }
 }
 
 class BaseMarkdownLinkResolver(
-    private val context: Context,
     private val linkOpener: LinkOpener,
-    private val serverUrl: String = "",
     private val showModalBottomSheet: (String) -> Unit,
     private val setBottomSheetState: (LinkBottomSheetState) -> Unit
 ) : LinkResolver {

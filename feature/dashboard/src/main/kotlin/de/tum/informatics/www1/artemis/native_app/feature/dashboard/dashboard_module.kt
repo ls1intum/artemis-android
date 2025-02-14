@@ -13,7 +13,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val dashboardModule = module {
-    viewModel { CourseOverviewViewModel(get(), get(), get(), get(), get()) }
+    viewModel { CourseOverviewViewModel(get(), get(), get(), get()) }
     single<DashboardService> { DashboardServiceImpl(get(), get()) }
     single<DashboardStorageService> { DashboardStorageServiceImpl(get()) }
     single<BetaHintService> { BetaHintServiceImpl(get()) }
