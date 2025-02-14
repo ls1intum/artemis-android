@@ -47,7 +47,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAcc
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.encodeToString
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -237,6 +236,7 @@ class LectureE2eTest : BaseComposeTest() {
             accountService = get(),
             liveParticipationService = get(),
             savedStateHandle = SavedStateHandle(),
+            channelService = get(),
             serverTimeService = get(),
             courseExerciseService = get(),
             coroutineContext = testDispatcher

@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
@@ -52,7 +52,7 @@ internal fun LectureScreenBody(
     onDisplaySetCompletedFailureDialog: () -> Unit
 ) {
     val selectedTabIndexState = rememberSaveable {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     }
 
     val overviewTabIndex = 0
@@ -64,6 +64,7 @@ internal fun LectureScreenBody(
             overviewTabIndex
         } else selectedTabIndexState.value
 
+    val lectureChannel by viewModel.channelDataState.collectAsState()
     val markLectureUnitDeferredMap = remember { SnapshotStateMap<Long, Deferred<Boolean>>() }
 
     markLectureUnitDeferredMap.forEach { (lectureUnitId, deferred) ->
@@ -127,7 +128,8 @@ internal fun LectureScreenBody(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = Spacings.ScreenHorizontalSpacing),
-                        description = lecture.description,
+                        lecture = lecture,
+                        lectureChannel = lectureChannel,
                         lectureUnits = lectureUnitsWithData,
                         onViewExercise = onViewExercise,
                         onMarkAsCompleted = { lectureUnitId, isCompleted ->

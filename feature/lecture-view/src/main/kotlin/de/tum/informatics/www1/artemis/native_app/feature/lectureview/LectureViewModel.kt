@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
@@ -21,8 +22,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BaseExerciseListViewModel
 import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipationService
-import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.service.LectureService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -34,7 +36,7 @@ import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
@@ -56,6 +58,7 @@ internal class LectureViewModel(
     private val accountService: AccountService,
     private val liveParticipationService: LiveParticipationService,
     private val savedStateHandle: SavedStateHandle,
+    private val channelService: ChannelService,
     serverTimeService: ServerTimeService,
     courseExerciseService: CourseExerciseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
@@ -199,6 +202,26 @@ internal class LectureViewModel(
             }
         }
     }
+
+    val channelDataState: StateFlow<DataState<ChannelChat>> = combine(
+        lectureDataState,
+        serverConfigurationService.serverUrl,
+        accountService.authToken
+    ) { lectureDataState, serverUrl, authToken ->
+        Triple(lectureDataState, serverUrl, authToken)
+    }
+        .flatMapLatest { (lectureDataState, serverUrl, authToken) ->
+            when (lectureDataState) {
+                is DataState.Success -> {
+                    val courseId = lectureDataState.data.course?.id ?: 0L
+                    retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                        channelService.getLectureChannel(lectureId, courseId, serverUrl, authToken)
+                    }
+                }
+                else -> flowOf(DataState.Loading())
+            }
+        }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
 
     fun requestReloadLecture() {
         onReloadLecture.tryEmit(Unit)

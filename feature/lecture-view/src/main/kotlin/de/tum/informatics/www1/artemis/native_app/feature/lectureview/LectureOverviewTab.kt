@@ -18,7 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,7 +37,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import de.tum.informatics.www1.artemis.native_app.core.data.DataState
+import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
+import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Lecture
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnit
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitAttachment
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitExercise
@@ -46,7 +48,11 @@ import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_uni
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitText
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitUnknown
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.lecture_units.LectureUnitVideo
+import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.DateFormats
+import de.tum.informatics.www1.artemis.native_app.core.ui.date.format
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.BoundExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitAttachmentUi
@@ -55,7 +61,11 @@ import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_un
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitOnlineUi
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitTextUi
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units.LectureUnitVideoUi
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.getChannelIconImageVector
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 
 internal const val TEST_TAG_OVERVIEW_LIST = "overview_list"
 
@@ -65,8 +75,8 @@ internal fun getLectureUnitTestTag(lectureUnitId: Long) = "LectureUnit$lectureUn
 @Composable
 internal fun LectureOverviewTab(
     modifier: Modifier,
-    description: String?,
-    date: String? = null,
+    lecture: Lecture,
+    lectureChannel: DataState<ChannelChat>,
     lectureUnits: List<LectureUnitData>,
     onViewExercise: (exerciseId: Long) -> Unit,
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
@@ -77,6 +87,10 @@ internal fun LectureOverviewTab(
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var selectedLectureUnit: LectureUnit? by remember { mutableStateOf(null) }
+    val channel = lectureChannel.bind { it }.orNull()
+    val startDate = lecture.startDate
+    val endDate = lecture.endDate
+    val description = lecture.description
     val coroutineScope = rememberCoroutineScope()
 
     // Only render the bottom sheet when selectedLectureUnit is not null
@@ -100,16 +114,16 @@ internal fun LectureOverviewTab(
 
     LazyColumn(
         modifier = modifier
-            .padding(top = 8.dp)
             .testTag(TEST_TAG_OVERVIEW_LIST),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         state = state,
-        contentPadding = Spacings.calculateEndOfPagePaddingValues()
+        contentPadding = Spacings.calculateContentPaddingValues()
     ) {
-        date?.let{
+        startDate?.let {
             dateSection(
                 modifier = Modifier.fillMaxWidth(),
-                date = it
+                startDate = it,
+                endDate = endDate
             )
         }
 
@@ -134,18 +148,47 @@ internal fun LectureOverviewTab(
             )
         }
 
-        channelSection(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {}
-        )
+        channel?.let {
+            channelSection(
+                modifier = Modifier.fillMaxWidth(),
+                channel = channel,
+                lecture = lecture
+            )
+        }
     }
 }
 
 private fun LazyListScope.dateSection(
     modifier: Modifier,
-    date: String?
+    startDate: Instant,
+    endDate: Instant?
 ) {
+    val dateRange = listOfNotNull(
+        startDate,
+        endDate
+    ).joinToString(" - ") { it.format(DateFormats.DefaultDateAndTime.format) }
 
+    stickyHeader {
+        Text(
+            text = stringResource(id = R.string.lecture_view_overview_section_date),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background),
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Medium
+            )
+        )
+    }
+
+    item {
+        Text(
+            text = dateRange,
+            modifier = modifier.animateItem(),
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+    }
 }
 
 private fun LazyListScope.descriptionSection(
@@ -177,7 +220,8 @@ private fun LazyListScope.descriptionSection(
 
 private fun LazyListScope.channelSection(
     modifier: Modifier,
-    onClick: () -> Unit = {}
+    lecture: Lecture,
+    channel: ChannelChat
 ) {
     stickyHeader {
         Text(
@@ -193,11 +237,23 @@ private fun LazyListScope.channelSection(
     }
 
     item {
+        val localLinkOpener = LocalLinkOpener.current
+
         Card(
             modifier = modifier
                 .animateItem()
                 .fillMaxWidth(),
-            onClick = onClick,
+            onClick = {
+                val courseId = lecture.course?.id
+                courseId?.let {
+                    localLinkOpener.openLink(
+                        CommunicationDeeplinks.ToConversation.inAppLink(
+                            it,
+                            channel.id
+                        )
+                    )
+                }
+            },
         ) {
             Row(
                 modifier = Modifier
@@ -212,12 +268,12 @@ private fun LazyListScope.channelSection(
                 ) {
                     Icon(
                         modifier = Modifier.height(24.dp),
-                        imageVector = Icons.Default.Tag,
+                        imageVector = getChannelIconImageVector(channel),
                         contentDescription = null
                     )
 
                     Text(
-                        text = "channelName",
+                        text = channel.humanReadableName.removePrefix("lecture-"),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
