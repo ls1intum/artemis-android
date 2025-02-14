@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -36,6 +37,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwo
 import de.tum.informatics.www1.artemis.native_app.feature.faq.R
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.FaqState
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.FaqCategoryChipRow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -121,6 +123,7 @@ private fun FaqOverviewBody(
     onNavigateToFaq: (Long) -> Unit
 ) {
     val isSearching = query.isNotBlank()
+    val allCategories = faqs.flatMap { it.categories }.toSet().toList()
 
     Column(
         modifier = modifier,
@@ -134,6 +137,16 @@ private fun FaqOverviewBody(
             hint = stringResource(R.string.faq_search_hint),
             testTag = TEST_TAG_FAQ_OVERVIEW_SEARCH,
         )
+
+        if (allCategories.isNotEmpty()) {
+            FaqCategoryChipRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+                ,
+                categories = allCategories
+            )
+        }
 
         if (faqs.isEmpty()) {
             val emptyStringResId = if (isSearching) {
@@ -212,11 +225,19 @@ private fun FaqPreviewItem(
                 onClick = onClick
             )
 
-            TextButton(
-                onClick = onClick,
-                modifier = Modifier.align(Alignment.End)
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResource(R.string.faq_overview_read_more))
+                FaqCategoryChipRow(
+                    modifier = Modifier.weight(1f),
+                    categories = faq.categories
+                )
+
+                TextButton(
+                    onClick = onClick,
+                ) {
+                    Text(stringResource(R.string.faq_overview_read_more))
+                }
             }
         }
     }
