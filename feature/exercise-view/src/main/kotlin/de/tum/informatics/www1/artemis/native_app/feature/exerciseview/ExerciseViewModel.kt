@@ -3,12 +3,11 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
-import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ExerciseService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
@@ -30,7 +29,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.plus
@@ -50,13 +48,12 @@ internal class ExerciseViewModel(
 
     private val requestReloadExercise = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    private val fetchedExercise: Flow<DataState<Exercise>> = flatMapLatest(
-            exerciseService.onReloadRequired,
-            requestReloadExercise.onStart { emit(Unit) }
-        ) { _, _ ->
-            retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                exerciseService.getExerciseDetails(exerciseId)
-            }
+    private val fetchedExercise: Flow<DataState<Exercise>> = exerciseService
+        .performAutoReloadingNetworkCall(
+            networkStatusProvider = networkStatusProvider,
+            manualReloadFlow = requestReloadExercise
+        ) {
+            getExerciseDetails(exerciseId)
         }
         .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
@@ -121,10 +118,8 @@ internal class ExerciseViewModel(
             when (exerciseState) {
                 is DataState.Success -> {
                     val courseId = exerciseState.data.course?.id.let { it ?: 0L }
-                    channelService.onReloadRequired.flatMapLatest {
-                        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                            channelService.getExerciseChannel(exerciseId, courseId)
-                        }
+                    channelService.performAutoReloadingNetworkCall(networkStatusProvider) {
+                        getExerciseChannel(exerciseId, courseId)
                     }
                 }
                 else -> flowOf(DataState.Loading())

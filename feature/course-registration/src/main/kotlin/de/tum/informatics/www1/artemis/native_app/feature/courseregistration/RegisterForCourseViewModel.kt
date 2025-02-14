@@ -2,9 +2,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.courseregistration
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.service.CourseRegistrationService
@@ -15,7 +14,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
@@ -30,14 +28,13 @@ class RegisterForCourseViewModel(
 
     private val reloadRegistrableCourses = MutableSharedFlow<Unit>()
 
-    val registrableCourses: StateFlow<DataState<List<SemesterCourses>>> = flatMapLatest(
-        courseRegistrationService.onReloadRequired,
-        reloadRegistrableCourses.onStart { emit(Unit) }
-    ) { _, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            courseRegistrationService.fetchRegistrableCourses()
+    val registrableCourses: StateFlow<DataState<List<SemesterCourses>>> = courseRegistrationService
+        .performAutoReloadingNetworkCall(
+            networkStatusProvider = networkStatusProvider,
+            manualReloadFlow = reloadRegistrableCourses
+        ) {
+            fetchRegistrableCourses()
         }
-    }
         .distinctUntilChanged() //No need to perform expensive group operation if not changed.
         .map { dataState ->
             dataState.bind { courses ->

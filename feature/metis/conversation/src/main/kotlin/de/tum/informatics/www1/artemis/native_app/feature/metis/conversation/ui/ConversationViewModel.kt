@@ -19,12 +19,14 @@ import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
+import de.tum.informatics.www1.artemis.native_app.core.model.account.Account
 import de.tum.informatics.www1.artemis.native_app.core.model.account.isAtLeastTutorInCourse
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.FileUploadExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ModelingExercise
@@ -199,15 +201,12 @@ internal open class ConversationViewModel(
         metisStorageService = metisStorageService
     )
 
-    private val course: StateFlow<DataState<Course>> = flatMapLatest(
-        courseService.onReloadRequired,
-        onRequestReload.onStart { emit(Unit) }
-    ) { _, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            courseService.getCourse(
-                metisContext.courseId,
-            ).bind { it.course }
-        }
+    private val course: StateFlow<DataState<Course>> = courseService.performAutoReloadingNetworkCall(
+        networkStatusProvider = networkStatusProvider,
+        manualReloadFlow = onReloadRequestAndWebsocketReconnect
+    ) {
+        getCourse(metisContext.courseId)
+            .bind { it.course }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
@@ -217,16 +216,23 @@ internal open class ConversationViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
-    private val isAtLeastTutorInCourse: StateFlow<Boolean> = flatMapLatest(
-        course,
-        onRequestReload.onStart { emit(Unit) },
-        accountDataService.onReloadRequired,
-    ) { course, _, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            accountDataService.getAccountData()
-                .bind { it.isAtLeastTutorInCourse(course = course.orThrow()) }
+
+    private val accountDataStateFlow: Flow<DataState<Account>> = accountDataService
+        .performAutoReloadingNetworkCall(
+            networkStatusProvider = networkStatusProvider,
+            manualReloadFlow = onRequestReload
+        ) {
+            getAccountData()
         }
-            .map { it.orElse(false) }
+
+    private val isAtLeastTutorInCourse: StateFlow<Boolean> = combine(
+        accountDataStateFlow,
+        course,
+    ) { accountDataState, courseDataState ->
+        accountDataState.bind {
+            it.isAtLeastTutorInCourse(course = courseDataState.orThrow())
+        }
+            .orElse(false)
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 

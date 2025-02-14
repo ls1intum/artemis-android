@@ -8,7 +8,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryNetworkCall
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -58,10 +57,8 @@ internal class TextExerciseParticipationViewModel(
     }
 
     private val initialParticipationDataState: StateFlow<DataState<Participation>> =
-        textEditorService.onReloadRequired.flatMapLatest {
-            retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                textEditorService.getParticipation(participationId)
-            }
+        textEditorService.performAutoReloadingNetworkCall(networkStatusProvider) {
+            getParticipation(participationId)
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 

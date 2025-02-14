@@ -2,10 +2,9 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.ChannelService
@@ -15,7 +14,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -23,22 +21,19 @@ import kotlin.coroutines.EmptyCoroutineContext
 internal class BrowseChannelsViewModel(
     private val courseId: Long,
     private val channelService: ChannelService,
-    private val networkStatusProvider: NetworkStatusProvider,
+    networkStatusProvider: NetworkStatusProvider,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : ViewModel() {
 
     private val requestRefresh = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    val channels: StateFlow<DataState<List<ChannelChat>>> = flatMapLatest(
-        channelService.onReloadRequired,
-        requestRefresh.onStart { emit(Unit) }
-    ) { _, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            channelService
-                .getChannels(courseId)
-                .bind { channels -> channels }
+    val channels: StateFlow<DataState<List<ChannelChat>>> = channelService
+        .performAutoReloadingNetworkCall(
+            networkStatusProvider = networkStatusProvider,
+            manualReloadFlow = requestRefresh
+        ) {
+            getChannels(courseId)
         }
-    }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
 
