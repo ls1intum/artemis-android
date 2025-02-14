@@ -41,9 +41,14 @@ class FaqOverviewViewModel(
     private val _selectedCategory: MutableStateFlow<FaqCategory?> = MutableStateFlow(null)
     val selectedCategory: StateFlow<FaqCategory?> = _selectedCategory
 
-    val allCategories: StateFlow<List<FaqCategory>> = allFaqs.map {
-        it.bind { faqs ->
-            faqs.flatMap { faq -> faq.categories }.toSet().toList()
+    val allCategories: StateFlow<List<FaqCategory>> = allFaqs.map { dataState ->
+        dataState.bind { faqs ->
+            faqs.flatMap { faq -> faq.categories }
+                .groupingBy { it }
+                .eachCount()
+                .entries
+                .sortedByDescending { it.value }
+                .map { it.key }
         }.orElse(emptyList())
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
