@@ -4,30 +4,28 @@ import android.content.Context
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.markdown.MarkdownUrlUtil
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.ui.LinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheet
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.LinkBottomSheetState
 import io.noties.markwon.LinkResolver
 
 class MarkdownLinkResolverImpl(
-    private val accountService: AccountService,
-    private val serverConfigurationService: ServerConfigurationService,
+    private val artemisContextProvider: ArtemisContextProvider
 ): MarkdownLinkResolver {
     @Composable
     override fun rememberMarkdownLinkResolver(): LinkResolver {
-        val serverUrl by serverConfigurationService.serverUrl.collectAsState(initial = "")
-        val authToken by accountService.authToken.collectAsState(initial = "")
+        val artemisContext by artemisContextProvider.collectAsState()
+        val serverUrl = artemisContext.serverUrl
+        val authToken = artemisContext.authToken
         val context = LocalContext.current
         val localLinkOpener = LocalLinkOpener.current
 

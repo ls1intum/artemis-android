@@ -5,7 +5,7 @@ data class ArtemisContext(
     val authToken: String,
 ) {
     companion object {
-        val EMPTY = ArtemisContext(
+        val Empty = ArtemisContext(
             serverUrl = "",
             authToken = "",
         )
