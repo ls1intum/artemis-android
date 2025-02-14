@@ -31,6 +31,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CourseOve
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.CoursesOverview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.datetime.Clock
 
 private const val IMAGE_MARS = "mars"
@@ -42,10 +43,8 @@ private const val IMAGE_SATURN_5 = "saturn5"
 fun `Dashboard - Exercise List`() {
     val viewModel = CourseOverviewViewModel(
         dashboardService = object : DashboardService {
-            override suspend fun loadDashboard(
-                authToken: String,
-                serverUrl: String
-            ): NetworkResponse<Dashboard> = NetworkResponse.Response(
+            override val onReloadRequired: Flow<Unit> = emptyFlow()
+            override suspend fun loadDashboard(): NetworkResponse<Dashboard> = NetworkResponse.Response(
                 Dashboard(
                     courses = mutableListOf(
                         CourseWithScore(

@@ -6,7 +6,6 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
 import de.tum.informatics.www1.artemis.native_app.core.model.Dashboard
@@ -102,10 +101,10 @@ internal class CourseOverviewViewModel(
      */
     private fun loadDashboard(context: CoroutineContext) {
         viewModelScope.launch(context) {
-            val authToken = accountService.authToken.first()
             val serverUrl = serverConfigurationService.serverUrl.first()
+
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                dashboardService.loadDashboard(authToken, serverUrl).bind { dashboard ->
+                dashboardService.loadDashboard().bind { dashboard ->
                     extractCoursesInSections(serverUrl, dashboard)
                 }
             }.collect {
