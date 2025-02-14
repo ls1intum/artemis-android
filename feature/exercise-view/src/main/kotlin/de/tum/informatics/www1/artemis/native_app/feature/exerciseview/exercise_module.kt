@@ -27,5 +27,5 @@ val exerciseModule = module {
     }
 
     single<TextSubmissionService> { TextSubmissionServiceImpl(get()) }
-    single<TextEditorService> { TextEditorServiceImpl(get()) }
+    single<TextEditorService> { TextEditorServiceImpl(get(), get()) }
 }

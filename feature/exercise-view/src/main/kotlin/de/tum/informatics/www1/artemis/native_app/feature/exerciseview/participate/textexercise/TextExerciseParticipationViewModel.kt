@@ -8,9 +8,9 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
+import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.datetime.Clock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -60,18 +62,12 @@ internal class TextExerciseParticipationViewModel(
     }
 
     private val initialParticipationDataState: StateFlow<DataState<Participation>> =
-        transformLatest(
-            serverConfigurationService.serverUrl,
-            accountService.authToken
-        ) { serverUrl, authToken ->
-            emitAll(
-                retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                    textEditorService.getParticipation(participationId, serverUrl, authToken)
-                }
-            )
+        textEditorService.onReloadRequired.flatMapLatest {
+            retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+                textEditorService.getParticipation(participationId)
+            }
         }
-            .flowOn(coroutineContext)
-            .stateIn(viewModelScope, SharingStarted.Eagerly, DataState.Loading())
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val initialParticipation: StateFlow<Participation?> = initialParticipationDataState
         .filterSuccess()
