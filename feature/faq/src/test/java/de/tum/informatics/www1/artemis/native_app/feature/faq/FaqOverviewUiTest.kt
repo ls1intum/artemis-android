@@ -52,13 +52,11 @@ class FaqOverviewUiTest : BaseComposeTest() {
         faq1.assertIsVisible()
         faq2.assertIsVisible()
 
-        //searchFor(faq1.questionTitle)
         viewModel.updateQuery(faq1.questionTitle)
 
         faq1.assertIsVisible()
         faq2.assertIsHidden()
 
-        //searchFor(faq2.questionAnswer)
         viewModel.updateQuery(faq2.questionAnswer)
 
         faq1.assertIsHidden()

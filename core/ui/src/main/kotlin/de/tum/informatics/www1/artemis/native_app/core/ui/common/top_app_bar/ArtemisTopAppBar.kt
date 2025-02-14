@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
@@ -51,6 +52,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBack
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 
 private const val animatingDuration = 300
+const val TEST_TAG_FAQ_ARTEMIS_TOP_APP_BAR_FAKE_SEARCH = "ARTEMIS_TOP_APP_BAR_FAKE_SEARCH"
 
 /**
  * A top app bar only featuring a title and a navigation icon using the style of the bottom app bar to
@@ -93,6 +95,7 @@ fun ArtemisSearchTopAppBar(
     searchBarHint: String,
     query: String,
     lineCount: Int = 1,
+    searchBarTestTag: String? = null,
     collapsingContentState: CollapsingContentState,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
@@ -146,6 +149,7 @@ fun ArtemisSearchTopAppBar(
                             textStyle = MaterialTheme.typography.bodyLarge,
                             hint = searchBarHint,
                             query = query,
+                            testTag = searchBarTestTag,
                             updateQuery = updateQuery,
                             focusRequester = focusRequester
                         )
@@ -218,6 +222,7 @@ private fun CollapsingSurface(
         ) {
             FakeBasicSearchTextField(
                 modifier = Modifier
+                    .testTag(TEST_TAG_FAQ_ARTEMIS_TOP_APP_BAR_FAKE_SEARCH)
                     .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                     .padding(bottom = 16.dp)
                     .then(if (lineCount > 1) Modifier.padding(top = 16.dp) else Modifier)
