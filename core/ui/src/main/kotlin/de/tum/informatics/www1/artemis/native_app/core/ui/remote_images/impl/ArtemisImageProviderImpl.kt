@@ -22,7 +22,7 @@ class ArtemisImageProviderImpl(
     private val imageProvider: BaseImageProvider
 ) : ArtemisImageProvider {
 
-    private suspend fun artemisContext() = artemisContextProvider.current.first()
+    private suspend fun artemisContext() = artemisContextProvider.flow.first()
 
     override suspend fun loadArtemisImage(context: Context, imagePath: String): ImageResult {
         val serverUrl = artemisContext().serverUrl
@@ -41,7 +41,7 @@ class ArtemisImageProviderImpl(
 
     @Composable
     override fun rememberArtemisImageRequest(imagePath: String): ImageRequest {
-        val artemisContext by artemisContextProvider.current.collectAsState(ArtemisContext.EMPTY)
+        val artemisContext by artemisContextProvider.flow.collectAsState(ArtemisContext.EMPTY)
 
         val imageUrl = URLBuilder(artemisContext.serverUrl).appendPathSegments(imagePath).buildString()
         val authToken = artemisContext.authToken
@@ -58,7 +58,7 @@ class ArtemisImageProviderImpl(
 
     @Composable
     override fun rememberArtemisImageLoader(): ImageLoader {
-        val artemisContext by artemisContextProvider.current.collectAsState(ArtemisContext.EMPTY)
+        val artemisContext by artemisContextProvider.flow.collectAsState(ArtemisContext.EMPTY)
         val authorizationToken = artemisContext.authToken
         val context = LocalContext.current
 

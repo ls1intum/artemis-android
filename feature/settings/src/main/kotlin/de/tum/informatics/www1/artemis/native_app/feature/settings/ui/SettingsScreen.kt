@@ -141,8 +141,6 @@ internal fun SettingsScreen(
                         scope.launch {
                             // the user manually logs out. Therefore we need to tell the server asap.
                             unsubscribeFromNotifications(
-                                serverConfigurationService,
-                                accountService,
                                 pushNotificationConfigurationService,
                                 pushNotificationJobService
                             )

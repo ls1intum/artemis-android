@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.combine
 
 class ArtemisContextProviderImpl(
     serverConfigurationService: ServerConfigurationService,
-    accountService: AccountService
+    accountService: AccountService,
 ) : ArtemisContextProvider {
 
-    override val current: Flow<ArtemisContext> = combine(
+    override val flow: Flow<ArtemisContext> = combine(
         serverConfigurationService.serverUrl,
         accountService.authToken
     ) { serverUrl, authToken ->
