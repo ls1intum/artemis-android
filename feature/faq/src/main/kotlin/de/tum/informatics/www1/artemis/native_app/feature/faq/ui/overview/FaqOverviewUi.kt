@@ -37,7 +37,10 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwo
 import de.tum.informatics.www1.artemis.native_app.feature.faq.R
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.FaqState
-import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.FaqCategoryChipRow
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipRow
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipSelectionConfig
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.SelectableFaqCategory
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.SelectableFaqCategoryChipRow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -69,10 +72,23 @@ fun FaqOverviewUi(
 ) {
     val faqs by viewModel.displayedFaqs.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
+    val selectedCategories by viewModel.selectedCategories.collectAsState()
+    val allCategories by viewModel.allCategories.collectAsState()
+
+    val selectableFaqCategories = allCategories.map {
+        SelectableFaqCategory(
+            category = it,
+            selectionConfig = FaqCategoryChipSelectionConfig.Enabled(
+                isSelected = selectedCategories.contains(it),
+                onClick = { viewModel.onToggleSelectableFaqCategory(it) }
+            )
+        )
+    }
 
     FaqOverviewUi(
         modifier = modifier,
         faqsDataState = faqs,
+        selectableFaqCategories = selectableFaqCategories,
         query = query,
         onUpdateQuery = viewModel::updateQuery,
         onReloadRequest = viewModel::requestReload,
@@ -85,6 +101,7 @@ fun FaqOverviewUi(
 fun FaqOverviewUi(
     modifier: Modifier = Modifier,
     faqsDataState: DataState<List<Faq>>,
+    selectableFaqCategories: List<SelectableFaqCategory>,
     query: String,
     onUpdateQuery: (String) -> Unit,
     onReloadRequest: () -> Unit,
@@ -106,6 +123,7 @@ fun FaqOverviewUi(
                     .fillMaxSize()
                     .imePadding(),
                 faqs = faqs,
+                selectableFaqCategories = selectableFaqCategories,
                 query = query,
                 onUpdateQuery = onUpdateQuery,
                 onNavigateToFaq = onNavigateToFaq
@@ -118,6 +136,7 @@ fun FaqOverviewUi(
 private fun FaqOverviewBody(
     modifier: Modifier = Modifier,
     faqs: List<Faq>,
+    selectableFaqCategories: List<SelectableFaqCategory>,
     query: String,
     onUpdateQuery: (String) -> Unit,
     onNavigateToFaq: (Long) -> Unit
@@ -138,13 +157,13 @@ private fun FaqOverviewBody(
             testTag = TEST_TAG_FAQ_OVERVIEW_SEARCH,
         )
 
-        if (allCategories.isNotEmpty()) {
-            FaqCategoryChipRow(
+        if (allCategories.size > 1) {
+            SelectableFaqCategoryChipRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
                 ,
-                categories = allCategories
+                selectableFaqCategories = selectableFaqCategories
             )
         }
 
