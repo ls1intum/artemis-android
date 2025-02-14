@@ -18,129 +18,74 @@ class MarkdownListContinuationUtilTest {
     fun `test WHEN typing newline after an unordered list line THEN next line continues with dash prefix`() {
         val oldText = "- Hello"
 
-        val newText = "- Hello\n"
-        val cursor = newText.length
-
-        val newValue = TextFieldValue(
-            text = newText,
-            selection = TextRange(cursor, cursor)
-        )
+        val newValue = oldText.insertNewLineAfter("Hello").toTextFieldValue()
 
         val result = continueListIfApplicable(oldText, newValue)
 
         val expectedText = "- Hello\n- "
         assertEquals(expectedText, result.text)
-        assertEquals(expectedText.length, result.selection.start)
-        assertEquals(expectedText.length, result.selection.end)
+        result.assertCursorAfterSubstring("\n- ")
     }
 
     @Test
     fun `test WHEN typing newline after an ordered list line THEN next line increments the list number`() {
         val oldText = "1. Hello"
 
-        val newText = "1. Hello\n"
-        val cursor = newText.length
-
-        val newValue = TextFieldValue(
-            text = newText,
-            selection = TextRange(cursor, cursor)
-        )
+        val newValue = oldText.insertNewLineAfter("Hello").toTextFieldValue()
 
         val result = continueListIfApplicable(oldText, newValue)
 
         val expectedText = "1. Hello\n2. "
         assertEquals(expectedText, result.text)
-        assertEquals(expectedText.length, result.selection.start)
-        assertEquals(expectedText.length, result.selection.end)
+        result.assertCursorAfterSubstring("2. ")
     }
 
     @Test
     fun `test WHEN newline after non-list line THEN no prefix is inserted`() {
         val oldText = "Hello"
 
-        val newText = "Hello\n"
-        val cursor = newText.length
-
-        val newValue = TextFieldValue(
-            text = newText,
-            selection = TextRange(cursor, cursor)
-        )
+        val newValue = oldText.insertNewLineAfter("Hello").toTextFieldValue()
 
         val result = continueListIfApplicable(oldText, newValue)
 
         val expectedText = "Hello\n"
         assertEquals(expectedText, result.text)
-        assertEquals(expectedText.length, result.selection.start)
-        assertEquals(expectedText.length, result.selection.end)
+        result.assertCursorAfterSubstring("\n")
     }
 
     @Test
     fun `test WHEN typing newline in the middle of multi-line text after ordered list THEN next line inserts next list number`() {
         val oldText = "1. Hello\nSome text"
 
-        val insertionIndex = 8
-        val newText = buildString {
-            append(oldText.substring(0, insertionIndex))
-            append("\n")
-            append(oldText.substring(insertionIndex))
-        }
-
-        val cursor = insertionIndex + 1
-        val newValue = TextFieldValue(
-            text = newText,
-            selection = TextRange(cursor, cursor)
-        )
+        val newValue = oldText.insertNewLineAfter("Hello").toTextFieldValue()
 
         val result = continueListIfApplicable(oldText, newValue)
 
         val expectedText = "1. Hello\n2. \nSome text"
         assertEquals(expectedText, result.text)
-        assertEquals(12, result.selection.start)
-        assertEquals(12, result.selection.end)
+        result.assertCursorAfterSubstring("2. ")
     }
 
     @Test
     fun `test WHEN typing newline in the middle after an unordered list line THEN next line inserts dash prefix and user types more text`() {
-
         val oldText = "- Hello\nSome text"
 
-        val insertionIndex = 7
-        val intermediateText = buildString {
-            append(oldText.substring(0, insertionIndex))
-            append("\n")
-            append(oldText.substring(insertionIndex))
-        }
-
-        val cursorAfterNewline = insertionIndex + 1
-        val newValue = TextFieldValue(
-            text = intermediateText,
-            selection = TextRange(cursorAfterNewline, cursorAfterNewline)
-        )
+        val newValue = oldText.insertNewLineAfter("Hello").toTextFieldValue()
 
         val result = continueListIfApplicable(oldText, newValue)
         val expectedAfterAutoInsert = "- Hello\n- \nSome text"
         assertEquals(expectedAfterAutoInsert, result.text)
 
-        assertEquals(10, result.selection.start)
-        assertEquals(10, result.selection.end)
+        result.assertCursorAfterSubstring("- Hello\n- ")
 
-        val typedString = "next"
-        val finalText = buildString {
-            append(result.text.substring(0, result.selection.start))
-            append(typedString)
-            append(result.text.substring(result.selection.start))
-        }
-
-        val finalCursor = result.selection.start + typedString.length
-        val finalValue = TextFieldValue(
-            text = finalText,
-            selection = TextRange(finalCursor, finalCursor)
-        )
+        val finalResult = result.text.insertAfterSubstring(
+            substring = "\n- ",
+            insertedText = "next"
+        ).toTextFieldValue()
 
         val expectedFinalText = "- Hello\n- next\nSome text"
-        assertEquals(expectedFinalText, finalValue.text)
-        assertEquals(14, finalValue.selection.start)
-        assertEquals(14, finalValue.selection.end)
+        assertEquals(expectedFinalText, finalResult.text)
+        finalResult.assertCursorAfterSubstring("next")
     }
 
     @Test
@@ -149,13 +94,10 @@ class MarkdownListContinuationUtilTest {
         val oldText = "- Test\n- \nNew text"
 
         // Simulate the user placing the cursor in the empty list item and typing 'Text'
-        val newText = "- Test\n- Text\nNew text"
-        val cursor = newText.length  // Cursor should be after 'Text'
-
-        val newValue = TextFieldValue(
-            text = newText,
-            selection = TextRange(cursor, cursor)
-        )
+        val newValue = oldText.insertAfterSubstring(
+            substring = "- Test\n- ",
+            insertedText = "Text"
+        ).toTextFieldValue()
 
         val result = continueListIfApplicable(oldText, newValue)
 
@@ -164,8 +106,7 @@ class MarkdownListContinuationUtilTest {
 
         // Check text and cursor position
         assertEquals(expectedText, result.text)
-        assertEquals(22, result.selection.start)  // Cursor at the end of 'Text'
-        assertEquals(22, result.selection.end)
+        result.assertCursorAfterSubstring("Text")
     }
 
     @Test
@@ -174,13 +115,10 @@ class MarkdownListContinuationUtilTest {
         val oldText = "- Test\n- \n\n"
 
         // Simulate the user moving back to the empty list item and typing 'Hello'
-        val newText = "- Test\n- Hello\n\n"
-        val cursor = newText.length  // Cursor at the end of 'Hello'
-
-        val newValue = TextFieldValue(
-            text = newText,
-            selection = TextRange(cursor, cursor)
-        )
+        val newValue = oldText.insertAfterSubstring(
+            substring = "- Test\n- ",
+            insertedText = "Hello"
+        ).toTextFieldValue()
 
         // Run the utility function
         val result = continueListIfApplicable(oldText, newValue)
@@ -190,8 +128,7 @@ class MarkdownListContinuationUtilTest {
 
         // Check text and cursor position
         assertEquals(expectedText, result.text)
-        assertEquals(16, result.selection.start)  // Cursor at the end of 'Hello'
-        assertEquals(16, result.selection.end)
+        result.assertCursorAfterSubstring("Hello")
     }
 
     @Test
@@ -200,13 +137,10 @@ class MarkdownListContinuationUtilTest {
         val oldText = "1. Test\n2. \nMore text"
 
         // Simulate the user placing the cursor in the empty list item and typing 'Text'
-        val newText = "1. Test\n2. Text\nMore text"
-        val cursor = newText.length  // Cursor should be after 'Text'
-
-        val newValue = TextFieldValue(
-            text = newText,
-            selection = TextRange(cursor, cursor)
-        )
+        val newValue = oldText.insertAfterSubstring(
+            substring = "2. ",
+            insertedText = "Text"
+        ).toTextFieldValue()
 
         // Run the utility function
         val result = continueListIfApplicable(oldText, newValue)
@@ -216,8 +150,7 @@ class MarkdownListContinuationUtilTest {
 
         // Check text and cursor position
         assertEquals(expectedText, result.text)
-        assertEquals(expectedText.length, result.selection.start)  // Cursor at the end of 'Text'
-        assertEquals(expectedText.length, result.selection.end)
+        result.assertCursorAfterSubstring("Text")
     }
 
     @Test
@@ -226,13 +159,10 @@ class MarkdownListContinuationUtilTest {
         val oldText = "1. Test\n2. \n\n"
 
         // Simulate the user moving back to the empty list item and typing 'Hello'
-        val newText = "1. Test\n2. Hello\n\n"
-        val cursor = newText.length  // Cursor at the end of 'Hello'
-
-        val newValue = TextFieldValue(
-            text = newText,
-            selection = TextRange(cursor, cursor)
-        )
+        val newValue = oldText.insertAfterSubstring(
+            substring = "2. ",
+            insertedText = "Hello"
+        ).toTextFieldValue()
 
         // Run the utility function
         val result = continueListIfApplicable(oldText, newValue)
@@ -242,10 +172,57 @@ class MarkdownListContinuationUtilTest {
 
         // Check text and cursor position
         assertEquals(expectedText, result.text)
-        assertEquals(expectedText.length, result.selection.start)  // Cursor at the end of 'Hello'
-        assertEquals(expectedText.length, result.selection.end)
+        result.assertCursorAfterSubstring("Hello")
     }
 
+
+    private fun String.insertNewLineAfter(substring: String): InsertionResult = insertAfterSubstring(
+        substring = substring,
+        insertedText = "\n"
+    )
+
+    private fun String.insertAfterSubstring(
+        substring: String,
+        insertedText: String
+    ): InsertionResult {
+        val firstIndex = indexOf(substring)
+        if (firstIndex == -1) {
+            throw IllegalArgumentException("Substring not found in the original string")
+        }
+
+        val insertionIndex = firstIndex + substring.length
+        return insertAtIndex(insertionIndex, insertedText)
+    }
+
+    private fun String.insertAtIndex(index: Int, insertedText: String): InsertionResult {
+        val newString = buildString {
+            append(this@insertAtIndex.substring(0, index))
+            append(insertedText)
+            append(this@insertAtIndex.substring(index))
+        }
+        return InsertionResult(newString, index + insertedText.length)
+    }
+
+    private data class InsertionResult(
+        val newString: String,
+        val cursor: Int
+    ) {
+        fun toTextFieldValue() = TextFieldValue(
+            text = newString,
+            selection = TextRange(cursor, cursor)
+        )
+    }
+
+    private fun TextFieldValue.assertCursorAfterSubstring(substring: String) {
+        val firstIndex = text.indexOf(substring)
+        if (firstIndex == -1) {
+            throw IllegalArgumentException("Substring not found in the original string")
+        }
+
+        val expectedCursor = firstIndex + substring.length
+        assertEquals(expectedCursor, selection.start)
+        assertEquals(expectedCursor, selection.end)
+    }
 }
 
 
