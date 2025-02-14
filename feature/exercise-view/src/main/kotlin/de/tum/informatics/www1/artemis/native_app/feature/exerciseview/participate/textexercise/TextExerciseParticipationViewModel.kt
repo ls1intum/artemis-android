@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.particip
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.transformLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -9,16 +10,12 @@ import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.retryNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.Result
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.SubmissionType
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.TextSubmission
-import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
-import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.TextEditorService
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.service.TextSubmissionService
 import kotlinx.coroutines.delay
@@ -50,8 +47,7 @@ internal class TextExerciseParticipationViewModel(
     private val exerciseId: Long,
     private val participationId: Long,
     private val textSubmissionService: TextSubmissionService,
-    private val serverConfigurationService: ServerConfigurationService,
-    private val accountService: AccountService,
+    val artemisContextProvider: ArtemisContextProvider,
     private val textEditorService: TextEditorService,
     private val networkStatusProvider: NetworkStatusProvider,
     coroutineContext: CoroutineContext = EmptyCoroutineContext
@@ -139,10 +135,6 @@ internal class TextExerciseParticipationViewModel(
         .map { it.results.orEmpty().lastOrNull() }
         .flowOn(coroutineContext)
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
-
-    val serverUrl = serverUrlStateFlow(serverConfigurationService)
-
-    val authToken = authTokenStateFlow(accountService)
 
     init {
         viewModelScope.launch(coroutineContext) {

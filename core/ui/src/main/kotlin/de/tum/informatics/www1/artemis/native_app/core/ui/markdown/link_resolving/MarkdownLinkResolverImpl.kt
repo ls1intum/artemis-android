@@ -38,8 +38,7 @@ class MarkdownLinkResolverImpl(
                 ) else null
             LinkBottomSheet(
                 modifier = Modifier.fillMaxSize(),
-                serverUrl = serverUrl,
-                authToken = authToken,
+                artemisContext = artemisContext,
                 link = bottomSheetLink,
                 fileName = filename,
                 state = bottomSheetState,

@@ -126,8 +126,7 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
             exerciseId = exercise.id!!,
             participationId = participation.id!!,
             textSubmissionService = get(),
-            serverConfigurationService = get(),
-            accountService = get(),
+            artemisContextProvider = get(),
             textEditorService = get(),
             networkStatusProvider = get(),
             coroutineContext = testDispatcher

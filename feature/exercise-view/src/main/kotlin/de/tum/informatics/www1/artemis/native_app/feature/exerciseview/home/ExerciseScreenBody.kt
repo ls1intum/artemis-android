@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.google.accompanist.web.WebViewState
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
@@ -42,8 +43,7 @@ internal fun ExerciseScreenBody(
     displayCommunicationOnSide: Boolean,
     navController: NavController,
     metisContext: MetisContext?,
-    serverUrl: String,
-    authToken: String,
+    artemisContext: ArtemisContext,
     actions: ExerciseActions,
     webViewState: WebViewState?,
     setWebView: (WebView) -> Unit,
@@ -70,8 +70,7 @@ internal fun ExerciseScreenBody(
                         setWebView = setWebView,
                         webView = webView,
                         actions = actions,
-                        serverUrl = serverUrl,
-                        authToken = authToken
+                        artemisContext = artemisContext
                     )
                 }
 

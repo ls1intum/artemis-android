@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
@@ -45,6 +46,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 internal class ExerciseViewModel(
     private val exerciseId: Long,
+    val artemisContextProvider: ArtemisContextProvider,
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
     private val exerciseService: ExerciseService,
