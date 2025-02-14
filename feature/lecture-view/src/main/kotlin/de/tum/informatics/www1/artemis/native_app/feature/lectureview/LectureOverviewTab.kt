@@ -1,9 +1,13 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lectureview
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -12,8 +16,12 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Tag
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -24,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -57,6 +66,7 @@ internal fun getLectureUnitTestTag(lectureUnitId: Long) = "LectureUnit$lectureUn
 internal fun LectureOverviewTab(
     modifier: Modifier,
     description: String?,
+    date: String? = null,
     lectureUnits: List<LectureUnitData>,
     onViewExercise: (exerciseId: Long) -> Unit,
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
@@ -92,17 +102,22 @@ internal fun LectureOverviewTab(
         modifier = modifier
             .padding(top = 8.dp)
             .testTag(TEST_TAG_OVERVIEW_LIST),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         state = state,
         contentPadding = Spacings.calculateEndOfPagePaddingValues()
     ) {
-        if (description != null) {
-            item {
-                DescriptionSection(
-                    modifier = Modifier.fillMaxWidth(),
-                    description = description
-                )
-            }
+        date?.let{
+            dateSection(
+                modifier = Modifier.fillMaxWidth(),
+                date = it
+            )
+        }
+
+        description?.let {
+            descriptionSection(
+                modifier = Modifier.fillMaxWidth(),
+                description = it
+            )
         }
 
         if (lectureUnits.isNotEmpty()) {
@@ -118,25 +133,103 @@ internal fun LectureOverviewTab(
                 }
             )
         }
+
+        channelSection(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {}
+        )
     }
 }
 
-@Composable
-private fun DescriptionSection(modifier: Modifier, description: String) {
-    Column(modifier = modifier) {
+private fun LazyListScope.dateSection(
+    modifier: Modifier,
+    date: String?
+) {
+
+}
+
+private fun LazyListScope.descriptionSection(
+    modifier: Modifier,
+    description: String
+) {
+    stickyHeader {
         Text(
             text = stringResource(id = R.string.lecture_view_overview_section_description),
-            modifier = Modifier.fillMaxWidth(),
-            style = MaterialTheme.typography.headlineSmall.copy(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background),
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Medium
             )
         )
+    }
 
+    item {
         MarkdownText(
+            modifier = modifier.animateItem(),
             markdown = description,
-            modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.bodyMedium
         )
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+private fun LazyListScope.channelSection(
+    modifier: Modifier,
+    onClick: () -> Unit = {}
+) {
+    stickyHeader {
+        Text(
+            text = stringResource(id = R.string.lecture_view_overview_section_communication),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background),
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Medium
+            )
+        )
+    }
+
+    item {
+        Card(
+            modifier = modifier
+                .animateItem()
+                .fillMaxWidth(),
+            onClick = onClick,
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Icon(
+                        modifier = Modifier.height(24.dp),
+                        imageVector = Icons.Default.Tag,
+                        contentDescription = null
+                    )
+
+                    Text(
+                        text = "channelName",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                Icon(
+                    modifier = Modifier.height(24.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null
+                )
+            }
+        }
     }
 }
 
@@ -146,20 +239,23 @@ private fun LazyListScope.lectureUnitSection(
     onMarkAsCompleted: (lectureUnitId: Long, isCompleted: Boolean) -> Unit,
     onHeaderClick: (LectureUnit) -> Unit
 ) {
-    item {
+    stickyHeader {
         Text(
-            modifier = modifier,
+            modifier = modifier.background(MaterialTheme.colorScheme.background),
             text = stringResource(id = R.string.lecture_view_overview_section_lecture_units),
-            style = MaterialTheme.typography.headlineSmall.copy(
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Medium
             )
         )
     }
 
-    lectureUnits.forEachIndexed { index, lectureUnitWithData ->
+    lectureUnits.forEachIndexed { _, lectureUnitWithData ->
         item(lectureUnitWithData.lectureUnit.id) {
             LectureUnitHeader(
-                modifier = modifier.testTag(getLectureUnitTestTag(lectureUnitWithData.lectureUnit.id)),
+                modifier = modifier
+                    .testTag(getLectureUnitTestTag(lectureUnitWithData.lectureUnit.id))
+                    .animateItem(),
                 lectureUnit = lectureUnitWithData.lectureUnit,
                 onMarkAsCompleted = { isCompleted ->
                     onMarkAsCompleted(lectureUnitWithData.lectureUnit.id, isCompleted)
@@ -168,12 +264,10 @@ private fun LazyListScope.lectureUnitSection(
                 onHeaderClick = { onHeaderClick(lectureUnitWithData.lectureUnit) }
             )
         }
+    }
 
-        if (index < lectureUnits.size - 1) {
-            item {
-                HorizontalDivider()
-            }
-        }
+    item {
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 

@@ -1,9 +1,9 @@
 package de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture_units
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Task
 import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -54,41 +55,46 @@ internal fun LectureUnitHeader(
         is LectureUnitVideo -> Icons.Default.Videocam to R.string.lecture_view_lecture_unit_type_video
     }
 
-    Row(
-        modifier = modifier.clickable {
+    Card(
+        modifier = modifier,
+        onClick = {
             onHeaderClick()
             onMarkAsCompleted(true)
-        },
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        }
     ) {
-        Icon(
-            modifier = Modifier.size(32.dp),
-            imageVector = icon,
-            contentDescription = null
-        )
+        Row(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                modifier = Modifier.size(32.dp),
+                imageVector = icon,
+                contentDescription = null
+            )
 
-        Text(
-            text =  lectureUnit.name ?: stringResource(id = text),
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f)
-        )
+            Text(
+                text = lectureUnit.name ?: stringResource(id = text),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
 
-        if (lectureUnit !is LectureUnitExercise) {
-            Crossfade(
-                targetState = isUploadingMarkedAsCompleted,
-                label = "IsCompletedCheckbox <-> Updating"
-            ) { isUploadingState ->
-                if (isUploadingState) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(48.dp)
-                    )
-                } else {
-                    Checkbox(
-                        modifier = Modifier.testTag(TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED),
-                        checked = lectureUnit.completed,
-                        onCheckedChange = onMarkAsCompleted
-                    )
+            if (lectureUnit !is LectureUnitExercise) {
+                Crossfade(
+                    targetState = isUploadingMarkedAsCompleted,
+                    label = "IsCompletedCheckbox <-> Updating"
+                ) { isUploadingState ->
+                    if (isUploadingState) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(48.dp)
+                        )
+                    } else {
+                        Checkbox(
+                            modifier = Modifier.testTag(TEST_TAG_CHECKBOX_LECTURE_UNIT_COMPLETED),
+                            checked = lectureUnit.completed,
+                            onCheckedChange = onMarkAsCompleted
+                        )
+                    }
                 }
             }
         }

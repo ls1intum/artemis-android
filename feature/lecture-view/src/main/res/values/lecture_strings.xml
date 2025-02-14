@@ -11,6 +11,7 @@
 
     <!--  Overview tab   -->
     <string name="lecture_view_overview_section_description">Description</string>
+    <string name="lecture_view_overview_section_communication">Communication</string>
     <string name="lecture_view_overview_section_lecture_units">Lecture Units</string>
     <string name="lecture_view_lecture_unit_type_attachment">Attachment</string>
     <string name="lecture_view_lecture_unit_type_exercise">Exercise</string>
