@@ -75,14 +75,14 @@ class MarkdownListContinuationUtilTest {
         val result = continueListIfApplicable(oldText, newValue)
         val expectedAfterAutoInsert = "- Hello\n- \nSome text"
         assertEquals(expectedAfterAutoInsert, result.text)
-
         result.assertCursorAfterSubstring("- Hello\n- ")
 
-        val finalResult = result.text.insertAfterSubstring(
+        val finalValue = result.text.insertAfterSubstring(
             substring = "\n- ",
             insertedText = "next"
         ).toTextFieldValue()
 
+        val finalResult = continueListIfApplicable(result.text, finalValue)
         val expectedFinalText = "- Hello\n- next\nSome text"
         assertEquals(expectedFinalText, finalResult.text)
         finalResult.assertCursorAfterSubstring("next")
