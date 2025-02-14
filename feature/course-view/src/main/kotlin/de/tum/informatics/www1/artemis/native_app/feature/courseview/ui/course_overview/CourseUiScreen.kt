@@ -156,7 +156,7 @@ fun CourseUiScreen(
 
     val collapsingContentState = remember { CollapsingContentState(
         initialCollapsingHeight = 0f,
-        initialOffset = 0f,
+        initialOffset = 0f
     ) }
 
     val exerciseQuery by viewModel.exerciseQuery.collectAsState()
@@ -249,6 +249,8 @@ internal fun CourseUiScreen(
                 currentDestination?.hierarchy?.any { it.hasRoute(tab::class) } == true
             },
             updateSelectedCourseTab = {
+                // Reset the collapsing content state when switching tabs to show the search bar again
+                collapsingContentState.resetCollapsingContent()
                 navController.navigate(it) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         saveState = true
