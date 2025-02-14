@@ -1,8 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.members
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -61,16 +58,10 @@ fun ConversationMembersScreen(
             )
         }
     ) { padding ->
-        // Animate the padding to provide smooth search transitions
-        val animatedPadding by animateDpAsState(
-            targetValue = padding.calculateTopPadding(),
-            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
-        )
-
         ConversationMembersBody(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = animatedPadding)
+                .padding(top = padding.calculateTopPadding())
                 .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             courseId = courseId,

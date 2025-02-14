@@ -5,7 +5,6 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -14,9 +13,9 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -48,7 +47,6 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
@@ -58,6 +56,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBack
 import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 
+private const val animatingDuration = 300
 
 /**
  * A top app bar only featuring a title and a navigation icon using the style of the bottom app bar to
@@ -128,10 +127,10 @@ fun ArtemisSearchTopAppBar(
                 AnimatedContent(
                     targetState = isSearchActive,
                     transitionSpec = {
-                        (fadeIn(tween(300)) + slideInVertically { it }).togetherWith(
+                        (fadeIn(tween(animatingDuration)) + slideInVertically { it }).togetherWith(
                             fadeOut(
                                 tween(
-                                    300
+                                    animatingDuration
                                 )
                             ) + slideOutVertically { -it })
                     }
@@ -189,13 +188,16 @@ fun ArtemisSearchTopAppBar(
             scrollBehavior = scrollBehavior
         )
 
+        val visibilityCondition =
+            if (collapsingContentState.isCollapsingEnabled) !isSearchActive && !collapsingContentState.isCollapsed else !isSearchActive
+
         CollapsingSurface(
             modifier = Modifier
                 .fillMaxWidth()
-                .dropShadowBelow(),
+                .then(if (visibilityCondition) Modifier.dropShadowBelow() else Modifier),
             lineCount = lineCount,
             searchBarHint = searchBarHint,
-            isSearchActive = isSearchActive,
+            visibilityCondition = visibilityCondition,
             collapsingContentState = collapsingContentState,
             onClick = { isSearchActive = it }
         )
@@ -207,24 +209,36 @@ private fun CollapsingSurface(
     modifier: Modifier,
     lineCount: Int,
     searchBarHint: String,
-    isSearchActive: Boolean,
+    visibilityCondition: Boolean,
     collapsingContentState: CollapsingContentState,
     onClick: (Boolean) -> Unit,
 ) {
-    val visibilityCondition =
-        if (collapsingContentState.isCollapsingEnabled) !isSearchActive && !collapsingContentState.isCollapsed else !isSearchActive
+    AnimatedContent(
+        modifier = modifier,
+        targetState = visibilityCondition,
+        transitionSpec = {
+            val searchEnter = fadeIn(tween(animatingDuration)) + slideInVertically { -it }
+            val searchExit = fadeOut(tween(animatingDuration)) + slideOutVertically { -it }
 
-    AnimatedVisibility(
-        visible = visibilityCondition,
-        enter = fadeIn(tween(300)),
-        exit = fadeOut(tween(300))
-    ) {
+            if (targetState) {
+                searchEnter.togetherWith(fadeOut(tween(animatingDuration)))
+            } else {
+                fadeIn(tween(animatingDuration)).togetherWith(searchExit)
+            }
+        },
+    ) { isVisible ->
+        if (!isVisible) {
+            Spacer(Modifier.fillMaxWidth())
+            return@AnimatedContent
+        }
+
         Surface(
-            modifier = modifier
+            modifier = Modifier
+                .fillMaxWidth()
                 .onSizeChanged {
                     collapsingContentState.collapsingHeight = it.height.toFloat()
-                }
-                .offset { IntOffset(0, collapsingContentState.offset.toInt()) },
+                },
+//                                .offset { IntOffset(0, collapsingContentState.offset.toInt()) },
             color = MaterialTheme.colorScheme.surfaceContainer,
         ) {
             FakeBasicSearchTextField(

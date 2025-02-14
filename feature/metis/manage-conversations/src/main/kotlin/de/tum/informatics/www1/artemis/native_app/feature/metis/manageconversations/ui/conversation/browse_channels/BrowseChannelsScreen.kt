@@ -1,8 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.browse_channels
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -121,16 +118,10 @@ internal fun BrowseChannelsScreen(
             )
         }
     ) { padding ->
-        // Animate the padding to provide smooth search transitions
-        val animatedPadding by animateDpAsState(
-            targetValue = padding.calculateTopPadding(),
-            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
-        )
-
         BasicDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = animatedPadding)
+                .padding(top = padding.calculateTopPadding())
                 .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top))
                 .padding(horizontal = Spacings.ScreenHorizontalSpacing),
             dataState = channelsDataState,

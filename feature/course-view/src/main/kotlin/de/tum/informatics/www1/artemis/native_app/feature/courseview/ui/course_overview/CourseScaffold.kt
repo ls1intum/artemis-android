@@ -1,8 +1,5 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -72,12 +69,6 @@ internal fun CourseScaffold(
             )
         }
     ) { padding ->
-        // Animate the padding to provide smooth search transitions
-        val animatedPadding by animateDpAsState(
-            targetValue = padding.calculateTopPadding(),
-            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
-        )
-
         BasicDataStateUi(
             modifier = Modifier
                 .fillMaxSize()
@@ -85,7 +76,7 @@ internal fun CourseScaffold(
                     start = padding.calculateStartPadding(LocalLayoutDirection.current),
                     end = padding.calculateEndPadding(LocalLayoutDirection.current),
                     bottom = padding.calculateBottomPadding(),
-                    top = animatedPadding
+                    top = padding.calculateTopPadding()
                 )
                 .consumeWindowInsets(padding)
                 .systemBarsPadding(),           // This line is needed due to https://stackoverflow.com/a/74545344/13366254
