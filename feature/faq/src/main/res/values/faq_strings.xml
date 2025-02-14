@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="faq_loading_faqs_loading">Fetching FAQs from the server …</string>
+    <string name="faq_loading_faqs_failed">Something went wrong while loading your FAQs.</string>
+    <string name="faq_loading_faqs_try_again">Try again</string>
+
+    <string name="faq_loading_faq_loading">Fetching FAQ from the server …</string>
+    <string name="faq_loading_faq_failed">Something went wrong while loading your FAQ.</string>
+    <string name="faq_loading_faq_try_again">Try again</string>
+
+    <string name="faq_overview_read_more">Read more</string>
+
+    <string name="faq_overview_no_faqs">No FAQs found</string>
+    <string name="faq_overview_no_faqs_search">No FAQs matching your query found</string>
+    <string name="faq_search_hint">Search</string>
+
+
+</resources>

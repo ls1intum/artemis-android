@@ -14,6 +14,10 @@ object ExerciseDeeplinks {
         fun markdownLink(courseId: Long, exerciseId: Long): String {
             return "/courses/$courseId/exercises/$exerciseId"
         }
+
+        fun inAppLink(courseId: Long, exerciseId: Long): String {
+            return "$IN_APP_HOST/courses/$courseId/exercises/$exerciseId"
+        }
     }
 
     object ToExerciseCourseAgnostic : ArtemisDeeplink() {

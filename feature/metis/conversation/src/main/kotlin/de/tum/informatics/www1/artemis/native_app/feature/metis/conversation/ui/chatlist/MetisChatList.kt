@@ -1,12 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.chatlist
 
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -164,7 +166,6 @@ fun MetisChatList(
             MetisPostListHandler(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                     .weight(1f),
                 serverUrl = serverUrl,
                 courseId = courseId,
@@ -237,6 +238,7 @@ private fun ChatList(
     postActionFlags: PostActionFlags,
     isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     clientId: Long,
+    displayUnreadIndicator: Boolean = false,        // See https://github.com/ls1intum/artemis-android/pull/375#issuecomment-2656030353
     onClickViewPost: (StandalonePostId) -> Unit,
     onRequestEdit: (IStandalonePost) -> Unit,
     onRequestDelete: (IStandalonePost) -> Unit,
@@ -257,14 +259,22 @@ private fun ChatList(
             key = posts::getItemKey
         ) { index ->
             when (val chatListItem = posts[index]) {
+                is ChatListItem.UnreadIndicator -> {
+                    if (displayUnreadIndicator) {
+                        UnreadPostsIndicator()
+                    }
+                }
+
                 is ChatListItem.DateDivider -> {
                     DateDivider(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                            .fillMaxWidth(),
                         date = chatListItem.localDate
                     )
                 }
 
-                is ChatListItem.PostChatListItem? -> {
+                is ChatListItem.IndexedPost? -> {
                     val post = chatListItem?.post
 
                     val postActions = rememberPostActions(
@@ -296,6 +306,7 @@ private fun ChatList(
 
                     PostWithBottomSheet(
                         modifier = Modifier
+                            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
                             .fillMaxWidth()
                             .let {
                                 if (post != null) {
@@ -316,7 +327,7 @@ private fun ChatList(
                             order = DisplayPostOrder.REVERSED,
                             getPost = { getPostIndex ->
                                 when (val entry = posts.peek(getPostIndex)) {
-                                    is ChatListItem.PostChatListItem -> entry.post
+                                    is ChatListItem.IndexedPost -> entry.post
                                     else -> null
                                 }
                             }
@@ -328,7 +339,7 @@ private fun ChatList(
                                 order = DisplayPostOrder.REVERSED,
                                 getPost = { getPostIndex ->
                                     when (val entry = posts.peek(getPostIndex)) {
-                                        is ChatListItem.PostChatListItem -> entry.post
+                                        is ChatListItem.IndexedPost -> entry.post
                                         else -> null
                                     }
                                 }
@@ -399,6 +410,39 @@ private fun NoPostsFoundInformation(
             text = stringResource(id = R.string.metis_post_list_empty),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun UnreadPostsIndicator(
+    modifier: Modifier = Modifier,
+) {
+    val color = MaterialTheme.colorScheme.error
+
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(3.dp)
+                .background(color)
+        )
+
+        Text(
+            modifier = Modifier
+                .padding(end = 32.dp)
+                .align(Alignment.CenterEnd)
+                .background(
+                    color = color,
+                    shape = MaterialTheme.shapes.small
+                )
+                .padding(4.dp),
+            text = stringResource(R.string.unread_post_indicator_text),
+            color = MaterialTheme.colorScheme.onError,
+            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
         )
     }
 }

@@ -40,4 +40,5 @@
     <string name="standalone_post_loading">Loading post…</string>
     <string name="standalone_post_failure">Something went wrong while loading the post.</string>
     <string name="standalone_post_try_again">Try again</string>
+    <string name="unread_post_indicator_text">New</string>
 </resources>

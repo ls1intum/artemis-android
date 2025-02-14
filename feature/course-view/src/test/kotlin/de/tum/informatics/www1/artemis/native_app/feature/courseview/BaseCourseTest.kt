@@ -67,6 +67,7 @@ abstract class BaseCourseTest : BaseComposeTest() {
                     onParticipateInQuiz = { _, _ -> },
                     onClickViewQuizResults = { _, _ -> },
                     onNavigateToLecture = {},
+                    onNavigateToFaq = {},
                     onNavigateBack = {}
                 )
             }

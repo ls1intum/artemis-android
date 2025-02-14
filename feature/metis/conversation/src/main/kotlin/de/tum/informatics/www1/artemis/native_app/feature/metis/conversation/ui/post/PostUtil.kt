@@ -29,14 +29,19 @@ internal fun <T : IBasePost> shouldDisplayHeader(
     getPost: (index: Int) -> T?
 ): Boolean {
     return remember(index, post, getPost, postCount) {
-        val prefPost = when (order) {
-            DisplayPostOrder.REVERSED -> if (index + 1 < postCount) getPost(index + 1) else null
-            DisplayPostOrder.REGULAR -> if (index - 1 >= 0) getPost(index - 1) else null
+        val prevPostIndex = when (order) {
+            DisplayPostOrder.REVERSED -> index + 1
+            DisplayPostOrder.REGULAR -> index - 1
         }
 
-        val prefPostCreationDate = prefPost?.creationDate
+        val prevPost = when (order) {
+            DisplayPostOrder.REVERSED -> if (index + 1 < postCount) getPost(prevPostIndex) else null
+            DisplayPostOrder.REGULAR -> if (index - 1 >= 0) getPost(prevPostIndex) else null
+        }
+
+        val prefPostCreationDate = prevPost?.creationDate
         val postCreationDate = post?.creationDate
-        if (prefPost != null && post != null && prefPost.authorId == post.authorId && prefPostCreationDate != null && postCreationDate != null) {
+        if (prevPost != null && post != null && prevPost.authorId == post.authorId && prefPostCreationDate != null && postCreationDate != null) {
             postCreationDate - prefPostCreationDate > MaxDurationJoinMessages
         } else true
     }
@@ -56,6 +61,7 @@ internal fun <T : IBasePost> determinePostItemViewJoinedType(
         DisplayPostOrder.REVERSED -> index - 1
         DisplayPostOrder.REGULAR -> index + 1
     }
+
     val nextPost = if (nextPostIndex in 0 until postCount) getPost(nextPostIndex) else null
     val isNextHeader = nextPost?.let {
         shouldDisplayHeader(nextPostIndex, it, postCount, order, getPost)
