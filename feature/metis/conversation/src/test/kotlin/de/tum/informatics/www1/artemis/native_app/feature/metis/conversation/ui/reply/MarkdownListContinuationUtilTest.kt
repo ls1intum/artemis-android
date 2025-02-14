@@ -101,10 +101,7 @@ class MarkdownListContinuationUtilTest {
 
         val result = continueListIfApplicable(oldText, newValue)
 
-        // Expect the text to remain as is without inserting additional dashes
         val expectedText = "- Test\n- Text\nNew text"
-
-        // Check text and cursor position
         assertEquals(expectedText, result.text)
         result.assertCursorAfterSubstring("Text")
     }
@@ -120,13 +117,9 @@ class MarkdownListContinuationUtilTest {
             insertedText = "Hello"
         ).toTextFieldValue()
 
-        // Run the utility function
         val result = continueListIfApplicable(oldText, newValue)
 
-        // Expect the text to remain as is without inserting repeated dashes
         val expectedText = "- Test\n- Hello\n\n"
-
-        // Check text and cursor position
         assertEquals(expectedText, result.text)
         result.assertCursorAfterSubstring("Hello")
     }
@@ -142,13 +135,9 @@ class MarkdownListContinuationUtilTest {
             insertedText = "Text"
         ).toTextFieldValue()
 
-        // Run the utility function
         val result = continueListIfApplicable(oldText, newValue)
 
-        // Expect the text to remain as is without inserting repeated prefixes
         val expectedText = "1. Test\n2. Text\nMore text"
-
-        // Check text and cursor position
         assertEquals(expectedText, result.text)
         result.assertCursorAfterSubstring("Text")
     }
@@ -164,13 +153,9 @@ class MarkdownListContinuationUtilTest {
             insertedText = "Hello"
         ).toTextFieldValue()
 
-        // Run the utility function
         val result = continueListIfApplicable(oldText, newValue)
 
-        // Expect the text to remain as is without inserting repeated prefixes
         val expectedText = "1. Test\n2. Hello\n\n"
-
-        // Check text and cursor position
         assertEquals(expectedText, result.text)
         result.assertCursorAfterSubstring("Hello")
     }
