@@ -36,10 +36,10 @@ internal fun FaqCategoryChipRow(
 ) {
     SelectableFaqCategoryChipRow(
         modifier = modifier,
-        selectableFaqCategories = categories.map {
-            SelectableFaqCategory(
+        configuredFaqCategories = categories.map {
+            ConfiguredFaqCategoryChip(
                 category = it,
-                selectionConfig = FaqCategoryChipSelectionConfig.Disabled
+                config = FaqCategoryChipConfig.Colorful
             )
         }
     )
@@ -49,17 +49,17 @@ internal fun FaqCategoryChipRow(
 @Composable
 internal fun SelectableFaqCategoryChipRow(
     modifier: Modifier = Modifier,
-    selectableFaqCategories: Iterable<SelectableFaqCategory>
+    configuredFaqCategories: Iterable<ConfiguredFaqCategoryChip>
 ) {
     Row(
         modifier = modifier
             .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        selectableFaqCategories.forEach {
+        configuredFaqCategories.forEach {
             FaqCategoryChip(
                 faqCategory = it.category,
-                selectionConfig = it.selectionConfig
+                config = it.config
             )
         }
     }
@@ -70,25 +70,27 @@ internal fun SelectableFaqCategoryChipRow(
 internal fun FaqCategoryChip(
     modifier: Modifier = Modifier,
     faqCategory: FaqCategory,
-    selectionConfig: FaqCategoryChipSelectionConfig = FaqCategoryChipSelectionConfig.Disabled
+    config: FaqCategoryChipConfig = FaqCategoryChipConfig.Colorful
 ) {
     val chipColor = Color(faqCategory.color.toArgb())
     val textColor = BackgroundColorBasedTextColor.of(chipColor)
 
-    val enabledConfig = selectionConfig as? FaqCategoryChipSelectionConfig.Enabled
+    val filterConfig = config as? FaqCategoryChipConfig.Filter
 
     FilterChip(
         modifier = modifier,
-        enabled = enabledConfig != null,
-        selected = enabledConfig?.isSelected ?: false,
-        onClick = enabledConfig?.onClick ?: {},
+        enabled = filterConfig != null,
+        selected = filterConfig?.isSelected ?: false,
+        onClick = filterConfig?.onClick ?: {},
         colors = FilterChipDefaults.filterChipColors().copy(
+            // To not make it too colorful, we only apply the color to the disabled state (we use
+            // the default Material3 colors for the selectable category chips)
             disabledContainerColor = chipColor,
             disabledLabelColor = textColor,
         ),
         leadingIcon = {
             AnimatedVisibility(
-                visible = enabledConfig?.isSelected == true,
+                visible = filterConfig?.isSelected == true,
                 enter = fadeIn() + expandHorizontally() + scaleIn(),
                 exit = fadeOut() + shrinkHorizontally() + scaleOut()
             ) {

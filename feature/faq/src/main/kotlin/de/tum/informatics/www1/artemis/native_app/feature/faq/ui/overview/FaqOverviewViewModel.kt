@@ -38,14 +38,12 @@ class FaqOverviewViewModel(
     val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
-    private val _selectedCategories: MutableStateFlow<List<FaqCategory>> = MutableStateFlow(emptyList())
-    val selectedCategories: StateFlow<List<FaqCategory>> = _selectedCategories
+    private val _selectedCategory: MutableStateFlow<FaqCategory?> = MutableStateFlow(null)
+    val selectedCategory: StateFlow<FaqCategory?> = _selectedCategory
 
     val allCategories: StateFlow<List<FaqCategory>> = allFaqs.map {
         it.bind { faqs ->
-            val all = faqs.flatMap { faq -> faq.categories }.toSet().toList()
-            _selectedCategories.tryEmit(all)    // Select all by default
-            all
+            faqs.flatMap { faq -> faq.categories }.toSet().toList()
         }.orElse(emptyList())
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
@@ -53,11 +51,13 @@ class FaqOverviewViewModel(
     val displayedFaqs: StateFlow<DataState<List<Faq>>> = combine(
         allFaqs,
         searchQuery,
-        selectedCategories,
-    ) { faqsDataState, query, categories ->
+        selectedCategory,
+    ) { faqsDataState, query, selectedCategory ->
         val filteredByCategories = faqsDataState.bind { faqs ->
+            if (selectedCategory == null) return@bind faqs
+
             faqs.filter { faq ->
-                faq.categories.any { categories.contains(it) }
+                faq.categories.contains(selectedCategory)
             }
         }
 
@@ -83,11 +83,8 @@ class FaqOverviewViewModel(
     }
 
     fun onToggleSelectableFaqCategory(category: FaqCategory) {
-        val isSelected = _selectedCategories.value.contains(category)
-        if (isSelected) {
-            _selectedCategories.value -= category
-        } else {
-            _selectedCategories.value += category
-        }
+        val isSelected = _selectedCategory.value == category
+        _selectedCategory.value = if (isSelected) null else category
+
     }
 }

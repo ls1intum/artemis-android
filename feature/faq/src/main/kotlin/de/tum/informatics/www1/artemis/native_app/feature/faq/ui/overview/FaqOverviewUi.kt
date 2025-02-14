@@ -37,9 +37,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwo
 import de.tum.informatics.www1.artemis.native_app.feature.faq.R
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.FaqState
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.ConfiguredFaqCategoryChip
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipConfig
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipRow
-import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipSelectionConfig
-import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.SelectableFaqCategory
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.SelectableFaqCategoryChipRow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -72,14 +72,14 @@ fun FaqOverviewUi(
 ) {
     val faqs by viewModel.displayedFaqs.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
-    val selectedCategories by viewModel.selectedCategories.collectAsState()
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
     val allCategories by viewModel.allCategories.collectAsState()
 
-    val selectableFaqCategories = allCategories.map {
-        SelectableFaqCategory(
+    val filterChips = allCategories.map {
+        ConfiguredFaqCategoryChip(
             category = it,
-            selectionConfig = FaqCategoryChipSelectionConfig.Enabled(
-                isSelected = selectedCategories.contains(it),
+            config = FaqCategoryChipConfig.Filter(
+                isSelected = selectedCategory == it,
                 onClick = { viewModel.onToggleSelectableFaqCategory(it) }
             )
         )
@@ -88,7 +88,7 @@ fun FaqOverviewUi(
     FaqOverviewUi(
         modifier = modifier,
         faqsDataState = faqs,
-        selectableFaqCategories = selectableFaqCategories,
+        filterChips = filterChips,
         query = query,
         onUpdateQuery = viewModel::updateQuery,
         onReloadRequest = viewModel::requestReload,
@@ -101,7 +101,7 @@ fun FaqOverviewUi(
 fun FaqOverviewUi(
     modifier: Modifier = Modifier,
     faqsDataState: DataState<List<Faq>>,
-    selectableFaqCategories: List<SelectableFaqCategory>,
+    filterChips: List<ConfiguredFaqCategoryChip>,
     query: String,
     onUpdateQuery: (String) -> Unit,
     onReloadRequest: () -> Unit,
@@ -123,7 +123,7 @@ fun FaqOverviewUi(
                     .fillMaxSize()
                     .imePadding(),
                 faqs = faqs,
-                selectableFaqCategories = selectableFaqCategories,
+                filterChips = filterChips,
                 query = query,
                 onUpdateQuery = onUpdateQuery,
                 onNavigateToFaq = onNavigateToFaq
@@ -132,17 +132,17 @@ fun FaqOverviewUi(
     }
 }
 
+
 @Composable
 private fun FaqOverviewBody(
     modifier: Modifier = Modifier,
     faqs: List<Faq>,
-    selectableFaqCategories: List<SelectableFaqCategory>,
+    filterChips: List<ConfiguredFaqCategoryChip>,
     query: String,
     onUpdateQuery: (String) -> Unit,
     onNavigateToFaq: (Long) -> Unit
 ) {
     val isSearching = query.isNotBlank()
-    val allCategories = faqs.flatMap { it.categories }.toSet().toList()
 
     Column(
         modifier = modifier,
@@ -157,13 +157,13 @@ private fun FaqOverviewBody(
             testTag = TEST_TAG_FAQ_OVERVIEW_SEARCH,
         )
 
-        if (allCategories.size > 1) {
+        if (filterChips.size > 1) {
             SelectableFaqCategoryChipRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
                 ,
-                selectableFaqCategories = selectableFaqCategories
+                configuredFaqCategories = filterChips
             )
         }
 
