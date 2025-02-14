@@ -89,77 +89,36 @@ class MarkdownListContinuationUtilTest {
     }
 
     @Test
-    fun `test WHEN revisiting an empty unordered list item THEN no repeated prefix is inserted`() {
-        // Initial text with an empty list item
-        val oldText = "- Test\n- \nNew text"
+    fun `test GIVEN a list with an empty item followed by a newline WHEN revisiting the empty list item and typing THEN no repeated prefix is inserted`() {
+        // https://github.com/ls1intum/artemis-android/issues/342
 
-        // Simulate the user placing the cursor in the empty list item and typing 'Text'
-        val newValue = oldText.insertAfterSubstring(
-            substring = "- Test\n- ",
-            insertedText = "Text"
-        ).toTextFieldValue()
-
-        val result = continueListIfApplicable(oldText, newValue)
-
-        val expectedText = "- Test\n- Text\nNew text"
-        assertEquals(expectedText, result.text)
-        result.assertCursorAfterSubstring("Text")
-    }
-
-    @Test
-    fun `test WHEN revisiting an empty unordered list item after multiple newlines THEN no repeated prefix is inserted`() {
-        // Initial text: user created an empty list item and hit Enter twice to create extra newlines
-        val oldText = "- Test\n- \n\n"
-
-        // Simulate the user moving back to the empty list item and typing 'Hello'
-        val newValue = oldText.insertAfterSubstring(
-            substring = "- Test\n- ",
-            insertedText = "Hello"
-        ).toTextFieldValue()
-
-        val result = continueListIfApplicable(oldText, newValue)
-
-        val expectedText = "- Test\n- Hello\n\n"
-        assertEquals(expectedText, result.text)
-        result.assertCursorAfterSubstring("Hello")
-    }
-
-    @Test
-    fun `test WHEN revisiting an empty ordered list item THEN no repeated prefix is inserted`() {
         // Initial text with an empty ordered list item
-        val oldText = "1. Test\n2. \nMore text"
+        val oldText = "1. abc\n2. \n"
 
-        // Simulate the user placing the cursor in the empty list item and typing 'Text'
-        val newValue = oldText.insertAfterSubstring(
+        // User typing "d"
+        val userInsert1 = oldText.insertAfterSubstring(
             substring = "2. ",
-            insertedText = "Text"
+            insertedText = "d"
         ).toTextFieldValue()
 
-        val result = continueListIfApplicable(oldText, newValue)
+        val intermediateResult = continueListIfApplicable(oldText, userInsert1)
 
-        val expectedText = "1. Test\n2. Text\nMore text"
-        assertEquals(expectedText, result.text)
-        result.assertCursorAfterSubstring("Text")
-    }
+        val expectedText1 = "1. abc\n2. d\n"
+        assertEquals(expectedText1, intermediateResult.text)
+        intermediateResult.assertCursorAfterSubstring("d")
 
-    @Test
-    fun `test WHEN revisiting an empty ordered list item after multiple newlines THEN no repeated prefix is inserted`() {
-        // Initial text with an empty ordered list item and extra newlines
-        val oldText = "1. Test\n2. \n\n"
-
-        // Simulate the user moving back to the empty list item and typing 'Hello'
-        val newValue = oldText.insertAfterSubstring(
-            substring = "2. ",
-            insertedText = "Hello"
+        // User typing "e"
+        val userInsert2 = intermediateResult.text.insertAfterSubstring(
+            substring = "d",
+            insertedText = "e"
         ).toTextFieldValue()
 
-        val result = continueListIfApplicable(oldText, newValue)
+        val result = continueListIfApplicable(intermediateResult.text, userInsert2)
 
-        val expectedText = "1. Test\n2. Hello\n\n"
+        val expectedText = "1. abc\n2. de\n"
         assertEquals(expectedText, result.text)
-        result.assertCursorAfterSubstring("Hello")
+        result.assertCursorAfterSubstring("e")
     }
-
 
     private fun String.insertNewLineAfter(substring: String): InsertionResult = insertAfterSubstring(
         substring = substring,
