@@ -18,15 +18,18 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.BackgroundColorBasedTextColor
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.FaqCategory
+
+
+internal fun testTagForCategoryFilterChip(category: FaqCategory) = "TEST_TAG_FAQ_CATEGORY_FILTER_${category.name}"
+internal fun testTagForCategoryColorfulChip(category: FaqCategory) = "TEST_TAG_FAQ_CATEGORY_COLORFUL_${category.name}"
 
 
 @Composable
@@ -77,8 +80,14 @@ internal fun FaqCategoryChip(
 
     val filterConfig = config as? FaqCategoryChipConfig.Filter
 
+    val testTag = when (config) {
+        is FaqCategoryChipConfig.Colorful -> testTagForCategoryColorfulChip(faqCategory)
+        is FaqCategoryChipConfig.Filter -> testTagForCategoryFilterChip(faqCategory)
+    }
+
     FilterChip(
-        modifier = modifier,
+        modifier = modifier
+            .testTag(testTag),
         enabled = filterConfig != null,
         selected = filterConfig?.isSelected ?: false,
         onClick = filterConfig?.onClick ?: {},
@@ -108,18 +117,4 @@ internal fun FaqCategoryChip(
             )
         }
     )
-}
-
-
-@Preview(showBackground = true, widthDp = 380, heightDp = 700)
-@Composable
-private fun FaqCategoryChipPreview() {
-    MaterialTheme {
-        FaqCategoryChip(
-            faqCategory = FaqCategory(
-                color = android.graphics.Color.valueOf(0xFFFFAA22),
-                name = "Category"
-            )
-        )
-    }
 }

@@ -8,7 +8,7 @@ data class ConfiguredFaqCategoryChip(
 )
 
 
-interface FaqCategoryChipConfig {
+sealed interface FaqCategoryChipConfig {
     data object Colorful : FaqCategoryChipConfig
 
     data class Filter(
