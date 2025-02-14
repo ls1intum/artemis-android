@@ -7,16 +7,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
+import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
+import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.DefaultTransition
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
 import org.koin.androidx.compose.koinViewModel
@@ -49,11 +51,15 @@ fun ConversationScreen(
         viewModel.updateOpenedThread(threadPostId)
     }
 
+    DisposableEffect(viewModel) {
+        onDispose { viewModel.chatListUseCase.resetLastAlreadyReadPostId() }
+    }
+
     val showThread by remember(threadPostId) {
         mutableStateOf(threadPostId != null)
     }
 
-    WindowSizeAwareTwoColumnLayout(
+    LayoutAwareTwoColumnLayout(
         modifier = modifier,
         optionalColumn = conversationsOverview,
     ) { innerModifier ->
@@ -81,8 +87,6 @@ fun ConversationScreen(
                 ConversationChatListScreen(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
-                    courseId = courseId,
-                    conversationId = conversationId,
                     onNavigateBack = onCloseConversation,
                     onNavigateToSettings = onNavigateToSettings,
                     onClickViewPost = onOpenThread
@@ -94,23 +98,21 @@ fun ConversationScreen(
 
 
 @Composable
-fun WindowSizeAwareTwoColumnLayout(
+fun LayoutAwareTwoColumnLayout(
     modifier: Modifier = Modifier,
     optionalColumnWeight: Float = 1f,
     priorityColumnWeight: Float = 2f,
     optionalColumn: @Composable (Modifier) -> Unit,
     priorityColumn: @Composable (Modifier) -> Unit
 ) {
-    val widthSizeClass = getWindowSizeClass().widthSizeClass
-
-    when {
-        widthSizeClass <= WindowWidthSizeClass.Compact -> {
+    when(getArtemisAppLayout()) {
+        ArtemisAppLayout.Phone -> {
             Box(modifier = modifier) {
                 priorityColumn(Modifier.fillMaxSize())
             }
         }
 
-        else -> {
+        ArtemisAppLayout.Tablet -> {
             Row(
                 modifier = modifier,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -127,6 +129,7 @@ fun WindowSizeAwareTwoColumnLayout(
 
                 Box(
                     modifier = Modifier
+                        .padding(bottom = 4.dp)
                         .weight(priorityColumnWeight)
                         .fillMaxHeight()
                 ) {

@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.heightIn
@@ -31,15 +30,10 @@ import androidx.compose.ui.zIndex
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quiz.DragAndDropQuizQuestion
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.AutoResizeText
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FontSizeRange
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.DragTargetInfo
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.question.draganddrop.LocalDragTargetInfo
-
-private val dragItemBackgroundColor: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color.Black else Color.White
-
-private val dragItemTextColor: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color.White else Color.Black
 
 @Composable
 internal fun DragItemUiElement(
@@ -49,7 +43,7 @@ internal fun DragItemUiElement(
 ) {
     Box(
         modifier = modifier
-            .background(dragItemBackgroundColor)
+            .background(ExerciseColors.Quiz.dragItemBackground)
             .border(width = 1.dp, color = dragItemOutlineColor),
         contentAlignment = Alignment.Center
     ) {
@@ -66,7 +60,7 @@ internal fun DragItemUiElementContent(
     modifier: Modifier,
     text: String?,
     pictureFilePath: String?,
-    fontColor: Color = dragItemTextColor
+    fontColor: Color = ExerciseColors.Quiz.dragItemText
 ) {
     Box(
         modifier = modifier,

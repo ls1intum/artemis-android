@@ -12,8 +12,8 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.account.User
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.create_personal_conversation.InclusionList
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.humanReadableName
 import kotlinx.coroutines.flow.Flow
@@ -70,7 +70,7 @@ internal abstract class MemberSelectionBaseViewModel(
         .map { it.recipients }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, emptyList())
 
-    private val recipientsFromServer: Flow<DataState<List<User>>> = flatMapLatest(
+    private val recipientsFromServer: Flow<DataState<List<CourseUser>>> = flatMapLatest(
         query.debounce(QUERY_DEBOUNCE_TIME),
         isQueryTooShort,
         inclusionList,
@@ -96,7 +96,7 @@ internal abstract class MemberSelectionBaseViewModel(
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-    val potentialRecipients: StateFlow<DataState<List<User>>> = combine(
+    val potentialRecipients: StateFlow<DataState<List<CourseUser>>> = combine(
         recipientsFromServer,
         recipients
     ) { recipientsFromServerDataState, recipients ->
@@ -112,11 +112,13 @@ internal abstract class MemberSelectionBaseViewModel(
         savedStateHandle[KEY_QUERY] = query
     }
 
-    fun addRecipient(recipient: User) {
+    fun addRecipient(recipient: CourseUser) {
         savedStateHandle[KEY_RECIPIENTS] = RecipientsList(
             recipients.value + Recipient(
                 recipient.username ?: return,
-                recipient.humanReadableName
+                recipient.humanReadableName,
+                recipient.imageUrl ?: "",
+                recipient.id
             )
         )
     }

@@ -13,13 +13,16 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:device"))
     implementation(project(":feature:metis"))
+    implementation(project(":feature:faq"))
 
     implementation(libs.kotlinx.datetime)
     implementation(libs.placeholder.material)
     implementation(project(":core:device-test"))
+    debugImplementation(project(":core:data-test"))
 
     testImplementation(project(":feature:login"))
     testImplementation(project(":feature:login-test"))
+    testImplementation(project(":feature:metis-test"))
 
     kover(project(":core:data"))
 }

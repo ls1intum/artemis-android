@@ -9,9 +9,13 @@ interface CommunicationNotificationManager {
         artemisNotification: ArtemisNotification<CommunicationNotificationType>
     )
 
+    /**
+     * Add a message to the notification sent by the user themself using direct reply.
+     */
     suspend fun addSelfMessage(
         parentId: Long,
         authorName: String,
+        authorImageUrl: String?,
         body: String,
         date: Instant
     )

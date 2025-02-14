@@ -15,14 +15,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.KSerializableNavType
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home.ExerciseScreen
@@ -35,8 +34,6 @@ import org.koin.core.parameter.parametersOf
 import kotlin.reflect.typeOf
 
 object ExerciseViewDestination {
-    const val EXERCISE_VIEW_ROUTE = "exercise/{exerciseId}/{viewMode}"
-
     /**
      * Set this to true to on the backStackEntry and the exercise will be reloaded
      */
@@ -89,11 +86,8 @@ fun NavGraphBuilder.exercise(
                 ExerciseViewMode.Overview.serializer()
             )
         ),
-        deepLinks = listOf(
-            navDeepLink {
-                uriPattern = "artemis://exercises/{exerciseId}"
-            }
-        ) + generateLinks("courses/{courseId}/exercises/{exerciseId}")
+        deepLinks = ExerciseDeeplinks.ToExercise.generateLinks() +
+                ExerciseDeeplinks.ToExerciseCourseAgnostic.generateLinks(),
     ) { backStackEntry ->
         val route: ExerciseViewUi = backStackEntry.toRoute()
 

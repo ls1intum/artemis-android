@@ -15,13 +15,8 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -36,12 +31,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
-import de.tum.informatics.www1.artemis.native_app.core.ui.generateLinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.LectureDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
@@ -75,11 +71,8 @@ fun NavGraphBuilder.lecture(
     onClickViewQuizResults: (courseId: Long, exerciseId: Long) -> Unit,
 ) {
     animatedComposable<LectureScreenUi>(
-        deepLinks = listOf(
-            navDeepLink {
-                uriPattern = "artemis://lectures/{lectureId}"
-            }
-        ) + generateLinks("courses/{courseId}/lectures/{lectureId}")
+        deepLinks = LectureDeeplinks.ToLecture.generateLinks() +
+                LectureDeeplinks.ToLectureCourseAgnostic.generateLinks()
     ) { backStackEntry ->
         val route: LectureScreenUi = backStackEntry.toRoute()
 
@@ -177,7 +170,7 @@ internal fun LectureScreen(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                TopAppBar(
+                ArtemisTopAppBar(
                     title = {
                         Text(
                             text = lectureTitle.orEmpty(),
@@ -186,11 +179,7 @@ internal fun LectureScreen(
                             overflow = TextOverflow.Ellipsis
                         )
                     },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                        }
-                    }
+                    navigationIcon = { NavigationBackButton(onNavigateBack) }
                 )
             }
         ) { padding ->

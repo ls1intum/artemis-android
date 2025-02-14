@@ -89,7 +89,9 @@ internal fun LectureOverviewTab(
     }
 
     LazyColumn(
-        modifier = modifier.testTag(TEST_TAG_OVERVIEW_LIST),
+        modifier = modifier
+            .padding(top = 8.dp)
+            .testTag(TEST_TAG_OVERVIEW_LIST),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         state = state,
         contentPadding = Spacings.calculateEndOfPagePaddingValues()
@@ -124,9 +126,7 @@ private fun DescriptionSection(modifier: Modifier, description: String) {
     Column(modifier = modifier) {
         Text(
             text = stringResource(id = R.string.lecture_view_overview_section_description),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
+            modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.headlineSmall.copy(
                 fontWeight = FontWeight.Medium
             )

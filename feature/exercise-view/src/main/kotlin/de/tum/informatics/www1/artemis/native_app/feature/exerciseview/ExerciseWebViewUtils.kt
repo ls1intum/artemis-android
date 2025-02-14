@@ -64,10 +64,11 @@ internal fun getFeedbackViewWebViewState(
                     courseId.toString(),
                     "exercises",
                     exerciseId.toString(),
-                    "feedback",
+                    "participations",
                     participationId.toString(),
+                    "results",
                     resultId.toString(),
-                    (templateStatus == ResultTemplateStatus.Missing).toString()
+                    "feedback"
                 )
             }.buildString()
         }

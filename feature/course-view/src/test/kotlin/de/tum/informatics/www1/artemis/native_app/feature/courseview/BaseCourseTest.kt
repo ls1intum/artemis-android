@@ -1,6 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
@@ -10,12 +11,12 @@ import de.tum.informatics.www1.artemis.native_app.core.test.testWebsocketModule
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseUiScreen
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.DEFAULT_CONVERSATION_ID
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.DEFAULT_POST_ID
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
+import de.tum.informatics.www1.artemis.native_app.feature.metistest.VisibleMetisContextManagerMock
 import org.junit.Before
 import org.junit.Rule
 import org.koin.android.ext.koin.androidContext
@@ -55,21 +56,23 @@ abstract class BaseCourseTest : BaseComposeTest() {
         )
 
         composeTestRule.setContent {
-            CourseUiScreen(
-                modifier = Modifier.fillMaxSize(),
-                viewModel = viewModel,
-                courseId = course.id!!,
-                conversationId = DEFAULT_CONVERSATION_ID,
-                postId = DEFAULT_POST_ID,
-                username = "",
-                onNavigateToExercise = {},
-                onNavigateToExerciseResultView = {},
-                onNavigateToTextExerciseParticipation = { _, _ -> },
-                onParticipateInQuiz = { _, _ -> },
-                onClickViewQuizResults = { _, _ -> },
-                onNavigateToLecture = {},
-                onNavigateBack = {}
-            )
+            CompositionLocalProvider(
+                LocalVisibleMetisContextManager provides VisibleMetisContextManagerMock
+            ) {
+                CourseUiScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    viewModel = viewModel,
+                    courseId = course.id!!,
+                    onNavigateToExercise = {},
+                    onNavigateToExerciseResultView = {},
+                    onNavigateToTextExerciseParticipation = { _, _ -> },
+                    onParticipateInQuiz = { _, _ -> },
+                    onClickViewQuizResults = { _, _ -> },
+                    onNavigateToLecture = {},
+                    onNavigateToFaq = {},
+                    onNavigateBack = {}
+                )
+            }
         }
 
         return viewModel

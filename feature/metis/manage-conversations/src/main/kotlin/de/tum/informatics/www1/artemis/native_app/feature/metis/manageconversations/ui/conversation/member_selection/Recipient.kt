@@ -4,4 +4,4 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class Recipient(val username: String, val humanReadableName: String) : Parcelable
+data class Recipient(val username: String, val humanReadableName: String, val imageUrl: String, val userId: Long) : Parcelable

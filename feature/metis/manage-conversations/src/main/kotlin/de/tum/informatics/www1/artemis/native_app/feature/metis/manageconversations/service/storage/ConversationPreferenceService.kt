@@ -16,6 +16,8 @@ interface ConversationPreferenceService {
         val lecturesExpanded: Boolean,
         val groupChatsExpanded: Boolean,
         val personalConversationsExpanded: Boolean,
-        val hiddenExpanded: Boolean
+        val hiddenExpanded: Boolean,
+        val savedPostsExpanded: Boolean,
+        val recentExpanded: Boolean
     )
 }

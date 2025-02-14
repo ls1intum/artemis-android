@@ -1,7 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.overview
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.material.icons.filled.ChatBubble
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.WifiOff
@@ -29,7 +28,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -49,13 +47,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicHintTextField
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.endOfPagePadding
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.codeofconduct.ui.CodeOfConductUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -66,6 +66,7 @@ fun ConversationOverviewBody(
     modifier: Modifier,
     courseId: Long,
     onNavigateToConversation: (conversationId: Long) -> Unit,
+    onNavigateToSavedPosts: (SavedPostStatus) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit,
     onRequestBrowseChannel: () -> Unit,
@@ -75,6 +76,7 @@ fun ConversationOverviewBody(
         modifier = modifier,
         viewModel = koinViewModel { parametersOf(courseId) },
         onNavigateToConversation = onNavigateToConversation,
+        onNavigateToSavedPosts = onNavigateToSavedPosts,
         onRequestCreatePersonalConversation = onRequestCreatePersonalConversation,
         onRequestAddChannel = onRequestAddChannel,
         onRequestBrowseChannel = onRequestBrowseChannel,
@@ -87,6 +89,7 @@ fun ConversationOverviewBody(
     modifier: Modifier,
     viewModel: ConversationOverviewViewModel,
     onNavigateToConversation: (conversationId: Long) -> Unit,
+    onNavigateToSavedPosts: (SavedPostStatus) -> Unit,
     onRequestCreatePersonalConversation: () -> Unit,
     onRequestAddChannel: () -> Unit,
     onRequestBrowseChannel: () -> Unit,
@@ -94,6 +97,7 @@ fun ConversationOverviewBody(
 ) {
     var showCodeOfConduct by rememberSaveable { mutableStateOf(false) }
     val conversationCollectionsDataState: DataState<ConversationCollections> by viewModel.conversations.collectAsState()
+    val isDisplayingErrorDialog by viewModel.isDisplayingErrorDialog.collectAsState()
 
     val isConnected by viewModel.isConnected.collectAsState()
 
@@ -137,8 +141,9 @@ fun ConversationOverviewBody(
                     }
                 }
 
-                ConversationSearch(
+                BasicSearchTextField(
                     modifier = Modifier.fillMaxWidth(),
+                    hint = stringResource(id = R.string.conversation_overview_search_hint),
                     query = query,
                     updateQuery = viewModel::onUpdateQuery
                 )
@@ -151,6 +156,7 @@ fun ConversationOverviewBody(
                         viewModel.setConversationMessagesRead(conversationId)
                         onNavigateToConversation(conversationId)
                     },
+                    onNavigateToSavedPosts = onNavigateToSavedPosts,
                     onToggleMarkAsFavourite = viewModel::markConversationAsFavorite,
                     onToggleHidden = viewModel::markConversationAsHidden,
                     onToggleMuted = viewModel::markConversationAsMuted,
@@ -183,7 +189,8 @@ fun ConversationOverviewBody(
             canCreateChannel = canCreateChannel,
             onCreateChat = onRequestCreatePersonalConversation,
             onBrowseChannels = onRequestBrowseChannel,
-            onCreateChannel = onRequestAddChannel
+            onCreateChannel = onRequestAddChannel,
+            onMarkAllAsRead = viewModel::markAllConversationsAsRead
         )
     }
 
@@ -203,6 +210,17 @@ fun ConversationOverviewBody(
             )
         }
     }
+
+    if (isDisplayingErrorDialog) {
+        TextAlertDialog(
+            title = stringResource(id = R.string.mark_all_messages_as_read_failed_title),
+            text = stringResource(id = R.string.mark_all_messages_as_read_failed_message),
+            confirmButtonText = stringResource(id = R.string.mark_all_messages_as_read_failed_positive),
+            dismissButtonText = null,
+            onPressPositiveButton = { viewModel.dismissErrorDialog() },
+            onDismissRequest = { viewModel.dismissErrorDialog() }
+        )
+    }
 }
 
 @Composable
@@ -211,7 +229,8 @@ fun ConversationFabWithDropdownMenu(
     canCreateChannel: Boolean,
     onCreateChat: () -> Unit,
     onBrowseChannels: () -> Unit,
-    onCreateChannel: () -> Unit
+    onCreateChannel: () -> Unit,
+    onMarkAllAsRead: () -> Unit
 ) {
     var showDropdownMenu by remember { mutableStateOf(false) }
 
@@ -273,53 +292,17 @@ fun ConversationFabWithDropdownMenu(
                         }
                     )
                 }
+                DropdownMenuItem(
+                    onClick = {
+                        showDropdownMenu = false
+                        onMarkAllAsRead()
+                    },
+                    text = { Text(stringResource(id = R.string.mark_all_messages_as_read)) },
+                    leadingIcon = {
+                        Icon(imageVector = Icons.Default.Checklist, contentDescription = null)
+                    }
+                )
             }
         }
     }
 }
-
-
-
-@Composable
-private fun ConversationSearch(
-    modifier: Modifier,
-    query: String,
-    updateQuery: (String) -> Unit
-) {
-    Box(
-        modifier = modifier.border(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.primaryContainer,
-            shape = MaterialTheme.shapes.small
-        )
-    ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            BasicHintTextField(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(8.dp),
-                hint = stringResource(id = R.string.conversation_overview_search_hint),
-                value = query,
-                onValueChange = updateQuery,
-                maxLines = 1
-            )
-
-            if (query.isNotEmpty()) {
-                IconButton(
-                    onClick = { updateQuery("") },
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .size(24.dp)
-                        .padding(end = 5.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-

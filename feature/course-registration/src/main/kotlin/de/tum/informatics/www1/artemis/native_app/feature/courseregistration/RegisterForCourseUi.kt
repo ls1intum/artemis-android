@@ -1,11 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseregistration
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -18,21 +14,13 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,11 +30,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -57,11 +44,9 @@ import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicDataStateUi
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseHeaderViewMode
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CompactCourseItemHeader
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.ExpandedCourseItemHeader
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseColumnCount
-import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.computeCourseItemModifier
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.CourseItemPreview
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.util.CourseUtil
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.MarkdownText
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
@@ -106,12 +91,6 @@ internal fun RegisterForCourseScreen(
     var signUpCandidate: Course? by remember { mutableStateOf(null) }
     var displayRegistrationFailedDialog: Boolean by rememberSaveable { mutableStateOf(false) }
 
-    val topAppBarState = rememberTopAppBarState()
-
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
-        topAppBarState
-    )
-
     var courseRegistrationDeferred: Deferred<Long?>? by remember { mutableStateOf(null) }
 
     AwaitDeferredCompletion(courseRegistrationDeferred) { courseId ->
@@ -126,16 +105,11 @@ internal fun RegisterForCourseScreen(
     }
 
     Scaffold(
-        modifier = modifier.then(Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)),
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text(text = stringResource(id = R.string.course_registration_title)) },
-                scrollBehavior = scrollBehavior,
-                navigationIcon = {
-                    IconButton(onClick = onNavigateUp) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    }
-                }
+                navigationIcon = { NavigationBackButton(onNavigateUp) }
             )
         }
     ) { padding ->
@@ -210,11 +184,7 @@ private fun RegisterForCourseContent(
         onClickRetry = reloadCourses
     ) { data ->
         val windowSizeClass = getWindowSizeClass()
-
-        val columnCount = computeCourseColumnCount(windowSizeClass)
-        val isCompact = windowSizeClass.widthSizeClass <= WindowWidthSizeClass.Compact
-        val courseItemModifier = Modifier
-            .computeCourseItemModifier(isCompact = isCompact)
+        val columnCount = CourseUtil.computeCourseColumnCount(windowSizeClass)
 
         if(data.isEmpty()) {
             Column(
@@ -235,94 +205,31 @@ private fun RegisterForCourseContent(
                 .testTag(TEST_TAG_REGISTRABLE_COURSE_LIST),
             columns = GridCells.Fixed(columnCount),
             contentPadding = Spacings.calculateEndOfPagePaddingValues(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(Spacings.CourseItem.gridSpacing),
+            horizontalArrangement = Arrangement.spacedBy(Spacings.CourseItem.gridSpacing),
         ) {
             data.forEach { semesterCourses ->
                 item(span = { GridItemSpan(columnCount) }) {
-                    SemesterHeader(
-                        modifier = Modifier.fillMaxWidth(),
-                        semester = semesterCourses.semester
+                    Text(
+                        text = semesterCourses.semester,
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp)
                     )
                 }
 
                 items(semesterCourses.courses, key = { it.id ?: 0L }) { course ->
-                    RegistrableCourse(
-                        modifier = courseItemModifier.testTag(testTagForRegistrableCourse(course.id ?: 0L)),
+                    CourseItemPreview(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(testTagForRegistrableCourse(course.id ?: 0L)),
                         course = course,
-                        onClickSignup = { onClickSignup(course) },
-                        isCompact = isCompact
+                        onClick = { onClickSignup(course) }
                     )
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun RegistrableCourse(
-    modifier: Modifier,
-    course: Course,
-    isCompact: Boolean,
-    onClickSignup: () -> Unit
-) {
-    val content: @Composable ColumnScope.() -> Unit = @Composable {
-        HorizontalDivider()
-
-        Row(
-            modifier = Modifier
-                .padding(top = 4.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(
-                modifier = Modifier.padding(bottom = 4.dp, end = 8.dp),
-                onClick = onClickSignup
-            ) {
-                Text(text = stringResource(id = R.string.course_registration_sign_up))
-            }
-        }
-    }
-
-    if (isCompact) {
-        CompactCourseItemHeader(
-            modifier = modifier,
-            course = course,
-            content = content,
-            compactCourseHeaderViewMode = CompactCourseHeaderViewMode.DESCRIPTION
-        )
-    } else {
-        ExpandedCourseItemHeader(
-            modifier = modifier,
-            course = course,
-            content = {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .weight(1f),
-                    text = course.description,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                content()
-            },
-            rightHeaderContent = {}
-        )
-    }
-}
-
-@Composable
-private fun SemesterHeader(modifier: Modifier, semester: String) {
-    Box(modifier = modifier.then(Modifier.background(MaterialTheme.colorScheme.onPrimary))) {
-        Text(
-            text = semester,
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center)
-                .padding(horizontal = 16.dp + 8.dp, vertical = 2.dp)
-        )
     }
 }

@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -17,6 +16,7 @@ import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
 import de.tum.informatics.www1.artemis.native_app.core.test.coreTestModules
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.course_creation.createCourse
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.course.TEST_TAG_ENROLL_BUTTON
 import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
@@ -84,11 +84,7 @@ class CourseRegistrationE2eTest : BaseComposeTest() {
             .onNode(
                 hasParent(
                     hasTestTag(testTagForRegistrableCourse(course.id!!))
-                ) and hasText(
-                    context.getString(
-                        R.string.course_registration_sign_up
-                    )
-                )
+                ) and hasTestTag(TEST_TAG_ENROLL_BUTTON)
             )
             .performClick()
 

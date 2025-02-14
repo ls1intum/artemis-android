@@ -61,6 +61,7 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
             serverConfigurationService = get(),
             accountService = get(),
             exerciseService = get(),
+            channelService = get(),
             liveParticipationService = get(),
             courseExerciseService = get(),
             networkStatusProvider = get(),

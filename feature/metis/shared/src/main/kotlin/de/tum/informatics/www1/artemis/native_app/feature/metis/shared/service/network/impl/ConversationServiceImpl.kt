@@ -4,7 +4,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
-import de.tum.informatics.www1.artemis.native_app.core.model.account.User
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
@@ -16,6 +16,7 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -52,7 +53,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         includeInstructors: Boolean,
         authToken: String,
         serverUrl: String
-    ): NetworkResponse<List<User>> {
+    ): NetworkResponse<List<CourseUser>> {
         val roles: List<String> =
             (if (includeStudents) listOf("students") else emptyList()) +
                     (if (includeInstructors) listOf("instructors") else emptyList()) +
@@ -77,7 +78,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         query: String,
         authToken: String,
         serverUrl: String
-    ): NetworkResponse<List<User>> {
+    ): NetworkResponse<List<ConversationUser>> {
         return performNetworkCall {
             ktorProvider.ktorClient.get(serverUrl) {
                 url {
@@ -126,6 +127,24 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
 
                 setBody(listOf(partner))
                 contentType(ContentType.Application.Json)
+
+                accept(ContentType.Application.Json)
+                cookieAuth(authToken)
+            }.body()
+        }
+    }
+
+    override suspend fun createOneToOneConversation(
+        courseId: Long,
+        partnerId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<OneToOneChat> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments("api", "courses", courseId.toString(), "one-to-one-chats", partnerId.toString())
+                }
 
                 accept(ContentType.Application.Json)
                 cookieAuth(authToken)
@@ -492,6 +511,46 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
             }
                 .status
                 .isSuccess()
+        }
+    }
+
+    override suspend fun markConversationAsRead(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.patch(serverUrl) {
+                url {
+                    appendPathSegments("api", "courses", courseId.toString(), "conversations", conversationId.toString(), "mark-as-read")
+                }
+
+                cookieAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }.status.isSuccess()
+        }
+    }
+
+    override suspend fun markAllConversationsAsRead(
+        courseId: Long,
+        serverUrl: String,
+        authToken: String
+    ): NetworkResponse<Boolean> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.post(serverUrl) {
+                url {
+                    appendPathSegments(
+                        "api",
+                        "courses",
+                        courseId.toString(),
+                        "channels",
+                        "mark-as-read"
+                    )
+                }
+                cookieAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }.status.isSuccess()
         }
     }
 

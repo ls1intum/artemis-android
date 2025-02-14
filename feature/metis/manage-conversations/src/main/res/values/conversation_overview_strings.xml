@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="conversation_overview_search_hint">Search for conversation</string>
+    <string name="conversation_overview_search_hint">Search for a conversation</string>
+
+    <string name="conversation_overview_conversation_item_show_actions">Show Actions</string>
 
     <string name="conversation_overview_conversation_item_mark_as_favorite">Favorite</string>
     <string name="conversation_overview_conversation_item_unmark_as_favorite">Unfavorite</string>
 
-    <string name="conversation_overview_conversation_item_mark_as_hidden">Hide</string>
-    <string name="conversation_overview_conversation_item_unmark_as_hidden">Unhide</string>
+    <string name="conversation_overview_conversation_item_mark_as_hidden">Archive</string>
+    <string name="conversation_overview_conversation_item_unmark_as_hidden">Unarchive</string>
 
     <string name="conversation_overview_conversation_item_mark_as_muted">Mute</string>
     <string name="conversation_overview_conversation_item_unmark_as_muted">Unmute</string>
@@ -18,7 +20,9 @@
     <string name="conversation_overview_section_exam_channels">Exams</string>
     <string name="conversation_overview_section_groups">Group Chats</string>
     <string name="conversation_overview_section_direct_messages">Direct Messages</string>
-    <string name="conversation_overview_section_hidden">Hidden</string>
+    <string name="conversation_overview_section_hidden">Archive</string>
+    <string name="conversation_overview_section_saved_posts">Saved Messages</string>
+    <string name="conversation_overview_section_recent">Recent</string>
 
     <string name="conversation_overview_section_add_channel_browse">Browse channels</string>
     <string name="conversation_overview_section_add_channel_create">Create channel</string>
@@ -32,4 +36,9 @@
     <string name="conversation_overview_not_connected_banner">Not connected to server</string>
 
     <string name="conversation_overview_button_show_code_of_conduct">Code of Conduct</string>
+
+    <string name="mark_all_messages_as_read">Mark all as read</string>
+    <string name="mark_all_messages_as_read_failed_title">Could not mark as read</string>
+    <string name="mark_all_messages_as_read_failed_message">Something went wrong while marking your messages as read. Please try again.</string>
+    <string name="mark_all_messages_as_read_failed_positive">@android:string/ok</string>
 </resources>

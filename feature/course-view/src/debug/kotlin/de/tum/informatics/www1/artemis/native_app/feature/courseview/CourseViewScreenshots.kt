@@ -17,8 +17,6 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipati
 import de.tum.informatics.www1.artemis.native_app.core.websocket.test.LiveParticipationServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseUiScreen
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.DEFAULT_CONVERSATION_ID
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.DEFAULT_POST_ID
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
@@ -54,16 +52,14 @@ fun `Course View - Exercise List`() {
         CourseUiScreen(
             modifier = Modifier.fillMaxSize(),
             viewModel = courseViewModel,
-            username = "",
             courseId = 0L,
-            conversationId = DEFAULT_CONVERSATION_ID,
-            postId = DEFAULT_POST_ID,
             onNavigateToExercise = {},
             onNavigateToTextExerciseParticipation = { _, _ -> },
             onNavigateToExerciseResultView = {},
             onParticipateInQuiz = { _, _ -> },
             onClickViewQuizResults = { _, _ -> },
             onNavigateToLecture = {},
+            onNavigateToFaq = {},
             onNavigateBack = {}
         )
     }

@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.CommunicationDeeplinks
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.MetisViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,16 +17,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 class UserProfileDialogViewModel(
     private val courseId: Long,
     private val userId: Long,
     serverConfigurationService: ServerConfigurationService,
     accountService: AccountService,
-    private val accountDataService: AccountDataService,
-    private val networkStatusProvider: NetworkStatusProvider,
+    accountDataService: AccountDataService,
+    networkStatusProvider: NetworkStatusProvider,
     websocketProvider: WebsocketProvider,
-    private val coroutineContext: CoroutineContext
+    coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
     serverConfigurationService,
     accountService,
@@ -36,17 +37,16 @@ class UserProfileDialogViewModel(
     coroutineContext
 ) {
 
-    val isShownUserTheAppUser: StateFlow<DataState<Boolean>>  = clientId
+    val isSendMessageAvailable: StateFlow<Boolean>  = clientId
         .map { dataState ->
             dataState.bind {
-                it == userId
-            }
+                it != userId
+            }.orElse(false)
         }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, DataState.Loading())
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     fun navigateToOneToOneChat(context: Context) {
-        // TODO: This does currently not work yet, see: https://github.com/ls1intum/artemis-android/issues/213
-        val chatLink = "artemis://courses/$courseId/messages?userId=$userId"
+        val chatLink = CommunicationDeeplinks.ToOneToOneChatByUserId.inAppLink(courseId, userId)
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(chatLink))
         context.startActivity(intent)
     }

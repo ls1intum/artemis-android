@@ -2,9 +2,14 @@ package de.tum.informatics.www1.artemis.native_app.feature.exerciseview.home
 
 import android.webkit.WebView
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -27,7 +32,6 @@ import androidx.navigation.NavController
 import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
-import de.tum.informatics.www1.artemis.native_app.core.model.exercise.latestParticipation
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
@@ -37,7 +41,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.getProble
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.MetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.canDisplayMetisOnDisplaySide
 import kotlinx.coroutines.Deferred
-import me.onebone.toolbar.ExperimentalToolbarApi
 
 val LocalExerciseScreenFloatingActionButton =
     compositionLocalOf { ExerciseScreenFloatingActionButtonProvider() }
@@ -45,7 +48,6 @@ val LocalExerciseScreenFloatingActionButton =
 /**
  * Display the exercise screen with tabs for the problem statement, the exercise info and the questions and answer.
  */
-@OptIn(ExperimentalToolbarApi::class)
 @Composable
 internal fun ExerciseScreen(
     modifier: Modifier,
@@ -61,6 +63,7 @@ internal fun ExerciseScreen(
     val authToken: String by viewModel.authToken.collectAsState()
 
     val exerciseDataState by viewModel.exerciseDataState.collectAsState()
+    val channelDataState by viewModel.channelDataState.collectAsState()
 
     val courseId: Long? = exerciseDataState.courseId
 
@@ -75,7 +78,7 @@ internal fun ExerciseScreen(
             exerciseDataState.bind { exercise ->
                 // Only relevant for programming exercises
                 if (exercise is ProgrammingExercise) {
-                    exercise.latestParticipation?.id
+                    exercise.getSpecificStudentParticipation(false)?.id
                 } else null
             }.orNull()
         }
@@ -144,8 +147,7 @@ internal fun ExerciseScreen(
                     ExerciseScreenTopAppBar(
                         modifier = Modifier.fillMaxWidth(),
                         onNavigateBack = onNavigateBack,
-                        exerciseDataState = exerciseDataState,
-                        onRequestReloadExercise = viewModel::requestReloadExercise
+                        exerciseDataState = exerciseDataState
                     )
                 },
                 floatingActionButton = floatingActionButton
@@ -184,8 +186,10 @@ internal fun ExerciseScreen(
                 ExerciseScreenBody(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding),
+                        .padding(top = padding.calculateTopPadding())
+                        .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
                     exerciseDataState = exerciseDataState,
+                    exerciseChannelDataState = channelDataState,
                     isLongToolbar = isLongToolbar,
                     displayCommunicationOnSide = displayCommunicationOnSide,
                     navController = navController,

@@ -1,7 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.shared
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.model.account.User
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.CourseUser
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ChannelChat
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.Conversation
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.conversation.ConversationUser
@@ -32,18 +32,25 @@ open class ConversationServiceStub(
         includeInstructors: Boolean,
         authToken: String,
         serverUrl: String
-    ): NetworkResponse<List<User>> = NetworkResponse.Response(emptyList())
+    ): NetworkResponse<List<CourseUser>> = NetworkResponse.Response(emptyList())
 
     override suspend fun searchForCourseMembers(
         courseId: Long,
         query: String,
         authToken: String,
         serverUrl: String
-    ): NetworkResponse<List<User>> = NetworkResponse.Response(emptyList())
+    ): NetworkResponse<List<ConversationUser>> = NetworkResponse.Response(emptyList())
 
     override suspend fun createOneToOneConversation(
         courseId: Long,
         partner: String,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<OneToOneChat> = NetworkResponse.Failure(StubException)
+
+    override suspend fun createOneToOneConversation(
+        courseId: Long,
+        partnerId: Long,
         authToken: String,
         serverUrl: String
     ): NetworkResponse<OneToOneChat> = NetworkResponse.Failure(StubException)
@@ -154,5 +161,18 @@ open class ConversationServiceStub(
         muted: Boolean,
         authToken: String,
         serverUrl: String
+    ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
+
+    override suspend fun markConversationAsRead(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
+
+    override suspend fun markAllConversationsAsRead(
+        courseId: Long,
+        serverUrl: String,
+        authToken: String
     ): NetworkResponse<Boolean> = NetworkResponse.Failure(StubException)
 }

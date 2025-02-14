@@ -13,10 +13,12 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigura
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.StandalonePostId
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.UserIdentifier
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.SavedPostStatus
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.service.network.ConversationService
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui.profile_picture.UserProfileDialogViewModel
-import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.NavigateToUserConversationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.SinglePageConversationBodyViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.metis.ui.user_conversation.NavigateToUserConversationViewModel
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
@@ -35,7 +37,7 @@ internal class communication_moduleTest {
     fun checkKoinModule() {
         communicationModule.verify(
             injections = listOf(
-                definition<NavigateToUserConversationViewModel>(Long::class, String::class),
+                definition<NavigateToUserConversationViewModel>(Long::class, UserIdentifier::class),
                 definition<SinglePageConversationBodyViewModel>(Long::class),
                 definition<UserProfileDialogViewModel>(Long::class, Long::class),
             ),
@@ -55,6 +57,7 @@ internal class communication_moduleTest {
                 Application::class,
                 CurrentActivityListener::class,
                 SavedStateHandle::class,
+                SavedPostStatus::class,
             )
         )
     }

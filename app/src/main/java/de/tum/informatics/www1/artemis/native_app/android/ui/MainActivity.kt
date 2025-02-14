@@ -23,9 +23,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navOptions
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
-import de.tum.informatics.www1.artemis.native_app.android.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.ui.theme.AppTheme
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
@@ -39,22 +37,8 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.WindowSizeClassProvide
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.link_resolving.LocalMarkdownLinkResolver
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
-import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.courseRegistration
-import de.tum.informatics.www1.artemis.native_app.feature.courseregistration.navigateToCourseRegistration
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.course
-import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.navigateToCourse
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.DashboardScreen
-import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.dashboard
-import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.navigateToDashboard
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewDestination
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewMode
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewUi
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.exercise
-import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.navigateToExercise
-import de.tum.informatics.www1.artemis.native_app.feature.lectureview.lecture
-import de.tum.informatics.www1.artemis.native_app.feature.lectureview.navigateToLecture
 import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
-import de.tum.informatics.www1.artemis.native_app.feature.login.loginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
@@ -63,13 +47,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visibleme
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.navigateToQuizParticipation
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.quizParticipation
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.navigateToQuizResult
-import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.quizResults
-import de.tum.informatics.www1.artemis.native_app.feature.settings.navigateToSettings
-import de.tum.informatics.www1.artemis.native_app.feature.settings.settingsScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -109,13 +86,17 @@ class MainActivity : AppCompatActivity(),
         val visibleMetisContextManager = object :
             VisibleMetisContextManager {
             override fun registerMetisContext(metisContext: VisibleMetisContext) {
-                visibleMetisContexts.value = visibleMetisContexts.value + metisContext
+                visibleMetisContexts.value += metisContext
 
                 cancelCommunicationNotifications(metisContext)
             }
 
             override fun unregisterMetisContext(metisContext: VisibleMetisContext) {
-                visibleMetisContexts.value = visibleMetisContexts.value - metisContext
+                visibleMetisContexts.value -= metisContext
+            }
+
+            override fun getRegisteredMetisContexts(): List<VisibleMetisContext> {
+                return visibleMetisContexts.value
             }
         }
 
@@ -222,33 +203,6 @@ class MainActivity : AppCompatActivity(),
             }
         }
 
-        val onNavigateToTextExerciseParticipation =
-            { exerciseId: Long, participationId: Long ->
-                navController.navigateToExercise(
-                    exerciseId,
-                    ExerciseViewMode.TextParticipation(participationId)
-                ) {}
-            }
-
-        val onNavigateToExerciseResultView = { exerciseId: Long ->
-            navController.navigateToExercise(
-                exerciseId,
-                ExerciseViewMode.ViewResult
-            ) {}
-        }
-
-        val onParticipateInQuiz = { courseId: Long, exerciseId: Long, isPractice: Boolean ->
-            navController.navigateToQuizParticipation(
-                courseId,
-                exerciseId,
-                if (isPractice) QuizType.Practice else QuizType.Live
-            )
-        }
-
-        val onClickViewQuizResults = { courseId: Long, exerciseId: Long ->
-            navController.navigateToQuizResult(courseId, exerciseId)
-        }
-
         val linkOpener = remember {
             CustomTabsLinkOpener(this@MainActivity)
         }
@@ -259,128 +213,15 @@ class MainActivity : AppCompatActivity(),
             LocalArtemisImageProvider provides koinInject(),
             LocalMarkdownLinkResolver provides koinInject()
         ) {
-            // Use jetpack compose navigation for the navigation logic.
             NavHost(navController = navController, startDestination = startDestination) {
-                loginScreen(
-                    onFinishedLoginFlow = { deepLink ->
-                        if (deepLink == null) {
-                            // Navigate to the course overview and remove the login screen from the navigation stack.
-                            navController.navigateToDashboard {
-                                popUpTo<LoginScreen> {
-                                    inclusive = true
-                                }
-                            }
-                        } else {
-                            try {
-                                navController.navigate(
-                                    Uri.parse(deepLink),
-                                    navOptions {
-                                        popUpTo<LoginScreen>()
-                                    }
-                                )
-                            } catch (_: IllegalArgumentException) {
-                                navController.navigateToDashboard {
-                                    popUpTo(navController.graph.id) {
-                                        inclusive = true
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    onRequestOpenSettings = {
-                        navController.navigateToSettings { }
-                    }
-                )
-
-                dashboard(
-                    onOpenSettings = {
-                        navController.navigateToSettings { }
-                    },
-                    onClickRegisterForCourse = {
-                        navController.navigateToCourseRegistration { }
-                    },
-                    onViewCourse = { courseId ->
-                        navController.navigateToCourse(courseId) { }
-                    }
-                )
-
-                courseRegistration(
-                    onNavigateUp = navController::navigateUp,
-                    onRegisteredInCourse = { courseId ->
-                        navController.navigateUp()
-                        navController.navigateToCourse(courseId) { }
-                    }
-                )
-
-                course(
-                    onNavigateToExercise = { exerciseId ->
-                        navController.navigateToExercise(
-                            exerciseId,
-                            ExerciseViewMode.Overview
-                        ) { }
-                    },
-                    onNavigateToExerciseResultView = onNavigateToExerciseResultView,
-                    onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
-                    onParticipateInQuiz = onParticipateInQuiz,
-                    onViewQuizResults = onClickViewQuizResults,
-                    onNavigateToLecture = { _, lectureId ->
-                        navController.navigateToLecture(
-                            lectureId = lectureId
-                        ) { }
-                    },
-                    onNavigateBack = navController::navigateUp
-                )
-
-                exercise(
+                rootNavGraph(
                     navController = navController,
-                    onNavigateBack = navController::navigateUp,
-                    onParticipateInQuiz = onParticipateInQuiz,
-                    onClickViewQuizResults = onClickViewQuizResults
-                )
-
-                lecture(
-                    navController = navController,
-                    onNavigateBack = navController::navigateUp,
-                    onViewExercise = { exerciseId ->
-                        navController.navigateToExercise(
-                            exerciseId,
-                            ExerciseViewMode.Overview
-                        ) { }
-                    },
-                    onNavigateToExerciseResultView = onNavigateToExerciseResultView,
-                    onNavigateToTextExerciseParticipation = onNavigateToTextExerciseParticipation,
-                    onParticipateInQuiz = onParticipateInQuiz,
-                    onClickViewQuizResults = onClickViewQuizResults
-                )
-
-                quizParticipation(
-                    onLeaveQuiz = {
-                        val previousBackStackEntry = navController.previousBackStackEntry
-                        if (previousBackStackEntry?.destination?.route == ExerciseViewUi::class.qualifiedName.orEmpty()) {
-                            previousBackStackEntry.savedStateHandle[ExerciseViewDestination.REQUIRE_RELOAD_KEY] =
-                                true
-                        }
-                        navController.navigateUp()
+                    onDisplayThirdPartyLicenses = {
+                        val intent =
+                            Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
+                        startActivity(intent)
                     }
                 )
-
-                quizResults(
-                    onRequestLeaveQuizResults = navController::navigateUp
-                )
-
-                settingsScreen(
-                    navController = navController,
-                    versionCode = BuildConfig.VERSION_CODE,
-                    versionName = BuildConfig.VERSION_NAME,
-                    onNavigateUp = navController::navigateUp,
-                    onLoggedOut = {
-                        // Nothing to do here, automatically moved to login screen
-                    }
-                ) {
-                    val intent =
-                        Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
-                    startActivity(intent)
-                }
             }
         }
     }

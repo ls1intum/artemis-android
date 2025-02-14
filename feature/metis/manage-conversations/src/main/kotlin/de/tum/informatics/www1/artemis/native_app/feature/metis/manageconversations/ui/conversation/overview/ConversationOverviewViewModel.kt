@@ -2,6 +2,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversat
 
 import android.app.Activity
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
 import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
@@ -9,14 +10,18 @@ import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState.Success
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.keepSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.onFailure
 import de.tum.informatics.www1.artemis.native_app.core.data.onSuccess
+import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternet
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.data.stateIn
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ConversationCollections.ConversationCollection
@@ -63,6 +68,9 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration.Companion.seconds
 
+
+private const val TAG = "ConversationOverviewViewModel"
+
 class ConversationOverviewViewModel(
     currentActivityListener: CurrentActivityListener?,
     val courseId: Long,
@@ -73,6 +81,7 @@ class ConversationOverviewViewModel(
     websocketProvider: WebsocketProvider,
     networkStatusProvider: NetworkStatusProvider,
     accountDataService: AccountDataService,
+    private val courseService: CourseService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
     serverConfigurationService,
@@ -93,6 +102,7 @@ class ConversationOverviewViewModel(
         websocketProvider: WebsocketProvider,
         networkStatusProvider: NetworkStatusProvider,
         accountDataService: AccountDataService,
+        courseService: CourseService,
         coroutineContext: CoroutineContext = EmptyCoroutineContext
     ) : this(
         application as? CurrentActivityListener,
@@ -104,6 +114,7 @@ class ConversationOverviewViewModel(
         websocketProvider,
         networkStatusProvider,
         accountDataService,
+        courseService,
         coroutineContext
     )
 
@@ -194,25 +205,44 @@ class ConversationOverviewViewModel(
             }
             .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 
+    private val isFiltering: StateFlow<Boolean> = query
+            .map { it.isNotBlank() }
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
+
+    private val course: StateFlow<DataState<Course>> = flatMapLatest(
+        serverConfigurationService.serverUrl,
+        accountService.authToken,
+        onRequestReload.onStart { emit(Unit) }
+    ) { serverUrl, authToken, _ ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            courseService.getCourse(
+                courseId,
+                serverUrl,
+                authToken
+            ).bind { it.course }
+        }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+
     private val conversationsAsCollections: StateFlow<DataState<ConversationCollections>> =
         combine(
             updatedConversations,
             currentPreferences,
-            query
-        ) { conversationsDataState, preferences, query ->
+            isFiltering
+        ) { conversationsDataState, preferences, filterActive ->
             conversationsDataState.bind { conversations ->
-                val isFiltering = query.isNotBlank()
 
                 ConversationCollections(
-                    channels = conversations.filterNotHiddenNorFavourite<ChannelChat>()
+                    channels = conversations.filterNotHidden<ChannelChat>()
                         .filter { !it.filterPredicate("exercise") && !it.filterPredicate("lecture") && !it.filterPredicate("exam") }
-                        .asCollection(isFiltering || preferences.generalsExpanded),
+                        .asCollection(filterActive || preferences.generalsExpanded),
 
-                    groupChats = conversations.filterNotHiddenNorFavourite<GroupChat>()
-                        .asCollection(isFiltering || preferences.groupChatsExpanded),
+                    groupChats = conversations.filterNotHidden<GroupChat>()
+                        .asCollection(filterActive || preferences.groupChatsExpanded),
 
-                    directChats = conversations.filterNotHiddenNorFavourite<OneToOneChat>()
-                        .asCollection(isFiltering || preferences.personalConversationsExpanded),
+                    directChats = conversations.filterNotHidden<OneToOneChat>()
+                        .asCollection(filterActive || preferences.personalConversationsExpanded),
 
                     favorites = conversations.filter { it.isFavorite }
                         .asCollection(preferences.favouritesExpanded),
@@ -221,25 +251,41 @@ class ConversationOverviewViewModel(
                         .asCollection(preferences.hiddenExpanded),
 
                     exerciseChannels = conversations.filter {
-                        it is ChannelChat && !it.isFavorite && !it.isHidden && it.filterPredicate("exercise")
+                        it is ChannelChat && !it.isHidden && it.filterPredicate("exercise")
                     }.map { it as ChannelChat }
-                        .asCollection(isFiltering || preferences.exercisesExpanded, showPrefix = false),
+                        .asCollection(filterActive || preferences.exercisesExpanded, showPrefix = false),
 
                     lectureChannels = conversations.filter {
-                        it is ChannelChat && !it.isFavorite && !it.isHidden && it.filterPredicate("lecture")
+                        it is ChannelChat && !it.isHidden && it.filterPredicate("lecture")
                     }.map { it as ChannelChat }
-                        .asCollection(isFiltering || preferences.lecturesExpanded, showPrefix = false),
+                        .asCollection(filterActive || preferences.lecturesExpanded, showPrefix = false),
 
                     examChannels = conversations.filter {
-                        it is ChannelChat && !it.isFavorite && !it.isHidden && it.filterPredicate("exam")
+                        it is ChannelChat && !it.isHidden && it.filterPredicate("exam")
                     }.map { it as ChannelChat }
-                        .asCollection(isFiltering || preferences.examsExpanded, showPrefix = false)
+                        .asCollection(filterActive || preferences.examsExpanded, showPrefix = false),
+
+                    recentChannels = conversations.filter { ConversationOverviewUtils.isRecent(
+                        it,
+                        course.value.orNull()
+                    ) }
+                        .asCollection(
+                            filterActive || preferences.recentExpanded,
+                            showPrefix = true
+                        )
                 )
             }
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
-
+    val isSavedPostsExpanded: StateFlow<Boolean> =
+        combine(
+            currentPreferences,
+            isFiltering
+        ) { preferences, filterActive ->
+            preferences.savedPostsExpanded && !filterActive
+        }
+            .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
 
     /**
@@ -270,6 +316,9 @@ class ConversationOverviewViewModel(
             }
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
+    private val _isDisplayingErrorDialog = MutableStateFlow(false)
+    val isDisplayingErrorDialog: StateFlow<Boolean> = _isDisplayingErrorDialog
 
     private fun getUpdateConversationsFlow(loadedConversations: List<Conversation>): Flow<Success<List<Conversation>>> =
         flow {
@@ -309,9 +358,21 @@ class ConversationOverviewViewModel(
                             val postUpdate = update.update
                             if (postUpdate.action != MetisCrudAction.CREATE) return@collect
 
+                            Log.d(TAG, "Received post creation update: $postUpdate")
+
                             val conversationId = postUpdate.post.conversation?.id ?: return@collect
                             val isConversationVisible = visibleMetisContexts.value.any { it.isInConversation(conversationId) }
-                            if (isConversationVisible) return@collect       // The user is currently looking at the conversation in the UI
+                            // The user is currently looking at the conversation in the UI
+                            if (isConversationVisible) {
+                                Log.d(TAG, "Conversation is visible, not increasing unread messages count")
+                                conversationService.markConversationAsRead(
+                                    courseId,
+                                    conversationId,
+                                    accountService.authToken.first(),
+                                    serverConfigurationService.serverUrl.first()
+                                )
+                                return@collect
+                            }
 
                             val existingConversation = currentConversations[conversationId] ?: return@collect
 
@@ -384,6 +445,30 @@ class ConversationOverviewViewModel(
         }
     }
 
+    fun markAllConversationsAsRead(): Deferred<Boolean> {
+        return viewModelScope.async(coroutineContext) {
+            conversationService.markAllConversationsAsRead(
+                courseId = courseId,
+                authToken = accountService.authToken.first(),
+                serverUrl = serverConfigurationService.serverUrl.first()
+            )
+                .onSuccess { isSuccessful ->
+                    if (isSuccessful) {
+                        onRequestReload.tryEmit(Unit)
+                    }
+                }
+                .onFailure {
+                    _isDisplayingErrorDialog.value = true
+                }
+                .or(false)
+        }
+    }
+
+    fun dismissErrorDialog() {
+        _isDisplayingErrorDialog.value = false
+    }
+
+
     fun setConversationMessagesRead(conversationId: Long) {
         viewModelScope.launch(coroutineContext) {
             manualConversationUpdates.emit(MarkMessagesRead(conversationId))
@@ -422,6 +507,14 @@ class ConversationOverviewViewModel(
         expandOrCollapseSection { copy(hiddenExpanded = !hiddenExpanded) }
     }
 
+    fun toggleSavedPostsExpanded() {
+        expandOrCollapseSection { copy(savedPostsExpanded = !savedPostsExpanded) }
+    }
+
+    fun toggleRecentExpanded() {
+        expandOrCollapseSection { copy(recentExpanded = !recentExpanded) }
+    }
+
     private fun expandOrCollapseSection(update: ConversationPreferenceService.Preferences.() -> ConversationPreferenceService.Preferences) {
         viewModelScope.launch(coroutineContext) {
             conversationPreferenceService.updatePreferences(
@@ -432,9 +525,9 @@ class ConversationOverviewViewModel(
         }
     }
 
-    private inline fun <reified T : Conversation> List<*>.filterNotHiddenNorFavourite(): List<T> {
+    private inline fun <reified T : Conversation> List<*>.filterNotHidden(): List<T> {
         return filterIsInstance<T>()
-            .filter { !it.isHidden && !it.isFavorite }
+            .filter { !it.isHidden }
     }
 
     private fun <T : Conversation> List<T>.asCollection(

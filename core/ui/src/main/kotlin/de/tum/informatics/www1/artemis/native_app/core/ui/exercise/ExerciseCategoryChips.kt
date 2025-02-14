@@ -15,17 +15,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.quizStatus
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 
 /**
  * Display a row of the categories this exercise is associated with
  */
 @Composable
-fun ExerciseCategoryChipRow(modifier: Modifier, exercise: Exercise) {
+fun ExerciseCategoryChipRow(
+    modifier: Modifier,
+    exercise: Exercise,
+    includeType: Boolean = true
+) {
     val context = LocalContext.current
 
     val quizStatus = if (exercise is QuizExercise) {
@@ -33,7 +39,12 @@ fun ExerciseCategoryChipRow(modifier: Modifier, exercise: Exercise) {
     } else QuizExercise.QuizStatus.INVISIBLE
 
     val chips = remember(exercise, quizStatus) {
-        collectExerciseCategoryChips(context, exercise, quizStatus)
+        collectExerciseCategoryChips(
+            context = context,
+            exercise = exercise,
+            quizStatus = quizStatus,
+            includeType = includeType
+        )
     }
 
     ExerciseCategoryChipRow(modifier = modifier, chips = chips)
@@ -90,7 +101,8 @@ fun ExerciseInfoChip(
         Text(
             modifier = Modifier.padding(ExerciseInfoChipTextPaddingValues),
             text = text,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight(FontWeight.Bold.weight),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             color = Color.White
@@ -104,33 +116,42 @@ fun ExerciseInfoChip(
 private fun collectExerciseCategoryChips(
     context: Context,
     exercise: Exercise,
-    quizStatus: QuizExercise.QuizStatus
+    quizStatus: QuizExercise.QuizStatus,
+    includeType: Boolean = true
 ): List<ExerciseCategoryChipData> {
     val liveQuizChips =
         if (exercise is QuizExercise && quizStatus == QuizExercise.QuizStatus.ACTIVE)
             listOf(
                 ExerciseCategoryChipData(
                     context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_live_quiz),
-                    Color(0xff28a745)
+                    ExerciseColors.Category.live
                 )
             ) else emptyList()
-
-    val bonusChips =
-        if (exercise.includedInOverallScore == Exercise.IncludedInOverallScore.INCLUDED_AS_BONUS) {
-            listOf(
-                ExerciseCategoryChipData(
-                    context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_is_bonus),
-                    Color.Cyan
-                )
-            )
-        } else emptyList()
 
     val categoryChips = exercise.categories.map { category ->
         ExerciseCategoryChipData(
             category.category,
-            Color(category.colorValue ?: 0xFFFFFFFF)
+            category.colorValue?.let { Color(it) } ?: ExerciseColors.Category.unknown
         )
     }
 
-    return liveQuizChips + categoryChips + bonusChips
+    if (!includeType) return liveQuizChips + categoryChips
+
+    val typeChips = when (exercise.includedInOverallScore) {
+        Exercise.IncludedInOverallScore.INCLUDED_AS_BONUS -> listOf(
+            ExerciseCategoryChipData(
+                context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_is_bonus),
+                ExerciseColors.Type.bonus
+            )
+        )
+        Exercise.IncludedInOverallScore.NOT_INCLUDED -> listOf(
+            ExerciseCategoryChipData(
+                context.getString(de.tum.informatics.www1.artemis.native_app.core.ui.R.string.exercise_is_optional),
+                ExerciseColors.Type.notIncluded
+            )
+        )
+        else -> emptyList()
+    }
+
+    return liveQuizChips + categoryChips + typeChips
 }

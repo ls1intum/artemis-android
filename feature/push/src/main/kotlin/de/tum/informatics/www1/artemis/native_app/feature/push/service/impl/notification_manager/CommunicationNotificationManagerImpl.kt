@@ -4,23 +4,41 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
+import androidx.core.graphics.drawable.IconCompat
 import androidx.room.withTransaction
+import coil3.request.ErrorResult
+import coil3.request.SuccessResult
+import coil3.toBitmap
 import de.tum.informatics.www1.artemis.native_app.core.common.ArtemisNotificationChannel
-import de.tum.informatics.www1.artemis.native_app.core.common.markdown.PushNotificationArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.common.markdown.ArtemisMarkdownTransformer
+import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ArtemisNotificationManager
+import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
+import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
+import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.ArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.PushCommunicationDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.push.R
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationMessageEntity
+import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.CommunicationNotificationConversationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.communication_notification_model.PushCommunicationEntity
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
+
+private const val TAG = "CommunicationNotificationManagerImpl"
 
 /**
  * Handles communication notifications and pops them as communication style push notifications.
@@ -28,16 +46,28 @@ import kotlinx.datetime.Instant
  */
 internal class CommunicationNotificationManagerImpl(
     private val context: Context,
-    private val dbProvider: PushCommunicationDatabaseProvider
+    private val dbProvider: PushCommunicationDatabaseProvider,
+    private val artemisImageProvider: ArtemisImageProvider,
+    private val serverConfigurationService: ServerConfigurationService,
+    private val accountService: AccountService,
+    private val accountDataService: AccountDataService,
 ) : CommunicationNotificationManager, BaseNotificationManager {
 
     override suspend fun popNotification(
         artemisNotification: ArtemisNotification<CommunicationNotificationType>
     ) {
+        var isPostFromAppUser = false
         val (communication, messages) = dbProvider.database.withTransaction {
-            dbProvider.pushCommunicationDao.insertNotification(artemisNotification) {
-                ArtemisNotificationManager.getNextNotificationId(context)
-            }
+            dbProvider.pushCommunicationDao.insertNotification(
+                artemisNotification = artemisNotification,
+                generateNotificationId = {
+                    ArtemisNotificationManager.getNextNotificationId(context)
+                },
+                isPostFromAppUser = { content ->
+                    isPostFromAppUser = content.authorId == getClientId().toString()
+                    isPostFromAppUser
+                }
+            )
 
             val parentId = artemisNotification.parentId
 
@@ -50,21 +80,45 @@ internal class CommunicationNotificationManagerImpl(
             communication to messages
         }
 
+        // Without this check, we would pop previous notifications in the following scenario:
+        // 1. App user creates post1.
+        // 2. Other user replies answer1 in post1's thread.
+        //      -> User gets notification for answer1 (desired).
+        // 3. App user replies answer2 in post1's thread.
+        //      -> User would get not get notification for answer2 (desired).
+        //      -> BUT: Notification for answer1 would be popped again (not desired).
+        if (isPostFromAppUser) return
 
         if (messages.isEmpty()) return
         popCommunicationNotification(communication, messages)
     }
 
-    /**
-     * Add a message to the notification sent by the user themself using direct reply.
-     */
+    private suspend fun getClientId(): Long? {
+        val serverUrl = serverConfigurationService.serverUrl.first()
+        val authToken = accountService.authToken.first()
+
+        val accountData = accountDataService.getCachedAccountData(
+            serverUrl = serverUrl,
+            bearerToken = authToken
+        )
+
+        return accountData?.id
+    }
+
     override suspend fun addSelfMessage(
         parentId: Long,
         authorName: String,
+        authorImageUrl: String?,
         body: String,
         date: Instant
     ) {
-        dbProvider.pushCommunicationDao.insertSelfMessage(parentId, authorName, body, date)
+        dbProvider.pushCommunicationDao.insertSelfMessage(
+            parentId = parentId,
+            authorName = authorName,
+            authorImageUrl = authorImageUrl,
+            body = body,
+            date = date
+        )
         repopNotification(parentId)
     }
 
@@ -99,7 +153,7 @@ internal class CommunicationNotificationManagerImpl(
 
         val notification = NotificationCompat.Builder(context, notificationChannel.id)
             .setStyle(buildMessagingStyle(communication, messages))
-            .setSmallIcon(R.drawable.baseline_chat_bubble_24)
+            .setSmallIcon(R.drawable.push_notification_icon)
             .setAutoCancel(true)
             .setContentIntent(
                 NotificationTargetManager.getMetisContentIntent(
@@ -147,30 +201,39 @@ internal class CommunicationNotificationManagerImpl(
     private fun buildMessagingStyle(
         communication: PushCommunicationEntity,
         messages: List<CommunicationMessageEntity>
-    ): NotificationCompat.MessagingStyle {
+    ): NotificationCompat.MessagingStyle = runBlocking {
         val firstMessage = messages.first()
         val person = Person.Builder().setName(firstMessage.authorName).build()
 
         val style = NotificationCompat.MessagingStyle(person)
         messages.forEach { message ->
+            val icon = withContext(Dispatchers.IO) {
+                getMessageIcon(message)
+            }
+
             style.addMessage(
                 NotificationCompat.MessagingStyle.Message(
-                    PushNotificationArtemisMarkdownTransformer.transformMarkdown(message.text),
+                    ArtemisMarkdownTransformer.Default.transformMarkdown(message.text),
                     message.date.toEpochMilliseconds(),
                     Person.Builder()
+                        .setIcon(icon)
                         .setName(message.authorName)
                         .build()
                 )
             )
         }
 
-        style.isGroupConversation = true
-        style.conversationTitle = if (communication.title != null) {
+        style.isGroupConversation = when (communication.conversationType) {
+            CommunicationNotificationConversationType.ONE_TO_ONE_CHAT -> false
+            else -> true
+        }
+
+        val isThread = communication.notificationType is ReplyPostCommunicationNotificationType
+        style.conversationTitle = if (isThread) {
             context.getString(
                 R.string.conversation_title_conversation_thread,
                 communication.courseTitle,
-                communication.containerTitle,
-                communication.title
+                communication.containerTitle
             )
         } else {
             context.getString(
@@ -180,8 +243,29 @@ internal class CommunicationNotificationManagerImpl(
             )
         }
 
-        return style
+        return@runBlocking style
     }
+
+    private suspend fun getMessageIcon(message: CommunicationMessageEntity): IconCompat? {
+        val result = artemisImageProvider.loadArtemisImage(
+            context = context,
+            imagePath = message.authorImageUrl ?: return null
+        )
+
+        when (result) {
+            is SuccessResult -> {
+                val bitmap = result.image.toBitmap()
+                return IconCompat.createWithBitmap(bitmap.toCircleShape())
+            }
+
+            is ErrorResult -> {
+                Log.e(TAG, "Error while loading notification profile image: ${result.throwable}")
+                return null
+            }
+
+        }
+    }
+
 
     private fun constructDeletionIntent(
         context: Context,

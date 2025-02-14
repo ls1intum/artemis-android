@@ -10,14 +10,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.PostColors
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.EmojiSelection
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostActions
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostContextBottomSheet
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.post.post_actions.PostReactionBottomSheet
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.DisplayPriority
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IAnswerPost
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.dto.IBasePost
@@ -31,6 +34,7 @@ internal fun PostWithBottomSheet(
     modifier: Modifier,
     post: IBasePost?,
     postItemViewType: PostItemViewType,
+    isMarkedAsDeleteList: SnapshotStateList<IBasePost>,
     postActions: PostActions,
     clientId: Long,
     displayHeader: Boolean,
@@ -38,15 +42,19 @@ internal fun PostWithBottomSheet(
     onClick: () -> Unit
 ) {
     var displayBottomSheet by remember(post, postItemViewType) { mutableStateOf(false) }
+    var displayReactionBottomSheet by remember(post, postItemViewType) { mutableStateOf(false) }
+    var emojiSelection: EmojiSelection by remember { mutableStateOf(EmojiSelection.ALL) }
 
     val isPinned = post is IStandalonePost && post.displayPriority == DisplayPriority.PINNED
     val isResolving = post is IAnswerPost && post.resolvesPost
     val isParentPostInThread = joinedItemType == PostItemViewJoinedType.PARENT
+    val isSaved = post?.isSaved == true
 
     val cardColor = when {
         isParentPostInThread -> MaterialTheme.colorScheme.background
         isResolving -> PostColors.StatusBackground.resolving
         isPinned -> PostColors.StatusBackground.pinned
+        isSaved -> PostColors.StatusBackground.saved
         else -> CardDefaults.cardColors().containerColor
     }
 
@@ -64,15 +72,15 @@ internal fun PostWithBottomSheet(
     }
 
     val applyPaddingToModifier: @Composable (modifier: Modifier, paddingValue: Dp) -> Modifier =
-        { modifier, paddingValue ->
+        { mod, paddingValue ->
             when (joinedItemType) {
-                PostItemViewJoinedType.HEADER -> modifier.padding(top = paddingValue, bottom = 0.dp)
-                PostItemViewJoinedType.FOOTER -> modifier.padding(top = 0.dp, bottom = paddingValue)
-                PostItemViewJoinedType.SINGLE -> modifier.padding(
+                PostItemViewJoinedType.HEADER -> mod.padding(top = paddingValue, bottom = 0.dp)
+                PostItemViewJoinedType.FOOTER -> mod.padding(top = 0.dp, bottom = paddingValue)
+                PostItemViewJoinedType.SINGLE -> mod.padding(
                     vertical = paddingValue
                 )
-                PostItemViewJoinedType.JOINED -> modifier.padding(vertical = 0.dp)
-                PostItemViewJoinedType.PARENT -> modifier.padding(0.dp)
+                PostItemViewJoinedType.JOINED -> mod.padding(vertical = 0.dp)
+                PostItemViewJoinedType.PARENT -> mod.padding(0.dp)
             }
         }
 
@@ -91,12 +99,17 @@ internal fun PostWithBottomSheet(
             clientId = clientId,
             displayHeader = displayHeader,
             postItemViewJoinedType = joinedItemType,
+            isMarkedAsDeleteList = isMarkedAsDeleteList,
             postActions = postActions,
             onClick = onClick,
             onLongClick = {
                 displayBottomSheet = true
             },
-            onRequestRetrySend = postActions.onRequestRetrySend
+            onRequestRetrySend = postActions.onRequestRetrySend,
+            onShowReactionsBottomSheet = {
+                emojiSelection = it
+                displayReactionBottomSheet = true
+            }
         )
     }
 
@@ -107,6 +120,16 @@ internal fun PostWithBottomSheet(
             clientId = clientId,
             onDismissRequest = {
                 displayBottomSheet = false
+            }
+        )
+    }
+
+    if (displayReactionBottomSheet && post != null) {
+        PostReactionBottomSheet(
+            post = post,
+            emojiSelection = emojiSelection,
+            onDismissRequest = {
+                displayReactionBottomSheet = false
             }
         )
     }

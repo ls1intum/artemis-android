@@ -27,7 +27,8 @@ data class Course(
     val teachingAssistantGroupName: String = "",
     val editorGroupName: String = "",
     val testCourse: Boolean = false,
-    val courseInformationSharingMessagingCodeOfConduct: String = ""
+    val courseInformationSharingMessagingCodeOfConduct: String = "",
+    val faqEnabled: Boolean = false,
 ) {
     enum class CourseInformationSharingConfiguration(val supportsMessaging: Boolean) {
         COMMUNICATION_AND_MESSAGING(true),

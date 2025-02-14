@@ -8,8 +8,6 @@ import androidx.room.Query
 import androidx.room.Transaction
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
-import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.StandalonePostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.parentId
 import kotlinx.datetime.Instant
 
@@ -26,11 +24,10 @@ interface PushCommunicationDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPushCommunication(pushCommunicationEntity: PushCommunicationEntity)
 
-    @Query("update push_communication set course_title = :courseTitle, title = :title where parent_id = :parentId")
+    @Query("update push_communication set course_title = :courseTitle where parent_id = :parentId")
     suspend fun updatePushCommunication(
         parentId: Long,
         courseTitle: String,
-        title: String?
     )
 
     @Insert
@@ -39,72 +36,50 @@ interface PushCommunicationDao {
     @Transaction
     suspend fun insertNotification(
         artemisNotification: ArtemisNotification<CommunicationNotificationType>,
-        generateNotificationId: suspend () -> Int
+        generateNotificationId: suspend () -> Int,
+        isPostFromAppUser: suspend (CommunicationNotificationPlaceholderContent) -> Boolean
     ) {
         val parentId = artemisNotification.parentId
 
         val message: CommunicationMessageEntity = try {
+            val content = CommunicationNotificationPlaceholderContent.fromNotificationsPlaceholders(
+                type = artemisNotification.type,
+                notificationPlaceholders = artemisNotification.notificationPlaceholders
+            ) ?: return
 
-            val courseTitle: String = artemisNotification.notificationPlaceholders[0]
-            val postTitle: String? = null
-
-            val postContent: String = artemisNotification.notificationPlaceholders[1]
-
-            val postAuthor: String = when (artemisNotification.type) {
-                is StandalonePostCommunicationNotificationType -> when (artemisNotification.notificationPlaceholders[5]) {
-                    "channel" -> artemisNotification.notificationPlaceholders[4]
-                    else -> artemisNotification.notificationPlaceholders[3]
-                }
-
-                is ReplyPostCommunicationNotificationType -> artemisNotification.notificationPlaceholders[3]
-            }
-
-            val containerTitle: String = when (artemisNotification.type) {
-                is StandalonePostCommunicationNotificationType -> when (artemisNotification.notificationPlaceholders[5]) {
-                    "channel" -> artemisNotification.notificationPlaceholders[3]
-                    else -> artemisNotification.notificationPlaceholders[4]
-                }
-
-                is ReplyPostCommunicationNotificationType -> artemisNotification.notificationPlaceholders[7]
+            if (isPostFromAppUser(content)) {
+                // As a temporary fix for receiving notifications for own posts.
+                // See: https://github.com/ls1intum/artemis-android/issues/326
+                return
             }
 
             if (hasPushCommunication(parentId)) {
-                updatePushCommunication(parentId, courseTitle, postTitle)
+                updatePushCommunication(
+                    parentId = parentId,
+                    courseTitle = content.courseName
+                )
             } else {
                 val pushCommunicationEntity = PushCommunicationEntity(
                     parentId = parentId,
                     notificationId = generateNotificationId(),
-                    courseTitle = courseTitle,
-                    containerTitle = containerTitle,
-                    title = postTitle,
-                    target = artemisNotification.target
+                    notificationTypeString = artemisNotification.type.toString(),
+                    courseTitle = content.courseName,
+                    containerTitle = content.channelName,
+                    target = artemisNotification.target,
+                    conversationTypeString = content.conversationType?.rawValue
                 )
 
                 insertPushCommunication(pushCommunicationEntity)
             }
 
-            when (artemisNotification.type) {
-                is StandalonePostCommunicationNotificationType -> CommunicationMessageEntity(
-                    communicationParentId = parentId,
-                    title = postTitle,
-                    text = postContent,
-                    authorName = postAuthor,
-                    date = artemisNotification.date
-                )
-
-                is ReplyPostCommunicationNotificationType -> {
-                    val answerPostContent = artemisNotification.notificationPlaceholders[4]
-                    val answerPostAuthor = artemisNotification.notificationPlaceholders[6]
-
-                    CommunicationMessageEntity(
-                        communicationParentId = parentId,
-                        title = null,
-                        text = answerPostContent,
-                        authorName = answerPostAuthor,
-                        date = artemisNotification.date
-                    )
-                }
-            }
+            CommunicationMessageEntity(
+                communicationParentId = parentId,
+                text = content.messageContent,
+                authorId = content.authorId,
+                authorName = content.authorName,
+                authorImageUrl = content.authorImageUrl,
+                date = artemisNotification.date
+            )
         } catch (e: Exception) {
             Log.e(TAG, "Error while parsing artemis communication notification", e)
             return
@@ -117,6 +92,7 @@ interface PushCommunicationDao {
     suspend fun insertSelfMessage(
         parentId: Long,
         authorName: String,
+        authorImageUrl: String?,
         body: String,
         date: Instant
     ) {
@@ -124,9 +100,10 @@ interface PushCommunicationDao {
             insertCommunicationMessage(
                 CommunicationMessageEntity(
                     communicationParentId = parentId,
-                    title = null,
                     text = body,
+                    authorId = "self",      // TODO
                     authorName = authorName,
+                    authorImageUrl = authorImageUrl,
                     date = date
                 )
             )

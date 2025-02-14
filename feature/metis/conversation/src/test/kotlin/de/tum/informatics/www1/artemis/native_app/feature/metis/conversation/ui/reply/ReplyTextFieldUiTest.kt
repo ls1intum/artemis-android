@@ -1,6 +1,8 @@
 package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
 
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,10 +17,14 @@ import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.tum.informatics.www1.artemis.native_app.core.common.test.UnitTest
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHint
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteHintCollection
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.AutoCompleteType
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.ReplyAutoCompleteHintProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.TEST_TAG_REPLY_AUTO_COMPLETE_POPUP_LIST
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -27,26 +33,29 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @Category(UnitTest::class)
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class ReplyTextFieldUiTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
 
     private val autoCompleteHints = listOf(
-        AutoCompleteCategory(
-            R.string.markdown_textfield_autocomplete_category_users, listOf(
-            AutoCompleteHint("User1", "<User1>", "1"),
-            AutoCompleteHint("User2", "<User2>", "2"),
-            AutoCompleteHint("User3", "<User3>", "3"),
-        ))
+        AutoCompleteHintCollection(
+            type = AutoCompleteType.USERS,
+            items = listOf(
+                AutoCompleteHint("User1", "<User1>", "1"),
+                AutoCompleteHint("User2", "<User2>", "2"),
+                AutoCompleteHint("User3", "<User3>", "3"),
+            )
+        )
     )
 
     private val hintProviderStub = object : ReplyAutoCompleteHintProvider {
         override val legalTagChars: List<Char> = listOf('@')
-        override fun produceAutoCompleteHints(tagChar: Char, query: String): Flow<DataState<List<AutoCompleteCategory>>> {
+        override fun produceAutoCompleteHints(tagChar: Char, query: String): Flow<DataState<List<AutoCompleteHintCollection>>> {
             return flowOf(DataState.Success(autoCompleteHints))
         }
     }
@@ -57,18 +66,24 @@ class ReplyTextFieldUiTest {
             CompositionLocalProvider(LocalReplyAutoCompleteHintProvider provides hintProviderStub) {
                 val text = remember { mutableStateOf(TextFieldValue()) }
 
-                ReplyTextField(
-                    modifier = Modifier.fillMaxSize(),
-                    replyMode = ReplyMode.NewMessage(
-                        text,
-                        onUpdateTextUpstream = { text.value = it }
-                    ) {
-                        CompletableDeferred()
-                    },
-                    updateFailureState = {},
-                    title = "TestChat",
-                    onFileSelected = { _ -> }
-                )
+                Column {
+                    // This Spacer is required to allocate some space where the autocompletion dialog can be 
+                    // displayed above the TextField.
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    ReplyTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        replyMode = ReplyMode.NewMessage(
+                            text,
+                            onUpdateTextUpstream = { text.value = it }
+                        ) {
+                            CompletableDeferred()
+                        },
+                        updateFailureState = {},
+                        conversationName = "TestChat",
+                        onFileSelected = { _ -> }
+                    )
+                }
             }
         }
 

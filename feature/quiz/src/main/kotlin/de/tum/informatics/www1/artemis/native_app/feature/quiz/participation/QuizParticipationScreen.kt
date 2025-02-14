@@ -1,18 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.feature.quiz.participation
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,17 +18,19 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.JsonProvider
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.DestructiveMarkdownTextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.ButtonWithLoadingAnimation
+import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
+import de.tum.informatics.www1.artemis.native_app.core.ui.deeplinks.ExerciseDeeplinks
+import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ExerciseColors
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.KSerializableNavType
 import de.tum.informatics.www1.artemis.native_app.core.ui.navigation.animatedComposable
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.QuizType
@@ -40,17 +38,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.R
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.view_result.ViewQuizResultScreen
 import kotlinx.coroutines.Deferred
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import kotlin.reflect.typeOf
-
-private val submitButtonColor: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(0xff00bc8c) else Color(0xff28a745)
-
-private val submitButtonTextColor: Color
-    @Composable get() = Color.White
 
 @Serializable
 private data class QuizParticipationScreen(
@@ -75,11 +66,7 @@ fun NavGraphBuilder.quizParticipation(onLeaveQuiz: () -> Unit) {
                 QuizType.WorkableQuizType.serializer()
             )
         ),
-        deepLinks = listOf(
-            navDeepLink {
-                uriPattern = "artemis://quiz_participation/{courseId}/{exerciseId}"
-            }
-        )
+        deepLinks = ExerciseDeeplinks.ToQuizParticipation.generateLinks()
     ) { backStackEntry ->
         val screen = backStackEntry.toRoute<QuizParticipationScreen>()
         val courseId = screen.courseId
@@ -171,12 +158,15 @@ internal fun QuizParticipationScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text(text = exerciseDataState.bind { it.title.orEmpty() }.orElse("")) },
+            ArtemisTopAppBar(
+                title = {
+                    Text(text = exerciseDataState.bind { it.title.orEmpty() }.orElse(""))
+                },
                 navigationIcon = {
-                    IconButton(onClick = onRequestLeave) {
-                        Icon(Icons.Default.Close, contentDescription = null)
-                    }
+                    NavigationBackButton(
+                        imageVector = Icons.Default.Close,
+                        onNavigateBack =  onRequestLeave
+                    )
                 },
                 actions = {
                     if (!isWaitingForQuizStart && !hasQuizEnded) {
@@ -185,8 +175,8 @@ internal fun QuizParticipationScreen(
                             isLoading = submissionDeferred != null,
                             onClick = { displaySubmitDialog = true },
                             colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = submitButtonColor,
-                                contentColor = submitButtonTextColor
+                                containerColor = ExerciseColors.Quiz.submitButton,
+                                contentColor = ExerciseColors.Quiz.submitButtonText
                             )
                         ) {
                             Text(text = stringResource(id = R.string.quiz_participation_submit_button))
