@@ -12,7 +12,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
@@ -85,8 +84,6 @@ class TextExerciseParticipationE2eTest : BaseExerciseTest() {
                     submissionType = SubmissionType.MANUAL
                 ),
                 exercise.id!!,
-                testServerUrl,
-                accessToken
             ).orThrow("Could no update text submission to set initial submission")
         }
         

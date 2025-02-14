@@ -166,14 +166,6 @@ internal class TextExerciseParticipationViewModel(
         initialSubmission: TextSubmission,
         text: String
     ): NetworkResponse<TextSubmission> {
-        val serverUrl = serverConfigurationService.serverUrl.first()
-        val authToken = when (val authData = accountService.authenticationData.first()) {
-            is AccountService.AuthenticationData.LoggedIn -> authData.authToken
-            AccountService.AuthenticationData.NotLoggedIn -> return NetworkResponse.Failure(
-                RuntimeException()
-            )
-        }
-
         return retryNetworkCall {
             textSubmissionService.update(
                 textSubmission = TextSubmission(
@@ -184,9 +176,7 @@ internal class TextExerciseParticipationViewModel(
                     text = text,
                     submissionType = SubmissionType.MANUAL
                 ),
-                exerciseId = exerciseId,
-                serverUrl = serverUrl,
-                authToken = authToken,
+                exerciseId = exerciseId
             )
         }
     }

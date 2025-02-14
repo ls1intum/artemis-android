@@ -26,6 +26,6 @@ val exerciseModule = module {
         TextExerciseParticipationViewModel(params[0], params[1], get(), get(), get(), get(), get())
     }
 
-    single<TextSubmissionService> { TextSubmissionServiceImpl(get()) }
+    single<TextSubmissionService> { TextSubmissionServiceImpl(get(), get()) }
     single<TextEditorService> { TextEditorServiceImpl(get(), get()) }
 }
