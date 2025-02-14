@@ -1,5 +1,12 @@
 package de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -80,7 +87,11 @@ internal fun FaqCategoryChip(
             disabledLabelColor = textColor,
         ),
         leadingIcon = {
-            if (enabledConfig?.isSelected ?: false) {
+            AnimatedVisibility(
+                visible = enabledConfig?.isSelected == true,
+                enter = fadeIn() + expandHorizontally() + scaleIn(),
+                exit = fadeOut() + shrinkHorizontally() + scaleOut()
+            ) {
                 Icon(
                     modifier = Modifier.size(18.dp),
                     imageVector = Icons.Filled.Check,
