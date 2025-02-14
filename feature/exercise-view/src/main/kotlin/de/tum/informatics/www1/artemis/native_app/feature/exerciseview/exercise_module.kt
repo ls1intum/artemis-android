@@ -18,8 +18,6 @@ val exerciseModule = module {
             get(),
             get(),
             get(),
-            get(),
-            get(),
         )
     }
 

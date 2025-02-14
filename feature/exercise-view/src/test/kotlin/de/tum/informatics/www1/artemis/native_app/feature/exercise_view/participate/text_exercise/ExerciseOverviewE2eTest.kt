@@ -59,8 +59,6 @@ class ExerciseOverviewE2eTest : BaseExerciseTest() {
         val viewModel = ExerciseViewModel(
             exerciseId = exercise.id!!,
             artemisContextProvider = get(),
-            serverConfigurationService = get(),
-            accountService = get(),
             exerciseService = get(),
             channelService = get(),
             liveParticipationService = get(),
