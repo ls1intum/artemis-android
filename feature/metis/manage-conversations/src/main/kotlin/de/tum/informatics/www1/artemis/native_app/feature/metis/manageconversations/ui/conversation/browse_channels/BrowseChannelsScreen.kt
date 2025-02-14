@@ -140,7 +140,9 @@ internal fun BrowseChannelsScreen(
                 ) {
                     items(channels) { channelChat ->
                         ChannelChatItem(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .animateItem(),
                             channelChat = channelChat,
                             onClick = {
                                 if (registerInChannelJob == null) {

@@ -163,9 +163,6 @@ internal fun SinglePageConversationBody(
                 }
 
                 is OpenedConversation -> {
-                    // Since we have the conversation list opened while being in a channel in tablet
-                    // mode we want to be able to use the conversation list search bar
-                    collapsingContentState.isSearchIconShown = doAlwaysShowScaffold
                     ConversationScreen(
                         modifier = modifier,
                         conversationId = config.conversationId,

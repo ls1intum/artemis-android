@@ -13,9 +13,9 @@ class CollapsingContentState(
     initialOffset: Float,
     val isCollapsingEnabled: Boolean = true
 ) {
-    var isSearchIconShown by mutableStateOf(false)
     var collapsingHeight by mutableFloatStateOf(initialCollapsingHeight)
     var offset by mutableFloatStateOf(initialOffset)
+        private set
     var isCollapsed by mutableStateOf(false)
         private set
 

@@ -18,10 +18,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
@@ -48,12 +44,10 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import de.tum.informatics.www1.artemis.native_app.core.ui.ArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.FakeBasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
-import de.tum.informatics.www1.artemis.native_app.core.ui.getArtemisAppLayout
 import de.tum.informatics.www1.artemis.native_app.core.ui.material.colors.ComponentColors
 
 private const val animatingDuration = 300
@@ -164,25 +158,7 @@ fun ArtemisSearchTopAppBar(
             navigationIcon = if (isSearchActive) {
                 { NavigationBackButton(closeSearch) }
             } else navigationIcon,
-            actions = {
-                actions()
-
-                if (collapsingContentState.isSearchIconShown) {
-                    // Since the search bar is collapsed by default on tablets to
-                    // make the screen less cluttered in the twoColumnLayout, we trigger the search bar by clicking the search icon
-                    if (getArtemisAppLayout() == ArtemisAppLayout.Tablet) {
-                        IconButton(onClick = {
-                            isSearchActive = true
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                tint = MaterialTheme.colorScheme.primary,
-                                contentDescription = null
-                            )
-                        }
-                    }
-                }
-            },
+            actions = actions,
             windowInsets = windowInsets,
             colors = colors,
             scrollBehavior = scrollBehavior
@@ -238,7 +214,6 @@ private fun CollapsingSurface(
                 .onSizeChanged {
                     collapsingContentState.collapsingHeight = it.height.toFloat()
                 },
-//                                .offset { IntOffset(0, collapsingContentState.offset.toInt()) },
             color = MaterialTheme.colorScheme.surfaceContainer,
         ) {
             FakeBasicSearchTextField(
