@@ -1,4 +1,4 @@
-package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply
+package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.util
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue

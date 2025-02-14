@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -29,9 +28,11 @@ import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
 import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
+import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R
-import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.LocalReplyAutoCompleteHintProvider
+import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.reply.autocomplete.LocalReplyAutoCompleteHintProvider
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.shared.ConversationDataStatusButton
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.thread.MetisThreadUi
 import de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui.util.rememberDerivedConversationName
@@ -57,7 +58,7 @@ internal fun ConversationThreadScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
+            ArtemisTopAppBar(
                 title = {
                     ThreadTitle(
                         conversation = conversation,
@@ -68,7 +69,7 @@ internal fun ConversationThreadScreen(
                     NavigationBackButton(onNavigateUp)
                 },
                 actions = {
-                    if (BuildConfig.DEBUG){
+                    if (BuildConfig.DEBUG) {
                         ConversationDataStatusButton(
                             dataStatus = dataStatus,
                             onRequestSoftReload = viewModel::requestReload
@@ -88,7 +89,7 @@ internal fun ConversationThreadScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .padding(top = padding.calculateTopPadding())
+                        .padding(top = padding.calculateTopPadding() + Spacings.ScreenTopBarSpacing)
                         .consumeWindowInsets(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
                     viewModel = viewModel
                 )

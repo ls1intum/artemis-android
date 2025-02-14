@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="create_personal_conversation_title">Start a conversation</string>
+    <string name="create_personal_conversation_title">New Conversation</string>
 
+    <plurals name="create_personal_conversation_members">
+        <item quantity="one">Add 1 user</item>
+        <item quantity="other">Add %d users</item>
+    </plurals>
     <string name="create_personal_conversation_failed_title">Could not create conversation.</string>
     <string name="create_personal_conversation_failed_message">Something went wrong while creating your conversation. Please try again.</string>
     <string name="create_personal_conversation_failed_positive">@android:string/ok</string>

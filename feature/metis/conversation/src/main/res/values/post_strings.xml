@@ -26,6 +26,7 @@
         <item quantity="one">%d Reply</item>
         <item quantity="other">%d Replies</item>
     </plurals>
+    <string name="post_reactions_show_all">All (%d)</string>
 
     <string name="post_sending_failed">Sending post failed. Click to try again.</string>
 </resources>

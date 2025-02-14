@@ -116,7 +116,9 @@ internal abstract class MemberSelectionBaseViewModel(
         savedStateHandle[KEY_RECIPIENTS] = RecipientsList(
             recipients.value + Recipient(
                 recipient.username ?: return,
-                recipient.humanReadableName
+                recipient.humanReadableName,
+                recipient.imageUrl ?: "",
+                recipient.id
             )
         )
     }
