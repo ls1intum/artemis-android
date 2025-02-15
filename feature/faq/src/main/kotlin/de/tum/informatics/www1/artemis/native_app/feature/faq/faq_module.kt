@@ -2,6 +2,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.faq
 
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.FaqRepository
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.FaqRepositoryImpl
+import de.tum.informatics.www1.artemis.native_app.feature.faq.service.local.FaqStorageService
+import de.tum.informatics.www1.artemis.native_app.feature.faq.service.local.impl.FaqStorageServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.faq.service.remote.FaqRemoteService
 import de.tum.informatics.www1.artemis.native_app.feature.faq.service.remote.FaqRemoteServiceImpl
 import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.detail.FaqDetailViewModel
@@ -11,7 +13,9 @@ import org.koin.dsl.module
 
 val faqModule = module {
     single<FaqRemoteService> { FaqRemoteServiceImpl(get()) }
+    single<FaqStorageService> { FaqStorageServiceImpl(get(), get()) }
     single<FaqRepository> { FaqRepositoryImpl(get(), get(), get(), get()) }
+
 
     viewModel { params ->
         FaqOverviewViewModel(
