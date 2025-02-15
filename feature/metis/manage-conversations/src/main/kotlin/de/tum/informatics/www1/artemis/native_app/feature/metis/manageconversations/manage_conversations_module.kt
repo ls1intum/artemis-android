@@ -13,7 +13,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversati
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.ui.conversation.settings.overview.ConversationSettingsViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val manageConversationsModule = module {
@@ -23,7 +23,7 @@ val manageConversationsModule = module {
         )
     }
 
-    single<ChannelService> { ChannelServiceImpl(get()) }
+    single<ChannelService> { ChannelServiceImpl(get(), get()) }
 
     viewModel { params ->
         ConversationOverviewViewModel(
@@ -64,10 +64,6 @@ val manageConversationsModule = module {
     viewModel { params ->
         BrowseChannelsViewModel(
             params.get(),
-            get(),
-            get(),
-            get(),
-            get(),
             get(),
             get()
         )
