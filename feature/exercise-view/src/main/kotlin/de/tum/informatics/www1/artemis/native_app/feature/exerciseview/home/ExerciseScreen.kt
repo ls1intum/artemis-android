@@ -33,6 +33,7 @@ import com.google.accompanist.web.WebViewState
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.ProgrammingExercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.AwaitDeferredCompletion
+import de.tum.informatics.www1.artemis.native_app.core.ui.collectAsState
 import de.tum.informatics.www1.artemis.native_app.core.ui.exercise.ExerciseActions
 import de.tum.informatics.www1.artemis.native_app.core.ui.getWindowSizeClass
 import de.tum.informatics.www1.artemis.native_app.feature.exerciseview.ExerciseViewModel
@@ -59,8 +60,7 @@ internal fun ExerciseScreen(
     onParticipateInQuiz: (courseId: Long, isPractice: Boolean) -> Unit,
     onClickViewQuizResults: (courseId: Long) -> Unit
 ) {
-    val serverUrl: String by viewModel.serverUrl.collectAsState()
-    val authToken: String by viewModel.authToken.collectAsState()
+    val artemisContext by viewModel.artemisContextProvider.collectAsState()
 
     val exerciseDataState by viewModel.exerciseDataState.collectAsState()
     val channelDataState by viewModel.channelDataState.collectAsState()
@@ -94,7 +94,7 @@ internal fun ExerciseScreen(
     }
 
     val webViewState: WebViewState? = getProblemStatementWebViewState(
-        serverUrl = serverUrl,
+        serverUrl = artemisContext.serverUrl,
         courseId = courseId,
         exerciseId = exerciseId,
         participationId = latestParticipationId
@@ -199,8 +199,7 @@ internal fun ExerciseScreen(
                     setWebView = { savedWebView = it },
                     webView = savedWebView,
                     onClickRetry = viewModel::requestReloadExercise,
-                    serverUrl = serverUrl,
-                    authToken = authToken
+                    artemisContext = artemisContext
                 )
             }
         }

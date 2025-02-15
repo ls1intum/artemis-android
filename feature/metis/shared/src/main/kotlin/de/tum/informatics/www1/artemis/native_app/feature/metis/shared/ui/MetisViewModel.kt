@@ -2,11 +2,10 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.shared.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
-import de.tum.informatics.www1.artemis.native_app.core.data.retryOnInternetIndefinetly
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.AccountDataService
+import de.tum.informatics.www1.artemis.native_app.core.data.service.performAutoReloadingNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProvider
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,8 +24,8 @@ import kotlin.coroutines.CoroutineContext
  * Base view model which handles logic such as creating posts and reactions.
  */
 abstract class MetisViewModel(
-    private val accountDataService: AccountDataService,
-    private val networkStatusProvider: NetworkStatusProvider,
+    accountDataService: AccountDataService,
+    networkStatusProvider: NetworkStatusProvider,
     websocketProvider: WebsocketProvider,
     coroutineContext: CoroutineContext
 ) : ViewModel() {
@@ -47,15 +46,11 @@ abstract class MetisViewModel(
         .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 0)
         .onStart { emit(Unit) }
 
-    val clientId: StateFlow<DataState<Long>> = flatMapLatest(
-        accountDataService.onReloadRequired,
-        onRequestReload.onStart { emit(Unit) }
-    ) { _, _ ->
-        retryOnInternetIndefinetly(
-            networkStatusProvider.currentNetworkStatus
-        ) {
-            accountDataService.getAccountData().bind { it.id }
-        }
+    val clientId: StateFlow<DataState<Long>> = accountDataService.performAutoReloadingNetworkCall(
+        networkStatusProvider = networkStatusProvider,
+        manualReloadFlow = onRequestReload
+    ) {
+        getAccountData().bind { it.id }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily, DataState.Loading())
 

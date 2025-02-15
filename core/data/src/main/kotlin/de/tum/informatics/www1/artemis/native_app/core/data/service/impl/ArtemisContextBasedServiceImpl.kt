@@ -22,9 +22,9 @@ abstract class ArtemisContextBasedServiceImpl(
     private val artemisContextProvider: ArtemisContextProvider,
 ) : ArtemisContextBasedService {
 
-    override val onReloadRequired: Flow<Unit> = artemisContextProvider.current.map { Unit }
+    override val onReloadRequired: Flow<Unit> = artemisContextProvider.flow.map { Unit }
 
-    suspend fun artemisContext(): ArtemisContext = artemisContextProvider.current.first()
+    suspend fun artemisContext(): ArtemisContext = artemisContextProvider.flow.first()
     suspend fun serverUrl(): String = artemisContext().serverUrl
     suspend fun authToken(): String = artemisContext().authToken
 
@@ -44,6 +44,16 @@ abstract class ArtemisContextBasedServiceImpl(
     ): NetworkResponse<T> {
         return request(contentType) {
             method = HttpMethod.Post
+            block()
+        }
+    }
+
+    suspend inline fun <reified T: Any>putRequest(
+        contentType: ContentType = ContentType.Application.Json,
+        crossinline block: HttpRequestBuilder.() -> Unit
+    ): NetworkResponse<T> {
+        return request(contentType) {
+            method = HttpMethod.Put
             block()
         }
     }

@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.WebViewState
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
@@ -34,8 +35,7 @@ internal fun ExerciseOverviewTab(
     exerciseChannel: ChannelChat?,
     isLongToolbar: Boolean,
     webViewState: WebViewState?,
-    serverUrl: String,
-    authToken: String,
+    artemisContext: ArtemisContext,
     setWebView: (WebView) -> Unit,
     webView: WebView?,
     actions: ExerciseActions
@@ -80,8 +80,7 @@ internal fun ExerciseOverviewTab(
                     .weight(1f),
                 webViewState = webViewState,
                 webView = webView,
-                serverUrl = serverUrl,
-                authToken = authToken,
+                artemisContext = artemisContext,
                 adjustHeightForContent = true,
                 setWebView = setWebView
             )

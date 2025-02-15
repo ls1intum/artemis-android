@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContext
 import kotlin.math.roundToInt
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -34,13 +35,15 @@ fun ArtemisWebView(
     modifier: Modifier,
     webViewState: WebViewState,
     webView: WebView?,
-    serverUrl: String,
-    authToken: String,
+    artemisContext: ArtemisContext,
     adjustHeightForContent: Boolean = false,
     setWebView: (WebView) -> Unit
 ) {
-    LaunchedEffect(serverUrl, authToken) {
-        CookieManager.getInstance().setCookie(serverUrl, "jwt=$authToken")
+    LaunchedEffect(artemisContext) {
+        CookieManager.getInstance().setCookie(
+            artemisContext.serverUrl,
+            "jwt=${artemisContext.authToken}"
+        )
     }
 
     val isSystemInDarkTheme = isSystemInDarkTheme()
