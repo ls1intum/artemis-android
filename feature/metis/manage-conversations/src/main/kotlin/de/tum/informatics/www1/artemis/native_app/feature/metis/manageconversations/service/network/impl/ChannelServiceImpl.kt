@@ -69,7 +69,7 @@ class ChannelServiceImpl(
                     )
                 }
 
-                setBody(artemisContext().username)
+                setBody(listOf(artemisContext().username))
                 contentType(ContentType.Application.Json)
 
                 cookieAuth(authToken())
