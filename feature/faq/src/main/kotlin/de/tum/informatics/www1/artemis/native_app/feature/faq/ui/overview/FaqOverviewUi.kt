@@ -200,7 +200,10 @@ private fun FaqList(
         contentPadding = Spacings.calculateEndOfPagePaddingValues(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(faqs) { faq ->
+        items(
+            items = faqs,
+            key = { faq -> faq.id }
+        ) { faq ->
             FaqPreviewItem(
                 modifier = Modifier
                     .fillMaxWidth()
