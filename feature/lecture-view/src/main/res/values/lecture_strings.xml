@@ -32,11 +32,6 @@
     <string name="lecture_view_attachments_file_info_date">(Date: %1$s)</string>
     <string name="lecture_view_attachments_file_info_version_date">(Version: %1$d - Date: %2$s)</string>
 
-    <string name="lecture_view_open_file_attachment_dialog_title">Open file attachment?</string>
-    <string name="lecture_view_open_file_attachment_dialog_message">Do you want to open and potentially download the file attachment?</string>
-    <string name="lecture_view_open_file_attachment_dialog_positive">Open</string>
-    <string name="lecture_view_open_file_attachment_dialog_negative">@android:string/cancel</string>
-
     <string name="lecture_view_open_link_dialog_title">Open link?</string>
     <string name="lecture_view_open_link_dialog_message">%1$s</string>
     <string name="lecture_view_open_link_dialog_positive">Open</string>
@@ -45,6 +40,4 @@
     <string name="lecture_view_lecture_unit_set_completed_failed_dialog_title">Error!</string>
     <string name="lecture_view_lecture_unit_set_completed_failed_dialog_message">Something went wrong while setting the lecture unit as completed.</string>
     <string name="lecture_view_lecture_unit_set_completed_failed_dialog_positive">@android:string/ok</string>
-
-    <string name="lecture_view_download_attachment_failed">Something went wrong while trying to download the attachment.</string>
 </resources>
