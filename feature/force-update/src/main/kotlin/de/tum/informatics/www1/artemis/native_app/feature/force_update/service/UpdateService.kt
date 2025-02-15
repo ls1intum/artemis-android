@@ -16,7 +16,6 @@ interface UpdateService {
         serverUrl: String,
         authToken: String
     ): NetworkResponse<Int>
-    //suspend fun getLatestVersion(): NetworkResponse<Int>
 }
 
 class UpdateServiceImpl(
@@ -39,11 +38,6 @@ class UpdateServiceImpl(
             dto.min.toInt()
         }
     }
-
-//    override suspend fun getLatestVersion(): NetworkResponse<Int> {
-//
-//        return NetworkResponse.Response(Random.nextInt(615, 626))
-//    }
 
 }
 

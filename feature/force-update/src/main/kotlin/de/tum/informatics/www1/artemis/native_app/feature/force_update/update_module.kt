@@ -5,7 +5,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.force_update.service.U
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.service.UpdateServiceImpl
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 val updateModule = module {
@@ -21,9 +20,8 @@ val updateModule = module {
             )
         }
 
-        viewModel { (versionCode: Int, openPlayStore: () -> Unit) ->
+        viewModel { (openPlayStore: () -> Unit) ->
             UpdateViewModel(
-                updateRepository = get { parametersOf(versionCode) },
                 openPlayStore = openPlayStore
             )
         }

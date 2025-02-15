@@ -13,7 +13,6 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,7 +39,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.link_resolving.LocalMarkdownLinkResolver
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.DashboardScreen
-import de.tum.informatics.www1.artemis.native_app.feature.force_update.UpdateViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.force_update.repository.UpdateRepository
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.ui.navigateToUpdateScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
@@ -51,13 +50,13 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visibleme
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.CommunicationNotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.unsubscribeFromNotifications
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
-import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
@@ -220,22 +219,16 @@ class MainActivity : AppCompatActivity(),
             LocalMarkdownLinkResolver provides koinInject()
         ) {
 
-            val updateViewModel: UpdateViewModel = koinViewModel {
-                parametersOf(BuildConfig.VERSION_CODE, ::openPlayStore)
-            }
-
-            val updateRequired by updateViewModel.updateRequired.collectAsState()
+            val updateRepository = koinInject<UpdateRepository> { parametersOf(BuildConfig.VERSION_CODE) }
 
             LaunchedEffect(Unit) {
-                updateViewModel.checkForUpdate()
-            }
-
-            LaunchedEffect(updateRequired) {
-                if (updateRequired) {
-                    navController.navigateToUpdateScreen()
+                val updateFlow: Flow<UpdateRepository.UpdateResult> = updateRepository.checkForUpdate()
+                updateFlow.collect { updateResult ->
+                    if (updateResult.updateAvailable) {
+                        navController.navigateToUpdateScreen()
+                    }
                 }
             }
-
 
             NavHost(navController = navController, startDestination = startDestination) {
                 rootNavGraph(
@@ -245,7 +238,7 @@ class MainActivity : AppCompatActivity(),
                             Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
                         startActivity(intent)
                     },
-                    updateViewModel = updateViewModel
+                    onOpenPlayStore = ::openPlayStore
                 )
             }
         }

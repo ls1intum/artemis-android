@@ -10,7 +10,9 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationService
 import de.tum.informatics.www1.artemis.native_app.core.datastore.authToken
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.service.UpdateService
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.util.concurrent.TimeUnit
 
@@ -29,54 +31,53 @@ class UpdateRepository(
         private val LAST_KNOWN_VERSION = intPreferencesKey("last_known_version")
     }
 
-    suspend fun checkForUpdate(): UpdateCheckResult {
-        val storedServerVersion = context.dataStore.data.map { it[LAST_KNOWN_VERSION] ?: 0 }.first()
+    fun checkForUpdate(): Flow<UpdateResult> = flow {
+        val storedServerVersion = context.dataStore.data
+            .map { it[LAST_KNOWN_VERSION] ?: 0 }
+            .first()
 
         if (storedServerVersion > versionCode) {
-            return UpdateCheckResult(
-                updateRequired = true,
-                forceUpdate = storedServerVersion > versionCode + 1
+            emit(
+                UpdateResult(
+                    updateAvailable = true,
+                    forceUpdate = true
+                )
             )
+            return@flow
         }
 
         if (!isTimeToCheckUpdate()) {
-            return UpdateCheckResult(false, false)
+            emit(UpdateResult(false, false))
+            return@flow
         }
 
-        return when (val response = updateService.getLatestVersion(
+        val response = updateService.getLatestVersion(
             serverConfigurationService.serverUrl.first(),
             accountService.authToken.first()
-        )) {
+        )
+
+        val updateCheckResult = when (response) {
             is NetworkResponse.Response -> {
                 val latestVersion = response.data
-                val forceUpdate = (latestVersion > versionCode + 1)
+                val shouldForceUpdate = (latestVersion > versionCode)
 
-                // If there's an update, record new version & timestamp
-                if (latestVersion > versionCode) {
+                if (shouldForceUpdate) {
                     saveLastUpdateCheck(System.currentTimeMillis())
                     saveLastKnownVersion(latestVersion)
                 }
-                UpdateCheckResult(latestVersion > versionCode, forceUpdate)
+
+                UpdateResult(
+                    updateAvailable = shouldForceUpdate,
+                    forceUpdate = shouldForceUpdate
+                )
             }
 
-            else -> UpdateCheckResult(false, false) // Silent fail
+            else -> UpdateResult(false, false) // silent fail
+            //else -> UpdateResult(true, true)
+
         }
 
-//        return when (val response = updateService.getLatestVersion()) {
-//            is NetworkResponse.Response -> {
-//                val latestVersion = response.data
-//                val forceUpdate = (latestVersion > versionCode + 1)
-//
-//                // If there's an update, record new version & timestamp
-//                if (latestVersion > versionCode) {
-//                    saveLastUpdateCheck(System.currentTimeMillis())
-//                    saveLastKnownVersion(latestVersion)
-//                }
-//                UpdateCheckResult(latestVersion > versionCode, forceUpdate)
-//            }
-//
-//            else -> UpdateCheckResult(false, false) // Silent fail
-//        }
+        emit(updateCheckResult)
     }
 
     private suspend fun isTimeToCheckUpdate(): Boolean {
@@ -93,5 +94,8 @@ class UpdateRepository(
         context.dataStore.edit { it[LAST_KNOWN_VERSION] = version }
     }
 
-    data class UpdateCheckResult(val updateRequired: Boolean, val forceUpdate: Boolean)
+    data class UpdateResult(
+        val updateAvailable: Boolean,
+        val forceUpdate: Boolean
+    )
 }
