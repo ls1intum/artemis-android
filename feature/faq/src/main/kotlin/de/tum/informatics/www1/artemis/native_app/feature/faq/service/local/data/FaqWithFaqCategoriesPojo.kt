@@ -7,8 +7,8 @@ import androidx.room.Relation
 data class FaqWithFaqCategoriesPojo(
     @Embedded val faq: FaqEntity,
     @Relation(
-        parentColumn = "client_side_id",
-        entityColumn = "faq_id",
+        parentColumn = "local_faq_id",
+        entityColumn = "local_faq_category_id",
         associateBy = Junction(FaqToFaqCategoryCrossRef::class)
     )
     val faqCategories: List<FaqCategoryEntity>

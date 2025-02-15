@@ -27,11 +27,11 @@ class FaqStorageServiceImpl(
             faqDao.insert(faq.toFaqEntity(courseClientSideId))
         } else {
             faqDao.update(faq.toFaqEntity(courseClientSideId).copy(
-                clientSideId = existingFaqEntity.clientSideId
+                localId = existingFaqEntity.localId
             ))
         }
 
-        storeCategories(faq, newFaqEntity.clientSideId, courseClientSideId)
+        storeCategories(faq, newFaqEntity.localId, courseClientSideId)
     }
 
     private suspend fun storeCategories(
@@ -42,7 +42,7 @@ class FaqStorageServiceImpl(
         for (category in faq.categories) {
             val categoryEntity = storeCategory(category, courseClientSideId)
             faqDao.upsertCrossRef(
-                FaqToFaqCategoryCrossRef(faqClientSideId, categoryEntity.clientSideId)
+                FaqToFaqCategoryCrossRef(faqClientSideId, categoryEntity.localId)
             )
         }
     }
@@ -56,7 +56,7 @@ class FaqStorageServiceImpl(
             faqDao.insertCategory(category.toFaqCategoryEntity(courseClientSideId))
         } else {
             faqDao.updateCategory(category.toFaqCategoryEntity(courseClientSideId).copy(
-                clientSideId = existingCategory.clientSideId
+                localId = existingCategory.localId
             ))
         }
     }

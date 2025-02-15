@@ -21,8 +21,8 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.room.course.Cou
 )
 data class FaqCategoryEntity(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "client_side_id")
-    val clientSideId: Long = 0,
+    @ColumnInfo(name = "local_faq_category_id")
+    val localId: Long = 0,
     @ColumnInfo(name = "course_client_side_id")
     val courseClientSideId: Long,
     @ColumnInfo(name = "color")

@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.faq.service.local
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Upsert
 import de.tum.informatics.www1.artemis.native_app.feature.faq.service.local.data.FaqCategoryEntity
@@ -17,11 +18,13 @@ interface FaqDao {
     suspend fun insert(faq: FaqEntity): FaqEntity
 
     @Update
-    suspend fun update(faq: FaqEntity): FaqEntity
+    suspend fun update(faq: FaqEntity): FaqEntity       // TODO can only return Long rowId
 
+    @Transaction
     @Query("SELECT * FROM faq WHERE course_client_side_id = :courseId AND id = :faqId")
     suspend fun getById(courseId: Long, faqId: Long): FaqWithFaqCategoriesPojo?
 
+    @Transaction
     @Query("SELECT * FROM faq WHERE course_client_side_id = :courseId")
     suspend fun getAll(courseId: Long): List<FaqWithFaqCategoriesPojo>
 
@@ -40,6 +43,6 @@ interface FaqDao {
     // CrossRefs
 
     @Upsert
-    suspend fun upsertCrossRef(crossRef: FaqToFaqCategoryCrossRef): FaqToFaqCategoryCrossRef
+    suspend fun upsertCrossRef(crossRef: FaqToFaqCategoryCrossRef)
 
 }

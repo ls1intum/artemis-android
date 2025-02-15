@@ -9,6 +9,7 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.room.course.Cou
 import de.tum.informatics.www1.artemis.native_app.feature.faq.service.local.FaqDao
 import de.tum.informatics.www1.artemis.native_app.feature.faq.service.local.data.FaqCategoryEntity
 import de.tum.informatics.www1.artemis.native_app.feature.faq.service.local.data.FaqEntity
+import de.tum.informatics.www1.artemis.native_app.feature.faq.service.local.data.FaqToFaqCategoryCrossRef
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.MetisDao
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.AnswerPostingEntity
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.db.entities.BasePostingEntity
@@ -34,7 +35,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.push.communication_not
         CommunicationMessageEntity::class,
         CourseEntity::class,
         FaqEntity::class,
-        FaqCategoryEntity::class
+        FaqCategoryEntity::class,
+        FaqToFaqCategoryCrossRef::class,
     ],
     exportSchema = true,
     version = 16,           // Latest update: Offline FAQs
