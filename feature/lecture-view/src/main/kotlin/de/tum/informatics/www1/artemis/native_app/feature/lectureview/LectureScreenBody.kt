@@ -5,9 +5,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Attachment
-import androidx.compose.material.icons.filled.ViewHeadline
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -18,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import de.tum.informatics.www1.artemis.native_app.core.data.DataState
@@ -78,20 +78,28 @@ internal fun LectureScreenBody(
     }
 
     Column(modifier = modifier) {
-        TabRow(selectedTabIndex = selectedTabIndex) {
-            DefaultTab(
-                index = overviewTabIndex,
-                icon = Icons.Default.ViewHeadline,
-                textRes = R.string.lecture_view_tab_overview,
-                selectedTabIndex = selectedTabIndexState
-            )
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shadowElevation = Spacings.AppBarElevation
+        ){
+            TabRow(
+                selectedTabIndex = selectedTabIndex,
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                divider = {},
+            ) {
+                DefaultTab(
+                    index = overviewTabIndex,
+                    painter = painterResource(id = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R.drawable.list),
+                    textRes = R.string.lecture_view_tab_overview,
+                    selectedTabIndex = selectedTabIndexState
+                )
 
-            DefaultTab(
-                index = attachmentsTabIndex,
-                icon = Icons.Default.Attachment,
-                textRes = R.string.lecture_view_tab_attachments,
-                selectedTabIndex = selectedTabIndexState
-            )
+                DefaultTab(
+                    index = attachmentsTabIndex,
+                    painter = painterResource(id = de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R.drawable.attachment),
+                    textRes = R.string.lecture_view_tab_attachments,
+                    selectedTabIndex = selectedTabIndexState
+                )
 
 //            if (!displayCommunicationOnSide) {
 //                DefaultTab(
@@ -101,6 +109,7 @@ internal fun LectureScreenBody(
 //                    selectedTabIndex = selectedTabIndexState
 //                )
 //            }
+            }
         }
 
         BasicDataStateUi(

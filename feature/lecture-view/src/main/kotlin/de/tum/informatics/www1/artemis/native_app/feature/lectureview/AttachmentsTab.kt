@@ -9,14 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.model.lecture.Attachment
@@ -63,7 +62,7 @@ internal fun AttachmentsTab(
         EmptyListHint(
             modifier = Modifier,
             hint = stringResource(id = R.string.lecture_view_attachments_empty),
-            icon = Icons.Default.AttachFile
+            painter = painterResource(de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.R.drawable.attachment)
         )
     }
 }

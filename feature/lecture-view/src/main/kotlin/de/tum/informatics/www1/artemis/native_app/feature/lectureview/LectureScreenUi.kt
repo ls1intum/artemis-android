@@ -176,7 +176,8 @@ internal fun LectureScreen(
                             overflow = TextOverflow.Ellipsis
                         )
                     },
-                    navigationIcon = { NavigationBackButton(onNavigateBack) }
+                    navigationIcon = { NavigationBackButton(onNavigateBack) },
+                    isElevated = false
                 )
             }
         ) { padding ->

@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -19,19 +20,34 @@ import androidx.compose.ui.unit.dp
 fun EmptyListHint(
     modifier: Modifier,
     hint: String,
-    icon: ImageVector,
+    imageVector: ImageVector? = null,
+    painter: Painter? = null
 ) {
+    require(painter == null || imageVector == null) { "Only painter OR imageVector should be set" }
+
     Column(
         modifier = modifier.fillMaxWidth(0.8f),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            modifier = Modifier.size(64.dp),
-            imageVector = icon,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            contentDescription = null
-        )
+        val iconModifier = Modifier.size(64.dp)
+        val iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+        imageVector?.let {
+            Icon(
+                modifier = iconModifier,
+                imageVector = it,
+                tint = iconTint,
+                contentDescription = null
+            )
+        }
+        painter?.let {
+            Icon(
+                modifier = iconModifier,
+                painter = it,
+                tint = iconTint,
+                contentDescription = null
+            )
+        }
 
         Spacer(modifier = Modifier.size(8.dp))
 

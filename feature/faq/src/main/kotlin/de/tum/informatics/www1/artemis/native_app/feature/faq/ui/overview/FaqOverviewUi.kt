@@ -144,7 +144,7 @@ private fun FaqOverviewBody(
             EmptyListHint(
                 modifier = Modifier.fillMaxSize(),
                 hint = stringResource(emptyStringResId),
-                icon = Icons.AutoMirrored.Filled.Help
+                imageVector = Icons.AutoMirrored.Filled.Help
             )
         } else {
             FaqList(
