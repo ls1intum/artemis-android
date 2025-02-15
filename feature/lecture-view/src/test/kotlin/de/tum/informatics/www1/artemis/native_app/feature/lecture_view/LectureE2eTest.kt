@@ -46,6 +46,7 @@ import de.tum.informatics.www1.artemis.native_app.feature.login.loginModule
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.getAdminAccessToken
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.performTestLogin
 import de.tum.informatics.www1.artemis.native_app.feature.login.test.testLoginModule
+import de.tum.informatics.www1.artemis.native_app.feature.metis.communicationModule
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -70,7 +71,7 @@ class LectureE2eTest : BaseComposeTest() {
         androidContext(InstrumentationRegistry.getInstrumentation().context)
 
         modules(coreTestModules)
-        modules(loginModule, lectureModule, testLoginModule, testWebsocketModule)
+        modules(loginModule, lectureModule, testLoginModule, testWebsocketModule, communicationModule)
     }
 
     private lateinit var course: Course
