@@ -85,7 +85,7 @@ private fun LectureListItem(modifier: Modifier, lecture: Lecture, onClick: () ->
                 Icon(
                     modifier = Modifier
                         .size(40.dp)
-                        .padding(end = 8.dp)
+                        .padding(end = 16.dp)
                         .fillMaxSize(),
                     painter = painterResource(id = R.drawable.chalkboard_teacher),
                     contentDescription = null

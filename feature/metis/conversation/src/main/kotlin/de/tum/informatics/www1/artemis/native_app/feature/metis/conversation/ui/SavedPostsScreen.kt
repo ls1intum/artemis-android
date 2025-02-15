@@ -183,7 +183,7 @@ private fun SavedPostsList(
                     id = R.string.saved_posts_empty_state_title,
                     status.getUiText()
                 ),
-                icon = status.getIcon()
+                imageVector = status.getIcon()
             )
             return@AnimatedContent
         }

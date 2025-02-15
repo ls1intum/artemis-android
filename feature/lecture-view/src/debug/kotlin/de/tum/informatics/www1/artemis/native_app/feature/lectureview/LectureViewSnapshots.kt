@@ -20,6 +20,7 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
 import de.tum.informatics.www1.artemis.native_app.core.ui.ScreenshotFrame
 import de.tum.informatics.www1.artemis.native_app.core.websocket.test.LiveParticipationServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.lectureview.service.LectureService
+import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.service.network.impl.ChannelServiceStub
 
 @PlayStoreScreenshots
 @Composable
@@ -77,6 +78,7 @@ fun `Lecture - Overview`() {
         accountService = AccountServiceStub(),
         liveParticipationService = LiveParticipationServiceStub(),
         savedStateHandle = SavedStateHandle(),
+        channelService = ChannelServiceStub,
         serverTimeService = ServerTimeServiceStub(),
         courseExerciseService = object : CourseExerciseService {
             override suspend fun startExercise(

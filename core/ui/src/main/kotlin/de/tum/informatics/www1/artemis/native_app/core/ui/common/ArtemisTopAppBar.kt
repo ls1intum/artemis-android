@@ -10,6 +10,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 
 @Composable
@@ -22,10 +23,11 @@ fun ArtemisTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
-    )
+    ),
+    isElevated: Boolean = true
 ) {
     Surface(
-        shadowElevation = Spacings.AppBarElevation,
+        shadowElevation = if (isElevated) Spacings.AppBarElevation else 0.dp,
     ) {
         TopAppBar(
             title = title,

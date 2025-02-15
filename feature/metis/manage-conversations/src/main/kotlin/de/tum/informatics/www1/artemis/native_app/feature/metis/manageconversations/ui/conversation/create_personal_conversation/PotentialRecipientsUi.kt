@@ -177,7 +177,7 @@ private fun PotentialRecipientsList(
 
         EmptyListHint(
             modifier,
-            icon = icon,
+            imageVector = icon,
             hint = text,
         )
     }
