@@ -9,13 +9,15 @@ import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 val updateModule = module {
-        single<UpdateService> { UpdateServiceImpl() }
+        single<UpdateService> { UpdateServiceImpl(get()) }
 
         single { (versionCode: Int) ->
             UpdateRepository(
                 context = androidContext(),
                 updateService = get(),
-                versionCode = versionCode
+                versionCode = versionCode,
+                get(),
+                get()
             )
         }
 

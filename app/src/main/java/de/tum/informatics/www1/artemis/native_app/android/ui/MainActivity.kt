@@ -42,7 +42,6 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArt
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.DashboardScreen
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.UpdateViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.force_update.ui.navigateToUpdateScreen
-import de.tum.informatics.www1.artemis.native_app.feature.force_update.ui.updateNavGraph
 import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
