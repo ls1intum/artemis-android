@@ -13,6 +13,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,6 +25,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import de.tum.informatics.www1.artemis.native_app.android.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.android.R
 import de.tum.informatics.www1.artemis.native_app.android.ui.theme.AppTheme
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
@@ -38,6 +40,9 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
 import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.link_resolving.LocalMarkdownLinkResolver
 import de.tum.informatics.www1.artemis.native_app.core.ui.remote_images.LocalArtemisImageProvider
 import de.tum.informatics.www1.artemis.native_app.feature.dashboard.ui.DashboardScreen
+import de.tum.informatics.www1.artemis.native_app.feature.force_update.UpdateViewModel
+import de.tum.informatics.www1.artemis.native_app.feature.force_update.ui.navigateToUpdateScreen
+import de.tum.informatics.www1.artemis.native_app.feature.force_update.ui.updateNavGraph
 import de.tum.informatics.www1.artemis.native_app.feature.login.LoginScreen
 import de.tum.informatics.www1.artemis.native_app.feature.login.navigateToLogin
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.LocalVisibleMetisContextManager
@@ -53,7 +58,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import org.koin.core.parameter.parametersOf
 
 /**
  * Main and only activity used in the android app.
@@ -213,6 +220,24 @@ class MainActivity : AppCompatActivity(),
             LocalArtemisImageProvider provides koinInject(),
             LocalMarkdownLinkResolver provides koinInject()
         ) {
+
+            val updateViewModel: UpdateViewModel = koinViewModel {
+                parametersOf(BuildConfig.VERSION_CODE, ::openPlayStore)
+            }
+
+            val updateRequired by updateViewModel.updateRequired.collectAsState()
+
+            LaunchedEffect(Unit) {
+                updateViewModel.checkForUpdate()
+            }
+
+            LaunchedEffect(updateRequired) {
+                if (updateRequired) {
+                    navController.navigateToUpdateScreen()
+                }
+            }
+
+
             NavHost(navController = navController, startDestination = startDestination) {
                 rootNavGraph(
                     navController = navController,
@@ -220,7 +245,8 @@ class MainActivity : AppCompatActivity(),
                         val intent =
                             Intent(this@MainActivity, OssLicensesMenuActivity::class.java)
                         startActivity(intent)
-                    }
+                    },
+                    updateViewModel = updateViewModel
                 )
             }
         }
@@ -248,4 +274,18 @@ class MainActivity : AppCompatActivity(),
             }
         }
     }
+
+    private fun openPlayStore() {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${packageName}"))
+            startActivity(intent)
+        } catch (e: Exception) {
+            val webIntent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://play.google.com/store/apps/details?id=${packageName}")
+            )
+            startActivity(webIntent)
+        }
+    }
 }
+

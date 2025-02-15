@@ -121,6 +121,7 @@ dependencies {
     implementation(project(":feature:push"))
     implementation(project(":feature:metis"))
     implementation(project(":feature:faq"))
+    implementation(project(":feature:force-update"))
 
     kover(project(":core:common"))
     kover(project(":core:data"))
