@@ -1,5 +1,6 @@
 package de.tum.informatics.www1.artemis.native_app.feature.faq.service.local.impl
 
+import androidx.room.withTransaction
 import de.tum.informatics.www1.artemis.native_app.core.datastore.room.course.CourseDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.FaqCategory
@@ -17,23 +18,27 @@ class FaqStorageServiceImpl(
 
     private val faqDao = faqDatabaseProvider.faqDao
     private val courseDao = courseDatabaseProvider.courseDao
+    private val database = faqDatabaseProvider.database         // Is the same as database from courseDatabaseProvider
 
     override suspend fun store(faq: Faq, courseId: Long, serverUrl: String) {
-        // TODO with transaction
-        val courseClientSideId = courseDao.getOrCreateClientSideId(serverUrl, courseId)
+        database.withTransaction {
+            val courseClientSideId = courseDao.getOrCreateClientSideId(serverUrl, courseId)
+            val existingFaqEntity = faqDao.getById(courseClientSideId, faq.id)?.faq
 
-        val existingFaqEntity = faqDao.getById(courseClientSideId, faq.id)?.faq
-        val faqEntityLocalId: Long
-        if (existingFaqEntity == null) {
-            faqEntityLocalId = faqDao.insert(faq.toFaqEntity(courseClientSideId))
-        } else {
-            faqEntityLocalId = existingFaqEntity.localId
-            faqDao.update(faq.toFaqEntity(courseClientSideId).copy(
-                localId = existingFaqEntity.localId
-            ))
+            val faqEntityLocalId: Long
+            if (existingFaqEntity == null) {
+                faqEntityLocalId = faqDao.insert(faq.toFaqEntity(courseClientSideId))
+            } else {
+                faqEntityLocalId = existingFaqEntity.localId
+                faqDao.update(
+                    faq.toFaqEntity(courseClientSideId).copy(
+                        localId = existingFaqEntity.localId
+                    )
+                )
+            }
+
+            storeCategories(faq, faqEntityLocalId, courseClientSideId)
         }
-
-        storeCategories(faq, faqEntityLocalId, courseClientSideId)
     }
 
     private suspend fun storeCategories(
@@ -65,12 +70,16 @@ class FaqStorageServiceImpl(
     }
 
     override suspend fun getAll(courseId: Long, serverUrl: String): List<Faq> {
-        val courseClientSideId = courseDao.getOrCreateClientSideId(serverUrl, courseId)
-        return faqDao.getAll(courseClientSideId).map { it.toFaq() }
+        return database.withTransaction {
+            val courseClientSideId = courseDao.getOrCreateClientSideId(serverUrl, courseId)
+            return@withTransaction faqDao.getAll(courseClientSideId).map { it.toFaq() }
+        }
     }
 
     override suspend fun getById(faqId: Long, courseId: Long, serverUrl: String): Faq? {
-        val courseClientSideId = courseDao.getOrCreateClientSideId(serverUrl, courseId)
-        return faqDao.getById(courseClientSideId, faqId)?.toFaq()
+        return database.withTransaction {
+            val courseClientSideId = courseDao.getOrCreateClientSideId(serverUrl, courseId)
+            return@withTransaction faqDao.getById(courseClientSideId, faqId)?.toFaq()
+        }
     }
 }
