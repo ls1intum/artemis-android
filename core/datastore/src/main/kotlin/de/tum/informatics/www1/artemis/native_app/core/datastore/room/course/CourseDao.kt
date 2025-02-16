@@ -8,16 +8,16 @@ import androidx.room.Query
 interface CourseDao {
 
     @Insert
-    suspend fun insert(course: CourseEntity): CourseEntity
+    suspend fun insert(course: CourseEntity): Long
 
     @Query("SELECT * FROM course WHERE server_url = :serverUrl AND id = :courseId")
     suspend fun getByServerUrlAndCourseId(serverUrl: String, courseId: Long): CourseEntity?
 
 
     suspend fun getOrCreateClientSideId(serverUrl: String, courseId: Long): Long {
-        val courseInDb = getByServerUrlAndCourseId(serverUrl, courseId) ?:
+        val localId = getByServerUrlAndCourseId(serverUrl, courseId)?.clientSideId ?:
             insert(CourseEntity(serverUrl = serverUrl, id = courseId))
 
-        return courseInDb.clientSideId
+        return localId
     }
 }

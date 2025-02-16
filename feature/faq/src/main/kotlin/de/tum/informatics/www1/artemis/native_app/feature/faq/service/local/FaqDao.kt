@@ -15,10 +15,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.faq.service.local.data
 interface FaqDao {
 
     @Insert
-    suspend fun insert(faq: FaqEntity): FaqEntity
+    suspend fun insert(faq: FaqEntity): Long
 
     @Update
-    suspend fun update(faq: FaqEntity): FaqEntity       // TODO can only return Long rowId
+    suspend fun update(faq: FaqEntity)
 
     @Transaction
     @Query("SELECT * FROM faq WHERE course_client_side_id = :courseId AND id = :faqId")
@@ -31,10 +31,10 @@ interface FaqDao {
     // Categories
 
     @Insert
-    suspend fun insertCategory(category: FaqCategoryEntity): FaqCategoryEntity
+    suspend fun insertCategory(category: FaqCategoryEntity): Long
 
     @Update
-    suspend fun updateCategory(category: FaqCategoryEntity): FaqCategoryEntity
+    suspend fun updateCategory(category: FaqCategoryEntity)
 
     @Query("SELECT * FROM faq_category WHERE course_client_side_id = :courseId AND name = :name")
     suspend fun getCategoryByName(courseId: Long, name: String): FaqCategoryEntity?

@@ -8,7 +8,6 @@ import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.ma
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.mappers.toFaqEntity
 import de.tum.informatics.www1.artemis.native_app.feature.faq.service.local.FaqDatabaseProvider
 import de.tum.informatics.www1.artemis.native_app.feature.faq.service.local.FaqStorageService
-import de.tum.informatics.www1.artemis.native_app.feature.faq.service.local.data.FaqCategoryEntity
 import de.tum.informatics.www1.artemis.native_app.feature.faq.service.local.data.FaqToFaqCategoryCrossRef
 
 class FaqStorageServiceImpl(
@@ -20,18 +19,21 @@ class FaqStorageServiceImpl(
     private val courseDao = courseDatabaseProvider.courseDao
 
     override suspend fun store(faq: Faq, courseId: Long, serverUrl: String) {
+        // TODO with transaction
         val courseClientSideId = courseDao.getOrCreateClientSideId(serverUrl, courseId)
 
         val existingFaqEntity = faqDao.getById(courseClientSideId, faq.id)?.faq
-        val newFaqEntity = if (existingFaqEntity == null) {
-            faqDao.insert(faq.toFaqEntity(courseClientSideId))
+        val faqEntityLocalId: Long
+        if (existingFaqEntity == null) {
+            faqEntityLocalId = faqDao.insert(faq.toFaqEntity(courseClientSideId))
         } else {
+            faqEntityLocalId = existingFaqEntity.localId
             faqDao.update(faq.toFaqEntity(courseClientSideId).copy(
                 localId = existingFaqEntity.localId
             ))
         }
 
-        storeCategories(faq, newFaqEntity.localId, courseClientSideId)
+        storeCategories(faq, faqEntityLocalId, courseClientSideId)
     }
 
     private suspend fun storeCategories(
@@ -40,9 +42,9 @@ class FaqStorageServiceImpl(
         courseClientSideId: Long
     ) {
         for (category in faq.categories) {
-            val categoryEntity = storeCategory(category, courseClientSideId)
+            val categoryEntityLocalId = storeCategory(category, courseClientSideId)
             faqDao.upsertCrossRef(
-                FaqToFaqCategoryCrossRef(faqClientSideId, categoryEntity.localId)
+                FaqToFaqCategoryCrossRef(faqClientSideId, categoryEntityLocalId)
             )
         }
     }
@@ -50,7 +52,7 @@ class FaqStorageServiceImpl(
     private suspend fun storeCategory(
         category: FaqCategory,
         courseClientSideId: Long
-    ): FaqCategoryEntity {
+    ): Long {
         val existingCategory = faqDao.getCategoryByName(courseClientSideId, category.name)
         return if (existingCategory == null) {
             faqDao.insertCategory(category.toFaqCategoryEntity(courseClientSideId))
@@ -58,6 +60,7 @@ class FaqStorageServiceImpl(
             faqDao.updateCategory(category.toFaqCategoryEntity(courseClientSideId).copy(
                 localId = existingCategory.localId
             ))
+            existingCategory.localId
         }
     }
 
