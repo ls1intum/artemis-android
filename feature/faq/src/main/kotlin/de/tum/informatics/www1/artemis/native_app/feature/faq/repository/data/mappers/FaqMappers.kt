@@ -40,17 +40,17 @@ private data class FaqCategoryDto(
 
 
 internal fun Faq.toFaqEntity(
-    courseClientSideId: Long,
+    courseLocalId: Long,
 ) = FaqEntity(
     id = id,
-    courseClientSideId = courseClientSideId,
+    courseLocalId = courseLocalId,
     question = questionTitle,
     answer = questionAnswer,
     faqState = faqState.toString(),
 )
 
-internal fun FaqCategory.toFaqCategoryEntity(courseClientSideId: Long) = FaqCategoryEntity(
-    courseClientSideId = courseClientSideId,
+internal fun FaqCategory.toFaqCategoryEntity(courseLocalId: Long) = FaqCategoryEntity(
+    courseLocalId = courseLocalId,
     color = color.toString(),
     name = name,
 )

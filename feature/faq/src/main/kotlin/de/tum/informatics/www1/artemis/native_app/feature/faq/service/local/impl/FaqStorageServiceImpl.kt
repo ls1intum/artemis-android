@@ -22,47 +22,47 @@ class FaqStorageServiceImpl(
 
     override suspend fun store(faq: Faq, courseId: Long, serverUrl: String) {
         database.withTransaction {
-            val courseClientSideId = courseDao.getOrCreateClientSideId(serverUrl, courseId)
-            val existingFaqEntity = faqDao.getById(courseClientSideId, faq.id)?.faq
+            val courseLocalId = courseDao.getOrCreateLocalId(serverUrl, courseId)
+            val existingFaqEntity = faqDao.getById(courseLocalId, faq.id)?.faq
 
             val faqEntityLocalId: Long
             if (existingFaqEntity == null) {
-                faqEntityLocalId = faqDao.insert(faq.toFaqEntity(courseClientSideId))
+                faqEntityLocalId = faqDao.insert(faq.toFaqEntity(courseLocalId))
             } else {
                 faqEntityLocalId = existingFaqEntity.localId
                 faqDao.update(
-                    faq.toFaqEntity(courseClientSideId).copy(
+                    faq.toFaqEntity(courseLocalId).copy(
                         localId = existingFaqEntity.localId
                     )
                 )
             }
 
-            storeCategories(faq, faqEntityLocalId, courseClientSideId)
+            storeCategories(faq, faqEntityLocalId, courseLocalId)
         }
     }
 
     private suspend fun storeCategories(
         faq: Faq,
-        faqClientSideId: Long,
-        courseClientSideId: Long
+        faqLocalId: Long,
+        courseLocalId: Long
     ) {
         for (category in faq.categories) {
-            val categoryEntityLocalId = storeCategory(category, courseClientSideId)
+            val categoryEntityLocalId = storeCategory(category, courseLocalId)
             faqDao.upsertCrossRef(
-                FaqToFaqCategoryCrossRef(faqClientSideId, categoryEntityLocalId)
+                FaqToFaqCategoryCrossRef(faqLocalId, categoryEntityLocalId)
             )
         }
     }
 
     private suspend fun storeCategory(
         category: FaqCategory,
-        courseClientSideId: Long
+        courseLocalId: Long
     ): Long {
-        val existingCategory = faqDao.getCategoryByName(courseClientSideId, category.name)
+        val existingCategory = faqDao.getCategoryByName(courseLocalId, category.name)
         return if (existingCategory == null) {
-            faqDao.insertCategory(category.toFaqCategoryEntity(courseClientSideId))
+            faqDao.insertCategory(category.toFaqCategoryEntity(courseLocalId))
         } else {
-            faqDao.updateCategory(category.toFaqCategoryEntity(courseClientSideId).copy(
+            faqDao.updateCategory(category.toFaqCategoryEntity(courseLocalId).copy(
                 localId = existingCategory.localId
             ))
             existingCategory.localId
@@ -71,15 +71,15 @@ class FaqStorageServiceImpl(
 
     override suspend fun getAll(courseId: Long, serverUrl: String): List<Faq> {
         return database.withTransaction {
-            val courseClientSideId = courseDao.getOrCreateClientSideId(serverUrl, courseId)
-            return@withTransaction faqDao.getAll(courseClientSideId).map { it.toFaq() }
+            val courseLocalId = courseDao.getOrCreateLocalId(serverUrl, courseId)
+            return@withTransaction faqDao.getAll(courseLocalId).map { it.toFaq() }
         }
     }
 
     override suspend fun getById(faqId: Long, courseId: Long, serverUrl: String): Faq? {
         return database.withTransaction {
-            val courseClientSideId = courseDao.getOrCreateClientSideId(serverUrl, courseId)
-            return@withTransaction faqDao.getById(courseClientSideId, faqId)?.toFaq()
+            val courseLocalId = courseDao.getOrCreateLocalId(serverUrl, courseId)
+            return@withTransaction faqDao.getById(courseLocalId, faqId)?.toFaq()
         }
     }
 }

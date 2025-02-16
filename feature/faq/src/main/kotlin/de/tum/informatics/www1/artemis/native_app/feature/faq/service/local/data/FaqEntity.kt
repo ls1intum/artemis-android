@@ -13,21 +13,21 @@ import de.tum.informatics.www1.artemis.native_app.core.datastore.room.course.Cou
     foreignKeys = [
         ForeignKey(
             entity = CourseEntity::class,
-            parentColumns = ["client_side_id"],
-            childColumns = ["course_client_side_id"],
+            parentColumns = ["course_local_id"],
+            childColumns = ["course_local_id"],
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["course_client_side_id", "id"], unique = true)]
+    indices = [Index(value = ["course_local_id", "id"], unique = true)]
 )
 data class FaqEntity(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "local_faq_id")
+    @ColumnInfo(name = "faq_local_id")
     val localId: Long = 0,
     @ColumnInfo(name = "id")
     val id: Long,
-    @ColumnInfo(name = "course_client_side_id")
-    val courseClientSideId: Long,
+    @ColumnInfo(name = "course_local_id")
+    val courseLocalId: Long,
     @ColumnInfo(name = "question")
     val question: String,
     @ColumnInfo(name = "answer")

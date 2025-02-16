@@ -14,8 +14,8 @@ interface CourseDao {
     suspend fun getByServerUrlAndCourseId(serverUrl: String, courseId: Long): CourseEntity?
 
 
-    suspend fun getOrCreateClientSideId(serverUrl: String, courseId: Long): Long {
-        val localId = getByServerUrlAndCourseId(serverUrl, courseId)?.clientSideId ?:
+    suspend fun getOrCreateLocalId(serverUrl: String, courseId: Long): Long {
+        val localId = getByServerUrlAndCourseId(serverUrl, courseId)?.localId ?:
             insert(CourseEntity(serverUrl = serverUrl, id = courseId))
 
         return localId

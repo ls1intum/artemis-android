@@ -21,12 +21,12 @@ interface FaqDao {
     suspend fun update(faq: FaqEntity)
 
     @Transaction
-    @Query("SELECT * FROM faq WHERE course_client_side_id = :courseId AND id = :faqId")
-    suspend fun getById(courseId: Long, faqId: Long): FaqWithFaqCategoriesPojo?
+    @Query("SELECT * FROM faq WHERE course_local_id = :courseLocalId AND id = :faqId")
+    suspend fun getById(courseLocalId: Long, faqId: Long): FaqWithFaqCategoriesPojo?
 
     @Transaction
-    @Query("SELECT * FROM faq WHERE course_client_side_id = :courseId")
-    suspend fun getAll(courseId: Long): List<FaqWithFaqCategoriesPojo>
+    @Query("SELECT * FROM faq WHERE course_local_id = :courseLocalId")
+    suspend fun getAll(courseLocalId: Long): List<FaqWithFaqCategoriesPojo>
 
     // Categories
 
@@ -36,8 +36,8 @@ interface FaqDao {
     @Update
     suspend fun updateCategory(category: FaqCategoryEntity)
 
-    @Query("SELECT * FROM faq_category WHERE course_client_side_id = :courseId AND name = :name")
-    suspend fun getCategoryByName(courseId: Long, name: String): FaqCategoryEntity?
+    @Query("SELECT * FROM faq_category WHERE course_local_id = :courseLocalId AND name = :name")
+    suspend fun getCategoryByName(courseLocalId: Long, name: String): FaqCategoryEntity?
 
 
     // CrossRefs

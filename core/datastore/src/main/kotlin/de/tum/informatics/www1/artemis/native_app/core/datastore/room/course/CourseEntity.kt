@@ -11,8 +11,8 @@ import androidx.room.PrimaryKey
 )
 class CourseEntity(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "client_side_id")
-    val clientSideId: Long = 0,     // TODO: rename to localId
+    @ColumnInfo(name = "course_local_id")
+    val localId: Long = 0,
     @ColumnInfo(name = "server_url")
     val serverUrl: String,
     @ColumnInfo(name = "id")

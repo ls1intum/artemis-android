@@ -6,25 +6,25 @@ import androidx.room.ForeignKey
 
 @Entity(
     tableName = "faq_to_faq_category",
-    primaryKeys = ["local_faq_id", "local_faq_category_id"],
+    primaryKeys = ["faq_local_id", "faq_category_local_id"],
     foreignKeys = [
         ForeignKey(
             entity = FaqEntity::class,
-            parentColumns = ["local_faq_id"],
-            childColumns = ["local_faq_id"],
+            parentColumns = ["faq_local_id"],
+            childColumns = ["faq_local_id"],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = FaqCategoryEntity::class,
-            parentColumns = ["local_faq_category_id"],
-            childColumns = ["local_faq_category_id"],
+            parentColumns = ["faq_category_local_id"],
+            childColumns = ["faq_category_local_id"],
             onDelete = ForeignKey.CASCADE
         )
     ]
 )
 data class FaqToFaqCategoryCrossRef(
-    @ColumnInfo(name = "local_faq_id")
+    @ColumnInfo(name = "faq_local_id")
     val faqId: Long,
-    @ColumnInfo(name = "local_faq_category_id")
+    @ColumnInfo(name = "faq_category_local_id")
     val faqCategoryId: Long
 )
