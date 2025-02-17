@@ -38,10 +38,7 @@ fun ConversationMembersScreen(
 
     val query by viewModel.query.collectAsState()
 
-    val collapsingContentState = CollapsingContentState(
-        initialCollapsingHeight = 0f,
-        initialOffset = 0f
-    )
+    val collapsingContentState = CollapsingContentState()
 
     Scaffold(
         modifier = modifier,

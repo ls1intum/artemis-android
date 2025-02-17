@@ -146,9 +146,7 @@ fun `Metis - Conversation Overview`() {
             updateSelectedCourseTab = {},
             onNavigateBack = {},
             onReloadCourse = {},
-            collapsingContentState = CollapsingContentState(
-                0f, 0f, true
-            )
+            collapsingContentState = CollapsingContentState()
         ) {
             ConversationOverviewBody(
                 modifier = Modifier.fillMaxSize(),
@@ -158,9 +156,7 @@ fun `Metis - Conversation Overview`() {
                 onRequestCreatePersonalConversation = {},
                 onRequestAddChannel = {},
                 onRequestBrowseChannel = {},
-                collapsingContentState = CollapsingContentState(
-                    0f, 0f, true
-                ),
+                collapsingContentState = CollapsingContentState(),
                 canCreateChannel = false
             )
         }

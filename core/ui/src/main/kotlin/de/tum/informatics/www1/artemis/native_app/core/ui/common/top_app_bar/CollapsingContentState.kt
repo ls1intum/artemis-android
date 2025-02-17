@@ -9,8 +9,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 
 class CollapsingContentState(
-    initialCollapsingHeight: Float,
-    initialOffset: Float,
+    initialCollapsingHeight: Float = 0f,
+    initialOffset: Float = 0f,
     val isCollapsingEnabled: Boolean = true
 ) {
     var collapsingHeight by mutableFloatStateOf(initialCollapsingHeight)

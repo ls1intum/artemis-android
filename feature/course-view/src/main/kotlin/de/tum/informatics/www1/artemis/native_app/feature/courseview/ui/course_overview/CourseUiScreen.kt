@@ -160,10 +160,7 @@ fun CourseUiScreen(
     val weeklyExercisesDataState by viewModel.exercisesGroupedByWeek.collectAsState()
     val weeklyLecturesDataState by viewModel.lecturesGroupedByWeek.collectAsState()
 
-    val collapsingContentState = remember { CollapsingContentState(
-        initialCollapsingHeight = 0f,
-        initialOffset = 0f
-    ) }
+    val collapsingContentState = remember { CollapsingContentState() }
 
     val exerciseQuery by viewModel.exerciseQuery.collectAsState()
     val lectureQuery by viewModel.lectureQuery.collectAsState()

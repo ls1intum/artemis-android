@@ -36,37 +36,41 @@ internal fun ExerciseListUi(
     actions: BoundExerciseActions,
     onClickExercise: (exerciseId: Long) -> Unit
 ) {
-    if (query.isNotBlank() && weeklyExercises.isEmpty()) {
-        NoSearchResults(
-            modifier = modifier,
-            title = stringResource(id = R.string.course_ui_exercises_no_search_results_title),
-            details = stringResource(id = R.string.course_ui_exercises_no_search_results_body, query)
-        )
-    } else if (weeklyExercises.isEmpty()) {
+    if (weeklyExercises.isEmpty()) {
+        if (query.isNotBlank()) {
+            NoSearchResults(
+                modifier = modifier,
+                title = stringResource(id = R.string.course_ui_exercises_no_search_results_title),
+                details = stringResource(id = R.string.course_ui_exercises_no_search_results_body, query)
+            )
+            return
+        }
+
         EmptyListHint(
             modifier = modifier,
             hint = stringResource(id = R.string.course_ui_exercises_no_search_results_title),
             icon = Icons.Default.ListAlt
         )
-    } else {
-        WeeklyItemsLazyColumn(
-            modifier = modifier
-                .nestedScroll(collapsingContentState.nestedScrollConnection)
-                .testTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN),
-            weeklyItemGroups = weeklyExercises,
-            getItemId = { id ?: 0 }
-        ) { m, exercise ->
-            ExerciseListItem(
-                modifier = m
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacings.ScreenHorizontalSpacing),
-                exercise = exercise,
-                exerciseActions = remember(
-                    exercise,
-                    actions
-                ) { actions.getUnbound(exerciseId = exercise.id ?: 0) },
-                onClickExercise = { onClickExercise(exercise.id ?: 0) }
-            )
-        }
+        return
+    }
+
+    WeeklyItemsLazyColumn(
+        modifier = modifier
+            .nestedScroll(collapsingContentState.nestedScrollConnection)
+            .testTag(TEST_TAG_EXERCISE_LIST_LAZY_COLUMN),
+        weeklyItemGroups = weeklyExercises,
+        getItemId = { id ?: 0 }
+    ) { m, exercise ->
+        ExerciseListItem(
+            modifier = m
+                .fillMaxWidth()
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+            exercise = exercise,
+            exerciseActions = remember(
+                exercise,
+                actions
+            ) { actions.getUnbound(exerciseId = exercise.id ?: 0) },
+            onClickExercise = { onClickExercise(exercise.id ?: 0) }
+        )
     }
 }

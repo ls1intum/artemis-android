@@ -204,34 +204,41 @@ internal fun CoursesOverview(
                 retryButtonText = stringResource(id = R.string.courses_loading_try_again),
                 onClickRetry = viewModel::requestReloadDashboard
             ) { dashboard: Dashboard ->
-                if (dashboard.courses.isEmpty() && dashboard.recentCourses.isEmpty() && query.isNotBlank()) {
-                    NoSearchResults(
-                        modifier = Modifier.fillMaxSize(),
-                        title = stringResource(id = R.string.course_overview_no_search_results),
-                        details = stringResource(id = R.string.course_overview_no_search_results_details, query)
-                    )
-                } else if (dashboard.courses.isEmpty() && dashboard.recentCourses.isEmpty()) {
+                if (dashboard.courses.isEmpty() && dashboard.recentCourses.isEmpty()) {
+                    if (query.isNotBlank()) {
+                        NoSearchResults(
+                            modifier = Modifier.fillMaxSize(),
+                            title = stringResource(id = R.string.course_overview_no_search_results),
+                            details = stringResource(
+                                id = R.string.course_overview_no_search_results_details,
+                                query
+                            )
+                        )
+                        return@BasicDataStateUi
+                    }
+
                     DashboardEmpty(
                         modifier = Modifier.fillMaxSize(),
                         onClickSignup = onClickRegisterForCourse
                     )
-                } else {
-                    CourseList(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = Spacings.ScreenHorizontalSpacing)
-                            .testTag(TEST_TAG_COURSE_LIST),
-                        courseListState = courseListState,
-                        courses = dashboard.courses,
-                        recentCourses = dashboard.recentCourses,
-                        onClickOnCourse = { course ->
-                            scope.launch{
-                                viewModel.onCourseAccessed(course.id ?: 0L)
-                            }
-                            onViewCourse(course.id ?: 0L)
-                        }
-                    )
+                    return@BasicDataStateUi
                 }
+
+                CourseList(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = Spacings.ScreenHorizontalSpacing)
+                        .testTag(TEST_TAG_COURSE_LIST),
+                    courseListState = courseListState,
+                    courses = dashboard.courses,
+                    recentCourses = dashboard.recentCourses,
+                    onClickOnCourse = { course ->
+                        scope.launch{
+                            viewModel.onCourseAccessed(course.id ?: 0L)
+                        }
+                        onViewCourse(course.id ?: 0L)
+                    }
+                )
             }
         }
     }

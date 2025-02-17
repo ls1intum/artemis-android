@@ -145,10 +145,12 @@ internal fun SinglePageConversationBody(
         ) { config ->
             // This handles the state of the search bar in tablet mode depending on the view
             // We only want to show it in the conversation overview
-            if (config !is NothingOpened && doAlwaysShowScaffold) {
-                collapsingContentState.collapseContent()
-            } else if (doAlwaysShowScaffold) {
-                collapsingContentState.resetCollapsingContent()
+            if (doAlwaysShowScaffold) {
+                if (config is NothingOpened) {
+                    collapsingContentState.resetCollapsingContent()
+                } else {
+                    collapsingContentState.collapseContent()
+                }
             }
 
             when (config) {

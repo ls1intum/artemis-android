@@ -84,10 +84,7 @@ internal fun BrowseChannelsScreen(
     val channelsDataState by viewModel.channels.collectAsState()
     val query by viewModel.query.collectAsState()
 
-    val collapsingContentState = CollapsingContentState(
-        initialCollapsingHeight = 0f,
-        initialOffset = 0f,
-    )
+    val collapsingContentState = CollapsingContentState()
 
     var registerInChannelJob: Deferred<Long?>? by remember { mutableStateOf(null) }
     var displayRegistrationFailedDialog by remember { mutableStateOf(false) }
@@ -152,19 +149,26 @@ internal fun BrowseChannelsScreen(
                         )
                     }
                 }
-            } else if (query.isNotBlank()) {
+                return@BasicDataStateUi
+            }
+
+            if (query.isNotBlank()) {
                 NoSearchResults(
                     modifier = Modifier.fillMaxSize(),
                     title = stringResource(id = R.string.browse_channel_list_no_search_results_title),
-                    details = stringResource(id = R.string.browse_channel_list_no_search_results_body, query)
+                    details = stringResource(
+                        id = R.string.browse_channel_list_no_search_results_body,
+                        query
+                    )
                 )
-            } else {
-                EmptyListHint(
-                    modifier = Modifier.align(Alignment.Center),
-                    hint = stringResource(id = R.string.browse_channel_list_empty),
-                    icon = Icons.Default.Tag
-                )
+                return@BasicDataStateUi
             }
+
+            EmptyListHint(
+                modifier = Modifier.align(Alignment.Center),
+                hint = stringResource(id = R.string.browse_channel_list_empty),
+                icon = Icons.Default.Tag
+            )
         }
 
         if (displayRegistrationFailedDialog) {

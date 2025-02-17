@@ -138,27 +138,30 @@ private fun FaqOverviewBody(
     Column(
         modifier = modifier,
     ) {
-        if (faqs.isEmpty() && isSearching) {
-            NoSearchResults(
-                modifier = Modifier.fillMaxSize(),
-                title = stringResource(R.string.faq_overview_no_faqs),
-                details = stringResource(R.string.faq_overview_no_faqs_search, query)
-            )
-        } else if (faqs.isEmpty()) {
-            EmptyListHint(
-                modifier = Modifier.fillMaxSize(),
-                hint = stringResource(R.string.faq_overview_no_faqs),
-                icon = Icons.Default.QuestionMark
-            )
-        } else {
-            FaqList(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .nestedScroll(collapsingContentState.nestedScrollConnection),
-                faqs = faqs,
-                onNavigateToFaq = onNavigateToFaq
-            )
+        if (faqs.isEmpty()) {
+            if (isSearching) {
+                NoSearchResults(
+                    modifier = Modifier.fillMaxSize(),
+                    title = stringResource(R.string.faq_overview_no_faqs),
+                    details = stringResource(R.string.faq_overview_no_faqs_search, query)
+                )
+            } else {
+                EmptyListHint(
+                    modifier = Modifier.fillMaxSize(),
+                    hint = stringResource(R.string.faq_overview_no_faqs),
+                    icon = Icons.Default.QuestionMark
+                )
+            }
+            return
         }
+
+        FaqList(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(collapsingContentState.nestedScrollConnection),
+            faqs = faqs,
+            onNavigateToFaq = onNavigateToFaq
+        )
     }
 }
 

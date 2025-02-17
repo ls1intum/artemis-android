@@ -77,7 +77,7 @@ class FaqOverviewUiTest : BaseComposeTest() {
         composeTestRule.setContent {
             FaqOverviewUi(
                 viewModel = viewModel,
-                collapsingContentState = CollapsingContentState(0f, 0f),
+                collapsingContentState = CollapsingContentState(),
                 onNavigateToFaq = {}
             )
         }

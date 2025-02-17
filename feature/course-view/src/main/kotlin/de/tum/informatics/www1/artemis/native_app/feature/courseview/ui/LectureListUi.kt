@@ -39,34 +39,38 @@ internal fun LectureListUi(
     query: String,
     onClickLecture: (Lecture) -> Unit
 ) {
-    if (query.isNotBlank() && lectures.isEmpty()) {
-        NoSearchResults(
-            modifier = modifier,
-            title = stringResource(id = R.string.course_ui_lectures_no_search_results_title),
-            details = stringResource(id = R.string.course_ui_lectures_no_search_results_body, query)
-        )
-    } else if (lectures.isEmpty()) {
+    if (lectures.isEmpty()) {
+        if (query.isNotBlank()) {
+            NoSearchResults(
+                modifier = modifier,
+                title = stringResource(id = R.string.course_ui_lectures_no_search_results_title),
+                details = stringResource(id = R.string.course_ui_lectures_no_search_results_body, query)
+            )
+            return
+        }
+
         EmptyListHint(
             modifier = modifier,
             hint = stringResource(id = R.string.course_ui_lectures_no_search_results_title),
             icon = Icons.Default.School
         )
-    } else {
-        WeeklyItemsLazyColumn(
-            modifier = modifier
-                .nestedScroll(collapsingContentState.nestedScrollConnection)
-                .testTag(TEST_TAG_LECTURE_LIST),
-            weeklyItemGroups = lectures,
-            getItemId = { id ?: 0L }
-        ) { m, lecture ->
-            LectureListItem(
-                modifier = m
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacings.ScreenHorizontalSpacing),
-                lecture = lecture,
-                onClick = { onClickLecture(lecture) }
-            )
-        }
+        return
+    }
+
+    WeeklyItemsLazyColumn(
+        modifier = modifier
+            .nestedScroll(collapsingContentState.nestedScrollConnection)
+            .testTag(TEST_TAG_LECTURE_LIST),
+        weeklyItemGroups = lectures,
+        getItemId = { id ?: 0L }
+    ) { m, lecture ->
+        LectureListItem(
+            modifier = m
+                .fillMaxWidth()
+                .padding(horizontal = Spacings.ScreenHorizontalSpacing),
+            lecture = lecture,
+            onClick = { onClickLecture(lecture) }
+        )
     }
 }
 
