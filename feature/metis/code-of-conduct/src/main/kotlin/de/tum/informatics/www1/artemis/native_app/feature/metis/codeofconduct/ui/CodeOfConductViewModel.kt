@@ -75,14 +75,15 @@ internal class CodeOfConductViewModel(
         flatMapLatest(
             accountService.authToken,
             serverConfigurationService.serverUrl,
+            courseService.onReloadRequired,
             requestReload.onStart { emit(Unit) }
-        ) { authToken, serverUrl, _ ->
+        ) { authToken, serverUrl, _, _ ->
             retryOnInternet(networkStatusProvider.currentNetworkStatus) {
                 /*
                 First fetch the coc of the course itself, if it is empty, load the template instead.
                  */
                 courseService
-                    .getCourse(courseId, serverUrl, authToken)
+                    .getCourse(courseId)
                     .bind { it.course.courseInformationSharingMessagingCodeOfConduct }
                     .then { courseCoc ->
                         if (courseCoc.isBlank()) {

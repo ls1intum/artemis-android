@@ -1,10 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.network
 
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
+import de.tum.informatics.www1.artemis.native_app.core.data.service.ArtemisContextBasedService
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.Exercise
-import kotlinx.datetime.Instant
 
-interface ExerciseService {
+interface ExerciseService : ArtemisContextBasedService {
 
     /**
      * Get exercise details including all results for the currently logged-in user
@@ -12,7 +12,5 @@ interface ExerciseService {
      */
     suspend fun getExerciseDetails(
         exerciseId: Long,
-        serverUrl: String,
-        authToken: String
     ): NetworkResponse<Exercise>
 }
