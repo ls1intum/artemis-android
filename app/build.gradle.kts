@@ -14,7 +14,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
     id("com.google.android.gms.oss-licenses-plugin")
-    id("io.sentry.android.gradle") version "5.1.0"
+    id("io.sentry.android.gradle") version "5.2.0"
     id("artemis.android.room")
 }
 
@@ -120,6 +120,7 @@ dependencies {
     implementation(project(":feature:quiz"))
     implementation(project(":feature:push"))
     implementation(project(":feature:metis"))
+    implementation(project(":feature:faq"))
 
     kover(project(":core:common"))
     kover(project(":core:data"))

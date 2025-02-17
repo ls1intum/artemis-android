@@ -133,8 +133,6 @@ internal open class ConversationViewModel(
     metisService: MetisService,
     private val coroutineContext: CoroutineContext = EmptyCoroutineContext
 ) : MetisViewModel(
-    serverConfigurationService,
-    accountService,
     accountDataService,
     networkStatusProvider,
     websocketProvider,
@@ -153,6 +151,22 @@ internal open class ConversationViewModel(
     private val deleteJobs = mutableMapOf<IBasePost, Job>()
     val isMarkedAsDeleteList = mutableStateListOf<IBasePost>()
 
+    val conversation: StateFlow<DataState<Conversation>> = flatMapLatest(
+        serverConfigurationService.serverUrl,
+        accountService.authToken,
+        onReloadRequestAndWebsocketReconnect.onStart { emit(Unit) }
+    ) { serverUrl, authToken, _ ->
+        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
+            conversationService.getConversation(
+                courseId = metisContext.courseId,
+                conversationId = metisContext.conversationId,
+                authToken = authToken,
+                serverUrl = serverUrl
+            )
+        }
+    }
+        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
+
     val chatListUseCase = ConversationChatListUseCase(
         viewModelScope = viewModelScope,
         metisService = metisService,
@@ -160,7 +174,8 @@ internal open class ConversationViewModel(
         metisContext = metisContext,
         onRequestSoftReload = onRequestSoftReload,
         serverConfigurationService = serverConfigurationService,
-        accountService = accountService
+        accountService = accountService,
+        conversation = conversation,
     )
 
     val threadUseCase = ConversationThreadUseCase(
@@ -185,50 +200,30 @@ internal open class ConversationViewModel(
     )
 
     private val course: StateFlow<DataState<Course>> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
+        courseService.onReloadRequired,
         onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
+    ) { _, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
             courseService.getCourse(
                 metisContext.courseId,
-                serverUrl,
-                authToken
             ).bind { it.course }
         }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Lazily)
 
-    private val hasModerationRights: StateFlow<Boolean> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
-        onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            conversationService
-                .getConversation(
-                    courseId = metisContext.courseId,
-                    conversationId = metisContext.conversationId,
-                    authToken = authToken,
-                    serverUrl = serverUrl
-                )
-                .bind { it.hasModerationRights }
-        }
-            .map { it.orElse(false) }
+    private val hasModerationRights: StateFlow<Boolean> = conversation.map {
+        it.bind { conversation -> conversation.hasModerationRights }
+            .orElse(false)
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, false)
 
     private val isAtLeastTutorInCourse: StateFlow<Boolean> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
         course,
-        onRequestReload.onStart { emit(Unit) }
-    ) { serverUrl, authToken, course, _ ->
+        onRequestReload.onStart { emit(Unit) },
+        accountDataService.onReloadRequired,
+    ) { course, _, _ ->
         retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            accountDataService.getAccountData(
-                serverUrl = serverUrl,
-                bearerToken = authToken
-            )
+            accountDataService.getAccountData()
                 .bind { it.isAtLeastTutorInCourse(course = course.orThrow()) }
         }
             .map { it.orElse(false) }
@@ -249,21 +244,6 @@ internal open class ConversationViewModel(
     }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DataStatus.Outdated)
 
-    val conversation: StateFlow<DataState<Conversation>> = flatMapLatest(
-        serverConfigurationService.serverUrl,
-        accountService.authToken,
-        onReloadRequestAndWebsocketReconnect.onStart { emit(Unit) }
-    ) { serverUrl, authToken, _ ->
-        retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-            conversationService.getConversation(
-                courseId = metisContext.courseId,
-                conversationId = metisContext.conversationId,
-                authToken = authToken,
-                serverUrl = serverUrl
-            )
-        }
-    }
-        .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val latestUpdatedConversation: StateFlow<DataState<Conversation>> = flatMapLatest(
         conversation.holdLatestLoaded(),

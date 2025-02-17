@@ -2,7 +2,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.metis.conversation.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -31,7 +30,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -56,6 +54,7 @@ import de.tum.informatics.www1.artemis.native_app.core.data.isSuccess
 import de.tum.informatics.www1.artemis.native_app.core.data.orNull
 import de.tum.informatics.www1.artemis.native_app.core.ui.BuildConfig
 import de.tum.informatics.www1.artemis.native_app.core.ui.LocalLinkOpener
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.BasicSearchTextField
 import de.tum.informatics.www1.artemis.native_app.core.ui.common.EmptyDataStateUi
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
@@ -184,27 +183,25 @@ fun ConversationChatListScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
+            ArtemisTopAppBar(
                 title = {
                     if (isSearchBarOpen) {
                         LaunchedEffect(Unit) {
                             searchBarFocusRequester.requestFocus()
                         }
 
-                        Box(
+                        BasicSearchTextField(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(end = 8.dp)
-                        ){
-                            BasicSearchTextField(
-                                modifier = Modifier,
-                                query = query,
-                                updateQuery = onUpdateQuery,
-                                hint = stringResource(id = R.string.metis_post_search_hint),
+                                .padding(end = 8.dp),
+                            query = query,
+                            updateQuery = onUpdateQuery,
+                            hint = stringResource(id = R.string.metis_post_search_hint),
+                            backgroundColor = MaterialTheme.colorScheme.background,
                                 textStyle = MaterialTheme.typography.bodyMedium,
                                 focusRequester = searchBarFocusRequester
                             )
-                        }
+
                     } else {
                         EmptyDataStateUi(
                             dataState = conversationDataState,
@@ -238,7 +235,11 @@ fun ConversationChatListScreen(
                         }
 
                         IconButton(onClick = { isSearchBarOpen = true }) {
-                            Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                tint = MaterialTheme.colorScheme.primary,
+                                contentDescription = null
+                            )
                         }
 
                         IconButton(
@@ -249,7 +250,11 @@ fun ConversationChatListScreen(
                                 }
                             }
                         ) {
-                            Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
+                            Icon(
+                                imageVector = Icons.Outlined.Info,
+                                tint = MaterialTheme.colorScheme.primary,
+                                contentDescription = null
+                            )
 
                             InfoDropdownMenu(
                                 isInfoDropdownExpanded = isInfoDropdownExpanded,

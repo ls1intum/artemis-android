@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="link_color">#006398</color>
+    <color name="code_text_color">#DC3545</color>
+    <color name="code_block_text_color">#191C20</color>
+    <color name="code_block_background_color">#EEEFF6</color>
+    <color name="code_background_color">#E0E2E8</color>
+</resources>

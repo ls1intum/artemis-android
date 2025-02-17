@@ -171,6 +171,13 @@ interface ConversationService {
         serverUrl: String
     ): NetworkResponse<Boolean>
 
+    suspend fun markConversationAsRead(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean>
+
     suspend fun markAllConversationsAsRead(
         courseId: Long,
         serverUrl: String,

@@ -19,7 +19,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,6 +31,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.tum.informatics.www1.artemis.native_app.core.ui.alert.TextAlertDialog
+import de.tum.informatics.www1.artemis.native_app.core.ui.common.ArtemisTopAppBar
 import de.tum.informatics.www1.artemis.native_app.core.ui.compose.NavigationBackButton
 import de.tum.informatics.www1.artemis.native_app.core.ui.pagePadding
 import de.tum.informatics.www1.artemis.native_app.feature.metis.manageconversations.R
@@ -84,7 +84,7 @@ internal fun CreateChannelScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
+            ArtemisTopAppBar(
                 title = {
                     Text(text = stringResource(id = R.string.create_channel_title))
                 },
@@ -92,8 +92,7 @@ internal fun CreateChannelScreen(
                     NavigationBackButton(onNavigateBack)
                 }
             )
-        },
-
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier

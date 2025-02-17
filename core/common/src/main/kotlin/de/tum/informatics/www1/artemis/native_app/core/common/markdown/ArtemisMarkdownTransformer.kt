@@ -2,35 +2,8 @@ package de.tum.informatics.www1.artemis.native_app.core.common.markdown
 
 abstract class ArtemisMarkdownTransformer {
 
-    /**
-     * Empty markdown transformer.
-     */
-    companion object : ArtemisMarkdownTransformer() {
-        override fun transformExerciseMarkdown(title: String, url: String, type: String): String =
-            ""
-
-        override fun transformUserMentionMarkdown(
-            text: String,
-            fullName: String,
-            userName: String
-        ): String = ""
-
-        override fun transformChannelMentionMarkdown(
-            channelName: String,
-            conversationId: Long
-        ): String = ""
-
-        override fun transformLectureContentMarkdown(
-            type: String,
-            fileName: String,
-            url: String
-        ) : String = ""
-
-        override fun transformFileUploadMessageMarkdown(
-            isImage: Boolean,
-            fileName: String,
-            filePath: String,
-        ) : String = ""
+    companion object {
+        val Default = object : ArtemisMarkdownTransformer() {}
     }
 
     private val exerciseMarkdownPattern =
@@ -92,32 +65,32 @@ abstract class ArtemisMarkdownTransformer {
         }
     }
 
-    protected abstract fun transformExerciseMarkdown(
+    protected open fun transformExerciseMarkdown(
         title: String,
         url: String,
         type: String
-    ): String
+    ): String = "$type: $title"
 
-    protected abstract fun transformUserMentionMarkdown(
+    protected open fun transformUserMentionMarkdown(
         text: String,
         fullName: String,
         userName: String
-    ): String
+    ): String = "@$userName"
 
-    protected abstract fun transformChannelMentionMarkdown(
+    protected open fun transformChannelMentionMarkdown(
         channelName: String,
         conversationId: Long
-    ): String
+    ): String = "#$channelName"
 
-    protected abstract fun transformLectureContentMarkdown(
+    protected open fun transformLectureContentMarkdown(
         type: String,
         fileName: String,
         url: String
-    ): String
+    ): String = "$type: $fileName"
 
-    protected abstract fun transformFileUploadMessageMarkdown(
+    protected open fun transformFileUploadMessageMarkdown(
         isImage: Boolean,
         fileName: String,
         filePath: String
-    ): String
+    ): String = fileName
 }

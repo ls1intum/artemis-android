@@ -18,8 +18,8 @@ import kotlinx.serialization.json.Json
 
 internal object NotificationTargetManager {
 
-    private val MainActivity =
-        Class.forName("de.tum.informatics.www1.artemis.native_app.android.ui.MainActivity")
+    private val MainActivity
+        get() = Class.forName("de.tum.informatics.www1.artemis.native_app.android.ui.MainActivity")
 
     private val json = Json {
         ignoreUnknownKeys = true

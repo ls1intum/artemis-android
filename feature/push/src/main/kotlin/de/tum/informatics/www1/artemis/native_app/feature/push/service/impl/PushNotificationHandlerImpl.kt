@@ -5,10 +5,12 @@ import android.util.Log
 import de.tum.informatics.www1.artemis.native_app.core.common.CurrentActivityListener
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContext
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleMetisContextReporter
+import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisiblePostList
 import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.visiblemetiscontextreporter.VisibleStandalonePostDetails
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ArtemisNotification
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.CommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.NotificationType
+import de.tum.informatics.www1.artemis.native_app.feature.push.notification_model.ReplyPostCommunicationNotificationType
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.NotificationManager
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.PushNotificationHandler
 import de.tum.informatics.www1.artemis.native_app.feature.push.service.impl.notification_manager.NotificationTargetManager
@@ -35,6 +37,29 @@ class PushNotificationHandlerImpl(
         ///
         /// The version is declared in the constants of Artemis, see [source](https://github.com/ls1intum/Artemis/blob/6.6.7/src/main/java/de/tum/in/www1/artemis/config/Constants.java#L318).
         private const val PUSH_NOTIFICATION_VERSION = 1
+
+        internal fun isNotificationContextInVisibleMetisContexts(
+            notification: ArtemisNotification<out NotificationType>,
+            visibleMetisContexts: List<VisibleMetisContext>
+        ): Boolean {
+            val notificationType = notification.type
+            if (notificationType !is CommunicationNotificationType) return false
+
+            val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
+                target = notification.target
+            )
+
+            val visibleMetisContext = if (notificationType is ReplyPostCommunicationNotificationType) {
+                VisibleStandalonePostDetails(
+                    metisContext = metisTarget.metisContext,
+                    postId = metisTarget.postId
+                )
+            } else {
+                VisiblePostList(metisContext = metisTarget.metisContext)
+            }
+
+            return visibleMetisContext in visibleMetisContexts
+        }
     }
 
     override fun handleServerPushNotification(payload: String) {
@@ -42,7 +67,10 @@ class PushNotificationHandlerImpl(
 
         val notification = decodeNotification(payload) ?: return
 
-        if (isNotificationContextAlreadyObservedByUser(notification)) return
+        if (isNotificationContextAlreadyObservedByUser(notification)) {
+            Log.d(TAG, "Notification context is already observed by user -> discarding")
+            return
+        }
 
         runBlocking {
             notificationManager.popNotification(
@@ -99,19 +127,7 @@ class PushNotificationHandlerImpl(
         val visibleMetisContexts: List<VisibleMetisContext> =
             (currentActivity as? VisibleMetisContextReporter)?.visibleMetisContexts?.value ?: return false
 
-        val notificationType = notification.type
-        if (notificationType !is CommunicationNotificationType) return false
-
-        val metisTarget = NotificationTargetManager.getCommunicationNotificationTarget(
-            target = notification.target
-        )
-
-        val visibleMetisContext = VisibleStandalonePostDetails(
-            metisContext = metisTarget.metisContext,
-            postId = metisTarget.postId
-        )
-
-        return visibleMetisContext in visibleMetisContexts
+        return isNotificationContextInVisibleMetisContexts(notification, visibleMetisContexts)
     }
 
 

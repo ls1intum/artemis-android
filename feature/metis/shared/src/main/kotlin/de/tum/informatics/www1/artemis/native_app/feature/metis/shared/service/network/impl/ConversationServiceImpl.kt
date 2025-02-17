@@ -16,6 +16,7 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -513,6 +514,24 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
             }
                 .status
                 .isSuccess()
+        }
+    }
+
+    override suspend fun markConversationAsRead(
+        courseId: Long,
+        conversationId: Long,
+        authToken: String,
+        serverUrl: String
+    ): NetworkResponse<Boolean> {
+        return performNetworkCall {
+            ktorProvider.ktorClient.patch(serverUrl) {
+                url {
+                    appendPathSegments("api", "courses", courseId.toString(), "conversations", conversationId.toString(), "mark-as-read")
+                }
+
+                cookieAuth(authToken)
+                contentType(ContentType.Application.Json)
+            }.status.isSuccess()
         }
     }
 
