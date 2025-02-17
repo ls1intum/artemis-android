@@ -3,6 +3,7 @@ package de.tum.informatics.www1.artemis.native_app.feature.faq.ui.overview
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -36,6 +37,10 @@ import de.tum.informatics.www1.artemis.native_app.core.ui.markdown.ProvideMarkwo
 import de.tum.informatics.www1.artemis.native_app.feature.faq.R
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.Faq
 import de.tum.informatics.www1.artemis.native_app.feature.faq.repository.data.FaqState
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.ConfiguredFaqCategoryChip
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipConfig
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.FaqCategoryChipRow
+import de.tum.informatics.www1.artemis.native_app.feature.faq.ui.shared.SelectableFaqCategoryChipRow
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -67,10 +72,23 @@ fun FaqOverviewUi(
 ) {
     val faqs by viewModel.displayedFaqs.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
+    val allCategories by viewModel.allCategories.collectAsState()
+
+    val filterChips = allCategories.map {
+        ConfiguredFaqCategoryChip(
+            category = it,
+            config = FaqCategoryChipConfig.Filter(
+                isSelected = selectedCategory == it,
+                onClick = { viewModel.onToggleSelectableFaqCategory(it) }
+            )
+        )
+    }
 
     FaqOverviewUi(
         modifier = modifier,
         faqsDataState = faqs,
+        filterChips = filterChips,
         query = query,
         onUpdateQuery = viewModel::updateQuery,
         onReloadRequest = viewModel::requestReload,
@@ -83,6 +101,7 @@ fun FaqOverviewUi(
 fun FaqOverviewUi(
     modifier: Modifier = Modifier,
     faqsDataState: DataState<List<Faq>>,
+    filterChips: List<ConfiguredFaqCategoryChip>,
     query: String,
     onUpdateQuery: (String) -> Unit,
     onReloadRequest: () -> Unit,
@@ -104,6 +123,7 @@ fun FaqOverviewUi(
                     .fillMaxSize()
                     .imePadding(),
                 faqs = faqs,
+                filterChips = filterChips,
                 query = query,
                 onUpdateQuery = onUpdateQuery,
                 onNavigateToFaq = onNavigateToFaq
@@ -112,10 +132,12 @@ fun FaqOverviewUi(
     }
 }
 
+
 @Composable
 private fun FaqOverviewBody(
     modifier: Modifier = Modifier,
     faqs: List<Faq>,
+    filterChips: List<ConfiguredFaqCategoryChip>,
     query: String,
     onUpdateQuery: (String) -> Unit,
     onNavigateToFaq: (Long) -> Unit
@@ -134,6 +156,16 @@ private fun FaqOverviewBody(
             hint = stringResource(R.string.faq_search_hint),
             testTag = TEST_TAG_FAQ_OVERVIEW_SEARCH,
         )
+
+        if (filterChips.size > 1) {
+            SelectableFaqCategoryChipRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+                ,
+                configuredFaqCategories = filterChips
+            )
+        }
 
         if (faqs.isEmpty()) {
             val emptyStringResId = if (isSearching) {
@@ -168,7 +200,10 @@ private fun FaqList(
         contentPadding = Spacings.calculateEndOfPagePaddingValues(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(faqs) { faq ->
+        items(
+            items = faqs,
+            key = { faq -> faq.id }
+        ) { faq ->
             FaqPreviewItem(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -212,11 +247,19 @@ private fun FaqPreviewItem(
                 onClick = onClick
             )
 
-            TextButton(
-                onClick = onClick,
-                modifier = Modifier.align(Alignment.End)
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResource(R.string.faq_overview_read_more))
+                FaqCategoryChipRow(
+                    modifier = Modifier.weight(1f),
+                    categories = faq.categories
+                )
+
+                TextButton(
+                    onClick = onClick,
+                ) {
+                    Text(stringResource(R.string.faq_overview_read_more))
+                }
             }
         }
     }

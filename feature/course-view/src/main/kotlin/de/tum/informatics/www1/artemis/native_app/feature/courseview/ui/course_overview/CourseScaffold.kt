@@ -1,5 +1,7 @@
 package de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -101,40 +103,61 @@ private fun BottomNavigationBar(
     isSelected: (CourseTab) -> Boolean,
     onUpdateSelectedTab: (CourseTab) -> Unit
 ) {
-    val navItems = BottomNavigationItem.defaults.toMutableList()
-    if (courseDataState.isSuccess) {
-        val course = (courseDataState as DataState.Success).data
-        if (course.faqEnabled) {
-            navItems += BottomNavigationItem.faq
-        }
-    }
+    val isFaqEnabled = courseDataState.bind { it.faqEnabled }.orElse(false)
 
     NavigationBar {
-        navItems.forEach { navigationItem ->
-            val labelText = stringResource(id = navigationItem.labelStringId)
-            NavigationBarItem(
-                selected = isSelected(navigationItem.route),
-                label = {
-                    Text(
-                        text = labelText,
-                        maxLines = 1,
-                        // On small devices the "Communication Label would overflow onto two lines
-                        // when FAQ is enabled. Therefore trim the label to one line.
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                icon = {
-                    Icon(
-                        navigationItem.icon,
-                        contentDescription = labelText
-                    )
-                },
-                onClick = {
-                    onUpdateSelectedTab(navigationItem.route)
-                }
+        BottomNavigationItem.defaults.forEach { navigationItem ->
+            BottomNavigationItemComposable(
+                modifier = Modifier.weight(1f),
+                navigationItem = navigationItem,
+                isSelected = isSelected,
+                onUpdateSelectedTab = onUpdateSelectedTab
+            )
+        }
+
+        AnimatedVisibility(
+            modifier = Modifier.weight(1f),
+            visible = isFaqEnabled,
+        ) {
+            BottomNavigationItemComposable(
+                navigationItem = BottomNavigationItem.faq,
+                isSelected = isSelected,
+                onUpdateSelectedTab = onUpdateSelectedTab
             )
         }
     }
+}
+
+@Composable
+private fun RowScope.BottomNavigationItemComposable(
+    modifier: Modifier = Modifier,
+    navigationItem: BottomNavigationItem,
+    isSelected: (CourseTab) -> Boolean,
+    onUpdateSelectedTab: (CourseTab) -> Unit
+) {
+    val labelText = stringResource(id = navigationItem.labelStringId)
+    NavigationBarItem(
+        modifier = modifier,
+        selected = isSelected(navigationItem.route),
+        label = {
+            Text(
+                text = labelText,
+                maxLines = 1,
+                // On small devices the "Communication Label would overflow onto two lines
+                // when FAQ is enabled. Therefore trim the label to one line.
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        icon = {
+            Icon(
+                navigationItem.icon,
+                contentDescription = labelText
+            )
+        },
+        onClick = {
+            onUpdateSelectedTab(navigationItem.route)
+        }
+    )
 }
 
 
