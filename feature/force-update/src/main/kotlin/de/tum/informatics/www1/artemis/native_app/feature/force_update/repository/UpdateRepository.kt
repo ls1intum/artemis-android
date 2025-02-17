@@ -31,6 +31,10 @@ class UpdateRepository(
         private val LAST_KNOWN_VERSION = intPreferencesKey("last_known_version")
     }
 
+    /**
+     * Called whenever serverUrl changes. We also re-check every 2 days if the stored
+     * version is not already higher than the local version.
+     */
     fun checkForUpdate(): Flow<UpdateResult> =
         serverConfigurationService.serverUrl.mapLatest { latestServerUrl ->
 
@@ -41,10 +45,7 @@ class UpdateRepository(
 
             // If the stored version is already higher than the local version, we need an update
             if (storedServerVersion > versionCode) {
-                return@mapLatest UpdateResult(
-                    updateAvailable = true,
-                    forceUpdate = true
-                )
+                return@mapLatest UpdateResult(updateAvailable = true, forceUpdate = true)
             }
 
             // If it’s not time to check updates yet, exit
@@ -52,17 +53,20 @@ class UpdateRepository(
                 return@mapLatest UpdateResult(updateAvailable = false, forceUpdate = false)
             }
 
+            //Do a new call to /management/info
             val token = accountService.authToken.first()
             val response = updateService.getLatestVersion(latestServerUrl, token)
 
             when (response) {
                 is NetworkResponse.Response -> {
-                    val latestVersion = response.data
-                    val shouldForceUpdate = latestVersion > versionCode
+                    // parse min version from “compatible-versions”
+                    val minVersion: Int = response.data ?: 0
 
+                    val shouldForceUpdate = minVersion > versionCode
                     if (shouldForceUpdate) {
+                        // remember new version & timestamp
+                        saveLastKnownVersion(minVersion)
                         saveLastUpdateCheck(System.currentTimeMillis())
-                        saveLastKnownVersion(latestVersion)
                     }
 
                     UpdateResult(
@@ -71,10 +75,8 @@ class UpdateRepository(
                     )
                 }
 
-                // If network fails, choose your fallback strategy:
+                // If network fails
                 else -> UpdateResult(false, false)
-                // else -> UpdateResult(true, true) triggers force update
-
             }
         }
 

@@ -1,10 +1,10 @@
 package de.tum.informatics.www1.artemis.native_app.feature.force_update.service
 
-
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
 import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.core.model.server_config.ProfileInfo
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.ContentType
@@ -15,7 +15,7 @@ interface UpdateService {
     suspend fun getLatestVersion(
         serverUrl: String,
         authToken: String
-    ): NetworkResponse<Int>
+    ): NetworkResponse<Int?>
 }
 
 class UpdateServiceImpl(
@@ -25,17 +25,17 @@ class UpdateServiceImpl(
     override suspend fun getLatestVersion(
         serverUrl: String,
         authToken: String
-    ): NetworkResponse<Int> {
+    ): NetworkResponse<Int?> {
         return performNetworkCall {
-            val dto: AndroidVersionDto = ktorProvider.ktorClient.get(serverUrl) {
+            val dto: ProfileInfo = ktorProvider.ktorClient.get(serverUrl) {
                 url {
-                    appendPathSegments("api", "versions", "android")
+                    appendPathSegments( "management", "info")
                 }
                 contentType(ContentType.Application.Json)
                 cookieAuth(authToken)
             }.body()
 
-            dto.min.toInt()
+            dto.compatibleVersions?.android?.min?.toInt()
         }
     }
 

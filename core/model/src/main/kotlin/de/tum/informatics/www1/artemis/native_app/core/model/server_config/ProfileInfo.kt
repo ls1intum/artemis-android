@@ -31,4 +31,16 @@ data class ProfileInfo(
      * If a login using a username-password combination is not possible.
      */
     val isPasswordLoginDisabled: Boolean = saml2 != null && (saml2.passwordLoginDisabled || !saml2.enablePassword)
+    val compatibleVersions: CompatibleVersions? = null
 }
+
+@Serializable
+data class CompatibleVersions(
+    val android: AndroidCompatibleVersions? = null
+)
+
+@Serializable
+data class AndroidCompatibleVersions(
+    val min: String? = null,
+    val recommended: String? = null
+)
