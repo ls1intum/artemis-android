@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 object Spacings {
     val ScreenHorizontalSpacing = 16.dp
@@ -27,6 +28,9 @@ object Spacings {
 
         val postHeadlineHeight = 36.dp
         val emojiHeight = 27.dp
+        val emojiTextSize = 12.sp
+        // The size of the emoji icon to open the emoji picker (measured in sp to support font scaling)
+        val addEmojiIconSize = 18.sp
     }
 
     object AutoCompletePopup {
