@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import de.tum.informatics.www1.artemis.native_app.core.common.ClockWithOffset
-import de.tum.informatics.www1.artemis.native_app.core.common.flatMapLatest
 import de.tum.informatics.www1.artemis.native_app.core.common.hasPassedFlow
 import de.tum.informatics.www1.artemis.native_app.core.common.withPrevious
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
@@ -29,8 +28,6 @@ import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.MultipleChoiceSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.ShortAnswerSubmittedAnswer
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.quiz.SubmittedAnswer
-import de.tum.informatics.www1.artemis.native_app.core.ui.authTokenStateFlow
-import de.tum.informatics.www1.artemis.native_app.core.ui.serverUrlStateFlow
 import de.tum.informatics.www1.artemis.native_app.core.websocket.WebsocketProvider
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.AnswerOptionId
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.BaseQuizViewModel
@@ -121,15 +118,13 @@ internal class QuizParticipationViewModel(
     private val submissionChannel = "/topic/quizExercise/$exerciseId/submission"
     private val quizExerciseChannel = "/topic/courses/$courseId/quizExercises"
 
-    private val serverUrl = serverUrlStateFlow(serverConfigurationService)
-    private val authToken = authTokenStateFlow(accountService)
 
     /**
      * Use server time for best time approximation.
      * The server time may change multiple times, as new clocks may be emitted regularly
      */
-    val serverClock: Flow<ClockWithOffset> = flatMapLatest(serverUrl, authToken) { serverUrl, authToken ->
-        serverTimeService.getServerClock(authToken = authToken, serverUrl = serverUrl)
+    val serverClock: Flow<ClockWithOffset> = serverTimeService.onReloadRequired.flatMapLatest {
+        serverTimeService.getServerClock()
     }
         .shareIn(viewModelScope + coroutineContext, SharingStarted.Eagerly, replay = 1)
 

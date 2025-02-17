@@ -3,7 +3,6 @@ package de.tum.informatics.www1.artemis.native_app.feature.coremodulestest
 import androidx.test.platform.app.InstrumentationRegistry
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.dataModule
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ServerTimeService
 import de.tum.informatics.www1.artemis.native_app.core.test.BaseComposeTest
@@ -42,10 +41,10 @@ class SyncServerTimeE2eTest : BaseComposeTest() {
     fun `sync server time`() = runTest(timeout = DefaultTimeoutMillis.milliseconds * 2) {       // Multiplied by 2, because flaky test
         val serverTimeService: ServerTimeService = koinRule.koin.get()
 
-        val accessToken = performTestLogin()
+        performTestLogin()
 
         val secondClock = async {
-            serverTimeService.getServerClock(authToken = accessToken, serverUrl = testServerUrl)
+            serverTimeService.getServerClock()
                 .drop(3).first()
         }
 

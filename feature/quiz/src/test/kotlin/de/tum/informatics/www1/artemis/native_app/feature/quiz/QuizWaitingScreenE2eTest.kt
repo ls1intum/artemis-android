@@ -11,7 +11,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import de.tum.informatics.www1.artemis.native_app.core.common.test.DefaultTestTimeoutMillis
 import de.tum.informatics.www1.artemis.native_app.core.common.test.EndToEndTest
-import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.StudentParticipation
 import de.tum.informatics.www1.artemis.native_app.core.test.test_setup.DefaultTimeoutMillis
@@ -86,7 +85,7 @@ internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
 
         val participation = runBlockingWithTestTimeout {
             participationService
-                .findParticipation(quiz.id, testServerUrl, accessToken)
+                .findParticipation(quiz.id)
                 .orThrow("Could not load participation. Expected a participation to have been created")
         }
 
@@ -155,7 +154,7 @@ internal class QuizWaitingScreenE2eTest : QuizBaseE2eTest(QuizType.Live) {
 
         val participation = runBlockingWithTestTimeout {
             participationService
-                .findParticipation(quiz.id, testServerUrl, accessToken)
+                .findParticipation(quiz.id)
                 .orThrow("Could not load participation. Expected a participation to have been created")
         }
 

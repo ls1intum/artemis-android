@@ -1,11 +1,14 @@
 package de.tum.informatics.www1.artemis.native_app.core.data
 
-import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseService
 import de.tum.informatics.www1.artemis.native_app.core.model.Course
 import de.tum.informatics.www1.artemis.native_app.core.model.CourseWithScore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 class CourseServiceFake(private val course: CourseWithScore) : CourseService {
+
+    override val onReloadRequired: Flow<Unit> = emptyFlow()
 
     constructor(course: Course) : this(
         CourseWithScore(
@@ -25,7 +28,5 @@ class CourseServiceFake(private val course: CourseWithScore) : CourseService {
 
     override suspend fun getCourse(
         courseId: Long,
-        serverUrl: String,
-        authToken: String
     ): NetworkResponse<CourseWithScore> = NetworkResponse.Response(course)
 }

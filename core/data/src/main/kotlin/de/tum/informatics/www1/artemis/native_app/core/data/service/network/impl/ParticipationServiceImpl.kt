@@ -1,33 +1,22 @@
 package de.tum.informatics.www1.artemis.native_app.core.data.service.network.impl
 
+import de.tum.informatics.www1.artemis.native_app.core.common.artemis_context.ArtemisContextProvider
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
-import de.tum.informatics.www1.artemis.native_app.core.data.cookieAuth
-import de.tum.informatics.www1.artemis.native_app.core.data.performNetworkCall
 import de.tum.informatics.www1.artemis.native_app.core.data.service.KtorProvider
+import de.tum.informatics.www1.artemis.native_app.core.data.service.impl.ArtemisContextBasedServiceImpl
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.ParticipationService
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
-import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.http.ContentType
 import io.ktor.http.appendPathSegments
-import io.ktor.http.contentType
 
-internal class ParticipationServiceImpl(private val ktorProvider: KtorProvider) :
-    ParticipationService {
-    override suspend fun findParticipation(
-        exerciseId: Long,
-        serverUrl: String,
-        authToken: String
-    ): NetworkResponse<Participation> {
-        return performNetworkCall {
-            ktorProvider.ktorClient.get(serverUrl) {
-                url {
-                    appendPathSegments("api", "exercises", exerciseId.toString(), "participation")
-                }
-
-                contentType(ContentType.Application.Json)
-                cookieAuth(authToken)
-            }.body()
+internal class ParticipationServiceImpl(
+    ktorProvider: KtorProvider,
+    artemisContextProvider: ArtemisContextProvider,
+) : ArtemisContextBasedServiceImpl(ktorProvider, artemisContextProvider),  ParticipationService {
+    override suspend fun findParticipation(exerciseId: Long): NetworkResponse<Participation> {
+        return getRequest {
+            url {
+                appendPathSegments("api", "exercises", exerciseId.toString(), "participation")
+            }
         }
     }
 }

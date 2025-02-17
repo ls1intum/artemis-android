@@ -7,8 +7,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import de.tum.informatics.www1.artemis.native_app.core.data.CourseServiceFake
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.data.service.network.CourseExerciseService
-import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountServiceStub
-import de.tum.informatics.www1.artemis.native_app.core.datastore.ServerConfigurationServiceStub
 import de.tum.informatics.www1.artemis.native_app.core.device.NetworkStatusProviderStub
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.participation.Participation
 import de.tum.informatics.www1.artemis.native_app.core.ui.PlayStoreScreenshots
@@ -17,6 +15,8 @@ import de.tum.informatics.www1.artemis.native_app.core.websocket.LiveParticipati
 import de.tum.informatics.www1.artemis.native_app.core.websocket.test.LiveParticipationServiceStub
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.CourseViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.courseview.ui.course_overview.CourseUiScreen
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
@@ -36,14 +36,10 @@ fun `Course View - Exercise List`() {
         courseId = 0L,
         courseService = CourseServiceFake(ScreenshotCourse),
         liveParticipationService = LiveParticipationServiceStub(),
-        serverConfigurationService = ServerConfigurationServiceStub(),
-        accountService = AccountServiceStub(),
         courseExerciseService = object : CourseExerciseService {
-            override suspend fun startExercise(
-                exerciseId: Long,
-                serverUrl: String,
-                authToken: String
-            ): NetworkResponse<Participation> = NetworkResponse.Failure(RuntimeException())
+            override val onReloadRequired: Flow<Unit> = emptyFlow()
+            override suspend fun startExercise(exerciseId: Long): NetworkResponse<Participation> =
+                NetworkResponse.Failure(RuntimeException())
         },
         networkStatusProvider = NetworkStatusProviderStub()
     )
