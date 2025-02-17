@@ -18,8 +18,10 @@ import de.tum.informatics.www1.artemis.native_app.feature.metis.shared.content.d
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.plus
@@ -39,7 +41,10 @@ internal class BrowseChannelsViewModel(
 
     private val requestRefresh = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
-    val channels: StateFlow<DataState<List<ChannelChat>>> = flatMapLatest(
+    private val _query = MutableStateFlow("")
+    val query: StateFlow<String> = _query
+
+    val channels: StateFlow<DataState<List<ChannelChat>>> = combine(flatMapLatest(
         serverConfigurationService.serverUrl,
         accountService.authToken,
         requestRefresh.onStart { emit(Unit) }
@@ -48,6 +53,10 @@ internal class BrowseChannelsViewModel(
             channelService
                 .getChannels(courseId, serverUrl, authToken)
                 .bind { channels -> channels }
+        }
+    }, query) { dataState, query ->
+        dataState.bind { channels ->
+            channels.filter { it.name.contains(query, ignoreCase = true) }
         }
     }
         .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
@@ -82,6 +91,9 @@ internal class BrowseChannelsViewModel(
         }
     }
 
+    fun updateQuery(query: String) {
+        _query.value = query
+    }
 
     fun requestReload() {
         requestRefresh.tryEmit(Unit)
