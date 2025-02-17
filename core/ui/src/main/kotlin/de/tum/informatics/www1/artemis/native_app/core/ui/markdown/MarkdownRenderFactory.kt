@@ -32,7 +32,7 @@ object MarkdownRenderFactory {
         useOriginalImageSize: Boolean = false,
     ): Markwon {
         val imagePlugin: CoilImagesPlugin? = createImagePlugin(imageLoader, context, useOriginalImageSize)
-        val linkHighlightPlugin = createLinkHighlightPlugin(context)
+        val textThemingPlugin = createTextThemingPlugin(context)
         val softLineBreakPlugin = createSoftLineBreakPlugin()
         val linkResolverPlugin: AbstractMarkwonPlugin? = createLinkResolverPlugin(linkResolver)
 
@@ -41,7 +41,7 @@ object MarkdownRenderFactory {
             .usePlugin(StrikethroughPlugin.create())
             .usePlugin(TablePlugin.create(context))
             .usePlugin(LinkifyPlugin.create())
-            .usePlugin(linkHighlightPlugin)
+            .usePlugin(textThemingPlugin)
             .usePlugin(softLineBreakPlugin)
             .apply {
                 if (imagePlugin != null) {
@@ -101,14 +101,19 @@ object MarkdownRenderFactory {
         }
     }
 
-    private fun createLinkHighlightPlugin(context: Context) =
+    private fun createTextThemingPlugin(context: Context) =
         object : AbstractMarkwonPlugin() {
             override fun configureTheme(builder: MarkwonTheme.Builder) {
                 builder
                     .linkColor(context.getColor(R.color.link_color))
                     .isLinkUnderlined(false)
+                    .codeTextColor(context.getColor(R.color.code_text_color))
+                    .codeBlockTextColor(context.getColor(R.color.code_block_text_color))
+                    .codeBackgroundColor(context.getColor(R.color.code_background_color))
+                    .codeBlockBackgroundColor(context.getColor(R.color.code_block_background_color))
             }
         }
+
 
     private fun createLinkResolverPlugin(linkResolver: LinkResolver?): AbstractMarkwonPlugin? {
         if (linkResolver == null) return null
