@@ -65,6 +65,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import de.tum.informatics.www1.artemis.native_app.core.ui.Spacings
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.DateFormats
 import de.tum.informatics.www1.artemis.native_app.core.ui.date.format
@@ -593,7 +594,7 @@ private fun StandalonePostFooter(
                         .clip(CircleShape)
                         .then(Modifier.align(Alignment.CenterVertically))
                         .sizeIn(minHeight = Spacings.Post.emojiHeight, minWidth = Spacings.Post.emojiHeight)
-                        .padding(5.dp)
+                        .padding(with(LocalDensity.current) { 5.sp.toDp() } )
                         .clickable(onClick = {
                             showEmojiDialog = true
                         })
