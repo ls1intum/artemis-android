@@ -68,6 +68,7 @@ open class ConversationServiceStub(
         description: String,
         isPublic: Boolean,
         isAnnouncement: Boolean,
+        isCourseWide: Boolean,
         authToken: String,
         serverUrl: String
     ): NetworkResponse<ChannelChat> = NetworkResponse.Failure(StubException)

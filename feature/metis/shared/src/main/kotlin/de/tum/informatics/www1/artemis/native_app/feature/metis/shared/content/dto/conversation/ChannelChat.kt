@@ -26,6 +26,7 @@ data class ChannelChat(
     val isPublic: Boolean = true,
     val isAnnouncementChannel: Boolean = false,
     val isArchived: Boolean = false,
+    val isCourseWide: Boolean = false,
     val hasChannelModerationRights: Boolean = false,
     val isChannelModerator: Boolean = false,
     val tutorialGroupId: Long? = null,

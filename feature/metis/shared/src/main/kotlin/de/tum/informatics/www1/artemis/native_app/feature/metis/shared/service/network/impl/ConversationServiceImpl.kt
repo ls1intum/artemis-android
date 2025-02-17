@@ -158,6 +158,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         description: String,
         isPublic: Boolean,
         isAnnouncement: Boolean,
+        isCourseWide: Boolean,
         authToken: String,
         serverUrl: String
     ): NetworkResponse<ChannelChat> {
@@ -171,6 +172,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
                     CreateChannelData(
                         isPublic = isPublic,
                         isAnnouncementChannel = isAnnouncement,
+                        isCourseWide = isCourseWide,
                         name = name,
                         description = description.ifBlank { null }
                     )
@@ -188,6 +190,7 @@ class ConversationServiceImpl(private val ktorProvider: KtorProvider) : Conversa
         val type: String = "channel",
         val isPublic: Boolean,
         val isAnnouncementChannel: Boolean,
+        val isCourseWide: Boolean,
         val name: String,
         val description: String?
     )

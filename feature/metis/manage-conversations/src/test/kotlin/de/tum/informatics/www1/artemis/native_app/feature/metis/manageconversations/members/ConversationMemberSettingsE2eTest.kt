@@ -59,6 +59,7 @@ class ConversationMemberSettingsE2eTest : ConversationBaseTest() {
                 description = "",
                 isPublic = true,
                 isAnnouncement = true,
+                isCourseWide = false,
                 authToken = accessToken,
                 serverUrl = testServerUrl
             )

@@ -44,6 +44,7 @@ class BrowseChannelsE2eTest : ConversationBaseTest() {
                     description = "",
                     isPublic = true,
                     isAnnouncement = false,
+                    isCourseWide = false,
                     authToken = getAdminAccessToken(),
                     serverUrl = testServerUrl
                 ).orThrow("Could not create channel $index")

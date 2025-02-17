@@ -21,6 +21,11 @@
     <string name="create_channel_channel_announcement_type_announcement">Announcement Channel</string>
     <string name="create_channel_channel_announcement_type_unrestricted">Unrestricted Channel</string>
 
+    <string name="create_channel_channel_course_wide_type">Course Wide Channel?</string>
+    <string name="create_channel_channel_course_wide_type_hint">In a course-wide channel, all users in the course are automatically added. In a selective channel, you can manually select the users to be added after creation.</string>
+    <string name="create_channel_channel_course_wide_type_announcement">Course Wide Channel</string>
+    <string name="create_channel_channel_course_wide_type_unrestricted">Selective Channel</string>
+
     <string name="create_channel_button">Create Channel</string>
     <string name="create_channel_failed_title">Could not create channel.</string>
     <string name="create_channel_failed_message">Something went wrong while creating your channel. Please try again.</string>
