@@ -592,7 +592,6 @@ private fun StandalonePostFooter(
                     modifier = modifier
                         .background(color = PostColors.EmojiChipColors.background, CircleShape)
                         .clip(CircleShape)
-                        .then(Modifier.align(Alignment.CenterVertically))
                         .sizeIn(minHeight = Spacings.Post.emojiHeight, minWidth = Spacings.Post.emojiHeight)
                         .padding(with(LocalDensity.current) { 5.sp.toDp() } )
                         .clickable(onClick = {
