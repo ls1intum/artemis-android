@@ -32,7 +32,7 @@ object MarkdownRenderFactory {
         useOriginalImageSize: Boolean = false,
     ): Markwon {
         val imagePlugin: CoilImagesPlugin? = createImagePlugin(imageLoader, context, useOriginalImageSize)
-        val linkHighlightPlugin = createLinkHighlightPlugin(context)
+        val textThemingPlugin = createTextThemingPlugin(context)
         val softLineBreakPlugin = createSoftLineBreakPlugin()
         val linkResolverPlugin: AbstractMarkwonPlugin? = createLinkResolverPlugin(linkResolver)
 
@@ -41,7 +41,7 @@ object MarkdownRenderFactory {
             .usePlugin(StrikethroughPlugin.create())
             .usePlugin(TablePlugin.create(context))
             .usePlugin(LinkifyPlugin.create())
-            .usePlugin(linkHighlightPlugin)
+            .usePlugin(textThemingPlugin)
             .usePlugin(softLineBreakPlugin)
             .apply {
                 if (imagePlugin != null) {
@@ -101,7 +101,7 @@ object MarkdownRenderFactory {
         }
     }
 
-    private fun createLinkHighlightPlugin(context: Context) =
+    private fun createTextThemingPlugin(context: Context) =
         object : AbstractMarkwonPlugin() {
             override fun configureTheme(builder: MarkwonTheme.Builder) {
                 builder
