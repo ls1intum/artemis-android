@@ -43,8 +43,6 @@ val pushModule = module {
             androidContext(),
             get(),
             get(),
-            get(),
-            get(),
             get()
         )
     }

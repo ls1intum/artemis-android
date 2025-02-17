@@ -96,13 +96,13 @@ internal fun SettingsScreen(
 
     val accountDataFlow: StateFlow<DataState<Account>?> = remember {
         flatMapLatest(
-            serverConfigurationService.serverUrl,
+            accountDataService.onReloadRequired,
             accountService.authenticationData
-        ) { serverUrl, authData ->
+        ) { _, authData ->
             when (authData) {
                 is AccountService.AuthenticationData.LoggedIn -> {
                     retryOnInternet(networkStatusProvider.currentNetworkStatus) {
-                        accountDataService.getAccountData(serverUrl, authData.authToken)
+                        accountDataService.getAccountData()
                     }
                 }
 

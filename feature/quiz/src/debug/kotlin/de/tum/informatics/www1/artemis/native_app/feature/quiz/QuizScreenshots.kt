@@ -26,6 +26,8 @@ import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.Qui
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.participation.QuizParticipationViewModel
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizExerciseService
 import de.tum.informatics.www1.artemis.native_app.feature.quiz.service.QuizParticipationService
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @PlayStoreScreenshots
 @Composable
@@ -72,10 +74,9 @@ private fun `Quiz - Multiple Choice Question`() {
         websocketProvider = WebsocketProviderStub(),
         networkStatusProvider = NetworkStatusProviderStub(),
         participationService = object : ParticipationService {
+            override val onReloadRequired: Flow<Unit> = emptyFlow()
             override suspend fun findParticipation(
-                exerciseId: Long,
-                serverUrl: String,
-                authToken: String
+                exerciseId: Long
             ): NetworkResponse<Participation> = NetworkResponse.Response(
                 StudentParticipation.StudentParticipationImpl(
                     exercise = QuizExercise(

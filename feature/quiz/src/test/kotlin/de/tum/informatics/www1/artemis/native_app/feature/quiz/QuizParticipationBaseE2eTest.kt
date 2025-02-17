@@ -9,7 +9,6 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import de.tum.informatics.www1.artemis.native_app.core.common.test.testServerUrl
 import de.tum.informatics.www1.artemis.native_app.core.data.filterSuccess
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.QuizExercise
 import de.tum.informatics.www1.artemis.native_app.core.model.exercise.submission.QuizSubmission
@@ -217,7 +216,7 @@ internal abstract class QuizParticipationBaseE2eTest(quizType: QuizType.Workable
                     when (quizType) {
                         QuizType.Live -> {
                             val participation = participationService
-                                .findParticipation(quiz.id, testServerUrl, accessToken)
+                                .findParticipation(quiz.id)
                                 .orThrow("Could not load submitted participation")
 
                             val results =
