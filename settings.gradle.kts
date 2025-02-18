@@ -42,6 +42,7 @@ include(":feature:settings")
 include(":feature:push")
 include(":feature:faq")
 include(":feature:faq-test")
+include(":feature:force-update")
 
 include(":feature:metis")
 include(":feature:metis:shared")
