@@ -135,6 +135,9 @@ class ConversationOverviewViewModel(
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query
 
+    private val _currentFilter = MutableStateFlow<ConversationOverviewUtils.ConversationFilter>(ConversationOverviewUtils.ConversationFilter.All)
+    val currentFilter: StateFlow<ConversationOverviewUtils.ConversationFilter> = _currentFilter
+
     private val conversationUpdates: Flow<ConversationWebsocketDto> = clientId
         .filterSuccess()
         .flatMapLatest { userId ->
@@ -306,13 +309,20 @@ class ConversationOverviewViewModel(
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
 
     val conversations: StateFlow<DataState<ConversationCollections>> =
-        combine(latestConversations, query) { latestConversationsDataState, query ->
-            if (query.isBlank()) {
-                latestConversationsDataState
-            } else {
-                latestConversationsDataState.bind { latestConversations ->
-                    latestConversations.filtered(query)
+        combine(latestConversations, query, currentFilter) { latestConversationsDataState, query, filter ->
+            latestConversationsDataState.bind { latestConversations ->
+                var filteredConversations = latestConversations
+
+                filteredConversations = when (filter) {
+                    ConversationOverviewUtils.ConversationFilter.Unread -> filteredConversations.filterUnread()
+                    //ConversationOverviewUtils.ConversationFilter.Unresolved -> filteredConversations.filterUnresolved()
+                    else -> filteredConversations
                 }
+
+                if (query.isNotBlank()) {
+                    filteredConversations = filteredConversations.filtered(query)
+                }
+                filteredConversations
             }
         }
             .stateIn(viewModelScope + coroutineContext, SharingStarted.Eagerly)
@@ -389,6 +399,10 @@ class ConversationOverviewViewModel(
 
     fun onUpdateQuery(newQuery: String) {
         _query.value = newQuery
+    }
+
+    fun onUpdateFilter(newFilter: ConversationOverviewUtils.ConversationFilter) {
+        _currentFilter.value = newFilter
     }
 
     fun markConversationAsHidden(conversationId: Long, hidden: Boolean): Deferred<Boolean> {

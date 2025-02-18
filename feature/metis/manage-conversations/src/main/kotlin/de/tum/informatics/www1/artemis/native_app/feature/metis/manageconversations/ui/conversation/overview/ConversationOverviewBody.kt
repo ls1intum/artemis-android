@@ -100,6 +100,7 @@ fun ConversationOverviewBody(
     var showCodeOfConduct by rememberSaveable { mutableStateOf(false) }
     val conversationCollectionsDataState: DataState<ConversationCollections> by viewModel.conversations.collectAsState()
     val isDisplayingErrorDialog by viewModel.isDisplayingErrorDialog.collectAsState()
+    val currentFilter by viewModel.currentFilter.collectAsState()
 
     val isConnected by viewModel.isConnected.collectAsState()
 
@@ -151,7 +152,9 @@ fun ConversationOverviewBody(
                 )
 
                 FilterRow(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    currentFilter = currentFilter,
+                    onUpdateFilter = viewModel::onUpdateFilter
                 )
 
                 ConversationList(
@@ -316,6 +319,8 @@ fun ConversationFabWithDropdownMenu(
 @Composable
 private fun FilterRow(
     modifier: Modifier,
+    currentFilter: ConversationOverviewUtils.ConversationFilter,
+    onUpdateFilter: (ConversationOverviewUtils.ConversationFilter) -> Unit,
     availableFilters: List<ConversationOverviewUtils.ConversationFilter> = listOf(
         ConversationOverviewUtils.ConversationFilter.All,
         ConversationOverviewUtils.ConversationFilter.Unread,
@@ -323,8 +328,6 @@ private fun FilterRow(
         ConversationOverviewUtils.ConversationFilter.Unresolved
     )
 ) {
-    var selectedFilter by remember { mutableStateOf(availableFilters.first { it.isInitiallySelected }) }
-
     Row(
         modifier = modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -332,10 +335,9 @@ private fun FilterRow(
     ) {
         availableFilters.forEach { filter ->
             FilterChip(
-                selected = filter == selectedFilter,
+                selected = filter == currentFilter,
                 onClick = {
-                    selectedFilter = filter
-                    filter.onClick()
+                    onUpdateFilter(filter)
                 },
                 label = {
                     Text(
