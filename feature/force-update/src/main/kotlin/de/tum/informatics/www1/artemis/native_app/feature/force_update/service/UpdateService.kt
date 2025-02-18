@@ -15,7 +15,7 @@ interface UpdateService {
     suspend fun getLatestVersion(
         serverUrl: String,
         authToken: String
-    ): NetworkResponse<Int?>
+    ): NetworkResponse<String?>
 }
 
 class UpdateServiceImpl(
@@ -25,7 +25,7 @@ class UpdateServiceImpl(
     override suspend fun getLatestVersion(
         serverUrl: String,
         authToken: String
-    ): NetworkResponse<Int?> {
+    ): NetworkResponse<String?> {
         return performNetworkCall {
             val dto: ProfileInfo = ktorProvider.ktorClient.get(serverUrl) {
                 url {
@@ -35,7 +35,7 @@ class UpdateServiceImpl(
                 cookieAuth(authToken)
             }.body()
 
-            dto.compatibleVersions?.android?.min?.toInt()
+            dto.compatibleVersions?.android?.min
         }
     }
 

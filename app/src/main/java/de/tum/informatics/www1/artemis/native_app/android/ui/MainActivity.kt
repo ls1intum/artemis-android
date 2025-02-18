@@ -219,7 +219,7 @@ class MainActivity : AppCompatActivity(),
             LocalMarkdownLinkResolver provides koinInject()
         ) {
 
-            val updateRepository = koinInject<UpdateRepository> { parametersOf(BuildConfig.VERSION_CODE) }
+            val updateRepository = koinInject<UpdateRepository> { parametersOf(BuildConfig.VERSION_NAME) }
 
             LaunchedEffect(Unit) {
                 val updateFlow: Flow<UpdateRepository.UpdateResult> = updateRepository.checkForUpdate()

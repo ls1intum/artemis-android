@@ -2,8 +2,8 @@ package de.tum.informatics.www1.artemis.native_app.feature.force_update.reposito
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import de.tum.informatics.www1.artemis.native_app.core.data.NetworkResponse
 import de.tum.informatics.www1.artemis.native_app.core.datastore.AccountService
@@ -21,67 +21,90 @@ private val Context.dataStore by preferencesDataStore("update_preferences")
 class UpdateRepository(
     private val context: Context,
     private val updateService: UpdateService,
-    private val versionCode: Int,
+    version: String,
     private val serverConfigurationService: ServerConfigurationService,
     private val accountService: AccountService,
 ) {
 
     companion object {
         private val LAST_UPDATE_CHECK = longPreferencesKey("last_update_check")
-        private val LAST_KNOWN_VERSION = intPreferencesKey("last_known_version")
+        private val LAST_KNOWN_VERSION = stringPreferencesKey("last_known_version")
     }
 
     /**
-     * Called whenever serverUrl changes. We also re-check every 2 days if the stored
-     * version is not already higher than the local version.
+     * Normalize version E.g., "1.x.x-prod" becomes "1.x.x".
+     */
+    private fun normalizeVersion(version: String): String =
+        version.substringBefore("-").trim()
+
+    /**
+     * Returns true if the serverVersion (normalized) is greater than currentVersion.
+     */
+    private fun isVersionGreater(serverVersion: String, currentVersion: String): Boolean {
+        val parts1 = serverVersion.split(".")
+        val parts2 = currentVersion.split(".")
+        val maxLen = maxOf(parts1.size, parts2.size)
+
+        for (i in 0 until maxLen) {
+            val p1 = parts1.getOrNull(i)?.toIntOrNull() ?: 0
+            val p2 = parts2.getOrNull(i)?.toIntOrNull() ?: 0
+            if (p1 != p2) return p1 > p2
+        }
+        return false
+    }
+
+    private val currentVersionNormalized = normalizeVersion(version)
+
+    /**
+     * Checks for an update whenever the server URL changes or every 2 days.
+     * Instead of using an integer version code, we compare version strings.
      */
     fun checkForUpdate(): Flow<UpdateResult> =
         serverConfigurationService.serverUrl.mapLatest { latestServerUrl ->
 
-            //Read the stored server version
+            // Read the stored server version from DataStore; default to "0.0.0" if none.
             val storedServerVersion = context.dataStore.data
-                .map { it[LAST_KNOWN_VERSION] ?: 0 }
+                .map { it[LAST_KNOWN_VERSION] ?: "0.0.0" }
                 .first()
 
-            // If the stored version is already higher than the local version, we need an update
-            if (storedServerVersion > versionCode) {
+            // If the stored version is greater than our current version, then an update is required.
+            if (isVersionGreater(storedServerVersion, currentVersionNormalized)) {
                 return@mapLatest UpdateResult(updateAvailable = true, forceUpdate = true)
             }
 
-            // If it’s not time to check updates yet, exit
+            // If it's not yet time to re-check (less than 2 days since last check), then assume no update.
             if (!isTimeToCheckUpdate()) {
                 return@mapLatest UpdateResult(updateAvailable = false, forceUpdate = false)
             }
 
-            //Do a new call to /management/info
             val token = accountService.authToken.first()
             val response = updateService.getLatestVersion(latestServerUrl, token)
 
             when (response) {
                 is NetworkResponse.Response -> {
-                    // parse min version from “compatible-versions”
-                    val minVersion: Int = response.data ?: 0
+                    // Use the server response—if it's null or blank, treat it as "0.0.0".
+                    val serverMinVersion = normalizeVersion(response.data ?: "0.0.0")
 
-                    val shouldForceUpdate = minVersion > versionCode
-                    if (shouldForceUpdate) {
-                        // remember new version & timestamp
-                        saveLastKnownVersion(minVersion)
+                    val updateRequired = isVersionGreater(serverMinVersion, currentVersionNormalized)
+                    if (updateRequired) {
+                        saveLastKnownVersion(serverMinVersion)
                         saveLastUpdateCheck(System.currentTimeMillis())
                     }
 
                     UpdateResult(
-                        updateAvailable = shouldForceUpdate,
-                        forceUpdate = shouldForceUpdate
+                        updateAvailable = updateRequired,
+                        forceUpdate = updateRequired
                     )
                 }
-
-                // If network fails
-                else -> UpdateResult(false, false)
+                // If the network call fails, assume no update.
+                else -> UpdateResult(updateAvailable = false, forceUpdate = false)
             }
         }
 
     private suspend fun isTimeToCheckUpdate(): Boolean {
-        val lastCheckTime = context.dataStore.data.map { it[LAST_UPDATE_CHECK] ?: 0L }.first()
+        val lastCheckTime = context.dataStore.data
+            .map { it[LAST_UPDATE_CHECK] ?: 0L }
+            .first()
         val now = System.currentTimeMillis()
         return (now - lastCheckTime) >= TimeUnit.DAYS.toMillis(2)
     }
@@ -90,7 +113,7 @@ class UpdateRepository(
         context.dataStore.edit { it[LAST_UPDATE_CHECK] = timestamp }
     }
 
-    private suspend fun saveLastKnownVersion(version: Int) {
+    private suspend fun saveLastKnownVersion(version: String) {
         context.dataStore.edit { it[LAST_KNOWN_VERSION] = version }
     }
 
